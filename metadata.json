@@ -1,0 +1,10 @@
+{
+  "name": "Remix: Remix: Remix: Remix: Remix: Remix: Remix: Remix: Remix: Apple Repair ERP",
+  "description": "Comprehensive Enterprise Resource Planning system for independent Apple repair shops, covering work orders, IMEI tracking, inventory tiers, RMA, POS, CRM, micro-soldering logs, and warranty tracking.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

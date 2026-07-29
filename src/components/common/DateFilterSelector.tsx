@@ -1,0 +1,471 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { Calendar, ChevronLeft, ChevronRight, X, Check, Clock } from 'lucide-react';
+import { CustomDropdownMenu, DropdownOption } from './CustomDropdownMenu';
+
+export type DatePreset = 'all' | 'today' | '7days' | '30days' | '60days' | 'custom';
+
+export interface DateFilterState {
+  preset: DatePreset;
+  startDate?: string; // YYYY-MM-DD
+  endDate?: string;   // YYYY-MM-DD
+}
+
+interface DateFilterSelectorProps {
+  filter?: DateFilterState;
+  value?: DateFilterState;
+  onChange: (newFilter: DateFilterState) => void;
+  className?: string;
+  compact?: boolean;
+}
+
+export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
+  filter,
+  value,
+  onChange,
+  className = '',
+  compact = false,
+}) => {
+  const currentFilter = filter || value || { preset: 'all' };
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
+  
+  // Internal state for custom calendar view month navigation
+  const [currentYear, setCurrentYear] = useState<number>(2026);
+  const [currentMonth, setCurrentMonth] = useState<number>(6); // 0-indexed: 6 = July
+  const [tempStartDate, setTempStartDate] = useState<string | undefined>(currentFilter.startDate);
+  const [tempEndDate, setTempEndDate] = useState<string | undefined>(currentFilter.endDate);
+
+  const popoverRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setTempStartDate(currentFilter.startDate);
+    setTempEndDate(currentFilter.endDate);
+  }, [currentFilter.startDate, currentFilter.endDate]);
+
+  // Close calendar popover on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
+        setShowCalendarModal(false);
+      }
+    };
+    if (showCalendarModal) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showCalendarModal]);
+
+  const handlePresetChange = (preset: DatePreset) => {
+    if (preset === 'custom') {
+      setShowCalendarModal(true);
+      onChange({ ...currentFilter, preset: 'custom' });
+    } else {
+      setShowCalendarModal(false);
+      onChange({ preset, startDate: undefined, endDate: undefined });
+    }
+  };
+
+  // Helper for calendar month grid rendering
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const firstDayOfWeek = new Date(currentYear, currentMonth, 1).getDay(); // 0 = Sun
+
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  const handleDateClick = (day: number) => {
+    const monthStr = String(currentMonth + 1).padStart(2, '0');
+    const dayStr = String(day).padStart(2, '0');
+    const dateStr = `${currentYear}-${monthStr}-${dayStr}`;
+
+    if (!tempStartDate || (tempStartDate && tempEndDate)) {
+      setTempStartDate(dateStr);
+      setTempEndDate(undefined);
+    } else if (tempStartDate && !tempEndDate) {
+      if (new Date(dateStr) < new Date(tempStartDate)) {
+        setTempEndDate(tempStartDate);
+        setTempStartDate(dateStr);
+      } else {
+        setTempEndDate(dateStr);
+      }
+    }
+  };
+
+  const handleApplyCustomRange = () => {
+    if (tempStartDate) {
+      onChange({
+        preset: 'custom',
+        startDate: tempStartDate,
+        endDate: tempEndDate || tempStartDate,
+      });
+    }
+    setShowCalendarModal(false);
+  };
+
+  const handlePrevMonth = () => {
+    if (currentMonth === 0) {
+      setCurrentMonth(11);
+      setCurrentYear(currentYear - 1);
+    } else {
+      setCurrentMonth(currentMonth - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (currentMonth === 11) {
+      setCurrentMonth(0);
+      setCurrentYear(currentYear + 1);
+    } else {
+      setCurrentMonth(currentMonth + 1);
+    }
+  };
+
+  // Format date helper for badge display
+  const formatDateLabel = (dStr?: string) => {
+    if (!dStr) return '';
+    const parts = dStr.split('-');
+    if (parts.length !== 3) return dStr;
+    const mIndex = parseInt(parts[1], 10) - 1;
+    return `${monthNames[mIndex]?.substring(0, 3)} ${parseInt(parts[2], 10)}`;
+  };
+
+  const isSelectedDate = (day: number) => {
+    const monthStr = String(currentMonth + 1).padStart(2, '0');
+    const dayStr = String(day).padStart(2, '0');
+    const dateStr = `${currentYear}-${monthStr}-${dayStr}`;
+    return dateStr === tempStartDate || dateStr === tempEndDate;
+  };
+
+  const isInRangeDate = (day: number) => {
+    if (!tempStartDate || !tempEndDate) return false;
+    const monthStr = String(currentMonth + 1).padStart(2, '0');
+    const dayStr = String(day).padStart(2, '0');
+    const dateStr = `${currentYear}-${monthStr}-${dayStr}`;
+    return dateStr > tempStartDate && dateStr < tempEndDate;
+  };
+
+  return (
+    <div ref={popoverRef} className={`relative flex items-center ${className}`}>
+      {compact ? (
+        /* Compact Dropdown Menu Modal */
+        <div className="relative flex items-center space-x-1">
+          <CustomDropdownMenu
+            value={currentFilter.preset}
+            onChange={(val) => handlePresetChange(val as DatePreset)}
+            options={[
+              { value: 'all', label: 'All Dates' },
+              { value: 'today', label: 'Today' },
+              { value: '7days', label: 'Last 7 Days' },
+              { value: '30days', label: 'Last 30 Days' },
+              { value: '60days', label: 'Last 60 Days' },
+              {
+                value: 'custom',
+                label:
+                  currentFilter.preset === 'custom' && currentFilter.startDate
+                    ? `${formatDateLabel(currentFilter.startDate)} - ${formatDateLabel(currentFilter.endDate)}`
+                    : 'Custom Range...',
+              },
+            ]}
+          />
+
+          <button
+            type="button"
+            onClick={() => {
+              setShowCalendarModal(!showCalendarModal);
+              if (currentFilter.preset !== 'custom') {
+                onChange({ ...currentFilter, preset: 'custom' });
+              }
+            }}
+            className={`p-1.5 rounded-xl border border-[#E5E5EA] cursor-pointer transition-all ${
+              currentFilter.preset === 'custom'
+                ? 'bg-[#0071E3] text-white font-bold'
+                : 'bg-[#F5F5F7] hover:bg-white text-[#424245]'
+            }`}
+            title="Calendar Picker"
+          >
+            <Calendar className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      ) : (
+        /* Minimalistic Segmented Control */
+        <div className="flex items-center bg-[#F5F5F7] p-1 rounded-xl border border-[#E5E5EA] shadow-2xs space-x-1">
+          <button
+            type="button"
+            onClick={() => handlePresetChange('all')}
+            className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+              currentFilter.preset === 'all'
+                ? 'bg-[#0071E3] text-white shadow-2xs font-bold'
+                : 'text-[#424245] hover:text-[#1D1D1F] hover:bg-white/60'
+            }`}
+          >
+            All
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handlePresetChange('today')}
+            className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+              currentFilter.preset === 'today'
+                ? 'bg-[#0071E3] text-white shadow-2xs font-bold'
+                : 'text-[#424245] hover:text-[#1D1D1F] hover:bg-white/60'
+            }`}
+          >
+            Today
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handlePresetChange('7days')}
+            className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+              currentFilter.preset === '7days'
+                ? 'bg-[#0071E3] text-white shadow-2xs font-bold'
+                : 'text-[#424245] hover:text-[#1D1D1F] hover:bg-white/60'
+            }`}
+          >
+            7 Days
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handlePresetChange('30days')}
+            className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+              currentFilter.preset === '30days'
+                ? 'bg-[#0071E3] text-white shadow-2xs font-bold'
+                : 'text-[#424245] hover:text-[#1D1D1F] hover:bg-white/60'
+            }`}
+          >
+            30 Days
+          </button>
+
+          {/* Custom Calendar Trigger Button */}
+          <button
+            type="button"
+            onClick={() => {
+              setShowCalendarModal(!showCalendarModal);
+              if (currentFilter.preset !== 'custom') {
+                onChange({ ...currentFilter, preset: 'custom' });
+              }
+            }}
+            className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center space-x-1.5 ${
+              currentFilter.preset === 'custom'
+                ? 'bg-[#0071E3] text-white shadow-2xs font-bold'
+                : 'text-[#424245] hover:text-[#1D1D1F] hover:bg-white/60'
+            }`}
+          >
+            <Calendar className="w-3.5 h-3.5" />
+            <span>
+              {currentFilter.preset === 'custom' && currentFilter.startDate
+                ? currentFilter.endDate && currentFilter.endDate !== currentFilter.startDate
+                  ? `${formatDateLabel(currentFilter.startDate)} - ${formatDateLabel(currentFilter.endDate)}`
+                  : formatDateLabel(currentFilter.startDate)
+                : 'Custom'}
+            </span>
+          </button>
+        </div>
+      )}
+
+      {/* Beautiful Popover Calendar Modal */}
+      {showCalendarModal && (
+        <div
+          className="absolute right-0 top-11 z-50 w-80 bg-white rounded-2xl border border-[#D2D2D7] shadow-2xl p-4 text-[#1D1D1F] animate-in fade-in zoom-in-95 duration-150"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-3 mb-3">
+            <div className="flex items-center space-x-2">
+              <Calendar className="w-4 h-4 text-[#0071E3]" />
+              <span className="font-extrabold text-xs text-[#1D1D1F]">Select Custom Date Range</span>
+            </div>
+            <button
+              onClick={() => setShowCalendarModal(false)}
+              className="p-1 rounded-full text-[#86868B] hover:text-[#1D1D1F] hover:bg-[#F5F5F7] transition-all cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Month Navigation */}
+          <div className="flex items-center justify-between mb-3 px-1">
+            <button
+              type="button"
+              onClick={handlePrevMonth}
+              className="p-1.5 rounded-lg border border-[#E5E5EA] hover:bg-[#F5F5F7] text-[#1D1D1F] transition-all cursor-pointer"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <span className="font-bold text-xs text-[#1D1D1F]">
+              {monthNames[currentMonth]} {currentYear}
+            </span>
+            <button
+              type="button"
+              onClick={handleNextMonth}
+              className="p-1.5 rounded-lg border border-[#E5E5EA] hover:bg-[#F5F5F7] text-[#1D1D1F] transition-all cursor-pointer"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Days of Week */}
+          <div className="grid grid-cols-7 text-center text-[10px] font-bold text-[#86868B] mb-2 uppercase">
+            <span>Su</span>
+            <span>Mo</span>
+            <span>Tu</span>
+            <span>We</span>
+            <span>Th</span>
+            <span>Fr</span>
+            <span>Sa</span>
+          </div>
+
+          {/* Calendar Grid */}
+          <div className="grid grid-cols-7 gap-1 text-center text-xs mb-4">
+            {Array.from({ length: firstDayOfWeek }).map((_, i) => (
+              <div key={`empty-${i}`} />
+            ))}
+
+            {Array.from({ length: daysInMonth }).map((_, i) => {
+              const day = i + 1;
+              const selected = isSelectedDate(day);
+              const inRange = isInRangeDate(day);
+
+              return (
+                <button
+                  key={`day-${day}`}
+                  type="button"
+                  onClick={() => handleDateClick(day)}
+                  className={`h-8 w-8 mx-auto rounded-lg font-semibold flex items-center justify-center transition-all cursor-pointer text-xs ${
+                    selected
+                      ? 'bg-[#0071E3] text-white font-bold shadow-xs'
+                      : inRange
+                      ? 'bg-[#F0F6FF] text-[#0071E3] font-bold'
+                      : 'hover:bg-[#F5F5F7] text-[#1D1D1F]'
+                  }`}
+                >
+                  {day}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Range Selection Status */}
+          <div className="bg-[#F5F5F7] p-2.5 rounded-xl border border-[#E5E5EA] text-xs mb-3 flex items-center justify-between">
+            <div className="text-[11px] text-[#6E6E73]">
+              {tempStartDate ? (
+                <span>
+                  <strong className="text-[#1D1D1F]">{tempStartDate}</strong>
+                  {tempEndDate ? (
+                    <> to <strong className="text-[#1D1D1F]">{tempEndDate}</strong></>
+                  ) : (
+                    <span className="text-[#86868B]"> (select end date)</span>
+                  )}
+                </span>
+              ) : (
+                <span>Click dates to pick range</span>
+              )}
+            </div>
+            {(tempStartDate || tempEndDate) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setTempStartDate(undefined);
+                  setTempEndDate(undefined);
+                }}
+                className="text-[10px] text-[#0071E3] font-bold hover:underline cursor-pointer ml-2"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+
+          {/* Direct Input Fallback & Action buttons */}
+          <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2 text-[11px]">
+              <div>
+                <label className="block text-[#86868B] font-semibold mb-0.5">Start Date</label>
+                <input
+                  type="date"
+                  value={tempStartDate || ''}
+                  onChange={(e) => setTempStartDate(e.target.value)}
+                  className="w-full px-2 py-1 bg-[#F5F5F7] border border-[#E5E5EA] rounded-lg text-[#1D1D1F] focus:outline-none focus:border-[#0071E3]"
+                />
+              </div>
+              <div>
+                <label className="block text-[#86868B] font-semibold mb-0.5">End Date</label>
+                <input
+                  type="date"
+                  value={tempEndDate || ''}
+                  onChange={(e) => setTempEndDate(e.target.value)}
+                  className="w-full px-2 py-1 bg-[#F5F5F7] border border-[#E5E5EA] rounded-lg text-[#1D1D1F] focus:outline-none focus:border-[#0071E3]"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end space-x-2 pt-2 border-t border-[#E5E5EA]">
+              <button
+                type="button"
+                onClick={() => setShowCalendarModal(false)}
+                className="px-3 py-1.5 text-xs text-[#6E6E73] font-semibold hover:bg-[#F5F5F7] rounded-lg transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleApplyCustomRange}
+                disabled={!tempStartDate}
+                className="px-4 py-1.5 bg-[#0071E3] hover:bg-[#0077ED] disabled:opacity-50 text-white font-bold text-xs rounded-lg shadow-xs transition-all cursor-pointer flex items-center space-x-1"
+              >
+                <Check className="w-3.5 h-3.5" />
+                <span>Apply Range</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export const filterByDateRange = <T extends { createdAt?: string }>(
+  items: T[],
+  filter?: DateFilterState
+): T[] => {
+  if (!filter || filter.preset === 'all') return items;
+
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  if (filter.preset === 'today') {
+    return items.filter((item) => item.createdAt && item.createdAt.startsWith(todayStr));
+  }
+
+  let days = 0;
+  if (filter.preset === '7days') days = 7;
+  else if (filter.preset === '30days') days = 30;
+  else if (filter.preset === '60days') days = 60;
+
+  if (days > 0) {
+    const todayStartMs = new Date().setHours(0, 0, 0, 0);
+    const cutoffMs = todayStartMs - (days - 1) * 24 * 60 * 60 * 1000;
+    return items.filter((item) => {
+      const itemTime = item.createdAt ? new Date(item.createdAt).getTime() : 0;
+      return !isNaN(itemTime) && itemTime >= cutoffMs;
+    });
+  }
+
+  if (filter.preset === 'custom') {
+    const startMs = filter.startDate ? new Date(filter.startDate + 'T00:00:00').getTime() : 0;
+    const endMs = filter.endDate ? new Date(filter.endDate + 'T23:59:59').getTime() : Date.now();
+    return items.filter((item) => {
+      const itemTime = item.createdAt ? new Date(item.createdAt).getTime() : 0;
+      return !isNaN(itemTime) && itemTime >= startMs && itemTime <= endMs;
+    });
+  }
+
+  return items;
+};
+
+export const isDateMatchingFilter = (
+  dateStr?: string,
+  filter?: DateFilterState
+): boolean => {
+  if (!filter || filter.preset === 'all') return true;
+  if (!dateStr) return false;
+  return filterByDateRange([{ createdAt: dateStr }], filter).length > 0;
+};

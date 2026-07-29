@@ -1,0 +1,239 @@
+import React, { useState } from 'react';
+import { 
+  X, 
+  Wrench, 
+  User, 
+  Phone, 
+  Mail, 
+  Building, 
+  DollarSign, 
+  Calendar, 
+  Clock, 
+  CheckCircle2, 
+  Search, 
+  Filter, 
+  Printer, 
+  Tag, 
+  Smartphone, 
+  ShieldCheck, 
+  AlertCircle,
+  FileText,
+  ExternalLink,
+  ChevronRight,
+  TrendingUp,
+  RotateCcw
+} from 'lucide-react';
+import { Customer, WorkOrder, SystemSettings } from '../../types';
+import { CustomerRepairTimeline } from './CustomerRepairTimeline';
+import { DEFAULT_SYSTEM_SETTINGS } from '../../data/seedData';
+
+interface CustomerRepairHistoryModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  customer: Customer | null;
+  workOrders: WorkOrder[];
+  systemSettings?: SystemSettings;
+  onPrintInvoice?: (wo: WorkOrder) => void;
+}
+
+const getStatusBadgeStyle = (status: string) => {
+  switch (status) {
+    case 'Finished':
+      return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    case 'In Progress':
+      return 'bg-blue-50 text-blue-700 border-blue-200';
+    case 'Pending':
+      return 'bg-amber-50 text-amber-700 border-amber-200';
+    case 'Receive':
+      return 'bg-purple-50 text-purple-700 border-purple-200';
+    case 'Taken Out':
+      return 'bg-slate-100 text-slate-700 border-slate-200';
+    case 'Cant Repair':
+      return 'bg-rose-50 text-rose-700 border-rose-200';
+    case 'Customer Not Repair':
+      return 'bg-orange-50 text-orange-700 border-orange-200';
+    default:
+      return 'bg-gray-50 text-gray-700 border-gray-200';
+  }
+};
+
+export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProps> = ({
+  isOpen,
+  onClose,
+  customer,
+  workOrders,
+  systemSettings = DEFAULT_SYSTEM_SETTINGS,
+  onPrintInvoice,
+}) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+
+  if (!isOpen || !customer) return null;
+
+  // Find all work orders for this customer
+  const customerOrders = workOrders.filter(
+    (wo) =>
+      wo.customerId === customer.id ||
+      (customer.phone && wo.customerPhone === customer.phone) ||
+      (customer.name && wo.customerName?.toLowerCase() === customer.name.toLowerCase())
+  );
+
+  // Filtered orders
+  const filteredOrders = customerOrders.filter((wo) => {
+    const q = searchTerm.toLowerCase();
+    const matchesSearch =
+      !q ||
+      (wo.orderNumber && wo.orderNumber.toLowerCase().includes(q)) ||
+      (wo.deviceModel && wo.deviceModel.toLowerCase().includes(q)) ||
+      (wo.serialNumber && wo.serialNumber.toLowerCase().includes(q)) ||
+      (wo.imei && wo.imei.toLowerCase().includes(q)) ||
+      (wo.symptomsReported && wo.symptomsReported.toLowerCase().includes(q));
+
+    const matchesStatus = statusFilter === 'ALL' || wo.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
+
+  // Calculate metrics
+  const completedCount = customerOrders.filter((wo) => wo.status === 'Finished').length;
+  const inProgressCount = customerOrders.filter((wo) => wo.status === 'In Progress' || wo.status === 'Receive' || wo.status === 'Pending').length;
+  const totalSpent = customerOrders.reduce((acc, wo) => acc + (wo.totalAmount || 0), 0);
+  const avgCost = customerOrders.length > 0 ? Math.round(totalSpent / customerOrders.length) : 0;
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-6 animate-fadeIn">
+      <div className="bg-white border border-[#E5E5EA] rounded-3xl w-full max-w-5xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+        {/* Modal Header */}
+        <div className="px-6 py-4 border-b border-[#E5E5EA] bg-[#F8FBFD] flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="p-3 bg-[#0071E3]/10 text-[#0071E3] rounded-2xl shadow-inner">
+              <User className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <h2 className="text-lg font-black text-[#1D1D1F]">{customer.name}</h2>
+                <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                  customer.type === 'B2B Corporate' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                  customer.type === 'Wholesale Mail-In' ? 'bg-[#F0F6FF] text-[#0071E3] border-[#0071E3]/20' :
+                  'bg-white text-[#1D1D1F] border-[#E5E5EA]'
+                }`}>
+                  {customer.type}
+                </span>
+              </div>
+              <p className="text-xs text-[#86868B]">Complete Lifetime Repair Dossier & Service Records</p>
+            </div>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="p-2 text-[#86868B] hover:text-[#1D1D1F] hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Modal Content Body */}
+        <div className="p-6 overflow-y-auto space-y-6 flex-1 text-xs">
+          {/* Customer Metadata Bar */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#F5F5F7] p-4 rounded-2xl border border-[#E5E5EA]">
+            <div className="flex items-center space-x-2">
+              <Phone className="w-4 h-4 text-[#86868B]" />
+              <div>
+                <span className="block text-[10px] text-[#86868B] font-bold uppercase">Phone</span>
+                <span className="font-mono font-bold text-[#1D1D1F]">{customer.phone || 'N/A'}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Mail className="w-4 h-4 text-[#86868B]" />
+              <div className="min-w-0">
+                <span className="block text-[10px] text-[#86868B] font-bold uppercase">Email</span>
+                <span className="font-semibold text-[#1D1D1F] truncate block">{customer.email || 'N/A'}</span>
+              </div>
+            </div>
+
+            {customer.company && (
+              <div className="flex items-center space-x-2">
+                <Building className="w-4 h-4 text-[#86868B]" />
+                <div className="min-w-0">
+                  <span className="block text-[10px] text-[#86868B] font-bold uppercase">Company</span>
+                  <span className="font-semibold text-[#1D1D1F] truncate block">{customer.company}</span>
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center space-x-2">
+              <Tag className="w-4 h-4 text-[#0071E3]" />
+              <div>
+                <span className="block text-[10px] text-[#86868B] font-bold uppercase">Account Tier</span>
+                <span className="font-bold text-[#0071E3]">{customer.discountPercentage}% Discount Tier</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Metrics Bar */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="bg-white p-3.5 rounded-2xl border border-[#E5E5EA] shadow-2xs">
+              <span className="text-[10px] font-bold text-[#86868B] uppercase">Total Repairs</span>
+              <div className="text-lg font-black text-[#1D1D1F] mt-0.5 flex items-center justify-between">
+                <span>{customerOrders.length}</span>
+                <Wrench className="w-5 h-5 text-[#0071E3]" />
+              </div>
+            </div>
+
+            <div className="bg-white p-3.5 rounded-2xl border border-[#E5E5EA] shadow-2xs">
+              <span className="text-[10px] font-bold text-[#86868B] uppercase">Completed</span>
+              <div className="text-lg font-black text-emerald-600 mt-0.5 flex items-center justify-between">
+                <span>{completedCount}</span>
+                <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+              </div>
+            </div>
+
+            <div className="bg-white p-3.5 rounded-2xl border border-[#E5E5EA] shadow-2xs">
+              <span className="text-[10px] font-bold text-[#86868B] uppercase">Active Repairs</span>
+              <div className="text-lg font-black text-amber-600 mt-0.5 flex items-center justify-between">
+                <span>{inProgressCount}</span>
+                <Clock className="w-5 h-5 text-amber-500" />
+              </div>
+            </div>
+
+            <div className="bg-white p-3.5 rounded-2xl border border-[#E5E5EA] shadow-2xs">
+              <span className="text-[10px] font-bold text-[#86868B] uppercase">Total Expenditure</span>
+              <div className="text-lg font-black text-[#28A745] mt-0.5 flex items-center justify-between">
+                <span>{totalSpent.toLocaleString()} {systemSettings.currencySymbol}</span>
+                <TrendingUp className="w-5 h-5 text-[#28A745]" />
+              </div>
+            </div>
+          </div>
+
+          {/* Chronological Repair History Timeline */}
+          <div className="space-y-3 pt-2">
+            <h3 className="font-extrabold text-[#1D1D1F] text-xs flex items-center justify-between">
+              <span>Chronological Repair History & Outcomes ({customerOrders.length})</span>
+              {customerOrders.length > 0 && (
+                <span className="text-[#86868B] text-[11px] font-medium">Average Ticket Value: {avgCost.toLocaleString()} {systemSettings.currencySymbol}</span>
+              )}
+            </h3>
+
+            <CustomerRepairTimeline
+              workOrders={customerOrders}
+              systemSettings={systemSettings}
+              onPrintInvoice={onPrintInvoice}
+              showFilters={true}
+            />
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-3 border-t border-[#E5E5EA] bg-[#F8FBFD] flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-5 py-2 bg-[#1D1D1F] hover:bg-black text-white font-bold text-xs rounded-xl shadow-2xs transition-all cursor-pointer"
+          >
+            Close Dossier
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};

@@ -1,0 +1,17 @@
+{
+  "short_name": "Apple ERP",
+  "name": "Apple Repair Management ERP",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#F5F5F7",
+  "theme_color": "#7360F2",
+  "display": "standalone",
+  "orientation": "any",
+  "description": "Apple Repair Shop Management ERP with Offline Support and Automatic IndexedDB Data Sync"
+}

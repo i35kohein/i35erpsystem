@@ -1,0 +1,376 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "MyanmarChatu";
+  src: local('Myanmar Chatu'), url('https://cdn.jsdelivr.net/gh/saturngod/myanmar-unicode-fonts@master/docs/KhmerType/MyanmarChatu.ttf') format('truetype');
+  font-display: swap;
+}
+
+/* Myanmar Language Font Overrides - Apply MyanmarChatu ONLY when in Myanmar UI */
+html[lang="mm"],
+html[data-lang="mm"],
+body.lang-mm,
+.lang-mm {
+  font-family: "MyanmarChatu", var(--font-family), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+html[lang="mm"] body,
+html[data-lang="mm"] body {
+  font-family: "MyanmarChatu", var(--font-family), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+/* Preserve monospaced font for codes and numbers in Myanmar mode */
+html[lang="mm"] .font-mono,
+html[data-lang="mm"] .font-mono,
+body.lang-mm .font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+}
+
+:root {
+  --font-family: 'Nunito', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --bg: #F8FBFD;
+  --sidebar: #FFFFFF;
+  --card-bg: #FFFFFF;
+  --primary: #136F9A;
+  --primary-hover: #0E5374;
+  --turquoise: #27B1AE;
+  --orange: #ED7132;
+  --dark-blue: #2C3E50;
+  --text-main: #2C3E50;
+  --text-secondary: #526375;
+  --text-muted: #7F7F7F;
+  --border: #D8E5ED;
+  --border-subtle: #EBF3F8;
+  --success: #27B1AE;
+  --warning: #ED7132;
+  --danger: #E04848;
+  --purple: #136F9A;
+  --blue-tint: #F0F7FB;
+}
+
+html[data-theme="minimalist-clean"],
+html:not([data-theme]) {
+  --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --bg: #FAFAFA;
+  --sidebar: #FFFFFF;
+  --card-bg: #FFFFFF;
+  --primary: #0F172A;
+  --primary-hover: #1E293B;
+  --turquoise: #0D9488;
+  --orange: #EA580C;
+  --dark-blue: #09090B;
+  --text-main: #09090B;
+  --text-secondary: #52525B;
+  --text-muted: #71717A;
+  --border: #E4E4E7;
+  --border-subtle: #F4F4F5;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --purple: #6366F1;
+  --blue-tint: #F1F5F9;
+}
+
+html[data-theme="nunito-navy"] {
+  --font-family: 'Nunito', sans-serif;
+  --bg: #F8FBFD;
+  --sidebar: #FFFFFF;
+  --card-bg: #FFFFFF;
+  --primary: #136F9A;
+  --primary-hover: #0E5374;
+  --turquoise: #27B1AE;
+  --orange: #ED7132;
+  --dark-blue: #2C3E50;
+  --text-main: #2C3E50;
+  --text-secondary: #526375;
+  --text-muted: #7F7F7F;
+  --border: #D8E5ED;
+  --border-subtle: #EBF3F8;
+  --success: #27B1AE;
+  --warning: #ED7132;
+  --danger: #E04848;
+  --purple: #136F9A;
+  --blue-tint: #F0F7FB;
+}
+
+html[data-theme="apple-clean"] {
+  --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  --bg: #F5F5F7;
+  --sidebar: #FFFFFF;
+  --card-bg: #FFFFFF;
+  --primary: #0071E3;
+  --primary-hover: #0051B3;
+  --turquoise: #27B1AE;
+  --orange: #ED7132;
+  --dark-blue: #1D1D1F;
+  --text-main: #1D1D1F;
+  --text-secondary: #6E6E73;
+  --text-muted: #86868B;
+  --border: #E5E5EA;
+  --border-subtle: #F2F2F7;
+  --success: #34C759;
+  --warning: #FF9500;
+  --danger: #FF3B30;
+  --purple: #AF52DE;
+  --blue-tint: #F0F6FF;
+}
+
+html[data-theme="dark-slate"] {
+  --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --bg: #090D16;
+  --sidebar: #131B2E;
+  --card-bg: #131B2E;
+  --primary: #38BDF8;
+  --primary-hover: #0284C7;
+  --turquoise: #2DD4BF;
+  --orange: #FB923C;
+  --dark-blue: #F8FAFC;
+  --text-main: #FFFFFF;
+  --text-secondary: #E2E8F0;
+  --text-muted: #CBD5E1;
+  --border: #26334D;
+  --border-subtle: #192238;
+  --success: #34D399;
+  --warning: #FBBF24;
+  --danger: #F87171;
+  --purple: #A78BFA;
+  --blue-tint: #1E293B;
+}
+
+/* Component Geometry: Square / Rectangular Design System vs Curved Soft Geometry */
+html[data-geometry="square"] *,
+html[data-geometry="square"] ::before,
+html[data-geometry="square"] ::after,
+html:not([data-geometry]) *,
+html:not([data-geometry]) ::before,
+html:not([data-geometry]) ::after {
+  border-radius: 0px !important;
+}
+
+html {
+  scrollbar-gutter: stable;
+  overflow-y: scroll;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Prevent Header, Main Content & Navbar layout shifts */
+header {
+  height: 52px;
+  min-height: 52px;
+  max-height: 52px;
+  contain: layout style;
+}
+
+#main-content-scroll {
+  scrollbar-gutter: stable;
+}
+
+/* Ensure images maintain aspect ratio and don't cause CLS on load */
+img {
+  content-visibility: auto;
+}
+
+/* Ensure main container flexes properly */
+main {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* Fix Header Top Navbar in Dark Mode & General Themes */
+html[data-theme="dark-slate"] header,
+html[data-theme="dark-slate"] .bg-white\/95,
+html[data-theme="dark-slate"] .bg-white\/90 {
+  background-color: rgba(19, 27, 46, 0.95) !important;
+  border-color: #26334D !important;
+}
+
+html[data-theme] .bg-white\/95,
+html[data-theme] .bg-white\/90 {
+  background-color: var(--card-bg) !important;
+}
+
+/* Enhanced Font Color & Visual High-Contrast Rules for Midnight Dark Slate Theme */
+html[data-theme="dark-slate"] input,
+html[data-theme="dark-slate"] select,
+html[data-theme="dark-slate"] textarea {
+  background-color: #0D1527 !important;
+  color: #FFFFFF !important;
+  border-color: #2E3E5E !important;
+}
+
+html[data-theme="dark-slate"] input::placeholder,
+html[data-theme="dark-slate"] textarea::placeholder {
+  color: #94A3B8 !important;
+}
+
+html[data-theme="dark-slate"] .bg-gray-50,
+html[data-theme="dark-slate"] .bg-slate-50,
+html[data-theme="dark-slate"] .bg-[#F5F5F7],
+html[data-theme="dark-slate"] .bg-[#F8FBFD],
+html[data-theme="dark-slate"] .bg-[#F9F9FB] {
+  background-color: #090D16 !important;
+}
+
+html[data-theme="dark-slate"] .hover\:bg-\[\#F5F5F7\]:hover,
+html[data-theme="dark-slate"] .hover\:bg-gray-50:hover,
+html[data-theme="dark-slate"] .hover\:bg-slate-50:hover {
+  background-color: #1E293B !important;
+}
+
+/* Side Menu Text & General Text Colors in Dark Mode */
+html[data-theme="dark-slate"] .text-[#2C3E50],
+html[data-theme="dark-slate"] .text-[#1D1D1F],
+html[data-theme="dark-slate"] .text-[#424245],
+html[data-theme="dark-slate"] .text-slate-900,
+html[data-theme="dark-slate"] .text-slate-800,
+html[data-theme="dark-slate"] .text-gray-900,
+html[data-theme="dark-slate"] .text-gray-800 {
+  color: #FFFFFF !important;
+}
+
+html[data-theme="dark-slate"] .text-[#7F7F7F],
+html[data-theme="dark-slate"] .text-[#86868B],
+html[data-theme="dark-slate"] .text-[#526375],
+html[data-theme="dark-slate"] .text-[#6E6E73],
+html[data-theme="dark-slate"] .text-slate-500,
+html[data-theme="dark-slate"] .text-gray-500 {
+  color: #CBD5E1 !important;
+}
+
+/* Dynamic Theme Overrides so hardcoded utility classes respond to active theme */
+html[data-theme] .bg-\[\#0071E3\],
+html[data-theme] .bg-\[\#136F9A\],
+html[data-theme] .bg-\[\#0062CC\] {
+  background-color: var(--primary) !important;
+}
+
+html[data-theme] .bg-\[\#F5F5F7\],
+html[data-theme] .bg-\[\#F8FBFD\],
+html[data-theme] .bg-\[\#F9F9FB\] {
+  background-color: var(--bg) !important;
+}
+
+html[data-theme] .bg-white {
+  background-color: var(--card-bg) !important;
+}
+
+html[data-theme] .text-\[\#1D1D1F\],
+html[data-theme] .text-\[\#2C3E50\],
+html[data-theme] .text-\[\#424245\] {
+  color: var(--text-main) !important;
+}
+
+html[data-theme] .text-\[\#86868B\],
+html[data-theme] .text-\[\#7F7F7F\],
+html[data-theme] .text-\[\#6E6E73\],
+html[data-theme] .text-\[\#526375\] {
+  color: var(--text-muted) !important;
+}
+
+html[data-theme] .text-\[\#0071E3\],
+html[data-theme] .text-\[\#136F9A\] {
+  color: var(--primary) !important;
+}
+
+html[data-theme] .border-\[\#E5E5EA\],
+html[data-theme] .border-\[\#D8E5ED\],
+html[data-theme] .border-\[\#D2D2D7\] {
+  border-color: var(--border) !important;
+}
+
+html[data-theme] .bg-\[\#27B1AE\] {
+  background-color: var(--turquoise) !important;
+}
+
+html[data-theme] .bg-\[\#ED7132\] {
+  background-color: var(--orange) !important;
+}
+
+/* Custom smooth scrollbar styling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ================= GLOBAL PRINT STYLES & OVERRIDES ================= */
+@media print {
+  /* 1. Hide non-printable app containers & navigation bars */
+  nav, header, footer, aside, .no-print, [role="navigation"], button.no-print {
+    display: none !important;
+  }
+
+  /* 2. Reset html, body, root and scroll containers so content isn't clipped or scroll-locked */
+  html, body, #root, #main-content-scroll, main, .no-print-bg {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    width: 100% !important;
+    position: static !important;
+    box-shadow: none !important;
+  }
+
+  /* 3. Reset modal overlay backdrops */
+  .fixed, .inset-0, .backdrop-blur-sm {
+    position: static !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    width: 100% !important;
+    box-shadow: none !important;
+  }
+
+  /* 4. Ensure target printable modal containers take full A4 or label dimensions without max-height limits */
+  .printable-invoice-modal,
+  .printable-area,
+  .printable-pos-receipt,
+  .printable-portal-voucher {
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 8mm !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+    display: block !important;
+  }
+
+  /* 5. Force background colors and borders to show accurately when printed */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* 6. Standard page margins */
+  @page {
+    size: auto;
+    margin: 6mm;
+  }
+}
+

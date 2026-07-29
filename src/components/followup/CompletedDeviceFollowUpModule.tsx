@@ -1,0 +1,885 @@
+import React, { useState } from 'react';
+import { 
+  PhoneCall, 
+  MessageSquare, 
+  Star, 
+  CheckCircle2, 
+  Clock, 
+  AlertTriangle, 
+  UserCheck, 
+  Search, 
+  Plus, 
+  X, 
+  Calendar, 
+  Smartphone, 
+  ChevronRight, 
+  Send, 
+  Phone, 
+  Filter, 
+  Sparkles,
+  History,
+  ShieldCheck,
+  Check,
+  Wrench,
+  FileText,
+  DollarSign,
+  Cpu
+} from 'lucide-react';
+import { WorkOrder, FollowUpStatus, FollowUpRecord, SystemSettings } from '../../types';
+import { DateFilterState, isDateMatchingFilter } from '../common/DateFilterSelector';
+
+interface CompletedDeviceFollowUpModuleProps {
+  workOrders: WorkOrder[];
+  onSaveWorkOrder: (updatedOrder: WorkOrder) => void;
+  systemSettings: SystemSettings;
+  searchQuery?: string;
+  setSearchQuery?: (q: string) => void;
+  dateFilter?: DateFilterState;
+  setDateFilter?: (df: DateFilterState) => void;
+}
+
+export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModuleProps> = ({
+  workOrders,
+  onSaveWorkOrder,
+  systemSettings,
+  searchQuery: propSearchQuery,
+  setSearchQuery: propSetSearchQuery,
+  dateFilter: propDateFilter,
+  setDateFilter: propSetDateFilter,
+}) => {
+  // Local or controlled filter states
+  const [localSearchQuery, setLocalSearchQuery] = useState('');
+  const [localDateFilter, setLocalDateFilter] = useState<DateFilterState>({ preset: 'all' });
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+
+  const searchQuery = propSearchQuery !== undefined ? propSearchQuery : localSearchQuery;
+  const setSearchQuery = propSetSearchQuery || setLocalSearchQuery;
+
+  const dateFilter = propDateFilter !== undefined ? propDateFilter : localDateFilter;
+  const setDateFilter = propSetDateFilter || setLocalDateFilter;
+
+  // Selected ticket for modal
+  const [selectedWo, setSelectedWo] = useState<WorkOrder | null>(null);
+  const [isLogModalOpen, setIsLogModalOpen] = useState(false);
+  const [historyModalWo, setHistoryModalWo] = useState<WorkOrder | null>(null);
+
+  // New Log Form State
+  const [formStatus, setFormStatus] = useState<FollowUpStatus>('Satisfied');
+  const [formRating, setFormRating] = useState<number>(5);
+  const [formAuthor, setFormAuthor] = useState<string>('Service Advisor');
+  const [formNotes, setFormNotes] = useState<string>('');
+  const [formNextDate, setFormNextDate] = useState<string>('');
+
+  // Helper to calculate days since repair completion / pickup
+  const getDaysSinceCompletion = (wo: WorkOrder): number => {
+    const completedTime = new Date(wo.updatedAt || wo.createdAt).getTime();
+    const now = new Date().getTime();
+    const diffDays = Math.floor((now - completedTime) / (1000 * 60 * 60 * 24));
+    return Math.max(0, diffDays);
+  };
+
+  // Filter completed devices (Taken Out strictly after customer delivery/pickup)
+  const completedWorkOrders = workOrders.filter(
+    (wo) => wo.status === 'Taken Out'
+  );
+
+  const filteredWorkOrders = completedWorkOrders.filter((wo) => {
+    const q = searchQuery.toLowerCase();
+    const matchesSearch =
+      !q ||
+      wo.orderNumber.toLowerCase().includes(q) ||
+      wo.customerName.toLowerCase().includes(q) ||
+      wo.customerPhone.includes(q) ||
+      wo.deviceModel.toLowerCase().includes(q) ||
+      (wo.serialNumber && wo.serialNumber.toLowerCase().includes(q)) ||
+      (wo.imei && wo.imei.toLowerCase().includes(q));
+
+    const currentFollowUpStatus = wo.followUpStatus || 'Pending Call';
+    const daysElapsed = getDaysSinceCompletion(wo);
+
+    let matchesStatus = true;
+    if (statusFilter === '7_DAYS') {
+      matchesStatus = daysElapsed >= 7;
+    } else if (statusFilter === '1_MONTH') {
+      matchesStatus = daysElapsed >= 30;
+    } else if (statusFilter === '2_MONTHS') {
+      matchesStatus = daysElapsed >= 60;
+    } else if (statusFilter !== 'ALL') {
+      matchesStatus = currentFollowUpStatus === statusFilter;
+    }
+
+    const matchesDate = isDateMatchingFilter(wo.updatedAt || wo.createdAt, dateFilter);
+
+    return matchesSearch && matchesStatus && matchesDate;
+  });
+
+  // Calculate Metrics
+  const totalCompleted = completedWorkOrders.length;
+  const count7Days = completedWorkOrders.filter((wo) => getDaysSinceCompletion(wo) >= 7).length;
+  const count30Days = completedWorkOrders.filter((wo) => getDaysSinceCompletion(wo) >= 30).length;
+  const count60Days = completedWorkOrders.filter((wo) => getDaysSinceCompletion(wo) >= 60).length;
+  const pendingCallsCount = completedWorkOrders.filter(
+    (wo) => !wo.followUpStatus || wo.followUpStatus === 'Pending Call'
+  ).length;
+  const satisfiedCount = completedWorkOrders.filter((wo) => wo.followUpStatus === 'Satisfied').length;
+  const issueReportedCount = completedWorkOrders.filter(
+    (wo) => wo.followUpStatus === 'Issue Reported'
+  ).length;
+
+  // Average Rating calculation
+  const ratedOrders = completedWorkOrders.filter((wo) => {
+    const lastRecord = wo.followUpRecords?.[wo.followUpRecords.length - 1];
+    return lastRecord && lastRecord.satisfactionRating && lastRecord.satisfactionRating > 0;
+  });
+  const avgRating = ratedOrders.length > 0
+    ? (ratedOrders.reduce((acc, wo) => {
+        const r = wo.followUpRecords?.[wo.followUpRecords.length - 1]?.satisfactionRating || 5;
+        return acc + r;
+      }, 0) / ratedOrders.length).toFixed(1)
+    : '5.0';
+
+  const handleOpenLogModal = (wo: WorkOrder) => {
+    setSelectedWo(wo);
+    setFormStatus(wo.followUpStatus || 'Satisfied');
+    setFormRating(5);
+    setFormAuthor('Service Advisor');
+    setFormNotes('');
+    setFormNextDate('');
+    setIsLogModalOpen(true);
+  };
+
+  const handleSaveFollowUpLog = () => {
+    if (!selectedWo) return;
+
+    const newRecord: FollowUpRecord = {
+      id: `fu-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      author: formAuthor.trim() || 'Service Advisor',
+      status: formStatus,
+      satisfactionRating: formStatus === 'Satisfied' ? formRating : undefined,
+      notes: formNotes.trim() || (formStatus === 'Satisfied' ? 'Customer confirmed device working perfectly.' : 'Follow-up log created.'),
+      nextFollowUpDate: formNextDate ? formNextDate : undefined,
+    };
+
+    const existingRecords = selectedWo.followUpRecords || [];
+    const updatedRecords = [...existingRecords, newRecord];
+
+    // Create a repair log entry as well for global auditing
+    const newRepairLog = {
+      id: `log-${Date.now()}`,
+      timestamp: new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }),
+      author: formAuthor.trim() || 'Service Advisor',
+      note: `Follow-up call status: ${formStatus}${formNotes ? ` - ${formNotes}` : ''}`,
+    };
+
+    const updatedWo: WorkOrder = {
+      ...selectedWo,
+      followUpStatus: formStatus,
+      followUpRecords: updatedRecords,
+      lastFollowUpAt: new Date().toISOString(),
+      repairLogs: [...(selectedWo.repairLogs || []), newRepairLog],
+      updatedAt: new Date().toISOString(),
+    };
+
+    onSaveWorkOrder(updatedWo);
+    setIsLogModalOpen(false);
+    setSelectedWo(null);
+  };
+
+  const getStatusBadge = (status?: FollowUpStatus) => {
+    switch (status) {
+      case 'Satisfied':
+        return (
+          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center space-x-1 w-max">
+            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+            <span>Satisfied Customer</span>
+          </span>
+        );
+      case 'Issue Reported':
+        return (
+          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 flex items-center space-x-1 w-max">
+            <AlertTriangle className="w-3 h-3 text-rose-600" />
+            <span>Issue Reported</span>
+          </span>
+        );
+      case 'No Answer':
+        return (
+          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 flex items-center space-x-1 w-max">
+            <PhoneCall className="w-3 h-3 text-amber-600" />
+            <span>No Answer / Left Msg</span>
+          </span>
+        );
+      case 'Callback Scheduled':
+        return (
+          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 flex items-center space-x-1 w-max">
+            <Clock className="w-3 h-3 text-blue-600" />
+            <span>Callback Scheduled</span>
+          </span>
+        );
+      case 'Closed':
+        return (
+          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 flex items-center space-x-1 w-max">
+            <Check className="w-3 h-3 text-slate-500" />
+            <span>Follow-up Closed</span>
+          </span>
+        );
+      case 'Pending Call':
+      default:
+        return (
+          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200 flex items-center space-x-1 w-max">
+            <Clock className="w-3 h-3 text-sky-600" />
+            <span>Pending Follow-up</span>
+          </span>
+        );
+    }
+  };
+
+  const quickNotesTemplates = [
+    'Customer confirmed screen display, touch & battery working great. Very satisfied.',
+    'Customer picked up device, confirmed all features tested OK.',
+    'Left voicemail message regarding post-repair satisfaction check.',
+    'Customer reported minor query about battery charge cycle, explained normal operation.',
+    'Customer requested warranty callback for micro-soldering check.',
+  ];
+
+  return (
+    <div className="space-y-6 max-w-7xl mx-auto pb-12">
+      {/* Top Banner / Dashboard Overview */}
+      <div className="bg-white border border-[#E5E5EA] rounded-2xl p-5 shadow-2xs space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center space-x-2">
+              <span className="p-2 bg-[#E5F1FF] text-[#0071E3] rounded-xl">
+                <UserCheck className="w-5 h-5" />
+              </span>
+              <div>
+                <h2 className="text-base font-extrabold text-[#1D1D1F] tracking-tight">
+                  Completed Repairs & Post-Delivery Customer Follow-Ups
+                </h2>
+                <p className="text-xs text-[#86868B]">
+                  Conduct post-service quality calls for repaired & delivered devices to ensure satisfaction and manage warranty queries.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2 shrink-0">
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#86868B]" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search ticket, customer, device..."
+                className="pl-8 pr-3 py-1.5 bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl text-xs focus:outline-none focus:border-[#0071E3] focus:bg-white transition-all w-48 sm:w-64"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Analytics Key Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-2.5 pt-2">
+          <div className="bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-3 space-y-1">
+            <span className="text-[11px] font-semibold text-[#86868B]">Total Completed</span>
+            <div className="text-xl font-extrabold text-[#1D1D1F]">{totalCompleted}</div>
+            <p className="text-[10px] text-[#86868B]">Finished & Picked Up</p>
+          </div>
+
+          <div className="bg-indigo-50/70 border border-indigo-200 rounded-xl p-3 space-y-1">
+            <span className="text-[11px] font-bold text-indigo-900">7-Day Check</span>
+            <div className="text-xl font-extrabold text-indigo-800">{count7Days}</div>
+            <p className="text-[10px] text-indigo-700 font-medium">≥ 7 days post-repair</p>
+          </div>
+
+          <div className="bg-purple-50/70 border border-purple-200 rounded-xl p-3 space-y-1">
+            <span className="text-[11px] font-bold text-purple-900">1-Month Check</span>
+            <div className="text-xl font-extrabold text-purple-800">{count30Days}</div>
+            <p className="text-[10px] text-purple-700 font-medium">≥ 30 days post-repair</p>
+          </div>
+
+          <div className="bg-violet-50/80 border border-violet-200 rounded-xl p-3 space-y-1">
+            <span className="text-[11px] font-bold text-violet-900">2-Month Check</span>
+            <div className="text-xl font-extrabold text-violet-800">{count60Days}</div>
+            <p className="text-[10px] text-violet-700 font-medium">≥ 60 days post-repair</p>
+          </div>
+
+          <div className="bg-emerald-50/50 border border-emerald-200 rounded-xl p-3 space-y-1">
+            <span className="text-[11px] font-semibold text-emerald-800">Satisfied</span>
+            <div className="text-xl font-extrabold text-emerald-900">{satisfiedCount}</div>
+            <p className="text-[10px] text-emerald-700">Positive feedback</p>
+          </div>
+
+          <div className="bg-amber-50/50 border border-amber-200 rounded-xl p-3 space-y-1 col-span-2 md:col-span-1">
+            <span className="text-[11px] font-semibold text-amber-800">Avg Rating</span>
+            <div className="flex items-center space-x-1.5">
+              <span className="text-xl font-extrabold text-amber-900">{avgRating}</span>
+              <div className="flex items-center text-amber-500">
+                <Star className="w-4 h-4 fill-amber-400 text-amber-500" />
+              </div>
+            </div>
+            <p className="text-[10px] text-amber-700">Out of 5.0 rating</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Filter Tabs Bar */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white border border-[#E5E5EA] p-3 rounded-2xl shadow-2xs">
+        <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
+          {[
+            { id: 'ALL', label: `All Completed (${completedWorkOrders.length})` },
+            { id: '7_DAYS', label: `7 Days Follow-Up (${count7Days})` },
+            { id: '1_MONTH', label: `1 Month (30 Days) (${count30Days})` },
+            { id: '2_MONTHS', label: `2 Months (60 Days) (${count60Days})` },
+            { id: 'Pending Call', label: `Pending Call (${pendingCallsCount})` },
+            { id: 'Satisfied', label: `Satisfied (${satisfiedCount})` },
+            { id: 'Issue Reported', label: `Issue Reported (${issueReportedCount})` },
+            { id: 'No Answer', label: 'No Answer' },
+            { id: 'Callback Scheduled', label: 'Callback Scheduled' },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setStatusFilter(tab.id)}
+              className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer shrink-0 ${
+                statusFilter === tab.id
+                  ? 'bg-[#0071E3] text-white shadow-2xs'
+                  : 'bg-[#F5F5F7] text-[#1D1D1F] hover:bg-[#E5E5EA]'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {statusFilter !== 'ALL' || searchQuery ? (
+          <button
+            type="button"
+            onClick={() => {
+              setStatusFilter('ALL');
+              setSearchQuery('');
+            }}
+            className="text-xs text-[#0071E3] font-bold hover:underline shrink-0 text-right sm:text-left"
+          >
+            Reset Filters
+          </button>
+        ) : null}
+      </div>
+
+      {/* Main Completed Tickets List */}
+      <div className="bg-white border border-[#E5E5EA] rounded-2xl shadow-2xs overflow-hidden">
+        <div className="px-5 py-3.5 border-b border-[#E5E5EA] flex items-center justify-between bg-[#FAFAFC]">
+          <h3 className="text-xs font-extrabold text-[#1D1D1F] uppercase tracking-wider">
+            Repaired & Delivered Devices ({filteredWorkOrders.length})
+          </h3>
+          <span className="text-[11px] text-[#86868B] font-semibold">
+            Click 'Log Follow-Up' to record customer status
+          </span>
+        </div>
+
+        {filteredWorkOrders.length === 0 ? (
+          <div className="p-12 text-center space-y-3">
+            <div className="w-12 h-12 rounded-full bg-[#F5F5F7] flex items-center justify-center mx-auto text-[#86868B]">
+              <UserCheck className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-[#1D1D1F]">No completed tickets found</p>
+              <p className="text-xs text-[#86868B]">
+                {searchQuery || statusFilter !== 'ALL'
+                  ? 'Try adjusting your search query or status filter.'
+                  : 'Work orders marked as Finished or Taken Out will appear here for follow-up.'}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="divide-y divide-[#E5E5EA]">
+            {filteredWorkOrders.map((wo) => {
+              const records = wo.followUpRecords || [];
+              const lastRecord = records.length > 0 ? records[records.length - 1] : null;
+              const daysElapsed = getDaysSinceCompletion(wo);
+
+              return (
+                <div
+                  key={wo.id}
+                  className="p-4 hover:bg-[#FAFAFC] transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4"
+                >
+                  {/* Customer & Ticket Info */}
+                  <div className="space-y-1.5 flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-mono font-extrabold text-xs text-[#0071E3]">
+                        {wo.orderNumber}
+                      </span>
+                      <span className="text-xs font-extrabold text-[#1D1D1F]">
+                        {wo.customerName}
+                      </span>
+                      <span className="text-xs text-[#86868B]">
+                        ({wo.customerPhone})
+                      </span>
+                      <div className="flex items-center space-x-1 ml-auto md:ml-0 flex-wrap gap-1">
+                        {getStatusBadge(wo.followUpStatus)}
+                        <span className="px-1.5 py-0.5 rounded-md text-[9px] font-extrabold bg-emerald-100 text-emerald-800">
+                          Delivered / Taken Out
+                        </span>
+
+                        {daysElapsed >= 60 ? (
+                          <span className="px-1.5 py-0.5 rounded-md text-[9px] font-extrabold bg-violet-100 text-violet-900 border border-violet-300">
+                            2 Months Due ({daysElapsed}d)
+                          </span>
+                        ) : daysElapsed >= 30 ? (
+                          <span className="px-1.5 py-0.5 rounded-md text-[9px] font-extrabold bg-purple-100 text-purple-900 border border-purple-300">
+                            1 Month Due ({daysElapsed}d)
+                          </span>
+                        ) : daysElapsed >= 7 ? (
+                          <span className="px-1.5 py-0.5 rounded-md text-[9px] font-extrabold bg-indigo-100 text-indigo-900 border border-indigo-300">
+                            7 Days Due ({daysElapsed}d)
+                          </span>
+                        ) : (
+                          <span className="px-1.5 py-0.5 rounded-md text-[9px] font-semibold bg-gray-100 text-gray-700">
+                            {daysElapsed === 0 ? 'Completed Today' : `${daysElapsed}d Post Delivery`}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-[#86868B]">
+                      <span className="flex items-center space-x-1 font-semibold text-[#1D1D1F]">
+                        <Smartphone className="w-3.5 h-3.5 text-[#0071E3]" />
+                        <span>{wo.deviceModel}</span>
+                      </span>
+                      {wo.serialNumber && (
+                        <span>S/N: <span className="font-mono text-[#1D1D1F]">{wo.serialNumber}</span></span>
+                      )}
+                      <span>
+                        Completed:{' '}
+                        <span className="font-medium text-[#1D1D1F]">
+                          {new Date(wo.updatedAt || wo.createdAt).toLocaleDateString()}
+                        </span>
+                      </span>
+                      {wo.assignedTechName && (
+                        <span>Tech: <span className="font-semibold text-[#1D1D1F]">{wo.assignedTechName}</span></span>
+                      )}
+                      <span>Warranty: <span className="font-semibold text-[#1D1D1F]">{wo.warrantyDays} Days</span></span>
+                      <span>Total: <span className="font-extrabold text-emerald-600">{systemSettings.currencySymbol}{wo.totalAmount || 0}</span></span>
+                    </div>
+
+                    {/* What Was Repaired Banner */}
+                    <div className="bg-[#F0F7FB] border border-[#D8E5ED] rounded-xl p-3 text-xs space-y-1.5 mt-2">
+                      <div className="flex items-center justify-between">
+                        <span className="font-extrabold text-[#136F9A] flex items-center space-x-1.5">
+                          <Wrench className="w-3.5 h-3.5 text-[#136F9A]" />
+                          <span>Repaired Services & Replaced Components:</span>
+                        </span>
+                        <span className="text-[11px] font-extrabold text-[#136F9A] bg-[#E5F1FF] px-2 py-0.5 rounded-md border border-[#BCE0FD]">
+                          {systemSettings.currencySymbol}{wo.totalAmount || 0}
+                        </span>
+                      </div>
+
+                      <div className="flex flex-wrap gap-1.5 pt-0.5">
+                        {wo.selectedRepairs && wo.selectedRepairs.length > 0 ? (
+                          wo.selectedRepairs.map((rep, idx) => (
+                            <span key={idx} className="px-2.5 py-1 bg-white border border-[#D8E5ED] text-[#2C3E50] font-extrabold text-[11px] rounded-lg shadow-2xs flex items-center space-x-1">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                              <span>{rep.name}</span>
+                            </span>
+                          ))
+                        ) : wo.lineItems && wo.lineItems.length > 0 ? (
+                          wo.lineItems.map((item, idx) => (
+                            <span key={idx} className="px-2.5 py-1 bg-white border border-[#D8E5ED] text-[#2C3E50] font-extrabold text-[11px] rounded-lg shadow-2xs flex items-center space-x-1">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                              <span>{item.description || item.partName}</span>
+                            </span>
+                          ))
+                        ) : (
+                          <span className="px-2.5 py-1 bg-white border border-[#D8E5ED] text-[#2C3E50] font-extrabold text-[11px] rounded-lg flex items-center space-x-1">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                            <span>{wo.symptomsReported || 'Standard Repair & Servicing'}</span>
+                          </span>
+                        )}
+
+                        {wo.microSolderingLog?.icReplaced && wo.microSolderingLog.icReplaced.length > 0 && (
+                          <span className="px-2.5 py-1 bg-purple-50 border border-purple-200 text-purple-900 font-extrabold text-[11px] rounded-lg flex items-center space-x-1">
+                            <Cpu className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                            <span>IC Replaced: {wo.microSolderingLog.icReplaced.join(', ')}</span>
+                          </span>
+                        )}
+                      </div>
+
+                      {(wo.afterRepairSummary || wo.symptomsReported || wo.diagnosticResult) && (
+                        <div className="text-[11px] text-[#526375] space-y-1 pt-1 border-t border-[#EBF3F8]">
+                          {wo.afterRepairSummary && (
+                            <p><strong className="text-[#2C3E50]">Tech Repair Notes:</strong> {wo.afterRepairSummary}</p>
+                          )}
+                          {wo.symptomsReported && (
+                            <p><strong className="text-[#2C3E50]">Reported Symptom:</strong> {wo.symptomsReported}</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Last Log preview */}
+                    {lastRecord && (
+                      <div className="bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2.5 text-xs text-[#1D1D1F] space-y-1 mt-1">
+                        <div className="flex items-center justify-between text-[11px] text-[#86868B]">
+                          <span className="font-bold text-[#1D1D1F] flex items-center space-x-1">
+                            <span>Last Logged by {lastRecord.author}</span>
+                            {lastRecord.satisfactionRating && (
+                              <span className="flex items-center text-amber-500 font-bold ml-2">
+                                {'★'.repeat(lastRecord.satisfactionRating)}
+                              </span>
+                            )}
+                          </span>
+                          <span>{new Date(lastRecord.timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
+                        </div>
+                        <p className="text-xs text-[#1D1D1F]">{lastRecord.notes}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actions Bar */}
+                  <div className="flex items-center space-x-2 shrink-0 border-t md:border-t-0 pt-2 md:pt-0 border-[#E5E5EA]">
+                    {/* Direct Contact Buttons */}
+                    <a
+                      href={`tel:${wo.customerPhone}`}
+                      className="p-2 rounded-xl bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] border border-[#E5E5EA] transition-colors cursor-pointer"
+                      title="Call Phone"
+                    >
+                      <Phone className="w-3.5 h-3.5 text-[#0071E3]" />
+                    </a>
+
+                    {records.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setHistoryModalWo(wo)}
+                        className="px-3 py-1.5 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] text-xs font-bold rounded-xl border border-[#E5E5EA] transition-colors flex items-center space-x-1 cursor-pointer"
+                      >
+                        <History className="w-3.5 h-3.5 text-[#86868B]" />
+                        <span>Logs ({records.length})</span>
+                      </button>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => handleOpenLogModal(wo)}
+                      className="px-3.5 py-1.5 bg-[#0071E3] hover:bg-[#0077ED] text-white text-xs font-bold rounded-xl shadow-2xs transition-all active:scale-95 flex items-center space-x-1.5 cursor-pointer"
+                    >
+                      <PhoneCall className="w-3.5 h-3.5" />
+                      <span>Log Follow-Up</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* LOG FOLLOW-UP MODAL */}
+      {isLogModalOpen && selectedWo && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white border border-[#E5E5EA] rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-xl animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-3">
+              <div className="flex items-center space-x-2">
+                <div className="p-2 bg-[#E5F1FF] text-[#0071E3] rounded-xl">
+                  <PhoneCall className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-sm text-[#1D1D1F]">
+                    Record Follow-Up Call
+                  </h3>
+                  <p className="text-xs text-[#86868B]">
+                    {selectedWo.orderNumber} • {selectedWo.customerName} ({selectedWo.deviceModel})
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsLogModalOpen(false)}
+                className="p-1 rounded-lg text-[#86868B] hover:bg-[#F5F5F7] hover:text-[#1D1D1F] transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              {/* Repaired Device Quick Reference Card */}
+              <div className="bg-[#F0F7FB] border border-[#D8E5ED] rounded-xl p-3 space-y-2 text-xs">
+                <div className="flex items-center justify-between border-b border-[#D8E5ED] pb-1.5">
+                  <span className="font-extrabold text-[#136F9A] flex items-center space-x-1.5">
+                    <Wrench className="w-4 h-4 text-[#136F9A]" />
+                    <span>Repaired Service Summary</span>
+                  </span>
+                  <span className="font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                    Total: {systemSettings.currencySymbol}{selectedWo.totalAmount || 0}
+                  </span>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex flex-wrap gap-1">
+                    {selectedWo.selectedRepairs && selectedWo.selectedRepairs.length > 0 ? (
+                      selectedWo.selectedRepairs.map((rep, idx) => (
+                        <span key={idx} className="px-2 py-0.5 bg-white border border-[#D8E5ED] text-[#2C3E50] font-bold text-[11px] rounded-md flex items-center space-x-1">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                          <span>{rep.name}</span>
+                        </span>
+                      ))
+                    ) : selectedWo.lineItems && selectedWo.lineItems.length > 0 ? (
+                      selectedWo.lineItems.map((item, idx) => (
+                        <span key={idx} className="px-2 py-0.5 bg-white border border-[#D8E5ED] text-[#2C3E50] font-bold text-[11px] rounded-md flex items-center space-x-1">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                          <span>{item.description || item.partName}</span>
+                        </span>
+                      ))
+                    ) : (
+                      <span className="px-2 py-0.5 bg-white border border-[#D8E5ED] text-[#2C3E50] font-bold text-[11px] rounded-md flex items-center space-x-1">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                        <span>{selectedWo.symptomsReported || 'Standard Repair Service'}</span>
+                      </span>
+                    )}
+
+                    {selectedWo.microSolderingLog?.icReplaced && selectedWo.microSolderingLog.icReplaced.length > 0 && (
+                      <span className="px-2 py-0.5 bg-purple-50 border border-purple-200 text-purple-900 font-bold text-[11px] rounded-md flex items-center space-x-1">
+                        <Cpu className="w-3 h-3 text-purple-600" />
+                        <span>IC Replaced: {selectedWo.microSolderingLog.icReplaced.join(', ')}</span>
+                      </span>
+                    )}
+                  </div>
+
+                  {selectedWo.afterRepairSummary && (
+                    <p className="text-[11px] text-[#526375] pt-0.5">
+                      <strong className="text-[#2C3E50]">Tech Summary:</strong> {selectedWo.afterRepairSummary}
+                    </p>
+                  )}
+
+                  <div className="flex items-center justify-between text-[11px] text-[#526375] pt-1 border-t border-[#EBF3F8]">
+                    <span>Assigned Tech: <strong className="text-[#2C3E50]">{selectedWo.assignedTechName || 'Shop Technician'}</strong></span>
+                    <span>Warranty: <strong className="text-[#2C3E50]">{selectedWo.warrantyDays || 30} Days</strong></span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Outcome / Status Selector */}
+              <div className="space-y-1.5">
+                <label className="font-bold text-[#1D1D1F]">Follow-Up Outcome Status</label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {(
+                    [
+                      { id: 'Satisfied', label: 'Satisfied (5★)' },
+                      { id: 'Issue Reported', label: 'Issue Reported' },
+                      { id: 'No Answer', label: 'No Answer' },
+                      { id: 'Callback Scheduled', label: 'Callback Scheduled' },
+                      { id: 'Pending Call', label: 'Pending Call' },
+                      { id: 'Closed', label: 'Closed' },
+                    ] as { id: FollowUpStatus; label: string }[]
+                  ).map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => setFormStatus(s.id)}
+                      className={`p-2 rounded-xl border font-bold text-center transition-all cursor-pointer ${
+                        formStatus === s.id
+                          ? 'border-[#0071E3] bg-[#E5F1FF] text-[#0071E3]'
+                          : 'border-[#E5E5EA] bg-white text-[#1D1D1F] hover:bg-[#F5F5F7]'
+                      }`}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Star Rating if Satisfied */}
+              {formStatus === 'Satisfied' && (
+                <div className="space-y-1 bg-amber-50/60 border border-amber-200 rounded-xl p-3">
+                  <label className="font-bold text-amber-900 block">Customer Satisfaction Rating</label>
+                  <div className="flex items-center space-x-2 pt-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setFormRating(star)}
+                        className="p-1 text-amber-400 hover:scale-110 transition-transform cursor-pointer"
+                      >
+                        <Star
+                          className={`w-6 h-6 ${
+                            star <= formRating ? 'fill-amber-400 text-amber-400' : 'text-slate-300'
+                          }`}
+                        />
+                      </button>
+                    ))}
+                    <span className="font-bold text-amber-900 ml-2">{formRating} / 5 Stars</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Staff Author */}
+              <div className="space-y-1">
+                <label className="font-bold text-[#1D1D1F]">Logged By (Staff / Advisor Name)</label>
+                <input
+                  type="text"
+                  value={formAuthor}
+                  onChange={(e) => setFormAuthor(e.target.value)}
+                  placeholder="e.g. Service Advisor Alex"
+                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#0071E3] focus:bg-white transition-all"
+                />
+              </div>
+
+              {/* Notes & Quick Templates */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-[#1D1D1F]">Call Notes & Feedback Details</label>
+                  <span className="text-[10px] text-[#86868B]">Quick click templates below</span>
+                </div>
+
+                <div className="flex flex-wrap gap-1.5 pb-1">
+                  {quickNotesTemplates.map((tmpl, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setFormNotes(tmpl)}
+                      className="px-2 py-1 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] border border-[#E5E5EA] rounded-lg text-[10px] font-semibold transition-all text-left cursor-pointer"
+                    >
+                      + {tmpl.slice(0, 32)}...
+                    </button>
+                  ))}
+                </div>
+
+                <textarea
+                  rows={3}
+                  value={formNotes}
+                  onChange={(e) => setFormNotes(e.target.value)}
+                  placeholder="Enter details from customer follow-up call..."
+                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-3 text-xs focus:outline-none focus:border-[#0071E3] focus:bg-white transition-all resize-none"
+                />
+              </div>
+
+              {/* Next Follow-up Date */}
+              <div className="space-y-1">
+                <label className="font-bold text-[#1D1D1F]">Next Follow-Up Date (Optional)</label>
+                <input
+                  type="date"
+                  value={formNextDate}
+                  onChange={(e) => setFormNextDate(e.target.value)}
+                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#0071E3] focus:bg-white transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-end space-x-2 pt-3 border-t border-[#E5E5EA]">
+              <button
+                type="button"
+                onClick={() => setIsLogModalOpen(false)}
+                className="px-4 py-2 bg-white border border-[#E5E5EA] text-[#1D1D1F] font-bold rounded-xl text-xs hover:bg-[#F5F5F7] transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveFollowUpLog}
+                className="px-5 py-2 bg-[#0071E3] hover:bg-[#0077ED] text-white font-extrabold rounded-xl text-xs shadow-2xs transition-all active:scale-95 cursor-pointer flex items-center space-x-1.5"
+              >
+                <Check className="w-4 h-4" />
+                <span>Save Follow-Up Log</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* HISTORY LOGS MODAL */}
+      {historyModalWo && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white border border-[#E5E5EA] rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-3">
+              <div className="flex items-center space-x-2">
+                <History className="w-5 h-5 text-[#0071E3]" />
+                <div>
+                  <h3 className="font-extrabold text-sm text-[#1D1D1F]">
+                    Follow-Up History Log
+                  </h3>
+                  <p className="text-xs text-[#86868B]">
+                    {historyModalWo.orderNumber} • {historyModalWo.customerName}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setHistoryModalWo(null)}
+                className="p-1 rounded-lg text-[#86868B] hover:bg-[#F5F5F7] hover:text-[#1D1D1F] transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
+              {/* Repaired Device Details */}
+              <div className="bg-[#F0F7FB] border border-[#D8E5ED] rounded-xl p-3 text-xs space-y-1.5">
+                <div className="flex items-center justify-between border-b border-[#D8E5ED] pb-1">
+                  <span className="font-extrabold text-[#136F9A] flex items-center space-x-1">
+                    <Wrench className="w-3.5 h-3.5 text-[#136F9A]" />
+                    <span>Repaired Services:</span>
+                  </span>
+                  <span className="font-bold text-emerald-700">{systemSettings.currencySymbol}{historyModalWo.totalAmount || 0}</span>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {historyModalWo.selectedRepairs && historyModalWo.selectedRepairs.length > 0 ? (
+                    historyModalWo.selectedRepairs.map((rep, idx) => (
+                      <span key={idx} className="px-2 py-0.5 bg-white border border-[#D8E5ED] text-[#2C3E50] font-bold text-[10px] rounded">
+                        ✓ {rep.name}
+                      </span>
+                    ))
+                  ) : historyModalWo.lineItems && historyModalWo.lineItems.length > 0 ? (
+                    historyModalWo.lineItems.map((item, idx) => (
+                      <span key={idx} className="px-2 py-0.5 bg-white border border-[#D8E5ED] text-[#2C3E50] font-bold text-[10px] rounded">
+                        ✓ {item.description || item.partName}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="px-2 py-0.5 bg-white border border-[#D8E5ED] text-[#2C3E50] font-bold text-[10px] rounded">
+                      ✓ {historyModalWo.symptomsReported || 'Standard Repair'}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {(historyModalWo.followUpRecords || []).map((rec) => (
+                <div
+                  key={rec.id}
+                  className="p-3 bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl text-xs space-y-1.5"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-[#1D1D1F]">{rec.author}</span>
+                    <span className="text-[10px] text-[#86868B]">
+                      {new Date(rec.timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {getStatusBadge(rec.status)}
+                    {rec.satisfactionRating && (
+                      <span className="text-amber-500 font-bold text-xs">
+                        {'★'.repeat(rec.satisfactionRating)}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[#1D1D1F]">{rec.notes}</p>
+                  {rec.nextFollowUpDate && (
+                    <div className="text-[10px] text-[#0071E3] font-semibold">
+                      Next Callback: {rec.nextFollowUpDate}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-2 text-right">
+              <button
+                type="button"
+                onClick={() => setHistoryModalWo(null)}
+                className="px-4 py-2 bg-[#F5F5F7] border border-[#E5E5EA] text-[#1D1D1F] font-bold rounded-xl text-xs hover:bg-[#E5E5EA] transition-all cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};

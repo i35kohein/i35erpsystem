@@ -1,0 +1,197 @@
+{
+  "entities": {
+    "workOrders": {
+      "title": "Work Orders",
+      "description": "Repair tickets, device intake, diagnostic details, and repair status",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "orderNumber": { "type": "string" },
+        "customerId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "customerPhone": { "type": "string" },
+        "customerEmail": { "type": "string" },
+        "deviceCategory": { "type": "string" },
+        "deviceModel": { "type": "string" },
+        "serialNumber": { "type": "string" },
+        "status": { "type": "string" },
+        "priority": { "type": "string" },
+        "assignedTechId": { "type": "string" },
+        "subtotal": { "type": "number" },
+        "taxAmount": { "type": "number" },
+        "totalAmount": { "type": "number" },
+        "isPaid": { "type": "boolean" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "orderNumber", "customerName", "deviceModel", "status"]
+    },
+    "parts": {
+      "title": "Parts Inventory",
+      "description": "Inventory parts, stock levels, reorder points, and suppliers",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "sku": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "qualityTier": { "type": "string" },
+        "quantityInStock": { "type": "number" },
+        "reorderPoint": { "type": "number" },
+        "costPrice": { "type": "number" },
+        "sellingPrice": { "type": "number" },
+        "supplierId": { "type": "string" }
+      },
+      "required": ["id", "sku", "name", "quantityInStock"]
+    },
+    "suppliers": {
+      "title": "Suppliers",
+      "description": "Component suppliers and vendor directory",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "code": { "type": "string" },
+        "website": { "type": "string" },
+        "contactEmail": { "type": "string" },
+        "phone": { "type": "string" }
+      },
+      "required": ["id", "name"]
+    },
+    "rmas": {
+      "title": "Vendor RMAs",
+      "description": "RMA claims for defective parts sent to vendors",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "rmaNumber": { "type": "string" },
+        "partId": { "type": "string" },
+        "partName": { "type": "string" },
+        "supplierId": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "rmaNumber", "partName", "status"]
+    },
+    "purchaseOrders": {
+      "title": "Purchase Orders",
+      "description": "Stock purchase orders sent to vendors",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "poNumber": { "type": "string" },
+        "supplierId": { "type": "string" },
+        "supplierName": { "type": "string" },
+        "totalCost": { "type": "number" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "poNumber", "status"]
+    },
+    "customers": {
+      "title": "Customers",
+      "description": "Customer profiles and repair histories",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "type": { "type": "string" },
+        "totalOrdersCount": { "type": "number" },
+        "totalSpent": { "type": "number" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "name", "phone"]
+    },
+    "technicians": {
+      "title": "Technicians",
+      "description": "Technician profiles and active repair counts",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "level": { "type": "string" },
+        "status": { "type": "string" },
+        "activeJobsCount": { "type": "number" },
+        "completedThisMonth": { "type": "number" }
+      },
+      "required": ["id", "name", "level"]
+    },
+    "systemSettings": {
+      "title": "System Settings",
+      "description": "Global ERP business branding, work order defaults, tax, currency, and thermal printing preferences",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "shopName": { "type": "string" },
+        "shopPhone": { "type": "string" },
+        "shopEmail": { "type": "string" },
+        "shopAddress": { "type": "string" },
+        "ticketPrefix": { "type": "string" },
+        "defaultWarrantyDays": { "type": "number" },
+        "currencySymbol": { "type": "string" },
+        "taxPercentage": { "type": "number" },
+        "lowStockThreshold": { "type": "number" },
+        "thermalPaperSize": { "type": "string" },
+        "receiptHeaderTitle": { "type": "string" },
+        "receiptFooterNote": { "type": "string" },
+        "mandatoryQaChecklist": { "type": "boolean" },
+        "requirePasscodeIntake": { "type": "boolean" },
+        "requireFindMyCheck": { "type": "boolean" }
+      },
+      "required": ["id", "shopName", "currencySymbol"]
+    },
+    "priceCatalog": {
+      "title": "Price Catalog",
+      "description": "Device repair price catalog matrix",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "model": { "type": "string" },
+        "prices": { "type": "object" },
+        "warranties": { "type": "object" }
+      },
+      "required": ["id", "model"]
+    }
+  },
+  "firestore": {
+    "workOrders/{workOrderId}": {
+      "schema": { "$ref": "#/entities/workOrders" },
+      "description": "Collection of work orders"
+    },
+    "parts/{partId}": {
+      "schema": { "$ref": "#/entities/parts" },
+      "description": "Collection of inventory parts"
+    },
+    "suppliers/{supplierId}": {
+      "schema": { "$ref": "#/entities/suppliers" },
+      "description": "Collection of component suppliers"
+    },
+    "rmas/{rmaId}": {
+      "schema": { "$ref": "#/entities/rmas" },
+      "description": "Collection of vendor RMA tickets"
+    },
+    "purchaseOrders/{poId}": {
+      "schema": { "$ref": "#/entities/purchaseOrders" },
+      "description": "Collection of stock purchase orders"
+    },
+    "customers/{customerId}": {
+      "schema": { "$ref": "#/entities/customers" },
+      "description": "Collection of customer profiles"
+    },
+    "technicians/{technicianId}": {
+      "schema": { "$ref": "#/entities/technicians" },
+      "description": "Collection of technicians"
+    },
+    "systemSettings/{settingId}": {
+      "schema": { "$ref": "#/entities/systemSettings" },
+      "description": "Global system configuration document"
+    },
+    "priceCatalog/{catalogId}": {
+      "schema": { "$ref": "#/entities/priceCatalog" },
+      "description": "Repair price catalog entries"
+    }
+  }
+}
