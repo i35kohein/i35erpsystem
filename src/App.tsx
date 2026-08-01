@@ -2,20 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Sparkles, Plus, CircleDot, Search, Filter, Calculator, Folder, Settings, Download, Database, ExternalLink, ClipboardList, Kanban, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, Menu, ChevronDown, PhoneCall, Truck, Boxes, CreditCard, Users, DollarSign, LayoutDashboard, Timer } from 'lucide-react';
 import { subscribeToCollection, saveDocument, saveBatchDocuments, deleteDocument, clearCollection } from './lib/supabase';
-import { 
-  INITIAL_WORK_ORDERS, 
-  INITIAL_PARTS, 
-  INITIAL_SUPPLIERS, 
-  INITIAL_RMAS, 
-  INITIAL_POS, 
-  INITIAL_CUSTOMERS, 
-  INITIAL_TECHNICIANS,
-  DEFAULT_SYSTEM_SETTINGS,
-  INITIAL_EXPENSES,
-  INITIAL_SUPPLIER_DEBTS,
-  INITIAL_TECHNICIAN_PAYOUTS,
-  INITIAL_USERS
-} from './data/seedData';
+import { DEFAULT_SYSTEM_SETTINGS, INITIAL_USERS } from './data/seedData';
 import { 
   WorkOrder, 
   PartItem, 
@@ -25,7 +12,6 @@ import {
   Customer, 
   Technician, 
   WorkOrderStatus, 
-  RepairPriority,
   RmaStatus, 
   MicroSolderingLog, 
   PostRepairChecklist,
@@ -107,18 +93,18 @@ export default function App() {
   
   // Primary ERP State
   const [systemSettings, setSystemSettings] = useState<SystemSettings>(DEFAULT_SYSTEM_SETTINGS);
-  const [users, setUsers] = useState<AppUser[]>(INITIAL_USERS);
+  const [users, setUsers] = useState<AppUser[]>([]);
   const [currentUser, setCurrentUser] = useState<AppUser>(INITIAL_USERS[0]);
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
-  const [parts, setParts] = useState<PartItem[]>(INITIAL_PARTS);
-  const [suppliers, setSuppliers] = useState<Supplier[]>(INITIAL_SUPPLIERS);
-  const [rmas, setRmas] = useState<RmaItem[]>(INITIAL_RMAS);
-  const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>(INITIAL_POS);
-  const [customers, setCustomers] = useState<Customer[]>(INITIAL_CUSTOMERS);
-  const [technicians, setTechnicians] = useState<Technician[]>(INITIAL_TECHNICIANS);
-  const [expenses, setExpenses] = useState<ExpenseItem[]>(INITIAL_EXPENSES);
-  const [supplierDebts, setSupplierDebts] = useState<SupplierDebtRecord[]>(INITIAL_SUPPLIER_DEBTS);
-  const [technicianPayouts, setTechnicianPayouts] = useState<TechnicianPayoutRecord[]>(INITIAL_TECHNICIAN_PAYOUTS);
+  const [parts, setParts] = useState<PartItem[]>([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [rmas, setRmas] = useState<RmaItem[]>([]);
+  const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [technicians, setTechnicians] = useState<Technician[]>([]);
+  const [expenses, setExpenses] = useState<ExpenseItem[]>([]);
+  const [supplierDebts, setSupplierDebts] = useState<SupplierDebtRecord[]>([]);
+  const [technicianPayouts, setTechnicianPayouts] = useState<TechnicianPayoutRecord[]>([]);
   const [isDbSynced, setIsDbSynced] = useState<boolean>(true);
 
   // User Management Handlers
@@ -172,47 +158,43 @@ export default function App() {
     const unsubWo = subscribeToCollection<WorkOrder>('workOrders', (data) => {
       setWorkOrders(data);
       setIsDbSynced(true);
-    }, INITIAL_WORK_ORDERS);
+    }, []);
 
     const unsubParts = subscribeToCollection<PartItem>('parts', (data) => {
       setParts(data);
-    }, INITIAL_PARTS);
+    }, []);
 
     const unsubSuppliers = subscribeToCollection<Supplier>('suppliers', (data) => {
       setSuppliers(data);
-    }, INITIAL_SUPPLIERS);
+    }, []);
 
     const unsubRmas = subscribeToCollection<RmaItem>('rmas', (data) => {
       setRmas(data);
-    }, INITIAL_RMAS);
+    }, []);
 
     const unsubPos = subscribeToCollection<PurchaseOrder>('purchaseOrders', (data) => {
       setPurchaseOrders(data);
-    }, INITIAL_POS);
+    }, []);
 
     const unsubCust = subscribeToCollection<Customer>('customers', (data) => {
       setCustomers(data);
-    }, INITIAL_CUSTOMERS);
+    }, []);
 
     const unsubTech = subscribeToCollection<Technician>('technicians', (data) => {
-      if (data && data.length > 0) {
-        setTechnicians(data);
-      } else {
-        setTechnicians(INITIAL_TECHNICIANS);
-      }
-    }, INITIAL_TECHNICIANS);
+      setTechnicians(data);
+    }, []);
 
     const unsubExpenses = subscribeToCollection<ExpenseItem>('expenses', (data) => {
       setExpenses(data);
-    }, INITIAL_EXPENSES);
+    }, []);
 
     const unsubDebts = subscribeToCollection<SupplierDebtRecord>('supplierDebts', (data) => {
       setSupplierDebts(data);
-    }, INITIAL_SUPPLIER_DEBTS);
+    }, []);
 
     const unsubPayouts = subscribeToCollection<TechnicianPayoutRecord>('technicianPayouts', (data) => {
       setTechnicianPayouts(data);
-    }, INITIAL_TECHNICIAN_PAYOUTS);
+    }, []);
 
     const unsubSettings = subscribeToCollection<any>('systemSettings', (data) => {
       if (data && data.length > 0) {
@@ -222,8 +204,8 @@ export default function App() {
     }, [{ id: 'global', ...DEFAULT_SYSTEM_SETTINGS }]);
 
     const unsubUsers = subscribeToCollection<AppUser>('users', (data) => {
-      setUsers(data.length ? data : INITIAL_USERS);
-    }, INITIAL_USERS);
+      setUsers(data);
+    }, []);
 
     return () => {
       unsubWo();
@@ -345,12 +327,6 @@ export default function App() {
     deleteDocument('technicians', id).catch(console.error);
   };
 
-  const handleRestoreDefaultTechnicians = () => {
-    setTechnicians(INITIAL_TECHNICIANS);
-    saveBatchDocuments('technicians', INITIAL_TECHNICIANS).catch(console.error);
-    addToast('Default technical staff roster restored successfully!', 'success', 'Staff Roster Restored');
-  };
-
   // Archive / Delete Work Order -> Move to Recycle Bin
   const handleDeleteWorkOrder = (id: string) => {
     if (currentUser.role !== 'Admin') {
@@ -451,109 +427,6 @@ export default function App() {
     } else {
       addToast(`Work order ${wo.id} created for ${wo.customerName}`, 'success', 'Work Order Created');
     }
-  };
-
-  const handleSaveBatchWorkOrders = (newWos: WorkOrder[]) => {
-    setWorkOrders((prev) => {
-      const copy = [...prev];
-      newWos.forEach((wo) => {
-        const idx = copy.findIndex((x) => x.id === wo.id);
-        if (idx >= 0) {
-          copy[idx] = wo;
-        } else {
-          copy.unshift(wo);
-        }
-      });
-      return copy;
-    });
-    saveBatchDocuments('workOrders', newWos).catch(console.error);
-    addToast(`Successfully generated ${newWos.length} sample work orders`, 'success', 'Test Tickets Seeded');
-  };
-
-  const handleGenerate10TestTickets = () => {
-    const sampleModels: { model: string; issue: string; status: WorkOrderStatus; total: number; priority: RepairPriority }[] = [
-      { model: 'iPhone 15 Pro Max', issue: 'Back Glass Cracked & Camera Glass Lens Shattered', status: 'Receive', total: 380000, priority: 'Urgent' },
-      { model: 'iPhone 13', issue: 'OLED Screen Display Flicker & Green Line Issue', status: 'In Progress', total: 185000, priority: 'Normal' },
-      { model: 'Samsung Galaxy S24 Ultra', issue: 'Inner Curved AMOLED Bleeding & Digitizer Dead Spot', status: 'Pending', total: 420000, priority: 'Urgent' },
-      { model: 'iPad Pro 12.9 (M2)', issue: 'USB-C Charging Port Pin Bent & Not Recognized', status: 'Receive', total: 160000, priority: 'Normal' },
-      { model: 'MacBook Air M2', issue: 'Liquid Damage Clean & Board Level Capacitor Short', status: 'In Progress', total: 290000, priority: 'B2B Priority' },
-      { model: 'iPhone 14 Pro', issue: 'Battery Service Warning (Degraded Capacity 72%)', status: 'Finished', total: 95000, priority: 'Normal' },
-      { model: 'Google Pixel 8 Pro', issue: 'Face Unlock & Front Selfie Camera Glass Cracked', status: 'Receive', total: 210000, priority: 'Normal' },
-      { model: 'Apple Watch Series 9', issue: 'Front Glass Screen Replacement & NFC Chip Check', status: 'Pending', total: 140000, priority: 'Normal' },
-      { model: 'iPhone 12 Mini', issue: 'Earpiece Speaker Muffled & Proximity Sensor Clean', status: 'Finished', total: 45000, priority: 'Normal' },
-      { model: 'Samsung Z Fold 5', issue: 'Hinge Dust Cleaning & Inner Flexible Film Re-fit', status: 'In Progress', total: 310000, priority: 'Urgent' },
-    ];
-
-    const now = new Date();
-    const batchTickets: WorkOrder[] = sampleModels.map((item, index) => {
-      const uniqueSuffix = Math.floor(100 + Math.random() * 900);
-      const ticketId = `wo-test-${Date.now()}-${index}-${uniqueSuffix}`;
-      const orderNum = `WO-${now.getFullYear()}-${Math.floor(1000 + Math.random() * 8999) + index}`;
-      const randomCust = customers[index % customers.length] || { id: 'cust-1', name: 'Sarah Jenkins', phone: '(555) 234-5678', email: 'sarah.j@gmail.com' };
-      const randomTech = technicians[index % technicians.length] || { id: 'tech-1', name: 'Alex Mercer' };
-
-      return {
-        id: ticketId,
-        orderNumber: orderNum,
-        customerId: randomCust.id,
-        customerName: randomCust.name,
-        customerPhone: randomCust.phone,
-        customerEmail: randomCust.email,
-        customerType: 'Retail',
-        deviceCategory: 'iPhone',
-        deviceModel: item.model,
-        serialNumber: `SN-883${index}92014`,
-        imei: `358921102938${index}`,
-        deviceColor: 'Space Black',
-        passcode: '1234',
-        findMyStatus: 'OFF',
-        symptomsReported: item.issue,
-        assignedTechId: randomTech.id,
-        assignedTechName: randomTech.name,
-        serviceType: 'Standard Modular',
-        status: item.status,
-        priority: item.priority,
-        lineItems: [
-          {
-            id: `li-${ticketId}-1`,
-            description: item.issue,
-            unitCost: item.total * 0.4,
-            unitPrice: item.total,
-            quantity: 1,
-            isLabor: false,
-          }
-        ],
-        subtotal: item.total,
-        depositAmount: item.status === 'Finished' ? item.total : 0,
-        discountAmount: 0,
-        taxAmount: 0,
-        totalAmount: item.total,
-        isPaid: item.status === 'Finished',
-        warrantyDays: 180,
-        intakeChecklist: {
-          powerOn: true,
-          screenDisplay: true,
-          touchGrid: true,
-          faceIdOrTouchId: true,
-          trueTonePresent: true,
-          frontCamera: true,
-          rearCamera: true,
-          microphones: true,
-          speakers: true,
-          wifiBluetooth: true,
-          cellularSignal: true,
-          wirelessCharging: true,
-          liquidIndicatorTriggered: false,
-          physicalDamageNotes: item.issue
-        },
-        intakePhotos: [],
-        createdAt: new Date(Date.now() - index * 60000).toISOString(),
-        updatedAt: new Date(Date.now() - index * 60000).toISOString(),
-        estimatedCompletion: new Date(Date.now() + 86400000 * 2).toISOString(),
-      };
-    });
-
-    handleSaveBatchWorkOrders(batchTickets);
   };
 
   const handleUpdateWorkOrderStatus = (workOrderId: string, newStatus: WorkOrderStatus) => {
@@ -812,6 +685,7 @@ export default function App() {
       case 'pos': return { category: t('navFinance'), title: t('navPos') };
       case 'finance': return { category: t('navFinance'), title: 'Shop Finance & P&L Engine' };
       case 'crm': return { category: t('navManagement'), title: t('navCrm') };
+      case 'follow-up': return { category: t('navRepair'), title: 'Follow Ups' };
       case 'settings': return { category: t('navManagement'), title: t('navSettings') };
       case 'qa': return { category: t('navRepair'), title: t('navQa') };
       default: return { category: 'ERP', title: t('appTitle') };
@@ -1305,7 +1179,6 @@ export default function App() {
                   technicians={technicians}
                   currentUser={currentUser}
                   onSaveWorkOrder={handleSaveWorkOrder}
-                  onSaveBatchWorkOrders={handleSaveBatchWorkOrders}
                   onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
                   onOpenAiAssistant={() => setIsAiAssistantOpen(true)}
                   onDeleteWorkOrder={handleDeleteWorkOrder}
@@ -1328,7 +1201,6 @@ export default function App() {
                   currentUser={currentUser}
                   onUpdateWorkOrderStatus={handleUpdateWorkOrderStatus}
                   onSaveWorkOrder={handleSaveWorkOrder}
-                  onSaveBatchWorkOrders={handleSaveBatchWorkOrders}
                   onDeleteWorkOrder={handleDeleteWorkOrder}
                   onClearAllWorkOrders={handleClearAllWorkOrders}
                   searchQuery={searchQuery}
@@ -1351,6 +1223,7 @@ export default function App() {
                   suppliers={suppliers}
                   systemSettings={systemSettings}
                   deviceModels={priceCatalog.catalog.map((m) => m.model)}
+                  inventoryCategories={priceCatalog.categories.map((category) => category.label)}
                   onAddPart={handleAddPart}
                   onUpdatePart={handleUpdatePart}
                   onDeletePart={handleDeletePart}
@@ -1525,7 +1398,10 @@ export default function App() {
                   onAddTechnician={handleAddTechnician}
                   onUpdateTechnician={handleUpdateTechnician}
                   onDeleteTechnician={handleDeleteTechnician}
-                  onRestoreDefaultTechnicians={handleRestoreDefaultTechnicians}
+                  repairCategories={priceCatalog.categories}
+                  onAddRepairCategory={priceCatalog.addCategory}
+                  onUpdateRepairCategory={priceCatalog.updateCategoryLabel}
+                  onDeleteRepairCategory={priceCatalog.deleteCategory}
                   onOpenRecycleBin={() => setIsRecycleBinOpen(true)}
                   archivedCount={archivedWorkOrders.length}
                   users={users}

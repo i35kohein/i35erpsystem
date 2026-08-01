@@ -77,13 +77,13 @@ export const TechnicianLeaderboardView: React.FC<TechnicianLeaderboardViewProps>
       const revenue = finishedOrders.reduce((sum, wo) => sum + (wo.subtotal || 0), 0);
       const estimatedMonthlyRevenue = revenue > 0 
         ? revenue 
-        : completedCurrentMonth * (tech.level === 'L3 Micro-Soldering' ? 180000 : tech.level === 'L2 Advanced' ? 110000 : 75000);
+        : completedCurrentMonth * (tech.level === 'Level 3 Master' ? 180000 : tech.level === 'Level 2 Spareparts + Hardware' ? 110000 : 75000);
 
       // Average turnaround duration in hours
       let avgDurationHours = 2.4;
-      if (tech.level === 'L1 Modular') avgDurationHours = 1.4;
-      if (tech.level === 'L2 Advanced') avgDurationHours = 2.2;
-      if (tech.level === 'L3 Micro-Soldering') avgDurationHours = 3.8;
+      if (tech.level === 'Level 1 Spareparts') avgDurationHours = 1.4;
+      if (tech.level === 'Level 2 Spareparts + Hardware') avgDurationHours = 2.2;
+      if (tech.level === 'Level 3 Master') avgDurationHours = 3.8;
 
       if (finishedOrders.length > 0) {
         const totalHours = finishedOrders.reduce((sum, wo) => {

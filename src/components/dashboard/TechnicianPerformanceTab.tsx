@@ -56,11 +56,11 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
     // Average repair duration calculation in hours
     // Benchmark durations based on skill level if no closed timestamps available
     let avgDurationHours = 2.4;
-    if (tech.level === 'L1 Modular') {
+    if (tech.level === 'Level 1 Spareparts') {
       avgDurationHours = 1.4;
-    } else if (tech.level === 'L2 Advanced') {
+    } else if (tech.level === 'Level 2 Spareparts + Hardware') {
       avgDurationHours = 2.2;
-    } else if (tech.level === 'L3 Micro-Soldering') {
+    } else if (tech.level === 'Level 3 Master') {
       avgDurationHours = 3.8;
     }
 
@@ -238,8 +238,8 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
                   </div>
 
                   <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-lg border shadow-2xs shrink-0 ${
-                    tech.level === 'L3 Micro-Soldering' ? 'bg-purple-50 text-[#AF52DE] border-purple-200' :
-                    tech.level === 'L2 Advanced' ? 'bg-blue-50 text-[#0071E3] border-blue-200' :
+                    tech.level === 'Level 3 Master' ? 'bg-purple-50 text-[#AF52DE] border-purple-200' :
+                    tech.level === 'Level 2 Spareparts + Hardware' ? 'bg-blue-50 text-[#0071E3] border-blue-200' :
                     'bg-emerald-50 text-[#1E7E34] border-emerald-200'
                   }`}>
                     {tech.level}

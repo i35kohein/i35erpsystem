@@ -124,15 +124,6 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
     }
   };
 
-  // Quick Demo Login Helper
-  const handleDemoLogin = (wo: WorkOrder) => {
-    setIdentifierInput(wo.orderNumber);
-    setAuthenticatedCustomerPhoneOrEmail(wo.orderNumber);
-    setSelectedWorkOrderId(wo.id);
-    setCustomerNameSig(wo.customerName);
-    setLoginError(null);
-  };
-
   // Handle Estimate Approval
   const handleApproveEstimate = () => {
     if (!currentWorkOrder) return;
@@ -324,33 +315,6 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
               </button>
             </form>
 
-            {/* Quick Demo Selector for instant testing */}
-            <div className="pt-4 border-t border-[#E5E5EA] space-y-2">
-              <p className="text-[10px] font-bold text-[#86868B] uppercase tracking-wider text-center">
-                Demo Accounts / Sample Tickets
-              </p>
-              <div className="space-y-1.5">
-                {workOrders.slice(0, 4).map((wo) => (
-                  <button
-                    key={wo.id}
-                    onClick={() => handleDemoLogin(wo)}
-                    className="w-full p-2.5 rounded-xl border border-[#E5E5EA] bg-[#F5F5F7] hover:bg-[#F0F6FF] hover:border-[#0071E3]/40 text-left transition-all flex items-center justify-between cursor-pointer"
-                  >
-                    <div>
-                      <p className="font-bold text-[#1D1D1F] text-xs">{wo.customerName} ({wo.deviceModel})</p>
-                      <p className="text-[10px] font-mono text-[#0071E3]">{wo.orderNumber} • {wo.customerPhone}</p>
-                    </div>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                      wo.status === 'Finished' ? 'bg-[#34C759]/10 text-[#34C759] border-[#34C759]/30' :
-                      wo.status === 'In Progress' ? 'bg-[#0071E3]/10 text-[#0071E3] border-[#0071E3]/30' :
-                      'bg-[#FF9500]/10 text-[#FF9500] border-[#FF9500]/30'
-                    }`}>
-                      {wo.status}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
         </main>
 

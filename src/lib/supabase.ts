@@ -13,6 +13,9 @@ import {
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
+// Production must never upload the bundled demo records. Enable this only in a
+// deliberately isolated demo Supabase project.
+const DEMO_SEEDING_ENABLED = import.meta.env.VITE_ENABLE_DEMO_SEED === 'true';
 
 if (!supabaseUrl || !supabaseKey) {
   throw new Error('Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY to .env.local.');
@@ -170,8 +173,14 @@ export function subscribeToCollection<T extends { id: string }>(
   const load = async () => {
     const idbItems = STORES.includes(collectionName) ? await idbGetAll<T>(collectionName) : [];
     const localItems = idbItems.length ? idbItems : getLocalCollection<T>(collectionName);
-    const initialItems = localItems.length ? localItems : initialSeedData;
-    if (initialItems.length && active) onData(initialItems);
+    const initialItems = localItems.length
+      ? localItems
+      : DEMO_SEEDING_ENABLED
+        ? initialSeedData
+        : [];
+    // Clear in-memory demo defaults immediately in production. Cloud data will
+    // replace this value once the request completes.
+    if (active) onData(initialItems);
 
     try {
       const cloudItems = await fetchCloudCollection<T>(collectionName);
@@ -179,8 +188,8 @@ export function subscribeToCollection<T extends { id: string }>(
       if (cloudItems.length) {
         await persistLocal(collectionName, cloudItems);
         onData(cloudItems);
-      } else if (initialItems.length) {
-        // First connection migration: preserve current browser records when the cloud is empty.
+      } else if (DEMO_SEEDING_ENABLED && initialItems.length) {
+        // Explicit demo-only migration. Never seed a production collection.
         const { error } = await supabase.from('erp_records').upsert(toRows(collectionName, initialItems), {
           onConflict: 'collection_name,id',
         });
@@ -188,12 +197,13 @@ export function subscribeToCollection<T extends { id: string }>(
         await persistLocal(collectionName, initialItems);
         onData(initialItems);
       } else {
+        await persistLocal(collectionName, []);
         onData([]);
       }
       notifySyncStatus({ isOnline: true, pendingCount: (await idbGetSyncQueue()).length, isSyncing: false, lastSyncedAt: Date.now() });
     } catch (error) {
       console.warn(`Supabase load fallback for ${collectionName}:`, error);
-      if (!initialItems.length && active) onData(initialSeedData);
+      if (!initialItems.length && active) onData([]);
     }
   };
 
@@ -295,4 +305,19 @@ export async function clearCollection(collectionName: string) {
   if (STORES.includes(collectionName)) await idbClearStore(collectionName);
   const { error } = await supabase.from('erp_records').delete().eq('collection_name', collectionName);
   if (error) throw error;
+}
+
+// Browser-only reset used when a shop moves from demo data to live records.
+// It never deletes Supabase rows.
+export async function discardLocalOfflineCache() {
+  for (const storeName of STORES) {
+    await idbClearStore(storeName);
+    localStorage.removeItem(localKey(storeName));
+  }
+  notifySyncStatus({
+    isOnline: typeof navigator === 'undefined' || navigator.onLine,
+    pendingCount: 0,
+    isSyncing: false,
+    lastSyncedAt: Date.now(),
+  });
 }

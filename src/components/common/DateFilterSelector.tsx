@@ -176,7 +176,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
                 onChange({ ...currentFilter, preset: 'custom' });
               }
             }}
-            className={`p-1.5 rounded-xl border border-[#E5E5EA] cursor-pointer transition-all ${
+            className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#E5E5EA] cursor-pointer transition-all ${
               currentFilter.preset === 'custom'
                 ? 'bg-[#0071E3] text-white font-bold'
                 : 'bg-[#F5F5F7] hover:bg-white text-[#424245]'

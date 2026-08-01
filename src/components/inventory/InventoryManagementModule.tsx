@@ -48,6 +48,7 @@ interface InventoryManagementModuleProps {
   suppliers: Supplier[];
   systemSettings?: SystemSettings;
   deviceModels?: string[];
+  inventoryCategories?: string[];
   onAddPart: (part: PartItem) => void;
   onUpdatePart?: (part: PartItem) => void;
   onAddRma?: (rma: RmaItem) => void;
@@ -94,6 +95,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   parts,
   suppliers,
   deviceModels,
+  inventoryCategories = [],
   onAddPart,
   onUpdatePart,
   onAddRma,
@@ -368,7 +370,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     sku: '',
     name: '',
     applePartNumber: '',
-    category: 'Display',
+    category: inventoryCategories[0] || 'Display',
     deviceCompatibility: activeDeviceModels[0] ? [activeDeviceModels[0]] : ['iPhone 15 Pro'],
     qualityTier: 'OEM Original Pulled',
     quantityInStock: 10,
@@ -383,9 +385,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   });
 
   const categories = useMemo(() => {
-    const set = new Set(parts.map((p) => p.category));
+    const set = new Set([...inventoryCategories, ...parts.map((p) => p.category)]);
     return Array.from(set);
-  }, [parts]);
+  }, [inventoryCategories, parts]);
 
   // Analytics Metrics
   const metrics = useMemo(() => {
@@ -509,50 +511,45 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   return (
     <div className="space-y-3">
       {/* Module Title Header Bar */}
-      <div className="module-toolbar flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-[#E5E5EA] shadow-xs">
+      <div className="module-toolbar flex flex-col md:flex-row md:items-center justify-between gap-2 bg-white p-3 rounded-xl border border-[#E5E5EA] shadow-xs">
         <div className="module-subheader">
           <div className="flex items-center space-x-2">
-            <div className="w-9 h-9 rounded-xl bg-[#0071E3] text-white flex items-center justify-center font-bold shadow-2xs">
-              <Boxes className="w-5 h-5" />
+            <div className="w-8 h-8 rounded-lg bg-[#0071E3] text-white flex items-center justify-center font-bold shadow-2xs">
+              <Boxes className="w-4 h-4" />
             </div>
             <div>
-              <h1 className="text-lg font-black text-[#1D1D1F] tracking-tight">
-                Apple Hardware Inventory & Stock Matrix
-              </h1>
-              <p className="text-xs text-[#86868B] font-medium">
-                Live OEM & Aftermarket components tracking, bin locations, profit margins & model compatibility
-              </p>
+              <h1 className="text-base font-black text-[#1D1D1F] tracking-tight">Parts Inventory & Stock Matrix</h1>
             </div>
           </div>
         </div>
 
         {/* Action Controls & View Switcher */}
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-1.5">
           {/* Dual View Switcher */}
           <div className="bg-[#F5F5F7] p-1 rounded-xl border border-[#E5E5EA] flex items-center space-x-1">
             <button
               type="button"
               onClick={() => setViewMode('catalog')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer ${
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer ${
                 viewMode === 'catalog'
                   ? 'bg-white text-[#0071E3] shadow-xs border border-[#0071E3]/20'
                   : 'text-[#86868B] hover:text-[#1D1D1F]'
               }`}
             >
               <List className="w-3.5 h-3.5" />
-              <span>Catalog List</span>
+              <span className="hidden lg:inline">Catalog</span>
             </button>
             <button
               type="button"
               onClick={() => setViewMode('matrix')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer ${
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer ${
                 viewMode === 'matrix'
                   ? 'bg-white text-[#0071E3] shadow-xs border border-[#0071E3]/20'
                   : 'text-[#86868B] hover:text-[#1D1D1F]'
               }`}
             >
               <Grid className="w-3.5 h-3.5" />
-              <span>Stock Matrix Grid</span>
+              <span className="hidden lg:inline">Matrix</span>
             </button>
           </div>
 
@@ -560,27 +557,27 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           <button
             type="button"
             onClick={() => setShowInventorySettingsModal(true)}
-            className="px-3.5 py-2 bg-white hover:bg-[#F5F5F7] text-[#1D1D1F] border border-[#E5E5EA] font-extrabold text-xs rounded-xl transition-all shadow-2xs flex items-center space-x-1.5 cursor-pointer active:scale-95"
+            aria-label="Inventory settings"
+            className="w-8 h-8 bg-white hover:bg-[#F5F5F7] text-[#1D1D1F] border border-[#E5E5EA] font-extrabold text-xs rounded-lg transition-all shadow-2xs flex items-center justify-center cursor-pointer active:scale-95"
             title="Manage Supplier Name Data & Quality Tiers"
           >
             <Settings className="w-4 h-4 text-[#0071E3]" />
-            <span>Inventory Settings</span>
           </button>
 
           {/* Add Part Button */}
           <button
             type="button"
             onClick={() => setShowAddModal(true)}
-            className="px-4 py-2 bg-[#0071E3] hover:bg-[#0051B3] text-white font-extrabold text-xs rounded-xl transition-all shadow-2xs flex items-center space-x-1.5 cursor-pointer active:scale-95"
+            className="px-3 py-2 bg-[#0071E3] hover:bg-[#0051B3] text-white font-extrabold text-xs rounded-lg transition-all shadow-2xs flex items-center space-x-1.5 cursor-pointer active:scale-95"
           >
             <Plus className="w-4 h-4" />
-            <span>Add New Component</span>
+            <span>Add Part</span>
           </button>
         </div>
       </div>
 
       {/* Analytics Summary Banner */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Total Stock Items Card */}
         <div className="bg-white p-4 rounded-2xl border border-[#E5E5EA] shadow-2xs space-y-2">
           <div className="flex items-center justify-between text-[#86868B]">
@@ -652,62 +649,12 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           </p>
         </button>
 
-        {/* Quality Tiers Distribution Card */}
-        <div className="bg-white p-4 rounded-2xl border border-[#E5E5EA] shadow-2xs space-y-2">
-          <div className="flex items-center justify-between text-[#86868B]">
-            <span className="text-xs font-bold uppercase tracking-wider">Quality Tiers</span>
-            <ShieldCheck className="w-4 h-4 text-purple-600" />
-          </div>
-          <div className="grid grid-cols-2 gap-1 text-[11px] font-bold pt-1">
-            <div className="bg-purple-50 text-purple-700 px-2 py-1 rounded-md flex justify-between">
-              <span>OEM Pulled:</span>
-              <span>{metrics.qualityCounts['OEM Original Pulled']}</span>
-            </div>
-            <div className="bg-emerald-50 text-[#16A34A] px-2 py-1 rounded-md flex justify-between">
-              <span>Grade A:</span>
-              <span>{metrics.qualityCounts['Refurbished Grade A']}</span>
-            </div>
-            <div className="bg-blue-50 text-[#0071E3] px-2 py-1 rounded-md flex justify-between">
-              <span>Prem Afterm:</span>
-              <span>{metrics.qualityCounts['Premium Aftermarket']}</span>
-            </div>
-            <div className="bg-slate-100 text-slate-700 px-2 py-1 rounded-md flex justify-between">
-              <span>Standard:</span>
-              <span>{metrics.qualityCounts['Standard Aftermarket']}</span>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Filter Toolbar */}
       <div className="space-y-2 rounded-xl border border-[var(--border)] bg-[var(--card-bg)] p-2.5">
-        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-          {/* Quality Tier Pill Tabs */}
-          <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar">
-            <span className="text-[11px] font-bold text-[#86868B] shrink-0 mr-1 flex items-center space-x-1">
-              <Filter className="w-3.5 h-3.5 text-[#0071E3]" />
-              <span>Tier:</span>
-            </span>
-            {[
-              { id: 'ALL', label: 'All Tiers' },
-              ...customQualityTiers.map((q) => ({ id: q, label: q })),
-            ].map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => setSelectedQuality(t.id)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-extrabold transition-all shrink-0 cursor-pointer ${
-                  selectedQuality === t.id
-                    ? 'bg-[#0071E3] text-white shadow-2xs'
-                    : 'bg-[#F5F5F7] text-[#1D1D1F] hover:bg-[#E5E5EA]'
-                }`}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Category Dropdown, Device Model Dropdown & Low Stock Toggle */}
+        <div className="flex flex-wrap items-center justify-start gap-1.5 text-xs">
+          {/* Model → Category → Tier */}
           <div className="flex min-w-0 flex-wrap items-center gap-1.5">
             <div className="flex items-center gap-1 rounded-lg bg-[var(--border-subtle)] p-1">
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[var(--card-bg)] text-[var(--primary)]">
@@ -759,18 +706,24 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               />
             </div>
 
-            <button
-              type="button"
-              onClick={() => setShowLowStockOnly(!showLowStockOnly)}
-              className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] font-extrabold transition-colors cursor-pointer ${
-                showLowStockOnly
-                  ? 'bg-amber-500 text-white border-amber-600 shadow-2xs'
-                  : 'bg-[#F5F5F7] hover:bg-amber-50 text-amber-900 border-[#E5E5EA]'
-              }`}
-            >
-              <AlertTriangle className="w-3.5 h-3.5" />
-              <span>Low Stock ({metrics.lowStockCount})</span>
-            </button>
+            <div className="flex items-center gap-1 rounded-lg bg-[var(--border-subtle)] p-1">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[var(--card-bg)] text-[var(--primary)]">
+                <Filter className="h-3.5 w-3.5" />
+              </span>
+              <CustomDropdownMenu
+                value={selectedQuality}
+                onChange={setSelectedQuality}
+                options={[
+                  { value: 'ALL', label: 'All Tiers' },
+                  ...customQualityTiers.map((tier) => ({ value: tier, label: tier })),
+                ]}
+                className="min-w-0"
+                buttonClassName="min-w-[142px] border-0 bg-transparent hover:bg-[var(--card-bg)]"
+                size="sm"
+                menuAlign="group-left"
+              />
+            </div>
+
           </div>
         </div>
       </div>
@@ -1271,19 +1224,15 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
               <div>
                 <label className="block font-bold text-[#1D1D1F] mb-1">Category</label>
-                <select
+                <CustomDropdownMenu
                   value={newPartData.category}
-                  onChange={(e) => setNewPartData({ ...newPartData, category: e.target.value })}
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2.5 text-xs text-[#1D1D1F] focus:bg-white focus:border-[#0071E3] focus:outline-none"
-                >
-                  <option value="Display">Display / OLED</option>
-                  <option value="Battery">Battery Assembly</option>
-                  <option value="Charging Port">Charging Port Flex</option>
-                  <option value="Camera">Camera Module</option>
-                  <option value="Back Glass">Back Glass & Housing</option>
-                  <option value="Logic Board">Logic Board IC / Micro-Soldering</option>
-                  <option value="Audio">Speaker / Earpiece</option>
-                </select>
+                  onChange={(category) => setNewPartData({ ...newPartData, category })}
+                  options={categories.map((category) => ({ value: category, label: category }))}
+                  className="w-full"
+                  buttonClassName="!h-10 !w-full !rounded-xl !border-[#E5E5EA] !bg-[#F5F5F7] !px-2.5"
+                  menuAlign="left"
+                  size="md"
+                />
               </div>
 
               <div>

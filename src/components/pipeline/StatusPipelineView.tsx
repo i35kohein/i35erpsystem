@@ -55,7 +55,6 @@ import {
   checkIsBeforeDiagnosticCompleted,
   checkIsAfterDiagnosticCompleted
 } from '../../utils/diagnosticUtils';
-import { generate10TestTickets, seedSampleTickets } from '../../utils/seedTickets';
 import { getActivePaymentMethods } from '../../data/seedData';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 import { DateFilterState, filterByDateRange, isDateMatchingFilter } from '../common/DateFilterSelector';
@@ -75,7 +74,6 @@ interface StatusPipelineViewProps {
   onSaveWorkOrder?: (wo: WorkOrder) => void;
   onDeleteWorkOrder?: (id: string) => void;
   onClearAllWorkOrders?: () => void;
-  onSaveBatchWorkOrders?: (tickets: WorkOrder[]) => void;
   searchQuery?: string;
   setSearchQuery?: (q: string) => void;
   statusFilter?: string;
@@ -108,7 +106,6 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
   onSaveWorkOrder,
   onDeleteWorkOrder,
   onClearAllWorkOrders,
-  onSaveBatchWorkOrders,
   searchQuery: propSearchQuery,
   setSearchQuery: propSetSearchQuery,
   statusFilter: propStatusFilter,
@@ -474,22 +471,6 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
             </button>
           )}
 
-          <button
-            type="button"
-            onClick={async () => {
-              const testTickets = generate10TestTickets();
-              if (onSaveBatchWorkOrders) {
-                onSaveBatchWorkOrders(testTickets);
-              }
-              await seedSampleTickets();
-              alert('✨ 10 Workflow Test Tickets generated successfully!\n\nWorkflow Test Cases:\n1. WO-2026-0001: Receive (Pre-Diag Pending ! Alert Icon)\n2. WO-2026-0002: Receive (Pre-Diag Passed - Ready for In Progress)\n3. WO-2026-0003: In Progress (Active Micro-Soldering)\n4. WO-2026-0004: Pending (Waiting for Supplier Part)\n5. WO-2026-0005: In Progress (Post-Repair QA Pending Alert)\n6. WO-2026-0006: Finished (Post-Repair QA Passed)\n7. WO-2026-0007: Finished (Ready for POS Cashout)\n8. WO-2026-0008: Taken Out (Paid & Delivered)\n9. WO-2026-0009: Customer Not Repair (Declined Quote)\n10. WO-2026-0010: Cant Repair (BER Unfixable Board Damage)');
-            }}
-            className="inline-flex h-7 items-center gap-1 rounded-md border border-[#105c80] bg-[#136F9A] px-2 text-[10px] font-bold text-white shadow-2xs transition-colors hover:bg-[#136F9A]/90"
-            title="Generate 10 tickets explicitly structured to test all workflow functions"
-          >
-            <Sparkles className="h-3 w-3 shrink-0 text-amber-300" />
-            <span>10 Test Tickets</span>
-          </button>
         </div>
       </div>
 

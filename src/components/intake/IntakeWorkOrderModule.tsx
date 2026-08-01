@@ -71,7 +71,6 @@ import {
   AppUser
 } from '../../types';
 import { get21Diagnostics, get21AfterDiagnostics } from '../../utils/diagnosticUtils';
-import { generate10TestTickets, seedSampleTickets } from '../../utils/seedTickets';
 import { 
   APPLE_MODEL_SERIES, 
   getAvailableColorsForModel, 
@@ -90,7 +89,6 @@ interface IntakeWorkOrderModuleProps {
   technicians: Technician[];
   currentUser?: AppUser;
   onSaveWorkOrder: (wo: WorkOrder) => void;
-  onSaveBatchWorkOrders?: (workOrders: WorkOrder[]) => void;
   onSelectPrintTag: (wo: WorkOrder) => void;
   onOpenAiAssistant: () => void;
   onDeleteWorkOrder?: (id: string) => void;
@@ -136,7 +134,6 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   technicians,
   currentUser,
   onSaveWorkOrder,
-  onSaveBatchWorkOrders,
   onSelectPrintTag,
   onOpenAiAssistant,
   onDeleteWorkOrder,
@@ -172,24 +169,6 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   React.useEffect(() => {
     setCurrentPage(1);
   }, [filterStatus, searchQuery, dateFilter, pageSize, sortByPriority]);
-
-  const handleSeed10TestTickets = async () => {
-    // Reset filters and search so all generated tickets are visible
-    setFilterStatus('ALL');
-    setDateFilter({ preset: 'all' });
-    if (setSearchQuery) setSearchQuery('');
-    setPageSize(5);
-    setCurrentPage(1);
-
-    const testTickets = generate10TestTickets();
-    if (onSaveBatchWorkOrders) {
-      onSaveBatchWorkOrders(testTickets);
-    } else {
-      testTickets.forEach((wo) => onSaveWorkOrder(wo));
-    }
-    await seedSampleTickets();
-    alert('✨ 10 Workflow Test Tickets generated successfully!\n\nWorkflow Test Cases:\n1. WO-2026-0001: Receive (Pre-Diag Pending ! Alert Icon)\n2. WO-2026-0002: Receive (Pre-Diag Passed - Ready for In Progress)\n3. WO-2026-0003: In Progress (Active Micro-Soldering)\n4. WO-2026-0004: Pending (Waiting for Supplier Part)\n5. WO-2026-0005: In Progress (Post-Repair QA Pending Alert)\n6. WO-2026-0006: Finished (Post-Repair QA Passed)\n7. WO-2026-0007: Finished (Ready for POS Cashout)\n8. WO-2026-0008: Taken Out (Paid & Delivered)\n9. WO-2026-0009: Customer Not Repair (Declined Quote)\n10. WO-2026-0010: Cant Repair (BER Unfixable Board Damage)');
-  };
 
   const getPriorityWeight = (priority: string) => {
     switch (priority) {
@@ -395,16 +374,6 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           </div>
 
           <div className="flex items-center space-x-2 flex-wrap">
-            <button
-              type="button"
-              onClick={handleSeed10TestTickets}
-              className="h-8 px-3 bg-[#0071E3]/10 hover:bg-[#0071E3]/20 text-[#0071E3] border border-[#0071E3]/30 text-xs font-bold rounded-lg transition-all inline-flex items-center space-x-1.5 cursor-pointer active:scale-95"
-              title="Quickly generate 10 test tickets for testing"
-            >
-              <Plus className="w-3.5 h-3.5 shrink-0" />
-              <span>+ 10 Test Tickets</span>
-            </button>
-
             {workOrders.length > 0 && (
               <button
                 type="button"
@@ -467,20 +436,6 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                   : "No tickets match your active status filter or search query."}
               </p>
             </div>
-            {workOrders.length === 0 && (
-              <div className="pt-2">
-                <button
-                  onClick={async () => {
-                    const { seedSampleTickets } = await import('../../utils/seedTickets');
-                    await seedSampleTickets();
-                    alert('Sample tickets added!');
-                  }}
-                  className="px-5 py-2.5 bg-[#136F9A] text-white font-extrabold rounded-xl shadow-xs hover:bg-[#136F9A]/90 transition-all text-xs cursor-pointer"
-                >
-                  Seed Sample Tickets
-                </button>
-              </div>
-            )}
           </div>
         ) : viewMode === 'table' ? (
           /* TABLE VIEW */

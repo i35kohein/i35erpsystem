@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Wifi, WifiOff, RefreshCw, Database, CheckCircle2, AlertTriangle, CloudUpload, ShieldCheck } from 'lucide-react';
-import { syncOfflineQueueToSupabase } from '../../lib/supabase';
+import { Wifi, WifiOff, RefreshCw, Database, CheckCircle2, AlertTriangle, CloudUpload, ShieldCheck, Trash2 } from 'lucide-react';
+import { discardLocalOfflineCache, syncOfflineQueueToSupabase } from '../../lib/supabase';
 import { idbGetSyncQueue, idbGetAll, STORES } from '../../lib/indexedDB';
 
 interface SyncStatusDetail {
@@ -19,6 +19,7 @@ export const OfflineSyncStatusBadge: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [dbStats, setDbStats] = useState<Record<string, number>>({});
   const [queueItems, setQueueItems] = useState<any[]>([]);
+  const [isClearingCache, setIsClearingCache] = useState(false);
 
   // Listen to custom offline/sync status events dispatched by firebase/indexedDB layer
   useEffect(() => {
@@ -63,6 +64,18 @@ export const OfflineSyncStatusBadge: React.FC = () => {
   const handleManualSync = async () => {
     await syncOfflineQueueToSupabase();
     loadModalStats();
+  };
+
+  const handleDiscardLocalCache = async () => {
+    if (!window.confirm('Discard this browser’s cached ERP data and pending offline changes? Supabase data will not be deleted.')) return;
+    setIsClearingCache(true);
+    try {
+      await discardLocalOfflineCache();
+      await loadModalStats();
+      setStatus((previous) => ({ ...previous, pendingCount: 0 }));
+    } finally {
+      setIsClearingCache(false);
+    }
   };
 
   return (
@@ -239,9 +252,21 @@ export const OfflineSyncStatusBadge: React.FC = () => {
 
             {/* Footer */}
             <div className="pt-2 flex items-center justify-between text-[11px] text-[#86868B] border-t border-[#E5E5EA]">
-              <div className="flex items-center space-x-1 text-emerald-700 font-semibold">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                <span>IndexedDB Auto-Persistence Active</span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleDiscardLocalCache}
+                  disabled={isClearingCache}
+                  className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-2 py-1.5 font-bold text-rose-700 hover:bg-rose-100 disabled:opacity-50"
+                  title="Clear this browser’s cache only. Supabase records remain safe."
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  {isClearingCache ? 'Clearing…' : 'Discard local cache'}
+                </button>
+                <div className="hidden sm:flex items-center space-x-1 text-emerald-700 font-semibold">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Offline ready</span>
+                </div>
               </div>
               <button
                 type="button"

@@ -17,7 +17,7 @@ export type WorkOrderStatus =
 
 export type RepairPriority = 'Normal' | 'Urgent' | 'B2B Priority' | 'Warranty Redo';
 
-export type TechnicianLevel = 'L1 Modular' | 'L2 Advanced' | 'L3 Micro-Soldering';
+export type TechnicianLevel = 'Level 1 Spareparts' | 'Level 2 Spareparts + Hardware' | 'Level 3 Master';
 
 export type CustomerType = 'Retail' | 'B2B Corporate' | 'Wholesale Mail-In';
 

@@ -209,10 +209,10 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
       <div className="grid grid-cols-1 gap-3 md:grid-cols-12">
         {/* Left Column: Work Orders Awaiting QA (4 cols) */}
         <div className="space-y-2 rounded-xl border border-[#E5E5EA] bg-white p-3 md:col-span-3">
-          <div className="flex justify-between items-center border-b border-[#E5E5EA] pb-2">
-            <h2 className="font-bold text-[#1D1D1F] text-xs">Finished Devices in QA Control</h2>
-            <span className="text-[10px] font-mono font-bold bg-[#0071E3]/10 text-[#0071E3] px-2 py-0.5 rounded-full">
-              {filteredWorkOrders.length} Finished
+          <div className="flex items-center justify-between gap-2 border-b border-[#E5E5EA] pb-2">
+            <h2 className="min-w-0 truncate font-bold text-[#1D1D1F] text-xs">QA Queue</h2>
+            <span className="shrink-0 text-[10px] font-mono font-bold bg-[#0071E3]/10 text-[#0071E3] px-2 py-0.5 rounded-full">
+              {filteredWorkOrders.length} Pending
             </span>
           </div>
 

@@ -57,8 +57,10 @@ import { DEFAULT_PAYMENT_METHODS, getActivePaymentMethods, DEFAULT_NOTIFICATION_
 import { useTheme, THEME_PRESETS, ThemeMode } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { LanguageSwitcher } from '../common/LanguageSwitcher';
+import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 import { QRCodeSVG } from 'qrcode.react';
 import { DeviceTagPrinterModal } from '../common/DeviceTagPrinterModal';
+import { RepairCategoryDef } from '../../types/priceCatalog';
 
 interface SystemManagementSettingsModuleProps {
   settings: SystemSettings;
@@ -67,7 +69,10 @@ interface SystemManagementSettingsModuleProps {
   onAddTechnician: (tech: Technician) => void;
   onUpdateTechnician: (tech: Technician) => void;
   onDeleteTechnician: (id: string) => void;
-  onRestoreDefaultTechnicians?: () => void;
+  repairCategories?: RepairCategoryDef[];
+  onAddRepairCategory?: (key: string, label: string, group: RepairCategoryDef['group']) => void;
+  onUpdateRepairCategory?: (key: string, label: string) => void;
+  onDeleteRepairCategory?: (key: string) => void;
   users?: AppUser[];
   onAddUser?: (user: AppUser) => void;
   onUpdateUser?: (user: AppUser) => void;
@@ -122,7 +127,10 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   onAddTechnician,
   onUpdateTechnician,
   onDeleteTechnician,
-  onRestoreDefaultTechnicians,
+  repairCategories = [],
+  onAddRepairCategory,
+  onUpdateRepairCategory,
+  onDeleteRepairCategory,
   users = [],
   onAddUser,
   onUpdateUser,
@@ -142,6 +150,10 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   const [formData, setFormData] = useState<SystemSettings>(settings);
   const [isSavedBanner, setIsSavedBanner] = useState(false);
   const [isDeviceTagPrinterOpen, setIsDeviceTagPrinterOpen] = useState(false);
+  const [categoryDraft, setCategoryDraft] = useState('');
+  const [categoryGroup, setCategoryGroup] = useState<RepairCategoryDef['group']>('Display');
+  const [editingCategoryKey, setEditingCategoryKey] = useState<string | null>(null);
+  const [editingCategoryLabel, setEditingCategoryLabel] = useState('');
   const receiptFooterEditorRef = useRef<HTMLTextAreaElement>(null);
   const [selectedFooterLineIndexes, setSelectedFooterLineIndexes] = useState<number[]>([0]);
 
@@ -519,7 +531,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
           name: userFormData.name.trim(),
           email: newUser.email,
           phone: userFormData.phone.trim() || '+95 9 700 000 000',
-          level: 'L2 Advanced',
+          level: 'Level 2 Spareparts + Hardware',
           specialty: 'Apple Repair Specialist',
           status: 'Active',
           commissionRate: 12,
@@ -550,7 +562,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
     name: '',
     email: '',
     phone: '',
-    level: 'L1 Modular',
+    level: 'Level 1 Spareparts',
     specialty: '',
     status: 'Active',
     commissionRate: 10,
@@ -573,7 +585,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
       name: '',
       email: '',
       phone: '',
-      level: 'L2 Advanced',
+      level: 'Level 2 Spareparts + Hardware',
       specialty: '',
       status: 'Active',
       commissionRate: 12,
@@ -663,6 +675,22 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   const handleConfirmDeleteTech = (id: string) => {
     onDeleteTechnician(id);
     setDeleteConfirmId(null);
+  };
+
+  const handleAddInventoryCategory = () => {
+    const label = categoryDraft.trim();
+    if (!label || !onAddRepairCategory) return;
+    const key = label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    onAddRepairCategory(key, label, categoryGroup);
+    setCategoryDraft('');
+  };
+
+  const handleSaveInventoryCategory = (key: string) => {
+    const label = editingCategoryLabel.trim();
+    if (!label || !onUpdateRepairCategory) return;
+    onUpdateRepairCategory(key, label);
+    setEditingCategoryKey(null);
+    setEditingCategoryLabel('');
   };
 
   return (
@@ -1614,17 +1642,6 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               </div>
 
               <div className="flex items-center space-x-2">
-                {onRestoreDefaultTechnicians && (
-                  <button
-                    type="button"
-                    onClick={onRestoreDefaultTechnicians}
-                    className="px-3 py-2 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] font-extrabold text-xs rounded-xl transition-all border border-[#D2D2D7] flex items-center space-x-1.5 cursor-pointer shrink-0 active:scale-95"
-                    title="Restore default technical staff roster"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5 text-[#0071E3]" />
-                    <span>Restore Default Roster</span>
-                  </button>
-                )}
                 <button
                   type="button"
                   onClick={handleOpenAddTech}
@@ -1645,20 +1662,10 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                 <div>
                   <h4 className="font-extrabold text-sm text-[#1D1D1F]">No Technical Staff Records Found</h4>
                   <p className="text-xs text-[#86868B] max-w-sm mx-auto mt-1">
-                    There are currently no technician profiles in the system roster. Restore default technician profiles or add a new technician account.
+                    There are currently no technician profiles in the system roster. Add a technician account when you are ready.
                   </p>
                 </div>
                 <div className="flex items-center justify-center space-x-3 pt-2">
-                  {onRestoreDefaultTechnicians && (
-                    <button
-                      type="button"
-                      onClick={onRestoreDefaultTechnicians}
-                      className="px-4 py-2 bg-[#0071E3] text-white font-extrabold text-xs rounded-xl hover:bg-[#0051B3] shadow-2xs transition-all flex items-center space-x-1.5 cursor-pointer active:scale-95"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                      <span>Restore Default Technicians</span>
-                    </button>
-                  )}
                   <button
                     type="button"
                     onClick={handleOpenAddTech}
@@ -2155,6 +2162,76 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               Define reorder triggers, stock reservation policies, and vendor SLA targets.
             </p>
           </div>
+
+          <section className="space-y-3 border-y border-[#E5E5EA] py-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h4 className="text-xs font-extrabold text-[#1D1D1F]">Inventory Categories</h4>
+                <p className="text-[11px] text-[#86868B]">Shared with Price List. Categories are available when adding a stock part.</p>
+              </div>
+              <span className="rounded-full bg-[#0071E3]/10 px-2 py-0.5 font-mono text-[10px] font-bold text-[#0071E3]">
+                {repairCategories.length} categories
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_190px_auto]">
+              <input
+                type="text"
+                value={categoryDraft}
+                onChange={(event) => setCategoryDraft(event.target.value)}
+                onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleAddInventoryCategory(); } }}
+                placeholder="New category, e.g. Camera"
+                className="h-9 w-full rounded-xl border border-[#D2D2D7] bg-[#F5F5F7] px-3 text-xs font-medium text-[#1D1D1F] outline-none focus:border-[#0071E3] focus:bg-white"
+              />
+              <CustomDropdownMenu
+                value={categoryGroup}
+                onChange={(group) => setCategoryGroup(group as RepairCategoryDef['group'])}
+                options={['Battery', 'Display', 'Housing', 'Charging', 'Audio', 'Logic Board', 'Network', 'Sensors & Keys'].map((group) => ({ value: group, label: group }))}
+                className="w-full"
+                buttonClassName="!h-9 !w-full !rounded-xl !border-[#D2D2D7] !bg-[#F5F5F7]"
+                menuAlign="left"
+              />
+              <button
+                type="button"
+                onClick={handleAddInventoryCategory}
+                disabled={!categoryDraft.trim()}
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#0071E3] px-3 text-xs font-extrabold text-white transition-colors hover:bg-[#0051B3] disabled:cursor-not-allowed disabled:opacity-45"
+              >
+                <Plus className="h-3.5 w-3.5" /> Add
+              </button>
+            </div>
+
+            <div className="max-h-52 divide-y divide-[#E5E5EA] overflow-y-auto rounded-xl border border-[#E5E5EA] bg-[#F8F9FA]">
+              {repairCategories.map((category) => (
+                <div key={category.key} className="flex items-center gap-2 px-3 py-2">
+                  {editingCategoryKey === category.key ? (
+                    <input
+                      autoFocus
+                      value={editingCategoryLabel}
+                      onChange={(event) => setEditingCategoryLabel(event.target.value)}
+                      onKeyDown={(event) => { if (event.key === 'Enter') handleSaveInventoryCategory(category.key); if (event.key === 'Escape') setEditingCategoryKey(null); }}
+                      className="h-7 min-w-0 flex-1 rounded-lg border border-[#0071E3] bg-white px-2 text-xs font-semibold outline-none"
+                    />
+                  ) : (
+                    <span className="min-w-0 flex-1 truncate text-xs font-semibold text-[#1D1D1F]">{category.label}</span>
+                  )}
+                  <span className="hidden rounded-md bg-white px-1.5 py-0.5 text-[10px] font-medium text-[#86868B] sm:inline">{category.group}</span>
+                  {editingCategoryKey === category.key ? (
+                    <button type="button" onClick={() => handleSaveInventoryCategory(category.key)} className="text-[11px] font-extrabold text-[#0071E3]">Save</button>
+                  ) : (
+                    <button type="button" onClick={() => { setEditingCategoryKey(category.key); setEditingCategoryLabel(category.label); }} className="text-[11px] font-extrabold text-[#0071E3]">Edit</button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => { if (window.confirm(`Delete category “${category.label}”? It will no longer appear for new inventory parts.`)) onDeleteRepairCategory?.(category.key); }}
+                    className="text-[11px] font-extrabold text-rose-600"
+                  >
+                    Delete
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs">
             <div className="space-y-1.5">
@@ -2993,15 +3070,19 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="font-bold text-[#1D1D1F] block mb-1">Skill Tier Level</label>
-                  <select
+                  <CustomDropdownMenu
                     value={techFormData.level}
-                    onChange={(e) => setTechFormData({ ...techFormData, level: e.target.value as TechnicianLevel })}
-                    className="w-full bg-[#F5F5F7] text-[#1D1D1F] font-bold px-3 py-2 rounded-xl border border-[#D2D2D7] focus:bg-white focus:outline-none focus:border-[#0071E3]"
-                  >
-                    <option value="L1 Modular">L1 Modular</option>
-                    <option value="L2 Advanced">L2 Advanced</option>
-                    <option value="L3 Micro-Soldering">L3 Micro-Soldering</option>
-                  </select>
+                    onChange={(level) => setTechFormData({ ...techFormData, level: level as TechnicianLevel })}
+                    options={[
+                      { value: 'Level 1 Spareparts', label: 'Level 1 Spareparts' },
+                      { value: 'Level 2 Spareparts + Hardware', label: 'Level 2 Spareparts + Hardware' },
+                      { value: 'Level 3 Master', label: 'Level 3 Master' },
+                    ]}
+                    className="w-full"
+                    buttonClassName="!w-full !h-10 !rounded-xl !border-[#D2D2D7] !bg-[#F5F5F7] !px-3"
+                    menuAlign="left"
+                    size="md"
+                  />
                 </div>
 
                 <div>

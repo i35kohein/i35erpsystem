@@ -1,6 +1,5 @@
 import { WorkOrder, PartItem, Supplier, RmaItem, Customer, Technician, PurchaseOrder, SystemSettings, PaymentMethodConfig, NotificationTemplate, AppUser } from '../types';
 import { get21Diagnostics } from '../utils/diagnosticUtils';
-import { generate10TestTickets } from '../utils/seedTickets';
 
 export const INITIAL_USERS: AppUser[] = [
   {
@@ -271,7 +270,7 @@ export const INITIAL_TECHNICIANS: Technician[] = [
     name: 'Aung Ko Ko',
     email: 'aungkoko@applerepairpro.com',
     phone: '+95 9 790 111 222',
-    level: 'L3 Micro-Soldering',
+    level: 'Level 3 Master',
     specialty: 'MacBook Logic Boards & Face ID Repair',
     status: 'Active',
     commissionRate: 15,
@@ -284,7 +283,7 @@ export const INITIAL_TECHNICIANS: Technician[] = [
     name: 'Kyaw Swar Lin',
     email: 'kyawswarlin@applerepairpro.com',
     phone: '+95 9 790 333 444',
-    level: 'L2 Advanced',
+    level: 'Level 2 Spareparts + Hardware',
     specialty: 'iPhone Screen & Battery Replacement',
     status: 'Active',
     commissionRate: 12,
@@ -297,7 +296,7 @@ export const INITIAL_TECHNICIANS: Technician[] = [
     name: 'Thura Aung',
     email: 'thuraaung@applerepairpro.com',
     phone: '+95 9 790 555 666',
-    level: 'L1 Modular',
+    level: 'Level 1 Spareparts',
     specialty: 'iPad & Apple Watch Modular Repairs',
     status: 'Active',
     commissionRate: 10,
@@ -310,7 +309,7 @@ export const INITIAL_TECHNICIANS: Technician[] = [
     name: 'Min Htet (Senior Tech)',
     email: 'minhtet@applerepairpro.com',
     phone: '+95 9 790 777 888',
-    level: 'L3 Micro-Soldering',
+    level: 'Level 3 Master',
     specialty: 'iMac, M-Series Power IC & GPU Repair',
     status: 'Active',
     commissionRate: 15,
@@ -323,7 +322,7 @@ export const INITIAL_TECHNICIANS: Technician[] = [
     name: 'Zin Mar Win',
     email: 'zinmarwin@applerepairpro.com',
     phone: '+95 9 790 999 000',
-    level: 'L2 Advanced',
+    level: 'Level 2 Spareparts + Hardware',
     specialty: 'TrueTone & Battery Health Calibration',
     status: 'Active',
     commissionRate: 12,
@@ -1730,7 +1729,9 @@ const RAW_WORK_ORDERS: WorkOrder[] = [
   }
 ];
 
-export const INITIAL_WORK_ORDERS: WorkOrder[] = generate10TestTickets();
+// Work orders always begin empty in the live ERP.  Records are loaded from
+// Supabase or created through the intake workflow.
+export const INITIAL_WORK_ORDERS: WorkOrder[] = [];
 
 export const INITIAL_RMAS: RmaItem[] = [
   {
