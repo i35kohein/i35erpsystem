@@ -160,7 +160,11 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
     };
   }, [workOrders, parts, customers, technicians, suppliers]);
 
-  const isExternalAi = Boolean(systemSettings.aiProvider && systemSettings.aiProvider !== 'local' && systemSettings.aiApiKey);
+  const isExternalAi = Boolean(
+    systemSettings.aiProvider
+    && systemSettings.aiProvider !== 'local'
+    && (systemSettings.aiProvider === 'deepseek' || systemSettings.aiApiKey)
+  );
   const providerLabel = isExternalAi
     ? `${systemSettings.aiProvider} · ${systemSettings.aiModel || 'default model'}`
     : 'Local live-data analysis';
@@ -247,7 +251,9 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             provider: systemSettings.aiProvider,
-            apiKey: systemSettings.aiApiKey,
+            // DeepSeek uses the server-only DEEPSEEK_API_KEY. Never send a key
+            // from the browser for that provider.
+            apiKey: systemSettings.aiProvider === 'deepseek' ? undefined : systemSettings.aiApiKey,
             model: systemSettings.aiModel,
             baseUrl: systemSettings.aiBaseUrl,
             systemPrompt: systemSettings.aiSystemPrompt,

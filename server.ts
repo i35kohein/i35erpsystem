@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
@@ -122,7 +123,10 @@ Return JSON with key "message".`;
   app.post("/api/ai/chat", async (req, res) => {
     try {
       const { provider, apiKey, model, baseUrl, systemPrompt, messages, context } = req.body;
-      if (!apiKey) return res.status(400).json({ success: false, error: "AI API key is not configured." });
+      // DeepSeek is configured once on the server, never exposed to the browser
+      // or committed with the application source.
+      const resolvedApiKey = apiKey || (provider === "deepseek" ? process.env.DEEPSEEK_API_KEY : undefined);
+      if (!resolvedApiKey) return res.status(400).json({ success: false, error: "AI API key is not configured on the server." });
 
       const instruction = `${systemPrompt || "You are a professional repair-shop operations copilot."}
 Use only the supplied live ERP context. If data is unavailable, say so rather than inventing it. Reply in the same language as the user's question (Burmese when the user writes Burmese). Be concise, operational, and direct: lead with the conclusion, then give prioritized next actions. Identify records by ticket, part, device, customer, or technician where possible. Use short bullets only when they improve scanability. Do not claim to have completed changes, contacted a customer, or performed an action.
@@ -137,7 +141,7 @@ ${JSON.stringify(context)}`;
           method: "POST",
           headers: {
             "content-type": "application/json",
-            "x-api-key": apiKey,
+            "x-api-key": resolvedApiKey,
             "anthropic-version": "2023-06-01",
           },
           body: JSON.stringify({
@@ -153,7 +157,7 @@ ${JSON.stringify(context)}`;
       } else if (provider === "gemini") {
         const selectedModel = model || "gemini-2.0-flash";
         const response = await fetch(
-          `${baseUrl || "https://generativelanguage.googleapis.com/v1beta"}/models/${selectedModel}:generateContent?key=${encodeURIComponent(apiKey)}`,
+          `${baseUrl || "https://generativelanguage.googleapis.com/v1beta"}/models/${selectedModel}:generateContent?key=${encodeURIComponent(resolvedApiKey)}`,
           {
             method: "POST",
             headers: { "content-type": "application/json" },
@@ -191,7 +195,7 @@ ${JSON.stringify(context)}`;
           method: "POST",
           headers: {
             "content-type": "application/json",
-            authorization: `Bearer ${apiKey}`,
+            authorization: `Bearer ${resolvedApiKey}`,
           },
           body: JSON.stringify({
             model: model || defaultModel,

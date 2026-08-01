@@ -741,7 +741,10 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               <span>Provider</span>
               <select
                 value={formData.aiProvider || 'local'}
-                onChange={(event) => setFormData({ ...formData, aiProvider: event.target.value as SystemSettings['aiProvider'] })}
+                onChange={(event) => {
+                  const aiProvider = event.target.value as SystemSettings['aiProvider'];
+                  setFormData({ ...formData, aiProvider, aiApiKey: aiProvider === 'deepseek' ? '' : formData.aiApiKey });
+                }}
                 className="w-full p-2.5 border border-[#E5E5EA] rounded-xl bg-white"
               >
                 <option value="local">Local Analysis (No API)</option>
@@ -765,18 +768,27 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               />
             </label>
 
-            <label className="space-y-1.5 text-xs font-bold text-[#1D1D1F]">
-              <span>API Key</span>
-              <input
-                type="password"
-                value={formData.aiApiKey || ''}
-                onChange={(event) => setFormData({ ...formData, aiApiKey: event.target.value })}
-                placeholder={formData.aiProvider === 'local' ? 'Not required for Local Analysis' : 'Provider API key'}
-                disabled={formData.aiProvider === 'local'}
-                autoComplete="off"
-                className="w-full p-2.5 border border-[#E5E5EA] rounded-xl bg-white disabled:opacity-50"
-              />
-            </label>
+            {formData.aiProvider === 'deepseek' ? (
+              <div className="space-y-1.5 text-xs font-bold text-[#1D1D1F]">
+                <span>DeepSeek API Key</span>
+                <div className="min-h-[42px] px-3 py-2.5 border border-emerald-200 bg-emerald-50 text-emerald-800 rounded-xl flex items-center">
+                  Server environment key in use — no browser key required.
+                </div>
+              </div>
+            ) : (
+              <label className="space-y-1.5 text-xs font-bold text-[#1D1D1F]">
+                <span>API Key</span>
+                <input
+                  type="password"
+                  value={formData.aiApiKey || ''}
+                  onChange={(event) => setFormData({ ...formData, aiApiKey: event.target.value })}
+                  placeholder={formData.aiProvider === 'local' ? 'Not required for Local Analysis' : 'Provider API key'}
+                  disabled={formData.aiProvider === 'local'}
+                  autoComplete="off"
+                  className="w-full p-2.5 border border-[#E5E5EA] rounded-xl bg-white disabled:opacity-50"
+                />
+              </label>
+            )}
 
             <label className="space-y-1.5 text-xs font-bold text-[#1D1D1F]">
               <span>Custom Base URL</span>
