@@ -14,7 +14,6 @@ import {
   ChevronRight, 
   Sparkles,
   Calendar,
-  Wrench,
   ShieldCheck,
   BarChart2
 } from 'lucide-react';
@@ -128,7 +127,7 @@ export const TechnicianLeaderboardView: React.FC<TechnicianLeaderboardViewProps>
   const totalShopCompleted = leaderboardData.reduce((sum, item) => sum + item.completedCount, 0);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Leaderboard Header Banner */}
       <div className="bg-gradient-to-r from-amber-500/10 via-amber-50/60 to-orange-500/10 border border-amber-300/60 p-5 rounded-2xl shadow-2xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

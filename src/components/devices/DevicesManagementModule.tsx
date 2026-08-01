@@ -237,9 +237,9 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
   };
 
   return (
-    <div className="space-y-6 text-xs">
+    <div className="space-y-3 text-xs">
       {/* Top Banner Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-[#E5E5EA] shadow-xs">
+      <div className="module-subheader flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-[#E5E5EA] shadow-xs">
         <div>
           <div className="flex items-center space-x-2">
             <span className="bg-[#F0F6FF] text-[#0071E3] font-extrabold text-[10px] px-2.5 py-0.5 rounded-full border border-[#0071E3]/20">

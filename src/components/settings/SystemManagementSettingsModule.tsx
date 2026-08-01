@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { 
   Sliders, 
   Users, 
@@ -30,6 +30,7 @@ import {
   Upload,
   Image as ImageIcon,
   Globe,
+  MapPin,
   CreditCard,
   QrCode,
   Wallet,
@@ -39,6 +40,10 @@ import {
   CheckSquare,
   User,
   Smartphone,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Type,
   ExternalLink,
   Scissors,
   BellRing,
@@ -71,7 +76,44 @@ interface SystemManagementSettingsModuleProps {
   onOpenRecycleBin?: () => void;
   archivedCount?: number;
   onRegisterActions?: (actions: { reset: () => void; save: () => void }) => void;
+  initialSubTab?: 'users' | 'ai';
 }
+
+const RECEIPT_FOOTER_ALIGNMENT_OPTIONS = [
+  { value: 'left', label: 'Left', Icon: AlignLeft },
+  { value: 'center', label: 'Center', Icon: AlignCenter },
+  { value: 'right', label: 'Right', Icon: AlignRight },
+] as const;
+
+const RECEIPT_FOOTER_SIZE_OPTIONS = [
+  { value: 'small', label: 'Small' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'large', label: 'Large' },
+] as const;
+
+const splitFooterTextBySize = (text: string, start: number, ranges: Array<{ start: number; end: number; size: 'small' | 'medium' | 'large' }>, fallback: 'small' | 'medium' | 'large') => {
+  const end = start + text.length;
+  const boundaries = new Set([start, end]);
+  ranges.forEach((range) => { if (range.start < end && range.end > start) { boundaries.add(Math.max(start, range.start)); boundaries.add(Math.min(end, range.end)); } });
+  const points = [...boundaries].sort((a, b) => a - b);
+  return points.slice(0, -1).map((point, index) => {
+    const next = points[index + 1];
+    return { text: text.slice(point - start, next - start), size: ranges.find((range) => range.start <= point && range.end >= next)?.size || fallback };
+  });
+};
+
+const getSelectedFooterLineIndexes = (text: string, selectionStart: number, selectionEnd: number) => {
+  const rangeStart = Math.max(0, Math.min(selectionStart, selectionEnd));
+  // A non-empty selection ending immediately after a newline includes the
+  // preceding line, not an accidental next empty line.
+  const rangeEnd = selectionStart === selectionEnd
+    ? rangeStart
+    : Math.max(rangeStart, Math.max(selectionStart, selectionEnd) - 1);
+  const startLine = text.slice(0, rangeStart).split('\n').length - 1;
+  const endLine = text.slice(0, rangeEnd).split('\n').length - 1;
+
+  return Array.from({ length: endLine - startLine + 1 }, (_, index) => startLine + index);
+};
 
 export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsModuleProps> = ({
   settings,
@@ -89,16 +131,19 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   onOpenRecycleBin,
   archivedCount = 0,
   onRegisterActions,
+  initialSubTab,
 }) => {
   const { theme, setTheme, geometry, setGeometry } = useTheme();
   const { t, language, setLanguage } = useLanguage();
-  const [activeSubTab, setActiveSubTab] = useState<'shop' | 'theme' | 'users' | 'technicians' | 'intake' | 'pricing' | 'payment' | 'inventory' | 'pos' | 'notifications' | 'qa' | 'recycle'>('users');
+  const [activeSubTab, setActiveSubTab] = useState<'shop' | 'theme' | 'users' | 'technicians' | 'intake' | 'pricing' | 'payment' | 'inventory' | 'pos' | 'notifications' | 'qa' | 'recycle' | 'ai'>(initialSubTab || 'users');
 
   
   // Local settings draft state
   const [formData, setFormData] = useState<SystemSettings>(settings);
   const [isSavedBanner, setIsSavedBanner] = useState(false);
   const [isDeviceTagPrinterOpen, setIsDeviceTagPrinterOpen] = useState(false);
+  const receiptFooterEditorRef = useRef<HTMLTextAreaElement>(null);
+  const [selectedFooterLineIndexes, setSelectedFooterLineIndexes] = useState<number[]>([0]);
 
   const SAMPLE_PRINT_WORK_ORDER: WorkOrder = {
     id: 'wo-sample-2026',
@@ -177,6 +222,74 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   const currentPaymentMethods = formData.paymentMethods && formData.paymentMethods.length > 0 
     ? formData.paymentMethods 
     : DEFAULT_PAYMENT_METHODS;
+  const connectedStorePhones = (formData.shopPhones || [])
+    .map((phone) => phone.trim())
+    .filter(Boolean);
+  const visibleStorePhones = connectedStorePhones.length > 0
+    ? connectedStorePhones
+    : formData.shopPhone?.trim()
+      ? [formData.shopPhone.trim()]
+      : [];
+
+  const updateSelectedFooterLines = (editor: HTMLTextAreaElement | null) => {
+    if (!editor) return;
+    setSelectedFooterLineIndexes(getSelectedFooterLineIndexes(
+      editor.value,
+      editor.selectionStart,
+      editor.selectionEnd,
+    ));
+  };
+
+  const handleReceiptFooterChange = (value: string, editor: HTMLTextAreaElement) => {
+    const lineCount = value.split('\n').length;
+    const lineAlignments = Object.fromEntries(
+      Object.entries(formData.receiptFooterLineAlignments || {}).filter(([lineIndex]) => Number(lineIndex) < lineCount),
+    ) as Record<number, 'left' | 'center' | 'right'>;
+
+    setFormData({ ...formData, receiptFooterNote: value, receiptFooterLineAlignments: lineAlignments });
+    updateSelectedFooterLines(editor);
+  };
+
+  const applyReceiptFooterAlignment = (alignment: 'left' | 'center' | 'right') => {
+    const editor = receiptFooterEditorRef.current;
+    const lineIndexes = editor
+      ? getSelectedFooterLineIndexes(editor.value, editor.selectionStart, editor.selectionEnd)
+      : selectedFooterLineIndexes;
+    const lineAlignments = { ...formData.receiptFooterLineAlignments };
+
+    lineIndexes.forEach((lineIndex) => {
+      lineAlignments[lineIndex] = alignment;
+    });
+
+    setFormData({ ...formData, receiptFooterLineAlignments: lineAlignments });
+    setSelectedFooterLineIndexes(lineIndexes);
+  };
+
+  const applyReceiptFooterTextSize = (size: 'small' | 'medium' | 'large') => {
+    const editor = receiptFooterEditorRef.current;
+    if (!editor || editor.selectionStart === editor.selectionEnd) return;
+    const start = Math.min(editor.selectionStart, editor.selectionEnd);
+    const end = Math.max(editor.selectionStart, editor.selectionEnd);
+    const ranges = (formData.receiptFooterTextSizeRanges || [])
+      .flatMap((range) => [
+        ...(range.start < start ? [{ ...range, end: Math.min(range.end, start) }] : []),
+        ...(range.end > end ? [{ ...range, start: Math.max(range.start, end) }] : []),
+      ])
+      .filter((range) => range.end > range.start);
+    setFormData({ ...formData, receiptFooterTextSizeRanges: [...ranges, { start, end, size }] });
+  };
+
+  const selectedFooterAlignment = (() => {
+    const lineAlignments = formData.receiptFooterLineAlignments || {};
+    const alignments = selectedFooterLineIndexes.map(
+      (lineIndex) => lineAlignments[lineIndex] || formData.receiptFooterTextAlign || 'left',
+    );
+    return alignments.every((alignment) => alignment === alignments[0]) ? alignments[0] : undefined;
+  })();
+  const receiptFooterPreviewLines = formData.receiptFooterNote.split(/\r?\n/);
+  const receiptFooterPreviewFontSize = ({ small: 10, medium: 11, large: 12 } as const)[
+    formData.receiptFooterFontSize || 'medium'
+  ];
 
   const handleTogglePaymentMethod = (id: string) => {
     const updated = currentPaymentMethods.map((m) =>
@@ -553,13 +666,13 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Save Toast Notification */}
       {isSavedBanner && (
         <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-bold flex items-center justify-between animate-fade-in">
           <div className="flex items-center space-x-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>System management settings updated and synchronized across all active modules!</span>
+            <span>Settings saved and sent to Supabase. The header database icon shows any pending offline sync.</span>
           </div>
         </div>
       )}
@@ -577,6 +690,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
           { id: 'inventory', label: 'Inventory & Stock Alerts', icon: Boxes },
           { id: 'pos', label: 'POS & Receipt Layout', icon: Printer },
           { id: 'notifications', label: 'SMS & Telegram Alerts', icon: BellRing },
+          { id: 'ai', label: 'AI Assistant & API', icon: Sparkles },
           { id: 'qa', label: 'QA & Diagnostic Rules', icon: ShieldCheck },
           { id: 'recycle', label: 'Recycle Bin & Trash', icon: Trash2, badge: archivedCount },
         ].map((tab) => {
@@ -608,6 +722,88 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
           );
         })}
       </div>
+
+      {/* Tab: AI Assistant Provider */}
+      {activeSubTab === 'ai' && (
+        <div className="bg-white p-6 rounded-2xl border border-[#D2D2D7] shadow-2xs space-y-5">
+          <div className="pb-4 border-b border-[#E5E5EA]">
+            <h3 className="text-base font-extrabold text-[#1D1D1F] flex items-center space-x-2">
+              <Sparkles className="w-5 h-5 text-[#0071E3]" />
+              <span>ERP AI Assistant & API Provider</span>
+            </h3>
+            <p className="text-xs text-[#86868B] mt-1">
+              Connect a mainstream model or any OpenAI-compatible endpoint. Local Analysis works without an API key.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <label className="space-y-1.5 text-xs font-bold text-[#1D1D1F]">
+              <span>Provider</span>
+              <select
+                value={formData.aiProvider || 'local'}
+                onChange={(event) => setFormData({ ...formData, aiProvider: event.target.value as SystemSettings['aiProvider'] })}
+                className="w-full p-2.5 border border-[#E5E5EA] rounded-xl bg-white"
+              >
+                <option value="local">Local Analysis (No API)</option>
+                <option value="openai">OpenAI</option>
+                <option value="anthropic">Anthropic Claude</option>
+                <option value="gemini">Google Gemini</option>
+                <option value="deepseek">DeepSeek</option>
+                <option value="groq">Groq</option>
+                <option value="openrouter">OpenRouter</option>
+                <option value="custom">Custom OpenAI-Compatible API</option>
+              </select>
+            </label>
+
+            <label className="space-y-1.5 text-xs font-bold text-[#1D1D1F]">
+              <span>Model</span>
+              <input
+                value={formData.aiModel || ''}
+                onChange={(event) => setFormData({ ...formData, aiModel: event.target.value })}
+                placeholder={formData.aiProvider === 'deepseek' ? 'deepseek-chat (default)' : 'Leave blank for provider default'}
+                className="w-full p-2.5 border border-[#E5E5EA] rounded-xl bg-white"
+              />
+            </label>
+
+            <label className="space-y-1.5 text-xs font-bold text-[#1D1D1F]">
+              <span>API Key</span>
+              <input
+                type="password"
+                value={formData.aiApiKey || ''}
+                onChange={(event) => setFormData({ ...formData, aiApiKey: event.target.value })}
+                placeholder={formData.aiProvider === 'local' ? 'Not required for Local Analysis' : 'Provider API key'}
+                disabled={formData.aiProvider === 'local'}
+                autoComplete="off"
+                className="w-full p-2.5 border border-[#E5E5EA] rounded-xl bg-white disabled:opacity-50"
+              />
+            </label>
+
+            <label className="space-y-1.5 text-xs font-bold text-[#1D1D1F]">
+              <span>Custom Base URL</span>
+              <input
+                value={formData.aiBaseUrl || ''}
+                onChange={(event) => setFormData({ ...formData, aiBaseUrl: event.target.value })}
+                placeholder="https://your-api.example.com/v1"
+                className="w-full p-2.5 border border-[#E5E5EA] rounded-xl bg-white"
+              />
+            </label>
+          </div>
+
+          <label className="block space-y-1.5 text-xs font-bold text-[#1D1D1F]">
+            <span>Assistant Instructions</span>
+            <textarea
+              rows={3}
+              value={formData.aiSystemPrompt || ''}
+              onChange={(event) => setFormData({ ...formData, aiSystemPrompt: event.target.value })}
+              className="w-full p-2.5 border border-[#E5E5EA] rounded-xl bg-white resize-y"
+            />
+          </label>
+
+          <div className="p-3 bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl text-[11px] text-[#86868B]">
+            The assistant sends a compact live operational summary to the selected provider. API credentials are used only for requests initiated from this ERP assistant. For shared production use, keep keys in server-side secrets instead of browser-synced settings.
+          </div>
+        </div>
+      )}
 
       {/* Tab: User Roles & Permissions */}
       {activeSubTab === 'users' && (
@@ -2035,9 +2231,9 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
 
           {/* Formats, Branding & Text Fields */}
           <div className="space-y-6">
-            {/* Connected Store Branding Status Card */}
-            <div className="bg-white p-4 rounded-2xl border border-[#D2D2D7] shadow-2xs flex items-center justify-between">
-              <div className="flex items-center space-x-3.5">
+            {/* Connected Store Branding Status Card — sourced only from Shop Settings. */}
+            <div className="bg-white p-4 rounded-2xl border border-[#D2D2D7] shadow-2xs flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex min-w-0 items-start space-x-3.5">
                 <div className="w-12 h-12 rounded-xl bg-[#F8FBFD] border border-[#D8E5ED] p-1 flex items-center justify-center shrink-0 shadow-2xs">
                   {formData.shopLogoUrl ? (
                     <img
@@ -2049,12 +2245,38 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                     <Store className="w-6 h-6 text-[#0071E3]" />
                   )}
                 </div>
-                <div>
-                  <span className="text-[10px] font-extrabold text-[#86868B] uppercase tracking-wider block">Connected Store Branding</span>
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="text-[10px] font-extrabold text-[#86868B] uppercase tracking-wider">Connected Store Branding</span>
+                    <span className="rounded-full bg-emerald-50 px-1.5 py-0.5 text-[9px] font-extrabold text-emerald-700">Shop Settings source</span>
+                  </div>
                   <p className="font-extrabold text-sm text-[#1D1D1F]">{formData.shopName || 'AppleRepair Pro'}</p>
-                  <p className="text-[11px] text-[#86868B]">
-                    {formData.shopPhone ? `Tel: ${formData.shopPhone}` : 'No phone set'} • {formData.shopEmail || 'No email set'}
-                  </p>
+                  <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] text-[#86868B]">
+                    {visibleStorePhones.length > 0 && (
+                      <span className="inline-flex items-center gap-1">
+                        <Phone className="h-3 w-3 shrink-0 text-[#0071E3]" />
+                        <span>{visibleStorePhones.join(' • ')}</span>
+                      </span>
+                    )}
+                    {formData.shopEmail && (
+                      <span className="inline-flex items-center gap-1">
+                        <Mail className="h-3 w-3 shrink-0 text-[#0071E3]" />
+                        <span>{formData.shopEmail}</span>
+                      </span>
+                    )}
+                    {formData.shopWebsite && (
+                      <span className="inline-flex items-center gap-1">
+                        <Globe className="h-3 w-3 shrink-0 text-[#0071E3]" />
+                        <span>{formData.shopWebsite}</span>
+                      </span>
+                    )}
+                    {formData.shopAddress && (
+                      <span className="inline-flex min-w-0 basis-full items-center gap-1">
+                        <MapPin className="h-3 w-3 shrink-0 text-[#0071E3]" />
+                        <span className="truncate">{formData.shopAddress}</span>
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -2064,7 +2286,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                 className="px-3 py-1.5 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#0071E3] font-extrabold text-xs rounded-xl border border-[#D2D2D7] transition-all flex items-center space-x-1 shrink-0 cursor-pointer"
               >
                 <Store className="w-3.5 h-3.5" />
-                <span>Update Logo</span>
+                <span>Edit Shop Profile</span>
               </button>
             </div>
 
@@ -2135,6 +2357,9 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               <h4 className="text-xs font-black text-[#1D1D1F] uppercase tracking-wider">
                 Voucher Text & Disclaimer Customization
               </h4>
+              <p className="text-[11px] text-[#86868B] -mt-2">
+                Used by POS receipts and every A4 Device Intake Print Voucher after you save all settings.
+              </p>
 
               <div className="grid grid-cols-1 gap-4 text-xs">
                 <div className="space-y-1">
@@ -2151,12 +2376,103 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                 <div className="space-y-1">
                   <label className="font-extrabold text-[#1D1D1F]">Receipt Footer Terms & Warranty Note</label>
                   <textarea
+                    ref={receiptFooterEditorRef}
                     value={formData.receiptFooterNote}
-                    onChange={(e) => setFormData({ ...formData, receiptFooterNote: e.target.value })}
+                    onChange={(e) => handleReceiptFooterChange(e.target.value, e.currentTarget)}
+                    onClick={(e) => updateSelectedFooterLines(e.currentTarget)}
+                    onKeyUp={(e) => updateSelectedFooterLines(e.currentTarget)}
+                    onSelect={(e) => updateSelectedFooterLines(e.currentTarget)}
                     rows={2.5}
                     className="w-full bg-[#F5F5F7] text-[#1D1D1F] font-bold px-3.5 py-2.5 rounded-xl border border-[#D2D2D7] focus:bg-white focus:outline-none focus:border-[#0071E3] transition-all"
                     placeholder="e.g. Thank you for choosing AppleRepair! All repairs covered by warranty under standard terms."
                   />
+                  <p className="text-[10px] text-[#86868B]">Plain text only. Select text in a line (or place the cursor there), then choose its alignment. Line breaks and text size are kept in the A4 print.</p>
+
+                  <div className="flex flex-col gap-1.5 rounded-lg border border-[#E5E5EA] bg-[#F8F9FA] p-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-1">
+                      <span className="flex items-center gap-0.5 text-[9px] font-extrabold text-[#526375]">
+                        <AlignLeft className="h-3 w-3" />
+                        Selected line
+                      </span>
+                      <div className="flex rounded-md border border-[#D2D2D7] bg-white p-0.5">
+                        {RECEIPT_FOOTER_ALIGNMENT_OPTIONS.map(({ value, label, Icon }) => {
+                          const isActive = selectedFooterAlignment === value;
+                          return (
+                            <button
+                              key={value}
+                              type="button"
+                              onMouseDown={(event) => event.preventDefault()}
+                              onClick={() => applyReceiptFooterAlignment(value)}
+                              style={{ height: 24, minHeight: 24, fontSize: 9, lineHeight: 1 }}
+                              className={`flex h-6 items-center gap-0.5 rounded px-1.5 text-[9px] font-bold transition-colors ${
+                                isActive ? 'bg-[#0071E3] text-white' : 'text-[#526375] hover:bg-[#F5F5F7]'
+                              }`}
+                              aria-pressed={isActive}
+                              title={`Align selected line(s) ${label}`}
+                            >
+                              <Icon className="h-2.5 w-2.5" />
+                              <span>{label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                      <span className="flex items-center gap-0.5 text-[9px] font-extrabold text-[#526375]">
+                        <Type className="h-3 w-3" />
+                        Text size
+                      </span>
+                      <div className="flex rounded-md border border-[#D2D2D7] bg-white p-0.5">
+                        {RECEIPT_FOOTER_SIZE_OPTIONS.map(({ value, label }) => {
+                          const isActive = (formData.receiptFooterFontSize || 'medium') === value;
+                          return (
+                            <button
+                              key={value}
+                              type="button"
+                              onMouseDown={(event) => event.preventDefault()}
+                              onClick={() => applyReceiptFooterTextSize(value)}
+                              style={{ height: 24, minHeight: 24, fontSize: 9, lineHeight: 1 }}
+                              className={`h-6 rounded px-1.5 text-[9px] font-bold transition-colors ${
+                                isActive ? 'bg-[#0071E3] text-white' : 'text-[#526375] hover:bg-[#F5F5F7]'
+                              }`}
+                              aria-pressed={isActive}
+                            >
+                              {label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    data-testid="receipt-footer-live-preview"
+                    className="min-h-[72px] rounded-lg border border-dashed border-[#D2D2D7] bg-white px-3 py-2.5 shadow-inner"
+                  >
+                    <div className="mb-1.5 flex items-center justify-between gap-2 text-[9px] font-extrabold uppercase tracking-wide text-[#86868B]">
+                      <span>Live A4 footer preview</span>
+                      <span>Updates as you edit</span>
+                    </div>
+                    <div className="min-h-8 text-[#1D1D1F]">
+                      {receiptFooterPreviewLines.map((line, lineIndex) => {
+                        const lineStart = receiptFooterPreviewLines.slice(0, lineIndex).reduce((offset, previousLine) => offset + previousLine.length + 1, 0);
+                        return (
+                        <p
+                          key={`${lineIndex}-${line}`}
+                          className="min-h-3 leading-tight"
+                          style={{
+                            fontSize: receiptFooterPreviewFontSize,
+                            textAlign: formData.receiptFooterLineAlignments?.[lineIndex] || formData.receiptFooterTextAlign || 'left',
+                          }}
+                        >
+                          {line ? splitFooterTextBySize(line, lineStart, formData.receiptFooterTextSizeRanges || [], formData.receiptFooterFontSize || 'medium').map((segment, segmentIndex) => (
+                            <span key={`${segmentIndex}-${segment.text}`} style={{ fontSize: ({ small: 10, medium: 11, large: 12 } as const)[segment.size] }}>{segment.text}</span>
+                          )) : '\u00A0'}
+                        </p>
+                      ); })}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -2170,11 +2486,11 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                 <span>A4 Intake Print Voucher & Job Sheet Defaults</span>
               </h4>
               <p className="text-[11px] text-[#86868B] mt-0.5">
-                Configure default paper styling, color palette, layout density, and section visibility for A4 workshop printouts.
+                Configure the saved defaults used by every Device Intake Print Voucher. Changes apply after you save all settings.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 text-xs">
               <div className="space-y-1.5">
                 <label className="font-bold text-[#1D1D1F] block">Default Print Color Palette</label>
                 <select
@@ -2190,7 +2506,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               <div className="space-y-1.5">
                 <label className="font-bold text-[#1D1D1F] block">Default A4 Sheet Layout</label>
                 <select
-                  value={formData.a4PrintLayoutDensity || 'standard'}
+                  value={formData.a4PrintLayoutDensity || 'compact'}
                   onChange={(e) => setFormData({ ...formData, a4PrintLayoutDensity: e.target.value as any })}
                   className="w-full bg-[#F5F5F7] text-[#1D1D1F] font-bold px-3 py-2 rounded-xl border border-[#D2D2D7] focus:bg-white focus:outline-none focus:border-[#0071E3]"
                 >
@@ -2208,6 +2524,20 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                   onChange={(e) => setFormData({ ...formData, a4CustomHeaderNote: e.target.value })}
                   className="w-full bg-[#F5F5F7] text-[#1D1D1F] font-bold px-3 py-2 rounded-xl border border-[#D2D2D7] focus:bg-white focus:outline-none focus:border-[#0071E3]"
                 />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-[#1D1D1F] block">21-Point Diagnostic Layout</label>
+                <select
+                  value={formData.a4DiagnosticDisplayFormat || 'comparison_table'}
+                  onChange={(e) => setFormData({ ...formData, a4DiagnosticDisplayFormat: e.target.value as SystemSettings['a4DiagnosticDisplayFormat'] })}
+                  className="w-full bg-[#F5F5F7] text-[#1D1D1F] font-bold px-3 py-2 rounded-xl border border-[#D2D2D7] focus:bg-white focus:outline-none focus:border-[#0071E3]"
+                >
+                  <option value="comparison_table">Before vs After Table</option>
+                  <option value="dual_grid">Before & After Dual Cards</option>
+                  <option value="before_only">Before Repair Only</option>
+                  <option value="after_only">After QA Pass Only</option>
+                </select>
               </div>
             </div>
 
@@ -3087,4 +3417,3 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
     </div>
   );
 };
-

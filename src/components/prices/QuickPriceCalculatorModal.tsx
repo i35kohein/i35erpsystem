@@ -15,7 +15,7 @@ import {
   RotateCcw,
   Search,
   Folder,
-  Wrench,
+  ListChecks,
   Sparkles,
   ChevronRight,
   MessageSquare,
@@ -381,7 +381,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
             <div className="lg:col-span-7 space-y-3">
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-extrabold uppercase tracking-wider text-[#86868B] flex items-center space-x-1.5">
-                  <Wrench className="w-3.5 h-3.5 text-[#0071E3]" />
+                  <ListChecks className="w-3.5 h-3.5 text-[#0071E3]" />
                   <span>Available Repair Services for {selectedDevice}</span>
                 </h3>
                 <span className="text-[11px] font-bold text-[#86868B]">
@@ -391,7 +391,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
 
               {filteredServices.length === 0 ? (
                 <div className="py-12 text-center bg-[#F5F5F7] rounded-2xl border border-[#E5E5EA] space-y-2">
-                  <Wrench className="w-8 h-8 text-[#86868B] mx-auto opacity-40" />
+                  <ListChecks className="w-8 h-8 text-[#86868B] mx-auto opacity-40" />
                   <p className="text-xs font-bold text-[#1D1D1F]">No priced services match filter</p>
                   <p className="text-[11px] text-[#86868B]">
                     Try clearing search or picking another device model.

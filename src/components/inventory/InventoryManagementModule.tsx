@@ -34,7 +34,6 @@ import {
   Phone,
   Mail,
   Star,
-  Wrench,
   PlusCircle,
   Palette,
   CheckCircle2,
@@ -42,6 +41,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { PartItem, PartQualityTier, Supplier, SystemSettings, RmaItem } from '../../types';
+import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 
 interface InventoryManagementModuleProps {
   parts: PartItem[];
@@ -507,10 +507,10 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Module Title Header Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-[#E5E5EA] shadow-xs">
-        <div>
+      <div className="module-toolbar flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-[#E5E5EA] shadow-xs">
+        <div className="module-subheader">
           <div className="flex items-center space-x-2">
             <div className="w-9 h-9 rounded-xl bg-[#0071E3] text-white flex items-center justify-center font-bold shadow-2xs">
               <Boxes className="w-5 h-5" />
@@ -680,8 +680,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       </div>
 
       {/* Filter Toolbar */}
-      <div className="bg-white p-3.5 rounded-2xl border border-[#E5E5EA] shadow-xs space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div className="space-y-2 rounded-xl border border-[var(--border)] bg-[var(--card-bg)] p-2.5">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
           {/* Quality Tier Pill Tabs */}
           <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar">
             <span className="text-[11px] font-bold text-[#86868B] shrink-0 mr-1 flex items-center space-x-1">
@@ -708,33 +708,61 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           </div>
 
           {/* Category Dropdown, Device Model Dropdown & Low Stock Toggle */}
-          <div className="flex items-center space-x-2 shrink-0">
-            <select
-              value={selectedModelFilter}
-              onChange={(e) => setSelectedModelFilter(e.target.value)}
-              className="bg-[#F5F5F7] text-[#1D1D1F] font-bold border border-[#E5E5EA] rounded-xl px-3 py-1.5 focus:border-[#0071E3] focus:bg-white focus:outline-none max-w-[180px]"
-            >
-              <option value="ALL">All Models ({activeDeviceModels.length})</option>
-              {activeDeviceModels.map((m) => (
-                <option key={m} value={m}>{m}</option>
-              ))}
-            </select>
+          <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+            <div className="flex items-center gap-1 rounded-lg bg-[var(--border-subtle)] p-1">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[var(--card-bg)] text-[var(--primary)]">
+                <Smartphone className="h-3.5 w-3.5" />
+              </span>
+              <CustomDropdownMenu
+                value={selectedModelFilter}
+                onChange={setSelectedModelFilter}
+                options={[
+                  { value: 'ALL', label: 'All Models', badge: activeDeviceModels.length },
+                  ...activeDeviceModels.map((model) => ({
+                    value: model,
+                    label: model,
+                    badge: parts.filter((part) =>
+                      part.deviceCompatibility.some(
+                        (device) =>
+                          device.toLowerCase().includes(model.toLowerCase()) ||
+                          model.toLowerCase().includes(device.toLowerCase()),
+                      ),
+                    ).length,
+                  })),
+                ]}
+                className="min-w-0"
+                buttonClassName="min-w-[150px] border-0 bg-transparent hover:bg-[var(--card-bg)]"
+                size="sm"
+                menuAlign="group-left"
+              />
+            </div>
 
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="bg-[#F5F5F7] text-[#1D1D1F] font-bold border border-[#E5E5EA] rounded-xl px-3 py-1.5 focus:border-[#0071E3] focus:bg-white focus:outline-none"
-            >
-              <option value="ALL">All Categories ({categories.length})</option>
-              {categories.map((c) => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
+            <div className="flex items-center gap-1 rounded-lg bg-[var(--border-subtle)] p-1">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[var(--card-bg)] text-[var(--primary)]">
+                <Layers className="h-3.5 w-3.5" />
+              </span>
+              <CustomDropdownMenu
+                value={selectedCategory}
+                onChange={setSelectedCategory}
+                options={[
+                  { value: 'ALL', label: 'All Categories', badge: categories.length },
+                  ...categories.map((category) => ({
+                    value: category,
+                    label: category,
+                    badge: parts.filter((part) => part.category === category).length,
+                  })),
+                ]}
+                className="min-w-0"
+                buttonClassName="min-w-[150px] border-0 bg-transparent hover:bg-[var(--card-bg)]"
+                size="sm"
+                menuAlign="group-left"
+              />
+            </div>
 
             <button
               type="button"
               onClick={() => setShowLowStockOnly(!showLowStockOnly)}
-              className={`px-3 py-1.5 rounded-xl border font-extrabold transition-all flex items-center space-x-1.5 cursor-pointer ${
+              className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] font-extrabold transition-colors cursor-pointer ${
                 showLowStockOnly
                   ? 'bg-amber-500 text-white border-amber-600 shadow-2xs'
                   : 'bg-[#F5F5F7] hover:bg-amber-50 text-amber-900 border-[#E5E5EA]'
@@ -2269,4 +2297,3 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     </div>
   );
 };
-

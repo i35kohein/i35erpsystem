@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { 
   Clock, 
   CheckCircle2, 
-  Wrench, 
+  Cog, 
   PackageCheck, 
   XCircle, 
   AlertCircle, 
@@ -39,7 +39,7 @@ interface WorkOrderStatusTimelineProps {
 
 export const MAIN_STATUS_PIPELINE: { status: WorkOrderStatus; label: string; desc: string; icon: any; color: string; badge: string; bg: string }[] = [
   { status: 'Receive', label: 'Received', desc: 'Ticket Intake & Inspection', icon: PackageCheck, color: 'text-purple-600 border-purple-500 bg-purple-500', badge: 'bg-purple-100 text-purple-800 border-purple-200', bg: 'bg-purple-50' },
-  { status: 'In Progress', label: 'In Progress', desc: 'Active Hardware Repair', icon: Wrench, color: 'text-[#0071E3] border-[#0071E3] bg-[#0071E3]', badge: 'bg-blue-100 text-blue-800 border-blue-200', bg: 'bg-blue-50' },
+  { status: 'In Progress', label: 'In Progress', desc: 'Active Hardware Repair', icon: Cog, color: 'text-[#0071E3] border-[#0071E3] bg-[#0071E3]', badge: 'bg-blue-100 text-blue-800 border-blue-200', bg: 'bg-blue-50' },
   { status: 'Pending', label: 'Pending', desc: 'Awaiting Parts or Client Approval', icon: Clock, color: 'text-amber-600 border-amber-500 bg-amber-500', badge: 'bg-amber-100 text-amber-800 border-amber-200', bg: 'bg-amber-50' },
   { status: 'Finished', label: 'Finished', desc: 'QA Passed & Ready for Pickup', icon: CheckCircle2, color: 'text-emerald-600 border-emerald-500 bg-emerald-500', badge: 'bg-emerald-100 text-emerald-800 border-emerald-200', bg: 'bg-emerald-50' },
   { status: 'Taken Out', label: 'Taken Out', desc: 'Paid & Returned to Customer', icon: ShieldCheck, color: 'text-slate-700 border-slate-700 bg-slate-700', badge: 'bg-slate-200 text-slate-800 border-slate-300', bg: 'bg-slate-100' },

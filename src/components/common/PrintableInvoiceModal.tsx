@@ -4,7 +4,7 @@ import {
   Printer, 
   CheckCircle2, 
   Clock, 
-  Wrench, 
+  ReceiptText, 
   User, 
   Smartphone, 
   FileText, 
@@ -68,11 +68,12 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
           <head>
             <title>Service Invoice - ${workOrder.orderNumber}</title>
             <style>
-              body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 24px; color: #1d1d1f; line-height: 1.5; background: #fff; }
+              body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 0; margin: 0; color: #1d1d1f; line-height: 1.5; background: #fff; }
               .no-print { display: none !important; }
               table { width: 100%; border-collapse: collapse; }
-              th, td { padding: 8px; border-bottom: 1px solid #e5e5ea; }
-              @page { size: A4 portrait; margin: 8mm; }
+              th, td { padding: 3px; border-bottom: 1px solid #e5e5ea; }
+              .printable-invoice-modal { zoom: 0.84 !important; line-height: 1.15 !important; }
+              @page { size: A4 portrait; margin: 4mm; }
             </style>
           </head>
           <body>
@@ -101,10 +102,20 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto no-print-bg">
+    <div className="printable-invoice-root fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto no-print-bg">
       {/* Print CSS rules */}
       <style>{`
         @media print {
+          body > #root > .basic-ui {
+            display: block !important;
+            width: 100% !important;
+            height: auto !important;
+            min-height: 0 !important;
+            background: transparent !important;
+          }
+          body > #root > .basic-ui > *:not(.printable-invoice-root) {
+            display: none !important;
+          }
           nav, header, footer, aside, .no-print {
             display: none !important;
           }
@@ -141,6 +152,8 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
             overflow: visible !important;
             max-height: none !important;
             height: auto !important;
+            zoom: 0.84 !important;
+            line-height: 1.15 !important;
           }
           .printable-invoice-modal > div {
             max-height: none !important;
@@ -149,7 +162,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
           }
           @page {
             size: A4 portrait;
-            margin: 8mm;
+            margin: 4mm;
           }
         }
       `}</style>
@@ -308,7 +321,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
           {/* Itemized Parts & Labor Table */}
           <div className="space-y-2">
             <h3 className="font-extrabold text-[#1D1D1F] text-xs uppercase tracking-wider flex items-center space-x-1.5">
-              <Wrench className="w-3.5 h-3.5 text-[#0071E3]" />
+              <ReceiptText className="w-3.5 h-3.5 text-[#0071E3]" />
               <span>Itemized Labor & Parts Breakdown</span>
             </h3>
 

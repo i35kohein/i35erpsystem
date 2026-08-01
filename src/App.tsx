@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Sparkles, Plus, CircleDot, Search, Filter, Calculator, Folder, Settings, Download, Database, ExternalLink, ClipboardList, Kanban, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, Menu, ChevronDown, PhoneCall, Truck, Boxes, CreditCard, Users, Smartphone, DollarSign, LayoutDashboard } from 'lucide-react';
-import { subscribeToCollection, saveDocument, saveBatchDocuments, deleteDocument, clearCollection } from './lib/firebase';
+import { Sparkles, Plus, CircleDot, Search, Filter, Calculator, Folder, Settings, Download, Database, ExternalLink, ClipboardList, Kanban, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, Menu, ChevronDown, PhoneCall, Truck, Boxes, CreditCard, Users, DollarSign, LayoutDashboard, Timer } from 'lucide-react';
+import { subscribeToCollection, saveDocument, saveBatchDocuments, deleteDocument, clearCollection } from './lib/supabase';
 import { 
   INITIAL_WORK_ORDERS, 
   INITIAL_PARTS, 
@@ -51,7 +51,6 @@ import { InventoryManagementModule } from './components/inventory/InventoryManag
 import { SupplierRmaModule } from './components/suppliers/SupplierRmaModule';
 import { PosInvoicingModule } from './components/pos/PosInvoicingModule';
 import { CrmCustomerPortalModule } from './components/crm/CrmCustomerPortalModule';
-import { DevicesManagementModule } from './components/devices/DevicesManagementModule';
 import { MicroSolderingModule } from './components/microsoldering/MicroSolderingModule';
 import { QualityAssuranceModule } from './components/qa/QualityAssuranceModule';
 import { AiDiagnosticAssistantModal } from './components/ai/AiDiagnosticAssistantModal';
@@ -64,6 +63,7 @@ import { CompletedDeviceFollowUpModule } from './components/followup/CompletedDe
 import { ShopFinancePlModule } from './components/finance/ShopFinancePlModule';
 import { usePriceCatalog } from './hooks/usePriceCatalog';
 import { OfflineSyncStatusBadge } from './components/common/OfflineSyncStatusBadge';
+import { HoverTooltip } from './components/common/HoverTooltip';
 
 export default function App() {
   const { t } = useLanguage();
@@ -82,7 +82,6 @@ export default function App() {
   // Modal triggers from top bar
   const [inventoryAddModalOpen, setInventoryAddModalOpen] = useState(false);
   const [rmaModalOpen, setRmaModalOpen] = useState(false);
-  const [deviceRegisterModalOpen, setDeviceRegisterModalOpen] = useState(false);
   
   // Price Catalog top navigation controls state
   const [priceCatalogQuickCalcOpen, setPriceCatalogQuickCalcOpen] = useState(false);
@@ -152,7 +151,7 @@ export default function App() {
     setCurrentUser(user);
     addToast(`Switched active profile to ${user.name} (${user.role})`, 'info', 'Role Switch');
     if (user.role === 'Technician') {
-      const allowedTechTabs = ['pipeline', 'qa', 'devices'];
+      const allowedTechTabs = ['pipeline', 'qa', 'crm'];
       if (!allowedTechTabs.includes(activeTab)) {
         setActiveTab('pipeline');
       }
@@ -168,7 +167,7 @@ export default function App() {
     handleUpdateSettings({ ...systemSettings, currencySymbol: newSymbol });
   });
 
-  // Subscribe to Live Firestore collections
+  // Subscribe to live Supabase collections with IndexedDB offline fallback.
   useEffect(() => {
     const unsubWo = subscribeToCollection<WorkOrder>('workOrders', (data) => {
       setWorkOrders(data);
@@ -220,7 +219,11 @@ export default function App() {
         const globalSettings = data.find((s) => s.id === 'global') || data[0];
         setSystemSettings((prev) => ({ ...prev, ...globalSettings }));
       }
-    });
+    }, [{ id: 'global', ...DEFAULT_SYSTEM_SETTINGS }]);
+
+    const unsubUsers = subscribeToCollection<AppUser>('users', (data) => {
+      setUsers(data.length ? data : INITIAL_USERS);
+    }, INITIAL_USERS);
 
     return () => {
       unsubWo();
@@ -234,6 +237,7 @@ export default function App() {
       unsubDebts();
       unsubPayouts();
       unsubSettings();
+      unsubUsers();
     };
   }, []);
 
@@ -284,6 +288,7 @@ export default function App() {
 
   // Modals State
   const [isAiAssistantOpen, setIsAiAssistantOpen] = useState(false);
+  const [settingsInitialSubTab, setSettingsInitialSubTab] = useState<'users' | 'ai'>('users');
   const [printableTagWo, setPrintableTagWo] = useState<WorkOrder | null>(null);
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -797,7 +802,7 @@ export default function App() {
 
   const getTabInfo = (tab: string) => {
     switch (tab) {
-      case 'dashboard': return { category: t('navRepair'), title: t('navDashboardFull') };
+      case 'dashboard': return { category: t('navRepair'), title: 'Dashboard' };
       case 'create-ticket': return { category: t('navRepair'), title: t('navCreateTicket') };
       case 'intake': return { category: t('navRepair'), title: t('navIntakeFull') };
       case 'pipeline': return { category: t('navRepair'), title: t('navPipeline') };
@@ -816,7 +821,7 @@ export default function App() {
   const currentTab = getTabInfo(activeTab);
 
   return (
-    <div className="h-screen h-dvh w-full bg-[#F5F5F7] text-[#1D1D1F] font-sans antialiased flex flex-col lg:flex-row overflow-hidden selection:bg-[#0071E3] selection:text-white">
+    <div className="basic-ui h-screen h-dvh w-full bg-[#F5F5F7] text-[#1D1D1F] font-sans antialiased flex flex-col lg:flex-row overflow-hidden selection:bg-[#0071E3] selection:text-white">
       {/* Persistent Left Sidebar Navigation */}
       <Navigation
         activeTab={activeTab}
@@ -840,9 +845,9 @@ export default function App() {
       />
 
       {/* Main Right Content Column */}
-      <div id="main-content-scroll" className="flex-1 flex flex-col min-w-0 h-full h-dvh overflow-y-auto relative scroll-smooth [scrollbar-gutter:stable]">
+      <div id="main-content-scroll" className="relative flex h-full h-dvh min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-gutter:stable]">
         {/* Top Navigation Bar Header */}
-        <header className="flex flex-row items-center justify-between px-3 sm:px-6 h-[52px] min-h-[52px] bg-white/95 backdrop-blur-md border-b border-[#E5E5EA] sticky top-0 z-40 shadow-2xs gap-2 shrink-0">
+        <header className="app-topbar flex flex-row items-center justify-between px-3 sm:px-5 h-[52px] min-h-[52px] bg-white border-b border-[#E5E5EA] sticky top-0 z-40 gap-2 shrink-0">
           {/* Active Tab Title & Mobile Toggle */}
           <div className="flex items-center space-x-2 sm:space-x-3 shrink-0 min-w-0">
             <button
@@ -860,7 +865,7 @@ export default function App() {
           </div>
 
           {/* Dynamic Header Actions & Quick Filters per Tab */}
-          <div className="flex items-center flex-nowrap justify-end gap-1.5 sm:gap-2 text-xs py-1 shrink-0 relative z-30">
+          <div className="app-topbar-actions flex min-w-0 items-center flex-nowrap justify-end gap-1.5 sm:gap-2 text-xs py-1 shrink-0 relative z-30">
             {/* Reset All Filters Pill Button when any filter is active */}
             {hasActiveFilters && (
               <button
@@ -958,7 +963,7 @@ export default function App() {
                   <span className="hidden md:inline">Export</span>
                 </button>
               </>
-            ) : ['intake', 'pipeline', 'inventory', 'devices', 'crm', 'suppliers', 'qa'].includes(activeTab) ? (
+            ) : ['intake', 'pipeline', 'inventory', 'crm', 'suppliers', 'qa'].includes(activeTab) ? (
               /* Contextual Search Input */
               <div className="relative w-28 sm:w-36 md:w-44 lg:w-52 shrink-0">
                 <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#86868B]" />
@@ -977,8 +982,6 @@ export default function App() {
                       ? "Search Name, Phone, Email..."
                       : activeTab === 'suppliers'
                       ? "Search Vendor, Part, RMA #..."
-                      : activeTab === 'devices'
-                      ? "Search Model, Serial #, IMEI..."
                       : activeTab === 'qa'
                       ? "Search Ticket #, Model, Tech..."
                       : `Search ${currentTab.title}...`
@@ -1028,12 +1031,12 @@ export default function App() {
                   onClick={() => setShowBottlenecksOnly(!showBottlenecksOnly)}
                   className={`py-1.5 px-3 rounded-xl border text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 ${
                     showBottlenecksOnly
-                      ? 'bg-amber-500 text-white border-amber-600 shadow-2xs'
-                      : 'bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-200'
+                      ? 'bg-red-500 text-white border-red-600 shadow-2xs'
+                      : 'bg-red-50 hover:bg-red-100 text-red-800 border-red-200'
                   }`}
                   title="Toggle Bottlenecks (>48h stationary)"
                 >
-                  <AlertTriangle className={`w-3.5 h-3.5 shrink-0 ${showBottlenecksOnly ? 'text-white' : 'text-amber-600'}`} />
+                  <Timer className={`w-3.5 h-3.5 shrink-0 ${showBottlenecksOnly ? 'text-white' : 'text-red-600'}`} />
                   <span className="hidden sm:inline">
                     Bottlenecks (&gt;48h)
                     {workOrders.filter((wo) => {
@@ -1151,25 +1154,6 @@ export default function App() {
               </>
             )}
 
-            {activeTab === 'devices' && (
-              <>
-                <CustomDropdownMenu
-                  value={categoryFilter}
-                  onChange={(val) => setCategoryFilter(val)}
-                  buttonClassName="!px-2.5 !py-1.5 text-xs"
-                  options={[
-                    { value: 'All', label: 'All Categories' },
-                    { value: 'iPhone', label: 'iPhone' },
-                    { value: 'iPad', label: 'iPad' },
-                    { value: 'MacBook', label: 'MacBook' },
-                    { value: 'Apple Watch', label: 'Apple Watch' },
-                  ]}
-                />
-
-                <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
-              </>
-            )}
-
             {activeTab === 'crm' && (
               <>
                 <CustomDropdownMenu
@@ -1215,7 +1199,6 @@ export default function App() {
                   buttonClassName="!px-2.5 !py-1.5 text-xs"
                   options={[
                     { value: 'ALL', label: 'All QA Statuses' },
-                    { value: 'Passed QA', label: 'Passed QA' },
                     { value: 'Pending QA', label: 'Pending QA' },
                   ]}
                 />
@@ -1266,14 +1249,6 @@ export default function App() {
                 <Plus className="w-3.5 h-3.5" />
                 <span>{t('flagRma')}</span>
               </button>
-            ) : activeTab === 'devices' ? (
-              <button
-                onClick={() => setDeviceRegisterModalOpen(true)}
-                className="flex items-center space-x-1.5 px-3.5 py-1.5 bg-[#0071E3] hover:bg-[#0051B3] text-white text-xs font-bold rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>{t('registerDevice')}</span>
-              </button>
             ) : activeTab === 'price-catalog' || activeTab === 'create-ticket' || activeTab === 'portal' || activeTab === 'settings' ? null : (
               <button
                 onClick={() => setActiveTab('create-ticket')}
@@ -1289,16 +1264,8 @@ export default function App() {
           </div>
         </header>
 
-        <main className="flex-1 w-full max-w-full px-4 sm:px-6 lg:px-8 pt-6 pb-12 flex flex-col">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.15, ease: 'easeOut' }}
-              className="flex-1 w-full flex flex-col"
-            >
+        <main className="flex-1 w-full max-w-full px-3 sm:px-4 lg:px-5 pt-3 pb-5 flex flex-col">
+          <div key={activeTab} className="app-module-content flex-1 w-full min-w-0 flex flex-col">
               {activeTab === 'dashboard' && (
                 <DashboardOverview
                   workOrders={activeWorkOrders}
@@ -1322,7 +1289,6 @@ export default function App() {
                   customers={customers}
                   technicians={technicians}
                   systemSettings={systemSettings}
-                  priceCatalog={priceCatalog.catalog}
                   prefill={ticketPrefill}
                   onSaveWorkOrder={handleSaveWorkOrder}
                   onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
@@ -1537,25 +1503,6 @@ export default function App() {
                 />
               )}
 
-              {activeTab === 'devices' && (
-                <DevicesManagementModule
-                  workOrders={activeWorkOrders}
-                  customers={customers}
-                  searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
-                  categoryFilter={categoryFilter}
-                  setCategoryFilter={setCategoryFilter}
-                  dateFilter={dateFilter}
-                  setDateFilter={setDateFilter}
-                  isRegisterModalOpen={deviceRegisterModalOpen}
-                  setIsRegisterModalOpen={setDeviceRegisterModalOpen}
-                  onOpenNewWorkOrder={(prefill) => {
-                    setActiveTab('create-ticket');
-                  }}
-                  onPrintTag={(wo) => setPrintableTagWo(wo)}
-                />
-              )}
-
               {activeTab === 'qa' && (
                 <QualityAssuranceModule
                   workOrders={activeWorkOrders}
@@ -1571,6 +1518,7 @@ export default function App() {
 
               {activeTab === 'settings' && (
                 <SystemManagementSettingsModule
+                  initialSubTab={settingsInitialSubTab}
                   settings={systemSettings}
                   onUpdateSettings={handleUpdateSettings}
                   technicians={technicians}
@@ -1591,15 +1539,37 @@ export default function App() {
                   }}
                 />
               )}
-            </motion.div>
-          </AnimatePresence>
+          </div>
         </main>
       </div>
+
+      {!isAiAssistantOpen && (
+        <button
+          type="button"
+          onClick={() => setIsAiAssistantOpen(true)}
+          className="fixed bottom-20 right-4 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent)] text-white shadow-lg lg:hidden"
+          aria-label="Open AI Assistant"
+          title="Open AI Assistant"
+        >
+          <Sparkles size={20} />
+        </button>
+      )}
 
       {/* AI Diagnostic Assistant Modal */}
       <AiDiagnosticAssistantModal
         isOpen={isAiAssistantOpen}
         onClose={() => setIsAiAssistantOpen(false)}
+        workOrders={activeWorkOrders}
+        parts={parts}
+        customers={customers}
+        technicians={technicians}
+        suppliers={suppliers}
+        systemSettings={systemSettings}
+        onOpenAiSettings={() => {
+          setIsAiAssistantOpen(false);
+          setSettingsInitialSubTab('ai');
+          setActiveTab('settings');
+        }}
       />
 
       {/* Printable Device Tag Sticker Modal */}
@@ -1619,6 +1589,8 @@ export default function App() {
         onRestoreAll={handleRestoreAllWorkOrders}
         onEmptyRecycleBin={handleEmptyRecycleBin}
       />
+
+      <HoverTooltip />
 
       {/* Floating Toast Notification Container */}
       <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none">

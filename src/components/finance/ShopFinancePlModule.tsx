@@ -242,10 +242,10 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="finance-module space-y-3">
       {/* Title & Header Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-[#E5E5EA] shadow-xs">
-        <div className="flex items-center space-x-3">
+      <div className="module-toolbar flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-[#E5E5EA] shadow-xs">
+        <div className="module-subheader flex items-center space-x-3">
           <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black shadow-2xs">
             <DollarSign className="w-6 h-6" />
           </div>
@@ -265,7 +265,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
           <button
             type="button"
             onClick={() => setShowAddExpenseModal(true)}
-            className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs rounded-xl shadow-2xs transition-all flex items-center space-x-1.5 cursor-pointer active:scale-95"
+            className="px-3.5 py-2 bg-[#0071E3] hover:opacity-90 text-white font-extrabold text-xs rounded-xl shadow-2xs transition-all flex items-center space-x-1.5 cursor-pointer active:scale-95"
           >
             <Plus className="w-4 h-4" />
             <span>Record Expense</span>
@@ -378,20 +378,20 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
             </div>
 
             {/* Net Profit Card */}
-            <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-5 rounded-2xl border border-slate-900 shadow-md space-y-2">
-              <div className="flex items-center justify-between text-slate-300">
+            <div className="bg-white p-5 rounded-2xl border border-[#E5E5EA] shadow-2xs space-y-2">
+              <div className="flex items-center justify-between text-[#86868B]">
                 <span className="text-xs font-bold uppercase tracking-wider">Net Profit</span>
-                <Sparkles className="w-4 h-4 text-emerald-400" />
+                <Sparkles className="w-4 h-4 text-[#0071E3]" />
               </div>
               <div className="flex items-baseline justify-between">
-                <span className="text-2xl font-black text-emerald-400 font-mono">
+                <span className="text-2xl font-black text-[#0071E3] font-mono">
                   {financialSummary.netProfit.toLocaleString()} MMK
                 </span>
-                <span className="text-xs font-black bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                <span className="text-xs font-black bg-[#F5F5F7] text-[#1D1D1F] px-2 py-0.5 rounded-full border border-[#E5E5EA]">
                   {financialSummary.netMarginPercent}% Net
                 </span>
               </div>
-              <div className="pt-2 border-t border-slate-700/60 text-[11px] text-slate-300 flex justify-between font-bold">
+              <div className="pt-2 border-t border-[#F5F5F7] text-[11px] text-[#86868B] flex justify-between font-bold">
                 <span>Net Formula:</span>
                 <span>Gross Profit - OpEx</span>
               </div>

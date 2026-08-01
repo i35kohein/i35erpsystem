@@ -20,7 +20,6 @@ import {
   ChevronRight,
   BellRing,
   AlertTriangle,
-  Wrench,
   XCircle,
   Split
 } from 'lucide-react';
@@ -80,18 +79,15 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   // Filter Work Orders by date, search, and status - ONLY show devices AFTER diagnostic is completed
   const dateFiltered = filterByDateRange<WorkOrder>(workOrders, dateFilter);
   const filteredWorkOrders = dateFiltered.filter((wo) => {
-    // POS & Invoicing strictly shows devices AFTER diagnostic testing is completed
-    const isDiagnosticDone = 
-      (wo.beforeDiagnostics && wo.beforeDiagnostics.some((d) => d.status === 'Pass' || d.status === 'Fail')) ||
-      (wo.diagnosticResult && wo.diagnosticResult.trim().length > 0 && wo.diagnosticResult !== 'Diagnostic Pending') ||
-      (wo.selectedRepairs && wo.selectedRepairs.length > 0) ||
-      (wo.lineItems && wo.lineItems.length > 0) ||
-      wo.status === 'Finished' ||
-      wo.status === 'Taken Out' ||
-      wo.status === 'Cant Repair' ||
-      wo.status === 'Customer Not Repair' ||
-      wo.status === 'In Progress' ||
-      wo.status === 'Pending';
+    // Normal repair tickets enter POS only after the post-repair QA record is saved.
+    // Declined/unrepairable tickets remain eligible so the diagnostic fee can be collected.
+    const hasRecordedDiagnostic =
+      (wo.beforeDiagnostics && wo.beforeDiagnostics.some((diagnostic) => diagnostic.status === 'Pass' || diagnostic.status === 'Fail')) ||
+      (wo.diagnosticResult && wo.diagnosticResult.trim().length > 0 && wo.diagnosticResult !== 'Diagnostic Pending');
+    const isDeclinedDiagnostic =
+      (wo.status === 'Cant Repair' || wo.status === 'Customer Not Repair') &&
+      hasRecordedDiagnostic;
+    const isDiagnosticDone = Boolean(wo.postRepairChecklist) || isDeclinedDiagnostic;
 
     if (!isDiagnosticDone) return false;
 
@@ -158,8 +154,8 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 text-xs">
+    <div className="space-y-3">
+      <div className="grid grid-cols-1 gap-3 text-xs md:grid-cols-12">
         {/* Left Column: Select Work Order to Checkout (5 cols) */}
         <div className="md:col-span-5 bg-white border border-[#E5E5EA] rounded-2xl p-4 space-y-3 shadow-xs">
           <div className="flex justify-between items-center border-b border-[#E5E5EA] pb-2">
@@ -233,23 +229,28 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
           {/* Pagination Bar */}
           {filteredWorkOrders.length > 0 && (
-            <div className="pt-3 border-t border-[#E5E5EA] flex items-center justify-between text-xs text-[#86868B]">
-              <span className="font-semibold text-[11px]">
-                {(safeCurrentPage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(safeCurrentPage * ITEMS_PER_PAGE, filteredWorkOrders.length)} of {filteredWorkOrders.length}
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#E5E5EA] pt-2 text-[10px] text-[#86868B]">
+              <span className="whitespace-nowrap font-semibold">
+                <strong className="text-[#1D1D1F]">
+                  {(safeCurrentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(safeCurrentPage * ITEMS_PER_PAGE, filteredWorkOrders.length)}
+                </strong>
+                {' '}of {filteredWorkOrders.length} devices
               </span>
 
-              <div className="flex items-center space-x-1">
+              {totalPages > 1 && (
+              <div className="inline-flex items-center gap-1 rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] p-1">
                 <button
                   type="button"
                   onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
                   disabled={safeCurrentPage === 1}
-                  className="p-1 rounded-lg border border-[#E5E5EA] hover:bg-slate-100 disabled:opacity-40 text-[#1D1D1F] transition-all cursor-pointer"
+                  className="inline-flex h-7 w-7 !min-h-7 items-center justify-center rounded-md bg-white text-[#1D1D1F] transition-colors hover:bg-[var(--blue-tint)] disabled:cursor-not-allowed disabled:opacity-35"
                   title="Previous Page"
+                  aria-label="Previous page"
                 >
                   <ChevronLeft className="w-3.5 h-3.5" />
                 </button>
 
-                <div className="flex items-center space-x-1">
+                <div className="flex items-center gap-1">
                   {Array.from({ length: totalPages }, (_, i) => i + 1)
                     .filter((p) => p === 1 || p === totalPages || Math.abs(p - safeCurrentPage) <= 1)
                     .map((p, idx, arr) => {
@@ -257,14 +258,16 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       const showEllipsis = prev && p - prev > 1;
                       return (
                         <React.Fragment key={p}>
-                          {showEllipsis && <span className="text-[10px] text-[#86868B]">..</span>}
+                          {showEllipsis && <span className="px-0.5 text-[10px] text-[#86868B]">…</span>}
                           <button
                             type="button"
                             onClick={() => setCurrentPage(p)}
-                            className={`w-6 h-6 rounded-lg text-[11px] font-extrabold transition-all cursor-pointer ${
+                            aria-label={`Page ${p}`}
+                            aria-current={safeCurrentPage === p ? 'page' : undefined}
+                            className={`inline-flex h-7 w-7 !min-h-7 items-center justify-center rounded-md text-[10px] font-extrabold transition-colors cursor-pointer ${
                               safeCurrentPage === p
-                                ? 'bg-[#0071E3] text-white shadow-2xs'
-                                : 'text-[#1D1D1F] hover:bg-slate-100 border border-[#E5E5EA]'
+                                ? 'bg-[#0071E3] text-white'
+                                : 'bg-white text-[#1D1D1F] hover:bg-[var(--blue-tint)]'
                             }`}
                           >
                             {p}
@@ -278,12 +281,14 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   type="button"
                   onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
                   disabled={safeCurrentPage === totalPages}
-                  className="p-1 rounded-lg border border-[#E5E5EA] hover:bg-slate-100 disabled:opacity-40 text-[#1D1D1F] transition-all cursor-pointer"
+                  className="inline-flex h-7 w-7 !min-h-7 items-center justify-center rounded-md bg-white text-[#1D1D1F] transition-colors hover:bg-[var(--blue-tint)] disabled:cursor-not-allowed disabled:opacity-35"
                   title="Next Page"
+                  aria-label="Next page"
                 >
                   <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>
+              )}
             </div>
           )}
         </div>

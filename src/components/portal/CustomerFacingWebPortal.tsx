@@ -19,7 +19,7 @@ import {
   ArrowLeft, 
   Check, 
   Lock, 
-  Wrench, 
+  ClipboardCheck,
   Sparkles, 
   ThumbsUp, 
   ThumbsDown, 
@@ -662,7 +662,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
               {/* Reported Issues & Technical Findings */}
               <div className="bg-white rounded-3xl border border-[#E5E5EA] p-5 shadow-2xs space-y-4">
                 <h3 className="font-extrabold text-sm text-[#1D1D1F] flex items-center space-x-2">
-                  <Wrench className="w-4 h-4 text-[#0071E3]" />
+                  <ClipboardCheck className="w-4 h-4 text-[#0071E3]" />
                   <span>Reported Symptoms & Diagnostic Findings</span>
                 </h3>
 

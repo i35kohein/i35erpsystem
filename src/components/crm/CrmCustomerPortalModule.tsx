@@ -13,7 +13,7 @@ import {
   X,
   ChevronDown,
   ChevronUp,
-  Wrench,
+  History,
   Calendar,
   Tag,
   DollarSign,
@@ -129,10 +129,10 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
   const selectedCustomerOrders = selectedCustomer ? getCustomerWorkOrders(selectedCustomer) : [];
 
   return (
-    <div className="space-y-6 text-xs">
+    <div className="space-y-3 text-xs">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-[#E5E5EA] shadow-xs">
-        <div>
+      <div className="module-toolbar flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white p-2 rounded-xl border border-[#E5E5EA] shadow-xs">
+        <div className="module-subheader">
           <h1 className="text-lg font-bold text-[#1D1D1F] flex items-center space-x-2">
             <Users className="w-5 h-5 text-[#0071E3]" />
             <span>Customer Relationship Management & Self-Service Portal</span>
@@ -140,7 +140,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
           <p className="text-xs text-[#86868B]">Classify accounts (Retail, B2B, Wholesale) and simulate customer tracking portal</p>
         </div>
 
-        <div className="bg-[#F5F5F7] p-1.5 rounded-2xl border border-[#E5E5EA] flex items-center space-x-1.5 overflow-x-auto no-scrollbar text-xs shadow-2xs">
+        <div className="flex items-center gap-1 overflow-x-auto rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] p-1 text-xs no-scrollbar">
           <button
             type="button"
             onClick={() => setActiveTab('CRM')}
@@ -167,7 +167,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
       </div>
 
       {activeTab === 'CRM' ? (
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-12">
           {/* Customer Directory List */}
           <div className="md:col-span-5 bg-white border border-[#E5E5EA] rounded-2xl p-4 space-y-3 shadow-xs">
             <div className="flex justify-between items-center border-b border-[#E5E5EA] pb-2">
@@ -268,7 +268,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                       <div className="mt-2.5 pt-2 border-t border-blue-100 bg-white p-2.5 rounded-xl border space-y-2 shadow-2xs">
                         <div className="flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wider text-[#1D1D1F]">
                           <span className="flex items-center space-x-1">
-                            <Wrench className="w-3 h-3 text-[#0071E3]" />
+                            <History className="w-3 h-3 text-[#0071E3]" />
                             <span>Repair History ({custOrders.length})</span>
                           </span>
                         </div>
@@ -443,7 +443,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                 <div className="space-y-3 pt-2 border-t border-[#E5E5EA]">
                   <div className="flex items-center justify-between pb-1">
                     <h3 className="font-black text-[#1D1D1F] text-xs flex items-center space-x-1.5">
-                      <Wrench className="w-4 h-4 text-[#0071E3]" />
+                      <History className="w-4 h-4 text-[#0071E3]" />
                       <span>Chronological Repair History & Outcomes ({selectedCustomerOrders.length})</span>
                     </h3>
                   </div>
@@ -499,4 +499,3 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
     </div>
   );
 };
-

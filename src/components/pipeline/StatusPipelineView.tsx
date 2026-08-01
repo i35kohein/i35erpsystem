@@ -6,6 +6,7 @@ import {
   Sparkles, 
   User, 
   Clock, 
+  Timer,
   AlertCircle,
   AlertTriangle,
   X,
@@ -23,8 +24,8 @@ import {
   Layers,
   Phone,
   ClipboardCheck,
+  Stethoscope,
   Trash2,
-  Wrench,
   BellRing,
   Eye,
   Key,
@@ -63,6 +64,7 @@ import { PriorityBadge } from '../common/PriorityBadge';
 import { WorkOrderStatusTimeline } from '../common/WorkOrderStatusTimeline';
 import { useLanguage } from '../../context/LanguageContext';
 import { CustomerNotificationModal } from '../common/CustomerNotificationModal';
+import { TicketDetailInspectorModal } from '../common/TicketDetailInspectorModal';
 
 interface StatusPipelineViewProps {
   workOrders: WorkOrder[];
@@ -395,72 +397,12 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
   });
 
   return (
-    <div className="space-y-6">
-      {/* Compact Diagnostic Status Bar */}
-      {(beforeNeedsDiagTotalCount > 0 || afterNeedsDiagTotalCount > 0) && (
-        <div className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs flex flex-wrap items-center justify-between gap-2 shadow-2xs">
-          <div className="flex items-center space-x-2.5 min-w-0">
-            <span className="font-extrabold text-[#1D1D1F] text-[11px] flex items-center space-x-1 shrink-0">
-              <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-              <span>Diagnostic Protocol Status:</span>
-            </span>
-            <div className="flex items-center space-x-1.5 flex-wrap">
-              {beforeNeedsDiagTotalCount > 0 && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowBeforeNeedsDiagOnly(!showBeforeNeedsDiagOnly);
-                    setShowNeedsDiagOnly(false);
-                  }}
-                  className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md border flex items-center space-x-1 transition-all cursor-pointer ${
-                    showBeforeNeedsDiagOnly
-                      ? 'bg-amber-600 text-white border-amber-700'
-                      : 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
-                  }`}
-                >
-                  <AlertTriangle className="w-2.5 h-2.5 shrink-0" />
-                  <span>Pre-Diag Pending ({beforeNeedsDiagTotalCount})</span>
-                </button>
-              )}
-              {afterNeedsDiagTotalCount > 0 && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowNeedsDiagOnly(!showNeedsDiagOnly);
-                    setShowBeforeNeedsDiagOnly(false);
-                  }}
-                  className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md border flex items-center space-x-1 transition-all cursor-pointer ${
-                    showNeedsDiagOnly
-                      ? 'bg-purple-600 text-white border-purple-700'
-                      : 'bg-purple-50 text-purple-800 border-purple-200 hover:bg-purple-100'
-                  }`}
-                >
-                  <AlertCircle className="w-2.5 h-2.5 shrink-0" />
-                  <span>Post-Diag Pending ({afterNeedsDiagTotalCount})</span>
-                </button>
-              )}
-            </div>
-          </div>
-          {(showBeforeNeedsDiagOnly || showNeedsDiagOnly) && (
-            <button
-              type="button"
-              onClick={() => {
-                setShowBeforeNeedsDiagOnly(false);
-                setShowNeedsDiagOnly(false);
-              }}
-              className="text-[10px] font-bold text-[#0071E3] hover:underline"
-            >
-              Reset Diag Filter
-            </button>
-          )}
-        </div>
-      )}
-
+    <div className="space-y-3">
       {/* Top Controls Bar (Kanban Pipeline Specific Actions) */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-[#D2D2D7] shadow-2xs text-xs">
-        <div className="flex items-center space-x-2">
-          <span className="font-extrabold text-[#1D1D1F]">Active Pipeline Overview</span>
-          <span className="text-[#86868B] font-medium text-[11px]">({filteredWorkOrders.length} tickets matching filters)</span>
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#D2D2D7] bg-white px-2.5 py-2 text-[11px] shadow-2xs">
+        <div className="flex min-w-0 items-center gap-1.5">
+          <span className="whitespace-nowrap font-extrabold text-[#1D1D1F]">Active Pipeline Overview</span>
+          <span className="truncate text-[10px] font-medium text-[#86868B]">({filteredWorkOrders.length} tickets matching filters)</span>
           {hasActiveFilters && (
             <button
               type="button"
@@ -476,20 +418,20 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
           )}
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-wrap items-center justify-end gap-1.5">
           <button
             type="button"
             onClick={() => {
               setShowBeforeNeedsDiagOnly(!showBeforeNeedsDiagOnly);
               setShowNeedsDiagOnly(false);
             }}
-            className={`h-8 px-3 rounded-lg font-bold text-xs inline-flex items-center space-x-1.5 transition-all cursor-pointer border ${
-              showBeforeNeedsDiagOnly
-                ? 'bg-amber-600 text-white border-amber-700 shadow-2xs'
-                : 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
-            }`}
+                className={`inline-flex h-7 items-center gap-1 rounded-md border px-2 text-[10px] font-bold transition-colors cursor-pointer ${
+                  showBeforeNeedsDiagOnly
+                    ? 'bg-blue-600 text-white border-blue-700 shadow-2xs'
+                    : 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100'
+                }`}
           >
-            <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+            <Stethoscope className="h-3 w-3 shrink-0" />
             <span>Before Diag Pending ({beforeNeedsDiagTotalCount})</span>
           </button>
 
@@ -499,19 +441,19 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
               setShowNeedsDiagOnly(!showNeedsDiagOnly);
               setShowBeforeNeedsDiagOnly(false);
             }}
-            className={`h-8 px-3 rounded-lg font-bold text-xs inline-flex items-center space-x-1.5 transition-all cursor-pointer border ${
-              showNeedsDiagOnly
-                ? 'bg-rose-600 text-white border-rose-700 shadow-2xs'
-                : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
-            }`}
+              className={`inline-flex h-7 items-center gap-1 rounded-md border px-2 text-[10px] font-bold transition-colors cursor-pointer ${
+                showNeedsDiagOnly
+                  ? 'bg-purple-600 text-white border-purple-700 shadow-2xs'
+                  : 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100'
+              }`}
           >
-            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+            <ShieldCheck className="h-3 w-3 shrink-0" />
             <span>Finished Needs Diag ({afterNeedsDiagTotalCount})</span>
           </button>
 
           {showBottlenecksOnly && (
-            <span className="h-8 px-3 bg-amber-500 text-white font-bold rounded-lg text-xs inline-flex items-center space-x-1.5 border border-amber-600 shadow-2xs">
-              <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+            <span className="inline-flex h-7 items-center gap-1 rounded-md border border-red-600 bg-red-500 px-2 text-[10px] font-bold text-white shadow-2xs">
+              <Timer className="h-3 w-3 shrink-0" />
               <span>Filtering Bottlenecks (&gt;48h)</span>
             </span>
           )}
@@ -524,10 +466,10 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   onClearAllWorkOrders();
                 }
               }}
-              className="h-8 px-3 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold rounded-lg text-xs inline-flex items-center space-x-1.5 transition-all cursor-pointer shadow-2xs"
+              className="inline-flex h-7 items-center gap-1 rounded-md border border-rose-200 bg-rose-50 px-2 text-[10px] font-bold text-rose-700 shadow-2xs transition-colors hover:bg-rose-100"
               title="Clear all tickets to reset workflow testing state"
             >
-              <Trash2 className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+              <Trash2 className="h-3 w-3 shrink-0 text-rose-600" />
               <span>Clear All ({workOrders.length})</span>
             </button>
           )}
@@ -542,11 +484,11 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
               await seedSampleTickets();
               alert('✨ 10 Workflow Test Tickets generated successfully!\n\nWorkflow Test Cases:\n1. WO-2026-0001: Receive (Pre-Diag Pending ! Alert Icon)\n2. WO-2026-0002: Receive (Pre-Diag Passed - Ready for In Progress)\n3. WO-2026-0003: In Progress (Active Micro-Soldering)\n4. WO-2026-0004: Pending (Waiting for Supplier Part)\n5. WO-2026-0005: In Progress (Post-Repair QA Pending Alert)\n6. WO-2026-0006: Finished (Post-Repair QA Passed)\n7. WO-2026-0007: Finished (Ready for POS Cashout)\n8. WO-2026-0008: Taken Out (Paid & Delivered)\n9. WO-2026-0009: Customer Not Repair (Declined Quote)\n10. WO-2026-0010: Cant Repair (BER Unfixable Board Damage)');
             }}
-            className="h-8 px-3 bg-[#136F9A] text-white font-bold rounded-lg text-xs inline-flex items-center space-x-1.5 hover:bg-[#136F9A]/90 border border-[#105c80] transition-all cursor-pointer shadow-2xs"
+            className="inline-flex h-7 items-center gap-1 rounded-md border border-[#105c80] bg-[#136F9A] px-2 text-[10px] font-bold text-white shadow-2xs transition-colors hover:bg-[#136F9A]/90"
             title="Generate 10 tickets explicitly structured to test all workflow functions"
           >
-            <Sparkles className="w-3.5 h-3.5 text-amber-300 shrink-0 animate-pulse" />
-            <span>Generate 10 Test Tickets</span>
+            <Sparkles className="h-3 w-3 shrink-0 text-amber-300" />
+            <span>10 Test Tickets</span>
           </button>
         </div>
       </div>
@@ -661,10 +603,10 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                           <div className="flex items-center space-x-1 shrink-0">
                             {isBeforeDiagNeeded && (
                               <span
-                                className="w-5 h-5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 flex items-center justify-center shrink-0 shadow-2xs"
+                                className="w-5 h-5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 flex items-center justify-center shrink-0 shadow-2xs"
                                 title="Initial 21-Point Diagnostic Pending"
                               >
-                                <AlertTriangle className="w-3 h-3 text-amber-600 shrink-0" />
+                                <Stethoscope className="w-3 h-3 text-blue-600 shrink-0" />
                               </span>
                             )}
                             {isAfterDiagNeeded && (
@@ -672,7 +614,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                                 className="w-5 h-5 rounded-full bg-purple-100 text-purple-900 border border-purple-300 flex items-center justify-center shrink-0 shadow-2xs"
                                 title="Post-Repair Diagnostic Quality Check Pending"
                               >
-                                <AlertCircle className="w-3 h-3 text-purple-700 shrink-0" />
+                                <ShieldCheck className="w-3 h-3 text-purple-700 shrink-0" />
                               </span>
                             )}
                           </div>
@@ -680,12 +622,12 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
 
                         {/* Stagnant Bottleneck Alert Banner / Age Chip */}
                         {isStagnant ? (
-                          <div className="flex items-center justify-between px-2 py-1 rounded-lg bg-amber-500/15 border border-amber-400/50 text-amber-900 text-[10px] font-extrabold">
+                          <div className="flex items-center justify-between px-2 py-1 rounded-lg bg-red-50 border border-red-200 text-red-800 text-[10px] font-extrabold">
                             <span className="flex items-center space-x-1">
-                              <AlertTriangle className="w-3.5 h-3.5 text-amber-600 animate-pulse shrink-0" />
+                              <Timer className="w-3.5 h-3.5 text-red-600 animate-pulse shrink-0" />
                               <span>Bottleneck (&gt;48h)</span>
                             </span>
-                            <span className="font-mono bg-amber-200/80 px-1.5 py-0.5 rounded text-amber-900">{hoursInStatus}h</span>
+                            <span className="font-mono bg-red-100 px-1.5 py-0.5 rounded text-red-800">{hoursInStatus}h</span>
                           </div>
                         ) : (
                           <div className="flex items-center space-x-1 text-[10px] text-[#86868B]">
@@ -701,7 +643,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                           
                           {/* What to repair under Customer info */}
                           <div className="flex items-start space-x-1.5 pt-1 mt-1 border-t border-slate-100 text-[11px] text-[#1D1D1F]">
-                            <Wrench className="w-3.5 h-3.5 text-[#0071E3] shrink-0 mt-0.5" />
+                            <ClipboardCheck className="w-3.5 h-3.5 text-[#0071E3] shrink-0 mt-0.5" />
                             <span className="font-semibold text-slate-700 line-clamp-2 leading-tight">
                               {getRepairSummary(wo)}
                             </span>
@@ -808,7 +750,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
 
       {/* MODAL 1: Full Ticket Detail View Modal */}
       {detailModalWo && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6">
+        <div className="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 items-center justify-center p-3 sm:p-6">
           <div className="bg-white border border-[#D2D2D7] rounded-2xl max-w-5xl w-full p-6 space-y-4 text-xs shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <button onClick={() => setDetailModalWo(null)} className="absolute right-4 top-4 text-[#86868B] hover:text-[#1D1D1F] cursor-pointer">
               <X className="w-5 h-5" />
@@ -914,7 +856,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                     <span>Technician & Cost</span>
                   </span>
                   <div className="font-bold text-[#1D1D1F] text-xs flex items-center space-x-1 truncate">
-                    <Wrench className="w-3 h-3 text-[#0071E3]" />
+                    <ClipboardCheck className="w-3 h-3 text-[#0071E3]" />
                     <span>Tech: {detailModalWo.assignedTechName || 'Unassigned'}</span>
                   </div>
                   <div className="font-mono font-black text-[#0071E3] text-xs flex items-center space-x-1">
@@ -961,7 +903,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
               <div className="p-3.5 bg-[#E5F1FF]/50 border border-[#0071E3]/20 rounded-xl space-y-2">
                 <div className="flex justify-between items-center border-b border-[#0071E3]/10 pb-1.5">
                   <span className="font-bold text-[#0071E3] flex items-center space-x-1.5 text-xs">
-                    <Wrench className="w-3.5 h-3.5 text-[#0071E3] shrink-0" />
+                    <ClipboardCheck className="w-3.5 h-3.5 text-[#0071E3] shrink-0" />
                     <span>Selected Services & Repairs:</span>
                   </span>
                   <span className="font-mono font-extrabold text-[#0071E3] text-xs">
@@ -1104,6 +1046,16 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {detailModalWo && (
+        <TicketDetailInspectorModal
+          workOrder={detailModalWo}
+          currentUser={currentUser}
+          onClose={() => setDetailModalWo(null)}
+          onPrint={onSelectPrintTag}
+          onDelete={onDeleteWorkOrder}
+        />
       )}
 
       {/* MODAL 2: Add Manual Repair Log */}

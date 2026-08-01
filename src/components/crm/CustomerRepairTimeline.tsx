@@ -3,7 +3,7 @@ import {
   CheckCircle2, 
   XCircle, 
   Clock, 
-  Wrench, 
+  Cog, 
   PackageCheck, 
   AlertCircle, 
   Smartphone, 
@@ -51,7 +51,7 @@ const getOutcomeMeta = (status: string) => {
         label: 'Under Active Repair',
         badgeClass: 'bg-blue-50 text-blue-700 border-blue-200',
         nodeBg: 'bg-[#0071E3] text-white ring-4 ring-blue-100',
-        icon: Wrench,
+        icon: Cog,
         bgGradient: 'from-blue-50/50 to-transparent',
         borderLeft: 'border-l-4 border-l-[#0071E3]',
       };

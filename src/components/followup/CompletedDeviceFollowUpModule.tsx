@@ -20,7 +20,6 @@ import {
   History,
   ShieldCheck,
   Check,
-  Wrench,
   FileText,
   DollarSign,
   Cpu
@@ -243,11 +242,11 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
   ];
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
+    <div className="space-y-3 max-w-7xl mx-auto pb-4">
       {/* Top Banner / Dashboard Overview */}
       <div className="bg-white border border-[#E5E5EA] rounded-2xl p-5 shadow-2xs space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
+          <div className="module-subheader">
             <div className="flex items-center space-x-2">
               <span className="p-2 bg-[#E5F1FF] text-[#0071E3] rounded-xl">
                 <UserCheck className="w-5 h-5" />
@@ -465,7 +464,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                     <div className="bg-[#F0F7FB] border border-[#D8E5ED] rounded-xl p-3 text-xs space-y-1.5 mt-2">
                       <div className="flex items-center justify-between">
                         <span className="font-extrabold text-[#136F9A] flex items-center space-x-1.5">
-                          <Wrench className="w-3.5 h-3.5 text-[#136F9A]" />
+                          <History className="w-3.5 h-3.5 text-[#136F9A]" />
                           <span>Repaired Services & Replaced Components:</span>
                         </span>
                         <span className="text-[11px] font-extrabold text-[#136F9A] bg-[#E5F1FF] px-2 py-0.5 rounded-md border border-[#BCE0FD]">
@@ -603,7 +602,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
               <div className="bg-[#F0F7FB] border border-[#D8E5ED] rounded-xl p-3 space-y-2 text-xs">
                 <div className="flex items-center justify-between border-b border-[#D8E5ED] pb-1.5">
                   <span className="font-extrabold text-[#136F9A] flex items-center space-x-1.5">
-                    <Wrench className="w-4 h-4 text-[#136F9A]" />
+                    <History className="w-4 h-4 text-[#136F9A]" />
                     <span>Repaired Service Summary</span>
                   </span>
                   <span className="font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
@@ -813,7 +812,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
               <div className="bg-[#F0F7FB] border border-[#D8E5ED] rounded-xl p-3 text-xs space-y-1.5">
                 <div className="flex items-center justify-between border-b border-[#D8E5ED] pb-1">
                   <span className="font-extrabold text-[#136F9A] flex items-center space-x-1">
-                    <Wrench className="w-3.5 h-3.5 text-[#136F9A]" />
+                    <History className="w-3.5 h-3.5 text-[#136F9A]" />
                     <span>Repaired Services:</span>
                   </span>
                   <span className="font-bold text-emerald-700">{systemSettings.currencySymbol}{historyModalWo.totalAmount || 0}</span>

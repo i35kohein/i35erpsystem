@@ -1,4 +1,4 @@
-import { saveDocument } from '../lib/firebase';
+import { saveDocument } from '../lib/supabase';
 import { WorkOrder } from '../types';
 import { get21Diagnostics } from './diagnosticUtils';
 

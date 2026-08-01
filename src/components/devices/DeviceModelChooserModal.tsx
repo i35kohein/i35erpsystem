@@ -40,20 +40,16 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-5 animate-fadeIn">
-      <div className="bg-white border border-[#E5E5EA] rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+      <div className="bg-white border border-[#E5E5EA] rounded-2xl w-full max-w-3xl max-h-[82vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Modal Header */}
-        <div className="p-4 sm:p-5 border-b border-[#E5E5EA] flex items-center justify-between bg-[#F5F5F7]/80">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#0071E3] text-white flex items-center justify-center font-bold shadow-2xs shrink-0">
-              <Folder className="w-5 h-5" />
+        <div className="px-3.5 py-3 border-b border-[#E5E5EA] flex items-center justify-between bg-[#F5F5F7]/80">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-[#0071E3] text-white flex items-center justify-center font-bold shadow-2xs shrink-0">
+              <Folder className="w-4 h-4" />
             </div>
-            <div>
-              <h2 className="font-extrabold text-base sm:text-lg text-[#1D1D1F] flex items-center space-x-2">
-                <span>Select Device Model</span>
-              </h2>
-              <p className="text-xs text-[#86868B]">
-                Choose hardware model for repair quote & intake ticket
-              </p>
+            <div className="min-w-0">
+              <h2 className="font-extrabold text-sm text-[#1D1D1F] truncate">Select Device Model</h2>
+              <p className="text-[10px] text-[#86868B] truncate">Choose a model for this repair ticket</p>
             </div>
           </div>
 
@@ -65,7 +61,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                   onClose();
                   onOpenSettings();
                 }}
-                className="px-3 py-1.5 rounded-xl bg-white hover:bg-[#E5E5EA] text-[#0071E3] font-extrabold text-xs border border-[#E5E5EA] transition-all flex items-center space-x-1.5 cursor-pointer shadow-2xs"
+                className="px-2.5 py-1.5 rounded-lg bg-white hover:bg-[#E5E5EA] text-[#0071E3] font-extrabold text-[11px] border border-[#E5E5EA] transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
               >
                 <Settings className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Folder Settings</span>
@@ -73,7 +69,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
             )}
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-[#E5E5EA] hover:bg-[#D1D1D6] text-[#1D1D1F] transition-all cursor-pointer flex items-center justify-center"
+              className="w-7 h-7 rounded-lg bg-[#E5E5EA] hover:bg-[#D1D1D6] text-[#1D1D1F] transition-all cursor-pointer flex items-center justify-center"
             >
               <X className="w-4 h-4" />
             </button>
@@ -81,9 +77,9 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
         </div>
 
         {/* Folder Family Tabs & Search Bar Header */}
-        <div className="p-4 border-b border-[#E5E5EA] bg-white space-y-3">
+        <div className="p-3 border-b border-[#E5E5EA] bg-white space-y-2.5">
           {/* Family Folder Tabs */}
-          <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
+          <div className="flex items-center gap-1 overflow-x-auto pb-0.5 text-xs no-scrollbar">
             {[
               { key: 'All', label: 'All Folders', icon: Folder },
               { key: 'iPhone', label: 'iPhone', icon: Smartphone },
@@ -106,7 +102,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                   key={fam.key}
                   type="button"
                   onClick={() => setActiveFamilyTab(fam.key as any)}
-                  className={`px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
+                  className={`px-2.5 py-1.5 text-[11px] font-extrabold rounded-lg transition-all flex items-center gap-1.5 shrink-0 cursor-pointer border select-none active:scale-95 ${
                     isActive
                       ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-xs'
                       : 'bg-white hover:bg-slate-100 text-[#6E6E73] hover:text-[#1D1D1F] border-[#E5E5EA]'
@@ -115,7 +111,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                   <IconComp className="w-4 h-4" />
                   <span>{fam.label}</span>
                   <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                    className={`px-1.5 py-0.5 rounded-full text-[9px] font-mono font-bold ${
                       isActive ? 'bg-white/20 text-white' : 'bg-[#E5E5EA] text-[#1D1D1F]'
                     }`}
                   >
@@ -128,13 +124,13 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
 
           {/* Search Box */}
           <div className="relative">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#86868B]" />
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#86868B]" />
             <input
               type="text"
               placeholder="Type model name (e.g. 15 Pro, M2, Series 9)..."
               value={deviceSearchQuery}
               onChange={(e) => setDeviceSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl text-xs font-bold text-[#1D1D1F] focus:outline-none focus:ring-2 focus:ring-[#0071E3]"
+              className="w-full pl-9 pr-4 py-2 bg-[#F5F5F7] border border-[#E5E5EA] rounded-lg text-[11px] font-bold text-[#1D1D1F] focus:outline-none focus:ring-2 focus:ring-[#0071E3]"
             />
             {deviceSearchQuery && (
               <button
@@ -149,7 +145,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
         </div>
 
         {/* Folder / Model Grid Container */}
-        <div className="p-5 overflow-y-auto space-y-6 max-h-[60vh]">
+        <div className="p-3.5 overflow-y-auto space-y-4 max-h-[58vh]">
           {(() => {
             const visibleFolders = enabledFolders.filter((f) => {
               if (activeFamilyTab !== 'All' && f.family !== activeFamilyTab) return false;
@@ -168,22 +164,22 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
               renderedFolderCount++;
 
               return (
-                <div key={folder.id} className="space-y-3">
+                <div key={folder.id} className="space-y-2">
                   {/* Folder Header */}
                   <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-2">
-                    <div className="flex items-center space-x-2">
-                      <Folder className="w-4 h-4 text-[#0071E3]" />
-                      <h3 className="text-xs font-black uppercase tracking-wider text-[#1D1D1F]">
+                    <div className="flex items-center gap-1.5">
+                      <Folder className="w-3.5 h-3.5 text-[#0071E3]" />
+                      <h3 className="text-[11px] font-black uppercase tracking-wider text-[#1D1D1F]">
                         {folder.name}
                       </h3>
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F5F5F7] text-[#86868B] border border-[#E5E5EA]">
-                        {filteredModels.length} models
+                        {filteredModels.length}
                       </span>
                     </div>
                   </div>
 
                   {/* Folder Models Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                     {filteredModels.map((item) => {
                       const isSelected = selectedDevice === item.model;
                       const activeServiceCount = Object.values(item.prices).filter((p) => p !== null).length;
@@ -196,7 +192,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                             onSelectDevice(item.model);
                             onClose();
                           }}
-                          className={`p-3 rounded-2xl text-xs font-extrabold flex items-center justify-between border transition-all cursor-pointer text-left ${
+                            className={`p-2.5 rounded-lg text-[11px] font-extrabold flex items-center justify-between border transition-all cursor-pointer text-left ${
                             isSelected
                               ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-xs'
                               : 'bg-[#F5F5F7] text-[#1D1D1F] border-[#E5E5EA] hover:border-[#0071E3] hover:text-[#0071E3]'
@@ -238,13 +234,11 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
         </div>
 
         {/* Modal Footer */}
-        <div className="p-3 bg-[#F5F5F7] border-t border-[#E5E5EA] flex items-center justify-between text-xs">
+        <div className="px-3.5 py-2 bg-[#F5F5F7] border-t border-[#E5E5EA] flex items-center justify-between text-[11px]">
           <span className="font-bold text-[#86868B]">
             Selected: <span className="text-[#0071E3] font-black">{selectedDevice || 'None'}</span>
           </span>
-          <span className="text-[11px] text-[#86868B] font-medium">
-            Folder toggles active from catalog settings ({enabledFolders.length} folders ON)
-          </span>
+          <span className="text-[10px] text-[#86868B] font-medium">{enabledFolders.length} folders available</span>
         </div>
       </div>
     </div>

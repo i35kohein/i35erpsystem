@@ -239,13 +239,16 @@ export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
   thermalPaperSize: '80mm',
   receiptHeaderTitle: 'AppleRepair Pro Lab - Official Service Voucher',
   receiptFooterNote: 'Thank you for choosing AppleRepair Pro Lab! All repairs covered by warranty.',
+  receiptFooterTextAlign: 'left',
+  receiptFooterFontSize: 'medium',
 
   a4PrintColorMode: 'monochrome',
   a4ShowDiagnosticsTable: true,
   a4ShowPricingTable: true,
   a4ShowTermsDisclaimer: true,
   a4CustomHeaderNote: 'Official Device Intake & Hardware Diagnostic Voucher',
-  a4PrintLayoutDensity: 'standard',
+  a4PrintLayoutDensity: 'compact',
+  a4DiagnosticDisplayFormat: 'comparison_table',
 
   mandatoryQaChecklist: true,
   requireMicroSolderingLog: true,
@@ -255,6 +258,11 @@ export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
   autoPromptNotificationModal: true,
   telegramBotToken: '',
   telegramChatId: '',
+  aiProvider: 'local',
+  aiApiKey: '',
+  aiModel: '',
+  aiBaseUrl: '',
+  aiSystemPrompt: 'You are a concise repair-shop operations assistant. Use only the supplied ERP data, clearly state uncertainty, and prioritize actionable next steps.',
 };
 
 export const INITIAL_TECHNICIANS: Technician[] = [
@@ -1921,4 +1929,3 @@ export const INITIAL_TECHNICIAN_PAYOUTS = [
     notes: 'Awaiting month-end final audit'
   }
 ];
-

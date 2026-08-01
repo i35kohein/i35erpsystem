@@ -19,6 +19,13 @@ html[data-lang="mm"] body {
   font-family: "MyanmarChatu", var(--font-family), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
 }
 
+/* Keep Burmese glyphs consistent inside controls, tables, modals, and print
+   layouts instead of falling back to a different font per component. */
+html[data-lang="mm"] :where(button, input, textarea, select, label, p, span, div, h1, h2, h3, h4, h5, h6, td, th),
+body.lang-mm :where(button, input, textarea, select, label, p, span, div, h1, h2, h3, h4, h5, h6, td, th) {
+  font-family: "MyanmarChatu", var(--font-family), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
 /* Preserve monospaced font for codes and numbers in Myanmar mode */
 html[lang="mm"] .font-mono,
 html[data-lang="mm"] .font-mono,
@@ -148,8 +155,17 @@ html:not([data-geometry]) ::after {
 }
 
 html {
-  scrollbar-gutter: stable;
-  overflow-y: scroll;
+  text-size-adjust: 100%;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  overflow: hidden;
 }
 
 body {
@@ -159,6 +175,278 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  min-width: 320px;
+}
+
+/* Basic production UI: compact, predictable, and intentionally undecorated. */
+.basic-ui {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.basic-ui .lucide {
+  stroke-width: 1.8;
+}
+
+.basic-ui *,
+.basic-ui *::before,
+.basic-ui *::after {
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  scroll-behavior: auto !important;
+}
+
+.basic-ui [class*="transition"],
+.basic-ui [class*="duration-"],
+.basic-ui [class*="animate-"] {
+  transition-duration: 100ms !important;
+  animation: none !important;
+}
+
+.basic-ui [class*="bg-gradient"],
+.basic-ui [class*="from-"],
+.basic-ui [class*="via-"],
+.basic-ui [class*="to-"] {
+  background-image: none !important;
+}
+
+.basic-ui header {
+  background: var(--card-bg) !important;
+  border-color: var(--border) !important;
+}
+
+.basic-ui aside {
+  background: var(--sidebar) !important;
+  border-color: var(--border) !important;
+}
+
+.basic-ui main,
+.basic-ui #main-content-scroll {
+  background: var(--bg);
+}
+
+.basic-ui button,
+.basic-ui input,
+.basic-ui select,
+.basic-ui textarea {
+  font: inherit;
+}
+
+.basic-ui button {
+  letter-spacing: 0;
+}
+
+.basic-ui input,
+.basic-ui select,
+.basic-ui textarea {
+  border-color: var(--border) !important;
+  background-color: var(--card-bg) !important;
+  color: var(--text-main) !important;
+}
+
+.basic-ui select {
+  appearance: none;
+  min-width: 112px;
+  padding-right: 34px !important;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--text-muted) 50%),
+    linear-gradient(135deg, var(--text-muted) 50%, transparent 50%),
+    linear-gradient(to right, var(--border), var(--border)) !important;
+  background-position:
+    calc(100% - 15px) 50%,
+    calc(100% - 11px) 50%,
+    calc(100% - 29px) 50% !important;
+  background-size: 4px 4px, 4px 4px, 1px 18px !important;
+  background-repeat: no-repeat !important;
+  border-radius: 8px;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.basic-ui select:hover {
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border)) !important;
+  background-color: var(--blue-tint) !important;
+}
+
+.basic-ui select:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.basic-ui input:focus,
+.basic-ui select:focus,
+.basic-ui textarea:focus,
+.basic-ui button:focus-visible {
+  outline: 2px solid #8bb8e8 !important;
+  outline-offset: 1px;
+}
+
+.basic-ui table {
+  border-collapse: collapse;
+}
+
+.basic-ui th {
+  background: var(--border-subtle) !important;
+  color: var(--text-secondary) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+}
+
+.basic-ui td,
+.basic-ui th {
+  border-color: var(--border) !important;
+}
+
+.basic-ui tbody tr:hover {
+  background: var(--blue-tint) !important;
+}
+
+.basic-ui .group:hover [class*="scale-"],
+.basic-ui [class*="hover:scale-"]:hover,
+.basic-ui [class*="active:scale-"]:active {
+  transform: none !important;
+}
+
+/* The app header already names the active module; keep module toolbars action-only. */
+.basic-ui .module-subheader {
+  display: none !important;
+}
+
+.basic-ui .module-toolbar {
+  min-height: 44px;
+  padding: 6px !important;
+  background: var(--border-subtle) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.basic-ui .module-toolbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Dashboard top controls are the canonical control language across modules. */
+.basic-ui .module-toolbar button,
+.basic-ui .app-control,
+.basic-ui [role="tab"] {
+  min-height: 32px;
+  flex-shrink: 0;
+  border-color: var(--border);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.basic-ui .app-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card-bg);
+  color: var(--text-secondary);
+}
+
+.basic-ui .app-control:hover {
+  background: var(--blue-tint);
+  color: var(--text-main);
+}
+
+.basic-ui .app-control-primary {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #fff;
+}
+
+.basic-ui .app-control-primary:hover {
+  background: var(--primary-hover);
+  color: #fff;
+}
+
+.basic-ui .app-panel {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card-bg);
+}
+
+@media (min-width: 1024px) {
+  .basic-ui aside.lg\:w-56 {
+    width: 224px !important;
+  }
+
+  .basic-ui aside.lg\:w-14 {
+    width: 56px !important;
+  }
+}
+
+@media (max-width: 639px) {
+  .basic-ui header > div:first-child {
+    flex: 1 1 auto;
+  }
+
+  .basic-ui header h1 {
+    max-width: 220px;
+  }
+
+  .basic-ui header > div:last-child {
+    flex: 0 0 auto;
+    overflow: visible;
+  }
+
+  .basic-ui header > div:last-child > *:not(:first-child) {
+    display: none !important;
+  }
+}
+
+/* iPad/tablet topbar: keep every action reachable without horizontal overflow. */
+@media (min-width: 640px) and (max-width: 1100px) {
+  .basic-ui .app-topbar {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    gap: 6px;
+  }
+
+  .basic-ui .app-topbar h1 {
+    max-width: 180px;
+  }
+
+  .basic-ui .app-topbar-actions {
+    gap: 4px !important;
+  }
+
+  .basic-ui .app-topbar-actions button {
+    width: 34px;
+    min-width: 34px;
+    max-width: 34px;
+    height: 34px;
+    padding: 0 !important;
+    justify-content: center;
+    gap: 0 !important;
+    overflow: hidden;
+  }
+
+  .basic-ui .app-topbar-actions button > span:not(:has(svg)) {
+    display: none !important;
+  }
+
+  .basic-ui .app-topbar-actions button svg {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+  }
+
+  .basic-ui .app-topbar-actions > div,
+  .basic-ui .app-topbar-actions > span {
+    flex-shrink: 0;
+  }
 }
 
 /* Prevent Header, Main Content & Navbar layout shifts */
@@ -171,11 +459,15 @@ header {
 
 #main-content-scroll {
   scrollbar-gutter: stable;
+  overflow-anchor: none;
+  min-height: 0;
+  overscroll-behavior: contain;
 }
 
-/* Ensure images maintain aspect ratio and don't cause CLS on load */
+/* Media can never grow wider than its reserved container. */
 img {
-  content-visibility: auto;
+  display: block;
+  max-width: 100%;
 }
 
 /* Ensure main container flexes properly */
@@ -213,22 +505,22 @@ html[data-theme="dark-slate"] textarea::placeholder {
 
 html[data-theme="dark-slate"] .bg-gray-50,
 html[data-theme="dark-slate"] .bg-slate-50,
-html[data-theme="dark-slate"] .bg-[#F5F5F7],
-html[data-theme="dark-slate"] .bg-[#F8FBFD],
-html[data-theme="dark-slate"] .bg-[#F9F9FB] {
+html[data-theme="dark-slate"] [class~="bg-[#F5F5F7]"],
+html[data-theme="dark-slate"] [class~="bg-[#F8FBFD]"],
+html[data-theme="dark-slate"] [class~="bg-[#F9F9FB]"] {
   background-color: #090D16 !important;
 }
 
-html[data-theme="dark-slate"] .hover\:bg-\[\#F5F5F7\]:hover,
+html[data-theme="dark-slate"] [class~="hover:bg-[#F5F5F7]"]:hover,
 html[data-theme="dark-slate"] .hover\:bg-gray-50:hover,
 html[data-theme="dark-slate"] .hover\:bg-slate-50:hover {
   background-color: #1E293B !important;
 }
 
 /* Side Menu Text & General Text Colors in Dark Mode */
-html[data-theme="dark-slate"] .text-[#2C3E50],
-html[data-theme="dark-slate"] .text-[#1D1D1F],
-html[data-theme="dark-slate"] .text-[#424245],
+html[data-theme="dark-slate"] [class~="text-[#2C3E50]"],
+html[data-theme="dark-slate"] [class~="text-[#1D1D1F]"],
+html[data-theme="dark-slate"] [class~="text-[#424245]"],
 html[data-theme="dark-slate"] .text-slate-900,
 html[data-theme="dark-slate"] .text-slate-800,
 html[data-theme="dark-slate"] .text-gray-900,
@@ -236,25 +528,25 @@ html[data-theme="dark-slate"] .text-gray-800 {
   color: #FFFFFF !important;
 }
 
-html[data-theme="dark-slate"] .text-[#7F7F7F],
-html[data-theme="dark-slate"] .text-[#86868B],
-html[data-theme="dark-slate"] .text-[#526375],
-html[data-theme="dark-slate"] .text-[#6E6E73],
+html[data-theme="dark-slate"] [class~="text-[#7F7F7F]"],
+html[data-theme="dark-slate"] [class~="text-[#86868B]"],
+html[data-theme="dark-slate"] [class~="text-[#526375]"],
+html[data-theme="dark-slate"] [class~="text-[#6E6E73]"],
 html[data-theme="dark-slate"] .text-slate-500,
 html[data-theme="dark-slate"] .text-gray-500 {
   color: #CBD5E1 !important;
 }
 
 /* Dynamic Theme Overrides so hardcoded utility classes respond to active theme */
-html[data-theme] .bg-\[\#0071E3\],
-html[data-theme] .bg-\[\#136F9A\],
-html[data-theme] .bg-\[\#0062CC\] {
+html[data-theme] [class~="bg-[#0071E3]"],
+html[data-theme] [class~="bg-[#136F9A]"],
+html[data-theme] [class~="bg-[#0062CC]"] {
   background-color: var(--primary) !important;
 }
 
-html[data-theme] .bg-\[\#F5F5F7\],
-html[data-theme] .bg-\[\#F8FBFD\],
-html[data-theme] .bg-\[\#F9F9FB\] {
+html[data-theme] [class~="bg-[#F5F5F7]"],
+html[data-theme] [class~="bg-[#F8FBFD]"],
+html[data-theme] [class~="bg-[#F9F9FB]"] {
   background-color: var(--bg) !important;
 }
 
@@ -262,36 +554,207 @@ html[data-theme] .bg-white {
   background-color: var(--card-bg) !important;
 }
 
-html[data-theme] .text-\[\#1D1D1F\],
-html[data-theme] .text-\[\#2C3E50\],
-html[data-theme] .text-\[\#424245\] {
+html[data-theme] [class~="text-[#1D1D1F]"],
+html[data-theme] [class~="text-[#2C3E50]"],
+html[data-theme] [class~="text-[#424245]"] {
   color: var(--text-main) !important;
 }
 
-html[data-theme] .text-\[\#86868B\],
-html[data-theme] .text-\[\#7F7F7F\],
-html[data-theme] .text-\[\#6E6E73\],
-html[data-theme] .text-\[\#526375\] {
+html[data-theme] [class~="text-[#86868B]"],
+html[data-theme] [class~="text-[#7F7F7F]"],
+html[data-theme] [class~="text-[#6E6E73]"],
+html[data-theme] [class~="text-[#526375]"] {
   color: var(--text-muted) !important;
 }
 
-html[data-theme] .text-\[\#0071E3\],
-html[data-theme] .text-\[\#136F9A\] {
+html[data-theme] [class~="text-[#0071E3]"],
+html[data-theme] [class~="text-[#136F9A]"] {
   color: var(--primary) !important;
 }
 
-html[data-theme] .border-\[\#E5E5EA\],
-html[data-theme] .border-\[\#D8E5ED\],
-html[data-theme] .border-\[\#D2D2D7\] {
+html[data-theme] [class~="border-[#E5E5EA]"],
+html[data-theme] [class~="border-[#D8E5ED]"],
+html[data-theme] [class~="border-[#D2D2D7]"] {
   border-color: var(--border) !important;
 }
 
-html[data-theme] .bg-\[\#27B1AE\] {
+html[data-theme] [class~="bg-[#27B1AE]"] {
   background-color: var(--turquoise) !important;
 }
 
-html[data-theme] .bg-\[\#ED7132\] {
+html[data-theme] [class~="bg-[#ED7132]"] {
   background-color: var(--orange) !important;
+}
+
+/* Keep every primary workspace module on the same usable content width. */
+.app-module-content > * {
+  width: 100%;
+  max-width: none !important;
+  min-width: 0;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.app-module-content {
+  min-width: 0;
+  contain: inline-size;
+}
+
+.app-module-content > :where(div, section) {
+  overflow-anchor: none;
+}
+
+/* Keep controls stable while counts, loading labels, and async status text update. */
+.basic-ui button,
+.basic-ui [role="button"],
+.basic-ui input,
+.basic-ui select {
+  min-height: 32px;
+}
+
+.basic-ui table {
+  width: 100%;
+}
+
+.basic-ui th,
+.basic-ui td {
+  vertical-align: middle;
+}
+
+/*
+ * Normalize legacy non-semantic accent utilities to the active theme.
+ * Status colors (success, warning, danger) intentionally remain semantic.
+ */
+html[data-theme] :is(
+  [class~="bg-blue-500"],
+  [class~="bg-blue-600"],
+  [class~="bg-purple-400"],
+  [class~="bg-purple-500"],
+  [class~="bg-purple-600"],
+  [class~="bg-purple-700"],
+  [class~="bg-indigo-600"],
+  [class~="bg-teal-500"],
+  [class~="bg-teal-600"],
+  [class~="bg-[#AF52DE]"],
+  [class~="bg-[#7360F2]"],
+  [class~="bg-[#0077ED]"]
+) {
+  background-color: var(--primary) !important;
+}
+
+html[data-theme] :is(
+  [class~="bg-blue-50"],
+  [class~="bg-blue-50/40"],
+  [class~="bg-blue-50/50"],
+  [class~="bg-blue-50/60"],
+  [class~="bg-blue-50/70"],
+  [class~="bg-blue-50/80"],
+  [class~="bg-blue-100"],
+  [class~="bg-blue-100/50"],
+  [class~="bg-blue-100/90"],
+  [class~="bg-purple-50"],
+  [class~="bg-purple-50/20"],
+  [class~="bg-purple-50/40"],
+  [class~="bg-purple-50/50"],
+  [class~="bg-purple-50/60"],
+  [class~="bg-purple-50/70"],
+  [class~="bg-purple-50/80"],
+  [class~="bg-purple-100"],
+  [class~="bg-purple-100/70"],
+  [class~="bg-purple-100/90"],
+  [class~="bg-indigo-50"],
+  [class~="bg-indigo-50/70"],
+  [class~="bg-indigo-50/90"],
+  [class~="bg-indigo-100"],
+  [class~="bg-teal-50"],
+  [class~="bg-teal-50/60"],
+  [class~="bg-teal-50/80"],
+  [class~="bg-[#F0F6FF]"],
+  [class~="bg-[#E5F1FF]"]
+) {
+  background-color: var(--blue-tint) !important;
+}
+
+html[data-theme] :is(
+  [class~="text-blue-300"],
+  [class~="text-blue-400"],
+  [class~="text-blue-600"],
+  [class~="text-blue-700"],
+  [class~="text-blue-800"],
+  [class~="text-blue-900"],
+  [class~="text-blue-950"],
+  [class~="text-purple-600"],
+  [class~="text-purple-700"],
+  [class~="text-purple-800"],
+  [class~="text-purple-900"],
+  [class~="text-purple-950"],
+  [class~="text-indigo-600"],
+  [class~="text-indigo-700"],
+  [class~="text-indigo-800"],
+  [class~="text-indigo-900"],
+  [class~="text-teal-600"],
+  [class~="text-teal-700"],
+  [class~="text-[#AF52DE]"],
+  [class~="text-[#7360F2]"],
+  [class~="text-[#0077ED]"],
+  [class~="text-[#0051B3]"]
+) {
+  color: var(--primary) !important;
+}
+
+html[data-theme] :is(
+  [class~="border-blue-100"],
+  [class~="border-blue-200"],
+  [class~="border-blue-200/80"],
+  [class~="border-blue-300"],
+  [class~="border-purple-100"],
+  [class~="border-purple-200"],
+  [class~="border-purple-200/80"],
+  [class~="border-purple-300"],
+  [class~="border-purple-300/40"],
+  [class~="border-indigo-200"],
+  [class~="border-indigo-200/80"],
+  [class~="border-indigo-300"],
+  [class~="border-teal-200"]
+) {
+  border-color: var(--border) !important;
+}
+
+/* Finance uses the active theme instead of a separate rainbow palette. */
+.finance-module .bg-blue-50\/60,
+.finance-module .bg-blue-50\/80,
+.finance-module .bg-purple-50,
+.finance-module .bg-purple-50\/80,
+.finance-module .bg-emerald-50,
+.finance-module .bg-emerald-50\/60 {
+  background-color: var(--border-subtle) !important;
+}
+
+.finance-module .border-blue-200,
+.finance-module .border-purple-200,
+.finance-module .border-emerald-200,
+.finance-module .border-emerald-300 {
+  border-color: var(--border) !important;
+}
+
+.finance-module .text-blue-800,
+.finance-module .text-blue-900,
+.finance-module .text-blue-950,
+.finance-module .text-purple-800,
+.finance-module .text-purple-900,
+.finance-module .text-purple-950 {
+  color: var(--primary) !important;
+}
+
+.finance-module .text-emerald-300,
+.finance-module .text-emerald-400,
+.finance-module .text-emerald-700,
+.finance-module .text-emerald-800,
+.finance-module .text-emerald-900,
+.finance-module .text-emerald-950,
+.finance-module [class~="text-[#16A34A]"],
+.finance-module [class~="text-[#34C759]"] {
+  color: var(--success) !important;
 }
 
 /* Custom smooth scrollbar styling */
@@ -373,4 +836,3 @@ html[data-theme] .bg-\[\#ED7132\] {
     margin: 6mm;
   }
 }
-

@@ -16,7 +16,6 @@ import {
   Plus,
   PanelLeftClose,
   PanelLeftOpen,
-  Smartphone,
   Tag,
   Settings,
   ExternalLink,
@@ -87,12 +86,24 @@ export const Navigation: React.FC<NavigationProps> = ({
       )
     : workOrders;
 
-  // Sidemenu count logic fix for Work Intake, Status Pipeline, and QA
+  // Sidebar counts mirror the actual module queues.
   const intakeCount = myWorkOrders.filter((w) => w.status === 'Receive').length;
   const activePipelineCount = myWorkOrders.filter(
     (w) => w.status === 'Receive' || w.status === 'In Progress' || w.status === 'Pending'
   ).length;
-  const qaFinishedCount = myWorkOrders.filter((w) => w.status === 'Finished').length;
+  const qaFinishedCount = myWorkOrders.filter(
+    (w) => (w.status === 'Finished' || w.status === 'Taken Out') && !w.postRepairChecklist
+  ).length;
+  const posReadyCount = myWorkOrders.filter((w) => {
+    const hasRecordedDiagnostic =
+      (w.beforeDiagnostics && w.beforeDiagnostics.some((diagnostic) => diagnostic.status === 'Pass' || diagnostic.status === 'Fail')) ||
+      (w.diagnosticResult && w.diagnosticResult.trim().length > 0 && w.diagnosticResult !== 'Diagnostic Pending');
+    const isDeclinedDiagnostic =
+      (w.status === 'Cant Repair' || w.status === 'Customer Not Repair') &&
+      hasRecordedDiagnostic;
+
+    return Boolean(w.postRepairChecklist) || isDeclinedDiagnostic;
+  }).length;
   const pendingFollowUpCount = myWorkOrders.filter(
     (w) => (w.status === 'Finished' || w.status === 'Taken Out') && (!w.followUpStatus || w.followUpStatus === 'Pending Call')
   ).length;
@@ -145,6 +156,8 @@ export const Navigation: React.FC<NavigationProps> = ({
           id: 'pos',
           label: t('navPos'),
           icon: CreditCard,
+          badge: posReadyCount > 0 ? posReadyCount : undefined,
+          badgeColor: 'bg-[#16A34A]',
         },
         {
           id: 'finance',
@@ -174,13 +187,6 @@ export const Navigation: React.FC<NavigationProps> = ({
       title: t('navManagement'),
       items: [
         {
-          id: 'devices',
-          label: isTech ? 'Device Repair History' : t('navDevices'),
-          icon: Smartphone,
-          badge: new Set(myWorkOrders.map((w) => w.serialNumber || w.imei || w.id)).size,
-          badgeColor: 'bg-[#5856D6]',
-        },
-        {
           id: 'crm',
           label: t('navCrm'),
           icon: Users,
@@ -205,8 +211,8 @@ export const Navigation: React.FC<NavigationProps> = ({
           return true;
         }
         if (role === 'Technician') {
-          // Technician can see Pipeline (assigned only), QA, Devices, and Price List
-          const allowedTechItems = ['pipeline', 'qa', 'devices', 'price-catalog'];
+          // Technician can see Pipeline (assigned only), QA, CRM, and Price List.
+          const allowedTechItems = ['pipeline', 'qa', 'crm', 'price-catalog'];
           if (allowedTechItems.includes(item.id)) return true;
           if (item.id === 'finance') return currentUser?.permissions?.canAccessFinance === true;
           if (item.id === 'settings') return currentUser?.permissions?.canAccessSettings === true;
@@ -247,8 +253,7 @@ export const Navigation: React.FC<NavigationProps> = ({
         flex flex-col justify-between
         transition-all duration-300 ease-in-out select-none
         ${isMobileMenuOpen ? 'translate-x-0 w-64' : '-translate-x-full lg:translate-x-0'}
-        ${isCollapsed ? 'lg:w-16' : 'lg:w-64'}
-        shadow-2xl lg:shadow-none
+        ${isCollapsed ? 'lg:w-14' : 'lg:w-56'}
       `}>
         {/* Sidebar Header & Toggle */}
         <div className="p-2.5 border-b border-[#E5E5EA] flex flex-col gap-2">
@@ -297,10 +302,10 @@ export const Navigation: React.FC<NavigationProps> = ({
                 <div className="min-w-0">
                   <div className="flex items-center space-x-1">
                     <span className="font-extrabold text-sm tracking-tight text-[#1D1D1F] truncate">
-                      {systemSettings?.shopName || 'AppleRepair Pro'}
+                      {systemSettings?.shopName || 'i35 ERP'}
                     </span>
                   </div>
-                  <p className="text-[10px] text-[#86868B] truncate font-medium">Official Shop ERP</p>
+                  <p className="text-[10px] text-[#86868B] truncate font-medium">Repair operations</p>
                 </div>
               </div>
 
@@ -337,13 +342,13 @@ export const Navigation: React.FC<NavigationProps> = ({
                 isCollapsed ? 'w-10 h-10 mx-auto justify-center p-0' : 'justify-between px-3.5 py-2.5'
               } rounded-xl font-bold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071E3] ${
                 activeTab === 'dashboard'
-                  ? 'bg-[#0071E3] text-white shadow-xs'
-                  : 'text-[#1D1D1F] bg-[#F9F9FB] hover:bg-[#F5F5F7] border border-[#E5E5EA]/60'
+                  ? 'bg-[#EAF2FF] text-[#1559A6] border border-[#B8D3F4]'
+                  : 'text-[#1D1D1F] bg-white hover:bg-[#F3F4F6] border border-transparent'
               }`}
               title="Overview Dashboard"
             >
               <div className="flex items-center justify-center min-w-0">
-                <LayoutDashboard className={`w-4 h-4 shrink-0 ${activeTab === 'dashboard' ? 'text-white' : 'text-[#0071E3]'}`} />
+                <LayoutDashboard className={`w-4 h-4 shrink-0 ${activeTab === 'dashboard' ? 'text-[#1559A6]' : 'text-[#667085]'}`} />
                 {!isCollapsed && <span className="ml-2.5">Dashboard Overview</span>}
               </div>
             </button>
@@ -372,8 +377,8 @@ export const Navigation: React.FC<NavigationProps> = ({
                         isCollapsed ? 'w-10 h-10 mx-auto justify-center p-0 relative' : 'justify-between px-3.5 py-2.5'
                       } rounded-xl font-semibold transition-all cursor-pointer border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071E3] ${
                         isActive
-                          ? 'bg-[#F0F6FF] text-[#0071E3] font-extrabold border-[#0071E3]/30 shadow-2xs'
-                          : 'bg-white text-[#424245] border-[#E5E5EA]/70 hover:text-[#1D1D1F] hover:bg-[#F5F5F7] hover:border-[#D2D2D7]'
+                          ? 'bg-[#EAF2FF] text-[#1559A6] font-bold border-[#B8D3F4]'
+                          : 'bg-white text-[#344054] border-transparent hover:text-[#1D1D1F] hover:bg-[#F3F4F6]'
                       }`}
                       title={item.label}
                     >
@@ -416,8 +421,8 @@ export const Navigation: React.FC<NavigationProps> = ({
           {!isCollapsed && (
             <div className="pt-1 px-1 flex items-center justify-between text-[10px] text-[#86868B]">
               <span className="flex items-center space-x-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#34C759] animate-pulse" />
-                <span className="font-medium">ERP Engine Online</span>
+                <span className="w-2 h-2 rounded-full bg-[#2E7D32]" />
+                <span className="font-medium">System online</span>
               </span>
               <span className="font-mono text-[9px] bg-[#E5E5EA] px-1.5 py-0.5 rounded-md text-[#1D1D1F]">v2.4.0</span>
             </div>
@@ -454,13 +459,13 @@ export const Navigation: React.FC<NavigationProps> = ({
 
             <button
               type="button"
-              onClick={() => handleTabSelect('devices')}
+              onClick={() => handleTabSelect('crm')}
               className={`min-h-[44px] flex-1 flex flex-col items-center justify-center space-y-0.5 rounded-xl transition-all cursor-pointer ${
-                activeTab === 'devices' ? 'text-[#0071E3] bg-blue-50/80 font-black' : 'text-[#86868B] font-bold hover:text-[#1D1D1F]'
+                activeTab === 'crm' ? 'text-[#0071E3] bg-blue-50/80 font-black' : 'text-[#86868B] font-bold hover:text-[#1D1D1F]'
               }`}
             >
-              <Smartphone className="w-5 h-5" />
-              <span className="text-[10px] truncate">Repair History</span>
+              <Users className="w-5 h-5" />
+              <span className="text-[10px] truncate">CRM</span>
             </button>
 
             <button
@@ -509,13 +514,13 @@ export const Navigation: React.FC<NavigationProps> = ({
 
             <button
               type="button"
-              onClick={() => handleTabSelect('devices')}
+              onClick={() => handleTabSelect('crm')}
               className={`min-h-[44px] flex-1 flex flex-col items-center justify-center space-y-0.5 rounded-xl transition-all cursor-pointer ${
-                activeTab === 'devices' ? 'text-[#0071E3] bg-blue-50/80 font-black' : 'text-[#86868B] font-bold hover:text-[#1D1D1F]'
+                activeTab === 'crm' ? 'text-[#0071E3] bg-blue-50/80 font-black' : 'text-[#86868B] font-bold hover:text-[#1D1D1F]'
               }`}
             >
-              <Smartphone className="w-5 h-5" />
-              <span className="text-[10px] truncate">Devices</span>
+              <Users className="w-5 h-5" />
+              <span className="text-[10px] truncate">CRM</span>
             </button>
 
             <button
@@ -532,5 +537,3 @@ export const Navigation: React.FC<NavigationProps> = ({
     </>
   );
 };
-
-

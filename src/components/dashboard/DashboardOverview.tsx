@@ -12,7 +12,6 @@ import {
   Sparkles,
   ChevronRight,
   Scale,
-  Wrench,
   BarChart3,
   LayoutDashboard,
   Smartphone,
@@ -57,6 +56,7 @@ import { TechnicianPerformanceTab } from './TechnicianPerformanceTab';
 import { TechnicianLeaderboardView } from './TechnicianLeaderboardView';
 import { StatusBadge } from '../common/StatusBadge';
 import { PriorityBadge } from '../common/PriorityBadge';
+import { TicketDetailInspectorModal } from '../common/TicketDetailInspectorModal';
 
 interface DashboardOverviewProps {
   workOrders: WorkOrder[];
@@ -111,13 +111,16 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const [warrantyFilterTab, setWarrantyFilterTab] = useState<'ALL_EXPIRING' | 'CRITICAL' | 'WARNING' | 'EXPIRED' | 'ALL'>('ALL_EXPIRING');
   const [copiedNoticeId, setCopiedNoticeId] = useState<string | null>(null);
   const [ticketToDelete, setTicketToDelete] = useState<WorkOrder | null>(null);
+  const [rosterTicket, setRosterTicket] = useState<WorkOrder | null>(null);
 
   // Background Warranty Telemetry & Expiry Check (Flags work orders nearing end of 90-day warranty)
   const warrantyCheckData = useMemo(() => {
     const now = Date.now();
     const ONE_DAY_MS = 1000 * 60 * 60 * 24;
 
-    return workOrders.map((wo) => {
+    return workOrders
+      .filter((wo) => wo.status === 'Finished' || wo.status === 'Taken Out')
+      .map((wo) => {
       const warrantyDays = wo.warrantyDays ?? 90;
       if (warrantyDays <= 0) return null;
 
@@ -151,7 +154,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         isExpired,
         isActive,
       };
-    }).filter((item): item is NonNullable<typeof item> => item !== null);
+      })
+      .filter((item): item is NonNullable<typeof item> => item !== null);
   }, [workOrders]);
 
   const expiringSoonWorkOrders = useMemo(() => {
@@ -247,15 +251,16 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const monthlyRepairsCount = technicians.reduce((sum, tech) => sum + tech.completedThisMonth, 0);
   
   const completedOrActive = filteredWorkOrders.filter((w) => w.createdAt);
-  let avgTurnaroundHours = 2.4;
+  let avgTurnaroundHours = 0;
   if (completedOrActive.length > 0) {
     const totalHours = completedOrActive.reduce((acc, wo) => {
       const created = new Date(wo.createdAt).getTime();
-      const updated = new Date(wo.updatedAt || wo.createdAt).getTime();
-      const diffHours = Math.max(0.5, (updated - created) / (1000 * 60 * 60));
+      const isClosed = ['Taken Out', 'Cant Repair', 'Customer Not Repair'].includes(wo.status);
+      const endTime = isClosed ? new Date(wo.updatedAt || wo.createdAt).getTime() : Date.now();
+      const diffHours = Math.max(0, (endTime - created) / (1000 * 60 * 60));
       return acc + diffHours;
     }, 0);
-    avgTurnaroundHours = Number((totalHours / completedOrActive.length).toFixed(1)) || 2.4;
+    avgTurnaroundHours = Number((totalHours / completedOrActive.length).toFixed(1));
   }
 
   // Filter ONLY Repair-Related Low Stock Parts
@@ -328,7 +333,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       { id: 'screen', label: 'Screen & Display OLED', icon: Smartphone, color: 'bg-[#0071E3]', textCol: 'text-[#0071E3]', bgLight: 'bg-[#F0F6FF]', count: 0, revenue: 0 },
       { id: 'battery', label: 'Battery & Charging System', icon: Zap, color: 'bg-[#34C759]', textCol: 'text-[#34C759]', bgLight: 'bg-[#EAF8ED]', count: 0, revenue: 0 },
       { id: 'board', label: 'Logic Board & Micro-Soldering', icon: Activity, color: 'bg-[#AF52DE]', textCol: 'text-[#AF52DE]', bgLight: 'bg-purple-50', count: 0, revenue: 0 },
-      { id: 'housing', label: 'Glass, Port, Camera & Housing', icon: Wrench, color: 'bg-[#FF9500]', textCol: 'text-[#FF9500]', bgLight: 'bg-[#FFF8ED]', count: 0, revenue: 0 },
+      { id: 'housing', label: 'Glass, Port, Camera & Housing', icon: Smartphone, color: 'bg-[#FF9500]', textCol: 'text-[#FF9500]', bgLight: 'bg-[#FFF8ED]', count: 0, revenue: 0 },
     ];
 
     filteredWorkOrders.forEach((wo) => {
@@ -482,7 +487,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   }, [parts]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Top Dashboard Navigation Subtabs Bar */}
       <div className="bg-[#F5F5F7] p-1.5 rounded-2xl border border-[#E5E5EA] flex items-center space-x-1.5 overflow-x-auto no-scrollbar w-full text-xs shadow-2xs">
         {/* Subtab 1: Status Queue */}
@@ -735,7 +740,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               Active Repairs
             </span>
             <div className="w-8 h-8 rounded-xl bg-[#F0F6FF] text-[#0071E3] flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Wrench className="w-4 h-4" />
+              <ClipboardList className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-2.5 flex items-baseline justify-between">
@@ -1090,7 +1095,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                       <th className="py-2.5 px-3">Priority</th>
                       <th className="py-2.5 px-3">Stage & Status</th>
                       <th className="py-2.5 px-3">Amount</th>
-                      <th className="py-2.5 px-3 text-right">Label Tag</th>
+                      <th className="py-2.5 px-3 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#E5E5EA]">
@@ -1164,9 +1169,20 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                             </span>
                           </td>
 
-                          {/* Label Tag Print (Read-Only Export) */}
+                          {/* Ticket status inspector and label export */}
                           <td className="py-3 px-3 text-right">
-                            {onSelectPrintTag && (
+                            <div className="inline-flex items-center justify-end gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => setRosterTicket(wo)}
+                                className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--blue-tint)] px-2.5 text-[10px] font-extrabold text-[var(--primary)] transition-colors hover:bg-[var(--card-bg)]"
+                                title="View Ticket Status"
+                                aria-label={`View status for ${wo.orderNumber || wo.id}`}
+                              >
+                                <Eye className="h-3.5 w-3.5" />
+                                <span>View</span>
+                              </button>
+                              {onSelectPrintTag && (
                               <button
                                 type="button"
                                 onClick={() => onSelectPrintTag(wo)}
@@ -1176,7 +1192,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                                 <Printer className="w-3.5 h-3.5 text-[#0071E3]" />
                                 <span>Tag</span>
                               </button>
-                            )}
+                              )}
+                            </div>
                           </td>
                         </tr>
                       );
@@ -1882,6 +1899,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             })()}
           </div>
         </div>
+      )}
+
+      {rosterTicket && (
+        <TicketDetailInspectorModal
+          workOrder={rosterTicket}
+          onClose={() => setRosterTicket(null)}
+          onPrint={onSelectPrintTag}
+        />
       )}
     </div>
   );

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ModelRepairPrice, REPAIR_CATEGORIES, RepairCategoryDef, FolderConfig, DEFAULT_DEVICE_FOLDERS, getModelFolderId } from '../types/priceCatalog';
 import { INITIAL_REPAIR_PRICE_DATA } from '../data/repairPriceData';
-import { subscribeToCollection, saveDocument, clearCollection } from '../lib/firebase';
+import { subscribeToCollection, saveDocument, clearCollection } from '../lib/supabase';
 
 export function usePriceCatalog(globalCurrencySymbol?: string, onUpdateGlobalCurrency?: (symbol: string) => void) {
   const [catalog, setCatalog] = useState<ModelRepairPrice[]>(INITIAL_REPAIR_PRICE_DATA);
@@ -16,7 +16,7 @@ export function usePriceCatalog(globalCurrencySymbol?: string, onUpdateGlobalCur
     }
   }, [globalCurrencySymbol]);
 
-  // Subscribe to Firestore 'priceCatalog', 'priceFolders', and 'priceCategories'
+  // Subscribe to Supabase price catalog collections.
   useEffect(() => {
     const seedDataWithIds = INITIAL_REPAIR_PRICE_DATA.map((item) => ({
       ...item,

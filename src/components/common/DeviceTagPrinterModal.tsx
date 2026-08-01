@@ -10,15 +10,8 @@ import {
   CircleDot, 
   User, 
   Smartphone, 
-  Sliders, 
   Check, 
   Scissors, 
-  Palette, 
-  Layout, 
-  Eye, 
-  EyeOff,
-  Building2,
-  CheckCircle2,
   Phone,
   Globe,
   MapPin
@@ -40,30 +33,35 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
   onClose,
 }) => {
   const [paperSize, setPaperSize] = useState<'3x2_tag' | 'a4_voucher'>('a4_voucher');
-  
-  // A4 Print Customization States (defaulting to Black & White / Monochrome for crisp ink-saving output)
-  const [a4ColorMode, setA4ColorMode] = useState<'monochrome' | 'color'>(
-    systemSettings?.a4PrintColorMode || 'monochrome'
-  );
-  const [a4LayoutDensity, setA4LayoutDensity] = useState<'standard' | 'compact' | 'dual_voucher'>(
-    systemSettings?.a4PrintLayoutDensity || 'standard'
-  );
-  const [showDiagnostics, setShowDiagnostics] = useState<boolean>(
-    systemSettings?.a4ShowDiagnosticsTable ?? true
-  );
-  const [diagDisplayFormat, setDiagDisplayFormat] = useState<'comparison_table' | 'dual_grid' | 'before_only' | 'after_only'>('comparison_table');
 
-  const [showPricing, setShowPricing] = useState<boolean>(
-    systemSettings?.a4ShowPricingTable ?? true
-  );
-  const [showTerms, setShowTerms] = useState<boolean>(
-    systemSettings?.a4ShowTermsDisclaimer ?? true
-  );
-  const [customHeaderNote, setCustomHeaderNote] = useState<string>(
-    systemSettings?.a4CustomHeaderNote || 'Official Device Intake & Hardware Diagnostic Voucher'
-  );
-
-  const [showA4SettingsPanel, setShowA4SettingsPanel] = useState<boolean>(false);
+  // Print layout is centrally managed in System Management → POS & Receipt Layout.
+  // The voucher only reads those saved defaults to keep every print consistent.
+  const a4ColorMode = systemSettings?.a4PrintColorMode ?? 'monochrome';
+  const a4LayoutDensity = systemSettings?.a4PrintLayoutDensity ?? 'compact';
+  const showDiagnostics = systemSettings?.a4ShowDiagnosticsTable ?? true;
+  const diagDisplayFormat = systemSettings?.a4DiagnosticDisplayFormat ?? 'comparison_table';
+  const showPricing = systemSettings?.a4ShowPricingTable ?? true;
+  const showTerms = systemSettings?.a4ShowTermsDisclaimer ?? true;
+  // The shared receipt text is also used on the A4 voucher so POS receipts and
+  // printed intake documents always carry the same shop wording. Keep this
+  // separate from the optional A4 layout fields so a saved voucher message can
+  // never be hidden by a layout toggle or an empty legacy field.
+  const voucherHeaderText = systemSettings?.receiptHeaderTitle?.trim() ||
+    systemSettings?.a4CustomHeaderNote?.trim() ||
+    'Official Device Intake & Hardware Diagnostic Voucher';
+  const voucherFooterText = systemSettings?.receiptFooterNote?.trim() ||
+    `Thank you for choosing ${systemSettings?.shopName || 'our repair shop'}.`;
+  const voucherFooterTextAlign = systemSettings?.receiptFooterTextAlign ?? 'left';
+  const voucherFooterLineAlignments = systemSettings?.receiptFooterLineAlignments ?? {};
+  const voucherFooterTextSizeRanges = systemSettings?.receiptFooterTextSizeRanges ?? [];
+  const voucherFooterLines = voucherFooterText.split(/\r?\n/);
+  const voucherFooterFontSize = systemSettings?.receiptFooterFontSize ?? 'medium';
+  const voucherFooterPreviewSizeClass = {
+    small: 'text-[9px]',
+    medium: 'text-[10px]',
+    large: 'text-[11px]',
+  }[voucherFooterFontSize];
+  const authorizationText = `Customer authorizes ${systemSettings?.shopName || 'the repair shop'} to perform diagnostics and hardware repairs. Please backup data prior to service. Replaced parts warrantied for ${workOrder?.warrantyDays ?? 0} days under standard conditions.`;
 
   if (!workOrder) return null;
 
@@ -94,51 +92,31 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
     workOrder.symptomsReported,
     workOrder.intakeChecklist
   );
-
-  const handlePopoutPrint = () => {
-    const el = document.getElementById('device-tag-printable-content');
-    if (!el) {
-      window.print();
-      return;
-    }
-    const printWindow = window.open('', '_blank', 'width=850,height=1000');
-    if (printWindow) {
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>Job Voucher - ${workOrder.orderNumber}</title>
-            <style>
-              body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; background: #fff; color: #000; }
-              .no-print { display: none !important; }
-              table { width: 100%; border-collapse: collapse; }
-              th, td { padding: 6px; border-bottom: 1px solid #e5e5ea; }
-              @page { size: ${paperSize === 'a4_voucher' ? 'A4 portrait' : '3in 2in'}; margin: 6mm; }
-            </style>
-          </head>
-          <body>
-            ${el.outerHTML}
-            <script>
-              setTimeout(() => {
-                window.print();
-              }, 250);
-            </script>
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-    } else {
-      window.print();
-    }
-  };
+  // New intake tickets do not have a post-repair QA result yet. Keep the
+  // printed intake voucher focused on the initial inspection until QA exists.
+  const hasAfterQa =
+    (workOrder.status === 'Finished' || workOrder.status === 'Taken Out') &&
+    Array.isArray(workOrder.afterDiagnostics) &&
+    workOrder.afterDiagnostics.length > 0;
+  const effectiveDiagDisplayFormat = hasAfterQa ? diagDisplayFormat : 'before_only';
+  const printableRepairItems = workOrder.selectedRepairs?.length
+    ? workOrder.selectedRepairs.map((item) => ({
+        id: item.id,
+        name: item.name,
+        basePrice: item.basePrice,
+        discountPercent: item.discountPercent,
+        finalPrice: item.finalPrice,
+      }))
+    : (workOrder.lineItems || []).map((item) => ({
+        id: item.id,
+        name: item.description,
+        basePrice: item.unitPrice * item.quantity,
+        discountPercent: 0,
+        finalPrice: item.unitPrice * item.quantity,
+      }));
 
   const handlePrint = () => {
-    try {
-      window.print();
-    } catch (err) {
-      console.warn('Direct print blocked, using popout print fallback', err);
-      handlePopoutPrint();
-    }
+    window.print();
   };
 
   // Helper renderer for diagnostic status with clean text and icons
@@ -179,23 +157,23 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
     const isMono = a4ColorMode === 'monochrome';
 
     return (
-      <div className={`space-y-4 font-sans text-xs ${isMono ? 'text-black' : 'text-slate-900'}`}>
+      <div className={`a4-voucher-content space-y-4 font-sans text-xs ${isMono ? 'text-black' : 'text-slate-900'}`}>
         {/* Top Banner Header */}
-        <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center pb-3 border-b ${
+        <div className={`a4-voucher-header flex flex-col sm:flex-row justify-between items-start sm:items-center pb-3 border-b ${
           isMono ? 'border-black' : 'border-slate-300'
         } gap-3`}>
           <div>
-            <div className="flex items-center space-x-2.5">
+            <div className="flex items-stretch space-x-2.5">
               {shopLogoUrl ? (
                 <img 
                   src={shopLogoUrl} 
                   alt={shopName} 
-                  className={`w-10 h-10 rounded-lg object-contain bg-white border p-0.5 shrink-0 ${
+                    className={`print-shop-logo w-10 h-auto min-h-[40px] self-stretch rounded-lg object-contain bg-white border p-0.5 shrink-0 ${
                     isMono ? 'border-black' : 'border-slate-300'
                   }`}
                 />
               ) : (
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
+                <div className={`w-8 min-h-[32px] self-stretch rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
                   isMono ? 'bg-black text-white' : 'bg-[#0071E3] text-white'
                 }`}>
                   <CircleDot className="w-5 h-5" />
@@ -210,11 +188,12 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                     </span>
                   )}
                 </div>
-                {customHeaderNote && (
-                  <p className={`text-[10px] font-semibold mb-0.5 ${isMono ? 'text-slate-800' : 'text-slate-600'}`}>
-                    {customHeaderNote}
-                  </p>
-                )}
+                <p
+                  data-print-voucher-header-text
+                  className={`text-[10px] font-semibold mb-0.5 ${isMono ? 'text-slate-800' : 'text-slate-600'}`}
+                >
+                  {voucherHeaderText}
+                </p>
                 {/* Separated Store Address, Website, and Phone Lines */}
                 <div className="space-y-0.5 text-[9.5px] text-slate-600 font-medium pt-0.5">
                   {shopAddress && (
@@ -249,7 +228,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
               <p className="text-[10px] text-slate-600">Est. Return: {workOrder.estimatedCompletion}</p>
             </div>
 
-            <div className={`p-1.5 bg-white border rounded-lg flex flex-col items-center shrink-0 ${
+            <div className={`print-qr p-1.5 bg-white border rounded-lg flex flex-col items-center shrink-0 ${
               isMono ? 'border-black' : 'border-slate-300 shadow-2xs'
             }`}>
               <QRCodeSVG value={ticketUrl} size={a4LayoutDensity === 'compact' ? 40 : 48} level="M" />
@@ -261,7 +240,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
         {/* Customer & Device Information Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {/* Customer Info */}
-          <div className={`p-2.5 rounded-xl border space-y-1 ${
+          <div className={`a4-info-card p-2.5 rounded-xl border space-y-1 ${
             isMono ? 'bg-slate-50 border-slate-300 text-black' : 'bg-slate-50/70 border-slate-200 text-slate-800'
           }`}>
             <h3 className={`font-extrabold text-xs flex items-center space-x-1.5 border-b pb-1 ${
@@ -279,7 +258,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
           </div>
 
           {/* Device Info (Passcode omitted for security on printed output) */}
-          <div className={`p-2.5 rounded-xl border space-y-1 ${
+          <div className={`a4-info-card p-2.5 rounded-xl border space-y-1 ${
             isMono ? 'bg-slate-50 border-slate-300 text-black' : 'bg-slate-50/70 border-slate-200 text-slate-800'
           }`}>
             <h3 className={`font-extrabold text-xs flex items-center space-x-1.5 border-b pb-1 ${
@@ -292,47 +271,47 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
               <p><strong>Model:</strong> {workOrder.deviceModel}</p>
               <p><strong>Color:</strong> {workOrder.deviceColor}</p>
               <p className="font-mono"><strong>S/N:</strong> {workOrder.serialNumber}</p>
-              <p><strong>Find My:</strong> {workOrder.findMyStatus}</p>
-              <p><strong>Warranty:</strong> {workOrder.warrantyDays} Days</p>
+              <p className="font-mono"><strong>IMEI:</strong> {workOrder.imei || '—'}</p>
             </div>
           </div>
         </div>
 
         {/* Selected Repairs & Estimated Charges Table */}
-        {showPricing && workOrder.selectedRepairs && workOrder.selectedRepairs.length > 0 && (
-          <div className="space-y-1.5">
+        {showPricing && printableRepairItems.length > 0 && (
+          <div className="a4-service-section space-y-1.5">
             <h3 className={`font-extrabold text-xs border-b pb-1 flex justify-between items-center ${
               isMono ? 'border-black text-black' : 'border-slate-300 text-slate-900'
             }`}>
               <span>Requested Hardware Service Items</span>
-              <span className={`font-mono ${isMono ? 'text-black font-bold' : 'text-[#0071E3]'}`}>Currency: MMK</span>
             </h3>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-[11px] border-collapse">
+              <table className="a4-service-table w-full text-left text-[11px] border-collapse">
                 <thead>
                   <tr className={`border-b ${
                     isMono ? 'bg-slate-100 text-black border-slate-300' : 'bg-slate-50 text-slate-700 border-slate-200'
                   }`}>
-                    <th className="p-1.5 font-bold">Repair Item Description</th>
+                    <th className="p-1.5 font-bold">Repair Item</th>
                     <th className="p-1.5 text-right font-bold">Base Cost</th>
                     <th className="p-1.5 text-right font-bold">Discount</th>
+                    <th className="p-1.5 text-right font-bold">Warranty</th>
                     <th className="p-1.5 text-right font-bold">Subtotal</th>
                   </tr>
                 </thead>
                 <tbody className={`divide-y font-mono ${isMono ? 'divide-slate-200 text-black' : 'divide-slate-200'}`}>
-                  {workOrder.selectedRepairs.map((item) => (
+                  {printableRepairItems.map((item) => (
                     <tr key={item.id}>
                       <td className="p-1.5 font-sans font-semibold">{item.name}</td>
                       <td className="p-1.5 text-right">{item.basePrice.toLocaleString()} MMK</td>
                       <td className="p-1.5 text-right">{item.discountPercent}%</td>
+                      <td className="p-1.5 text-right">{workOrder.warrantyDays} Days</td>
                       <td className="p-1.5 text-right font-bold">{item.finalPrice.toLocaleString()} MMK</td>
                     </tr>
                   ))}
                 </tbody>
                 <tfoot>
                   <tr className={`border-t font-bold ${isMono ? 'border-black' : 'border-slate-800'}`}>
-                    <td colSpan={3} className="p-1.5 text-right font-sans text-xs">Estimated Total Charge:</td>
+                    <td colSpan={4} className="p-1.5 text-right font-sans text-xs">Estimated Total Charge:</td>
                     <td className={`p-1.5 text-right text-sm font-mono ${isMono ? 'text-black font-extrabold' : 'text-[#0071E3]'}`}>
                       {workOrder.subtotal.toLocaleString()} MMK
                     </td>
@@ -343,40 +322,32 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
           </div>
         )}
 
-        {/* Reported Symptoms */}
-        {workOrder.symptomsReported && (
-          <div className={`p-2 border rounded-xl space-y-0.5 text-[11px] ${
-            isMono ? 'bg-slate-100 border-slate-400 text-black' : 'bg-amber-50/70 border-amber-200 text-slate-800'
-          }`}>
-            <p className="font-bold text-black">Customer Reported Symptoms & Notes:</p>
-            <p className="italic text-slate-800">{workOrder.symptomsReported}</p>
-          </div>
-        )}
-
         {/* 21-POINT HARDWARE DIAGNOSTIC INSPECTION REPORT SECTION (CLEAN BORDERS, PASS/FAIL TEXT & ICONS) */}
         {showDiagnostics && (
-          <div className="space-y-2 pt-1 border-t border-slate-200">
+          <div className="a4-diagnostic-section space-y-2 pt-1 border-t border-slate-200">
             <div className={`flex flex-wrap justify-between items-center border-b pb-1 gap-1 ${
               isMono ? 'border-slate-400' : 'border-slate-200'
             }`}>
               <h3 className="font-extrabold text-xs text-black flex items-center space-x-1.5">
                 <ShieldCheck className={`w-4 h-4 ${isMono ? 'text-black' : 'text-[#34C759]'}`} />
-                <span>21-Point Hardware Diagnostic Checklist — 1. Before Intake vs 2. After QA Pass</span>
+                <span>{hasAfterQa ? '21-Point Hardware Diagnostic Checklist — Before Intake vs After QA Pass' : '21-Point Hardware Diagnostic Checklist — Before Intake'}</span>
               </h3>
               <div className="flex items-center space-x-2 text-[10px] font-bold font-mono">
                 <span className="bg-slate-50 text-slate-700 px-1.5 py-0.5 rounded border border-slate-300">
                   Before: {beforeDiagnosticList.filter(d => d.status === 'Pass').length}/21 Pass
                 </span>
-                <span className="bg-emerald-50 text-emerald-800 px-1.5 py-0.5 rounded border border-emerald-200">
-                  After QA: {afterDiagnosticList.filter(d => d.status === 'Pass').length}/21 Pass
-                </span>
+                {hasAfterQa && (
+                  <span className="bg-emerald-50 text-emerald-800 px-1.5 py-0.5 rounded border border-emerald-200">
+                    After QA: {afterDiagnosticList.filter(d => d.status === 'Pass').length}/21 Pass
+                  </span>
+                )}
               </div>
             </div>
 
             {/* FORMAT 1: COMPARISON TABLE */}
-            {diagDisplayFormat === 'comparison_table' && (
-              <div className="overflow-x-auto rounded-lg border border-slate-200">
-                <table className="w-full text-left text-[10px] border-collapse">
+            {effectiveDiagDisplayFormat === 'comparison_table' && hasAfterQa && (
+              <div className="a4-diagnostic-table overflow-x-auto rounded-lg border border-slate-200">
+                <table className="a4-diagnostic-table w-full text-left text-[10px] border-collapse">
                   <thead>
                     <tr className={`border-b text-[9.5px] uppercase font-mono ${
                       isMono ? 'bg-slate-100 text-black border-slate-300' : 'bg-slate-50 text-slate-700 border-slate-200'
@@ -410,7 +381,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
             )}
 
             {/* FORMAT 2: DUAL CARDS GRID (SIDE BY SIDE) */}
-            {diagDisplayFormat === 'dual_grid' && (
+            {effectiveDiagDisplayFormat === 'dual_grid' && hasAfterQa && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[10px]">
                 {/* BEFORE INTAKE PANEL */}
                 <div className={`p-2 rounded-xl border space-y-1.5 ${isMono ? 'bg-white border-slate-300' : 'bg-slate-50/60 border-slate-200'}`}>
@@ -447,24 +418,32 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
             )}
 
             {/* FORMAT 3: BEFORE INTAKE ONLY */}
-            {diagDisplayFormat === 'before_only' && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 text-[10px]">
+            {effectiveDiagDisplayFormat === 'before_only' && (
+              <div className="a4-diagnostic-grid grid grid-cols-1 gap-1.5 text-[10px]">
                 {beforeDiagnosticList.map((item, idx) => (
-                  <div key={item.name} className="p-1 rounded-lg border border-slate-200 bg-white flex items-center justify-between">
-                    <span className="font-semibold text-black truncate pr-1"><strong className="font-mono text-slate-400">{idx+1}.</strong> {item.name}</span>
-                    {renderDiagStatus(item.status, isMono)}
+                  <div key={item.name} className="a4-diagnostic-row min-h-[28px] p-1.5 rounded-lg border-0 border-b border-slate-200 bg-white grid grid-cols-[minmax(120px,0.8fr)_minmax(0,1.2fr)_auto] items-center gap-2">
+                    <span className="order-1 font-semibold text-black truncate pr-1"><strong className="font-mono text-slate-400">{idx+1}.</strong> {item.name}</span>
+                    {item.note && (
+                      <span className="order-2 border-l border-slate-200 pl-1 text-[8px] leading-tight text-slate-600 italic truncate" title={item.note}>Note: {item.note}</span>
+                    )}
+                    {!item.note && <span className="order-2 block h-[9px]" aria-hidden="true" />}
+                    <span className="order-3">{renderDiagStatus(item.status, isMono)}</span>
                   </div>
                 ))}
               </div>
             )}
 
             {/* FORMAT 4: AFTER QA ONLY */}
-            {diagDisplayFormat === 'after_only' && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 text-[10px]">
+            {effectiveDiagDisplayFormat === 'after_only' && hasAfterQa && (
+              <div className="a4-diagnostic-grid grid grid-cols-1 gap-1.5 text-[10px]">
                 {afterDiagnosticList.map((item, idx) => (
-                  <div key={item.name} className="p-1 rounded-lg border border-slate-200 bg-white flex items-center justify-between">
-                    <span className="font-semibold text-black truncate pr-1"><strong className="font-mono text-slate-400">{idx+1}.</strong> {item.name}</span>
-                    {renderDiagStatus(item.status, isMono)}
+                  <div key={item.name} className="a4-diagnostic-row min-h-[28px] p-1.5 rounded-lg border-0 border-b border-slate-200 bg-white grid grid-cols-[minmax(120px,0.8fr)_minmax(0,1.2fr)_auto] items-center gap-2">
+                    <span className="order-1 font-semibold text-black truncate pr-1"><strong className="font-mono text-slate-400">{idx+1}.</strong> {item.name}</span>
+                    {item.note && (
+                      <span className="order-2 border-l border-slate-200 pl-1 text-[8px] leading-tight text-slate-600 italic truncate" title={item.note}>Note: {item.note}</span>
+                    )}
+                    {!item.note && <span className="order-2 block h-[9px]" aria-hidden="true" />}
+                    <span className="order-3">{renderDiagStatus(item.status, isMono)}</span>
                   </div>
                 ))}
               </div>
@@ -472,25 +451,92 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
           </div>
         )}
 
-        {/* Signature & Disclaimer Footer */}
-        {showTerms && (
-          <div className={`pt-3 border-t space-y-2 text-[10px] ${
-            isMono ? 'border-slate-400 text-slate-800' : 'border-slate-300 text-slate-600'
-          }`}>
+        {/* Saved voucher text always prints. The A4 toggle only controls the
+            additional authorization line, not the user's own footer note. */}
+        <div className={`a4-terms pt-3 border-t space-y-1 text-[10px] ${
+          isMono ? 'border-slate-400 text-slate-800' : 'border-slate-300 text-slate-600'
+        }`}>
+          {showTerms && (
             <p className="leading-tight">
-              * <strong>Terms & Authorization:</strong> Customer authorizes {shopName} to perform diagnostics and hardware repairs. Please backup data prior to service. Replaced parts warrantied for {workOrder.warrantyDays} days under standard conditions.
+              * <strong>Terms & Authorization:</strong> {authorizationText}
             </p>
+          )}
+          <div
+            data-print-voucher-footer-text
+            className={`print-voucher-footer-text leading-tight font-medium whitespace-pre-wrap footer-text-${voucherFooterFontSize} ${voucherFooterPreviewSizeClass}`}
+          >
+            {voucherFooterLines.map((line, lineIndex) => {
+              const lineStart = voucherFooterLines.slice(0, lineIndex).reduce((offset, previousLine) => offset + previousLine.length + 1, 0);
+              const boundaries = [...new Set([lineStart, lineStart + line.length, ...voucherFooterTextSizeRanges.flatMap((range) => range.start < lineStart + line.length && range.end > lineStart ? [Math.max(lineStart, range.start), Math.min(lineStart + line.length, range.end)] : [])])].sort((a, b) => a - b);
+              return <p
+                key={`${lineIndex}-${line}`}
+                style={{ textAlign: voucherFooterLineAlignments[lineIndex] || voucherFooterTextAlign }}
+              >
+                {line ? boundaries.slice(0, -1).map((point, index) => {
+                  const next = boundaries[index + 1]; const size = voucherFooterTextSizeRanges.find((range) => range.start <= point && range.end >= next)?.size || voucherFooterFontSize;
+                  return <span key={`${point}-${next}`} className={`footer-text-${size}`}>{line.slice(point - lineStart, next - lineStart)}</span>;
+                }) : '\u00A0'}
+              </p>;
+            })}
           </div>
-        )}
+        </div>
+
       </div>
     );
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+    <div className="printable-print-root fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
       {/* Printable CSS style block with Black & White / Grayscale print overrides */}
       <style>{`
         @media print {
+          body > #root > .basic-ui {
+            display: block !important;
+            width: 100% !important;
+            height: auto !important;
+            min-height: 0 !important;
+            background: transparent !important;
+          }
+          /* The voucher can be opened from Settings, Intake, or Pipeline.
+             Keep its full ancestor path visible and hide every other main
+             descendant. This prevents the background screen and the ticket
+             inspector from leaking into the printed A4 document. */
+          body:has(.printable-print-root) .basic-ui > *:not(:has(.printable-print-root)):not(.printable-print-root):not(.printable-print-root *),
+          body:has(.printable-print-root) main *:not(:has(.printable-print-root)):not(.printable-print-root):not(.printable-print-root *) {
+            display: none !important;
+          }
+          .printable-print-root,
+          .printable-print-root .printable-modal-wrapper,
+          .printable-print-root #device-tag-printable-content {
+            width: 100% !important;
+            max-width: none !important;
+            min-width: 0 !important;
+          }
+          .printable-print-root,
+          #device-tag-printable-content {
+            display: block !important;
+            height: auto !important;
+            min-height: 0 !important;
+            max-height: none !important;
+            overflow: visible !important;
+          }
+          #device-tag-printable-content > * {
+            display: none !important;
+          }
+          #device-tag-printable-content > .printable-area,
+          #device-tag-printable-content > .printable-preview-stage,
+          #device-tag-printable-content > *:has(.printable-area) {
+            display: block !important;
+          }
+          #device-tag-printable-content > *:has(.printable-area) > .printable-area {
+            margin: 0 auto !important;
+          }
+          .printable-preview-stage {
+            padding: 0 !important;
+            min-height: 0 !important;
+            background: transparent !important;
+            border: none !important;
+          }
           nav, header, footer, aside, .no-print {
             display: none !important;
           }
@@ -543,9 +589,217 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
               print-color-adjust: exact !important;
             ` : ''}
           }
+          .tag-printable-area {
+            width: 76.2mm !important;
+            max-width: 76.2mm !important;
+            margin: 0 auto !important;
+          }
+          /* A4 vouchers are always print-condensed, even when the screen
+             preview uses Standard A4. This keeps the full 21-point list on
+             one physical A4 sheet without changing the on-screen layout. */
+          .a4-voucher-print {
+            padding: 2.5mm !important;
+            font-size: 8px !important;
+            line-height: 1.04 !important;
+          }
+          .a4-voucher-print > .a4-voucher-content > * + * {
+            margin-top: 3px !important;
+          }
+          .a4-voucher-print .a4-voucher-header {
+            gap: 4px !important;
+            padding-bottom: 3px !important;
+          }
+          .a4-voucher-print .a4-voucher-header h1 {
+            font-size: 12px !important;
+            line-height: 1 !important;
+          }
+          .a4-voucher-print .a4-voucher-header p {
+            font-size: 7px !important;
+            line-height: 1.05 !important;
+            margin: 1px 0 !important;
+          }
+          .a4-voucher-print .print-shop-logo {
+            width: 34px !important;
+            min-height: 34px !important;
+            max-height: 34px !important;
+          }
+          .a4-voucher-print .print-qr {
+            padding: 1px !important;
+          }
+          .a4-voucher-print .print-qr svg {
+            width: 34px !important;
+            height: 34px !important;
+          }
+          .a4-voucher-print .print-qr span {
+            font-size: 6px !important;
+            margin-top: 0 !important;
+          }
+          .a4-voucher-print .a4-info-card {
+            padding: 4px !important;
+            border-radius: 3px !important;
+            gap: 1px !important;
+          }
+          .a4-voucher-print .a4-info-card h3 {
+            font-size: 8px !important;
+            line-height: 1 !important;
+            padding-bottom: 2px !important;
+            margin-bottom: 1px !important;
+          }
+          .a4-voucher-print .a4-info-card p {
+            font-size: 7.5px !important;
+            line-height: 1.06 !important;
+            margin: 0 !important;
+          }
+          .a4-voucher-print .a4-service-section {
+            gap: 2px !important;
+          }
+          .a4-voucher-print .a4-service-section h3 {
+            font-size: 8px !important;
+            padding-bottom: 2px !important;
+          }
+          .a4-voucher-print .a4-service-table {
+            font-size: 7px !important;
+            line-height: 1.04 !important;
+          }
+          .a4-voucher-print .a4-service-table th,
+          .a4-voucher-print .a4-service-table td {
+            padding: 1.5px 2px !important;
+            line-height: 1.04 !important;
+          }
+          .a4-voucher-print .a4-diagnostic-section {
+            padding-top: 2px !important;
+            gap: 2px !important;
+          }
+          .a4-voucher-print .a4-diagnostic-section > div:first-child {
+            padding-bottom: 2px !important;
+            gap: 2px !important;
+          }
+          .a4-voucher-print .a4-diagnostic-section h3 {
+            font-size: 8px !important;
+            line-height: 1 !important;
+          }
+          .a4-voucher-print .a4-diagnostic-section h3 svg {
+            width: 10px !important;
+            height: 10px !important;
+          }
+          .a4-voucher-print .a4-diagnostic-section > div:first-child > div span {
+            font-size: 7px !important;
+            padding: 1px 3px !important;
+          }
+          .a4-voucher-print .a4-diagnostic-grid {
+            gap: 0 !important;
+          }
+          .a4-voucher-print .a4-diagnostic-row {
+            min-height: 12px !important;
+            padding: 1px 2px !important;
+            gap: 3px !important;
+            font-size: 7px !important;
+            line-height: 1 !important;
+            border: none !important;
+            border-bottom: 1px solid #d2d2d7 !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+          }
+          .a4-voucher-print .a4-diagnostic-row > span:nth-child(2) {
+            font-size: 6.5px !important;
+            line-height: 1 !important;
+            padding-left: 2px !important;
+          }
+          .a4-voucher-print .a4-diagnostic-row .inline-flex {
+            font-size: 7px !important;
+            line-height: 9px !important;
+            padding: 0 2px !important;
+          }
+          .a4-voucher-print .a4-diagnostic-row .inline-flex svg {
+            width: 7px !important;
+            height: 7px !important;
+          }
+          .a4-voucher-print .a4-diagnostic-table {
+            border: none !important;
+            font-size: 7px !important;
+            line-height: 1 !important;
+          }
+          .a4-voucher-print .a4-diagnostic-table th,
+          .a4-voucher-print .a4-diagnostic-table td {
+            padding: 1px 2px !important;
+            line-height: 1 !important;
+          }
+          .a4-voucher-print .a4-diagnostic-table tr {
+            height: 11px !important;
+            border-bottom: 1px solid #d2d2d7 !important;
+          }
+          .a4-voucher-print .a4-terms {
+            padding-top: 2px !important;
+            gap: 0 !important;
+            font-size: 7px !important;
+            line-height: 1.05 !important;
+          }
+          .a4-voucher-print .a4-terms p {
+            margin: 0 !important;
+          }
+          .a4-voucher-print .print-voucher-footer-text {
+            white-space: pre-wrap !important;
+          }
+          .a4-voucher-print .print-voucher-footer-text.footer-text-small {
+            font-size: 6.5px !important;
+          }
+          .a4-voucher-print .print-voucher-footer-text.footer-text-medium {
+            font-size: 7px !important;
+          }
+          .a4-voucher-print .print-voucher-footer-text.footer-text-large {
+            font-size: 8px !important;
+          }
+          .a4-voucher-print .print-voucher-footer-text .footer-text-small { font-size: 6.5px !important; }
+          .a4-voucher-print .print-voucher-footer-text .footer-text-medium { font-size: 7px !important; }
+          .a4-voucher-print .print-voucher-footer-text .footer-text-large { font-size: 8px !important; }
+          .a4-voucher-print tr,
+          .a4-voucher-print .a4-diagnostic-row {
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
+          }
+          .a4-print-compact {
+            font-size: 10px !important;
+            line-height: 1.15 !important;
+            zoom: 1 !important;
+          }
+          .a4-print-compact > div,
+          .a4-print-compact .space-y-5 > :not([hidden]) ~ :not([hidden]),
+          .a4-print-compact .space-y-4 > :not([hidden]) ~ :not([hidden]),
+          .a4-print-compact .space-y-3 > :not([hidden]) ~ :not([hidden]) {
+            margin-top: 3px !important;
+          }
+          .a4-print-compact table th,
+          .a4-print-compact table td {
+            padding: 3px !important;
+            line-height: 1.1 !important;
+          }
+          .a4-print-compact h1 { font-size: 14px !important; }
+          .a4-print-compact h3 { font-size: 10px !important; }
+          .a4-print-compact .a4-diagnostic-grid { gap: 0 !important; }
+          .a4-print-compact .a4-diagnostic-row {
+            min-height: 12px !important;
+            padding: 1px 2px !important;
+            gap: 3px !important;
+            font-size: 7px !important;
+            border: none !important;
+            border-bottom: 1px solid #d2d2d7 !important;
+            background: transparent !important;
+          }
+          .a4-print-compact .a4-diagnostic-table {
+            border: none !important;
+          }
+          .a4-print-compact .a4-diagnostic-table tr {
+            border-bottom: 1px solid #d2d2d7 !important;
+          }
+          .a4-print-compact .a4-diagnostic-table th,
+          .a4-print-compact .a4-diagnostic-table td {
+            border-left: none !important;
+            border-right: none !important;
+          }
+          .a4-print-compact .print-shop-logo { border: none !important; }
           @page {
             size: ${paperSize === 'a4_voucher' ? 'A4 portrait' : '3in 2in'};
-            margin: 6mm;
+            margin: ${paperSize === 'a4_voucher' ? '3.5mm' : '4mm'};
           }
         }
       `}</style>
@@ -557,7 +811,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
             <Printer className="w-5 h-5 text-[#0071E3]" />
             <div>
               <h2 className="text-sm font-extrabold text-[#1D1D1F]">Device Intake Print Voucher</h2>
-              <p className="text-[11px] text-[#86868B]">Customizable A4 Job Sheet & 3"x2" Sticker Tag</p>
+              <p className="text-[11px] text-[#86868B]">A4 Job Sheet & 3"x2" Sticker Tag · Layout set in System Management</p>
             </div>
           </div>
 
@@ -588,20 +842,6 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
               </button>
             </div>
 
-            {/* Customization Settings Toggle Button */}
-            <button
-              type="button"
-              onClick={() => setShowA4SettingsPanel(!showA4SettingsPanel)}
-              className={`h-9 px-3 rounded-xl border font-bold text-xs flex items-center space-x-1.5 transition-all ${
-                showA4SettingsPanel
-                  ? 'bg-[#0071E3] text-white border-[#0071E3]'
-                  : 'bg-[#F5F5F7] text-[#1D1D1F] border-[#E5E5EA] hover:bg-[#E5E5EA]'
-              }`}
-            >
-              <Sliders className="w-3.5 h-3.5 shrink-0" />
-              <span>Customize Settings</span>
-            </button>
-
             <button
               type="button"
               onClick={onClose}
@@ -612,146 +852,16 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
           </div>
         </div>
 
-        {/* Collapsible Settings Customization Drawer */}
-        {showA4SettingsPanel && (
-          <div className="bg-[#F8FBFD] p-3.5 rounded-xl border border-[#0071E3]/30 space-y-3 text-xs shrink-0 no-print animate-in fade-in duration-150">
-            <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-2">
-              <span className="font-extrabold text-[#1D1D1F] flex items-center space-x-1.5">
-                <Sliders className="w-3.5 h-3.5 text-[#0071E3]" />
-                <span>Print Voucher & Layout Customization Settings</span>
-              </span>
-              <span className="text-[10px] text-[#86868B]">Changes apply immediately to preview and print output</span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-              {/* Color Mode & Theme Selector */}
-              <div>
-                <label className="text-[11px] font-bold text-[#1D1D1F] block mb-1 flex items-center space-x-1">
-                  <Palette className="w-3 h-3 text-[#0071E3]" />
-                  <span>Color Mode</span>
-                </label>
-                <div className="grid grid-cols-2 gap-1 bg-white p-0.5 rounded-lg border border-[#D2D2D7]">
-                  <button
-                    type="button"
-                    onClick={() => setA4ColorMode('color')}
-                    className={`py-1 flex items-center justify-center space-x-1 text-[11px] font-bold rounded-md transition-all ${
-                      a4ColorMode === 'color' ? 'bg-[#0071E3] text-white' : 'text-[#86868B] hover:text-[#1D1D1F]'
-                    }`}
-                  >
-                    <Palette className="w-3 h-3 shrink-0" />
-                    <span>Color</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setA4ColorMode('monochrome')}
-                    className={`py-1 flex items-center justify-center space-x-1 text-[11px] font-bold rounded-md transition-all ${
-                      a4ColorMode === 'monochrome' ? 'bg-black text-white' : 'text-[#86868B] hover:text-[#1D1D1F]'
-                    }`}
-                  >
-                    <CircleDot className="w-3 h-3 shrink-0" />
-                    <span>Grey Mode</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Layout Density Selector */}
-              <div>
-                <label className="text-[11px] font-bold text-[#1D1D1F] block mb-1 flex items-center space-x-1">
-                  <Layout className="w-3 h-3 text-[#0071E3]" />
-                  <span>A4 Sheet Layout</span>
-                </label>
-                <select
-                  value={a4LayoutDensity}
-                  onChange={(e) => setA4LayoutDensity(e.target.value as any)}
-                  className="w-full bg-white text-[#1D1D1F] font-bold px-2 py-1.5 rounded-lg border border-[#D2D2D7] text-xs focus:outline-none"
-                >
-                  <option value="standard">Standard Single A4 Page</option>
-                  <option value="compact">Compact Single A4 Page</option>
-                  <option value="dual_voucher">Dual Voucher (Cust + Shop Copy)</option>
-                </select>
-              </div>
-
-              {/* 21 Diag Format Selector */}
-              <div>
-                <label className="text-[11px] font-bold text-[#1D1D1F] block mb-1 flex items-center space-x-1">
-                  <ShieldCheck className="w-3 h-3 text-[#0071E3]" />
-                  <span>21 Diag Print Format</span>
-                </label>
-                <select
-                  value={diagDisplayFormat}
-                  onChange={(e) => setDiagDisplayFormat(e.target.value as any)}
-                  className="w-full bg-white text-[#1D1D1F] font-bold px-2 py-1.5 rounded-lg border border-[#D2D2D7] text-xs focus:outline-none"
-                >
-                  <option value="comparison_table">Before vs After Table</option>
-                  <option value="dual_grid">Before & After Dual Cards</option>
-                  <option value="before_only">Before Repair Only</option>
-                  <option value="after_only">After QA Pass Only</option>
-                </select>
-              </div>
-
-              {/* Custom Header Subtitle */}
-              <div>
-                <label className="text-[11px] font-bold text-[#1D1D1F] block mb-1 flex items-center space-x-1">
-                  <Building2 className="w-3 h-3 text-[#0071E3]" />
-                  <span>Voucher Header Subtitle</span>
-                </label>
-                <input
-                  type="text"
-                  value={customHeaderNote}
-                  onChange={(e) => setCustomHeaderNote(e.target.value)}
-                  className="w-full bg-white text-[#1D1D1F] font-semibold px-2 py-1.5 rounded-lg border border-[#D2D2D7] text-xs focus:outline-none"
-                />
-              </div>
-            </div>
-
-            {/* Toggle Section Display Switches */}
-            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[#E5E5EA]">
-              <button
-                type="button"
-                onClick={() => setShowDiagnostics(!showDiagnostics)}
-                className={`px-2.5 py-1 rounded-lg font-bold text-[11px] border flex items-center space-x-1 transition-all ${
-                  showDiagnostics ? 'bg-emerald-50 text-emerald-800 border-emerald-300' : 'bg-slate-100 text-slate-500 border-slate-200'
-                }`}
-              >
-                {showDiagnostics ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-                <span>21-Point Diagnostics ({showDiagnostics ? 'SHOW' : 'HIDE'})</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setShowPricing(!showPricing)}
-                className={`px-2.5 py-1 rounded-lg font-bold text-[11px] border flex items-center space-x-1 transition-all ${
-                  showPricing ? 'bg-emerald-50 text-emerald-800 border-emerald-300' : 'bg-slate-100 text-slate-500 border-slate-200'
-                }`}
-              >
-                {showPricing ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-                <span>Repair Costs ({showPricing ? 'SHOW' : 'HIDE'})</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setShowTerms(!showTerms)}
-                className={`px-2.5 py-1 rounded-lg font-bold text-[11px] border flex items-center space-x-1 transition-all ${
-                  showTerms ? 'bg-emerald-50 text-emerald-800 border-emerald-300' : 'bg-slate-100 text-slate-500 border-slate-200'
-                }`}
-              >
-                {showTerms ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-                <span>Terms & Notes ({showTerms ? 'SHOW' : 'HIDE'})</span>
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Scrollable Printable Document Preview */}
         <div id="device-tag-printable-content" className="printable-modal-scroll flex-1 overflow-y-auto pr-1 space-y-4">
           {paperSize === '3x2_tag' ? (
             /* ---------------- 3x2 MONOCHROME STICKER TAG PREVIEW (CENTERED STAGE) ---------------- */
-            <div className="flex flex-col items-center justify-center p-6 bg-slate-100/70 border border-dashed border-slate-300 rounded-2xl min-h-[380px]">
+            <div className="printable-preview-stage flex flex-col items-center justify-center p-6 bg-slate-100/70 border border-dashed border-slate-300 rounded-2xl min-h-[380px]">
               <div className="mb-3 flex items-center space-x-2 text-[11px] font-bold text-slate-600 bg-white px-3 py-1 rounded-full border border-slate-200 shadow-2xs">
                 <QrCode className="w-3.5 h-3.5 text-[#0071E3]" />
                 <span>3" × 2" Device Sticker Tag Preview</span>
               </div>
-              <div className="printable-area bg-white text-black p-4 rounded-xl border-2 border-black font-sans space-y-2 select-none max-w-sm w-full shadow-md">
+              <div className="printable-area tag-printable-area bg-white text-black p-4 rounded-xl border-2 border-black font-sans space-y-2 select-none max-w-sm w-full shadow-md">
                 <div className="flex justify-between items-start border-b-2 border-black pb-1">
                   <div className="flex items-center space-x-1.5">
                     {shopLogoUrl && (
@@ -799,7 +909,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
             </div>
           ) : (
             /* ---------------- A4 JOB SHEET PREVIEW (STANDARD / COMPACT / DUAL) ---------------- */
-            <div className={`printable-area bg-white text-black p-5 sm:p-6 rounded-2xl border font-sans space-y-5 shadow-xs transition-all ${
+            <div className={`printable-area a4-voucher-print ${a4LayoutDensity === 'compact' ? 'a4-print-compact' : ''} bg-white text-black p-5 sm:p-6 rounded-2xl border font-sans space-y-5 shadow-xs transition-all ${
               a4ColorMode === 'monochrome' ? 'border-black grayscale contrast-105' : 'border-[#E5E5EA]'
             }`}>
               {a4LayoutDensity === 'dual_voucher' ? (
@@ -856,7 +966,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
               }`}
             >
               <Printer className="w-4 h-4" />
-              <span>Print {paperSize === 'a4_voucher' ? 'A4 Job Voucher' : 'Tag Sticker'}</span>
+              <span>{paperSize === 'a4_voucher' ? 'Print / Save PDF' : 'Print Tag Sticker'}</span>
             </button>
           </div>
         </div>

@@ -4,7 +4,7 @@ import {
   Search, 
   ShieldCheck, 
   Smartphone, 
-  Wrench, 
+  ListChecks, 
   SlidersHorizontal, 
   Download, 
   Plus, 
@@ -232,7 +232,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
       };
     }
     return {
-      icon: Wrench,
+      icon: ListChecks,
       color: 'text-slate-600',
       bg: 'bg-slate-100 border-slate-200',
     };
@@ -477,7 +477,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3.5 pb-8 pt-0.5 px-0.5">
             {availableRepairItems.length === 0 ? (
               <div className="col-span-full bg-white border border-[#E5E5EA] rounded-2xl p-10 text-center text-[#86868B]">
-                <Wrench className="w-8 h-8 mx-auto mb-2 opacity-40 text-[#0071E3]" />
+                <ListChecks className="w-8 h-8 mx-auto mb-2 opacity-40 text-[#0071E3]" />
                 <p className="font-extrabold text-xs text-[#1D1D1F]">No services found for {selectedDevice}</p>
                 <p className="text-[11px] text-[#86868B] mt-1">Try searching another term or choose a different model.</p>
               </div>

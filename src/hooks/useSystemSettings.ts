@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { subscribeToCollection, saveDocument } from '../lib/firebase';
+import { subscribeToCollection, saveDocument } from '../lib/supabase';
 
 export interface SystemSettings {
   // Business Profile
@@ -77,7 +77,7 @@ export function useSystemSettings() {
     return DEFAULT_SYSTEM_SETTINGS;
   });
 
-  // Subscribe to live settings document in Firestore
+  // Subscribe to live settings document in Supabase.
   useEffect(() => {
     const unsub = subscribeToCollection<SystemSettings & { id: string }>(
       'systemSettings',

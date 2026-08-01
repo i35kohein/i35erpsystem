@@ -154,10 +154,10 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-[#E5E5EA] shadow-xs">
-        <div>
+        <div className="module-subheader">
           <h1 className="text-lg font-bold text-[#1D1D1F] flex items-center space-x-2">
             <Truck className="w-5 h-5 text-[#0071E3]" />
             <span>Supplier Purchase Orders & Defective RMA Returns</span>

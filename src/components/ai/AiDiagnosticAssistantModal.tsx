@@ -1,170 +1,314 @@
-import React, { useState } from 'react';
-import { 
-  Sparkles, 
-  X, 
-  Cpu, 
-  Activity, 
-  CircleDot, 
-  ShieldAlert, 
-  CheckCircle2, 
-  AlertTriangle,
-  Send
-} from 'lucide-react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
+import { Bot, Send, Sparkles, X, AlertTriangle, PackageSearch, PhoneCall, Activity, Settings2 } from 'lucide-react';
+import { Customer, PartItem, Supplier, SystemSettings, Technician, WorkOrder } from '../../types';
+
+type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string };
 
 interface AiDiagnosticAssistantModalProps {
   isOpen: boolean;
   onClose: () => void;
+  workOrders: WorkOrder[];
+  parts: PartItem[];
+  customers: Customer[];
+  technicians: Technician[];
+  suppliers: Supplier[];
+  systemSettings: SystemSettings;
+  onOpenAiSettings: () => void;
 }
+
+const QUICK_PROMPTS = [
+  { label: 'Bottlenecks', prompt: 'What are the current repair bottlenecks?', icon: AlertTriangle },
+  { label: 'Top parts', prompt: 'Which parts are top selling or most used?', icon: PackageSearch },
+  { label: 'Follow-ups', prompt: 'Which devices or customers need follow-up?', icon: PhoneCall },
+  { label: 'Daily brief', prompt: 'Give me a concise operations brief and priorities.', icon: Activity },
+];
 
 export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProps> = ({
   isOpen,
   onClose,
+  workOrders,
+  parts,
+  customers,
+  technicians,
+  suppliers,
+  systemSettings,
+  onOpenAiSettings,
 }) => {
-  const [deviceModel, setDeviceModel] = useState('iPhone 13 Pro');
-  const [symptoms, setSymptoms] = useState('No power after liquid contact. Consumes 0.000A on DC Power Supply. iTunes Error 4013.');
-  const [panicLog, setPanicLog] = useState('panic(cpu 0 caller 0xfffffff011a0c410): "i2c0 bus failure / prst0 thermal sensor timed out"');
+  const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [diagnosisResult, setDiagnosisResult] = useState<any>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      id: 'welcome',
+      role: 'assistant',
+      content: 'I can analyze this shop’s live tickets, bottlenecks, parts usage, stock, follow-ups, technicians, customers, suppliers, and finance. What should we check?',
+    },
+  ]);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  if (!isOpen) return null;
+  const context = useMemo(() => {
+    const now = Date.now();
+    const active = workOrders.filter((order) => !['Finished', 'Taken Out', 'Cant Repair', 'Customer Not Repair'].includes(order.status));
+    const bottlenecks = active
+      .map((order) => {
+        const ageHours = Math.floor((now - new Date(order.updatedAt || order.createdAt).getTime()) / 3_600_000);
+        return { ...order, ageHours };
+      })
+      .filter((order) => order.ageHours >= 48)
+      .sort((a, b) => b.ageHours - a.ageHours)
+      .slice(0, 15)
+      .map((order) => ({
+        ticket: order.orderNumber,
+        device: order.deviceModel,
+        customer: order.customerName,
+        status: order.status,
+        technician: order.assignedTechName || 'Unassigned',
+        hoursWithoutUpdate: order.ageHours,
+        priority: order.priority,
+      }));
 
-  const handleAnalyze = async () => {
+    const partUsage = new Map<string, { name: string; quantity: number; revenue: number }>();
+    workOrders.forEach((order) =>
+      order.lineItems?.filter((item) => !item.isLabor).forEach((item) => {
+        const key = item.partId || item.partName || item.description;
+        const current = partUsage.get(key) || { name: item.partName || item.description, quantity: 0, revenue: 0 };
+        current.quantity += item.quantity;
+        current.revenue += item.unitPrice * item.quantity;
+        partUsage.set(key, current);
+      })
+    );
+
+    const followUps = workOrders
+      .filter((order) => ['Finished', 'Taken Out'].includes(order.status))
+      .filter((order) => !['Satisfied', 'Closed'].includes(order.followUpStatus || ''))
+      .map((order) => ({
+        ticket: order.orderNumber,
+        customer: order.customerName,
+        phone: order.customerPhone,
+        device: order.deviceModel,
+        completedAt: order.updatedAt,
+        followUpStatus: order.followUpStatus || 'Pending Call',
+      }))
+      .slice(0, 20);
+
+    return {
+      generatedAt: new Date().toISOString(),
+      summary: {
+        totalTickets: workOrders.length,
+        activeTickets: active.length,
+        completedTickets: workOrders.filter((order) => ['Finished', 'Taken Out'].includes(order.status)).length,
+        unpaidTickets: workOrders.filter((order) => !order.isPaid).length,
+        customers: customers.length,
+        suppliers: suppliers.length,
+      },
+      statusCounts: Object.fromEntries(
+        ['Receive', 'In Progress', 'Pending', 'Finished', 'Taken Out', 'Cant Repair', 'Customer Not Repair'].map((status) => [
+          status,
+          workOrders.filter((order) => order.status === status).length,
+        ])
+      ),
+      bottlenecks,
+      topUsedParts: [...partUsage.values()].sort((a, b) => b.quantity - a.quantity).slice(0, 10),
+      lowStockParts: parts
+        .filter((part) => part.quantityInStock <= part.reorderPoint)
+        .map((part) => ({
+          sku: part.sku,
+          name: part.name,
+          stock: part.quantityInStock,
+          reserved: part.reservedQuantity,
+          reorderPoint: part.reorderPoint,
+          supplier: part.supplierName,
+        }))
+        .slice(0, 20),
+      followUps,
+      technicianLoad: technicians.map((tech) => ({
+        name: tech.name,
+        status: tech.status,
+        activeJobs: active.filter((order) => order.assignedTechId === tech.id).length,
+        warrantyReturns: tech.warrantyReturnCount,
+      })),
+      finance: {
+        totalRevenue: workOrders.filter((order) => order.isPaid).reduce((sum, order) => sum + order.totalAmount, 0),
+        outstanding: workOrders.reduce((sum, order) => sum + Math.max(0, order.totalAmount - (order.paidAmount || 0)), 0),
+      },
+    };
+  }, [workOrders, parts, customers, technicians, suppliers]);
+
+  useEffect(() => {
+    if (isOpen) requestAnimationFrame(() => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight }));
+  }, [messages, isOpen]);
+
+  const localAnswer = (question: string) => {
+    const normalized = question.toLowerCase();
+    if (normalized.includes('bottleneck') || normalized.includes('stuck') || normalized.includes('delay')) {
+      if (!context.bottlenecks.length) return 'No active ticket has gone 48 hours without an update. The repair pipeline currently has no aging bottleneck.';
+      return `There are ${context.bottlenecks.length} aging tickets:\n${context.bottlenecks
+        .slice(0, 8)
+        .map((item) => `• ${item.ticket} — ${item.device}, ${item.status}, ${item.hoursWithoutUpdate}h, ${item.technician}`)
+        .join('\n')}`;
+    }
+    if (normalized.includes('part') || normalized.includes('selling') || normalized.includes('stock')) {
+      const top = context.topUsedParts.length
+        ? context.topUsedParts.map((item, index) => `${index + 1}. ${item.name}: ${item.quantity} used`).join('\n')
+        : 'No non-labor part usage is recorded yet.';
+      const low = context.lowStockParts.length
+        ? `\n\nLow stock:\n${context.lowStockParts.slice(0, 8).map((item) => `• ${item.name}: ${item.stock} available (reorder at ${item.reorderPoint})`).join('\n')}`
+        : '\n\nNo parts are currently at or below their reorder point.';
+      return `Top used parts:\n${top}${low}`;
+    }
+    if (normalized.includes('follow') || normalized.includes('call') || normalized.includes('customer')) {
+      if (!context.followUps.length) return 'No completed device currently requires a follow-up.';
+      return `${context.followUps.length} completed devices need follow-up:\n${context.followUps
+        .slice(0, 10)
+        .map((item) => `• ${item.ticket} — ${item.customer}, ${item.device}, ${item.followUpStatus}`)
+        .join('\n')}`;
+    }
+    if (
+      normalized.includes('finance') ||
+      normalized.includes('revenue') ||
+      normalized.includes('balance') ||
+      normalized.includes('unpaid') ||
+      normalized.includes('money')
+    ) {
+      const collectionPriority =
+        context.finance.outstanding > 0
+          ? `Priority: review and collect the ${context.finance.outstanding.toLocaleString()} ${systemSettings.currencySymbol} outstanding balance across ${context.summary.unpaidTickets} unpaid ticket(s).`
+          : 'No outstanding repair balance requires collection.';
+      return `Finance summary:\n• Paid revenue: ${context.finance.totalRevenue.toLocaleString()} ${systemSettings.currencySymbol}.\n• Outstanding balance: ${context.finance.outstanding.toLocaleString()} ${systemSettings.currencySymbol}.\n• Unpaid tickets: ${context.summary.unpaidTickets}.\n\n${collectionPriority}`;
+    }
+    return `Shop brief:\n• ${context.summary.activeTickets} active tickets; ${context.summary.completedTickets} completed.\n• ${context.bottlenecks.length} ticket(s) aging over 48 hours.\n• ${context.followUps.length} completed device(s) need follow-up.\n• ${context.lowStockParts.length} part(s) are at or below reorder level.\n• Paid revenue: ${context.finance.totalRevenue.toLocaleString()} ${systemSettings.currencySymbol}.\n• Outstanding balance: ${context.finance.outstanding.toLocaleString()} ${systemSettings.currencySymbol}.\n\nAsk about bottlenecks, top parts, stock, follow-ups, technicians, or finance for details.`;
+  };
+
+  const sendMessage = async (question = input) => {
+    const trimmed = question.trim();
+    if (!trimmed || isLoading) return;
+    const userMessage: ChatMessage = { id: `user-${Date.now()}`, role: 'user', content: trimmed };
+    const nextMessages = [...messages, userMessage];
+    setMessages(nextMessages);
+    setInput('');
     setIsLoading(true);
+
     try {
-      const res = await fetch('/api/gemini/diagnose', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          deviceModel,
-          symptoms,
-          panicLog,
-        }),
-      });
-      const data = await res.json();
-      if (data.success && data.diagnosis) {
-        setDiagnosisResult(data.diagnosis);
+      let answer: string;
+      if (!systemSettings.aiProvider || systemSettings.aiProvider === 'local') {
+        answer = localAnswer(trimmed);
       } else {
-        alert(data.error || 'Diagnostic assistant failed.');
+        const response = await fetch('/api/ai/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            provider: systemSettings.aiProvider,
+            apiKey: systemSettings.aiApiKey,
+            model: systemSettings.aiModel,
+            baseUrl: systemSettings.aiBaseUrl,
+            systemPrompt: systemSettings.aiSystemPrompt,
+            messages: nextMessages.filter((message) => message.id !== 'welcome').map(({ role, content }) => ({ role, content })),
+            context,
+          }),
+        });
+        const responseText = await response.text();
+        let data: { success?: boolean; answer?: string; error?: string } = {};
+        if (responseText.trim()) {
+          try {
+            data = JSON.parse(responseText);
+          } catch {
+            throw new Error(`AI service returned an invalid response (HTTP ${response.status}).`);
+          }
+        } else {
+          throw new Error(
+            response.status === 404
+              ? 'AI service is not ready. Restart the local server once, then try again.'
+              : `AI service returned no response (HTTP ${response.status}).`
+          );
+        }
+        if (!response.ok || !data.success) throw new Error(data.error || `AI provider request failed (HTTP ${response.status}).`);
+        if (!data.answer) throw new Error('The AI provider returned an empty answer.');
+        answer = data.answer;
       }
-    } catch (err) {
-      console.error(err);
-      alert('Error communicating with Gemini AI diagnostic endpoint.');
+      setMessages((current) => [...current, { id: `assistant-${Date.now()}`, role: 'assistant', content: answer }]);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'AI provider request failed.';
+      setMessages((current) => [
+        ...current,
+        { id: `assistant-${Date.now()}`, role: 'assistant', content: `${message}\n\nLocal analysis:\n${localAnswer(trimmed)}` },
+      ]);
     } finally {
       setIsLoading(false);
     }
   };
 
+  if (!isOpen) return null;
+
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white border border-[#E5E5EA] rounded-2xl max-w-2xl w-full p-6 space-y-4 text-xs shadow-2xl relative max-h-[90vh] overflow-y-auto">
-        <button
-          onClick={onClose}
-          className="absolute right-4 top-4 text-[#86868B] hover:text-[#1D1D1F] p-1 rounded-full hover:bg-[#F5F5F7] transition-colors"
-        >
-          <X className="w-5 h-5" />
-        </button>
-
-        {/* Header */}
-        <div className="flex items-center space-x-3 border-b border-[#E5E5EA] pb-3">
-          <div className="p-2.5 bg-[#AF52DE] rounded-xl text-white shadow-xs">
-            <Sparkles className="w-5 h-5 text-amber-200" />
+    <>
+      <button type="button" aria-label="Close AI Assistant" onClick={onClose} className="fixed inset-0 z-40 bg-black/10 cursor-default" />
+      <aside className="fixed right-0 top-[52px] bottom-0 z-50 w-full sm:w-[420px] bg-white border-l border-[#E5E5EA] shadow-2xl flex flex-col">
+        <div className="h-14 px-4 border-b border-[#E5E5EA] flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 bg-[#0071E3] text-white flex items-center justify-center rounded-lg"><Bot className="w-4.5 h-4.5" /></div>
+            <div className="min-w-0">
+              <h2 className="text-sm font-extrabold text-[#1D1D1F]">ERP Operations Assistant</h2>
+              <p className="text-[10px] text-[#86868B] truncate">
+                {systemSettings.aiProvider === 'local' || !systemSettings.aiProvider ? 'Local live-data analysis' : `${systemSettings.aiProvider} · ${systemSettings.aiModel || 'default model'}`}
+              </p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-base font-bold text-[#1D1D1F]">Apple Certified AI Panic Log & Diagnostic Assistant</h2>
-            <p className="text-[#86868B] text-[11px]">Powered by Gemini 3.6 Flash for micro-soldering, diode readings, and error code troubleshooting</p>
+          <div className="flex items-center gap-1">
+            <button type="button" onClick={onOpenAiSettings} title="AI Provider Settings" className="p-2 text-[#86868B] hover:text-[#0071E3] hover:bg-[#F5F5F7] rounded-lg"><Settings2 className="w-4 h-4" /></button>
+            <button type="button" onClick={onClose} title="Close Assistant" className="p-2 text-[#86868B] hover:text-[#1D1D1F] hover:bg-[#F5F5F7] rounded-lg"><X className="w-4 h-4" /></button>
           </div>
         </div>
 
-        {/* Form Inputs */}
-        <div className="space-y-3 bg-[#F5F5F7]/80 p-4 rounded-xl border border-[#E5E5EA]">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[#86868B] font-bold mb-1">Device Model:</label>
-              <input
-                type="text"
-                value={deviceModel}
-                onChange={(e) => setDeviceModel(e.target.value)}
-                className="w-full bg-white border border-[#E5E5EA] rounded-lg p-2 text-[#1D1D1F] focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
-              />
-            </div>
-
-            <div>
-              <label className="block text-[#86868B] font-bold mb-1">Symptoms / Error Code:</label>
-              <input
-                type="text"
-                value={symptoms}
-                onChange={(e) => setSymptoms(e.target.value)}
-                className="w-full bg-white border border-[#E5E5EA] rounded-lg p-2 text-[#1D1D1F] focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-[#86868B] font-bold mb-1">Panic Log / Thermal Camera / Multimeter Notes:</label>
-            <textarea
-              rows={2}
-              value={panicLog}
-              onChange={(e) => setPanicLog(e.target.value)}
-              className="w-full bg-white border border-[#E5E5EA] rounded-lg p-2 text-[#1D1D1F] font-mono focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
-            />
-          </div>
-
-          <button
-            onClick={handleAnalyze}
-            disabled={isLoading}
-            className="w-full py-2.5 bg-[#AF52DE] hover:bg-purple-600 text-white font-bold rounded-xl flex items-center justify-center space-x-2 shadow-xs transition-all active:scale-95"
-          >
-            <Sparkles className="w-4 h-4 text-amber-200" />
-            <span>{isLoading ? 'Gemini AI Analyzing Diode Rails & Panic Logs...' : 'Generate AI Diagnostic Breakdown'}</span>
-          </button>
+        <div className="px-3 py-2.5 border-b border-[#E5E5EA] flex gap-1.5 overflow-x-auto no-scrollbar shrink-0">
+          {QUICK_PROMPTS.map(({ label, prompt, icon: Icon }) => (
+            <button key={label} type="button" onClick={() => sendMessage(prompt)} className="px-2.5 py-1.5 bg-[#F5F5F7] border border-[#E5E5EA] text-[#1D1D1F] rounded-lg text-[10px] font-bold flex items-center gap-1.5 shrink-0">
+              <Icon className="w-3.5 h-3.5 text-[#0071E3]" /> {label}
+            </button>
+          ))}
         </div>
 
-        {/* AI Output Result Card */}
-        {diagnosisResult && (
-          <div className="space-y-3 bg-[#F5F5F7]/80 p-4 rounded-xl border border-[#AF52DE]/30 text-[#1D1D1F]">
-            <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-2">
-              <span className="font-bold text-[#AF52DE] uppercase tracking-wider text-[11px]">
-                AI Hardware Analysis Output
-              </span>
-              <span className="bg-purple-50 text-purple-700 border border-purple-200 font-bold px-2 py-0.5 rounded text-[10px]">
-                {diagnosisResult.estimatedDifficulty || 'Level 3 Micro-Soldering'}
-              </span>
-            </div>
-
-            {/* Suspected Issues */}
-            <div className="space-y-1">
-              <strong className="text-[#D97706]">Suspected Hardware Failures:</strong>
-              <ul className="list-disc list-inside space-y-0.5 text-[#1D1D1F]">
-                {diagnosisResult.suspectedIssues?.map((iss: string, idx: number) => (
-                  <li key={idx}>{iss}</li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Diode Test Points */}
-            <div className="space-y-1">
-              <strong className="text-[#0071E3]">Multimeter Diode Mode Test Points:</strong>
-              <div className="bg-white p-2.5 rounded-lg border border-[#E5E5EA] font-mono text-[11px] space-y-1 text-[#1D1D1F]">
-                {diagnosisResult.diodeTestPoints?.map((tp: string, idx: number) => (
-                  <p key={idx}>• {tp}</p>
-                ))}
+        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-[var(--bg)]">
+          {messages.map((message) => (
+            <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div className={`max-w-[88%] px-3 py-2.5 text-xs leading-relaxed whitespace-pre-wrap border ${
+                message.role === 'user'
+                  ? 'bg-[#0071E3] text-white border-[#0071E3] rounded-2xl rounded-br-md'
+                  : 'bg-white text-[#1D1D1F] border-[#E5E5EA] rounded-2xl rounded-bl-md'
+              }`}>
+                {message.content}
               </div>
             </div>
-
-            {/* Recommended Action */}
-            <div className="space-y-1">
-              <strong className="text-[#28A745]">Recommended Repair Action:</strong>
-              <p className="text-[#1D1D1F]">{diagnosisResult.recommendedAction}</p>
+          ))}
+          {isLoading && (
+            <div className="flex justify-start">
+              <div className="px-3 py-2.5 bg-white border border-[#E5E5EA] rounded-2xl rounded-bl-md text-xs text-[#86868B] flex items-center gap-2">
+                <Sparkles className="w-3.5 h-3.5 text-[#0071E3]" /> Analyzing live ERP data…
+              </div>
             </div>
+          )}
+        </div>
 
-            {/* Customer Explanation */}
-            <div className="p-3 bg-white rounded-lg border border-[#E5E5EA] text-[#1D1D1F]">
-              <span className="text-[#86868B] font-bold block mb-0.5">Suggested Customer Summary:</span>
-              <p className="italic">"{diagnosisResult.clientExplanation}"</p>
-            </div>
+        <form onSubmit={(event) => { event.preventDefault(); sendMessage(); }} className="p-3 border-t border-[#E5E5EA] bg-white shrink-0">
+          <div className="flex items-end gap-2">
+            <textarea
+              value={input}
+              onChange={(event) => setInput(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                  event.preventDefault();
+                  sendMessage();
+                }
+              }}
+              rows={2}
+              placeholder="Ask about tickets, parts, follow-ups, finance…"
+              className="flex-1 min-h-[42px] max-h-28 resize-none border border-[#E5E5EA] bg-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#0071E3]"
+            />
+            <button type="submit" disabled={!input.trim() || isLoading} title="Send Message" className="w-10 h-10 bg-[#0071E3] text-white rounded-xl flex items-center justify-center disabled:opacity-40">
+              <Send className="w-4 h-4" />
+            </button>
           </div>
-        )}
-      </div>
-    </div>
+          <p className="mt-1.5 text-[9px] text-[#86868B] text-center">Uses current ERP records. Verify critical decisions before acting.</p>
+        </form>
+      </aside>
+    </>
   );
 };

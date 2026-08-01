@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Wifi, WifiOff, RefreshCw, Database, CheckCircle2, AlertTriangle, CloudUpload, ShieldCheck } from 'lucide-react';
-import { syncOfflineQueueToFirestore } from '../../lib/firebase';
+import { syncOfflineQueueToSupabase } from '../../lib/supabase';
 import { idbGetSyncQueue, idbGetAll, STORES } from '../../lib/indexedDB';
 
 interface SyncStatusDetail {
@@ -61,7 +61,7 @@ export const OfflineSyncStatusBadge: React.FC = () => {
   };
 
   const handleManualSync = async () => {
-    const res = await syncOfflineQueueToFirestore();
+    await syncOfflineQueueToSupabase();
     loadModalStats();
   };
 
@@ -71,38 +71,47 @@ export const OfflineSyncStatusBadge: React.FC = () => {
       <button
         type="button"
         onClick={handleOpenModal}
-        className={`px-2.5 py-1 rounded-full text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shadow-2xs ${
+        className={`relative inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors cursor-pointer ${
           !status.isOnline
-            ? 'bg-amber-500 text-white animate-pulse ring-2 ring-amber-300'
+            ? 'bg-amber-500 text-white ring-2 ring-amber-300'
             : status.pendingCount > 0
             ? 'bg-indigo-600 text-white'
             : status.isSyncing
             ? 'bg-purple-600 text-white'
             : 'bg-emerald-50 text-emerald-800 border border-emerald-200/80 hover:bg-emerald-100/80'
         }`}
-        title="Click to view IndexedDB Offline Storage & Sync Queue"
+        title={
+          !status.isOnline
+            ? `Offline — ${status.pendingCount} saved`
+            : status.isSyncing
+              ? `Syncing ${status.pendingCount} change(s)`
+              : status.pendingCount > 0
+                ? `${status.pendingCount} change(s) ready to sync`
+                : 'Supabase synced'
+        }
+        aria-label={
+          !status.isOnline
+            ? `Offline, ${status.pendingCount} changes saved`
+            : status.isSyncing
+              ? 'Supabase syncing'
+              : status.pendingCount > 0
+                ? `${status.pendingCount} changes ready to sync`
+                : 'Supabase synced'
+        }
       >
         {!status.isOnline ? (
-          <>
-            <WifiOff className="w-3.5 h-3.5" />
-            <span>Offline ({status.pendingCount} Saved)</span>
-          </>
+          <WifiOff className="h-4 w-4" />
         ) : status.isSyncing ? (
-          <>
-            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-            <span>Syncing ({status.pendingCount})...</span>
-          </>
+          <RefreshCw className="h-4 w-4 animate-spin" />
         ) : status.pendingCount > 0 ? (
-          <>
-            <CloudUpload className="w-3.5 h-3.5 animate-bounce" />
-            <span>Sync Ready ({status.pendingCount})</span>
-          </>
+          <CloudUpload className="h-4 w-4" />
         ) : (
-          <>
-            <Database className="w-3.5 h-3.5 text-emerald-600" />
-            <span className="hidden sm:inline">IndexedDB Synced</span>
-            <span className="sm:hidden">Offline Ready</span>
-          </>
+          <Database className="h-4 w-4 text-emerald-600" />
+        )}
+        {status.pendingCount > 0 && (
+          <span className="absolute -right-1 -top-1 min-w-4 rounded-full bg-rose-500 px-1 text-center text-[9px] font-black leading-4 text-white ring-2 ring-white">
+            {status.pendingCount > 9 ? '9+' : status.pendingCount}
+          </span>
         )}
       </button>
 
@@ -148,7 +157,7 @@ export const OfflineSyncStatusBadge: React.FC = () => {
                   </div>
                   <div className="text-[11px] opacity-80 font-normal">
                     {status.isOnline
-                      ? 'Changes automatically sync to Firestore & local IndexedDB.'
+                      ? 'Changes automatically sync to Supabase & local IndexedDB.'
                       : 'All new work orders, inventory edits, and POS sales are stored locally in IndexedDB.'}
                   </div>
                 </div>
@@ -183,7 +192,7 @@ export const OfflineSyncStatusBadge: React.FC = () => {
 
               {queueItems.length === 0 ? (
                 <div className="p-3 bg-[#F5F5F7] rounded-xl text-center text-xs text-[#86868B] font-medium border border-[#E5E5EA]">
-                  ✨ No pending offline changes. All local IndexedDB data is completely synced with Cloud Firestore.
+                  ✨ No pending offline changes. Local IndexedDB data is synchronized with Supabase.
                 </div>
               ) : (
                 <div className="max-h-32 overflow-y-auto space-y-1.5 pr-1">

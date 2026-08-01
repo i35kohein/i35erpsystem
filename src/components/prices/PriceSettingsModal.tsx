@@ -7,7 +7,6 @@ import {
   DollarSign, 
   ShieldCheck, 
   Smartphone, 
-  Wrench, 
   Check, 
   SlidersHorizontal,
   Download,

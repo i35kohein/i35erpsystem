@@ -6,7 +6,6 @@ import {
   Award, 
   Zap, 
   BarChart3, 
-  Wrench, 
   ShieldCheck, 
   Scale, 
   ChevronRight, 
@@ -118,7 +117,7 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
     : techStats.filter((t) => t.tech.id === selectedTechId);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Top Banner: Shop-Wide Staff Performance Metrics */}
       <div className="bg-white border border-[#E5E5EA] rounded-2xl p-5 shadow-2xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E5E5EA]">

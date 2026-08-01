@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, Wrench, UserCheck, ChevronDown, Check, UserPlus, Lock } from 'lucide-react';
+import { Shield, HardHat, UserCheck, ChevronDown, Check, UserPlus, Lock } from 'lucide-react';
 import { AppUser, UserRole } from '../../types';
 
 interface UserRoleSwitcherProps {
@@ -31,7 +31,7 @@ export const UserRoleSwitcher: React.FC<UserRoleSwitcherProps> = ({
         return {
           label: 'Technician',
           bgColor: 'bg-blue-100 text-blue-700 border-blue-200',
-          icon: Wrench,
+          icon: HardHat,
         };
       case 'Reception':
         return {

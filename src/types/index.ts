@@ -330,6 +330,12 @@ export interface SystemSettings {
   thermalPaperSize: '80mm' | '58mm';
   receiptHeaderTitle: string;
   receiptFooterNote: string;
+  // Footer wording stays as plain text. Individual hard-return lines can have
+  // their own alignment without storing rich HTML in the database.
+  receiptFooterLineAlignments?: Record<number, 'left' | 'center' | 'right'>;
+  receiptFooterTextSizeRanges?: Array<{ start: number; end: number; size: 'small' | 'medium' | 'large' }>;
+  receiptFooterTextAlign?: 'left' | 'center' | 'right';
+  receiptFooterFontSize?: 'small' | 'medium' | 'large';
 
   // A4 Print Voucher Settings
   a4PrintColorMode?: 'monochrome' | 'color';
@@ -338,6 +344,7 @@ export interface SystemSettings {
   a4ShowTermsDisclaimer?: boolean;
   a4CustomHeaderNote?: string;
   a4PrintLayoutDensity?: 'standard' | 'compact' | 'dual_voucher';
+  a4DiagnosticDisplayFormat?: 'comparison_table' | 'dual_grid' | 'before_only' | 'after_only';
 
   // Quality Assurance
   mandatoryQaChecklist: boolean;
@@ -349,6 +356,13 @@ export interface SystemSettings {
   autoPromptNotificationModal?: boolean;
   telegramBotToken?: string;
   telegramChatId?: string;
+
+  // ERP AI Operations Assistant
+  aiProvider?: 'local' | 'openai' | 'anthropic' | 'gemini' | 'deepseek' | 'groq' | 'openrouter' | 'custom';
+  aiApiKey?: string;
+  aiModel?: string;
+  aiBaseUrl?: string;
+  aiSystemPrompt?: string;
 }
 
 export interface NotificationTemplate {

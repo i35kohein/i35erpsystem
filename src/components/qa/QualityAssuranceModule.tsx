@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { WorkOrder, PostRepairChecklist, Technician, DiagnosticItemResult, AppUser } from '../../types';
 import { DIAGNOSTIC_NAMES, getDiagnosticIcon } from '../intake/deviceData';
+import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 
 interface QualityAssuranceModuleProps {
   workOrders: WorkOrder[];
@@ -39,7 +40,9 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
 }) => {
   // Only finished tasks are shown in QA & Warranty Inspection module
   const finishedWorkOrders = workOrders.filter(
-    (w) => w.status === 'Finished' || w.status === 'Taken Out'
+    (w) =>
+      (w.status === 'Finished' || w.status === 'Taken Out') &&
+      !w.postRepairChecklist
   );
 
   const isTechnicianUser = currentUser?.role === 'Technician';
@@ -61,9 +64,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
       w.deviceModel.toLowerCase().includes(q) ||
       w.serialNumber.toLowerCase().includes(q);
 
-    const matchesStatus = statusFilter === 'ALL' ||
-      (statusFilter === 'Passed QA' && w.postRepairChecklist) ||
-      (statusFilter === 'Pending QA' && !w.postRepairChecklist);
+    const matchesStatus = statusFilter === 'ALL' || statusFilter === 'Pending QA';
 
     return matchesSearch && matchesStatus;
   });
@@ -71,14 +72,14 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
   const [selectedWoId, setSelectedWoId] = useState<string>(
     filteredWorkOrders[0]?.id || finishedWorkOrders[0]?.id || ''
   );
-  const selectedWo = workOrders.find((w) => w.id === selectedWoId);
+  const selectedWo = filteredWorkOrders.find((w) => w.id === selectedWoId);
   const [qaSavedNotice, setQaSavedNotice] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!selectedWoId && (filteredWorkOrders[0]?.id || finishedWorkOrders[0]?.id)) {
-      setSelectedWoId(filteredWorkOrders[0]?.id || finishedWorkOrders[0]?.id || '');
+    if (!filteredWorkOrders.some((workOrder) => workOrder.id === selectedWoId)) {
+      setSelectedWoId(filteredWorkOrders[0]?.id || '');
     }
-  }, [filteredWorkOrders, finishedWorkOrders, selectedWoId]);
+  }, [filteredWorkOrders, selectedWoId]);
 
   // Form State for Post Repair QA Checklist
   const [qaData, setQaData] = useState<PostRepairChecklist>(
@@ -92,7 +93,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
       enclosureAlignmentPass: true,
       cleanAndSanitized: true,
       qaTechnicianId: technicians[0]?.id || 'tech-1',
-      notes: 'Passed all final QA post-repair checks with TrueTone transfer confirmed.',
+      notes: '',
     }
   );
 
@@ -116,20 +117,43 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
         enclosureAlignmentPass: true,
         cleanAndSanitized: true,
         qaTechnicianId: technicians[0]?.id || 'tech-1',
-        notes: 'Passed all final QA post-repair checks with TrueTone transfer confirmed.',
+        notes: '',
       });
     }
 
-    if (selectedWo.afterDiagnostics && selectedWo.afterDiagnostics.length > 0) {
-      setQaDiagnostics(selectedWo.afterDiagnostics);
-    } else if (selectedWo.beforeDiagnostics && selectedWo.beforeDiagnostics.length > 0) {
-      setQaDiagnostics(selectedWo.beforeDiagnostics.map(d => ({ ...d, status: 'Pass' })));
+    if (
+      selectedWo.postRepairChecklist &&
+      selectedWo.afterDiagnostics &&
+      selectedWo.afterDiagnostics.length > 0
+    ) {
+      setQaDiagnostics(
+        selectedWo.afterDiagnostics.map((diagnostic) => ({
+          ...diagnostic,
+          note: diagnostic.note?.trim().toLowerCase() === 'qa verified ok' ? '' : diagnostic.note,
+        })),
+      );
+    } else if (
+      (selectedWo.afterDiagnostics && selectedWo.afterDiagnostics.length > 0) ||
+      (selectedWo.beforeDiagnostics && selectedWo.beforeDiagnostics.length > 0)
+    ) {
+      const untestedDiagnostics =
+        selectedWo.afterDiagnostics && selectedWo.afterDiagnostics.length > 0
+          ? selectedWo.afterDiagnostics
+          : selectedWo.beforeDiagnostics;
+
+      setQaDiagnostics(
+        untestedDiagnostics.map((diagnostic) => ({
+          ...diagnostic,
+          status: 'N/A',
+          note: '',
+        })),
+      );
     } else {
       setQaDiagnostics(
         DIAGNOSTIC_NAMES.map((name, i) => ({
           id: `qa-diag-${i + 1}`,
           name,
-          status: 'Pass' as const,
+          status: 'N/A' as const,
           note: '',
         }))
       );
@@ -166,9 +190,9 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
   const failCount = qaDiagnostics.filter(d => d.status === 'Fail').length;
 
   return (
-    <div className="space-y-6 text-xs">
+    <div className="space-y-3 text-xs">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-[#E5E5EA] shadow-xs">
+      <div className="module-subheader flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-[#E5E5EA] shadow-xs">
         <div>
           <h1 className="text-lg font-bold text-[#1D1D1F] flex items-center space-x-2">
             <ShieldCheck className="w-5 h-5 text-[#34C759]" />
@@ -182,9 +206,9 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-12">
         {/* Left Column: Work Orders Awaiting QA (4 cols) */}
-        <div className="md:col-span-4 bg-white border border-[#E5E5EA] rounded-2xl p-4 space-y-3 shadow-xs">
+        <div className="space-y-2 rounded-xl border border-[#E5E5EA] bg-white p-3 md:col-span-3">
           <div className="flex justify-between items-center border-b border-[#E5E5EA] pb-2">
             <h2 className="font-bold text-[#1D1D1F] text-xs">Finished Devices in QA Control</h2>
             <span className="text-[10px] font-mono font-bold bg-[#0071E3]/10 text-[#0071E3] px-2 py-0.5 rounded-full">
@@ -255,9 +279,9 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
         </div>
 
         {/* Right Column: QA Checklist Worksheet & 21 Diagnostic Points (8 cols) */}
-        <div className="md:col-span-8 bg-white border border-[#E5E5EA] rounded-2xl p-5 space-y-5 shadow-xs">
+        <div className="space-y-3 rounded-xl border border-[#E5E5EA] bg-white p-3 md:col-span-9">
           {selectedWo ? (
-            <div className="space-y-5">
+            <div className="space-y-3">
               {qaSavedNotice && (
                 <div className="p-3 bg-[#EAF8ED] border border-[#34C759] text-[#1E7E34] rounded-xl flex items-center justify-between font-bold text-xs animate-in fade-in">
                   <div className="flex items-center space-x-2">
@@ -278,15 +302,16 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
 
                 <button
                   onClick={handleSaveQaPass}
+                  title="Confirm QA pass and mark device ready"
                   className="px-4 py-2 bg-[#34C759] hover:bg-[#30B753] text-white font-extrabold rounded-xl shadow-xs transition-all active:scale-95 flex items-center space-x-1.5"
                 >
                   <CheckCircle2 className="w-4 h-4" />
-                  <span>Confirm QA Pass & Mark Ready</span>
+                  <span>Confirm QA Pass</span>
                 </button>
               </div>
 
               {/* 21-Point Post-Repair Hardware Diagnostic Checklist */}
-              <div className="p-4 bg-[#F5F5F7] rounded-2xl border border-[#E5E5EA] space-y-3">
+              <div className="space-y-2 rounded-xl border border-[#E5E5EA] bg-[#F5F5F7] p-3">
                 <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-2">
                   <h3 className="text-xs font-extrabold text-[#1D1D1F] flex items-center space-x-2">
                     <ShieldCheck className="w-4 h-4 text-[#0071E3]" />
@@ -298,36 +323,36 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs">
+                <div className="grid grid-cols-1 gap-1.5 text-xs sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {qaDiagnostics.map((item, idx) => {
                     const IconComp = getDiagnosticIcon(item.name);
 
                     return (
-                      <div key={item.id} className="p-2 bg-white border border-[#E5E5EA] rounded-xl space-y-1.5 text-xs shadow-2xs hover:border-[#0071E3]/50 transition-all flex flex-col justify-between">
-                        <div className="space-y-1.5">
+                      <div key={item.id} className="flex flex-col justify-between space-y-1 rounded-lg border border-[#E5E5EA] bg-white p-1.5 text-xs transition-colors hover:border-[#0071E3]/50">
+                        <div className="space-y-1">
                           <div className="font-bold text-[#1D1D1F] flex justify-between items-center">
-                            <div className="flex items-center space-x-1.5 truncate">
-                              <div className="w-5 h-5 rounded-md bg-[#F5F5F7] text-[#0071E3] flex items-center justify-center shrink-0">
-                                <IconComp className="w-3.5 h-3.5" />
+                            <div className="flex min-w-0 items-center gap-1 truncate">
+                              <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded bg-[#F5F5F7] text-[#0071E3]">
+                                <IconComp className="h-3 w-3" />
                               </div>
-                              <span className="text-[11px] font-extrabold truncate">{idx + 1}. {item.name}</span>
+                              <span className="truncate text-[10px] font-extrabold">{idx + 1}. {item.name}</span>
                             </div>
 
-                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-md tracking-wider uppercase shrink-0 shadow-2xs ${
+                            <span className={`shrink-0 rounded px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wide ${
                               item.status === 'Pass' ? 'bg-[#16A34A] text-white' :
-                              item.status === 'Fail' ? 'bg-[#DC2626] text-white animate-pulse' : 'bg-[#475569] text-white'
+                              item.status === 'Fail' ? 'bg-[#DC2626] text-white' : 'bg-[#475569] text-white'
                             }`}>
-                              {item.status === 'Pass' ? '✓ PASS' : item.status === 'Fail' ? '✕ FAIL' : 'N/A'}
+                              {item.status}
                             </span>
                           </div>
 
                           {/* Status Toggle Buttons */}
-                          <div className="flex items-center space-x-1 text-[10px]">
+                          <div className="flex items-center gap-0.5 text-[9px]">
                             <button
                               type="button"
                               onClick={() => handleDiagnosticStatusChange(item.id, 'Pass')}
-                              className={`flex-1 py-1 rounded-lg font-black transition-all ${
-                                item.status === 'Pass' ? 'bg-[#16A34A] text-white shadow-xs' : 'bg-[#F5F5F7] text-[#1D1D1F] hover:bg-slate-200'
+                              className={`h-6 !min-h-6 flex-1 rounded font-black transition-colors ${
+                                item.status === 'Pass' ? 'bg-[#16A34A] text-white' : 'bg-[#F5F5F7] text-[#1D1D1F] hover:bg-slate-200'
                               }`}
                             >
                               Pass
@@ -335,8 +360,8 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                             <button
                               type="button"
                               onClick={() => handleDiagnosticStatusChange(item.id, 'Fail')}
-                              className={`flex-1 py-1 rounded-lg font-black transition-all ${
-                                item.status === 'Fail' ? 'bg-[#DC2626] text-white shadow-xs' : 'bg-[#F5F5F7] text-[#1D1D1F] hover:bg-slate-200'
+                              className={`h-6 !min-h-6 flex-1 rounded font-black transition-colors ${
+                                item.status === 'Fail' ? 'bg-[#DC2626] text-white' : 'bg-[#F5F5F7] text-[#1D1D1F] hover:bg-slate-200'
                               }`}
                             >
                               Fail
@@ -344,8 +369,8 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                             <button
                               type="button"
                               onClick={() => handleDiagnosticStatusChange(item.id, 'N/A')}
-                              className={`flex-1 py-1 rounded-lg font-black transition-all ${
-                                item.status === 'N/A' ? 'bg-[#475569] text-white shadow-xs' : 'bg-[#F5F5F7] text-[#1D1D1F] hover:bg-slate-200'
+                              className={`h-6 !min-h-6 flex-1 rounded font-black transition-colors ${
+                                item.status === 'N/A' ? 'bg-[#475569] text-white' : 'bg-[#F5F5F7] text-[#1D1D1F] hover:bg-slate-200'
                               }`}
                             >
                               N/A
@@ -354,13 +379,13 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                         </div>
 
                         {/* Optional Comment Input */}
-                        <div className="pt-0.5">
+                        <div>
                           <input
                             type="text"
                             value={item.note || ''}
                             onChange={(e) => handleDiagnosticNoteChange(item.id, e.target.value)}
-                            placeholder={`Note...`}
-                            className="w-full h-6 bg-[#F5F5F7] border border-[#E5E5EA] rounded-lg px-2 text-[10px] text-[#1D1D1F] placeholder:text-[#A1A1A6] focus:bg-white focus:border-[#0071E3] focus:outline-none transition-colors"
+                            placeholder="Optional note…"
+                            className="h-6 !min-h-6 w-full rounded border border-[#E5E5EA] bg-[#F5F5F7] px-1.5 text-[9px] text-[#1D1D1F] placeholder:text-[#A1A1A6] focus:border-[#0071E3] focus:bg-white focus:outline-none"
                           />
                         </div>
                       </div>
@@ -369,65 +394,35 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                 </div>
               </div>
 
-              {/* Mandatory Post-Repair Checklist */}
-              <div className="bg-[#F5F5F7]/80 p-4 rounded-xl border border-[#E5E5EA] space-y-3">
-                <h3 className="font-bold text-[#28A745] uppercase tracking-wider text-[11px]">
-                  Mandatory Apple Calibration Checklist
-                </h3>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {[
-                    { key: 'trueToneTransferred', label: 'TrueTone EEPROM Transferred' },
-                    { key: 'displayNoMessageWarning', label: 'No Non-Genuine Display Warning' },
-                    { key: 'batteryHealthVerified', label: 'Battery Health & BSI Lines Verified' },
-                    { key: 'cameraOisFunctional', label: 'Camera OIS & Focus Tested' },
-                    { key: 'proximitySensorWorking', label: 'Earpiece & Proximity Sensor Working' },
-                    { key: 'speakerClarityPass', label: 'Speaker Clarity & Mic Audio Normal' },
-                    { key: 'enclosureAlignmentPass', label: 'Enclosure Alignment & Screws Tightened' },
-                    { key: 'cleanAndSanitized', label: 'Sanitized & Cleaned Before Customer Pickup' },
-                  ].map((item) => {
-                    const val = (qaData as any)[item.key];
-
-                    return (
-                      <button
-                        key={item.key}
-                        onClick={() => handleToggleQaItem(item.key as keyof PostRepairChecklist)}
-                        className={`p-2.5 rounded-xl border text-left flex items-center justify-between font-semibold transition-colors ${
-                          val
-                            ? 'bg-[#EAF8ED] border-[#34C759]/30 text-[#28A745]'
-                            : 'bg-[#FFF0F0] border-[#FF3B30]/30 text-[#FF3B30]'
-                        }`}
-                      >
-                        <span>{item.label}</span>
-                        {val ? <CheckCircle2 className="w-4 h-4" /> : <X className="w-4 h-4" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
               {/* Inspector Technician & Notes */}
-              <div className="bg-[#F5F5F7]/80 p-4 rounded-xl border border-[#E5E5EA] space-y-3">
+              <div className="grid grid-cols-1 gap-3 rounded-xl border border-[#E5E5EA] bg-[#F5F5F7]/80 p-3 sm:grid-cols-[minmax(220px,0.8fr)_minmax(0,1.2fr)]">
                 <div>
                   <label className="block text-[#86868B] font-bold mb-1">QA Inspector Technician</label>
-                  <select
+                  <CustomDropdownMenu
                     value={qaData.qaTechnicianId}
-                    onChange={(e) => setQaData({ ...qaData, qaTechnicianId: e.target.value })}
-                    className="w-full bg-white border border-[#E5E5EA] rounded-lg p-2 text-[#1D1D1F] focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
-                  >
-                    {technicians.map((t) => (
-                      <option key={t.id} value={t.id}>{t.name} ({t.level})</option>
-                    ))}
-                  </select>
+                    onChange={(value) => setQaData({ ...qaData, qaTechnicianId: value })}
+                    options={technicians.map((technician) => ({
+                      value: technician.id,
+                      label: technician.name,
+                      badge: technician.level,
+                    }))}
+                    placeholder="Select QA inspector"
+                    className="w-full"
+                    buttonClassName="w-full"
+                    menuAlign="left"
+                    menuPlacement="top"
+                    size="sm"
+                  />
                 </div>
 
                 <div>
                   <label className="block text-[#86868B] font-bold mb-1">QA Inspector Verification Notes</label>
                   <textarea
-                    rows={2}
+                    rows={1}
                     value={qaData.notes}
                     onChange={(e) => setQaData({ ...qaData, notes: e.target.value })}
-                    className="w-full bg-white border border-[#E5E5EA] rounded-lg p-2 text-[#1D1D1F] focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
+                    placeholder="Add final QA notes…"
+                    className="min-h-8 w-full resize-y rounded-lg border border-[#E5E5EA] bg-white px-2.5 py-1.5 text-[#1D1D1F] focus:border-[#0071E3] focus:outline-none"
                   />
                 </div>
               </div>

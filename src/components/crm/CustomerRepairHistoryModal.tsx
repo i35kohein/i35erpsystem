@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   X, 
-  Wrench, 
+  History, 
   User, 
   Phone, 
   Mail, 
@@ -177,7 +177,7 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
               <span className="text-[10px] font-bold text-[#86868B] uppercase">Total Repairs</span>
               <div className="text-lg font-black text-[#1D1D1F] mt-0.5 flex items-center justify-between">
                 <span>{customerOrders.length}</span>
-                <Wrench className="w-5 h-5 text-[#0071E3]" />
+                <History className="w-5 h-5 text-[#0071E3]" />
               </div>
             </div>
 

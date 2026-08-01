@@ -5,9 +5,21 @@ import { GoogleGenAI } from "@google/genai";
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
   app.use(express.json({ limit: "10mb" }));
+
+  async function readProviderJson(response: Response, providerName: string) {
+    const body = await response.text();
+    if (!body.trim()) {
+      throw new Error(`${providerName} returned an empty response (HTTP ${response.status}).`);
+    }
+    try {
+      return JSON.parse(body);
+    } catch {
+      throw new Error(`${providerName} returned an invalid response (HTTP ${response.status}).`);
+    }
+  }
 
   // Helper function to get Gemini instance safely
   function getGeminiClient() {
@@ -103,6 +115,99 @@ Return JSON with key "message".`;
     } catch (err: any) {
       console.error("Gemini draft message error:", err);
       res.status(500).json({ success: false, error: err.message || "Failed to draft notification" });
+    }
+  });
+
+  // ERP-aware AI chat supporting mainstream and OpenAI-compatible custom APIs.
+  app.post("/api/ai/chat", async (req, res) => {
+    try {
+      const { provider, apiKey, model, baseUrl, systemPrompt, messages, context } = req.body;
+      if (!apiKey) return res.status(400).json({ success: false, error: "AI API key is not configured." });
+
+      const instruction = `${systemPrompt || "You are a concise repair-shop operations assistant."}
+Use only the supplied live ERP context. If data is unavailable, say so. Give concrete priorities and identify records by ticket, part, device, customer, or technician where possible.
+
+LIVE ERP CONTEXT:
+${JSON.stringify(context)}`;
+
+      let answer = "";
+
+      if (provider === "anthropic") {
+        const response = await fetch(`${baseUrl || "https://api.anthropic.com"}/v1/messages`, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "x-api-key": apiKey,
+            "anthropic-version": "2023-06-01",
+          },
+          body: JSON.stringify({
+            model: model || "claude-3-5-haiku-latest",
+            max_tokens: 900,
+            system: instruction,
+            messages,
+          }),
+        });
+        const data: any = await readProviderJson(response, "Anthropic");
+        if (!response.ok) throw new Error(data?.error?.message || "Anthropic request failed.");
+        answer = data.content?.map((item: any) => item.text || "").join("\n") || "";
+      } else if (provider === "gemini") {
+        const selectedModel = model || "gemini-2.0-flash";
+        const response = await fetch(
+          `${baseUrl || "https://generativelanguage.googleapis.com/v1beta"}/models/${selectedModel}:generateContent?key=${encodeURIComponent(apiKey)}`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              systemInstruction: { parts: [{ text: instruction }] },
+              contents: messages.map((message: any) => ({
+                role: message.role === "assistant" ? "model" : "user",
+                parts: [{ text: message.content }],
+              })),
+            }),
+          }
+        );
+        const data: any = await readProviderJson(response, "Gemini");
+        if (!response.ok) throw new Error(data?.error?.message || "Gemini request failed.");
+        answer = data.candidates?.[0]?.content?.parts?.map((part: any) => part.text || "").join("\n") || "";
+      } else {
+        const providerBase =
+          baseUrl ||
+          (provider === "groq"
+            ? "https://api.groq.com/openai/v1"
+            : provider === "deepseek"
+              ? "https://api.deepseek.com"
+            : provider === "openrouter"
+              ? "https://openrouter.ai/api/v1"
+              : "https://api.openai.com/v1");
+        const defaultModel =
+          provider === "groq"
+            ? "llama-3.1-8b-instant"
+            : provider === "deepseek"
+              ? "deepseek-chat"
+            : provider === "openrouter"
+              ? "openai/gpt-4o-mini"
+              : "gpt-4o-mini";
+        const response = await fetch(`${providerBase.replace(/\/$/, "")}/chat/completions`, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: model || defaultModel,
+            temperature: 0.2,
+            messages: [{ role: "system", content: instruction }, ...messages],
+          }),
+        });
+        const data: any = await readProviderJson(response, provider === "deepseek" ? "DeepSeek" : "AI provider");
+        if (!response.ok) throw new Error(data?.error?.message || "AI provider request failed.");
+        answer = data.choices?.[0]?.message?.content || "";
+      }
+
+      res.json({ success: true, answer });
+    } catch (err: any) {
+      console.error("ERP AI chat error:", err);
+      res.status(500).json({ success: false, error: err.message || "AI assistant request failed." });
     }
   });
 

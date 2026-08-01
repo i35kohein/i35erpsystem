@@ -3,10 +3,10 @@ import { DateFilterState, filterByDateRange } from '../common/DateFilterSelector
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 import { StatusBadge } from '../common/StatusBadge';
 import { PriorityBadge } from '../common/PriorityBadge';
-import { WorkOrderStatusTimeline } from '../common/WorkOrderStatusTimeline';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
 import { CameraQrScannerModal } from '../common/CameraQrScannerModal';
 import { ConfirmDeleteModal } from '../common/ConfirmDeleteModal';
+import { TicketDetailInspectorModal } from '../common/TicketDetailInspectorModal';
 import { 
   ClipboardList, 
   Search, 
@@ -50,7 +50,6 @@ import {
   ChevronRight,
   Inbox,
   Ticket,
-  FileText,
   SlidersHorizontal,
   LayoutGrid,
   Table as TableIcon,
@@ -71,8 +70,6 @@ import {
   SelectedRepairItem,
   AppUser
 } from '../../types';
-import { ModelRepairPrice } from '../../types/priceCatalog';
-import { getModelPriceCatalogItems } from '../../utils/priceCatalogLookup';
 import { get21Diagnostics, get21AfterDiagnostics } from '../../utils/diagnosticUtils';
 import { generate10TestTickets, seedSampleTickets } from '../../utils/seedTickets';
 import { 
@@ -92,7 +89,6 @@ interface IntakeWorkOrderModuleProps {
   customers: Customer[];
   technicians: Technician[];
   currentUser?: AppUser;
-  priceCatalog?: ModelRepairPrice[];
   onSaveWorkOrder: (wo: WorkOrder) => void;
   onSaveBatchWorkOrders?: (workOrders: WorkOrder[]) => void;
   onSelectPrintTag: (wo: WorkOrder) => void;
@@ -139,7 +135,6 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   customers,
   technicians,
   currentUser,
-  priceCatalog,
   onSaveWorkOrder,
   onSaveBatchWorkOrders,
   onSelectPrintTag,
@@ -167,9 +162,6 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
 
   const dateFilter = propDateFilter !== undefined ? propDateFilter : localDateFilter;
   const setDateFilter = propSetDateFilter || setLocalDateFilter;
-
-  // Detail Sub-Tab State inside right detail workspace modal
-  const [detailTab, setDetailTab] = useState<'overview' | 'diagnostics' | 'services' | 'history'>('overview');
 
   // Pagination State for Repair Tickets Roster
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -272,11 +264,11 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-3 max-w-7xl mx-auto">
       {/* Top Header Banner & Actions */}
       <div className="bg-white border border-[#E5E5EA] rounded-2xl p-5 shadow-xs space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#E5E5EA]">
-          <div className="space-y-1">
+          <div className="module-subheader space-y-1">
             <div className="flex items-center space-x-2.5">
               <span className="p-2.5 bg-[#136F9A]/10 text-[#136F9A] rounded-xl">
                 <ClipboardList className="w-5 h-5" />
@@ -336,9 +328,9 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
         </div>
 
         {/* Quick Stats Filter Chips */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
           {[
-            { id: 'ALL', label: 'All Active Tickets', count: counts.total, color: 'text-[#2C3E50]', bg: 'bg-[#F8FBFD]', border: 'border-[#D8E5ED]' },
+            { id: 'ALL', label: 'All Active Tickets', count: counts.total, color: 'text-[#136F9A]', bg: 'bg-blue-50/60', border: 'border-blue-200' },
             { id: 'Receive', label: 'Intake (Receive)', count: counts.receive, color: 'text-[#136F9A]', bg: 'bg-blue-50/60', border: 'border-blue-200' },
             { id: 'In Progress', label: 'In Progress', count: counts.inProgress, color: 'text-[#27B1AE]', bg: 'bg-teal-50/60', border: 'border-teal-200' },
             { id: 'Pending', label: 'Pending Approval', count: counts.pending, color: 'text-[#ED7132]', bg: 'bg-orange-50/60', border: 'border-orange-200' },
@@ -357,16 +349,16 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                     setFilterStatus(st.id);
                   }
                 }}
-                className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                className={`min-h-[84px] px-4 py-3.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                   isSelected
-                    ? `${st.bg} ${st.border} ring-2 ring-offset-1 ring-[#27B1AE]/30 shadow-xs`
-                    : 'bg-white border-[#E5E5EA] hover:bg-[#F8FBFD]'
+                    ? `${st.bg} ${st.border} ring-1 ring-[#136F9A]/20`
+                    : `${st.bg} ${st.border} hover:border-[#136F9A]/45`
                 }`}
               >
-                <span className="text-[10px] font-extrabold text-[#7F7F7F] uppercase tracking-wider block truncate">
+                <span className="text-[10px] font-bold text-[#526375] uppercase tracking-[0.06em] block leading-4">
                   {st.label}
                 </span>
-                <span className={`text-xl font-black mt-1 ${st.color}`}>
+                <span className={`text-xl font-extrabold mt-2 leading-none ${st.color}`}>
                   {st.count}
                 </span>
               </button>
@@ -493,24 +485,27 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
         ) : viewMode === 'table' ? (
           /* TABLE VIEW */
           <div className="overflow-x-auto min-h-[380px] max-h-[calc(100vh-220px)] overflow-y-auto rounded-xl">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full min-w-[1120px] text-left border-collapse">
               <thead className="sticky top-0 z-20 bg-[#F8FBFD] shadow-2xs">
                 <tr className="border-b border-[#E5E5EA] bg-[#F8FBFD] text-[11px] font-black uppercase text-[#7F7F7F] tracking-wider">
-                  <th className="py-3 px-4 rounded-tl-xl bg-[#F8FBFD]">Ticket #</th>
-                  <th className="py-3 px-4 bg-[#F8FBFD]">Device & Color</th>
-                  <th className="py-3 px-4 bg-[#F8FBFD]">Customer & Phone</th>
-                  <th className="py-3 px-4 bg-[#F8FBFD]">Priority & Status</th>
+                  <th className="py-3 px-4 rounded-tl-xl bg-[#F8FBFD]">Ticket # & Date</th>
+                  <th className="py-3 px-4 bg-[#F8FBFD]">Customer & Contact</th>
+                  <th className="py-3 px-4 bg-[#F8FBFD]">Device & Serial/IMEI</th>
+                  <th className="py-3 px-4 bg-[#F8FBFD]">Symptoms / Service</th>
                   <th className="py-3 px-4 bg-[#F8FBFD]">Assigned Tech</th>
-                  <th className="py-3 px-4 text-right bg-[#F8FBFD]">Estimate (MMK)</th>
+                  <th className="py-3 px-4 bg-[#F8FBFD]">Priority</th>
+                  <th className="py-3 px-4 bg-[#F8FBFD]">Stage & Status</th>
+                  <th className="py-3 px-4 bg-[#F8FBFD]">Amount</th>
                   <th className="py-3 px-4 text-center rounded-tr-xl bg-[#F8FBFD]">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E5E5EA] text-xs">
                 {paginatedOrders.map((wo) => {
-                  const woColorStyle = getRealisticColorStyle(wo.deviceColor);
-                  const diag21 = get21Diagnostics(wo.beforeDiagnostics, wo.symptomsReported, wo.intakeChecklist);
-                  const passCount = diag21.filter((d) => d.status === 'Pass').length;
-                  const failCount = diag21.filter((d) => d.status === 'Fail').length;
+                  const createdDate = new Date(wo.createdAt || Date.now()).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                  });
+                  const totalAmount = wo.totalAmount || wo.subtotal || 0;
 
                   return (
                     <tr
@@ -518,57 +513,63 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                       onClick={() => handleOpenTicketDetail(wo)}
                       className="hover:bg-[#F8FBFD] transition-colors cursor-pointer group"
                     >
-                      {/* Ticket # */}
+                      {/* Ticket # & Date */}
                       <td className="py-3.5 px-4 font-mono font-black text-[#136F9A]">
-                        <div className="flex items-center space-x-1.5">
-                          <span className="bg-[#136F9A]/10 px-2.5 py-1 rounded-lg">
-                            {wo.orderNumber}
+                        <p>{wo.orderNumber || wo.id}</p>
+                        <span className="text-[10px] font-medium text-[#7F7F7F]">{createdDate}</span>
+                      </td>
+
+                      {/* Customer & Contact */}
+                      <td className="py-3.5 px-4 text-[#2C3E50]">
+                        <div className="space-y-0.5">
+                          <span className="block max-w-[140px] truncate font-bold">{wo.customerName}</span>
+                          <span className="block font-mono text-[10px] text-[#7F7F7F]">{wo.customerPhone}</span>
+                        </div>
+                      </td>
+
+                      {/* Device & Serial */}
+                      <td className="py-3.5 px-4 text-[#2C3E50]">
+                        <div className="space-y-0.5">
+                          <span className="block max-w-[150px] truncate font-semibold">{wo.deviceModel}</span>
+                          <span className="block max-w-[150px] truncate font-mono text-[10px] text-[#7F7F7F]">
+                            {wo.serialNumber || wo.imei ? `SN: ${wo.serialNumber || wo.imei}` : 'No Serial'}
                           </span>
                         </div>
                       </td>
 
-                      {/* Device & Color */}
-                      <td className="py-3.5 px-4 font-extrabold text-[#2C3E50]">
-                        <div className="space-y-0.5">
-                          <span className="text-sm block">{wo.deviceModel}</span>
-                          <div className="flex items-center space-x-1.5 text-[11px] text-[#7F7F7F] font-medium">
-                            <span>{wo.deviceColor || 'Standard'}</span>
-                            <span 
-                              className={`w-3 h-3 rounded-full border border-white shadow-2xs ${woColorStyle.border}`}
-                              style={{ background: woColorStyle.gradient }}
-                            />
-                            {wo.serialNumber && <span className="font-mono text-[10px]">({wo.serialNumber})</span>}
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* Customer */}
+                      {/* Symptoms / Service */}
                       <td className="py-3.5 px-4 text-[#2C3E50]">
-                        <div className="space-y-0.5">
-                          <span className="font-bold text-xs block">{wo.customerName}</span>
-                          <span className="text-[11px] text-[#7F7F7F] font-mono block">{wo.customerPhone}</span>
-                        </div>
-                      </td>
-
-                      {/* Priority & Status */}
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center space-x-1.5">
-                          <StatusBadge status={wo.status} size="xs" />
-                          <PriorityBadge priority={wo.priority} size="xs" />
-                        </div>
+                        <p className="line-clamp-1 max-w-[180px]" title={wo.symptomsReported || wo.serviceType}>
+                          {wo.symptomsReported || wo.serviceType || 'General Repair'}
+                        </p>
                       </td>
 
                       {/* Assigned Tech */}
                       <td className="py-3.5 px-4 text-[#2C3E50]">
                         <div className="flex items-center space-x-1.5">
-                          <User className="w-3.5 h-3.5 text-[#136F9A]" />
-                          <span className="font-bold text-xs">{wo.assignedTechName || 'Unassigned'}</span>
+                          <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-200 text-[10px] font-bold text-slate-700">
+                            {(wo.assignedTechName || 'U').charAt(0)}
+                          </div>
+                          <span className="max-w-[100px] truncate font-medium">{wo.assignedTechName || 'Unassigned'}</span>
                         </div>
                       </td>
 
-                      {/* Total Estimate */}
-                      <td className="py-3.5 px-4 text-right font-mono font-black text-sm text-[#136F9A]">
-                        {(wo.totalAmount || wo.subtotal || 0).toLocaleString()} MMK
+                      <td className="py-3.5 px-4">
+                        <PriorityBadge priority={wo.priority} size="xs" />
+                      </td>
+
+                      <td className="py-3.5 px-4">
+                        <StatusBadge status={wo.status} size="xs" />
+                      </td>
+
+                      {/* Amount & payment */}
+                      <td className="py-3.5 px-4">
+                        <p className="font-mono font-black text-[#2C3E50]">{totalAmount.toLocaleString()} MMK</p>
+                        <span className={`rounded px-1.5 py-0.5 text-[9px] font-bold ${
+                          wo.isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                        }`}>
+                          {wo.isPaid ? 'Paid' : 'Unpaid'}
+                        </span>
                       </td>
 
                       {/* Action */}
@@ -577,29 +578,12 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                           <button
                             type="button"
                             onClick={() => handleOpenTicketDetail(wo)}
-                            className="p-1.5 bg-[#136F9A]/10 text-[#136F9A] hover:bg-[#136F9A] hover:text-white rounded-lg transition-colors cursor-pointer"
-                            title="Inspect Ticket Details"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--blue-tint)] text-[var(--primary)] transition-colors hover:bg-[var(--primary)] hover:text-white"
+                            title="View Ticket Status"
+                            aria-label={`View status for ${wo.orderNumber || wo.id}`}
                           >
-                            <Maximize2 className="w-4 h-4" />
+                            <Maximize2 className="h-4 w-4" />
                           </button>
-                          <button
-                            type="button"
-                            onClick={() => onSelectPrintTag(wo)}
-                            className="p-1.5 bg-slate-100 text-[#2C3E50] hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
-                            title="Print Sticker"
-                          >
-                            <Printer className="w-4 h-4" />
-                          </button>
-                          {currentUser?.role === 'Admin' && (
-                            <button
-                              type="button"
-                              onClick={() => setTicketToDelete(wo)}
-                              className="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors cursor-pointer"
-                              title="Delete Ticket"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          )}
                         </div>
                       </td>
                     </tr>
@@ -669,23 +653,14 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                     </div>
 
                     <div className="flex items-center space-x-1.5" onClick={(e) => e.stopPropagation()}>
-                      {currentUser?.role === 'Admin' && (
-                        <button
-                          type="button"
-                          onClick={() => setTicketToDelete(wo)}
-                          className="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-xl transition-all cursor-pointer"
-                          title="Delete Ticket"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      )}
                       <button
                         type="button"
                         onClick={() => handleOpenTicketDetail(wo)}
-                        className="px-3 py-1.5 bg-[#136F9A] text-white hover:bg-[#136F9A]/90 text-xs font-bold rounded-xl transition-all shadow-2xs cursor-pointer flex items-center space-x-1"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--blue-tint)] text-[var(--primary)] transition-colors hover:bg-[var(--primary)] hover:text-white"
+                        title="View Ticket Status"
+                        aria-label={`View status for ${wo.orderNumber || wo.id}`}
                       >
-                        <Maximize2 className="w-3.5 h-3.5" />
-                        <span>Inspect</span>
+                        <Maximize2 className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
@@ -754,39 +729,36 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
 
       {/* FULL-SCREEN TICKET DETAIL INSPECTOR MODAL */}
       {isDetailModalOpen && selectedWorkOrder && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-6 animate-fadeIn">
-          <div className="bg-white border border-[#E5E5EA] rounded-3xl w-full max-w-5xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
+        <div className="hidden fixed inset-0 bg-black/45 z-50 items-center justify-center p-3 sm:p-5 animate-fadeIn">
+          <div className="bg-[var(--card-bg)] border border-[var(--border)] rounded-xl w-full max-w-5xl max-h-[92vh] flex flex-col shadow-xl overflow-hidden">
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-[#E5E5EA] bg-[#F8FBFD] flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <span className="font-mono text-xs font-black text-[#136F9A] bg-[#136F9A]/10 px-3 py-1 rounded-lg border border-[#136F9A]/20">
+            <div className="px-4 sm:px-5 py-3 border-b border-[var(--border)] bg-[var(--card-bg)] flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <h2 className="text-sm font-black text-[var(--text-main)]">Ticket details</h2>
+                <span className="font-mono text-[11px] font-bold text-[var(--text-muted)] whitespace-nowrap">
                   {selectedWorkOrder.orderNumber}
                 </span>
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <h2 className="text-lg font-black text-[#2C3E50]">{selectedWorkOrder.deviceModel}</h2>
-                    <PriorityBadge priority={selectedWorkOrder.priority} size="sm" />
-                    <StatusBadge status={selectedWorkOrder.status} size="sm" />
-                  </div>
-                  <p className="text-xs text-[#7F7F7F]">
-                    Customer: <strong className="text-[#2C3E50]">{selectedWorkOrder.customerName}</strong> ({selectedWorkOrder.customerPhone}) • <span className="font-bold text-[#136F9A]">{selectedWorkOrder.customerAddress || 'Yangon'}</span>
-                  </p>
-                </div>
               </div>
 
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-1 shrink-0 sm:justify-end">
                 <button
                   type="button"
                   onClick={() => onSelectPrintTag(selectedWorkOrder)}
-                  className="px-3.5 py-1.5 bg-white border border-[#E5E5EA] hover:bg-slate-50 text-[#2C3E50] font-extrabold text-xs rounded-xl flex items-center space-x-1.5 transition-all cursor-pointer shadow-2xs"
+                  aria-label="Print ticket sticker"
+                  title="Print sticker"
+                  className="group relative flex h-9 w-9 items-center justify-center rounded-lg border border-transparent text-[var(--text-muted)] transition-colors hover:border-[var(--border)] hover:bg-[var(--bg)] hover:text-[var(--primary)] cursor-pointer"
                 >
-                  <Printer className="w-4 h-4 text-[#136F9A]" />
-                  <span>Print Sticker</span>
+                  <Printer className="h-4 w-4" />
+                  <span className="pointer-events-none absolute right-0 top-full z-20 mt-2 hidden whitespace-nowrap rounded-md bg-[var(--text-main)] px-2 py-1 text-[10px] font-bold text-[var(--card-bg)] shadow-md group-hover:block">
+                    Print sticker
+                  </span>
                 </button>
 
                 {currentUser?.role === 'Admin' ? (
                   <button
                     type="button"
+                    aria-label="Delete ticket"
+                    title="Delete ticket"
                     onClick={() => {
                       if (window.confirm(`Are you sure you want to delete ticket ${selectedWorkOrder.orderNumber || selectedWorkOrder.id}?`)) {
                         onDeleteWorkOrder?.(selectedWorkOrder.id);
@@ -794,63 +766,99 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                         setSelectedWorkOrder(null);
                       }
                     }}
-                    className="px-3.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-extrabold text-xs rounded-xl flex items-center space-x-1.5 cursor-pointer transition-all shadow-2xs"
+                    className="group relative flex h-9 w-9 items-center justify-center rounded-lg border border-transparent text-[var(--text-muted)] transition-colors hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 cursor-pointer"
                   >
-                    <Trash2 className="w-4 h-4 text-rose-600" />
-                    <span>Delete</span>
+                    <Trash2 className="h-4 w-4" />
+                    <span className="pointer-events-none absolute right-0 top-full z-20 mt-2 hidden whitespace-nowrap rounded-md bg-[var(--text-main)] px-2 py-1 text-[10px] font-bold text-[var(--card-bg)] shadow-md group-hover:block">
+                      Delete ticket
+                    </span>
                   </button>
                 ) : (
-                  <span className="px-3 py-1.5 bg-slate-100 text-slate-500 font-bold text-xs rounded-xl border border-slate-200 flex items-center space-x-1 cursor-not-allowed">
-                    <Lock className="w-3.5 h-3.5 text-slate-400 shrink-0 mr-1" />
-                    <span>Delete Locked</span>
+                  <span
+                    aria-label="Delete locked"
+                    title="Delete locked"
+                    className="group relative flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-muted)] opacity-50 cursor-not-allowed"
+                  >
+                    <Lock className="h-4 w-4" />
+                    <span className="pointer-events-none absolute right-0 top-full z-20 mt-2 hidden whitespace-nowrap rounded-md bg-[var(--text-main)] px-2 py-1 text-[10px] font-bold text-[var(--card-bg)] shadow-md group-hover:block">
+                      Delete locked
+                    </span>
                   </span>
                 )}
 
                 <button
                   type="button"
+                  aria-label="Close ticket details"
+                  title="Close"
                   onClick={() => setIsDetailModalOpen(false)}
-                  className="p-2 text-[#7F7F7F] hover:text-[#2C3E50] hover:bg-slate-200 rounded-xl transition-colors cursor-pointer ml-2"
+                  className="ml-1 flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-muted)] transition-colors hover:bg-[var(--bg)] hover:text-[var(--text-main)] cursor-pointer"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="h-4.5 w-4.5" />
                 </button>
               </div>
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 overflow-y-auto space-y-6 flex-1">
+            <div className="grid flex-1 grid-cols-1 overflow-y-auto md:grid-cols-[250px_minmax(0,1fr)]">
+              <aside className="border-b border-[var(--border)] bg-[var(--bg)] p-4 md:border-b-0 md:border-r md:p-5">
+                <div className="space-y-5">
+                  <div>
+                    <div className="mb-2 flex flex-wrap items-center gap-1.5">
+                      {selectedWorkOrder.priority === 'Urgent' && (
+                        <span className="inline-flex h-5 items-center gap-1.5 rounded-md border border-rose-200 bg-rose-50 px-2 text-[9px] font-extrabold uppercase tracking-[0.08em] text-rose-700">
+                          <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+                          Urgent
+                        </span>
+                      )}
+                      <span className="inline-flex h-5 items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--card-bg)] px-2 text-[9px] font-extrabold uppercase tracking-[0.08em] text-[var(--text-muted)]">
+                        <span className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" />
+                        {selectedWorkOrder.status}
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-black leading-6 text-[var(--text-main)]">{selectedWorkOrder.deviceModel}</h3>
+                    <p className="mt-1 text-xs font-bold text-[var(--text-main)]">{selectedWorkOrder.customerName}</p>
+                    {selectedWorkOrder.customerAddress && (
+                      <p className="mt-0.5 text-[11px] leading-4 text-[var(--text-muted)]">{selectedWorkOrder.customerAddress}</p>
+                    )}
+                  </div>
+
               {/* Spec Matrix Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs bg-[#F8FBFD] p-4 rounded-2xl border border-[#D8E5ED]">
-                <div>
-                  <span className="block text-[10px] font-extrabold text-[#7F7F7F] uppercase tracking-wider">Town / City</span>
-                  <span className="font-bold text-[#136F9A] block mt-1 truncate">
-                    {selectedWorkOrder.customerAddress || 'Yangon'}
+              <dl className="divide-y divide-[var(--border)] border-y border-[var(--border)] text-xs">
+                <div className="py-2.5">
+                  <span className="block text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-wider">Contact</span>
+                  <span className="font-bold text-[var(--primary)] block mt-1 truncate">
+                    {selectedWorkOrder.customerPhone || 'No phone'}
                   </span>
                 </div>
-                <div>
-                  <span className="block text-[10px] font-extrabold text-[#7F7F7F] uppercase tracking-wider">Serial / IMEI</span>
-                  <span className="font-mono text-xs font-bold text-[#2C3E50] block mt-1 truncate">
+                <div className="py-2.5">
+                  <span className="block text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-wider">Serial / IMEI</span>
+                  <span className="font-mono text-xs font-bold text-[var(--text-main)] block mt-1 truncate">
                     {selectedWorkOrder.serialNumber || selectedWorkOrder.imei || 'N/A'}
                   </span>
                 </div>
-                <div>
-                  <span className="block text-[10px] font-extrabold text-[#7F7F7F] uppercase tracking-wider">Color & Passcode</span>
-                  <span className="font-bold text-[#2C3E50] block mt-1 truncate">
-                    {selectedWorkOrder.deviceColor || 'Standard'} ({selectedWorkOrder.passcode || 'No Passcode'})
+                <div className="py-2.5">
+                  <span className="block text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-wider">Technician</span>
+                  <span className="font-bold text-[var(--text-main)] block mt-1 truncate">
+                    {selectedWorkOrder.assignedTechName || 'Unassigned'}
                   </span>
                 </div>
-                <div>
-                  <span className="block text-[10px] font-extrabold text-[#7F7F7F] uppercase tracking-wider">Intake Date</span>
-                  <span className="font-bold text-[#2C3E50] block mt-1 truncate">
+                <div className="py-2.5">
+                  <span className="block text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-wider">Intake Date</span>
+                  <span className="font-bold text-[var(--text-main)] block mt-1 truncate">
                     {new Date(selectedWorkOrder.createdAt).toLocaleDateString()}
                   </span>
                 </div>
-                <div>
-                  <span className="block text-[10px] font-extrabold text-[#7F7F7F] uppercase tracking-wider">Total Estimate</span>
-                  <span className="font-mono font-black text-base text-[#136F9A] block mt-0.5">
+                <div className="py-2.5">
+                  <span className="block text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-wider">Total Estimate</span>
+                  <span className="font-mono font-black text-base text-[var(--primary)] block mt-0.5">
                     {(selectedWorkOrder.totalAmount || selectedWorkOrder.subtotal || 0).toLocaleString()} MMK
                   </span>
                 </div>
-              </div>
+              </dl>
+                </div>
+              </aside>
+
+              <div className="min-w-0 space-y-4 p-4 sm:p-5">
 
               {/* Reported Symptoms (Filtered to exclude duplicate repair summaries) */}
               {(() => {
@@ -873,211 +881,110 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                 if (!cleanNotes) return null;
 
                 return (
-                  <div className="p-4 bg-slate-50 border border-[#E5E5EA] rounded-2xl space-y-1 text-xs">
-                    <span className="font-black text-[#2C3E50] block text-sm">Symptoms & Reported Issues:</span>
-                    <p className="text-[#2C3E50] whitespace-pre-wrap leading-relaxed font-medium">{cleanNotes}</p>
+                  <div className="p-3 bg-[var(--bg)] border border-[var(--border)] rounded-lg space-y-1 text-xs">
+                    <span className="font-black text-[var(--text-main)] block text-sm">Reported issue</span>
+                    <p className="text-[var(--text-secondary)] whitespace-pre-wrap leading-relaxed font-medium">{cleanNotes}</p>
                   </div>
                 );
               })()}
 
-              {/* Detail Tabs */}
-              <div className="flex border-b border-[#E5E5EA] space-x-6 text-xs font-extrabold">
-                {[
-                  { id: 'overview', label: '21 Diag Inspection' },
-                  { id: 'services', label: 'Selected Services & Catalog' },
-                  { id: 'history', label: 'Status Audit & Transition Timeline' },
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setDetailTab(tab.id as any)}
-                    className={`pb-2.5 transition-all cursor-pointer border-b-2 ${
-                      detailTab === tab.id
-                        ? 'border-[#136F9A] text-[#136F9A] font-black'
-                        : 'border-transparent text-[#7F7F7F] hover:text-[#2C3E50]'
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
+              {/* PRIORITY DIAGNOSTIC SUMMARY */}
+              {(() => {
+                  const beforeList = get21Diagnostics(selectedWorkOrder.beforeDiagnostics, selectedWorkOrder.symptomsReported, selectedWorkOrder.intakeChecklist);
+                  const afterList = get21AfterDiagnostics(selectedWorkOrder.afterDiagnostics, selectedWorkOrder.beforeDiagnostics, selectedWorkOrder.symptomsReported, selectedWorkOrder.intakeChecklist);
+                  const diagnosticRows = beforeList.map((beforeItem, index) => ({
+                    beforeItem,
+                    afterItem: afterList[index] || beforeItem,
+                  }));
+                  const statusClass = (status: string) => {
+                    if (status === 'Pass') return 'border-emerald-200 bg-emerald-50 text-emerald-700';
+                    if (status === 'Fail') return 'border-rose-200 bg-rose-50 text-rose-700';
+                    return 'border-[var(--border)] bg-[var(--bg)] text-[var(--text-muted)]';
+                  };
 
-              {/* TAB 1: 21 DIAGNOSTICS MASTER COMPARISON GRID (NO SCROLLBAR) */}
-              {detailTab === 'overview' && (
-                <div className="space-y-4">
-                  <div className="p-4 bg-slate-50/80 border border-[#D8E5ED] rounded-2xl space-y-3">
-                    <div className="flex flex-wrap justify-between items-center pb-2 border-b border-[#D8E5ED] gap-2">
-                      <div className="flex items-center space-x-2">
-                        <ShieldCheck className="w-5 h-5 text-[#136F9A]" />
-                        <span className="font-extrabold text-sm text-[#2C3E50]">21-Point Complete Hardware Diagnostic Status</span>
-                      </div>
-                      <div className="flex items-center space-x-3 text-[11px] font-bold">
-                        <span className="flex items-center space-x-1 text-[#2C3E50]">
-                          <span className="w-2.5 h-2.5 rounded-full bg-[#136F9A] inline-block" />
-                          <span>Left: Before Intake</span>
+                  return (
+                    <section className="rounded-lg border border-[var(--border)] bg-[var(--bg)] p-3">
+                      <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)] pb-2.5">
+                        <span className="text-xs font-black text-[var(--text-main)]">
+                          21-Point Hardware Diagnostic Comparison
                         </span>
-                        <span className="flex items-center space-x-1 text-[#2C3E50]">
-                          <span className="w-2.5 h-2.5 rounded-full bg-purple-600 inline-block" />
-                          <span>Right: After QA</span>
-                        </span>
+                        <div className="flex items-center gap-3 text-[9px] font-bold text-[var(--text-muted)]">
+                          <span className="flex items-center gap-1">
+                            <span className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" />
+                            Before intake
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="h-1.5 w-1.5 rounded-full bg-violet-500" />
+                            After QA
+                          </span>
+                        </div>
                       </div>
-                    </div>
 
-                    {/* 3-Column Compact Grid for All 21 Items - Fits on Screen without Scrollbar */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-xs">
-                      {(() => {
-                        const beforeList = get21Diagnostics(selectedWorkOrder.beforeDiagnostics, selectedWorkOrder.symptomsReported, selectedWorkOrder.intakeChecklist);
-                        const afterList = get21AfterDiagnostics(selectedWorkOrder.afterDiagnostics, selectedWorkOrder.beforeDiagnostics, selectedWorkOrder.symptomsReported, selectedWorkOrder.intakeChecklist);
-
-                        return beforeList.map((beforeItem, idx) => {
-                          const afterItem = afterList[idx] || beforeItem;
-                          const IconComp = getDiagnosticIcon(beforeItem.name);
-
-                          const renderHighContrastBadge = (status: string) => {
-                            if (status === 'Pass') {
-                              return (
-                                <span className="bg-[#16A34A] text-white font-black text-[10px] px-1.5 py-0.5 rounded shadow-2xs tracking-wider uppercase inline-flex items-center">
-                                  ✓ PASS
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                        {diagnosticRows.map(({ beforeItem, afterItem }, index) => (
+                          <div
+                            key={beforeItem.id || beforeItem.name}
+                            className={`flex min-h-12 items-center justify-between gap-2 rounded-lg border px-2.5 py-2 ${
+                              beforeItem.status === 'Fail' || afterItem.status === 'Fail'
+                                ? 'border-rose-200 bg-rose-50/70'
+                                : 'border-[var(--border)] bg-[var(--card-bg)]'
+                            }`}
+                          >
+                            <div className="min-w-0">
+                              <p className="truncate text-xs font-extrabold text-[var(--text-main)]">
+                                <span className="mr-2 font-mono text-[10px] text-[var(--text-muted)]">
+                                  {index + 1}.
                                 </span>
-                              );
-                            }
-                            if (status === 'Fail') {
-                              return (
-                                <span className="bg-[#DC2626] text-white font-black text-[10px] px-1.5 py-0.5 rounded shadow-2xs tracking-wider uppercase inline-flex items-center animate-pulse">
-                                  ✕ FAIL
-                                </span>
-                              );
-                            }
-                            return (
-                              <span className="bg-[#475569] text-white font-bold text-[10px] px-1.5 py-0.5 rounded uppercase inline-flex items-center">
-                                N/A
+                                {beforeItem.name}
+                              </p>
+                              {(afterItem.note || beforeItem.note) && (
+                                <p className="mt-0.5 max-w-32 truncate pl-5 text-[9px] italic text-[var(--text-muted)]">
+                                  {afterItem.note || beforeItem.note}
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex shrink-0 items-center gap-1">
+                              <span className={`inline-flex min-w-14 justify-center rounded-md border px-2 py-1 text-[9px] font-extrabold uppercase ${statusClass(beforeItem.status)}`}>
+                                {beforeItem.status}
                               </span>
-                            );
-                          };
-
-                          return (
-                            <div
-                              key={beforeItem.id || beforeItem.name}
-                              className={`p-2 rounded-xl border transition-all flex items-center justify-between shadow-2xs ${
-                                beforeItem.status === 'Fail' || afterItem.status === 'Fail'
-                                  ? 'bg-red-50/70 border-red-200'
-                                  : 'bg-white border-[#E5E5EA]'
-                              }`}
-                            >
-                              <div className="min-w-0 pr-1 space-y-0.5">
-                                <div className="font-extrabold text-[#2C3E50] text-[11px] truncate flex items-center space-x-1.5">
-                                  <IconComp className="w-3.5 h-3.5 text-[#136F9A] shrink-0" />
-                                  <span className="truncate">{idx + 1}. {beforeItem.name}</span>
-                                </div>
-                                {(beforeItem.note || afterItem.note) && (
-                                  <p className="text-[9px] text-[#7F7F7F] truncate italic max-w-[130px]">
-                                    {afterItem.note || beforeItem.note}
-                                  </p>
-                                )}
-                              </div>
-
-                              <div className="flex items-center space-x-1 shrink-0">
-                                <div title="Before Repair Intake Status">
-                                  {renderHighContrastBadge(beforeItem.status)}
-                                </div>
-                                <span className="text-[#86868B] text-[10px] font-bold">→</span>
-                                <div title="After QA Final Status">
-                                  {renderHighContrastBadge(afterItem.status)}
-                                </div>
-                              </div>
+                              <span className="text-[9px] font-bold text-[var(--text-muted)]">→</span>
+                              <span className={`inline-flex min-w-14 justify-center rounded-md border px-2 py-1 text-[9px] font-extrabold uppercase ${statusClass(afterItem.status)}`}>
+                                {afterItem.status}
+                              </span>
                             </div>
-                          );
-                        });
-                      })()}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 2: SERVICES & CATALOG */}
-              {detailTab === 'services' && (
-                <div className="space-y-5">
-                  <div className="p-4 bg-[#F8FBFD] border border-[#D8E5ED] rounded-2xl space-y-3 text-xs">
-                    <span className="font-black text-sm text-[#2C3E50] block">Selected Repair Services:</span>
-                    {selectedWorkOrder.selectedRepairs && selectedWorkOrder.selectedRepairs.length > 0 ? (
-                      <div className="space-y-2 divide-y divide-[#D8E5ED]">
-                        {selectedWorkOrder.selectedRepairs.map((r) => (
-                          <div key={r.id} className="pt-2 first:pt-0 flex justify-between items-center">
-                            <div>
-                              <span className="font-extrabold text-[#2C3E50] text-sm block">{r.repairName}</span>
-                              <span className="text-xs text-[#7F7F7F]">{r.group} · Warranty: {r.warranty}</span>
-                            </div>
-                            <span className="font-mono font-black text-[#136F9A] text-sm">
-                              {r.price.toLocaleString()} MMK
-                            </span>
                           </div>
                         ))}
                       </div>
-                    ) : (
-                      <p className="text-xs text-[#7F7F7F] italic">No specific service items logged.</p>
-                    )}
-                  </div>
-
-                  {/* PRICE CATALOG REFERENCE */}
-                  <div className="p-4 bg-[#F8FBFD] border border-[#D8E5ED] rounded-2xl space-y-3 text-xs">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <FileText className="w-4 h-4 text-[#136F9A]" />
-                        <span className="font-black text-sm text-[#2C3E50]">
-                          Catalog Reference Prices ({selectedWorkOrder.deviceModel})
-                        </span>
-                      </div>
-                      <span className="text-xs font-bold text-[#136F9A] bg-white px-2.5 py-1 rounded-lg border border-[#136F9A]/20">
-                        Official Rates
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-56 overflow-y-auto pr-1">
-                      {getModelPriceCatalogItems(selectedWorkOrder.deviceModel, priceCatalog).slice(0, 12).map((item) => (
-                        <div key={item.id} className="p-3 bg-white rounded-xl border border-[#D8E5ED] flex justify-between items-center text-xs">
-                          <div className="truncate space-y-0.5 max-w-[65%]">
-                            <span className="font-bold text-[#2C3E50] truncate block">{item.name}</span>
-                            <span className="text-[10px] text-[#7F7F7F] block">{item.group}</span>
-                          </div>
-                          <span className="font-mono font-black text-[#136F9A]">
-                            {item.price.toLocaleString()} MMK
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 3: STATUS AUDIT & TRANSITION TIMELINE */}
-              {detailTab === 'history' && (
-                <div className="space-y-3 text-xs">
-                  <WorkOrderStatusTimeline
-                    workOrder={selectedWorkOrder}
-                    onSaveWorkOrder={(updatedWo) => {
-                      setSelectedWorkOrder(updatedWo);
-                      onSaveWorkOrder(updatedWo);
-                    }}
-                  />
-                </div>
-              )}
+                    </section>
+                  );
+                })()}
+            </div>
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-4 border-t border-[#E5E5EA] bg-[#F8FBFD] flex items-center justify-between">
-              <span className="text-xs font-bold text-[#7F7F7F]">
-                Apple Repair ERP · Ticket Details Inspector
+            <div className="px-4 sm:px-5 py-3 border-t border-[var(--border)] bg-[var(--card-bg)] flex items-center justify-between">
+              <span className="text-xs font-bold text-[var(--text-muted)]">
+                Repair ticket record
               </span>
               <button
                 type="button"
                 onClick={() => setIsDetailModalOpen(false)}
-                className="px-5 py-2 bg-[#2C3E50] hover:bg-[#136F9A] text-white font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+                className="px-4 py-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-extrabold text-xs rounded-lg transition-colors cursor-pointer"
               >
-                Done / Close
+                Close
               </button>
             </div>
           </div>
         </div>
+      )}
+      {isDetailModalOpen && selectedWorkOrder && (
+        <TicketDetailInspectorModal
+          workOrder={selectedWorkOrder}
+          currentUser={currentUser}
+          onClose={() => setIsDetailModalOpen(false)}
+          onPrint={onSelectPrintTag}
+          onDelete={onDeleteWorkOrder}
+        />
       )}
       {/* Confirm Delete Modal */}
       <ConfirmDeleteModal

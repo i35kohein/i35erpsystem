@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
 import { CameraQrScannerModal } from '../common/CameraQrScannerModal';
+import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 import { 
   Plus, 
   Check, 
@@ -322,9 +323,6 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
 
     const prefix = systemSettings?.ticketPrefix || 'WO-';
     const newOrderNumber = `${prefix}2026-${1000 + workOrders.length + 1}`;
-    const defaultTech = systemSettings?.defaultTechnicianId 
-      ? technicians.find(t => t.id === systemSettings.defaultTechnicianId) || technicians[0]
-      : technicians[0];
     const nowIso = new Date().toISOString();
     const formattedDate = new Date().toLocaleString('en-US', {
       month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true
@@ -348,8 +346,9 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       findMyStatus,
       status: 'Receive',
       priority: 'Normal',
-      assignedTechId: defaultTech?.id || 'tech-1',
-      assignedTechName: defaultTech?.name || 'Marcus Vance',
+      // New intake tickets stay unassigned until the repair coordinator assigns a technician.
+      assignedTechId: '',
+      assignedTechName: '',
       serviceType: 'Standard Modular',
       selectedRepairs,
       beforeDiagnostics,
@@ -505,47 +504,39 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
   const activeColorStyle = getRealisticColorStyle(deviceColor);
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-12">
+    <div className="max-w-5xl mx-auto space-y-3 pb-5">
       {/* Top Banner Header */}
-      <div className="bg-white p-5 rounded-2xl border border-[#E5E5EA] shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={onViewRepairTickets}
-              className="text-xs text-[#0071E3] font-bold flex items-center space-x-1 hover:underline"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Repair Tickets</span>
-            </button>
+      <div className="module-toolbar bg-white px-3.5 py-3 rounded-xl border border-[#E5E5EA] shadow-2xs flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-[#F0F6FF] text-[#0071E3] flex items-center justify-center shrink-0">
+            <Smartphone className="w-4 h-4" />
           </div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-[#1D1D1F] pt-1 flex items-center space-x-2">
-            <Plus className="w-5 h-5 text-[#0071E3]" />
-            <span>Create Repair Ticket (Intake Desk)</span>
-          </h1>
-          <p className="text-xs text-[#86868B] font-medium">Hardware intake, 21-point repair diagnostics with comments, MMK currency pricing</p>
+          <div className="min-w-0">
+            <h1 className="text-sm font-extrabold text-[#1D1D1F] truncate">New Intake Ticket Registration</h1>
+            <p className="text-[10px] text-[#86868B] truncate">Customer, device, repair estimate and intake diagnostics</p>
+          </div>
         </div>
+        <button
+          onClick={onViewRepairTickets}
+          className="text-[11px] text-[#0071E3] font-bold flex items-center gap-1 hover:bg-[#F0F6FF] rounded-lg px-2 py-1.5 shrink-0"
+        >
+          <ArrowLeft className="w-3 h-3" />
+          <span className="hidden sm:inline">Back to Tickets</span>
+          <span className="sm:hidden">Back</span>
+        </button>
       </div>
 
       {/* Main Container */}
-      <div className="bg-white border border-[#E5E5EA] rounded-2xl p-6 shadow-xs space-y-6">
+      <div className="bg-white border border-[#E5E5EA] rounded-xl p-4 shadow-xs space-y-4">
 
         {/* UI Direction Helper Banner */}
-        <div className="bg-[#F0F7FF] border border-[#0071E3]/25 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-[#1D1D1F]">
-          <div className="flex items-start space-x-3">
-            <div className="p-2 bg-[#0071E3]/10 text-[#0071E3] rounded-xl shrink-0 mt-0.5">
-              <HelpCircle className="w-5 h-5" />
-            </div>
-            <div className="space-y-1">
-              <h4 className="font-extrabold text-[#0071E3] text-xs uppercase tracking-wide">Intake Workflow Directions & Checklist</h4>
-              <p className="text-[#51525C] leading-relaxed">
-                Follow steps 1 to 7 below: Enter customer phone to auto-fill existing records, pick the hardware model and realistic color finish, configure catalog repair services in MMK, and mark initial 21-Point diagnostic statuses before saving.
-              </p>
-            </div>
-          </div>
+        <div className="flex items-center gap-2 rounded-lg border border-[#0071E3]/20 bg-[#F0F7FF] px-3 py-2 text-[10px] text-[#51525C]">
+          <HelpCircle className="w-3.5 h-3.5 text-[#0071E3] shrink-0" />
+          <span>Enter customer details, choose the device, add repairs, then complete the intake check.</span>
         </div>
 
         {/* STEP 1: Customer Information */}
-        <div className="p-4 bg-[#F8F9FA] rounded-2xl border border-[#E5E5EA] space-y-3">
+        <div className="p-3 bg-[#F8F9FA] rounded-xl border border-[#E5E5EA] space-y-2.5">
           <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-2.5">
             <h3 className="text-xs font-extrabold text-[#1D1D1F] flex items-center space-x-2">
               <span className="w-6 h-6 rounded-full bg-[#0071E3] text-white flex items-center justify-center text-[11px] font-black">1</span>
@@ -598,15 +589,18 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
 
             <div>
               <label className="block text-[#86868B] mb-1 font-medium">Customer Type</label>
-              <select
+              <CustomDropdownMenu
                 value={customerType}
-                onChange={(e) => setCustomerType(e.target.value as any)}
-                className="w-full bg-white border border-[#E5E5EA] rounded-xl px-3 py-2 text-[#1D1D1F] focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20 transition-all"
-              >
-                <option value="Retail">Retail Walk-In</option>
-                <option value="B2B Corporate">B2B Corporate Account</option>
-                <option value="Wholesale Mail-In">Wholesale Mail-In Partner</option>
-              </select>
+                onChange={(value) => setCustomerType(value as 'Retail' | 'B2B Corporate' | 'Wholesale Mail-In')}
+                options={[
+                  { value: 'Retail', label: 'Retail Walk-In' },
+                  { value: 'B2B Corporate', label: 'B2B Corporate Account' },
+                  { value: 'Wholesale Mail-In', label: 'Wholesale Mail-In Partner' },
+                ]}
+                menuAlign="left"
+                className="w-full"
+                buttonClassName="w-full bg-white border-[#E5E5EA] rounded-xl h-9 px-3 text-xs"
+              />
             </div>
           </div>
         </div>
@@ -614,7 +608,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         {/* STEP 2: Choose Device Model */}
         <div 
           onClick={() => setIsModelModalOpen(true)}
-          className="p-4 bg-[#F5F5F7]/80 rounded-2xl border border-[#E5E5EA] space-y-3 cursor-pointer hover:border-[#0071E3]/50 hover:bg-[#F5F5F7] transition-all group"
+          className="p-3 bg-[#F5F5F7]/80 rounded-xl border border-[#E5E5EA] space-y-2.5 cursor-pointer hover:border-[#0071E3]/50 hover:bg-[#F5F5F7] transition-all group"
         >
           <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-2">
             <h3 className="text-xs font-extrabold text-[#1D1D1F] flex items-center space-x-2">
@@ -627,7 +621,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           </div>
 
           {!deviceModel ? (
-            <div className="flex items-center justify-between bg-amber-50 p-3.5 rounded-xl border-2 border-dashed border-amber-300 text-xs shadow-2xs group-hover:border-amber-400">
+            <div className="flex items-center justify-between bg-amber-50 p-2.5 rounded-lg border border-dashed border-amber-300 text-xs shadow-2xs group-hover:border-amber-400">
               <div className="flex items-center space-x-2.5">
                 <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 animate-pulse" />
                 <div>
@@ -657,7 +651,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           {/* STEP 3: Real Official Color Selection */}
           <div 
             onClick={() => setIsColorModalOpen(true)}
-            className="p-4 bg-[#F8F9FA] rounded-2xl border border-[#E5E5EA] space-y-3 cursor-pointer hover:border-[#0071E3]/50 transition-all group"
+            className="p-3 bg-[#F8F9FA] rounded-xl border border-[#E5E5EA] space-y-2.5 cursor-pointer hover:border-[#0071E3]/50 transition-all group"
           >
             <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-2.5">
               <h3 className="text-xs font-extrabold text-[#1D1D1F] flex items-center space-x-2">
@@ -682,7 +676,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           {/* STEP 4: Warranty Selection */}
           <div 
             onClick={() => setIsWarrantyModalOpen(true)}
-            className="p-4 bg-[#F8F9FA] rounded-2xl border border-[#E5E5EA] space-y-3 cursor-pointer hover:border-[#0071E3]/50 transition-all group"
+            className="p-3 bg-[#F8F9FA] rounded-xl border border-[#E5E5EA] space-y-2.5 cursor-pointer hover:border-[#0071E3]/50 transition-all group"
           >
             <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-2.5">
               <h3 className="text-xs font-extrabold text-[#1D1D1F] flex items-center space-x-2">
@@ -705,7 +699,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         </div>
 
         {/* Serial / IMEI Input */}
-        <div className="p-4 bg-[#F5F5F7]/80 rounded-2xl border border-[#E5E5EA] space-y-3">
+        <div className="p-3 bg-[#F5F5F7]/80 rounded-xl border border-[#E5E5EA] space-y-2.5">
           <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-2">
             <h3 className="text-xs font-extrabold text-[#1D1D1F] flex items-center space-x-2">
               <Smartphone className="w-4 h-4 text-[#0071E3]" />
@@ -761,7 +755,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         </div>
 
         {/* STEP 5: Choose Available Repairs (MMK CURRENCY) */}
-        <div className="p-4 bg-[#F5F5F7]/80 rounded-2xl border border-[#E5E5EA] space-y-3">
+        <div className="p-3 bg-[#F5F5F7]/80 rounded-xl border border-[#E5E5EA] space-y-2.5">
           <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-2">
             <h3 className="text-xs font-extrabold text-[#1D1D1F] flex items-center space-x-2">
               <span className="w-5 h-5 rounded-full bg-[#0071E3] text-white flex items-center justify-center text-[10px]">5</span>
@@ -895,7 +889,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         </div>
 
         {/* STEP 6: Intake Notes */}
-        <div className="p-4 bg-[#F8F9FA] rounded-2xl border border-[#D2D2D7] space-y-3">
+        <div className="p-3 bg-[#F8F9FA] rounded-xl border border-[#D2D2D7] space-y-2.5">
           <h3 className="text-xs font-extrabold text-[#1D1D1F] flex items-center space-x-2 border-b border-[#D2D2D7] pb-2">
             <span className="w-5 h-5 rounded-full bg-[#0071E3] text-white flex items-center justify-center text-[10px]">6</span>
             <span>Intake Notes & Customer Symptoms</span>
@@ -917,7 +911,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         </div>
 
         {/* STEP 7: 21-Point Repair Diagnostic Inspection with Comment Box & Dedicated Icons */}
-        <div className="p-4 bg-[#F5F5F7] rounded-2xl border border-[#E5E5EA] space-y-3">
+        <div className="p-3 bg-[#F5F5F7] rounded-xl border border-[#E5E5EA] space-y-2.5">
           <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-2">
             <h3 className="text-xs font-extrabold text-[#1D1D1F] flex items-center space-x-2">
               <span className="w-5 h-5 rounded-full bg-[#0071E3] text-white flex items-center justify-center text-[10px]">7</span>
@@ -950,7 +944,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                       <div className="w-5 h-5 rounded-md bg-[#F5F5F7] text-[#0071E3] flex items-center justify-center shrink-0">
                         <IconComp className="w-3.5 h-3.5" />
                       </div>
-                      <span className="text-[11px] font-extrabold truncate">{idx + 1}. {item.name}</span>
+                        <span className="text-[11px] font-extrabold truncate">{idx + 1}. {item.name}</span>
                     </div>
 
                     <span className={`text-[10px] font-black px-2 py-0.5 rounded-md tracking-wider uppercase shrink-0 shadow-2xs ${
@@ -959,6 +953,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                     }`}>
                       {item.status === 'Pass' ? '✓ PASS' : item.status === 'Fail' ? '✕ FAIL' : 'N/A'}
                     </span>
+
                   </div>
 
                   <div className="flex space-x-1 text-[10px]">
@@ -968,7 +963,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                         updated[idx].status = 'Pass';
                         setBeforeDiagnostics(updated);
                       }}
-                      className={`flex-1 py-1 rounded-lg font-black transition-all ${
+                        className={`flex-1 py-1 rounded-lg font-black transition-all ${
                         item.status === 'Pass' ? 'bg-[#16A34A] text-white shadow-xs' : 'bg-[#F5F5F7] text-[#1D1D1F] hover:bg-slate-200'
                       }`}
                     >
@@ -980,7 +975,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                         updated[idx].status = 'Fail';
                         setBeforeDiagnostics(updated);
                       }}
-                      className={`flex-1 py-1 rounded-lg font-black transition-all ${
+                        className={`flex-1 py-1 rounded-lg font-black transition-all ${
                         item.status === 'Fail' ? 'bg-[#DC2626] text-white shadow-xs' : 'bg-[#F5F5F7] text-[#1D1D1F] hover:bg-slate-200'
                       }`}
                     >
@@ -992,7 +987,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                         updated[idx].status = 'N/A';
                         setBeforeDiagnostics(updated);
                       }}
-                      className={`flex-1 py-1 rounded-lg font-black transition-all ${
+                        className={`flex-1 py-1 rounded-lg font-black transition-all ${
                         item.status === 'N/A' ? 'bg-[#475569] text-white shadow-xs' : 'bg-[#F5F5F7] text-[#1D1D1F] hover:bg-slate-200'
                       }`}
                     >
@@ -1021,7 +1016,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         </div>
 
         {/* STEP 8: Before-Repair Condition Photos */}
-        <div className="p-4 bg-[#F5F5F7] rounded-2xl border border-[#E5E5EA] space-y-3">
+        <div className="p-3 bg-[#F5F5F7] rounded-xl border border-[#E5E5EA] space-y-2.5">
           <h3 className="text-xs font-extrabold text-[#1D1D1F] flex items-center space-x-2 border-b border-[#E5E5EA] pb-2">
             <span className="w-5 h-5 rounded-full bg-[#0071E3] text-white flex items-center justify-center text-[10px]">8</span>
             <span>Before-Repair Condition Photos</span>
