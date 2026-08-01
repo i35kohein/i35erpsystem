@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
-import { ModelRepairPrice, REPAIR_CATEGORIES, RepairCategoryDef, FolderConfig, DEFAULT_DEVICE_FOLDERS, getModelFolderId } from '../types/priceCatalog';
+import { ModelRepairPrice, PriceCatalogImportRow, REPAIR_CATEGORIES, RepairCategoryDef, FolderConfig, DEFAULT_DEVICE_FOLDERS, getModelFolderId } from '../types/priceCatalog';
 import { INITIAL_REPAIR_PRICE_DATA } from '../data/repairPriceData';
-import { subscribeToCollection, saveDocument, clearCollection } from '../lib/supabase';
+import { subscribeToCollection, saveBatchDocuments, saveDocument, clearCollection } from '../lib/supabase';
 
 export function usePriceCatalog(globalCurrencySymbol?: string, onUpdateGlobalCurrency?: (symbol: string) => void) {
-  const [catalog, setCatalog] = useState<ModelRepairPrice[]>(INITIAL_REPAIR_PRICE_DATA);
+  // Price List is live Supabase data only. Do not merge bundled sample models
+  // or categories back into the inventory settings.
+  const [catalog, setCatalog] = useState<ModelRepairPrice[]>([]);
   const [currencySymbol, setLocalCurrencySymbol] = useState<string>(globalCurrencySymbol || 'MMK');
-  const [folders, setFolders] = useState<FolderConfig[]>(DEFAULT_DEVICE_FOLDERS);
-  const [categories, setCategories] = useState<RepairCategoryDef[]>(REPAIR_CATEGORIES);
+  const [folders, setFolders] = useState<FolderConfig[]>([]);
+  const [categories, setCategories] = useState<RepairCategoryDef[]>([]);
 
   // Sync with global currency symbol if provided
   useEffect(() => {
@@ -18,68 +20,28 @@ export function usePriceCatalog(globalCurrencySymbol?: string, onUpdateGlobalCur
 
   // Subscribe to Supabase price catalog collections.
   useEffect(() => {
-    const seedDataWithIds = INITIAL_REPAIR_PRICE_DATA.map((item) => ({
-      ...item,
-      id: item.model.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase(),
-    }));
-
     const unsubCatalog = subscribeToCollection<ModelRepairPrice & { id: string; _deleted?: boolean }>(
       'priceCatalog',
       (data) => {
-        if (data && data.length > 0) {
-          const modelMap = new Map<string, ModelRepairPrice & { id: string; _deleted?: boolean }>();
-          seedDataWithIds.forEach((item) => {
-            modelMap.set(item.id, item);
-          });
-          data.forEach((item) => {
-            modelMap.set(item.id, item);
-          });
-          const activeCatalog = Array.from(modelMap.values()).filter((item) => !item._deleted);
-          setCatalog(activeCatalog);
-        }
+        setCatalog(data.filter((item) => !item._deleted));
       },
-      seedDataWithIds
+      []
     );
 
     const unsubFolders = subscribeToCollection<FolderConfig & { id: string; _deleted?: boolean }>(
       'priceFolders',
       (data) => {
-        if (data && data.length > 0) {
-          const folderMap = new Map<string, FolderConfig & { id: string; _deleted?: boolean }>();
-          DEFAULT_DEVICE_FOLDERS.forEach((f) => {
-            folderMap.set(f.id, { ...f, id: f.id });
-          });
-          data.forEach((f) => {
-            folderMap.set(f.id, f);
-          });
-          const activeFolders = Array.from(folderMap.values()).filter((f) => !f._deleted);
-          setFolders(activeFolders);
-        }
+        setFolders(data.filter((item) => !item._deleted));
       },
-      DEFAULT_DEVICE_FOLDERS.map((f) => ({ ...f, id: f.id }))
+      []
     );
-
-    const seedCategoriesWithIds = REPAIR_CATEGORIES.map((c) => ({
-      ...c,
-      id: c.key,
-    }));
 
     const unsubCategories = subscribeToCollection<RepairCategoryDef & { id: string; _deleted?: boolean }>(
       'priceCategories',
       (data) => {
-        if (data && data.length > 0) {
-          const catMap = new Map<string, RepairCategoryDef & { id: string; _deleted?: boolean }>();
-          REPAIR_CATEGORIES.forEach((c) => {
-            catMap.set(c.key, { ...c, id: c.key });
-          });
-          data.forEach((c) => {
-            catMap.set(c.key, c);
-          });
-          const activeCategories = Array.from(catMap.values()).filter((c) => !c._deleted);
-          setCategories(activeCategories);
-        }
+        setCategories(data.filter((item) => !item._deleted));
       },
-      seedCategoriesWithIds
+      []
     );
 
     return () => {
@@ -302,6 +264,56 @@ export function usePriceCatalog(globalCurrencySymbol?: string, onUpdateGlobalCur
     );
   };
 
+  // Import price lists in one update per model so a CSV restore does not create
+  // hundreds of individual write requests. Price List categories are an
+  // independent collection: this intentionally never touches inventory categories.
+  const importCatalogRows = async (
+    rows: PriceCatalogImportRow[],
+    importedCategories: RepairCategoryDef[] = [],
+    replaceCategories = false,
+  ) => {
+    const importByModel = new Map(rows.map((row) => [row.model.trim().toLowerCase(), row]));
+    const updatedModels: Array<ModelRepairPrice & { id: string }> = [];
+    const updatedCatalog = catalog.map((item) => {
+      const imported = importByModel.get(item.model.trim().toLowerCase());
+      if (!imported) return item;
+
+      const updated: ModelRepairPrice & { id: string } = {
+        ...item,
+        id: (item as any).id || item.model.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase(),
+        prices: { ...item.prices, ...imported.prices },
+        warranties: { ...item.warranties, ...imported.warranties },
+      };
+      updatedModels.push(updated);
+      return updated;
+    });
+
+    if (updatedModels.length) {
+      setCatalog(updatedCatalog);
+      await saveBatchDocuments('priceCatalog', updatedModels);
+    }
+
+    if (replaceCategories) {
+      // The CSV is the source of truth for Price List services. Clearing this
+      // collection does not affect System Management > Inventory Categories.
+      setCategories(importedCategories);
+      await clearCollection('priceCategories');
+      await saveBatchDocuments(
+        'priceCategories',
+        importedCategories.map((category) => ({ ...category, id: category.key })),
+      );
+    } else if (importedCategories.length) {
+      const existingCategoryKeys = new Set(categories.map((category) => category.key));
+      const missingCategories = importedCategories.filter((category) => !existingCategoryKeys.has(category.key));
+      if (missingCategories.length) {
+        setCategories((prev) => [...prev, ...missingCategories]);
+        await saveBatchDocuments('priceCategories', missingCategories.map((category) => ({ ...category, id: category.key })));
+      }
+    }
+
+    return updatedModels.length;
+  };
+
   // Global Bulk Price Adjustment (+X% or +Flat Amount)
   const applyGlobalPriceAdjustment = (
     folderId: string | 'ALL',
@@ -368,6 +380,10 @@ export function usePriceCatalog(globalCurrencySymbol?: string, onUpdateGlobalCur
 
   // Reset to initial seed data in Firestore
   const resetToDefaults = async () => {
+    if (import.meta.env.VITE_ENABLE_DEMO_SEED !== 'true') {
+      console.warn('Demo seed reset is disabled for live ERP data.');
+      return;
+    }
     try {
       await clearCollection('priceCatalog');
       await clearCollection('priceFolders');
@@ -420,6 +436,7 @@ export function usePriceCatalog(globalCurrencySymbol?: string, onUpdateGlobalCur
     addCategory,
     deleteCategory,
     updatePriceAndWarranty,
+    importCatalogRows,
     addModel,
     renameModel,
     deleteModel,

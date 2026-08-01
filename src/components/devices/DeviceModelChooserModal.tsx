@@ -20,6 +20,7 @@ interface DeviceModelChooserModalProps {
   selectedDevice?: string;
   onSelectDevice: (modelName: string) => void;
   onOpenSettings?: () => void;
+  embedded?: boolean;
 }
 
 export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = ({
@@ -28,6 +29,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
   selectedDevice = '',
   onSelectDevice,
   onOpenSettings,
+  embedded = false,
 }) => {
   const { catalog, folders } = usePriceCatalog();
   const [deviceSearchQuery, setDeviceSearchQuery] = useState('');
@@ -38,9 +40,8 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
   // Filter enabled folders only
   const enabledFolders = folders.filter((f) => f.enabled);
 
-  return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-5 animate-fadeIn">
-      <div className="bg-white border border-[#E5E5EA] rounded-2xl w-full max-w-3xl max-h-[82vh] flex flex-col shadow-2xl overflow-hidden">
+  const chooserContent = (
+      <div className={`bg-white ${embedded ? 'h-full w-full' : 'w-full max-w-3xl max-h-[82vh] rounded-2xl border border-[#E5E5EA] shadow-2xl'} flex flex-col overflow-hidden`}>
         {/* Modal Header */}
         <div className="px-3.5 py-3 border-b border-[#E5E5EA] flex items-center justify-between bg-[#F5F5F7]/80">
           <div className="flex items-center gap-2.5 min-w-0">
@@ -145,7 +146,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
         </div>
 
         {/* Folder / Model Grid Container */}
-        <div className="p-3.5 overflow-y-auto space-y-4 max-h-[58vh]">
+        <div className={`min-h-0 overflow-y-auto space-y-4 p-3.5 ${embedded ? 'flex-1' : 'max-h-[58vh]'}`}>
           {(() => {
             const visibleFolders = enabledFolders.filter((f) => {
               if (activeFamilyTab !== 'All' && f.family !== activeFamilyTab) return false;
@@ -241,6 +242,13 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
           <span className="text-[10px] text-[#86868B] font-medium">{enabledFolders.length} folders available</span>
         </div>
       </div>
+  );
+
+  if (embedded) return chooserContent;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-3 backdrop-blur-xs sm:p-5 animate-fadeIn">
+      {chooserContent}
     </div>
   );
 };

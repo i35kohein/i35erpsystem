@@ -16,6 +16,7 @@ interface DateFilterSelectorProps {
   onChange: (newFilter: DateFilterState) => void;
   className?: string;
   compact?: boolean;
+  iconOnly?: boolean;
 }
 
 export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
@@ -24,6 +25,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
   onChange,
   className = '',
   compact = false,
+  iconOnly = false,
 }) => {
   const currentFilter = filter || value || { preset: 'all' };
   const [showCalendarModal, setShowCalendarModal] = useState(false);
@@ -152,6 +154,9 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
           <CustomDropdownMenu
             value={currentFilter.preset}
             onChange={(val) => handlePresetChange(val as DatePreset)}
+            iconOnly={iconOnly}
+            triggerIcon={<Calendar className="h-3.5 w-3.5" />}
+            ariaLabel="Filter by date"
             options={[
               { value: 'all', label: 'All Dates' },
               { value: 'today', label: 'Today' },
@@ -168,7 +173,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
             ]}
           />
 
-          <button
+          {!iconOnly && <button
             type="button"
             onClick={() => {
               setShowCalendarModal(!showCalendarModal);
@@ -184,7 +189,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
             title="Calendar Picker"
           >
             <Calendar className="w-3.5 h-3.5" />
-          </button>
+          </button>}
         </div>
       ) : (
         /* Minimalistic Segmented Control */

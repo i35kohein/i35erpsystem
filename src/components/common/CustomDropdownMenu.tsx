@@ -19,6 +19,9 @@ interface CustomDropdownMenuProps {
   menuAlign?: 'left' | 'right' | 'group-left';
   menuClassName?: string;
   menuPlacement?: 'top' | 'bottom';
+  iconOnly?: boolean;
+  triggerIcon?: React.ReactNode;
+  ariaLabel?: string;
 }
 
 export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
@@ -32,11 +35,15 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
   menuAlign = 'right',
   menuClassName = '',
   menuPlacement = 'bottom',
+  iconOnly = false,
+  triggerIcon,
+  ariaLabel,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const selectedOption = options.find((o) => o.value === value) || options[0];
+  // An empty value is intentionally unselected. Do not silently show the first option.
+  const selectedOption = options.find((o) => o.value === value);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -62,14 +69,24 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
         onClick={() => setIsOpen(!isOpen)}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        className={`flex min-w-32 items-center justify-between gap-2 rounded-lg border border-[var(--border)] bg-[var(--card-bg)] font-bold text-[var(--text-main)] transition-colors cursor-pointer hover:bg-[var(--blue-tint)] focus:outline-none focus:border-[var(--primary)] ${
-          size === 'sm' ? 'h-8 px-2.5 text-xs' : 'h-10 px-3.5 text-sm'
+        aria-label={ariaLabel || selectedOption?.label || placeholder}
+        title={ariaLabel || selectedOption?.label || placeholder}
+        className={`flex items-center justify-between gap-2 rounded-lg border border-[var(--border)] bg-[var(--card-bg)] font-bold text-[var(--text-main)] transition-colors cursor-pointer hover:bg-[var(--blue-tint)] focus:outline-none focus:border-[var(--primary)] ${
+          iconOnly
+            ? size === 'sm' ? 'h-8 w-8 justify-center' : 'h-10 w-10 justify-center'
+            : size === 'sm' ? 'h-8 min-w-32 px-2.5 text-xs' : 'h-10 min-w-32 px-3.5 text-sm'
         } ${buttonClassName}`}
       >
-        <span className="truncate max-w-[120px] sm:max-w-[170px]">
-          {selectedOption ? selectedOption.label : placeholder}
-        </span>
-        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-[var(--border-subtle)]">
+        {iconOnly ? (
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center text-[var(--primary)]">
+            {triggerIcon}
+          </span>
+        ) : (
+          <span className="truncate max-w-[120px] sm:max-w-[170px]">
+            {selectedOption ? selectedOption.label : placeholder}
+          </span>
+        )}
+        <span className={`${iconOnly ? 'sr-only' : 'flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-[var(--border-subtle)]'}`}>
           <ChevronDown className={`h-3.5 w-3.5 text-[var(--text-muted)] transition-transform ${isOpen ? 'rotate-180 text-[var(--primary)]' : ''}`} />
         </span>
       </button>

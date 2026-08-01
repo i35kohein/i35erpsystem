@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { 
   Boxes, 
   Search, 
@@ -27,6 +27,7 @@ import {
   Sparkles,
   ArrowRight,
   Edit2,
+  Eye,
   Trash2,
   X,
   Settings,
@@ -38,10 +39,22 @@ import {
   Palette,
   CheckCircle2,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ChevronDown
 } from 'lucide-react';
 import { PartItem, PartQualityTier, Supplier, SystemSettings, RmaItem } from '../../types';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
+import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
+import { getAvailableColorsForModel, getRealisticColorStyle } from '../intake/deviceData';
+
+const isSameDeviceModel = (left: string, right: string) =>
+  left.trim().toLocaleLowerCase() === right.trim().toLocaleLowerCase();
+
+const DEFAULT_QUALITY_TIERS = [
+  'Original',
+  'OEM',
+  'Genuine',
+];
 
 interface InventoryManagementModuleProps {
   parts: PartItem[];
@@ -67,33 +80,10 @@ interface InventoryManagementModuleProps {
   setShowAddModal?: (s: boolean) => void;
 }
 
-// Popular Apple Models for Matrix Grid mapping
-const POPULAR_APPLE_MODELS = [
-  'iPhone 15 Pro Max',
-  'iPhone 15 Pro',
-  'iPhone 15',
-  'iPhone 14 Pro Max',
-  'iPhone 14 Pro',
-  'iPhone 14',
-  'iPhone 13 Pro Max',
-  'iPhone 13',
-  'iPad Pro 12.9"',
-  'MacBook Pro 16"'
-];
-
-// Key Component Categories for Matrix
-const MATRIX_CATEGORIES = [
-  'Display',
-  'Battery',
-  'Charging Port',
-  'Camera',
-  'Back Glass',
-  'Logic Board'
-];
-
 export const InventoryManagementModule: React.FC<InventoryManagementModuleProps> = ({
   parts,
   suppliers,
+  systemSettings,
   deviceModels,
   inventoryCategories = [],
   onAddPart,
@@ -118,38 +108,18 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const [selectedModelFilter, setSelectedModelFilter] = useState<string>('ALL');
   const [localSearchQuery, setLocalSearchQuery] = useState<string>('');
   const [localShowAddModal, setLocalShowAddModal] = useState(false);
-  const [viewMode, setViewMode] = useState<'catalog' | 'matrix'>('catalog');
+  const [viewMode, setViewMode] = useState<'stock' | 'profit' | 'matrix'>('stock');
   const [showLowStockOnly, setShowLowStockOnly] = useState(false);
 
   // Supplier & Quality Tier Edit States
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [editingQualityTier, setEditingQualityTier] = useState<{ oldName: string; newName: string } | null>(null);
 
-  // Quality Tiers State (default + custom user-added with localStorage persistence)
-  const [customQualityTiers, setCustomQualityTiers] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem('custom_quality_tiers');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch (err) {
-      console.error(err);
-    }
-    return [
-      'OEM Original Pulled',
-      'Refurbished Grade A',
-      'Premium Aftermarket',
-      'Standard Aftermarket',
-      'Original Genuine Service Pack',
-      'Soft OLED High Copy',
-      'Refurbished Grade S+',
-    ];
-  });
-
-  // Inventory Tab Settings Modal State
-  const [showInventorySettingsModal, setShowInventorySettingsModal] = useState(false);
-  const [settingsTab, setSettingsTab] = useState<'SUPPLIERS' | 'QUALITY_TIERS'>('SUPPLIERS');
+  // Tiers are managed centrally in System Management and synchronised with Supabase.
+  const customQualityTiers = DEFAULT_QUALITY_TIERS;
+  // Legacy modal handlers remain mounted only while the inventory page is open;
+  // management now lives in System Management and is intentionally read-only here.
+  const setCustomQualityTiers = (_tiers: string[]) => undefined;
 
   // Mini modals for quick-add inside Part Add/Edit forms
   const [showAddSupplierMiniModal, setShowAddSupplierMiniModal] = useState(false);
@@ -279,11 +249,21 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   };
 
   const activeDeviceModels = useMemo(() => {
-    return deviceModels && deviceModels.length > 0 ? deviceModels : POPULAR_APPLE_MODELS;
+    return [...new Set(deviceModels?.filter(Boolean) || [])].sort((a, b) => a.localeCompare(b));
   }, [deviceModels]);
+
+  // Inventory filters should only list models with an actual saved stock row.
+  const inventoryDeviceModels = useMemo(() => {
+    return [...new Set(parts.flatMap((part) => part.deviceCompatibility || []).filter(Boolean))]
+      .sort((a, b) => a.localeCompare(b));
+  }, [parts]);
 
   // Edit Part Modal state
   const [editingPart, setEditingPart] = useState<PartItem | null>(null);
+  const [selectedPartForDetails, setSelectedPartForDetails] = useState<PartItem | null>(null);
+  const [isDeviceModelChooserOpen, setIsDeviceModelChooserOpen] = useState(false);
+  const [isLocationBinMenuOpen, setIsLocationBinMenuOpen] = useState(false);
+  const [isEditLocationBinMenuOpen, setIsEditLocationBinMenuOpen] = useState(false);
 
   // Warranty Claim Modal state
   const [claimingWarrantyPart, setClaimingWarrantyPart] = useState<PartItem | null>(null);
@@ -370,24 +350,122 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     sku: '',
     name: '',
     applePartNumber: '',
-    category: inventoryCategories[0] || 'Display',
-    deviceCompatibility: activeDeviceModels[0] ? [activeDeviceModels[0]] : ['iPhone 15 Pro'],
-    qualityTier: 'OEM Original Pulled',
-    quantityInStock: 10,
+    category: '',
+    deviceCompatibility: [],
+    qualityTier: undefined,
+    quantityInStock: 0,
     reservedQuantity: 0,
     reorderPoint: 4,
-    costPrice: 85000,
-    sellingPrice: 165000,
-    supplierId: suppliers[0]?.id || 'sup-1',
-    supplierName: suppliers[0]?.name || 'MobileSentrix OEM',
-    locationBin: 'BIN-A01',
+    costPrice: 0,
+    sellingPrice: 0,
+    supplierId: '',
+    supplierName: '',
+    locationBin: '',
     isSerialized: false,
   });
 
   const categories = useMemo(() => {
-    const set = new Set([...inventoryCategories, ...parts.map((p) => p.category)]);
-    return Array.from(set);
-  }, [inventoryCategories, parts]);
+    return [...new Set(inventoryCategories.filter(Boolean))];
+  }, [inventoryCategories]);
+
+  const generatePartName = (part: Partial<PartItem>) => {
+    const model = part.deviceCompatibility?.[0]?.trim();
+    const category = part.category?.trim();
+    const quality = part.qualityTier?.trim();
+    const isBackGlass = Boolean(category && /back\s*glass/i.test(category));
+    const color = isBackGlass ? part.backGlassColor?.trim() : '';
+    return model && category && quality ? [model, category, color, quality].filter(Boolean).join(' - ') : '';
+  };
+
+  const generatePartSku = (part: Partial<PartItem>) => {
+    const model = part.deviceCompatibility?.[0]?.trim();
+    const category = part.category?.trim();
+    const quality = part.qualityTier?.trim();
+    const isBackGlass = Boolean(category && /back\s*glass/i.test(category));
+    const color = isBackGlass ? part.backGlassColor?.trim() : '';
+    if (!model || !category || !quality || (isBackGlass && !color)) return '';
+
+    const toSkuCode = (value: string) => value
+      .replace(/iPhone/gi, 'IP')
+      .replace(/Apple Watch/gi, 'AW')
+      .replace(/MacBook/gi, 'MB')
+      .replace(/iPad/gi, 'IPAD')
+      .replace(/[^a-z0-9]+/gi, '')
+      .toUpperCase();
+
+    return [model, category, color, quality].filter(Boolean).map(toSkuCode).join('-');
+  };
+
+  const applyPartSpecification = (changes: Partial<PartItem>) => {
+    setNewPartData((current) => {
+      const next = { ...current, ...changes };
+      if (changes.category !== undefined && !/back\s*glass/i.test(changes.category)) {
+        next.backGlassColor = undefined;
+      }
+      if (changes.deviceCompatibility !== undefined && /back\s*glass/i.test(next.category || '')) {
+        next.backGlassColor = undefined;
+      }
+      return {
+        ...next,
+        name: generatePartName(next) || current.name || '',
+        sku: generatePartSku(next) || current.sku || '',
+      };
+    });
+  };
+
+  const isBackGlassCategory = /back\s*glass/i.test(newPartData.category || '');
+  const selectedPartModel = newPartData.deviceCompatibility?.[0] || '';
+  const availableBackGlassColors = selectedPartModel ? getAvailableColorsForModel(selectedPartModel) : [];
+  const existingLocationBins = useMemo(
+    () => [...new Set(parts.map((part) => part.locationBin?.trim()).filter((bin): bin is string => Boolean(bin)))].sort((a, b) => a.localeCompare(b)),
+    [parts]
+  );
+  const matrixModels = useMemo(
+    () => [...new Set(parts.flatMap((part) => part.deviceCompatibility.filter(Boolean)))].sort((a, b) => a.localeCompare(b)),
+    [parts]
+  );
+  const matrixCategories = useMemo(
+    () => [...new Set(parts.map((part) => part.category).filter(Boolean))].sort((a, b) => a.localeCompare(b)),
+    [parts]
+  );
+
+  // Inventory category options are owned by System Management / Price List.
+  // Old part records must not add obsolete values back into this selector.
+  useEffect(() => {
+    setNewPartData((current) => {
+      const category = current.category && categories.includes(current.category) ? current.category : '';
+      const currentModel = current.deviceCompatibility?.[0] || '';
+      const deviceCompatibility = activeDeviceModels.includes(currentModel)
+        ? current.deviceCompatibility
+        : [];
+      return { ...current, category, deviceCompatibility };
+    });
+  }, [activeDeviceModels, categories]);
+
+  const resetNewPartData = () => {
+    const freshPart: Partial<PartItem> = {
+      sku: '',
+      name: '',
+      applePartNumber: '',
+      category: '',
+      deviceCompatibility: [],
+      qualityTier: undefined,
+      quantityInStock: 0,
+      reservedQuantity: 0,
+      reorderPoint: 3,
+      costPrice: 0,
+      sellingPrice: 0,
+      supplierId: '',
+      supplierName: '',
+      locationBin: '',
+      isSerialized: false,
+    };
+    setNewPartData({ ...freshPart, name: generatePartName(freshPart) });
+  };
+
+  useEffect(() => {
+    if (showAddModal) resetNewPartData();
+  }, [showAddModal]);
 
   // Analytics Metrics
   const metrics = useMemo(() => {
@@ -398,10 +476,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     let outOfStockCount = 0;
 
     const qualityCounts = {
-      'OEM Original Pulled': 0,
-      'Refurbished Grade A': 0,
-      'Premium Aftermarket': 0,
-      'Standard Aftermarket': 0,
+      'Original': 0,
+      'OEM': 0,
+      'Genuine': 0,
     };
 
     parts.forEach((p) => {
@@ -442,7 +519,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       const matchesModel =
         selectedModelFilter === 'ALL' ||
         part.deviceCompatibility.some(
-          (d) => d.toLowerCase().includes(selectedModelFilter.toLowerCase()) || selectedModelFilter.toLowerCase().includes(d.toLowerCase())
+          (device) => isSameDeviceModel(device, selectedModelFilter)
         );
       const matchesLowStock = !showLowStockOnly || part.quantityInStock <= part.reorderPoint;
       
@@ -468,8 +545,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   }, [filteredParts, safeCurrentPage]);
 
   const handleSaveNewPart = () => {
-    if (!newPartData.name || !newPartData.sku) {
-      alert('Please enter Part Name and SKU.');
+    if (!newPartData.name || !newPartData.sku || !newPartData.category || !newPartData.qualityTier || !newPartData.supplierId || !newPartData.deviceCompatibility?.[0] || (isBackGlassCategory && !newPartData.backGlassColor)) {
+      alert('Choose a device model, category, quality tier, and supplier. Back Glass parts also need a color. Then enter the part name and SKU.');
       return;
     }
 
@@ -478,23 +555,23 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       sku: newPartData.sku || `SKU-${Date.now()}`,
       name: newPartData.name,
       applePartNumber: newPartData.applePartNumber || '',
-      category: newPartData.category || 'Display',
-      deviceCompatibility: newPartData.deviceCompatibility && newPartData.deviceCompatibility.length > 0
-        ? newPartData.deviceCompatibility
-        : ['iPhone 15 Pro'],
-      qualityTier: (newPartData.qualityTier as PartQualityTier) || 'OEM Original Pulled',
+      category: newPartData.category || '',
+      deviceCompatibility: newPartData.deviceCompatibility || [],
+      backGlassColor: newPartData.backGlassColor || undefined,
+      qualityTier: (newPartData.qualityTier as PartQualityTier) || 'OEM',
       quantityInStock: Number(newPartData.quantityInStock) || 0,
       reservedQuantity: 0,
       reorderPoint: Number(newPartData.reorderPoint) || 3,
       costPrice: Number(newPartData.costPrice) || 0,
       sellingPrice: Number(newPartData.sellingPrice) || 0,
-      supplierId: newPartData.supplierId || suppliers[0]?.id || 'sup-1',
-      supplierName: newPartData.supplierName || suppliers[0]?.name || 'MobileSentrix OEM',
-      locationBin: newPartData.locationBin || 'BIN-A01',
+      supplierId: newPartData.supplierId,
+      supplierName: newPartData.supplierName || '',
+      locationBin: newPartData.locationBin || '',
       isSerialized: newPartData.isSerialized || false,
     };
 
     onAddPart(part);
+    resetNewPartData();
     setShowAddModal(false);
   };
 
@@ -518,7 +595,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <Boxes className="w-4 h-4" />
             </div>
             <div>
-              <h1 className="text-base font-black text-[#1D1D1F] tracking-tight">Parts Inventory & Stock Matrix</h1>
+              <h1 className="text-base font-black text-[#1D1D1F] tracking-tight">Parts Inventory</h1>
             </div>
           </div>
         </div>
@@ -529,15 +606,27 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           <div className="bg-[#F5F5F7] p-1 rounded-xl border border-[#E5E5EA] flex items-center space-x-1">
             <button
               type="button"
-              onClick={() => setViewMode('catalog')}
+              onClick={() => setViewMode('stock')}
               className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer ${
-                viewMode === 'catalog'
+                viewMode === 'stock'
                   ? 'bg-white text-[#0071E3] shadow-xs border border-[#0071E3]/20'
                   : 'text-[#86868B] hover:text-[#1D1D1F]'
               }`}
             >
               <List className="w-3.5 h-3.5" />
-              <span className="hidden lg:inline">Catalog</span>
+              <span>Stock</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('profit')}
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer ${
+                viewMode === 'profit'
+                  ? 'bg-white text-[#0071E3] shadow-xs border border-[#0071E3]/20'
+                  : 'text-[#86868B] hover:text-[#1D1D1F]'
+              }`}
+            >
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span>Profit</span>
             </button>
             <button
               type="button"
@@ -549,34 +638,15 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               }`}
             >
               <Grid className="w-3.5 h-3.5" />
-              <span className="hidden lg:inline">Matrix</span>
+              <span className="hidden sm:inline">Matrix</span>
             </button>
           </div>
 
-          {/* Inventory Settings Button */}
-          <button
-            type="button"
-            onClick={() => setShowInventorySettingsModal(true)}
-            aria-label="Inventory settings"
-            className="w-8 h-8 bg-white hover:bg-[#F5F5F7] text-[#1D1D1F] border border-[#E5E5EA] font-extrabold text-xs rounded-lg transition-all shadow-2xs flex items-center justify-center cursor-pointer active:scale-95"
-            title="Manage Supplier Name Data & Quality Tiers"
-          >
-            <Settings className="w-4 h-4 text-[#0071E3]" />
-          </button>
-
-          {/* Add Part Button */}
-          <button
-            type="button"
-            onClick={() => setShowAddModal(true)}
-            className="px-3 py-2 bg-[#0071E3] hover:bg-[#0051B3] text-white font-extrabold text-xs rounded-lg transition-all shadow-2xs flex items-center space-x-1.5 cursor-pointer active:scale-95"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add Part</span>
-          </button>
         </div>
       </div>
 
-      {/* Analytics Summary Banner */}
+      {/* Financial summary belongs to the Profit view, leaving Stock and Matrix full-height. */}
+      {viewMode === 'profit' && (
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Total Stock Items Card */}
         <div className="bg-white p-4 rounded-2xl border border-[#E5E5EA] shadow-2xs space-y-2">
@@ -650,6 +720,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         </button>
 
       </div>
+      )}
 
       {/* Filter Toolbar */}
       <div className="space-y-2 rounded-xl border border-[var(--border)] bg-[var(--card-bg)] p-2.5">
@@ -664,15 +735,13 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 value={selectedModelFilter}
                 onChange={setSelectedModelFilter}
                 options={[
-                  { value: 'ALL', label: 'All Models', badge: activeDeviceModels.length },
-                  ...activeDeviceModels.map((model) => ({
+                  { value: 'ALL', label: 'All Models', badge: inventoryDeviceModels.length },
+                  ...inventoryDeviceModels.map((model) => ({
                     value: model,
                     label: model,
                     badge: parts.filter((part) =>
                       part.deviceCompatibility.some(
-                        (device) =>
-                          device.toLowerCase().includes(model.toLowerCase()) ||
-                          model.toLowerCase().includes(device.toLowerCase()),
+                        (device) => isSameDeviceModel(device, model),
                       ),
                     ).length,
                   })),
@@ -728,27 +797,25 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         </div>
       </div>
 
-      {/* VIEW MODE 1: CATALOG TABLE */}
-      {viewMode === 'catalog' && (
-        <div className="bg-white border border-[#E5E5EA] rounded-2xl overflow-hidden text-xs shadow-xs">
-          <div className="overflow-x-auto min-h-[440px] max-h-[calc(100vh-240px)] overflow-y-auto rounded-xl">
+      {/* VIEW MODE 1: STOCK TABLE */}
+      {viewMode === 'stock' && (
+        <div className="workspace-panel workspace-panel--standard rounded-2xl border border-[#E5E5EA] bg-white text-xs shadow-xs">
+          <div className="workspace-panel__scroll rounded-xl">
             <table className="w-full text-left border-collapse">
               <thead className="sticky top-0 z-20 bg-[#F5F5F7] text-[#86868B] text-[10px] uppercase font-mono border-b border-[#E5E5EA] shadow-2xs">
                 <tr>
-                  <th className="p-3.5 bg-[#F5F5F7]">Part Name & SKU / Apple PN</th>
-                  <th className="p-3.5 bg-[#F5F5F7]">Quality Tier</th>
-                  <th className="p-3.5 bg-[#F5F5F7]">Supplier Name</th>
-                  <th className="p-3.5 bg-[#F5F5F7]">Device Compatibility</th>
-                  <th className="p-3.5 bg-[#F5F5F7]">Stock Level & Bar</th>
-                  <th className="p-3.5 bg-[#F5F5F7]">Cost & Retail Selling (MMK)</th>
-                  <th className="p-3.5 bg-[#F5F5F7]">Bin Location</th>
-                  <th className="p-3.5 text-right bg-[#F5F5F7]">Stock Action</th>
+                  <th className="p-2.5 bg-[#F5F5F7]">Part Name & SKU</th>
+                  <th className="p-2.5 bg-[#F5F5F7]">Quality</th>
+                  <th className="p-2.5 bg-[#F5F5F7]">Stock</th>
+                  <th className="p-2.5 bg-[#F5F5F7]">Selling Price</th>
+                  <th className="p-2.5 bg-[#F5F5F7]">Bin</th>
+                  <th className="p-2.5 text-right bg-[#F5F5F7]">Detail</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E5E5EA]">
                 {filteredParts.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="p-12 text-center space-y-2">
+                    <td colSpan={6} className="p-12 text-center space-y-2">
                       <PackageX className="w-8 h-8 text-[#86868B] mx-auto" />
                       <p className="text-sm font-bold text-[#1D1D1F]">No inventory components found matching your filter</p>
                       <p className="text-xs text-[#86868B]">Try resetting the search query or quality tier selection.</p>
@@ -770,8 +837,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   paginatedParts.map((part) => {
                     const isLow = part.quantityInStock <= part.reorderPoint;
                     const isOut = part.quantityInStock === 0;
-                    const unitProfit = part.sellingPrice - part.costPrice;
-                    const marginPercent = part.sellingPrice > 0 ? Math.round((unitProfit / part.sellingPrice) * 100) : 0;
 
                     return (
                       <tr key={part.id} className="hover:bg-slate-50/80 transition-colors">
@@ -782,77 +847,37 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                               <Cpu className="w-3.5 h-3.5" />
                             </div>
                             <div>
-                              <p className="font-extrabold text-[#1D1D1F] text-xs leading-snug flex items-center space-x-1.5 flex-wrap gap-1">
-                                <span className="hover:text-[#0071E3] transition-colors">{part.name}</span>
-                                {part.category && (
-                                  <span className="bg-slate-100 text-slate-700 text-[10px] font-bold px-1.5 py-0.5 rounded border border-slate-200">
-                                    {part.category}
-                                  </span>
-                                )}
-                                {part.isSerialized && (
-                                  <span className="bg-indigo-50 text-indigo-700 text-[9px] font-black px-1.5 py-0.2 rounded border border-indigo-200">
-                                    SERIALIZED
-                                  </span>
-                                )}
+                              <p className="font-extrabold text-[#1D1D1F] text-xs leading-snug">
+                                {part.name}
                               </p>
-                              <div className="flex items-center space-x-2 mt-1">
-                                <span className="font-mono text-[10px] font-extrabold text-[#0071E3] bg-[#0071E3]/10 px-2 py-0.5 rounded-md border border-[#0071E3]/20 shadow-2xs">
-                                  SKU: {part.sku}
-                                </span>
-                                {part.applePartNumber && (
-                                  <span className="text-[10px] text-slate-700 font-mono bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200 font-bold flex items-center space-x-1">
-                                    <span>PN: {part.applePartNumber}</span>
-                                  </span>
-                                )}
-                              </div>
+                              <p className="mt-1 font-mono text-[9px] font-medium text-[#86868B]">SKU {part.sku}</p>
                             </div>
                           </div>
                         </td>
 
                         {/* Quality Tier */}
                         <td className="p-3.5">
-                          {part.qualityTier === 'OEM Original Pulled' || part.qualityTier.includes('Original') ? (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-1 rounded-lg bg-blue-50 text-blue-800 border border-blue-200 shadow-2xs">
-                              <ShieldCheck className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                          {part.qualityTier === 'Original' || part.qualityTier.includes('Original') ? (
+                            <span className="inline-flex max-w-[112px] items-center gap-1 truncate rounded-md border border-blue-200 bg-blue-50 px-1.5 py-0.5 text-[10px] font-extrabold text-blue-800">
+                              <ShieldCheck className="h-3 w-3 shrink-0 text-blue-600" />
                               <span>{part.qualityTier}</span>
                             </span>
-                          ) : part.qualityTier === 'Refurbished Grade A' || part.qualityTier.includes('Grade A') || part.qualityTier.includes('Grade S') ? (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
-                              <Sparkles className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                          ) : part.qualityTier === 'OEM' ? (
+                            <span className="inline-flex max-w-[112px] items-center gap-1 truncate rounded-md border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-extrabold text-emerald-800">
+                              <Sparkles className="h-3 w-3 shrink-0 text-emerald-600" />
                               <span>{part.qualityTier}</span>
                             </span>
-                          ) : part.qualityTier === 'Premium Aftermarket' || part.qualityTier.includes('Soft OLED') || part.qualityTier.includes('Premium') ? (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-1 rounded-lg bg-purple-50 text-purple-800 border border-purple-200 shadow-2xs">
-                              <Cpu className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                          ) : part.qualityTier === 'Genuine' ? (
+                            <span className="inline-flex max-w-[112px] items-center gap-1 truncate rounded-md border border-purple-200 bg-purple-50 px-1.5 py-0.5 text-[10px] font-extrabold text-purple-800">
+                              <Cpu className="h-3 w-3 shrink-0 text-purple-600" />
                               <span>{part.qualityTier}</span>
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800 border border-slate-300 shadow-2xs">
-                              <Tag className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+                            <span className="inline-flex max-w-[112px] items-center gap-1 truncate rounded-md border border-slate-300 bg-slate-100 px-1.5 py-0.5 text-[10px] font-extrabold text-slate-800">
+                              <Tag className="h-3 w-3 shrink-0 text-slate-600" />
                               <span>{part.qualityTier}</span>
                             </span>
                           )}
-                        </td>
-
-                        {/* Supplier Name */}
-                        <td className="p-3.5">
-                          <div className="flex items-center space-x-1.5 font-bold text-[#1D1D1F]">
-                            <Truck className="w-3.5 h-3.5 text-[#0071E3] shrink-0" />
-                            <span className="truncate max-w-[130px] font-semibold text-xs" title={part.supplierName || 'Default Vendor'}>
-                              {part.supplierName || 'Default Vendor'}
-                            </span>
-                          </div>
-                        </td>
-
-                        {/* Device Compatibility */}
-                        <td className="p-3.5">
-                          <div className="flex flex-wrap gap-1 max-w-[220px]">
-                            {part.deviceCompatibility.map((dev) => (
-                              <span key={dev} className="bg-[#F5F5F7] text-[#1D1D1F] text-[10px] font-extrabold px-2 py-0.5 rounded-md border border-[#E5E5EA]">
-                                {dev}
-                              </span>
-                            ))}
-                          </div>
                         </td>
 
                         {/* Stock Level & Visual Bar */}
@@ -891,28 +916,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                           </div>
                         </td>
 
-                        {/* Cost & Retail Selling Pricing */}
-                        <td className="p-3.5 font-mono">
-                          <div className="space-y-1 min-w-[160px]">
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="text-[10px] text-[#86868B] font-bold uppercase">Cost:</span>
-                              <span className="text-[#6E6E73] font-semibold">
-                                {part.costPrice.toLocaleString()} MMK
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="text-[10px] text-[#16A34A] font-bold uppercase">Sell:</span>
-                              <span className="text-[#16A34A] font-black">
-                                {part.sellingPrice.toLocaleString()} MMK
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between text-[10px] pt-0.5 border-t border-[#F5F5F7]">
-                              <span className="text-[#0071E3] font-extrabold">Profit:</span>
-                              <span className="font-extrabold text-[#0071E3]">
-                                +{unitProfit.toLocaleString()} MMK ({marginPercent}%)
-                              </span>
-                            </div>
-                          </div>
+                        {/* Selling price only — profit belongs in the Profit tab. */}
+                        <td className="p-2.5 font-mono text-xs font-black text-[#16A34A] whitespace-nowrap">
+                          {part.sellingPrice.toLocaleString()} MMK
                         </td>
 
                         {/* Location Bin */}
@@ -923,51 +929,16 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                           </span>
                         </td>
 
-                        {/* Stock Quick Adjustment Buttons */}
-                        <td className="p-3.5 text-right space-x-1.5 shrink-0">
+                        {/* Detailed stock controls are kept inside the part detail modal. */}
+                        <td className="p-3.5 text-right shrink-0">
                           <button
                             type="button"
-                            onClick={() => onUpdatePartStock(part.id, Math.max(0, part.quantityInStock - 1))}
-                            className="w-7 h-7 bg-[#F5F5F7] hover:bg-red-50 hover:text-red-600 hover:border-red-300 border border-[#E5E5EA] text-[#1D1D1F] rounded-lg font-mono font-black text-xs transition-colors cursor-pointer"
-                            title="Subtract 1 Stock"
+                            onClick={() => setSelectedPartForDetails(part)}
+                            aria-label={`View ${part.name} details`}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] text-[#1D1D1F] transition-colors hover:border-[#0071E3] hover:bg-blue-50 hover:text-[#0071E3]"
+                            title="View part details"
                           >
-                            -
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => onUpdatePartStock(part.id, part.quantityInStock + 1)}
-                            className="w-7 h-7 bg-[#F5F5F7] hover:bg-emerald-50 hover:text-[#16A34A] hover:border-emerald-300 border border-[#E5E5EA] text-[#0071E3] rounded-lg font-mono font-black text-xs transition-colors cursor-pointer"
-                            title="Add 1 Stock"
-                          >
-                            +
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleOpenWarrantyModal(part)}
-                            className="p-1.5 bg-amber-50 hover:bg-amber-600 hover:text-white border border-amber-200 text-amber-700 rounded-lg transition-colors cursor-pointer"
-                            title="File Parts Warranty Claim (RMA) with Supplier"
-                          >
-                            <ShieldAlert className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setEditingPart(part)}
-                            className="p-1.5 bg-[#F5F5F7] hover:bg-[#0071E3] hover:text-white border border-[#E5E5EA] text-[#1D1D1F] rounded-lg transition-colors cursor-pointer"
-                            title="Edit Part Details"
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (window.confirm(`Are you sure you want to delete part "${part.name}" (${part.sku})?`)) {
-                                if (onDeletePart) onDeletePart(part.id);
-                              }
-                            }}
-                            className="p-1.5 bg-rose-50 hover:bg-rose-600 hover:text-white border border-rose-200 text-rose-600 rounded-lg transition-colors cursor-pointer"
-                            title="Delete Part SKU"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Eye className="h-3.5 w-3.5" />
                           </button>
                         </td>
                       </tr>
@@ -980,7 +951,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
           {/* Pagination Bar */}
           {filteredParts.length > 0 && (
-            <div className="p-3.5 bg-white border-t border-[#E5E5EA] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#86868B]">
+            <div className="workspace-panel__footer p-3.5 bg-white border-t border-[#E5E5EA] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#86868B]">
               <span className="font-bold">
                 Showing <strong className="text-[#1D1D1F]">{(safeCurrentPage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(safeCurrentPage * ITEMS_PER_PAGE, filteredParts.length)}</strong> of <strong className="text-[#1D1D1F]">{filteredParts.length}</strong> parts
               </span>
@@ -1036,110 +1007,130 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         </div>
       )}
 
-      {/* VIEW MODE 2: INTERACTIVE STOCK MATRIX GRID */}
-      {viewMode === 'matrix' && (
-        <div className="bg-white border border-[#E5E5EA] rounded-2xl p-5 space-y-4 shadow-xs">
-          <div className="flex justify-between items-center pb-3 border-b border-[#E5E5EA]">
-            <div>
-              <h3 className="font-black text-base text-[#1D1D1F] flex items-center space-x-2">
-                <Grid className="w-5 h-5 text-[#0071E3]" />
-                <span>Apple Device Model x Component Stock Matrix</span>
-              </h3>
-              <p className="text-xs text-[#86868B] mt-0.5">
-                Visual matrix overview showing available hardware components across key Apple device lines
-              </p>
+      {/* VIEW MODE 2: PROFIT TABLE */}
+      {viewMode === 'profit' && (
+        <div className="workspace-panel workspace-panel--with-summary rounded-2xl border border-[#E5E5EA] bg-white text-xs shadow-xs">
+          <div className="flex items-center justify-between border-b border-[#E5E5EA] px-3 py-2.5">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-[#0071E3]" />
+              <div>
+                <h3 className="font-extrabold text-[#1D1D1F]">Profit Analysis</h3>
+                <p className="text-[10px] text-[#86868B]">Cost, selling price, and expected margin per unit</p>
+              </div>
             </div>
-            <div className="flex items-center space-x-3 text-xs font-bold">
-              <span className="flex items-center space-x-1 text-[#16A34A]">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#16A34A]" />
-                <span>In Stock (&gt;3)</span>
-              </span>
-              <span className="flex items-center space-x-1 text-amber-600">
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-                <span>Low Stock (1-3)</span>
-              </span>
-              <span className="flex items-center space-x-1 text-red-600">
-                <span className="w-2.5 h-2.5 rounded-full bg-red-600" />
-                <span>Out of Stock (0)</span>
-              </span>
-            </div>
+            <span className="font-mono text-[11px] font-black text-[#0071E3]">+{metrics.totalPotentialProfit.toLocaleString()} MMK</span>
           </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[700px]">
-              <thead>
-                <tr className="bg-[#F5F5F7] text-[#86868B] text-[11px] uppercase font-mono border-b border-[#E5E5EA]">
-                  <th className="p-3 font-bold">Apple Device Model</th>
-                  {MATRIX_CATEGORIES.map((cat) => (
-                    <th key={cat} className="p-3 font-bold text-center">{cat}</th>
-                  ))}
+          <div className="workspace-panel__scroll">
+            <table className="w-full text-left">
+              <thead className="sticky top-0 z-20 border-b border-[#E5E5EA] bg-[#F5F5F7] font-mono text-[10px] uppercase text-[#86868B]">
+                <tr>
+                  <th className="p-2.5">Part</th>
+                  <th className="p-2.5">Cost</th>
+                  <th className="p-2.5">Selling</th>
+                  <th className="p-2.5">Profit / Unit</th>
+                  <th className="p-2.5">Margin</th>
+                  <th className="p-2.5 text-right">Detail</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E5E5EA]">
-                {activeDeviceModels.map((model) => (
-                  <tr key={model} className="hover:bg-slate-50 transition-colors">
-                    <td className="p-3 font-extrabold text-[#1D1D1F] text-xs bg-[#F8F9FA] border-r border-[#E5E5EA]">
-                      <div className="flex items-center space-x-2">
-                        <Smartphone className="w-4 h-4 text-[#0071E3] shrink-0" />
-                        <span>{model}</span>
-                      </div>
-                    </td>
-
-                    {MATRIX_CATEGORIES.map((category) => {
-                      // Find parts matching model and category
-                      const matchingParts = parts.filter(
-                        (p) =>
-                          p.category.toLowerCase().includes(category.toLowerCase()) &&
-                          p.deviceCompatibility.some((d) => d.toLowerCase().includes(model.toLowerCase()))
-                      );
-
-                      const totalQty = matchingParts.reduce((acc, p) => acc + p.quantityInStock, 0);
-
-                      return (
-                        <td key={category} className="p-2 text-center align-middle">
-                          {matchingParts.length === 0 ? (
-                            <span className="text-[10px] text-[#C7C7CC] font-mono">--</span>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setViewMode('catalog');
-                                setSearchQuery(model);
-                                setSelectedCategory(category);
-                              }}
-                              className={`w-full py-2 px-1 rounded-xl text-xs font-black font-mono transition-all flex flex-col items-center justify-center cursor-pointer shadow-2xs hover:scale-105 ${
-                                totalQty === 0
-                                  ? 'bg-red-50 text-red-700 border border-red-200'
-                                  : totalQty <= 3
-                                  ? 'bg-amber-50 text-amber-900 border border-amber-300'
-                                  : 'bg-emerald-50 text-[#16A34A] border border-emerald-300'
-                              }`}
-                              title={`Click to view ${matchingParts.length} parts for ${model} ${category}`}
-                            >
-                              <span>{totalQty} in stock</span>
-                              <span className="text-[9px] font-normal opacity-80">
-                                ({matchingParts.length} SKUs)
-                              </span>
-                            </button>
-                          )}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
+                {paginatedParts.map((part) => {
+                  const profit = part.sellingPrice - part.costPrice;
+                  const margin = part.sellingPrice ? Math.round((profit / part.sellingPrice) * 100) : 0;
+                  return (
+                    <tr key={part.id} className="hover:bg-slate-50/80">
+                      <td className="p-2.5"><p className="max-w-[260px] truncate font-bold text-[#1D1D1F]">{part.name}</p><p className="mt-0.5 font-mono text-[10px] text-[#86868B]">{part.sku}</p></td>
+                      <td className="p-2.5 font-mono text-[#6E6E73] whitespace-nowrap">{part.costPrice.toLocaleString()} MMK</td>
+                      <td className="p-2.5 font-mono font-bold text-[#16A34A] whitespace-nowrap">{part.sellingPrice.toLocaleString()} MMK</td>
+                      <td className={`p-2.5 font-mono font-black whitespace-nowrap ${profit >= 0 ? 'text-[#0071E3]' : 'text-rose-600'}`}>{profit >= 0 ? '+' : ''}{profit.toLocaleString()} MMK</td>
+                      <td className="p-2.5"><span className={`rounded-md px-1.5 py-0.5 font-mono text-[10px] font-black ${margin >= 0 ? 'bg-blue-50 text-[#0071E3]' : 'bg-rose-50 text-rose-600'}`}>{margin}%</span></td>
+                      <td className="p-2.5 text-right"><button type="button" aria-label={`View ${part.name} details`} title="View part details" onClick={() => setSelectedPartForDetails(part)} className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-[#E5E5EA] bg-white text-[#1D1D1F] hover:border-[#0071E3] hover:text-[#0071E3]"><Eye className="h-3 w-3" /></button></td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         </div>
       )}
 
+      {/* VIEW MODE 3: LIVE STOCK MATRIX — derived only from saved inventory rows. */}
+      {viewMode === 'matrix' && (
+        <div className="workspace-panel workspace-panel--with-summary rounded-2xl border border-[#E5E5EA] bg-white text-xs shadow-xs">
+          <div className="flex items-center justify-between border-b border-[#E5E5EA] px-3 py-2.5">
+            <div className="flex items-center gap-2">
+              <Grid className="h-4 w-4 text-[#0071E3]" />
+              <div>
+                <h3 className="font-extrabold text-[#1D1D1F]">Apple Device Model × Component Stock Matrix</h3>
+                <p className="text-[10px] text-[#86868B]">Live totals from saved inventory components</p>
+              </div>
+            </div>
+            <span className="text-[10px] font-bold text-[#86868B]">{matrixModels.length} models · {matrixCategories.length} categories</span>
+          </div>
+
+          {matrixModels.length && matrixCategories.length ? (
+            <div className="workspace-panel__scroll">
+              <table className="min-w-max w-full text-left">
+                <thead className="sticky top-0 z-20 border-b border-[#E5E5EA] bg-[#F5F5F7] font-mono text-[10px] uppercase text-[#86868B]">
+                  <tr>
+                    <th className="sticky left-0 z-30 min-w-44 bg-[#F5F5F7] p-2.5">Device Model</th>
+                    {matrixCategories.map((category) => <th key={category} className="min-w-28 p-2.5 text-center">{category}</th>)}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E5E5EA]">
+                  {matrixModels.map((model) => (
+                    <tr key={model} className="hover:bg-slate-50/80">
+                      <td className="sticky left-0 z-10 bg-white p-2.5 font-bold text-[#1D1D1F]">{model}</td>
+                      {matrixCategories.map((category) => {
+                        const matchingParts = parts.filter((part) =>
+                          part.category === category && part.deviceCompatibility.some((device) => device.toLowerCase() === model.toLowerCase())
+                        );
+                        const quantity = matchingParts.reduce((total, part) => total + part.quantityInStock, 0);
+                        const reorderPoint = matchingParts.reduce((total, part) => total + part.reorderPoint, 0);
+                        const isLow = matchingParts.length > 0 && quantity <= reorderPoint;
+                        return (
+                          <td key={category} className="p-1.5 text-center">
+                            {matchingParts.length ? (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedModelFilter(model);
+                                  setSelectedCategory(category);
+                                  setViewMode('stock');
+                                }}
+                                className={`min-w-14 rounded-lg border px-2 py-1 font-mono text-xs font-black ${
+                                  quantity === 0 ? 'border-rose-200 bg-rose-50 text-rose-600' : isLow ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                                }`}
+                                title={`${matchingParts.length} SKU${matchingParts.length === 1 ? '' : 's'} · ${quantity} units`}
+                              >
+                                {quantity}
+                              </button>
+                            ) : <span className="text-[#C7C7CC]">—</span>}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 text-center">
+              <Boxes className="h-8 w-8 text-[#86868B]" />
+              <p className="font-bold text-[#1D1D1F]">No saved inventory data yet</p>
+              <p className="text-[11px] text-[#86868B]">Add components with a device model and category to populate the matrix.</p>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* MODAL: ADD NEW PART */}
       {showAddModal && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-[#E5E5EA] rounded-2xl max-w-2xl w-full p-6 space-y-5 text-xs shadow-2xl">
-            <div className="flex justify-between items-center border-b border-[#E5E5EA] pb-3">
-              <h3 className="text-base font-extrabold text-[#1D1D1F] flex items-center space-x-2">
-                <Plus className="w-5 h-5 text-[#0071E3]" />
+          <div className="flex h-[82vh] max-h-[82vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-[#E5E5EA] bg-white text-xs shadow-2xl">
+            <div className={isDeviceModelChooserOpen ? 'hidden' : 'contents'}>
+            <div className="flex shrink-0 items-center justify-between border-b border-[#E5E5EA] px-4 py-3">
+              <h3 className="flex items-center space-x-2 text-sm font-extrabold text-[#1D1D1F]">
+                <Plus className="h-4 w-4 text-[#0071E3]" />
                 <span>Register New Hardware Component</span>
               </h3>
               <button
@@ -1150,114 +1141,154 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="sm:col-span-2 space-y-2">
-                <label className="block font-bold text-[#1D1D1F]">Part Name *</label>
-                <input
-                  type="text"
-                  value={newPartData.name || ''}
-                  onChange={(e) => setNewPartData({ ...newPartData, name: e.target.value })}
-                  placeholder="e.g. iPhone 15 Pro Max - OLED Display Assembly (OEM Pulled)"
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2.5 text-xs font-bold text-[#1D1D1F] focus:bg-white focus:border-[#0071E3] focus:outline-none"
-                />
-
-                {/* Quick Name Presets & Styling Assistant */}
-                <div className="p-2.5 bg-blue-50/70 border border-blue-200 rounded-xl space-y-2">
-                  <div className="flex items-center justify-between text-[11px] font-extrabold text-[#0071E3]">
-                    <span className="flex items-center space-x-1">
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>Part Name Style Generator & Presets</span>
+            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-3 [scrollbar-gutter:stable]">
+            <div className="space-y-1">
+              <div className="flex items-center justify-between gap-2">
+                <label className="block font-bold text-[#1D1D1F]">Device Model</label>
+                <span className="font-medium text-[10px] text-[#86868B]">Price List · {activeDeviceModels.length} models</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsDeviceModelChooserOpen(true)}
+                aria-haspopup="dialog"
+                className="flex h-24 w-full items-center justify-between rounded-xl border border-[#0071E3]/30 bg-blue-50/60 px-4 text-left transition-colors hover:border-[#0071E3] hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-[#0071E3]/20"
+                title="Choose a model from the Price List"
+              >
+                <span className="flex min-w-0 items-center gap-2">
+                  <Smartphone className="h-6 w-6 shrink-0 text-[#0071E3]" />
+                  <span className="min-w-0">
+                    <span className="block text-sm font-extrabold text-[#0071E3]">Select Device Model</span>
+                    <span className={`mt-1 block truncate text-xs font-medium ${newPartData.deviceCompatibility?.[0] ? 'text-[#1D1D1F]' : 'text-[#86868B]'}`}>
+                      {newPartData.deviceCompatibility?.[0] || (activeDeviceModels.length ? 'Choose from Price List' : 'No models in Price List')}
                     </span>
-                    <span className="text-[10px] text-[#86868B] font-medium">Click to auto-format name</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    {[
-                      { label: 'OLED Display', cat: 'Display' },
-                      { label: 'High Capacity Battery', cat: 'Battery' },
-                      { label: 'USB-C Charging Flex', cat: 'Charging Port' },
-                      { label: 'Rear Camera Module', cat: 'Camera' },
-                      { label: 'Back Glass Cover', cat: 'Back Glass' },
-                      { label: 'PMIC Power IC Chip', cat: 'Logic Board' },
-                    ].map((preset) => (
-                      <button
-                        key={preset.label}
-                        type="button"
-                        onClick={() => {
-                          const model = newPartData.deviceCompatibility?.[0] || 'iPhone 15 Pro';
-                          const tier = newPartData.qualityTier || customQualityTiers[0] || 'OEM Original Pulled';
-                          setNewPartData({
-                            ...newPartData,
-                            name: `${model} - ${preset.label} (${tier})`,
-                            category: preset.cat,
-                          });
-                        }}
-                        className="px-2 py-0.5 bg-white hover:bg-[#0071E3] hover:text-white text-[#1D1D1F] text-[10px] font-bold rounded-md border border-blue-200 transition-all cursor-pointer shadow-2xs"
-                      >
-                        + {preset.label}
-                      </button>
-                    ))}
-                  </div>
+                  </span>
+                </span>
+                <ArrowRight className="h-5 w-5 shrink-0 text-[#0071E3]" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <div className="mb-1 flex h-4 items-center">
+                  <label className="block font-bold text-[#1D1D1F]">Category</label>
                 </div>
-              </div>
-
-              <div>
-                <label className="block font-bold text-[#1D1D1F] mb-1">SKU / Code *</label>
-                <input
-                  type="text"
-                  value={newPartData.sku || ''}
-                  onChange={(e) => setNewPartData({ ...newPartData, sku: e.target.value })}
-                  placeholder="e.g. DISP-iP15P-OEM"
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2.5 text-xs font-mono text-[#1D1D1F] focus:bg-white focus:border-[#0071E3] focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-[#1D1D1F] mb-1">Apple Part Number (Optional)</label>
-                <input
-                  type="text"
-                  value={newPartData.applePartNumber || ''}
-                  onChange={(e) => setNewPartData({ ...newPartData, applePartNumber: e.target.value })}
-                  placeholder="e.g. 661-02381"
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2.5 text-xs font-mono text-[#1D1D1F] focus:bg-white focus:border-[#0071E3] focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-[#1D1D1F] mb-1">Category</label>
                 <CustomDropdownMenu
                   value={newPartData.category}
-                  onChange={(category) => setNewPartData({ ...newPartData, category })}
+                  onChange={(category) => applyPartSpecification({ category })}
                   options={categories.map((category) => ({ value: category, label: category }))}
+                  placeholder={categories.length ? 'Choose category' : 'Add a category in Settings first'}
                   className="w-full"
-                  buttonClassName="!h-10 !w-full !rounded-xl !border-[#E5E5EA] !bg-[#F5F5F7] !px-2.5"
+                  buttonClassName="!h-9 !w-full !rounded-lg !border-[#E5E5EA] !bg-[#F5F5F7] !px-2.5"
                   menuAlign="left"
                   size="md"
                 />
               </div>
 
               <div>
-                <div className="flex justify-between items-center mb-1">
+                <div className="mb-1 flex h-4 items-center">
                   <label className="block font-bold text-[#1D1D1F]">Quality Tier</label>
+                </div>
+                <CustomDropdownMenu
+                  value={newPartData.qualityTier || ''}
+                  onChange={(qualityTier) => applyPartSpecification({ qualityTier: qualityTier as PartQualityTier })}
+                  options={customQualityTiers.map((tier) => ({ value: tier, label: tier }))}
+                  placeholder="Choose quality tier"
+                  className="w-full"
+                  buttonClassName="!h-9 !w-full !rounded-lg !border-[#E5E5EA] !bg-[#F5F5F7] !px-2.5"
+                  menuAlign="left"
+                  size="md"
+                />
+              </div>
+            </div>
+
+            {isBackGlassCategory && (
+              <div className="rounded-xl border border-[#0071E3]/20 bg-blue-50/40 p-3">
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <Palette className="h-4 w-4 text-[#0071E3]" />
+                    <div>
+                      <p className="text-xs font-extrabold text-[#1D1D1F]">Back Glass Color</p>
+                      <p className="text-[10px] text-[#86868B]">Match the original device color</p>
+                    </div>
+                  </div>
+                  {newPartData.backGlassColor && (
+                    <span className="text-[10px] font-bold text-[#0071E3]">{newPartData.backGlassColor}</span>
+                  )}
+                </div>
+
+                {availableBackGlassColors.length ? (
+                  <div className="flex flex-wrap gap-2">
+                    {availableBackGlassColors.map((colorName) => {
+                      const colorStyle = getRealisticColorStyle(colorName);
+                      const isSelected = newPartData.backGlassColor === colorName;
+                      return (
+                        <button
+                          key={colorName}
+                          type="button"
+                          onClick={() => applyPartSpecification({ backGlassColor: colorName })}
+                          className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-2 text-[10px] font-bold transition-colors ${
+                            isSelected
+                              ? 'border-[#0071E3] bg-white text-[#0071E3] shadow-xs'
+                              : 'border-[#E5E5EA] bg-white text-[#1D1D1F] hover:border-[#0071E3]/50'
+                          }`}
+                        >
+                          <span
+                            className={`h-3.5 w-3.5 rounded-full border border-white shadow-sm ${colorStyle.border}`}
+                            style={{ background: colorStyle.gradient }}
+                          />
+                          <span>{colorName}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-[11px] font-medium text-[#86868B]">Select a device model first to choose the correct back glass color.</p>
+                )}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <div className="mb-1 flex items-center justify-between gap-3">
+                  <label className="block font-bold text-[#1D1D1F]">Part Name *</label>
                   <button
                     type="button"
-                    onClick={() => setShowAddQualityMiniModal(true)}
-                    className="text-[10px] text-purple-700 font-extrabold hover:underline flex items-center space-x-0.5 cursor-pointer"
+                    onClick={() => setNewPartData((current) => ({ ...current, name: generatePartName(current) || current.name || '' }))}
+                    className="inline-flex shrink-0 items-center gap-1 text-[10px] font-extrabold text-[#0071E3] hover:underline"
+                    title="Generate from model, category, and quality tier"
                   >
-                    <Plus className="w-3 h-3" />
-                    <span>Add Tier</span>
+                    <Sparkles className="h-3 w-3" /> Auto-generate
                   </button>
                 </div>
-                <select
-                  value={newPartData.qualityTier}
-                  onChange={(e) => setNewPartData({ ...newPartData, qualityTier: e.target.value as any })}
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2.5 text-xs font-bold text-[#1D1D1F] focus:bg-white focus:border-[#0071E3] focus:outline-none"
-                >
-                  {customQualityTiers.map((tier) => (
-                    <option key={tier} value={tier}>
-                      {tier}
-                    </option>
-                  ))}
-                </select>
+                <input
+                  type="text"
+                  value={newPartData.name || ''}
+                  onChange={(e) => setNewPartData({ ...newPartData, name: e.target.value })}
+                  placeholder="Select model, category, and quality tier to generate"
+                  className="w-full rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] p-2 text-xs font-bold text-[#1D1D1F] focus:border-[#0071E3] focus:bg-white focus:outline-none"
+                />
+                <p className="mt-1 text-[10px] text-[#86868B]">Model → Category → Quality Tier</p>
+              </div>
+
+              <div className="sm:col-span-2">
+                <div className="mb-1 flex items-center justify-between gap-2">
+                  <label className="block font-bold text-[#1D1D1F]">SKU / Code *</label>
+                  <button
+                    type="button"
+                    onClick={() => setNewPartData((current) => ({ ...current, sku: generatePartSku(current) || current.sku || '' }))}
+                    className="inline-flex items-center gap-1 text-[10px] font-extrabold text-[#0071E3] hover:underline"
+                    title="Generate from model, category, color, and quality tier"
+                  >
+                    <Sparkles className="h-3 w-3" /> Auto-generate
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  value={newPartData.sku || ''}
+                  onChange={(e) => setNewPartData({ ...newPartData, sku: e.target.value })}
+                  placeholder="Generated after specifications are selected"
+                  className="w-full rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] p-2 text-xs font-mono text-[#1D1D1F] focus:border-[#0071E3] focus:bg-white focus:outline-none"
+                />
               </div>
 
               <div className="sm:col-span-2">
@@ -1272,24 +1303,23 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     <span>Add Supplier Data</span>
                   </button>
                 </div>
-                <select
-                  value={newPartData.supplierId || suppliers[0]?.id || ''}
-                  onChange={(e) => {
-                    const selectedSup = suppliers.find((s) => s.id === e.target.value);
+                <CustomDropdownMenu
+                  value={newPartData.supplierId || ''}
+                  onChange={(supplierId) => {
+                    const selectedSup = suppliers.find((supplier) => supplier.id === supplierId);
                     setNewPartData({
                       ...newPartData,
-                      supplierId: e.target.value,
-                      supplierName: selectedSup?.name || e.target.value,
+                      supplierId,
+                      supplierName: selectedSup?.name || '',
                     });
                   }}
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2.5 text-xs font-bold text-[#1D1D1F] focus:bg-white focus:border-[#0071E3] focus:outline-none"
-                >
-                  {suppliers.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name} ({s.code}) - Avg RMA: {s.avgRmaTurnaroundDays} days
-                    </option>
-                  ))}
-                </select>
+                  options={suppliers.map((supplier) => ({ value: supplier.id, label: supplier.name }))}
+                  placeholder={suppliers.length ? 'Choose supplier name' : 'Add a supplier first'}
+                  className="w-full"
+                  buttonClassName="!h-9 !w-full !rounded-lg !border-[#E5E5EA] !bg-[#F5F5F7] !px-2.5"
+                  menuAlign="left"
+                  size="md"
+                />
               </div>
 
               <div>
@@ -1298,7 +1328,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   type="number"
                   value={newPartData.costPrice || ''}
                   onChange={(e) => setNewPartData({ ...newPartData, costPrice: Number(e.target.value) })}
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2.5 text-xs font-mono font-bold text-[#1D1D1F] focus:bg-white focus:border-[#0071E3] focus:outline-none"
+                  className="w-full rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] p-2 text-xs font-mono font-bold text-[#1D1D1F] focus:border-[#0071E3] focus:bg-white focus:outline-none"
                 />
               </div>
 
@@ -1308,7 +1338,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   type="number"
                   value={newPartData.sellingPrice || ''}
                   onChange={(e) => setNewPartData({ ...newPartData, sellingPrice: Number(e.target.value) })}
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2.5 text-xs font-mono font-bold text-[#16A34A] focus:bg-white focus:border-[#0071E3] focus:outline-none"
+                  className="w-full rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] p-2 text-xs font-mono font-bold text-[#16A34A] focus:border-[#0071E3] focus:bg-white focus:outline-none"
                 />
               </div>
 
@@ -1318,51 +1348,64 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   type="number"
                   value={newPartData.quantityInStock || ''}
                   onChange={(e) => setNewPartData({ ...newPartData, quantityInStock: Number(e.target.value) })}
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2.5 text-xs font-mono text-[#1D1D1F] focus:bg-white focus:border-[#0071E3] focus:outline-none"
+                  className="w-full rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] p-2 text-xs font-mono text-[#1D1D1F] focus:border-[#0071E3] focus:bg-white focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-[#1D1D1F] mb-1">Storage Location Bin</label>
-                <input
-                  type="text"
-                  value={newPartData.locationBin || ''}
-                  onChange={(e) => setNewPartData({ ...newPartData, locationBin: e.target.value })}
-                  placeholder="e.g. BIN-A01"
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2.5 text-xs font-mono text-[#1D1D1F] focus:bg-white focus:border-[#0071E3] focus:outline-none"
-                />
-              </div>
-
-              <div className="sm:col-span-2">
-                <label className="block font-bold text-[#1D1D1F] mb-1">
-                  Device Compatibility (From Price Catalog)
-                </label>
-                <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-2.5 bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl">
-                  {activeDeviceModels.map((m) => {
-                    const isSelected = newPartData.deviceCompatibility?.includes(m);
-                    return (
-                      <button
-                        key={m}
-                        type="button"
-                        onClick={() => {
-                          const current = newPartData.deviceCompatibility || [];
-                          const next = isSelected
-                            ? current.filter((item) => item !== m)
-                            : [...current, m];
-                          setNewPartData({ ...newPartData, deviceCompatibility: next });
-                        }}
-                        className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
-                          isSelected
-                            ? 'bg-[#0071E3] text-white shadow-xs'
-                            : 'bg-white text-[#1D1D1F] border border-[#E5E5EA] hover:bg-[#E5E5EA]'
-                        }`}
-                      >
-                        {m}
-                      </button>
-                    );
-                  })}
+                <div className="mb-1 flex items-center justify-between gap-2">
+                  <label className="block font-bold text-[#1D1D1F]">Storage Location Bin</label>
+                  {existingLocationBins.length > 0 && (
+                    <span className="text-[10px] font-medium text-[#86868B]">{existingLocationBins.length} saved</span>
+                  )}
+                </div>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={newPartData.locationBin || ''}
+                    onFocus={() => setIsLocationBinMenuOpen(true)}
+                    onChange={(e) => {
+                      setNewPartData({ ...newPartData, locationBin: e.target.value });
+                      setIsLocationBinMenuOpen(true);
+                    }}
+                    placeholder="Choose saved bin or type a new bin"
+                    className="w-full rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] p-2 pr-8 text-xs font-mono text-[#1D1D1F] focus:border-[#0071E3] focus:bg-white focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setIsLocationBinMenuOpen((open) => !open)}
+                    className="absolute right-1 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-[#86868B] hover:bg-white hover:text-[#0071E3]"
+                    title="Choose a saved bin"
+                  >
+                    <ChevronDown className={`h-3.5 w-3.5 transition-transform ${isLocationBinMenuOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  {isLocationBinMenuOpen && (
+                    <div className="absolute z-30 mt-1 w-full overflow-hidden rounded-lg border border-[#E5E5EA] bg-white p-1 shadow-lg">
+                      {existingLocationBins.length ? (
+                        <div className="max-h-32 overflow-y-auto">
+                          {existingLocationBins.map((bin) => (
+                            <button
+                              key={bin}
+                              type="button"
+                              onMouseDown={(event) => event.preventDefault()}
+                              onClick={() => {
+                                setNewPartData({ ...newPartData, locationBin: bin });
+                                setIsLocationBinMenuOpen(false);
+                              }}
+                              className="flex w-full items-center rounded-md px-2 py-1.5 text-left font-mono text-[11px] font-bold text-[#1D1D1F] hover:bg-blue-50 hover:text-[#0071E3]"
+                            >
+                              {bin}
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="px-2 py-2 text-[11px] text-[#86868B]">No saved bins yet — type a new bin above.</p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
+
             </div>
 
             {/* Projected Margin Card */}
@@ -1374,22 +1417,81 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 </span>
               </div>
             )}
+            </div>
 
-            <div className="flex justify-end space-x-2 pt-2 border-t border-[#E5E5EA]">
+            <div className="flex shrink-0 justify-end space-x-2 border-t border-[#E5E5EA] bg-white px-4 py-2.5">
               <button
                 type="button"
                 onClick={() => setShowAddModal(false)}
-                className="px-4 py-2.5 bg-white border border-[#E5E5EA] text-[#1D1D1F] font-bold rounded-xl hover:bg-[#F5F5F7]"
+                className="rounded-lg border border-[#E5E5EA] bg-white px-3 py-2 text-xs font-bold text-[#1D1D1F] hover:bg-[#F5F5F7]"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleSaveNewPart}
-                className="px-5 py-2.5 bg-[#0071E3] hover:bg-[#0051B3] text-white font-extrabold rounded-xl shadow-xs transition-all active:scale-95"
+                className="rounded-lg bg-[#0071E3] px-4 py-2 text-xs font-extrabold text-white shadow-xs transition-all hover:bg-[#0051B3] active:scale-95"
               >
                 Save Hardware Component
               </button>
+            </div>
+            </div>
+
+            {isDeviceModelChooserOpen && (
+              <DeviceModelChooserModal
+                embedded
+                isOpen
+                onClose={() => setIsDeviceModelChooserOpen(false)}
+                selectedDevice={newPartData.deviceCompatibility?.[0] || ''}
+                onSelectDevice={(model) => applyPartSpecification({ deviceCompatibility: [model] })}
+              />
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: PART DETAILS */}
+      {selectedPartForDetails && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg space-y-4 rounded-2xl border border-[#E5E5EA] bg-white p-5 text-xs shadow-2xl">
+            <div className="flex items-start justify-between gap-3 border-b border-[#E5E5EA] pb-3">
+              <div className="min-w-0">
+                <p className="font-mono text-[10px] font-extrabold text-[#0071E3]">{selectedPartForDetails.sku}</p>
+                <h3 className="mt-1 truncate text-sm font-extrabold text-[#1D1D1F]">{selectedPartForDetails.name}</h3>
+                <p className="mt-1 text-[11px] text-[#86868B]">{selectedPartForDetails.category} · {selectedPartForDetails.qualityTier}</p>
+              </div>
+              <button type="button" onClick={() => setSelectedPartForDetails(null)} className="rounded-lg p-1 text-[#86868B] hover:bg-[#F5F5F7] hover:text-[#1D1D1F]" title="Close details">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <div className="rounded-xl border border-[#E5E5EA] bg-[#F8F9FA] p-3">
+                <p className="text-[10px] font-bold uppercase tracking-wide text-[#86868B]">In Stock</p>
+                <p className="mt-1 font-mono text-xl font-black text-[#1D1D1F]">{selectedPartForDetails.quantityInStock}</p>
+                <div className="mt-2 flex gap-1.5">
+                  <button type="button" onClick={() => { onUpdatePartStock(selectedPartForDetails.id, Math.max(0, selectedPartForDetails.quantityInStock - 1)); setSelectedPartForDetails({ ...selectedPartForDetails, quantityInStock: Math.max(0, selectedPartForDetails.quantityInStock - 1) }); }} className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#E5E5EA] bg-white font-black hover:bg-rose-50 hover:text-rose-600" title="Subtract one">−</button>
+                  <button type="button" onClick={() => { onUpdatePartStock(selectedPartForDetails.id, selectedPartForDetails.quantityInStock + 1); setSelectedPartForDetails({ ...selectedPartForDetails, quantityInStock: selectedPartForDetails.quantityInStock + 1 }); }} className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#E5E5EA] bg-white font-black text-[#0071E3] hover:bg-emerald-50 hover:text-emerald-600" title="Add one">+</button>
+                  <span className="self-center text-[10px] font-bold text-[#86868B]">Min: {selectedPartForDetails.reorderPoint}</span>
+                </div>
+              </div>
+              <div className="rounded-xl border border-[#E5E5EA] bg-[#F8F9FA] p-3">
+                <p className="text-[10px] font-bold uppercase tracking-wide text-[#86868B]">Price & Location</p>
+                <p className="mt-1 font-mono text-[11px] font-bold text-[#1D1D1F]">Cost {selectedPartForDetails.costPrice.toLocaleString()} MMK</p>
+                <p className="font-mono text-[11px] font-black text-[#16A34A]">Sell {selectedPartForDetails.sellingPrice.toLocaleString()} MMK</p>
+                <p className="mt-2 text-[10px] font-semibold text-[#86868B]">Bin: {selectedPartForDetails.locationBin || '—'}</p>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-[#E5E5EA] bg-[#F8F9FA] p-3">
+              <p className="text-[10px] font-bold uppercase tracking-wide text-[#86868B]">Supplier</p>
+              <p className="mt-1 font-semibold text-[#1D1D1F]">{selectedPartForDetails.supplierName || 'No supplier assigned'}</p>
+            </div>
+
+            <div className="flex flex-wrap justify-end gap-2 border-t border-[#E5E5EA] pt-3">
+              <button type="button" onClick={() => { setClaimingWarrantyPart(selectedPartForDetails); setSelectedPartForDetails(null); }} className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 font-extrabold text-amber-700 hover:bg-amber-100"><ShieldAlert className="h-3.5 w-3.5" /> Warranty</button>
+              <button type="button" onClick={() => { setEditingPart(selectedPartForDetails); setSelectedPartForDetails(null); }} className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] px-2.5 font-extrabold text-[#1D1D1F] hover:bg-[#E5E5EA]"><Edit2 className="h-3.5 w-3.5" /> Edit</button>
+              <button type="button" onClick={() => { if (window.confirm(`Delete part “${selectedPartForDetails.name}” (${selectedPartForDetails.sku})?`)) { onDeletePart?.(selectedPartForDetails.id); setSelectedPartForDetails(null); } }} className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-2.5 font-extrabold text-rose-600 hover:bg-rose-100"><Trash2 className="h-3.5 w-3.5" /> Delete</button>
             </div>
           </div>
         </div>
@@ -1398,7 +1500,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       {/* MODAL: EDIT PART DETAILS */}
       {editingPart && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-[#E5E5EA] rounded-2xl max-w-lg w-full p-6 space-y-4 text-xs shadow-2xl">
+          <div className="bg-white border border-[#E5E5EA] rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-5 space-y-3 text-xs shadow-2xl">
             <div className="flex justify-between items-center border-b border-[#E5E5EA] pb-3">
               <h3 className="text-sm font-extrabold text-[#1D1D1F] flex items-center space-x-2">
                 <Edit2 className="w-4 h-4 text-[#0071E3]" />
@@ -1412,7 +1514,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               </button>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               <div>
                 <label className="block font-bold text-[#1D1D1F] mb-1">Part Name</label>
                 <input
@@ -1466,26 +1568,62 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               </div>
 
               <div>
-                <label className="block font-bold text-[#1D1D1F] mb-1">Storage Location Bin</label>
-                <input
-                  type="text"
-                  value={editingPart.locationBin}
-                  onChange={(e) => setEditingPart({ ...editingPart, locationBin: e.target.value })}
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2.5 text-xs font-mono text-[#1D1D1F]"
-                />
+                <div className="mb-1 flex items-center justify-between gap-2">
+                  <label className="block font-bold text-[#1D1D1F]">Storage Location Bin</label>
+                  {existingLocationBins.length > 0 && (
+                    <span className="text-[10px] font-medium text-[#86868B]">{existingLocationBins.length} saved</span>
+                  )}
+                </div>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={editingPart.locationBin}
+                    onFocus={() => setIsEditLocationBinMenuOpen(true)}
+                    onChange={(e) => {
+                      setEditingPart({ ...editingPart, locationBin: e.target.value });
+                      setIsEditLocationBinMenuOpen(true);
+                    }}
+                    placeholder="Choose saved bin or type a new bin"
+                    className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2.5 pr-9 text-xs font-mono text-[#1D1D1F] focus:border-[#0071E3] focus:bg-white focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setIsEditLocationBinMenuOpen((open) => !open)}
+                    className="absolute right-1.5 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-[#86868B] hover:bg-white hover:text-[#0071E3]"
+                    title="Choose a saved bin"
+                  >
+                    <ChevronDown className={`h-3.5 w-3.5 transition-transform ${isEditLocationBinMenuOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  {isEditLocationBinMenuOpen && (
+                    <div className="absolute z-30 mt-1 w-full overflow-hidden rounded-lg border border-[#E5E5EA] bg-white p-1 shadow-lg">
+                      {existingLocationBins.length ? (
+                        <div className="max-h-32 overflow-y-auto">
+                          {existingLocationBins.map((bin) => (
+                            <button
+                              key={bin}
+                              type="button"
+                              onMouseDown={(event) => event.preventDefault()}
+                              onClick={() => {
+                                setEditingPart({ ...editingPart, locationBin: bin });
+                                setIsEditLocationBinMenuOpen(false);
+                              }}
+                              className="flex w-full items-center rounded-md px-2 py-1.5 text-left font-mono text-[11px] font-bold text-[#1D1D1F] hover:bg-blue-50 hover:text-[#0071E3]"
+                            >
+                              {bin}
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="px-2 py-2 text-[11px] text-[#86868B]">No saved bins yet — type a new bin above.</p>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div>
-                <div className="flex justify-between items-center mb-1">
+                <div className="mb-1 flex items-center">
                   <label className="block font-bold text-[#1D1D1F]">Quality Tier</label>
-                  <button
-                    type="button"
-                    onClick={() => setShowAddQualityMiniModal(true)}
-                    className="text-[10px] text-purple-700 font-extrabold hover:underline flex items-center space-x-0.5 cursor-pointer"
-                  >
-                    <Plus className="w-3 h-3" />
-                    <span>Add Tier</span>
-                  </button>
                 </div>
                 <select
                   value={editingPart.qualityTier}
@@ -1532,36 +1670,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 </select>
               </div>
 
-              <div>
-                <label className="block font-bold text-[#1D1D1F] mb-1">
-                  Device Compatibility (From Price Catalog)
-                </label>
-                <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-2.5 bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl">
-                  {activeDeviceModels.map((m) => {
-                    const isSelected = editingPart.deviceCompatibility?.includes(m);
-                    return (
-                      <button
-                        key={m}
-                        type="button"
-                        onClick={() => {
-                          const current = editingPart.deviceCompatibility || [];
-                          const next = isSelected
-                            ? current.filter((item) => item !== m)
-                            : [...current, m];
-                          setEditingPart({ ...editingPart, deviceCompatibility: next });
-                        }}
-                        className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
-                          isSelected
-                            ? 'bg-[#0071E3] text-white shadow-xs'
-                            : 'bg-white text-[#1D1D1F] border border-[#E5E5EA] hover:bg-[#E5E5EA]'
-                        }`}
-                      >
-                        {m}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
             </div>
 
             <div className="flex justify-end space-x-2 pt-3 border-t border-[#E5E5EA]">
@@ -1715,8 +1823,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         </div>
       )}
 
-      {/* MODAL: INVENTORY TAB SETTINGS */}
-      {showInventorySettingsModal && (
+      {/* Legacy settings content is intentionally disabled: management lives in System Management. */}
+      {false && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border border-[#E5E5EA] rounded-2xl max-w-3xl w-full p-6 space-y-5 text-xs shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center border-b border-[#E5E5EA] pb-3">
@@ -1921,7 +2029,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       required
                       value={newQualityForm.name}
                       onChange={(e) => setNewQualityForm({ name: e.target.value })}
-                      placeholder="e.g. Genuine Service Pack / Soft OLED High Copy / Refurbished Grade S+"
+                      placeholder="e.g. OEM / Original / Genuine"
                       className="flex-1 bg-white border border-purple-200 rounded-xl p-2 text-xs font-bold text-[#1D1D1F]"
                     />
                     <button
@@ -2081,7 +2189,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 required
                 value={newQualityForm.name}
                 onChange={(e) => setNewQualityForm({ name: e.target.value })}
-                placeholder="e.g. Original Genuine Service Pack / Soft OLED"
+                placeholder="e.g. OEM / Original / Genuine"
                 className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2.5 text-xs font-bold text-[#1D1D1F]"
               />
             </div>

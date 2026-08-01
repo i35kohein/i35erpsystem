@@ -50,9 +50,10 @@ import {
   Send,
   MessageSquare,
   Sparkles,
-  RefreshCw
+  RefreshCw,
+  Truck
 } from 'lucide-react';
-import { Technician, SystemSettings, TechnicianLevel, PaymentMethodConfig, WorkOrder, NotificationTemplate, AppUser, UserRole, UserPermissions } from '../../types';
+import { Technician, SystemSettings, TechnicianLevel, PaymentMethodConfig, WorkOrder, NotificationTemplate, AppUser, UserRole, UserPermissions, PartItem, Supplier } from '../../types';
 import { DEFAULT_PAYMENT_METHODS, getActivePaymentMethods, DEFAULT_NOTIFICATION_TEMPLATES } from '../../data/seedData';
 import { useTheme, THEME_PRESETS, ThemeMode } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -60,7 +61,6 @@ import { LanguageSwitcher } from '../common/LanguageSwitcher';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 import { QRCodeSVG } from 'qrcode.react';
 import { DeviceTagPrinterModal } from '../common/DeviceTagPrinterModal';
-import { RepairCategoryDef } from '../../types/priceCatalog';
 
 interface SystemManagementSettingsModuleProps {
   settings: SystemSettings;
@@ -69,10 +69,14 @@ interface SystemManagementSettingsModuleProps {
   onAddTechnician: (tech: Technician) => void;
   onUpdateTechnician: (tech: Technician) => void;
   onDeleteTechnician: (id: string) => void;
-  repairCategories?: RepairCategoryDef[];
-  onAddRepairCategory?: (key: string, label: string, group: RepairCategoryDef['group']) => void;
-  onUpdateRepairCategory?: (key: string, label: string) => void;
-  onDeleteRepairCategory?: (key: string) => void;
+  inventoryCategories?: string[];
+  onUpdateInventoryCategories?: (categories: string[]) => void;
+  parts?: PartItem[];
+  suppliers?: Supplier[];
+  onAddSupplier?: (supplier: Supplier) => void;
+  onUpdateSupplier?: (supplier: Supplier) => void;
+  onDeleteSupplier?: (id: string) => void;
+  onUpdatePart?: (part: PartItem) => void;
   users?: AppUser[];
   onAddUser?: (user: AppUser) => void;
   onUpdateUser?: (user: AppUser) => void;
@@ -127,10 +131,14 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   onAddTechnician,
   onUpdateTechnician,
   onDeleteTechnician,
-  repairCategories = [],
-  onAddRepairCategory,
-  onUpdateRepairCategory,
-  onDeleteRepairCategory,
+  inventoryCategories = [],
+  onUpdateInventoryCategories,
+  parts = [],
+  suppliers = [],
+  onAddSupplier,
+  onUpdateSupplier,
+  onDeleteSupplier,
+  onUpdatePart,
   users = [],
   onAddUser,
   onUpdateUser,
@@ -151,9 +159,13 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   const [isSavedBanner, setIsSavedBanner] = useState(false);
   const [isDeviceTagPrinterOpen, setIsDeviceTagPrinterOpen] = useState(false);
   const [categoryDraft, setCategoryDraft] = useState('');
-  const [categoryGroup, setCategoryGroup] = useState<RepairCategoryDef['group']>('Display');
   const [editingCategoryKey, setEditingCategoryKey] = useState<string | null>(null);
   const [editingCategoryLabel, setEditingCategoryLabel] = useState('');
+  const [supplierDraft, setSupplierDraft] = useState({ name: '', code: '', phone: '', contactEmail: '', avgRmaTurnaroundDays: 3 });
+  const [editingInventorySupplier, setEditingInventorySupplier] = useState<Supplier | null>(null);
+  const [qualityTierDraft, setQualityTierDraft] = useState('');
+  const [editingQualityTier, setEditingQualityTier] = useState<string | null>(null);
+  const [editingQualityTierLabel, setEditingQualityTierLabel] = useState('');
   const receiptFooterEditorRef = useRef<HTMLTextAreaElement>(null);
   const [selectedFooterLineIndexes, setSelectedFooterLineIndexes] = useState<number[]>([0]);
 
@@ -679,18 +691,67 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
 
   const handleAddInventoryCategory = () => {
     const label = categoryDraft.trim();
-    if (!label || !onAddRepairCategory) return;
-    const key = label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
-    onAddRepairCategory(key, label, categoryGroup);
+    if (!label || !onUpdateInventoryCategories) return;
+    if (inventoryCategories.some((category) => category.toLowerCase() === label.toLowerCase())) return;
+    onUpdateInventoryCategories([...inventoryCategories, label]);
     setCategoryDraft('');
   };
 
-  const handleSaveInventoryCategory = (key: string) => {
+  const handleSaveInventoryCategory = (categoryToReplace: string) => {
     const label = editingCategoryLabel.trim();
-    if (!label || !onUpdateRepairCategory) return;
-    onUpdateRepairCategory(key, label);
+    if (!label || !onUpdateInventoryCategories) return;
+    if (inventoryCategories.some((category) => category !== categoryToReplace && category.toLowerCase() === label.toLowerCase())) return;
+    onUpdateInventoryCategories(inventoryCategories.map((category) => category === categoryToReplace ? label : category));
     setEditingCategoryKey(null);
     setEditingCategoryLabel('');
+  };
+
+  const inventoryQualityTiers = settings.inventoryQualityTiers?.length
+    ? settings.inventoryQualityTiers
+    : ['Original', 'OEM', 'Genuine'];
+
+  const saveInventoryQualityTiers = (tiers: string[]) => {
+    onUpdateSettings({ ...settings, inventoryQualityTiers: tiers });
+  };
+
+  const handleAddInventorySupplier = (event: React.FormEvent) => {
+    event.preventDefault();
+    const name = supplierDraft.name.trim();
+    if (!name || !onAddSupplier) return;
+    onAddSupplier({
+      id: `sup-${Date.now()}`,
+      name,
+      code: supplierDraft.code.trim().toUpperCase() || 'SUP',
+      phone: supplierDraft.phone.trim() || 'N/A',
+      contactEmail: supplierDraft.contactEmail.trim() || 'vendor@example.com',
+      website: 'https://supplier.com',
+      avgRmaTurnaroundDays: Number(supplierDraft.avgRmaTurnaroundDays) || 3,
+      rating: 5,
+    });
+    setSupplierDraft({ name: '', code: '', phone: '', contactEmail: '', avgRmaTurnaroundDays: 3 });
+  };
+
+  const handleAddInventoryQualityTier = () => {
+    const tier = qualityTierDraft.trim();
+    if (!tier || inventoryQualityTiers.some((item) => item.toLowerCase() === tier.toLowerCase())) return;
+    saveInventoryQualityTiers([...inventoryQualityTiers, tier]);
+    setQualityTierDraft('');
+  };
+
+  const handleSaveInventoryQualityTier = (tier: string) => {
+    const next = editingQualityTierLabel.trim();
+    if (!next || (next !== tier && inventoryQualityTiers.some((item) => item.toLowerCase() === next.toLowerCase()))) return;
+    saveInventoryQualityTiers(inventoryQualityTiers.map((item) => item === tier ? next : item));
+    parts.filter((part) => part.qualityTier === tier).forEach((part) => onUpdatePart?.({ ...part, qualityTier: next }));
+    setEditingQualityTier(null);
+    setEditingQualityTierLabel('');
+  };
+
+  const handleDeleteInventoryQualityTier = (tier: string) => {
+    const remaining = inventoryQualityTiers.filter((item) => item !== tier);
+    if (!remaining.length || !window.confirm(`Delete quality tier “${tier}”? Parts using it will change to “${remaining[0]}”.`)) return;
+    saveInventoryQualityTiers(remaining);
+    parts.filter((part) => part.qualityTier === tier).forEach((part) => onUpdatePart?.({ ...part, qualityTier: remaining[0] }));
   };
 
   return (
@@ -700,7 +761,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
         <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-bold flex items-center justify-between animate-fade-in">
           <div className="flex items-center space-x-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>Settings saved and sent to Supabase. The header database icon shows any pending offline sync.</span>
+            <span>Settings saved to Supabase. The header database icon shows the live connection status.</span>
           </div>
         </div>
       )}
@@ -715,7 +776,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
           { id: 'intake', label: 'Work Orders & Intake', icon: FileText },
           { id: 'pricing', label: 'Pricing & Currency', icon: DollarSign },
           { id: 'payment', label: 'Payment Methods & MM QR', icon: CreditCard },
-          { id: 'inventory', label: 'Inventory & Stock Alerts', icon: Boxes },
+          { id: 'inventory', label: 'Inventory Data & Quality', icon: Boxes, badge: inventoryCategories.length },
           { id: 'pos', label: 'POS & Receipt Layout', icon: Printer },
           { id: 'notifications', label: 'SMS & Telegram Alerts', icon: BellRing },
           { id: 'ai', label: 'AI Assistant & API', icon: Sparkles },
@@ -2153,13 +2214,13 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
         </div>
       )}
 
-      {/* Tab 4: Inventory & Stock Alerts */}
+      {/* Tab 4: Inventory data, categories, and stock alerts */}
       {activeSubTab === 'inventory' && (
         <div className="bg-white p-5 rounded-2xl border border-[#D2D2D7] shadow-2xs space-y-6">
           <div>
-            <h3 className="text-sm font-extrabold text-[#1D1D1F]">Parts Inventory & Stock Matrix Alerts</h3>
+            <h3 className="text-sm font-extrabold text-[#1D1D1F]">Inventory System Data & Quality Settings</h3>
             <p className="text-xs text-[#86868B]">
-              Define reorder triggers, stock reservation policies, and vendor SLA targets.
+              Create simple names for physical stock parts, then define stock alerts and vendor rules.
             </p>
           </div>
 
@@ -2167,29 +2228,21 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h4 className="text-xs font-extrabold text-[#1D1D1F]">Inventory Categories</h4>
-                <p className="text-[11px] text-[#86868B]">Shared with Price List. Categories are available when adding a stock part.</p>
+                <p className="text-[11px] text-[#86868B]">For stock parts only. Price List repair services stay separate.</p>
               </div>
               <span className="rounded-full bg-[#0071E3]/10 px-2 py-0.5 font-mono text-[10px] font-bold text-[#0071E3]">
-                {repairCategories.length} categories
+                {inventoryCategories.length} categories
               </span>
             </div>
 
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_190px_auto]">
+            <div className="flex flex-wrap gap-2">
               <input
                 type="text"
                 value={categoryDraft}
                 onChange={(event) => setCategoryDraft(event.target.value)}
                 onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleAddInventoryCategory(); } }}
                 placeholder="New category, e.g. Camera"
-                className="h-9 w-full rounded-xl border border-[#D2D2D7] bg-[#F5F5F7] px-3 text-xs font-medium text-[#1D1D1F] outline-none focus:border-[#0071E3] focus:bg-white"
-              />
-              <CustomDropdownMenu
-                value={categoryGroup}
-                onChange={(group) => setCategoryGroup(group as RepairCategoryDef['group'])}
-                options={['Battery', 'Display', 'Housing', 'Charging', 'Audio', 'Logic Board', 'Network', 'Sensors & Keys'].map((group) => ({ value: group, label: group }))}
-                className="w-full"
-                buttonClassName="!h-9 !w-full !rounded-xl !border-[#D2D2D7] !bg-[#F5F5F7]"
-                menuAlign="left"
+                className="h-9 min-w-0 flex-1 rounded-xl border border-[#D2D2D7] bg-[#F5F5F7] px-3 text-xs font-medium text-[#1D1D1F] outline-none focus:border-[#0071E3] focus:bg-white"
               />
               <button
                 type="button"
@@ -2202,32 +2255,97 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             </div>
 
             <div className="max-h-52 divide-y divide-[#E5E5EA] overflow-y-auto rounded-xl border border-[#E5E5EA] bg-[#F8F9FA]">
-              {repairCategories.map((category) => (
-                <div key={category.key} className="flex items-center gap-2 px-3 py-2">
-                  {editingCategoryKey === category.key ? (
+              {inventoryCategories.map((category) => (
+                <div key={category} className="flex items-center gap-2 px-3 py-2">
+                  {editingCategoryKey === category ? (
                     <input
                       autoFocus
                       value={editingCategoryLabel}
                       onChange={(event) => setEditingCategoryLabel(event.target.value)}
-                      onKeyDown={(event) => { if (event.key === 'Enter') handleSaveInventoryCategory(category.key); if (event.key === 'Escape') setEditingCategoryKey(null); }}
+                      onKeyDown={(event) => { if (event.key === 'Enter') handleSaveInventoryCategory(category); if (event.key === 'Escape') setEditingCategoryKey(null); }}
                       className="h-7 min-w-0 flex-1 rounded-lg border border-[#0071E3] bg-white px-2 text-xs font-semibold outline-none"
                     />
                   ) : (
-                    <span className="min-w-0 flex-1 truncate text-xs font-semibold text-[#1D1D1F]">{category.label}</span>
+                    <span className="min-w-0 flex-1 truncate text-xs font-semibold text-[#1D1D1F]">{category}</span>
                   )}
-                  <span className="hidden rounded-md bg-white px-1.5 py-0.5 text-[10px] font-medium text-[#86868B] sm:inline">{category.group}</span>
-                  {editingCategoryKey === category.key ? (
-                    <button type="button" onClick={() => handleSaveInventoryCategory(category.key)} className="text-[11px] font-extrabold text-[#0071E3]">Save</button>
+                  {editingCategoryKey === category ? (
+                    <button type="button" onClick={() => handleSaveInventoryCategory(category)} className="text-[11px] font-extrabold text-[#0071E3]">Save</button>
                   ) : (
-                    <button type="button" onClick={() => { setEditingCategoryKey(category.key); setEditingCategoryLabel(category.label); }} className="text-[11px] font-extrabold text-[#0071E3]">Edit</button>
+                    <button type="button" onClick={() => { setEditingCategoryKey(category); setEditingCategoryLabel(category); }} className="text-[11px] font-extrabold text-[#0071E3]">Edit</button>
                   )}
                   <button
                     type="button"
-                    onClick={() => { if (window.confirm(`Delete category “${category.label}”? It will no longer appear for new inventory parts.`)) onDeleteRepairCategory?.(category.key); }}
+                    onClick={() => { if (window.confirm(`Delete category “${category}”? It will no longer appear for new inventory parts.`)) onUpdateInventoryCategories?.(inventoryCategories.filter((item) => item !== category)); }}
                     className="text-[11px] font-extrabold text-rose-600"
                   >
                     Delete
                   </button>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="space-y-3 border-b border-[#E5E5EA] pb-5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h4 className="text-xs font-extrabold text-[#1D1D1F]">Supplier Name Data</h4>
+                <p className="text-[11px] text-[#86868B]">Supplier records used when registering stock parts and RMA claims.</p>
+              </div>
+              <span className="rounded-full bg-[#0071E3]/10 px-2 py-0.5 font-mono text-[10px] font-bold text-[#0071E3]">{suppliers.length} suppliers</span>
+            </div>
+
+            <form onSubmit={handleAddInventorySupplier} className="grid grid-cols-1 gap-2 rounded-xl border border-[#E5E5EA] bg-[#F8F9FA] p-3 sm:grid-cols-2 lg:grid-cols-5">
+              <input required value={supplierDraft.name} onChange={(event) => setSupplierDraft({ ...supplierDraft, name: event.target.value })} placeholder="Supplier name" className="h-9 rounded-lg border border-[#D2D2D7] bg-white px-2.5 text-xs font-semibold outline-none focus:border-[#0071E3]" />
+              <input required value={supplierDraft.code} onChange={(event) => setSupplierDraft({ ...supplierDraft, code: event.target.value })} placeholder="Code" className="h-9 rounded-lg border border-[#D2D2D7] bg-white px-2.5 font-mono text-xs outline-none focus:border-[#0071E3]" />
+              <input value={supplierDraft.phone} onChange={(event) => setSupplierDraft({ ...supplierDraft, phone: event.target.value })} placeholder="Phone" className="h-9 rounded-lg border border-[#D2D2D7] bg-white px-2.5 text-xs outline-none focus:border-[#0071E3]" />
+              <input type="number" min="1" value={supplierDraft.avgRmaTurnaroundDays} onChange={(event) => setSupplierDraft({ ...supplierDraft, avgRmaTurnaroundDays: Number(event.target.value) })} placeholder="RMA days" className="h-9 rounded-lg border border-[#D2D2D7] bg-white px-2.5 text-xs outline-none focus:border-[#0071E3]" />
+              <button type="submit" className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-[#0071E3] px-3 text-xs font-extrabold text-white hover:bg-[#0051B3]"><Plus className="h-3.5 w-3.5" /> Add supplier</button>
+            </form>
+
+            {editingInventorySupplier && (
+              <form onSubmit={(event) => { event.preventDefault(); onUpdateSupplier?.(editingInventorySupplier); setEditingInventorySupplier(null); }} className="grid grid-cols-1 gap-2 rounded-xl border border-blue-200 bg-blue-50/60 p-3 sm:grid-cols-2 lg:grid-cols-5">
+                <input required value={editingInventorySupplier.name} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, name: event.target.value })} className="h-9 rounded-lg border border-blue-200 bg-white px-2.5 text-xs font-semibold outline-none focus:border-[#0071E3]" />
+                <input required value={editingInventorySupplier.code} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, code: event.target.value })} className="h-9 rounded-lg border border-blue-200 bg-white px-2.5 font-mono text-xs outline-none focus:border-[#0071E3]" />
+                <input value={editingInventorySupplier.phone} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, phone: event.target.value })} className="h-9 rounded-lg border border-blue-200 bg-white px-2.5 text-xs outline-none focus:border-[#0071E3]" />
+                <input type="number" min="1" value={editingInventorySupplier.avgRmaTurnaroundDays} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, avgRmaTurnaroundDays: Number(event.target.value) })} className="h-9 rounded-lg border border-blue-200 bg-white px-2.5 text-xs outline-none focus:border-[#0071E3]" />
+                <div className="flex gap-2"><button type="submit" className="h-9 flex-1 rounded-lg bg-[#0071E3] text-xs font-extrabold text-white">Save</button><button type="button" onClick={() => setEditingInventorySupplier(null)} className="h-9 rounded-lg border border-[#D2D2D7] px-3 text-xs font-bold">Cancel</button></div>
+              </form>
+            )}
+
+            <div className="divide-y divide-[#E5E5EA] overflow-hidden rounded-xl border border-[#E5E5EA] bg-white">
+              {suppliers.length ? suppliers.map((supplier) => (
+                <div key={supplier.id} className="flex items-center gap-3 px-3 py-2.5 text-xs">
+                  <Truck className="h-4 w-4 shrink-0 text-[#0071E3]" />
+                  <span className="min-w-0 flex-1 truncate font-extrabold text-[#1D1D1F]">{supplier.name}</span>
+                  <span className="font-mono text-[10px] text-[#86868B]">{supplier.code}</span>
+                  <span className="hidden text-[10px] text-[#86868B] sm:inline">{supplier.avgRmaTurnaroundDays} days</span>
+                  <button type="button" onClick={() => setEditingInventorySupplier(supplier)} className="text-[11px] font-extrabold text-[#0071E3]">Edit</button>
+                  <button type="button" onClick={() => { if (window.confirm(`Delete supplier “${supplier.name}”?`)) onDeleteSupplier?.(supplier.id); }} className="text-[11px] font-extrabold text-rose-600">Delete</button>
+                </div>
+              )) : <p className="px-3 py-4 text-center text-xs text-[#86868B]">No suppliers yet.</p>}
+            </div>
+          </section>
+
+          <section className="space-y-3 border-b border-[#E5E5EA] pb-5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h4 className="text-xs font-extrabold text-[#1D1D1F]">Quality Tiers</h4>
+                <p className="text-[11px] text-[#86868B]">Shared quality options for every physical inventory part.</p>
+              </div>
+              <span className="rounded-full bg-purple-100 px-2 py-0.5 font-mono text-[10px] font-bold text-purple-700">{inventoryQualityTiers.length} tiers</span>
+            </div>
+            <div className="flex gap-2">
+              <input value={qualityTierDraft} onChange={(event) => setQualityTierDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleAddInventoryQualityTier(); } }} placeholder="New quality tier" className="h-9 min-w-0 flex-1 rounded-xl border border-[#D2D2D7] bg-[#F5F5F7] px-3 text-xs font-medium outline-none focus:border-[#0071E3] focus:bg-white" />
+              <button type="button" onClick={handleAddInventoryQualityTier} disabled={!qualityTierDraft.trim()} className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-purple-600 px-3 text-xs font-extrabold text-white hover:bg-purple-700 disabled:opacity-45"><Plus className="h-3.5 w-3.5" /> Add</button>
+            </div>
+            <div className="divide-y divide-[#E5E5EA] overflow-hidden rounded-xl border border-[#E5E5EA] bg-[#F8F9FA]">
+              {inventoryQualityTiers.map((tier) => (
+                <div key={tier} className="flex items-center gap-2 px-3 py-2">
+                  <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-purple-600" />
+                  {editingQualityTier === tier ? <input autoFocus value={editingQualityTierLabel} onChange={(event) => setEditingQualityTierLabel(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') handleSaveInventoryQualityTier(tier); if (event.key === 'Escape') setEditingQualityTier(null); }} className="h-7 min-w-0 flex-1 rounded-lg border border-purple-300 bg-white px-2 text-xs font-semibold outline-none" /> : <span className="min-w-0 flex-1 truncate text-xs font-semibold text-[#1D1D1F]">{tier}</span>}
+                  <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-[#86868B]">{parts.filter((part) => part.qualityTier === tier).length} parts</span>
+                  {editingQualityTier === tier ? <button type="button" onClick={() => handleSaveInventoryQualityTier(tier)} className="text-[11px] font-extrabold text-purple-700">Save</button> : <button type="button" onClick={() => { setEditingQualityTier(tier); setEditingQualityTierLabel(tier); }} className="text-[11px] font-extrabold text-[#0071E3]">Edit</button>}
+                  <button type="button" onClick={() => handleDeleteInventoryQualityTier(tier)} className="text-[11px] font-extrabold text-rose-600">Delete</button>
                 </div>
               ))}
             </div>

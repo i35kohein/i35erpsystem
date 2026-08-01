@@ -475,7 +475,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
       </div>
 
       {/* Horizontal Scrollable 6 Kanban Columns */}
-      <div className="flex space-x-3 overflow-x-auto pb-4 pt-1 snap-x touch-pan-x no-scrollbar min-h-[620px]">
+      <div className="flex min-h-[calc(100dvh-14rem)] space-x-3 overflow-x-auto pb-4 pt-1 snap-x touch-pan-x no-scrollbar">
         {KANBAN_STAGES.filter((stage) => statusFilter === 'ALL' || stage.id === statusFilter).map((stage) => {
           const stageOrders = filteredWorkOrders.filter((w) => w.status === stage.id);
           const stageStagnantOrders = stageOrders.filter((w) => getIsStagnant(w));

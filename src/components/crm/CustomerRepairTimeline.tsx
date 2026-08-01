@@ -33,6 +33,7 @@ interface CustomerRepairTimelineProps {
   onPrintInvoice?: (wo: WorkOrder) => void;
   showFilters?: boolean;
   compact?: boolean;
+  emptyClassName?: string;
 }
 
 const getOutcomeMeta = (status: string) => {
@@ -118,6 +119,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
   onPrintInvoice,
   showFilters = true,
   compact = false,
+  emptyClassName = '',
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -164,7 +166,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
 
   if (workOrders.length === 0) {
     return (
-      <div className="p-8 text-center text-[#86868B] bg-[#F8F9FA] rounded-2xl border border-dashed border-[#E5E5EA]">
+      <div className={`flex min-h-[260px] flex-col items-center justify-center rounded-2xl border border-dashed border-[#E5E5EA] bg-[#F8F9FA] p-8 text-center text-[#86868B] ${emptyClassName}`}>
         <Clock className="w-8 h-8 text-[#86868B]/50 mx-auto mb-2" />
         <p className="font-semibold text-xs">No repair history recorded for this customer account.</p>
         <p className="text-[11px] text-[#86868B] mt-0.5">When work orders are intaken, they will appear chronologically here.</p>

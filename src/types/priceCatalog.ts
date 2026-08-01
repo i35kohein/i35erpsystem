@@ -10,6 +10,12 @@ export interface ModelRepairPrice {
   warranties: Record<string, string>; // categoryKey -> warranty string
 }
 
+export interface PriceCatalogImportRow {
+  model: string;
+  prices: Record<string, number | null>;
+  warranties: Record<string, string>;
+}
+
 export interface FolderConfig {
   id: string;
   name: string;

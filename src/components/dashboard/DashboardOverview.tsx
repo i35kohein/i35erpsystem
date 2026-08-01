@@ -725,7 +725,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </div>
       )}
 
-      {/* Executive Overview: Sleek 3 Data Cards Row */}
+      {/* Queue summary cards belong only to the Status Queue view. */}
+      {activeDashboardSubTab === 'status-queue' && (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
         {/* Card 1: Active In-Shop Repairs */}
         <div 
@@ -823,6 +824,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
         </div>
       </div>
+      )}
 
       {/* SUBTAB 1: STATUS QUEUE */}
       {activeDashboardSubTab === 'status-queue' && (

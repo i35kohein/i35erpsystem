@@ -597,11 +597,70 @@ html[data-theme] [class~="bg-[#ED7132]"] {
 
 .app-module-content {
   min-width: 0;
+  min-height: 0;
   contain: inline-size;
 }
 
 .app-module-content > :where(div, section) {
   overflow-anchor: none;
+}
+
+/*
+ * Stable data workspaces
+ *
+ * Lists, empty states and pagination share one fixed viewport area.  Data can
+ * grow inside the scrolling region without moving the surrounding page or its
+ * footer.  Use the modifier that matches the amount of content above a table.
+ */
+.workspace-panel {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.workspace-panel--standard {
+  height: clamp(400px, calc(100dvh - 220px), 920px);
+}
+
+.workspace-panel--with-toolbar {
+  height: clamp(380px, calc(100dvh - 400px), 760px);
+}
+
+.workspace-panel--with-summary {
+  height: clamp(380px, calc(100dvh - 290px), 860px);
+}
+
+.workspace-panel__scroll {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.workspace-panel__footer {
+  flex: 0 0 auto;
+}
+
+.workspace-grid {
+  min-height: 0;
+  height: clamp(420px, calc(100dvh - 200px), 920px);
+}
+
+@media (max-width: 767px) {
+  .workspace-panel--standard,
+  .workspace-panel--with-summary {
+    height: clamp(360px, calc(100dvh - 190px), 720px);
+  }
+
+  .workspace-panel--with-toolbar {
+    height: clamp(360px, calc(100dvh - 240px), 640px);
+  }
+
+  .workspace-grid {
+    height: clamp(400px, calc(100dvh - 150px), 760px);
+  }
 }
 
 /* Keep controls stable while counts, loading labels, and async status text update. */

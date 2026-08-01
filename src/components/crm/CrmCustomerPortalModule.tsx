@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Users, 
   Search, 
@@ -110,6 +110,16 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
 
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(filteredCustomers[0] || customers[0] || null);
 
+  // Keep list, detail, and pagination stable when customers are added, removed,
+  // or filtered. A deleted customer must not remain in the detail panel.
+  useEffect(() => {
+    setCurrentPage((page) => Math.min(Math.max(page, 1), totalPages));
+    setSelectedCustomer((selected) => {
+      if (selected && customers.some((customer) => customer.id === selected.id)) return selected;
+      return customers[0] || null;
+    });
+  }, [customers, totalPages]);
+
   const toggleExpandCustomer = (custId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setExpandedCustomerIds((prev) =>
@@ -167,15 +177,22 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
       </div>
 
       {activeTab === 'CRM' ? (
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-12">
+        <div className="workspace-grid grid grid-cols-1 gap-3 overflow-hidden md:grid-cols-12">
           {/* Customer Directory List */}
-          <div className="md:col-span-5 bg-white border border-[#E5E5EA] rounded-2xl p-4 space-y-3 shadow-xs">
+          <div className="flex min-h-0 h-full flex-col md:col-span-5 bg-white border border-[#E5E5EA] rounded-2xl p-4 shadow-xs">
             <div className="flex justify-between items-center border-b border-[#E5E5EA] pb-2">
               <h2 className="font-bold text-[#1D1D1F] text-xs">Customer Account Roster</h2>
               <span className="text-[10px] font-semibold text-[#86868B]">{filteredCustomers.length} accounts</span>
             </div>
 
-            <div className="space-y-2 min-h-[360px]">
+            <div className="min-h-0 flex-1 space-y-2 overflow-y-auto py-3 pr-1">
+              {paginatedCustomers.length === 0 && (
+                <div className="flex h-full min-h-[260px] flex-col items-center justify-center rounded-xl border border-dashed border-[#E5E5EA] bg-[#F8F9FA] px-5 text-center text-[#86868B]">
+                  <Users className="mb-2 h-7 w-7 text-[#86868B]/50" />
+                  <p className="font-semibold">No customer accounts found</p>
+                  <p className="mt-1 text-[11px]">Customers from new intake tickets will appear here.</p>
+                </div>
+              )}
               {paginatedCustomers.map((cust) => {
                 const custOrders = getCustomerWorkOrders(cust);
                 const isExpanded = expandedCustomerIds.includes(cust.id);
@@ -327,11 +344,12 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
               })}
             </div>
 
-            {/* Pagination Bar */}
-            {filteredCustomers.length > 0 && (
-              <div className="pt-3 border-t border-[#E5E5EA] flex items-center justify-between text-xs text-[#86868B]">
+            {/* Fixed pagination footer: it stays in the same place even when the roster is empty. */}
+            <div className="mt-auto min-h-11 border-t border-[#E5E5EA] pt-3 flex items-center justify-between text-xs text-[#86868B]">
                 <span className="font-semibold text-[11px]">
-                  {(safeCurrentPage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(safeCurrentPage * ITEMS_PER_PAGE, filteredCustomers.length)} of {filteredCustomers.length}
+                  {filteredCustomers.length > 0
+                    ? `${(safeCurrentPage - 1) * ITEMS_PER_PAGE + 1}-${Math.min(safeCurrentPage * ITEMS_PER_PAGE, filteredCustomers.length)} of ${filteredCustomers.length}`
+                    : '0 of 0'}
                 </span>
 
                 <div className="flex items-center space-x-1">
@@ -381,13 +399,12 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                   </button>
                 </div>
               </div>
-            )}
           </div>
 
           {/* Customer Details & History */}
-          <div className="md:col-span-7 bg-white border border-[#E5E5EA] rounded-2xl p-5 space-y-5 shadow-xs">
+          <div className="flex min-h-0 h-full flex-col md:col-span-7 bg-white border border-[#E5E5EA] rounded-2xl p-5 shadow-xs">
             {selectedCustomer ? (
-              <div className="space-y-5">
+              <div className="flex min-h-0 flex-1 flex-col gap-5">
                 <div className="border-b border-[#E5E5EA] pb-3">
                   <div className="flex justify-between items-start">
                     <div>
@@ -440,7 +457,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                 )}
 
                 {/* Selected Customer Detailed Repair History Timeline */}
-                <div className="space-y-3 pt-2 border-t border-[#E5E5EA]">
+                <div className="flex min-h-0 flex-1 flex-col space-y-3 pt-2 border-t border-[#E5E5EA]">
                   <div className="flex items-center justify-between pb-1">
                     <h3 className="font-black text-[#1D1D1F] text-xs flex items-center space-x-1.5">
                       <History className="w-4 h-4 text-[#0071E3]" />
@@ -451,6 +468,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                   <CustomerRepairTimeline
                     workOrders={selectedCustomerOrders}
                     systemSettings={systemSettings}
+                    emptyClassName="flex-1"
                     onPrintInvoice={(wo) => {
                       setSelectedInvoiceWo(wo);
                       setIsInvoiceModalOpen(true);
@@ -460,7 +478,10 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                 </div>
               </div>
             ) : (
-              <div className="p-8 text-center text-[#86868B]">Select a customer to view details.</div>
+              <div className="flex min-h-[360px] flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-[#E5E5EA] bg-[#F8F9FA] p-8 text-center text-[#86868B]">
+                <Users className="mb-2 h-8 w-8 text-[#86868B]/50" />
+                <p className="font-semibold">Select a customer to view details.</p>
+              </div>
             )}
           </div>
         </div>

@@ -6,7 +6,7 @@ export interface AppleModelSeriesGroup {
 export const APPLE_MODEL_SERIES: AppleModelSeriesGroup[] = [
   {
     series: 'iPhone 17 Series',
-    models: ['iPhone 17 Pro Max', 'iPhone 17 Pro', 'iPhone 17 Plus', 'iPhone 17']
+    models: ['iPhone 17 Pro Max', 'iPhone 17 Pro', 'iPhone Air', 'iPhone 17']
   },
   {
     series: 'iPhone 16 Series',
@@ -47,10 +47,13 @@ export const getAvailableColorsForModel = (modelName: string): string[] => {
 
   // iPhone 17 Series
   if (name.includes('iphone 17 pro')) {
-    return ['Cosmic Amber', 'Space Black', 'Silver', 'Natural Titanium'];
+    return ['Silver', 'Cosmic Orange', 'Deep Blue'];
+  }
+  if (name.includes('iphone air')) {
+    return ['Space Black', 'Cloud White', 'Light Gold', 'Sky Blue'];
   }
   if (name.includes('iphone 17')) {
-    return ['Sky Blue', 'Teal', 'Pink', 'Starlight', 'Midnight'];
+    return ['Black', 'Lavender', 'Mist Blue', 'Sage', 'White'];
   }
 
   // iPhone 16 Series
@@ -85,21 +88,54 @@ export const getAvailableColorsForModel = (modelName: string): string[] => {
     return ['Midnight', 'Starlight', 'Blue', 'Pink', 'Green', '(PRODUCT)RED'];
   }
 
-  // iPhone 12 & Older
+  // iPhone 12 Series
   if (name.includes('iphone 12 pro')) {
     return ['Pacific Blue', 'Graphite', 'Gold', 'Silver'];
   }
   if (name.includes('iphone 12')) {
     return ['Black', 'White', 'Green', 'Purple', 'Blue', '(PRODUCT)RED'];
   }
+
+  // iPhone 11 Series
   if (name.includes('iphone 11 pro')) {
     return ['Midnight Green', 'Space Gray', 'Silver', 'Gold'];
   }
   if (name.includes('iphone 11')) {
     return ['Purple', 'Yellow', 'Green', 'Black', 'White', '(PRODUCT)RED'];
   }
-  if (name.includes('iphone se')) {
+
+  // iPhone X / XS / XR Series
+  if (name.includes('iphone xs max') || name.includes('iphone xs')) {
+    return ['Gold', 'Space Gray', 'Silver'];
+  }
+  if (name.includes('iphone xr')) {
+    return ['(PRODUCT)RED', 'Yellow', 'White', 'Coral', 'Black', 'Blue'];
+  }
+  if (/iphone\s*x(\s|$)/.test(name)) {
+    return ['Silver', 'Space Gray'];
+  }
+
+  // iPhone SE / 8 / 7 / 6 Series
+  if (name.includes('iphone se 2') || name.includes('iphone se (2020)')) {
+    return ['Black', 'White', '(PRODUCT)RED'];
+  }
+  if (name.includes('iphone se 3') || name.includes('iphone se (2022)')) {
     return ['Midnight', 'Starlight', '(PRODUCT)RED'];
+  }
+  if (name.includes('iphone se')) {
+    return ['Silver', 'Gold', 'Space Gray', 'Rose Gold'];
+  }
+  if (name.includes('iphone 8')) {
+    return ['Gold', 'Silver', 'Space Gray', '(PRODUCT)RED'];
+  }
+  if (name.includes('iphone 7')) {
+    return ['Rose Gold', 'Gold', 'Silver', 'Black', 'Jet Black', '(PRODUCT)RED'];
+  }
+  if (name.includes('iphone 6s')) {
+    return ['Rose Gold', 'Gold', 'Silver', 'Space Gray'];
+  }
+  if (name.includes('iphone 6')) {
+    return ['Silver', 'Gold', 'Space Gray'];
   }
 
   // iPad Series
@@ -114,6 +150,9 @@ export const getAvailableColorsForModel = (modelName: string): string[] => {
   }
 
   // MacBook Series
+  if (name.includes('macbook pro') && name.includes('m3')) {
+    return ['Space Black', 'Silver'];
+  }
   if (name.includes('macbook pro')) {
     return ['Space Black', 'Silver', 'Space Gray'];
   }
@@ -183,6 +222,48 @@ export interface RealisticColorInfo {
 }
 
 export const REALISTIC_COLOR_MAP: Record<string, RealisticColorInfo> = {
+  'Cosmic Orange': {
+    name: 'Cosmic Orange',
+    gradient: 'linear-gradient(135deg, #B74B22 0%, #E98141 50%, #7C2D12 100%)',
+    border: 'border-orange-700',
+    shadow: '0 6px 16px rgba(183, 75, 34, 0.45)'
+  },
+  'Deep Blue': {
+    name: 'Deep Blue',
+    gradient: 'linear-gradient(135deg, #152A45 0%, #315476 50%, #0D1B2A 100%)',
+    border: 'border-blue-900',
+    shadow: '0 6px 16px rgba(21, 42, 69, 0.45)'
+  },
+  'Cloud White': {
+    name: 'Cloud White',
+    gradient: 'linear-gradient(135deg, #E3E6EA 0%, #FFFFFF 50%, #CED3D9 100%)',
+    border: 'border-slate-300',
+    shadow: '0 6px 16px rgba(206, 211, 217, 0.42)'
+  },
+  'Light Gold': {
+    name: 'Light Gold',
+    gradient: 'linear-gradient(135deg, #D6C28D 0%, #F4E9C5 50%, #B69A5A 100%)',
+    border: 'border-amber-300',
+    shadow: '0 6px 16px rgba(214, 194, 141, 0.45)'
+  },
+  'Lavender': {
+    name: 'Lavender',
+    gradient: 'linear-gradient(135deg, #B9A6D9 0%, #E2D8F3 50%, #937BB5 100%)',
+    border: 'border-violet-300',
+    shadow: '0 6px 16px rgba(185, 166, 217, 0.45)'
+  },
+  'Mist Blue': {
+    name: 'Mist Blue',
+    gradient: 'linear-gradient(135deg, #88AFC5 0%, #C8DFEA 50%, #5F889F 100%)',
+    border: 'border-sky-300',
+    shadow: '0 6px 16px rgba(136, 175, 197, 0.45)'
+  },
+  'Sage': {
+    name: 'Sage',
+    gradient: 'linear-gradient(135deg, #829B7B 0%, #B9CDB2 50%, #5E7558 100%)',
+    border: 'border-green-600',
+    shadow: '0 6px 16px rgba(130, 155, 123, 0.45)'
+  },
   'Cosmic Amber': {
     name: 'Cosmic Amber',
     gradient: 'linear-gradient(135deg, #d97706 0%, #fbbf24 50%, #b45309 100%)',
@@ -302,6 +383,24 @@ export const REALISTIC_COLOR_MAP: Record<string, RealisticColorInfo> = {
     gradient: 'linear-gradient(135deg, #E6D0AC 0%, #FCE8CA 50%, #C7B08B 100%)',
     border: 'border-amber-300',
     shadow: '0 6px 16px rgba(230, 208, 172, 0.45)'
+  },
+  'Rose Gold': {
+    name: 'Rose Gold',
+    gradient: 'linear-gradient(135deg, #C68E86 0%, #F0C6BE 50%, #A96F68 100%)',
+    border: 'border-rose-300',
+    shadow: '0 6px 16px rgba(198, 142, 134, 0.45)'
+  },
+  'Jet Black': {
+    name: 'Jet Black',
+    gradient: 'linear-gradient(135deg, #060606 0%, #2A2A2A 48%, #080808 100%)',
+    border: 'border-zinc-950',
+    shadow: '0 6px 16px rgba(0, 0, 0, 0.7)'
+  },
+  'Coral': {
+    name: 'Coral',
+    gradient: 'linear-gradient(135deg, #E37C6B 0%, #F4B2A5 50%, #BC584B 100%)',
+    border: 'border-orange-300',
+    shadow: '0 6px 16px rgba(227, 124, 107, 0.45)'
   },
   '(PRODUCT)RED': {
     name: '(PRODUCT)RED',

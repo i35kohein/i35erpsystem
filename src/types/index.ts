@@ -1,10 +1,9 @@
 export type AppleDeviceCategory = 'iPhone' | 'iPad' | 'MacBook' | 'iMac' | 'AppleWatch' | 'AirPods';
 
 export type PartQualityTier = 
-  | 'OEM Original Pulled' 
-  | 'Refurbished Grade A' 
-  | 'Premium Aftermarket' 
-  | 'Standard Aftermarket';
+  | 'Original'
+  | 'OEM'
+  | 'Genuine';
 
 export type WorkOrderStatus = 
   | 'Receive' 
@@ -204,6 +203,7 @@ export interface PartItem {
   applePartNumber?: string;
   category: string; // e.g., Display, Battery, Charging Port, Logic Board Chip, Back Glass
   deviceCompatibility: string[]; // e.g., ["iPhone 13", "iPhone 13 Pro"]
+  backGlassColor?: string;
   qualityTier: PartQualityTier;
   quantityInStock: number;
   reservedQuantity: number;
@@ -322,6 +322,11 @@ export interface SystemSettings {
   paymentMethods?: PaymentMethodConfig[];
 
   // Inventory & Stock
+  // Simple names used only when classifying physical stock parts. These are
+  // intentionally separate from the repair-service categories in Price List.
+  inventoryCategories?: string[];
+  // Configured from System Management > Inventory Data & Quality.
+  inventoryQualityTiers?: string[];
   lowStockThreshold: number;
   autoReserveOnAssignment: boolean;
   defaultSupplierSlaDays: number;

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Sparkles, Plus, CircleDot, Search, Filter, Calculator, Folder, Settings, Download, Database, ExternalLink, ClipboardList, Kanban, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, Menu, ChevronDown, PhoneCall, Truck, Boxes, CreditCard, Users, DollarSign, LayoutDashboard, Timer } from 'lucide-react';
 import { subscribeToCollection, saveDocument, saveBatchDocuments, deleteDocument, clearCollection } from './lib/supabase';
@@ -53,6 +53,7 @@ import { HoverTooltip } from './components/common/HoverTooltip';
 
 export default function App() {
   const { t } = useLanguage();
+  const [isOnline, setIsOnline] = useState(() => typeof navigator === 'undefined' || navigator.onLine);
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [searchQuery, setSearchQuery] = useState<string>('');
   
@@ -153,7 +154,25 @@ export default function App() {
     handleUpdateSettings({ ...systemSettings, currencySymbol: newSymbol });
   });
 
-  // Subscribe to live Supabase collections with IndexedDB offline fallback.
+  // Keep the existing detailed stock category names when moving away from the
+  // old shared Price List list. This is a one-time migration only: after it is
+  // stored in System Settings, the two lists never sync again.
+  const legacyInventoryCategories = useMemo(
+    () => Array.from(new Set(priceCatalog.categories.map((category) => category.label.trim()).filter(Boolean))),
+    [priceCatalog.categories]
+  );
+  const inventoryCategories = systemSettings.inventoryCategories !== undefined
+    ? systemSettings.inventoryCategories
+    : legacyInventoryCategories;
+
+  // Keep top-bar inventory filters aligned with the saved inventory categories and stock data.
+  const inventoryCategoryOptions = Array.from(new Set([
+    ...inventoryCategories,
+    ...parts.map((part) => part.category).filter(Boolean),
+  ])).sort((a, b) => a.localeCompare(b));
+  const inventoryQualityOptions = Array.from(new Set(parts.map((part) => part.qualityTier).filter(Boolean))).sort((a, b) => a.localeCompare(b));
+
+  // Cloud-only ERP data. No browser cache or offline queue is used.
   useEffect(() => {
     const unsubWo = subscribeToCollection<WorkOrder>('workOrders', (data) => {
       setWorkOrders(data);
@@ -161,7 +180,21 @@ export default function App() {
     }, []);
 
     const unsubParts = subscribeToCollection<PartItem>('parts', (data) => {
-      setParts(data);
+      // Normalize older Supabase rows so inventory values remain editable after schema/UI changes.
+      const normalized = data.map((raw: any) => ({
+        ...raw,
+        quantityInStock: Number(raw.quantityInStock ?? raw.quantity_in_stock ?? raw.stock ?? 0),
+        reorderPoint: Number(raw.reorderPoint ?? raw.reorder_point ?? 0),
+        costPrice: Number(raw.costPrice ?? raw.cost_price ?? raw.cost ?? 0),
+        sellingPrice: Number(raw.sellingPrice ?? raw.selling_price ?? raw.price ?? 0),
+        qualityTier: (() => {
+          const value = String(raw.qualityTier ?? raw.quality_tier ?? '').toLowerCase();
+          if (value.includes('genuine') || value.includes('service pack')) return 'Genuine';
+          if (value.includes('oem')) return 'OEM';
+          return 'Original';
+        })(),
+      })) as PartItem[];
+      setParts(normalized);
     }, []);
 
     const unsubSuppliers = subscribeToCollection<Supplier>('suppliers', (data) => {
@@ -220,6 +253,17 @@ export default function App() {
       unsubPayouts();
       unsubSettings();
       unsubUsers();
+    };
+  }, []);
+
+  useEffect(() => {
+    const goOnline = () => setIsOnline(true);
+    const goOffline = () => setIsOnline(false);
+    window.addEventListener('online', goOnline);
+    window.addEventListener('offline', goOffline);
+    return () => {
+      window.removeEventListener('online', goOnline);
+      window.removeEventListener('offline', goOffline);
     };
   }, []);
 
@@ -307,6 +351,11 @@ export default function App() {
     setSystemSettings(newSettings);
     saveDocument('systemSettings', { id: 'global', ...newSettings }).catch(console.error);
   };
+
+  useEffect(() => {
+    if (systemSettings.inventoryCategories !== undefined || legacyInventoryCategories.length === 0) return;
+    handleUpdateSettings({ ...systemSettings, inventoryCategories: legacyInventoryCategories });
+  }, [systemSettings, legacyInventoryCategories]);
 
   const handleAddTechnician = (tech: Technician) => {
     setTechnicians((prev) => [...prev, tech]);
@@ -694,6 +743,20 @@ export default function App() {
 
   const currentTab = getTabInfo(activeTab);
 
+  if (!isOnline) {
+    return (
+      <main className="flex min-h-dvh w-full items-center justify-center bg-[#F5F5F7] p-5 text-[#1D1D1F]">
+        <section className="w-full max-w-sm rounded-2xl border border-[#E5E5EA] bg-white p-6 text-center shadow-sm">
+          <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
+            <AlertTriangle className="h-5 w-5" />
+          </div>
+          <h1 className="text-base font-bold">Internet connection required</h1>
+          <p className="mt-1 text-xs leading-5 text-[#6E6E73]">This ERP uses live Supabase data only. Reconnect to open the system.</p>
+        </section>
+      </main>
+    );
+  }
+
   return (
     <div className="basic-ui h-screen h-dvh w-full bg-[#F5F5F7] text-[#1D1D1F] font-sans antialiased flex flex-col lg:flex-row overflow-hidden selection:bg-[#0071E3] selection:text-white">
       {/* Persistent Left Sidebar Navigation */}
@@ -981,33 +1044,30 @@ export default function App() {
                 <CustomDropdownMenu
                   value={categoryFilter}
                   onChange={(val) => setCategoryFilter(val)}
-                  buttonClassName="!px-2.5 !py-1.5 text-xs"
+                  iconOnly
+                  triggerIcon={<Tag className="h-3.5 w-3.5" />}
+                  ariaLabel="Filter inventory by category"
+                  menuAlign="right"
                   options={[
                     { value: 'ALL', label: 'All Categories' },
-                    { value: 'Display', label: 'Display' },
-                    { value: 'Battery', label: 'Battery' },
-                    { value: 'Logic Board', label: 'Logic Board' },
-                    { value: 'Charging Port', label: 'Charging Port' },
-                    { value: 'Back Glass', label: 'Back Glass' },
-                    { value: 'Camera', label: 'Camera' },
-                    { value: 'Audio', label: 'Audio' },
+                    ...inventoryCategoryOptions.map((category) => ({ value: category, label: category })),
                   ]}
                 />
 
                 <CustomDropdownMenu
                   value={stockFilter}
                   onChange={(val) => setStockFilter(val)}
-                  buttonClassName="!px-2.5 !py-1.5 text-xs"
-                  className="hidden sm:inline-block"
+                  iconOnly
+                  triggerIcon={<ShieldCheck className="h-3.5 w-3.5" />}
+                  ariaLabel="Filter inventory by quality tier"
+                  menuAlign="right"
                   options={[
                     { value: 'ALL', label: 'All Tiers' },
-                    { value: 'OEM Original Pulled', label: 'OEM Original' },
-                    { value: 'Refurbished Grade A', label: 'Refurbished' },
-                    { value: 'Aftermarket Premium', label: 'Aftermarket' },
+                    ...inventoryQualityOptions.map((tier) => ({ value: tier, label: tier })),
                   ]}
                 />
 
-                <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
+                <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact iconOnly />
               </>
             )}
 
@@ -1133,12 +1193,12 @@ export default function App() {
               </button>
             )}
 
-            {/* Offline Mode & IndexedDB Sync Badge */}
+            {/* Live Supabase connection indicator */}
             <OfflineSyncStatusBadge />
           </div>
         </header>
 
-        <main className="flex-1 w-full max-w-full px-3 sm:px-4 lg:px-5 pt-3 pb-5 flex flex-col">
+        <main className="min-h-0 flex-1 w-full max-w-full px-3 sm:px-4 lg:px-5 pt-3 pb-5 flex flex-col">
           <div key={activeTab} className="app-module-content flex-1 w-full min-w-0 flex flex-col">
               {activeTab === 'dashboard' && (
                 <DashboardOverview
@@ -1223,7 +1283,7 @@ export default function App() {
                   suppliers={suppliers}
                   systemSettings={systemSettings}
                   deviceModels={priceCatalog.catalog.map((m) => m.model)}
-                  inventoryCategories={priceCatalog.categories.map((category) => category.label)}
+                  inventoryCategories={inventoryCategoryOptions}
                   onAddPart={handleAddPart}
                   onUpdatePart={handleUpdatePart}
                   onDeletePart={handleDeletePart}
@@ -1267,6 +1327,7 @@ export default function App() {
                 <PriceCatalogModule
                   catalog={priceCatalog.catalog}
                   updatePriceAndWarranty={priceCatalog.updatePriceAndWarranty}
+                  importCatalogRows={priceCatalog.importCatalogRows}
                   addModel={priceCatalog.addModel}
                   renameModel={priceCatalog.renameModel}
                   deleteModel={priceCatalog.deleteModel}
@@ -1398,10 +1459,14 @@ export default function App() {
                   onAddTechnician={handleAddTechnician}
                   onUpdateTechnician={handleUpdateTechnician}
                   onDeleteTechnician={handleDeleteTechnician}
-                  repairCategories={priceCatalog.categories}
-                  onAddRepairCategory={priceCatalog.addCategory}
-                  onUpdateRepairCategory={priceCatalog.updateCategoryLabel}
-                  onDeleteRepairCategory={priceCatalog.deleteCategory}
+                  inventoryCategories={inventoryCategories}
+                  onUpdateInventoryCategories={(inventoryCategories) => handleUpdateSettings({ ...systemSettings, inventoryCategories })}
+                  parts={parts}
+                  suppliers={suppliers}
+                  onAddSupplier={handleAddSupplier}
+                  onUpdateSupplier={handleUpdateSupplier}
+                  onDeleteSupplier={handleDeleteSupplier}
+                  onUpdatePart={handleUpdatePart}
                   onOpenRecycleBin={() => setIsRecycleBinOpen(true)}
                   archivedCount={archivedWorkOrders.length}
                   users={users}

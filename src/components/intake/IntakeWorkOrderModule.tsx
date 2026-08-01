@@ -347,7 +347,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
       </div>
 
       {/* Main Full-Width Section: Controls Bar & Ticket List */}
-      <div className="bg-white border border-[#E5E5EA] rounded-2xl p-5 space-y-4 shadow-xs flex flex-col justify-between">
+      <div className="workspace-panel workspace-panel--with-toolbar bg-white border border-[#E5E5EA] rounded-2xl p-5 space-y-4 shadow-xs">
         {/* Controls Bar: Items Count, Filters, Clear All, Sort */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-[#E5E5EA]">
           <div className="flex items-center space-x-3">
@@ -424,7 +424,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
 
         {/* View Content: Table or Grid Cards */}
         {filteredOrders.length === 0 ? (
-          <div className="p-12 text-center text-xs space-y-4 bg-[#F8FBFD] rounded-2xl border border-dashed border-[#D8E5ED] my-4">
+          <div className="flex min-h-0 flex-1 flex-col items-center justify-center p-12 text-center text-xs space-y-4 bg-[#F8FBFD] rounded-2xl border border-dashed border-[#D8E5ED] my-4">
             <div className="w-14 h-14 bg-[#136F9A]/10 text-[#136F9A] rounded-2xl flex items-center justify-center mx-auto shadow-2xs">
               <Inbox className="w-7 h-7" />
             </div>
@@ -439,7 +439,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           </div>
         ) : viewMode === 'table' ? (
           /* TABLE VIEW */
-          <div className="overflow-x-auto min-h-[380px] max-h-[calc(100vh-220px)] overflow-y-auto rounded-xl">
+          <div className="workspace-panel__scroll rounded-xl">
             <table className="w-full min-w-[1120px] text-left border-collapse">
               <thead className="sticky top-0 z-20 bg-[#F8FBFD] shadow-2xs">
                 <tr className="border-b border-[#E5E5EA] bg-[#F8FBFD] text-[11px] font-black uppercase text-[#7F7F7F] tracking-wider">
@@ -549,7 +549,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           </div>
         ) : (
           /* GRID CARDS VIEW */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[380px] content-start">
+          <div className="workspace-panel__scroll grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 content-start rounded-xl">
             {paginatedOrders.map((wo) => {
               const woColorStyle = getRealisticColorStyle(wo.deviceColor);
               const diag21 = get21Diagnostics(wo.beforeDiagnostics, wo.symptomsReported, wo.intakeChecklist);
@@ -627,7 +627,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
 
         {/* Pagination Bar */}
         {filteredOrders.length > 0 && (
-          <div className="pt-4 border-t border-[#E5E5EA] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#7F7F7F]">
+          <div className="workspace-panel__footer pt-4 border-t border-[#E5E5EA] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#7F7F7F]">
             <span className="font-bold">
               Showing <strong className="text-[#2C3E50]">{startIndex + 1}-{endIndex}</strong> of <strong className="text-[#2C3E50]">{filteredOrders.length}</strong> repair tickets
             </span>

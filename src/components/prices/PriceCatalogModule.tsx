@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { 
   ModelRepairPrice, 
+  PriceCatalogImportRow,
   REPAIR_CATEGORIES, 
   RepairCategoryDef, 
   FolderConfig, 
@@ -45,6 +46,11 @@ import { QuickPriceCalculatorModal } from './QuickPriceCalculatorModal';
 interface PriceCatalogModuleProps {
   catalog: ModelRepairPrice[];
   updatePriceAndWarranty: (modelName: string, categoryKey: string, newPrice: number | null, newWarranty: string) => void;
+  importCatalogRows?: (
+    rows: PriceCatalogImportRow[],
+    importedCategories?: RepairCategoryDef[],
+    replaceCategories?: boolean,
+  ) => Promise<number>;
   addModel: (modelName: string, folderId?: string, cloneFromModel?: string) => void;
   renameModel?: (oldName: string, newName: string) => void;
   deleteModel?: (modelName: string) => void;
@@ -99,6 +105,7 @@ const DEVICE_SERIES_ORDER = [
 export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
   catalog,
   updatePriceAndWarranty,
+  importCatalogRows,
   addModel,
   renameModel,
   deleteModel,
@@ -434,9 +441,9 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
   }, [onRegisterExportHandler, handleExportCsv]);
 
   return (
-    <div className="space-y-4">
-      {/* Top Banner Header displaying BIG Active Device - Sticky at top */}
-      <div className="sticky top-0 z-20 bg-[#F5F5F7] pt-1 pb-1">
+    <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
+      {/* Keep the chosen device visible while the catalog itself scrolls. */}
+      <div className="z-20 shrink-0 bg-[#F5F5F7] pt-1 pb-1">
         <div className="bg-white border border-[#E5E5EA] p-4 sm:p-5 rounded-3xl shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#0071E3] text-white flex items-center justify-center font-black shrink-0">
@@ -469,9 +476,9 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
       </div>
 
       {/* POS Catalog & Cart Main Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+      <div className="grid min-h-0 flex-1 grid-cols-1 items-stretch gap-5 overflow-y-auto lg:grid-cols-12 lg:overflow-hidden [scrollbar-gutter:stable]">
         {/* Main POS Catalog & Grid Section (8 Cols on Desktop) - Dedicated Scroll Container */}
-        <div className="lg:col-span-8 space-y-4 max-h-[calc(100vh-230px)] overflow-y-auto p-2 sm:p-2.5 scrollbar-thin">
+        <div className="min-h-0 space-y-4 overflow-visible p-2 sm:p-2.5 lg:col-span-8 lg:overflow-y-auto scrollbar-thin [scrollbar-gutter:stable]">
 
           {/* Service Grid - Fixed Height Non-shifting Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3.5 pb-8 pt-0.5 px-0.5">
@@ -574,7 +581,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
         </div>
 
         {/* Right Side Cart & Invoice Summary Panel (4 Cols Desktop) */}
-        <div className="lg:col-span-4 bg-white border border-[#E5E5EA] rounded-2xl shadow-2xs overflow-hidden flex flex-col sticky top-4">
+        <div className="flex flex-col overflow-hidden rounded-2xl border border-[#E5E5EA] bg-white shadow-2xs lg:col-span-4 lg:h-full lg:min-h-0 lg:overflow-y-auto">
           {/* Cart Header */}
           <div className="p-3.5 sm:p-4 border-b border-[#E5E5EA] flex items-center justify-between bg-[#F5F5F7]/80 h-[56px] shrink-0">
             <div className="flex items-center space-x-2.5 min-w-0">
@@ -857,6 +864,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
         onClose={() => setSettingsModalOpen(false)}
         catalog={catalog}
         updatePriceAndWarranty={updatePriceAndWarranty}
+        importCatalogRows={importCatalogRows}
         addModel={addModel}
         renameModel={renameModel}
         deleteModel={deleteModel}

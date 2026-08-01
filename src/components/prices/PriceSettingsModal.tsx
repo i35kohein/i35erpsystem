@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { 
   X, 
   Save, 
@@ -10,6 +10,7 @@ import {
   Check, 
   SlidersHorizontal,
   Download,
+  FileUp,
   AlertCircle,
   Folder,
   FolderCheck,
@@ -28,13 +29,54 @@ import {
   TrendingUp,
   Globe
 } from 'lucide-react';
-import { ModelRepairPrice, REPAIR_CATEGORIES, RepairCategoryDef, FolderConfig, getModelFolderId } from '../../types/priceCatalog';
+import { ModelRepairPrice, PriceCatalogImportRow, REPAIR_CATEGORIES, RepairCategoryDef, FolderConfig, getModelFolderId } from '../../types/priceCatalog';
+
+const normalizeCsvHeader = (value: string) => value.replace(/^\uFEFF/, '').trim().toLowerCase().replace(/\s+/g, ' ');
+
+const parseCsvRows = (source: string): string[][] => {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let field = '';
+  let quoted = false;
+
+  for (let index = 0; index < source.length; index += 1) {
+    const char = source[index];
+    if (char === '"') {
+      if (quoted && source[index + 1] === '"') {
+        field += '"';
+        index += 1;
+      } else {
+        quoted = !quoted;
+      }
+    } else if (char === ',' && !quoted) {
+      row.push(field);
+      field = '';
+    } else if ((char === '\n' || char === '\r') && !quoted) {
+      if (char === '\r' && source[index + 1] === '\n') index += 1;
+      row.push(field);
+      if (row.some((cell) => cell.trim())) rows.push(row);
+      row = [];
+      field = '';
+    } else {
+      field += char;
+    }
+  }
+
+  row.push(field);
+  if (row.some((cell) => cell.trim())) rows.push(row);
+  return rows;
+};
 
 interface PriceSettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   catalog: ModelRepairPrice[];
   updatePriceAndWarranty: (modelName: string, categoryKey: string, newPrice: number | null, newWarranty: string) => void;
+  importCatalogRows?: (
+    rows: PriceCatalogImportRow[],
+    importedCategories?: RepairCategoryDef[],
+    replaceCategories?: boolean,
+  ) => Promise<number>;
   addModel: (modelName: string, folderId?: string, cloneFromModel?: string) => void;
   renameModel?: (oldName: string, newName: string) => void;
   deleteModel?: (modelName: string) => void;
@@ -60,6 +102,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
   onClose,
   catalog,
   updatePriceAndWarranty,
+  importCatalogRows,
   addModel,
   renameModel,
   deleteModel,
@@ -112,6 +155,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
   const [globalWarrantyFolder, setGlobalWarrantyFolder] = useState<string>('ALL');
   const [globalWarrantyCategory, setGlobalWarrantyCategory] = useState<string>('ALL');
   const [globalWarrantyTerm, setGlobalWarrantyTerm] = useState<string>('3 Month');
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen) return null;
 
@@ -269,6 +313,85 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
     downloadAnchor.remove();
   };
 
+  const handleImportCsv = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file || !importCatalogRows) return;
+
+    try {
+      const rows = parseCsvRows(await file.text());
+      const headers = rows.shift();
+      if (!headers?.length) throw new Error('This CSV file has no header row.');
+
+      const modelIndex = headers.findIndex((header) => normalizeCsvHeader(header) === 'model');
+      if (modelIndex < 0) throw new Error('The CSV needs a "Model" column.');
+
+      const columns = new Map<number, { key: string; type: 'price' | 'warranty' }>();
+      const categoryLookup = new Map<string, { key: string; type: 'price' | 'warranty' }>();
+      const csvCategoryKeys = new Set<string>();
+      const importCategories = [
+        ...categories,
+        ...REPAIR_CATEGORIES.filter((defaultCategory) => !categories.some((category) => category.key === defaultCategory.key)),
+      ];
+      importCategories.forEach((category) => {
+        categoryLookup.set(normalizeCsvHeader(`${category.label} Price`), { key: category.key, type: 'price' });
+        categoryLookup.set(normalizeCsvHeader(`${category.label} Warranty`), { key: category.key, type: 'warranty' });
+      });
+      REPAIR_CATEGORIES.forEach((category) => {
+        categoryLookup.set(normalizeCsvHeader(`${category.label} Price`), { key: category.key, type: 'price' });
+        categoryLookup.set(normalizeCsvHeader(`${category.label} Warranty`), { key: category.key, type: 'warranty' });
+      });
+      headers.forEach((header, index) => {
+        const column = categoryLookup.get(normalizeCsvHeader(header));
+        if (column) {
+          columns.set(index, column);
+          csvCategoryKeys.add(column.key);
+        }
+      });
+      if (columns.size === 0) throw new Error('No matching Price List service columns were found.');
+
+      const knownModels = new Set(catalog.map((item) => item.model.trim().toLowerCase()));
+      const parsedRows: PriceCatalogImportRow[] = [];
+      let skippedModels = 0;
+      rows.forEach((row) => {
+        const model = row[modelIndex]?.trim();
+        if (!model) return;
+        if (!knownModels.has(model.toLowerCase())) {
+          skippedModels += 1;
+          return;
+        }
+
+        const prices: Record<string, number | null> = {};
+        const warranties: Record<string, string> = {};
+        columns.forEach((column, index) => {
+          const value = (row[index] || '').trim();
+          if (column.type === 'warranty') {
+            warranties[column.key] = value;
+            return;
+          }
+          const numeric = Number(value.replace(/,/g, ''));
+          prices[column.key] = value === '' || !Number.isFinite(numeric) ? null : numeric;
+        });
+        parsedRows.push({ model, prices, warranties });
+      });
+
+      if (parsedRows.length === 0) throw new Error('No existing Price List models matched this file.');
+      const csvCategories = REPAIR_CATEGORIES.filter((category) => csvCategoryKeys.has(category.key));
+      if (!window.confirm(`Replace the Price List repair categories with the ${csvCategories.length} services in this CSV and import prices for ${parsedRows.length} existing model(s)? Inventory Categories will not change.`)) return;
+
+      const imported = await importCatalogRows(
+        parsedRows,
+        csvCategories,
+        true,
+      );
+      const skippedNote = skippedModels ? ` ${skippedModels} unknown model(s) skipped.` : '';
+      triggerToast(`Replaced Price List categories with ${csvCategories.length} CSV services and imported ${imported} model(s).${skippedNote}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Could not read this CSV file.';
+      alert(message);
+    }
+  };
+
   const getFamilyIcon = (family: string) => {
     switch (family) {
       case 'iPhone':
@@ -367,6 +490,22 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
           </div>
 
           <div className="flex items-center space-x-2">
+            <input
+              ref={importInputRef}
+              type="file"
+              accept=".csv,text/csv"
+              className="hidden"
+              onChange={handleImportCsv}
+            />
+            <button
+              type="button"
+              onClick={() => importInputRef.current?.click()}
+              className="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-[#0071E3] font-bold text-xs transition-all flex items-center space-x-1.5 border border-blue-200 cursor-pointer"
+              title="Import a Price List CSV exported from this ERP"
+            >
+              <FileUp className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Import CSV</span>
+            </button>
             <button
               onClick={handleExportJson}
               className="px-3 py-1.5 rounded-lg bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] font-bold text-xs transition-all flex items-center space-x-1.5 border border-[#E5E5EA] cursor-pointer"
