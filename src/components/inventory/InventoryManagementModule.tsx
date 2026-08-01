@@ -723,6 +723,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       )}
 
       {/* Filter Toolbar */}
+      {viewMode !== 'matrix' && (
       <div className="space-y-2 rounded-xl border border-[var(--border)] bg-[var(--card-bg)] p-2.5">
         <div className="flex flex-wrap items-center justify-start gap-1.5 text-xs">
           {/* Model → Category → Tier */}
@@ -796,6 +797,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           </div>
         </div>
       </div>
+      )}
 
       {/* VIEW MODE 1: STOCK TABLE */}
       {viewMode === 'stock' && (

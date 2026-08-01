@@ -154,16 +154,8 @@ export default function App() {
     handleUpdateSettings({ ...systemSettings, currencySymbol: newSymbol });
   });
 
-  // Keep the existing detailed stock category names when moving away from the
-  // old shared Price List list. This is a one-time migration only: after it is
-  // stored in System Settings, the two lists never sync again.
-  const legacyInventoryCategories = useMemo(
-    () => Array.from(new Set(priceCatalog.categories.map((category) => category.label.trim()).filter(Boolean))),
-    [priceCatalog.categories]
-  );
-  const inventoryCategories = systemSettings.inventoryCategories !== undefined
-    ? systemSettings.inventoryCategories
-    : legacyInventoryCategories;
+  // Inventory Categories are independent from the Price List categories.
+  const inventoryCategories = systemSettings.inventoryCategories || [];
 
   // Keep top-bar inventory filters aligned with the saved inventory categories and stock data.
   const inventoryCategoryOptions = Array.from(new Set([
@@ -171,6 +163,14 @@ export default function App() {
     ...parts.map((part) => part.category).filter(Boolean),
   ])).sort((a, b) => a.localeCompare(b));
   const inventoryQualityOptions = Array.from(new Set(parts.map((part) => part.qualityTier).filter(Boolean))).sort((a, b) => a.localeCompare(b));
+
+  const normalizeInventoryPartCategory = (category: unknown) => {
+    const value = String(category || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    if (value === 'back glass' || value === 'backglass') return 'Backglass Replacement';
+    if (value === 'battery') return 'Battery Original';
+    if (value === 'battery cell') return 'Battery Cell';
+    return String(category || '').trim();
+  };
 
   // Cloud-only ERP data. No browser cache or offline queue is used.
   useEffect(() => {
@@ -183,6 +183,7 @@ export default function App() {
       // Normalize older Supabase rows so inventory values remain editable after schema/UI changes.
       const normalized = data.map((raw: any) => ({
         ...raw,
+        category: normalizeInventoryPartCategory(raw.category),
         quantityInStock: Number(raw.quantityInStock ?? raw.quantity_in_stock ?? raw.stock ?? 0),
         reorderPoint: Number(raw.reorderPoint ?? raw.reorder_point ?? 0),
         costPrice: Number(raw.costPrice ?? raw.cost_price ?? raw.cost ?? 0),
@@ -195,6 +196,12 @@ export default function App() {
         })(),
       })) as PartItem[];
       setParts(normalized);
+      // One-time data correction for legacy part rows. The normalized rows are
+      // persisted so filters and future edits use the same category vocabulary.
+      normalized.forEach((part, index) => {
+        const raw = data[index] as any;
+        if (raw?.category !== part.category) saveDocument('parts', part).catch(console.error);
+      });
     }, []);
 
     const unsubSuppliers = subscribeToCollection<Supplier>('suppliers', (data) => {
@@ -348,14 +355,18 @@ export default function App() {
 
   // --- Handlers ---
   const handleUpdateSettings = (newSettings: SystemSettings) => {
-    setSystemSettings(newSettings);
-    saveDocument('systemSettings', { id: 'global', ...newSettings }).catch(console.error);
+    // Preserve independently managed inventory data when another settings
+    // draft (for example the print or shop form) is saved from an older draft.
+    const mergedSettings: SystemSettings = {
+      ...systemSettings,
+      ...newSettings,
+      inventoryCategories: newSettings.inventoryCategories ?? systemSettings.inventoryCategories,
+      inventoryQualityTiers: newSettings.inventoryQualityTiers ?? systemSettings.inventoryQualityTiers,
+      inventoryBinNames: newSettings.inventoryBinNames ?? systemSettings.inventoryBinNames,
+    };
+    setSystemSettings(mergedSettings);
+    saveDocument('systemSettings', { id: 'global', ...mergedSettings }).catch(console.error);
   };
-
-  useEffect(() => {
-    if (systemSettings.inventoryCategories !== undefined || legacyInventoryCategories.length === 0) return;
-    handleUpdateSettings({ ...systemSettings, inventoryCategories: legacyInventoryCategories });
-  }, [systemSettings, legacyInventoryCategories]);
 
   const handleAddTechnician = (tech: Technician) => {
     setTechnicians((prev) => [...prev, tech]);

@@ -327,6 +327,7 @@ export interface SystemSettings {
   inventoryCategories?: string[];
   // Configured from System Management > Inventory Data & Quality.
   inventoryQualityTiers?: string[];
+  inventoryBinNames?: string[];
   lowStockThreshold: number;
   autoReserveOnAssignment: boolean;
   defaultSupplierSlaDays: number;

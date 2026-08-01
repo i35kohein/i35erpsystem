@@ -628,7 +628,9 @@ html[data-theme] [class~="bg-[#ED7132]"] {
 }
 
 .workspace-panel--with-summary {
-  height: clamp(380px, calc(100dvh - 290px), 860px);
+  /* Give matrix/list workspaces the remaining screen height while keeping
+     their own data region scrollable. */
+  height: clamp(520px, calc(100dvh - 170px), 1100px);
 }
 
 .workspace-panel__scroll {

@@ -152,6 +152,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   const { theme, setTheme, geometry, setGeometry } = useTheme();
   const { t, language, setLanguage } = useLanguage();
   const [activeSubTab, setActiveSubTab] = useState<'shop' | 'theme' | 'users' | 'technicians' | 'intake' | 'pricing' | 'payment' | 'inventory' | 'pos' | 'notifications' | 'qa' | 'recycle' | 'ai'>(initialSubTab || 'users');
+  const [inventoryDataTab, setInventoryDataTab] = useState<'categories' | 'suppliers' | 'tiers' | 'bins' | 'rules'>('categories');
 
   
   // Local settings draft state
@@ -166,6 +167,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   const [qualityTierDraft, setQualityTierDraft] = useState('');
   const [editingQualityTier, setEditingQualityTier] = useState<string | null>(null);
   const [editingQualityTierLabel, setEditingQualityTierLabel] = useState('');
+  const [binDraft, setBinDraft] = useState('');
   const receiptFooterEditorRef = useRef<HTMLTextAreaElement>(null);
   const [selectedFooterLineIndexes, setSelectedFooterLineIndexes] = useState<number[]>([0]);
 
@@ -693,7 +695,9 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
     const label = categoryDraft.trim();
     if (!label || !onUpdateInventoryCategories) return;
     if (inventoryCategories.some((category) => category.toLowerCase() === label.toLowerCase())) return;
-    onUpdateInventoryCategories([...inventoryCategories, label]);
+    const nextCategories = [...inventoryCategories, label];
+    onUpdateInventoryCategories(nextCategories);
+    setFormData((current) => ({ ...current, inventoryCategories: nextCategories }));
     setCategoryDraft('');
   };
 
@@ -701,7 +705,9 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
     const label = editingCategoryLabel.trim();
     if (!label || !onUpdateInventoryCategories) return;
     if (inventoryCategories.some((category) => category !== categoryToReplace && category.toLowerCase() === label.toLowerCase())) return;
-    onUpdateInventoryCategories(inventoryCategories.map((category) => category === categoryToReplace ? label : category));
+    const nextCategories = inventoryCategories.map((category) => category === categoryToReplace ? label : category);
+    onUpdateInventoryCategories(nextCategories);
+    setFormData((current) => ({ ...current, inventoryCategories: nextCategories }));
     setEditingCategoryKey(null);
     setEditingCategoryLabel('');
   };
@@ -736,6 +742,14 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
     if (!tier || inventoryQualityTiers.some((item) => item.toLowerCase() === tier.toLowerCase())) return;
     saveInventoryQualityTiers([...inventoryQualityTiers, tier]);
     setQualityTierDraft('');
+  };
+
+  const inventoryBinNames = settings.inventoryBinNames || [];
+  const handleAddInventoryBin = () => {
+    const bin = binDraft.trim().toUpperCase();
+    if (!bin || inventoryBinNames.some((item) => item.toLowerCase() === bin.toLowerCase())) return;
+    onUpdateSettings({ ...settings, inventoryBinNames: [...inventoryBinNames, bin] });
+    setBinDraft('');
   };
 
   const handleSaveInventoryQualityTier = (tier: string) => {
@@ -2224,7 +2238,21 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             </p>
           </div>
 
-          <section className="space-y-3 border-y border-[#E5E5EA] py-4">
+          <div className="flex flex-wrap gap-1.5 border-b border-[#E5E5EA] pb-3">
+            {([
+              ['categories', 'Categories'],
+              ['suppliers', 'Suppliers'],
+              ['tiers', 'Quality Tiers'],
+              ['bins', 'Storage Bins'],
+              ['rules', 'Stock Rules'],
+            ] as const).map(([id, label]) => (
+              <button key={id} type="button" onClick={() => setInventoryDataTab(id)} className={`rounded-lg px-3 py-1.5 text-xs font-extrabold ${inventoryDataTab === id ? 'bg-[#0071E3] text-white' : 'bg-[#F5F5F7] text-[#6E6E73] hover:bg-[#E5E5EA]'}`}>
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <section className={`${inventoryDataTab === 'categories' ? 'space-y-3' : 'hidden'} border-y border-[#E5E5EA] py-4`}>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h4 className="text-xs font-extrabold text-[#1D1D1F]">Inventory Categories</h4>
@@ -2254,7 +2282,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               </button>
             </div>
 
-            <div className="max-h-52 divide-y divide-[#E5E5EA] overflow-y-auto rounded-xl border border-[#E5E5EA] bg-[#F8F9FA]">
+            <div className="divide-y divide-[#E5E5EA] overflow-hidden rounded-xl border border-[#E5E5EA] bg-[#F8F9FA]">
               {inventoryCategories.map((category) => (
                 <div key={category} className="flex items-center gap-2 px-3 py-2">
                   {editingCategoryKey === category ? (
@@ -2275,7 +2303,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                   )}
                   <button
                     type="button"
-                    onClick={() => { if (window.confirm(`Delete category “${category}”? It will no longer appear for new inventory parts.`)) onUpdateInventoryCategories?.(inventoryCategories.filter((item) => item !== category)); }}
+                    onClick={() => { if (window.confirm(`Delete category “${category}”? It will no longer appear for new inventory parts.`)) { const nextCategories = inventoryCategories.filter((item) => item !== category); onUpdateInventoryCategories?.(nextCategories); setFormData((current) => ({ ...current, inventoryCategories: nextCategories })); } }}
                     className="text-[11px] font-extrabold text-rose-600"
                   >
                     Delete
@@ -2285,7 +2313,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             </div>
           </section>
 
-          <section className="space-y-3 border-b border-[#E5E5EA] pb-5">
+          <section className={`${inventoryDataTab === 'suppliers' ? 'space-y-3' : 'hidden'} border-b border-[#E5E5EA] pb-5`}>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h4 className="text-xs font-extrabold text-[#1D1D1F]">Supplier Name Data</h4>
@@ -2326,7 +2354,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             </div>
           </section>
 
-          <section className="space-y-3 border-b border-[#E5E5EA] pb-5">
+          <section className={`${inventoryDataTab === 'tiers' ? 'space-y-3' : 'hidden'} border-b border-[#E5E5EA] pb-5`}>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h4 className="text-xs font-extrabold text-[#1D1D1F]">Quality Tiers</h4>
@@ -2351,7 +2379,16 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             </div>
           </section>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs">
+          <section className={`${inventoryDataTab === 'bins' ? 'space-y-3' : 'hidden'} border-b border-[#E5E5EA] pb-5`}>
+            <div className="flex items-center justify-between gap-2">
+              <div><h4 className="text-xs font-extrabold text-[#1D1D1F]">Storage Bin Names</h4><p className="text-[11px] text-[#86868B]">Saved bin names appear when registering or editing inventory parts.</p></div>
+              <span className="rounded-full bg-[#0071E3]/10 px-2 py-0.5 text-[10px] font-bold text-[#0071E3]">{inventoryBinNames.length} bins</span>
+            </div>
+            <div className="flex gap-2"><input value={binDraft} onChange={(event) => setBinDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleAddInventoryBin(); } }} placeholder="e.g. BIN-A01" className="h-9 min-w-0 flex-1 rounded-xl border border-[#D2D2D7] bg-[#F5F5F7] px-3 text-xs font-mono font-bold outline-none focus:border-[#0071E3] focus:bg-white" /><button type="button" onClick={handleAddInventoryBin} disabled={!binDraft.trim()} className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-[#0071E3] px-3 text-xs font-extrabold text-white hover:bg-[#0051B3] disabled:opacity-45"><Plus className="h-3.5 w-3.5" /> Add bin</button></div>
+            <div className="flex flex-wrap gap-2 rounded-xl border border-[#E5E5EA] bg-[#F8F9FA] p-3">{inventoryBinNames.length ? inventoryBinNames.map((bin) => <span key={bin} className="inline-flex items-center gap-2 rounded-lg bg-white px-2.5 py-1.5 font-mono text-xs font-bold text-[#1D1D1F] shadow-sm"><MapPin className="h-3.5 w-3.5 text-[#0071E3]" />{bin}<button type="button" onClick={() => onUpdateSettings({ ...settings, inventoryBinNames: inventoryBinNames.filter((item) => item !== bin) })} className="text-rose-600" aria-label={`Delete ${bin}`}>×</button></span>) : <p className="text-xs text-[#86868B]">No saved bins yet.</p>}</div>
+          </section>
+
+          <div className={`${inventoryDataTab === 'rules' ? 'grid' : 'hidden'} grid-cols-1 md:grid-cols-2 gap-5 text-xs`}>
             <div className="space-y-1.5">
               <label className="font-extrabold text-[#1D1D1F] flex items-center space-x-1.5">
                 <AlertCircle className="w-3.5 h-3.5 text-[#FF9500]" />
