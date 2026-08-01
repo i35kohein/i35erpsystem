@@ -1,8 +1,13 @@
 import React, { useMemo, useRef, useState, useEffect } from 'react';
-import { Bot, Send, Sparkles, X, AlertTriangle, PackageSearch, PhoneCall, Activity, Settings2 } from 'lucide-react';
+import { Bot, Send, Sparkles, X, AlertTriangle, PackageSearch, PhoneCall, Activity, Settings2, Copy, Database, RotateCcw } from 'lucide-react';
 import { Customer, PartItem, Supplier, SystemSettings, Technician, WorkOrder } from '../../types';
 
-type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string };
+type ChatMessage = {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  source?: 'ai' | 'local';
+};
 
 interface AiDiagnosticAssistantModalProps {
   isOpen: boolean;
@@ -17,11 +22,18 @@ interface AiDiagnosticAssistantModalProps {
 }
 
 const QUICK_PROMPTS = [
-  { label: 'Bottlenecks', prompt: 'What are the current repair bottlenecks?', icon: AlertTriangle },
-  { label: 'Top parts', prompt: 'Which parts are top selling or most used?', icon: PackageSearch },
-  { label: 'Follow-ups', prompt: 'Which devices or customers need follow-up?', icon: PhoneCall },
-  { label: 'Daily brief', prompt: 'Give me a concise operations brief and priorities.', icon: Activity },
+  { label: 'Today’s priorities', prompt: 'Give me a concise operations brief and priorities for today.', icon: Activity },
+  { label: 'Repair delays', prompt: 'What are the current repair bottlenecks and what should the team do next?', icon: AlertTriangle },
+  { label: 'Follow-ups', prompt: 'Which customers and devices need follow-up first?', icon: PhoneCall },
+  { label: 'Parts & stock', prompt: 'Which parts are top used and which stock needs attention?', icon: PackageSearch },
 ];
+
+const WELCOME_MESSAGE: ChatMessage = {
+  id: 'welcome',
+  role: 'assistant',
+  source: 'local',
+  content: 'Hello — I am your ERP Operations Copilot. I can turn today’s live ticket, stock, follow-up, technician, and finance data into clear next actions. What would you like to review?',
+};
 
 export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProps> = ({
   isOpen,
@@ -36,18 +48,31 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
 }) => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 'welcome',
-      role: 'assistant',
-      content: 'I can analyze this shop’s live tickets, bottlenecks, parts usage, stock, follow-ups, technicians, customers, suppliers, and finance. What should we check?',
-    },
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const context = useMemo(() => {
     const now = Date.now();
+    const today = new Date(now);
+    const isToday = (value?: string) => {
+      if (!value) return false;
+      const date = new Date(value);
+      return !Number.isNaN(date.getTime())
+        && date.getFullYear() === today.getFullYear()
+        && date.getMonth() === today.getMonth()
+        && date.getDate() === today.getDate();
+    };
     const active = workOrders.filter((order) => !['Finished', 'Taken Out', 'Cant Repair', 'Customer Not Repair'].includes(order.status));
+    const completedToday = workOrders
+      .filter((order) => ['Finished', 'Taken Out'].includes(order.status))
+      .filter((order) => isToday(order.updatedAt || order.createdAt))
+      .map((order) => ({
+        ticket: order.orderNumber,
+        device: order.deviceModel,
+        customer: order.customerName,
+        status: order.status,
+        technician: order.assignedTechName || 'Unassigned',
+      }));
     const bottlenecks = active
       .map((order) => {
         const ageHours = Math.floor((now - new Date(order.updatedAt || order.createdAt).getTime()) / 3_600_000);
@@ -96,6 +121,7 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
         totalTickets: workOrders.length,
         activeTickets: active.length,
         completedTickets: workOrders.filter((order) => ['Finished', 'Taken Out'].includes(order.status)).length,
+        completedToday: completedToday.length,
         unpaidTickets: workOrders.filter((order) => !order.isPaid).length,
         customers: customers.length,
         suppliers: suppliers.length,
@@ -120,6 +146,7 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
         }))
         .slice(0, 20),
       followUps,
+      completedToday,
       technicianLoad: technicians.map((tech) => ({
         name: tech.name,
         status: tech.status,
@@ -133,12 +160,35 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
     };
   }, [workOrders, parts, customers, technicians, suppliers]);
 
+  const isExternalAi = Boolean(systemSettings.aiProvider && systemSettings.aiProvider !== 'local' && systemSettings.aiApiKey);
+  const providerLabel = isExternalAi
+    ? `${systemSettings.aiProvider} · ${systemSettings.aiModel || 'default model'}`
+    : 'Local live-data analysis';
+
   useEffect(() => {
     if (isOpen) requestAnimationFrame(() => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight }));
   }, [messages, isOpen]);
 
   const localAnswer = (question: string) => {
     const normalized = question.toLowerCase();
+    const isBurmese = /[\u1000-\u109f]/.test(question);
+    const asksToday = normalized.includes('today') || question.includes('ဒီနေ့');
+    const asksCompletedRepair =
+      normalized.includes('completed') || normalized.includes('finished') || normalized.includes('repaired') || normalized.includes('repair')
+      || question.includes('ပြင်ပြီး') || question.includes('ပြင်') || question.includes('ပြီးလဲ') || question.includes('ပြီး');
+
+    if (asksToday && asksCompletedRepair) {
+      if (isBurmese) {
+        const completedList = context.completedToday.length
+          ? `\n${context.completedToday.slice(0, 8).map((item) => `• ${item.ticket} — ${item.device} (${item.status})`).join('\n')}`
+          : '';
+        return `ဒီနေ့ ပြီးစီးထားတဲ့ repair ticket ${context.summary.completedToday} လုံးရှိပါတယ်။${completedList}\n\nFinished / Taken Out status ဖြစ်ပြီး ဒီနေ့ update လုပ်ထားတဲ့ ticket တွေကိုတွက်ထားတာပါ။`;
+      }
+      const completedList = context.completedToday.length
+        ? `\n${context.completedToday.slice(0, 8).map((item) => `• ${item.ticket} — ${item.device} (${item.status})`).join('\n')}`
+        : '';
+      return `${context.summary.completedToday} repair ticket(s) were completed today.${completedList}\n\nThis counts Finished and Taken Out tickets updated today.`;
+    }
     if (normalized.includes('bottleneck') || normalized.includes('stuck') || normalized.includes('delay')) {
       if (!context.bottlenecks.length) return 'No active ticket has gone 48 hours without an update. The repair pipeline currently has no aging bottleneck.';
       return `There are ${context.bottlenecks.length} aging tickets:\n${context.bottlenecks
@@ -189,7 +239,7 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
 
     try {
       let answer: string;
-      if (!systemSettings.aiProvider || systemSettings.aiProvider === 'local') {
+      if (!isExternalAi) {
         answer = localAnswer(trimmed);
       } else {
         const response = await fetch('/api/ai/chat', {
@@ -201,7 +251,10 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
             model: systemSettings.aiModel,
             baseUrl: systemSettings.aiBaseUrl,
             systemPrompt: systemSettings.aiSystemPrompt,
-            messages: nextMessages.filter((message) => message.id !== 'welcome').map(({ role, content }) => ({ role, content })),
+            messages: nextMessages
+              .filter((message) => message.role !== 'system' && message.id !== 'welcome')
+              .slice(-12)
+              .map(({ role, content }) => ({ role, content })),
             context,
           }),
         });
@@ -224,12 +277,15 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
         if (!data.answer) throw new Error('The AI provider returned an empty answer.');
         answer = data.answer;
       }
-      setMessages((current) => [...current, { id: `assistant-${Date.now()}`, role: 'assistant', content: answer }]);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'AI provider request failed.';
       setMessages((current) => [
         ...current,
-        { id: `assistant-${Date.now()}`, role: 'assistant', content: `${message}\n\nLocal analysis:\n${localAnswer(trimmed)}` },
+        { id: `assistant-${Date.now()}`, role: 'assistant', source: isExternalAi ? 'ai' : 'local', content: answer },
+      ]);
+    } catch (error) {
+      setMessages((current) => [
+        ...current,
+        { id: `notice-${Date.now()}`, role: 'system', content: 'AI provider is unavailable right now. Showing local live-data analysis instead.' },
+        { id: `assistant-${Date.now()}`, role: 'assistant', source: 'local', content: localAnswer(trimmed) },
       ]);
     } finally {
       setIsLoading(false);
@@ -238,56 +294,85 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
 
   if (!isOpen) return null;
 
+  const clearConversation = () => {
+    if (isLoading) return;
+    setMessages([WELCOME_MESSAGE]);
+    setInput('');
+  };
+
+  const copyMessage = async (content: string) => {
+    try {
+      await navigator.clipboard.writeText(content);
+    } catch {
+      // Clipboard support is not guaranteed in every browser context.
+    }
+  };
+
   return (
     <>
       <button type="button" aria-label="Close AI Assistant" onClick={onClose} className="fixed inset-0 z-40 bg-black/10 cursor-default" />
-      <aside className="fixed right-0 top-[52px] bottom-0 z-50 w-full sm:w-[420px] bg-white border-l border-[#E5E5EA] shadow-2xl flex flex-col">
-        <div className="h-14 px-4 border-b border-[#E5E5EA] flex items-center justify-between shrink-0">
+      <aside className="fixed right-0 top-[52px] bottom-0 z-50 w-full sm:w-[440px] bg-white border-l border-[var(--border)] shadow-2xl flex flex-col">
+        <div className="px-4 py-3 border-b border-[var(--border)] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 bg-[#0071E3] text-white flex items-center justify-center rounded-lg"><Bot className="w-4.5 h-4.5" /></div>
+            <div className="w-8 h-8 bg-[var(--primary)] text-white flex items-center justify-center rounded-lg"><Bot className="w-4 h-4" /></div>
             <div className="min-w-0">
-              <h2 className="text-sm font-extrabold text-[#1D1D1F]">ERP Operations Assistant</h2>
-              <p className="text-[10px] text-[#86868B] truncate">
-                {systemSettings.aiProvider === 'local' || !systemSettings.aiProvider ? 'Local live-data analysis' : `${systemSettings.aiProvider} · ${systemSettings.aiModel || 'default model'}`}
-              </p>
+              <h2 className="text-sm font-extrabold text-[var(--text-main)]">Operations Copilot</h2>
+              <p className="text-[10px] text-[var(--text-muted)] truncate flex items-center gap-1"><span className={`w-1.5 h-1.5 rounded-full ${isExternalAi ? 'bg-emerald-500' : 'bg-[var(--primary)]'}`} />{providerLabel}</p>
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <button type="button" onClick={onOpenAiSettings} title="AI Provider Settings" className="p-2 text-[#86868B] hover:text-[#0071E3] hover:bg-[#F5F5F7] rounded-lg"><Settings2 className="w-4 h-4" /></button>
-            <button type="button" onClick={onClose} title="Close Assistant" className="p-2 text-[#86868B] hover:text-[#1D1D1F] hover:bg-[#F5F5F7] rounded-lg"><X className="w-4 h-4" /></button>
+            <button type="button" onClick={clearConversation} disabled={isLoading} title="New conversation" className="p-2 text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--blue-tint)] rounded-lg disabled:opacity-40"><RotateCcw className="w-4 h-4" /></button>
+            <button type="button" onClick={onOpenAiSettings} title="AI provider settings" className="p-2 text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--blue-tint)] rounded-lg"><Settings2 className="w-4 h-4" /></button>
+            <button type="button" onClick={onClose} title="Close assistant" className="p-2 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--blue-tint)] rounded-lg"><X className="w-4 h-4" /></button>
           </div>
         </div>
 
-        <div className="px-3 py-2.5 border-b border-[#E5E5EA] flex gap-1.5 overflow-x-auto no-scrollbar shrink-0">
+        <div className="px-4 py-2.5 border-b border-[var(--border)] shrink-0">
+          <div className="flex items-center gap-1.5 text-[10px] text-[var(--text-muted)] mb-2">
+            <Database className="w-3.5 h-3.5 text-[var(--primary)]" />
+            <span>Live context: <strong className="text-[var(--text-main)]">{context.summary.activeTickets} active</strong> · <strong className="text-[var(--text-main)]">{context.lowStockParts.length} low stock</strong> · <strong className="text-[var(--text-main)]">{context.followUps.length} follow-ups</strong></span>
+          </div>
+          <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
           {QUICK_PROMPTS.map(({ label, prompt, icon: Icon }) => (
-            <button key={label} type="button" onClick={() => sendMessage(prompt)} className="px-2.5 py-1.5 bg-[#F5F5F7] border border-[#E5E5EA] text-[#1D1D1F] rounded-lg text-[10px] font-bold flex items-center gap-1.5 shrink-0">
-              <Icon className="w-3.5 h-3.5 text-[#0071E3]" /> {label}
+            <button key={label} type="button" disabled={isLoading} onClick={() => sendMessage(prompt)} className="px-2.5 py-1.5 bg-[var(--bg)] border border-[var(--border)] text-[var(--text-main)] rounded-lg text-[10px] font-bold flex items-center gap-1.5 shrink-0 hover:border-[var(--primary)] hover:bg-[var(--blue-tint)] disabled:opacity-50">
+              <Icon className="w-3.5 h-3.5 text-[var(--primary)]" /> {label}
             </button>
           ))}
+          </div>
         </div>
 
-        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-[var(--bg)]">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-[var(--bg)] [scrollbar-gutter:stable]">
           {messages.map((message) => (
-            <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[88%] px-3 py-2.5 text-xs leading-relaxed whitespace-pre-wrap border ${
+            message.role === 'system' ? (
+              <div key={message.id} className="mx-auto max-w-[92%] px-2.5 py-1.5 text-[10px] text-amber-800 bg-amber-50 border border-amber-200 rounded-lg text-center">{message.content}</div>
+            ) : (
+            <div key={message.id} className={`group flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div className={`relative max-w-[90%] px-3 py-2.5 text-xs leading-relaxed whitespace-pre-wrap border ${
                 message.role === 'user'
-                  ? 'bg-[#0071E3] text-white border-[#0071E3] rounded-2xl rounded-br-md'
-                  : 'bg-white text-[#1D1D1F] border-[#E5E5EA] rounded-2xl rounded-bl-md'
+                  ? 'bg-[var(--primary)] text-white border-[var(--primary)] rounded-2xl rounded-br-md'
+                  : 'bg-white text-[var(--text-main)] border-[var(--border)] rounded-2xl rounded-bl-md shadow-sm'
               }`}>
+                {message.role === 'assistant' && <span className="block mb-1 text-[9px] font-bold uppercase tracking-wide text-[var(--text-muted)]">{message.source === 'ai' ? 'AI analysis' : 'Live ERP analysis'}</span>}
                 {message.content}
+                {message.role === 'assistant' && (
+                  <button type="button" onClick={() => void copyMessage(message.content)} title="Copy response" className="absolute -right-8 top-1.5 p-1 text-[var(--text-muted)] opacity-0 group-hover:opacity-100 hover:text-[var(--primary)]">
+                    <Copy className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
             </div>
+            )
           ))}
           {isLoading && (
             <div className="flex justify-start">
-              <div className="px-3 py-2.5 bg-white border border-[#E5E5EA] rounded-2xl rounded-bl-md text-xs text-[#86868B] flex items-center gap-2">
-                <Sparkles className="w-3.5 h-3.5 text-[#0071E3]" /> Analyzing live ERP data…
+              <div className="px-3 py-2.5 bg-white border border-[var(--border)] rounded-2xl rounded-bl-md text-xs text-[var(--text-muted)] flex items-center gap-2">
+                <Sparkles className="w-3.5 h-3.5 text-[var(--primary)] animate-pulse" /> Reviewing live ERP data…
               </div>
             </div>
           )}
         </div>
 
-        <form onSubmit={(event) => { event.preventDefault(); sendMessage(); }} className="p-3 border-t border-[#E5E5EA] bg-white shrink-0">
+        <form onSubmit={(event) => { event.preventDefault(); sendMessage(); }} className="p-3 border-t border-[var(--border)] bg-white shrink-0">
           <div className="flex items-end gap-2">
             <textarea
               value={input}
@@ -298,15 +383,15 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
                   sendMessage();
                 }
               }}
-              rows={2}
-              placeholder="Ask about tickets, parts, follow-ups, finance…"
-              className="flex-1 min-h-[42px] max-h-28 resize-none border border-[#E5E5EA] bg-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#0071E3]"
+              rows={1}
+              placeholder="Ask a business question…"
+              className="flex-1 min-h-[42px] max-h-28 resize-none border border-[var(--border)] bg-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[var(--primary)]"
             />
-            <button type="submit" disabled={!input.trim() || isLoading} title="Send Message" className="w-10 h-10 bg-[#0071E3] text-white rounded-xl flex items-center justify-center disabled:opacity-40">
+            <button type="submit" disabled={!input.trim() || isLoading} title="Send message" className="w-10 h-10 bg-[var(--primary)] text-white rounded-xl flex items-center justify-center disabled:opacity-40">
               <Send className="w-4 h-4" />
             </button>
           </div>
-          <p className="mt-1.5 text-[9px] text-[#86868B] text-center">Uses current ERP records. Verify critical decisions before acting.</p>
+          <p className="mt-1.5 text-[9px] text-[var(--text-muted)] text-center">Enter to send · Shift + Enter for a new line · Confirm critical decisions before acting.</p>
         </form>
       </aside>
     </>

@@ -124,8 +124,8 @@ Return JSON with key "message".`;
       const { provider, apiKey, model, baseUrl, systemPrompt, messages, context } = req.body;
       if (!apiKey) return res.status(400).json({ success: false, error: "AI API key is not configured." });
 
-      const instruction = `${systemPrompt || "You are a concise repair-shop operations assistant."}
-Use only the supplied live ERP context. If data is unavailable, say so. Give concrete priorities and identify records by ticket, part, device, customer, or technician where possible.
+      const instruction = `${systemPrompt || "You are a professional repair-shop operations copilot."}
+Use only the supplied live ERP context. If data is unavailable, say so rather than inventing it. Reply in the same language as the user's question (Burmese when the user writes Burmese). Be concise, operational, and direct: lead with the conclusion, then give prioritized next actions. Identify records by ticket, part, device, customer, or technician where possible. Use short bullets only when they improve scanability. Do not claim to have completed changes, contacted a customer, or performed an action.
 
 LIVE ERP CONTEXT:
 ${JSON.stringify(context)}`;
