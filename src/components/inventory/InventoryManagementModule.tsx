@@ -56,6 +56,15 @@ const DEFAULT_QUALITY_TIERS = [
   'Genuine',
 ];
 
+type InlineDraft = {
+  quantityInStock?: string;
+  reorderPoint?: string;
+  costPrice?: string;
+  sellingPrice?: string;
+  locationBin?: string;
+  supplierId?: string;
+};
+
 interface InventoryManagementModuleProps {
   parts: PartItem[];
   suppliers: Supplier[];
@@ -109,6 +118,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const [localSearchQuery, setLocalSearchQuery] = useState<string>('');
   const [localShowAddModal, setLocalShowAddModal] = useState(false);
   const [viewMode, setViewMode] = useState<'stock' | 'profit' | 'matrix'>('stock');
+  const [inlineEditMode, setInlineEditMode] = useState(false);
+  const [inlineDrafts, setInlineDrafts] = useState<Record<string, InlineDraft>>({});
+  const [showInlineSaveConfirm, setShowInlineSaveConfirm] = useState(false);
   const [showLowStockOnly, setShowLowStockOnly] = useState(false);
 
   // Supplier & Quality Tier Edit States
@@ -417,12 +429,24 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const selectedPartModel = newPartData.deviceCompatibility?.[0] || '';
   const availableBackGlassColors = selectedPartModel ? getAvailableColorsForModel(selectedPartModel) : [];
   const existingLocationBins = useMemo(
-    () => [...new Set(parts.map((part) => part.locationBin?.trim()).filter((bin): bin is string => Boolean(bin)))].sort((a, b) => a.localeCompare(b)),
-    [parts]
+    () => [...new Set([
+      ...(systemSettings?.inventoryBinNames || []),
+      ...parts.map((part) => part.locationBin?.trim()).filter((bin): bin is string => Boolean(bin)),
+    ])].sort((a, b) => a.localeCompare(b)),
+    [parts, systemSettings?.inventoryBinNames]
   );
   const matrixModels = useMemo(
-    () => [...new Set(parts.flatMap((part) => part.deviceCompatibility.filter(Boolean)))].sort((a, b) => a.localeCompare(b)),
-    [parts]
+    () => {
+      const unique = new Map<string, string>();
+      [...activeDeviceModels, ...parts.flatMap((part) => part.deviceCompatibility.filter(Boolean))]
+        .forEach((model) => unique.set(model.trim().toLowerCase(), model.trim()));
+      return [...unique.values()].sort((a, b) => {
+        const numberOf = (model: string) => Number(model.match(/iPhone\s+(\d+)/i)?.[1] || 0);
+        const generation = numberOf(b) - numberOf(a);
+        return generation || b.localeCompare(a, undefined, { numeric: true, sensitivity: 'base' });
+      });
+    },
+    [activeDeviceModels, parts]
   );
   const matrixCategories = useMemo(
     () => [...new Set(parts.map((part) => part.category).filter(Boolean))].sort((a, b) => a.localeCompare(b)),
@@ -509,7 +533,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   }, [parts]);
 
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const ITEMS_PER_PAGE = 8;
 
   // Filter Parts
   const filteredParts = useMemo(() => {
@@ -536,13 +559,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     });
   }, [parts, selectedQuality, selectedCategory, selectedModelFilter, showLowStockOnly, activeSearchQuery]);
 
-  const totalPages = Math.ceil(filteredParts.length / ITEMS_PER_PAGE) || 1;
-  const safeCurrentPage = Math.min(Math.max(currentPage, 1), totalPages);
-
-  const paginatedParts = useMemo(() => {
-    const startIndex = (safeCurrentPage - 1) * ITEMS_PER_PAGE;
-    return filteredParts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredParts, safeCurrentPage]);
+  const totalPages = 1;
+  const safeCurrentPage = 1;
+  const paginatedParts = filteredParts;
 
   const handleSaveNewPart = () => {
     if (!newPartData.name || !newPartData.sku || !newPartData.category || !newPartData.qualityTier || !newPartData.supplierId || !newPartData.deviceCompatibility?.[0] || (isBackGlassCategory && !newPartData.backGlassColor)) {
@@ -583,6 +602,112 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       onUpdatePartStock(editingPart.id, editingPart.quantityInStock);
     }
     setEditingPart(null);
+  };
+
+  const beginInlineEdit = (part: PartItem) => {
+    setInlineDrafts((current) => current[part.id] ? current : {
+      ...current,
+      [part.id]: {
+        quantityInStock: String(part.quantityInStock),
+        reorderPoint: String(part.reorderPoint),
+        costPrice: String(part.costPrice),
+        sellingPrice: String(part.sellingPrice),
+        locationBin: part.locationBin || '',
+        supplierId: part.supplierId || '',
+      },
+    });
+  };
+
+  const saveInlineEdit = (part: PartItem) => {
+    const draft = inlineDrafts[part.id];
+    if (!draft || !onUpdatePart) return;
+    const parsedQuantity = draft.quantityInStock?.trim() ? Number(draft.quantityInStock) : part.quantityInStock;
+    const parsedReorder = draft.reorderPoint?.trim() ? Number(draft.reorderPoint) : part.reorderPoint;
+    const parsedCost = draft.costPrice?.trim() ? Number(draft.costPrice) : part.costPrice;
+    const parsedSelling = draft.sellingPrice?.trim() ? Number(draft.sellingPrice) : part.sellingPrice;
+    const selectedSup = suppliers.find((supplier) => supplier.id === draft.supplierId);
+    onUpdatePart({
+      ...part,
+      ...draft,
+      quantityInStock: parsedQuantity,
+      reorderPoint: parsedReorder,
+      costPrice: parsedCost,
+      sellingPrice: parsedSelling,
+      supplierId: draft.supplierId || part.supplierId,
+      supplierName: selectedSup?.name || part.supplierName,
+    });
+    setInlineDrafts((current) => { const next = { ...current }; delete next[part.id]; return next; });
+  };
+
+  const inlineSaveReview = useMemo(() => {
+    return Object.entries(inlineDrafts)
+      .map(([partId, draft]) => {
+        const part = parts.find((item) => item.id === partId);
+        if (!part) return null;
+        const changes: Array<{ label: string; value: string }> = [];
+
+        if (draft.quantityInStock?.trim() && Number(draft.quantityInStock) !== part.quantityInStock) {
+          changes.push({ label: 'Stock', value: `${part.quantityInStock} → ${Number(draft.quantityInStock)}` });
+        }
+        if (draft.reorderPoint?.trim() && Number(draft.reorderPoint) !== part.reorderPoint) {
+          changes.push({ label: 'Reorder point', value: `${part.reorderPoint} → ${Number(draft.reorderPoint)}` });
+        }
+        if (draft.costPrice?.trim() && Number(draft.costPrice) !== part.costPrice) {
+          changes.push({ label: 'Purchase price', value: `${part.costPrice.toLocaleString()} → ${Number(draft.costPrice).toLocaleString()}` });
+        }
+        if (draft.sellingPrice?.trim() && Number(draft.sellingPrice) !== part.sellingPrice) {
+          changes.push({ label: 'Selling price', value: `${part.sellingPrice.toLocaleString()} → ${Number(draft.sellingPrice).toLocaleString()}` });
+        }
+        if (draft.supplierId !== undefined && draft.supplierId !== part.supplierId) {
+          const selectedSup = suppliers.find((supplier) => supplier.id === draft.supplierId);
+          changes.push({ label: 'Supplier', value: `${part.supplierName || '—'} → ${selectedSup?.name || '—'}` });
+        }
+        if (draft.locationBin !== undefined && draft.locationBin !== part.locationBin) {
+          changes.push({ label: 'Bin', value: `${part.locationBin || '—'} → ${draft.locationBin || '—'}` });
+        }
+
+        if (!changes.length) return null;
+
+        return {
+          part,
+          changes,
+        };
+      })
+      .filter(Boolean) as Array<{
+        part: PartItem;
+        changes: Array<{ label: string; value: string }>;
+      }>;
+  }, [inlineDrafts, parts, suppliers]);
+
+  const confirmInlineSave = () => {
+    if (!inlineSaveReview.length || !onUpdatePart) {
+      setShowInlineSaveConfirm(false);
+      return;
+    }
+
+      inlineSaveReview.forEach(({ part, changes }) => {
+        const draft = inlineDrafts[part.id];
+        if (!draft) return;
+        const parsedQuantity = draft.quantityInStock?.trim() ? Number(draft.quantityInStock) : part.quantityInStock;
+        const parsedReorder = draft.reorderPoint?.trim() ? Number(draft.reorderPoint) : part.reorderPoint;
+        const parsedCost = draft.costPrice?.trim() ? Number(draft.costPrice) : part.costPrice;
+        const parsedSelling = draft.sellingPrice?.trim() ? Number(draft.sellingPrice) : part.sellingPrice;
+        const selectedSup = suppliers.find((supplier) => supplier.id === draft.supplierId);
+        onUpdatePart({
+          ...part,
+          ...draft,
+          quantityInStock: parsedQuantity,
+          reorderPoint: parsedReorder,
+          costPrice: parsedCost,
+          sellingPrice: parsedSelling,
+          supplierId: draft.supplierId || part.supplierId,
+          supplierName: selectedSup?.name || part.supplierName,
+        });
+      });
+
+    setInlineDrafts({});
+    setInlineEditMode(false);
+    setShowInlineSaveConfirm(false);
   };
 
   return (
@@ -641,6 +766,36 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <span className="hidden sm:inline">Matrix</span>
             </button>
           </div>
+
+          {viewMode === 'stock' && (
+            <div className="ml-auto flex items-center gap-1.5">
+              {inlineEditMode && (
+                <button
+                  type="button"
+                  onClick={() => setShowInlineSaveConfirm(true)}
+                  className="inline-flex h-8 items-center justify-center rounded-lg border border-[#0071E3] bg-[#0071E3] px-2.5 text-[10px] font-bold text-white transition-colors hover:bg-blue-700"
+                  title="Save inline edits"
+                >
+                  Save
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  if (inlineEditMode && inlineSaveReview.length) {
+                    setShowInlineSaveConfirm(true);
+                    return;
+                  }
+                  setInlineEditMode((value) => !value);
+                  setInlineDrafts({});
+                }}
+                className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border transition-colors ${inlineEditMode ? 'border-[#0071E3] bg-blue-50 text-[#0071E3]' : 'border-[#E5E5EA] bg-white text-[#1D1D1F] hover:border-[#0071E3]'}`}
+                title="Edit stock rows"
+              >
+                <Edit2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
 
         </div>
       </div>
@@ -806,18 +961,19 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             <table className="w-full text-left border-collapse">
               <thead className="sticky top-0 z-20 bg-[#F5F5F7] text-[#86868B] text-[10px] uppercase font-mono border-b border-[#E5E5EA] shadow-2xs">
                 <tr>
-                  <th className="p-2.5 bg-[#F5F5F7]">Part Name & SKU</th>
-                  <th className="p-2.5 bg-[#F5F5F7]">Quality</th>
-                  <th className="p-2.5 bg-[#F5F5F7]">Stock</th>
-                  <th className="p-2.5 bg-[#F5F5F7]">Selling Price</th>
-                  <th className="p-2.5 bg-[#F5F5F7]">Bin</th>
-                  <th className="p-2.5 text-right bg-[#F5F5F7]">Detail</th>
+                  <th className="w-[34%] px-2 py-2 bg-[#F5F5F7]">Part Name & SKU</th>
+                  <th className="w-[108px] px-2 py-2 bg-[#F5F5F7]">Quality</th>
+                  <th className="w-[96px] px-1.5 py-2 bg-[#F5F5F7]">Stock</th>
+                  <th className="w-[104px] px-1.5 py-2 bg-[#F5F5F7]">Selling Price</th>
+                  {inlineEditMode && <th className="w-[150px] px-1.5 py-2 bg-[#F5F5F7]">Supplier</th>}
+                  <th className="px-2 py-2 bg-[#F5F5F7]">Bin</th>
+                  {!inlineEditMode && <th className="px-2 py-2 text-right bg-[#F5F5F7]">Detail</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E5E5EA]">
                 {filteredParts.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="p-12 text-center space-y-2">
+                    <td colSpan={inlineEditMode ? 7 : 6} className="p-12 text-center space-y-2">
                       <PackageX className="w-8 h-8 text-[#86868B] mx-auto" />
                       <p className="text-sm font-bold text-[#1D1D1F]">No inventory components found matching your filter</p>
                       <p className="text-xs text-[#86868B]">Try resetting the search query or quality tier selection.</p>
@@ -839,26 +995,28 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   paginatedParts.map((part) => {
                     const isLow = part.quantityInStock <= part.reorderPoint;
                     const isOut = part.quantityInStock === 0;
+                    const draft = inlineDrafts[part.id] || {};
+                    const editValue = (key: keyof PartItem, fallback: string | number) => draft[key] ?? fallback;
 
                     return (
                       <tr key={part.id} className="hover:bg-slate-50/80 transition-colors">
                         {/* Part Name & SKU */}
-                        <td className="p-3.5 space-y-1.5">
+                        <td className="px-2 py-2 space-y-1">
                           <div className="flex items-start space-x-2">
-                            <div className="p-1.5 rounded-lg bg-[#0071E3]/10 text-[#0071E3] shrink-0 mt-0.5">
-                              <Cpu className="w-3.5 h-3.5" />
+                            <div className="p-1 rounded-md bg-[#0071E3]/10 text-[#0071E3] shrink-0 mt-0.5">
+                              <Cpu className="w-3 h-3" />
                             </div>
                             <div>
-                              <p className="font-extrabold text-[#1D1D1F] text-xs leading-snug">
+                              <p className="font-extrabold text-[#1D1D1F] text-[11px] leading-snug">
                                 {part.name}
                               </p>
-                              <p className="mt-1 font-mono text-[9px] font-medium text-[#86868B]">SKU {part.sku}</p>
+                              <p className="mt-0.5 font-mono text-[9px] font-medium text-[#86868B]">SKU {part.sku}</p>
                             </div>
                           </div>
                         </td>
 
                         {/* Quality Tier */}
-                        <td className="p-3.5">
+                        <td className="w-[108px] px-2 py-2">
                           {part.qualityTier === 'Original' || part.qualityTier.includes('Original') ? (
                             <span className="inline-flex max-w-[112px] items-center gap-1 truncate rounded-md border border-blue-200 bg-blue-50 px-1.5 py-0.5 text-[10px] font-extrabold text-blue-800">
                               <ShieldCheck className="h-3 w-3 shrink-0 text-blue-600" />
@@ -883,56 +1041,126 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         </td>
 
                         {/* Stock Level & Visual Bar */}
-                        <td className="p-3.5 min-w-[140px]">
-                          <div className="space-y-1">
+                        <td className="w-[96px] min-w-[96px] pr-2 py-2">
+                          {inlineEditMode ? (
+                            <div className="grid grid-cols-1 gap-1" onFocus={() => beginInlineEdit(part)}>
+                              <label className="flex min-w-0 flex-col gap-0.5 text-[9px] font-bold uppercase tracking-wide text-[#86868B]">
+                                <span>Stock</span>
+                                <input aria-label={`Stock quantity for ${part.name}`} type="text" inputMode="numeric" value={inlineDrafts[part.id]?.quantityInStock ?? String(part.quantityInStock)} onWheel={(e) => e.currentTarget.blur()} onChange={(e) => setInlineDrafts((current) => ({ ...current, [part.id]: { ...current[part.id], quantityInStock: e.target.value } }))} className="w-full min-w-0 rounded-md border border-[#D2D2D7] bg-white px-2 py-1.5 text-[14px] font-semibold font-sans tabular-nums tracking-normal text-[#111111]" />
+                              </label>
+                            </div>
+                          ) : null}
+                          {!inlineEditMode && <div className="space-y-1">
                             <div className="flex items-center justify-between">
-                              <span className={`font-black text-sm font-mono ${
+                              <span className={`font-black text-[13px] font-mono tracking-wide ${
                                 isOut ? 'text-red-600' : isLow ? 'text-amber-600' : 'text-[#1D1D1F]'
                               }`}>
-                                {part.quantityInStock} <span className="text-[10px] font-normal text-[#86868B]">units</span>
+                                {(inlineEditMode ? editValue('quantityInStock', part.quantityInStock) : part.quantityInStock)} <span className="text-[10px] font-normal text-[#86868B]">units</span>
                               </span>
-                              {isOut ? (
-                                <span className="bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider animate-pulse">
+                              {!inlineEditMode && isOut ? (
+                                <span className="bg-red-600 text-white text-[7px] font-black px-1 py-0.5 rounded uppercase tracking-[0.1em] leading-none animate-pulse">
                                   OUT OF STOCK
                                 </span>
-                              ) : isLow ? (
-                                <span className="bg-amber-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider">
+                              ) : !inlineEditMode && isLow ? (
+                                <span className="bg-amber-500 text-white text-[7px] font-black px-1 py-0.5 rounded uppercase tracking-[0.1em] leading-none">
                                   REORDER
                                 </span>
-                              ) : (
-                                <span className="text-[10px] text-[#86868B] font-bold">
+                              ) : !inlineEditMode ? (
+                                <span className="text-[9px] text-[#86868B] font-bold">
                                   Min: {part.reorderPoint}
                                 </span>
-                              )}
+                              ) : null}
                             </div>
 
                             {/* Stock Visual Bar */}
-                            <div className="w-full h-1.5 bg-[#E5E5EA] rounded-full overflow-hidden">
+                            {!inlineEditMode && <div className="w-full h-1.5 bg-[#E5E5EA] rounded-full overflow-hidden">
                               <div
                                 className={`h-full transition-all duration-300 ${
                                   isOut ? 'bg-red-600 w-0' : isLow ? 'bg-amber-500' : 'bg-[#34C759]'
                                 }`}
                                 style={{ width: `${Math.min(100, Math.max(8, (part.quantityInStock / (part.reorderPoint * 3)) * 100))}%` }}
                               />
-                            </div>
-                          </div>
+                            </div>}
+                          </div>}
                         </td>
 
                         {/* Selling price only — profit belongs in the Profit tab. */}
-                        <td className="p-2.5 font-mono text-xs font-black text-[#16A34A] whitespace-nowrap">
-                          {part.sellingPrice.toLocaleString()} MMK
+                        <td className="w-[176px] min-w-[176px] pl-3 pr-1.5 py-2 font-sans text-[14px] font-semibold text-[#16A34A] whitespace-nowrap">
+                          {inlineEditMode ? (
+                            <div className="grid grid-cols-2 gap-2">
+                              <label className="flex min-w-0 flex-col gap-0.5 text-[9px] font-bold uppercase tracking-wide text-[#86868B]">
+                                <span>Purchase</span>
+                                <input aria-label={`Purchase price for ${part.name}`} type="text" inputMode="numeric" value={inlineDrafts[part.id]?.costPrice ?? String(part.costPrice)} onWheel={(e) => e.currentTarget.blur()} onFocus={() => beginInlineEdit(part)} onChange={(e) => setInlineDrafts((current) => ({ ...current, [part.id]: { ...current[part.id], costPrice: e.target.value } }))} className="w-full min-w-0 rounded-md border border-[#D2D2D7] bg-white px-2 py-1.5 text-[14px] font-semibold font-sans tabular-nums tracking-normal text-[#111111]" />
+                              </label>
+                              <label className="flex min-w-0 flex-col gap-0.5 text-[9px] font-bold uppercase tracking-wide text-[#86868B]">
+                                <span>Selling</span>
+                                <input aria-label={`Selling price for ${part.name}`} type="text" inputMode="numeric" value={inlineDrafts[part.id]?.sellingPrice ?? String(part.sellingPrice)} onWheel={(e) => e.currentTarget.blur()} onChange={(e) => setInlineDrafts((current) => ({ ...current, [part.id]: { ...current[part.id], sellingPrice: e.target.value } }))} className="w-full min-w-0 rounded-md border border-[#D2D2D7] bg-white px-2 py-1.5 text-[14px] font-semibold font-sans tabular-nums tracking-normal text-[#111111]" />
+                              </label>
+                            </div>
+                          ) : `${part.sellingPrice.toLocaleString()} MMK`}
                         </td>
 
+                        {inlineEditMode ? (
+                          <td className="w-[108px] px-1.5 py-2 align-top">
+                            <div className="flex min-w-0 flex-col gap-0.5 text-[9px] font-bold uppercase tracking-wide text-[#86868B]">
+                              <span>Supplier</span>
+                              <CustomDropdownMenu
+                                value={inlineDrafts[part.id]?.supplierId ?? part.supplierId ?? ''}
+                                onChange={(supplierId) => {
+                                  const selectedSup = suppliers.find((supplier) => supplier.id === supplierId);
+                                  beginInlineEdit(part);
+                                  setInlineDrafts((current) => ({
+                                    ...current,
+                                    [part.id]: {
+                                      ...current[part.id],
+                                      supplierId,
+                                    },
+                                  }));
+                                  if (selectedSup) {
+                                    // keep name in sync immediately for downstream save review
+                                    setInlineDrafts((current) => ({
+                                      ...current,
+                                      [part.id]: {
+                                        ...current[part.id],
+                                        supplierId,
+                                      },
+                                    }));
+                                  }
+                                }}
+                                placeholder={suppliers.length ? 'Choose supplier' : 'No supplier'}
+                                options={suppliers.map((supplier) => ({
+                                  value: supplier.id,
+                                  label: `${supplier.name} (${supplier.code})`,
+                                  badge: `${supplier.avgRmaTurnaroundDays}d`,
+                                }))}
+                                className="w-full"
+                                buttonClassName="w-full rounded-md bg-white px-2 py-1.5 text-left text-[14px] font-semibold text-[#1D1D1F]"
+                                menuAlign="left"
+                              />
+                            </div>
+                          </td>
+                        ) : null}
+
                         {/* Location Bin */}
-                        <td className="p-3.5">
-                          <span className="inline-flex items-center space-x-1 font-mono text-[#1D1D1F] font-bold bg-[#F5F5F7] px-2.5 py-1 rounded-lg text-[11px] border border-[#E5E5EA]">
-                            <MapPin className="w-3 h-3 text-[#0071E3]" />
-                            <span>{part.locationBin}</span>
-                          </span>
+                        <td className="w-[104px] max-w-[104px] px-1.5 py-2">
+                          {inlineEditMode ? (
+                            <div className="flex min-w-0 flex-col gap-0.5 text-[9px] font-bold uppercase tracking-wide text-[#86868B]">
+                              <span>Bin</span>
+                              <select aria-label={`Bin for ${part.name}`} value={editValue('locationBin', part.locationBin) as string} onFocus={() => beginInlineEdit(part)} onChange={(e) => setInlineDrafts((current) => ({ ...current, [part.id]: { ...current[part.id], locationBin: e.target.value } }))} className="w-full min-w-0 rounded-md border border-[#D2D2D7] bg-white px-2 py-1.5 text-[14px] font-semibold font-sans tabular-nums tracking-normal text-[#111111]"><option value="">Choose bin</option>{existingLocationBins.map((bin) => <option key={bin} value={bin}>{bin}</option>)}</select>
+                            </div>
+                          ) : part.locationBin ? (
+                            <div className="flex min-w-0 flex-col gap-0.5 text-[9px] font-bold uppercase tracking-wide text-[#86868B]">
+                              <span>Bin</span>
+                              <span className="inline-flex items-center gap-1 px-1 py-0.5 text-[10px] font-extrabold leading-none text-[#0071E3]">
+                                <MapPin className="h-2.5 w-2.5 shrink-0 text-[#0071E3]" />
+                                {part.locationBin}
+                              </span>
+                            </div>
+                          ) : null}
                         </td>
 
                         {/* Detailed stock controls are kept inside the part detail modal. */}
-                        <td className="p-3.5 text-right shrink-0">
+                        {!inlineEditMode && <td className="w-[70px] px-1.5 py-2 text-right shrink-0">
                           <button
                             type="button"
                             onClick={() => setSelectedPartForDetails(part)}
@@ -940,9 +1168,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                             className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] text-[#1D1D1F] transition-colors hover:border-[#0071E3] hover:bg-blue-50 hover:text-[#0071E3]"
                             title="View part details"
                           >
-                            <Eye className="h-3.5 w-3.5" />
+                            <FileText className="h-3.5 w-3.5" />
                           </button>
-                        </td>
+                        </td>}
                       </tr>
                     );
                   })
@@ -951,59 +1179,13 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             </table>
           </div>
 
-          {/* Pagination Bar */}
+          {/* Full list footer */}
           {filteredParts.length > 0 && (
-            <div className="workspace-panel__footer p-3.5 bg-white border-t border-[#E5E5EA] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#86868B]">
+            <div className="workspace-panel__footer p-3.5 bg-white border-t border-[#E5E5EA] flex items-center justify-between text-xs text-[#86868B]">
               <span className="font-bold">
-                Showing <strong className="text-[#1D1D1F]">{(safeCurrentPage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(safeCurrentPage * ITEMS_PER_PAGE, filteredParts.length)}</strong> of <strong className="text-[#1D1D1F]">{filteredParts.length}</strong> parts
+                Showing <strong className="text-[#1D1D1F]">1-{filteredParts.length}</strong> of <strong className="text-[#1D1D1F]">{filteredParts.length}</strong> parts
               </span>
-
-              <div className="flex items-center space-x-1.5">
-                <button
-                  type="button"
-                  onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                  disabled={safeCurrentPage === 1}
-                  className="p-1.5 rounded-xl border border-[#E5E5EA] hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-transparent text-[#1D1D1F] transition-all cursor-pointer"
-                  title="Previous Page"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-
-                <div className="flex items-center space-x-1 px-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1)
-                    .filter((p) => p === 1 || p === totalPages || Math.abs(p - safeCurrentPage) <= 1)
-                    .map((p, idx, arr) => {
-                      const prev = arr[idx - 1];
-                      const showEllipsis = prev && p - prev > 1;
-                      return (
-                        <React.Fragment key={p}>
-                          {showEllipsis && <span className="text-xs text-[#86868B] px-1">...</span>}
-                          <button
-                            type="button"
-                            onClick={() => setCurrentPage(p)}
-                            className={`w-7 h-7 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
-                              safeCurrentPage === p
-                                ? 'bg-[#0071E3] text-white shadow-2xs'
-                                : 'text-[#1D1D1F] hover:bg-slate-100 border border-[#E5E5EA]'
-                            }`}
-                          >
-                            {p}
-                          </button>
-                        </React.Fragment>
-                      );
-                    })}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                  disabled={safeCurrentPage === totalPages}
-                  className="p-1.5 rounded-xl border border-[#E5E5EA] hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-transparent text-[#1D1D1F] transition-all cursor-pointer"
-                  title="Next Page"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
+              <span className="font-bold text-[#1D1D1F]">{filteredParts.length > 0 ? 'All rows visible' : ''}</span>
             </div>
           )}
         </div>
@@ -1652,24 +1834,26 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     <span>Add Supplier Data</span>
                   </button>
                 </div>
-                <select
-                  value={editingPart.supplierId || suppliers[0]?.id || ''}
-                  onChange={(e) => {
-                    const selectedSup = suppliers.find((s) => s.id === e.target.value);
+                <CustomDropdownMenu
+                  value={editingPart.supplierId || ''}
+                  onChange={(supplierId) => {
+                    const selectedSup = suppliers.find((s) => s.id === supplierId);
                     setEditingPart({
                       ...editingPart,
-                      supplierId: e.target.value,
+                      supplierId,
                       supplierName: selectedSup?.name || editingPart.supplierName,
                     });
                   }}
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2.5 text-xs font-bold text-[#1D1D1F]"
-                >
-                  {suppliers.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name} ({s.code}) - Avg RMA: {s.avgRmaTurnaroundDays} days
-                    </option>
-                  ))}
-                </select>
+                  placeholder={suppliers.length ? 'Choose supplier name' : 'Add a supplier first'}
+                  options={suppliers.map((s) => ({
+                    value: s.id,
+                    label: `${s.name} (${s.code})`,
+                    badge: `${s.avgRmaTurnaroundDays}d`,
+                  }))}
+                  className="w-full"
+                  buttonClassName="w-full rounded-xl bg-[#F5F5F7] px-3 py-2.5 text-left text-xs font-bold text-[#1D1D1F]"
+                  menuAlign="left"
+                />
               </div>
 
             </div>
@@ -2351,6 +2535,95 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {showInlineSaveConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-3xl space-y-4 rounded-2xl border border-[#D2D2D7] bg-white p-5 text-[11px] shadow-2xl">
+            {(() => {
+              const totalChangeCount = inlineSaveReview.reduce((count, item) => count + item.changes.length, 0);
+              const categoryChangeCount = inlineSaveReview.reduce(
+                (count, item) => count + item.changes.filter((change) => /category/i.test(change.label)).length,
+                0,
+              );
+              return (
+                <>
+            <div className="flex items-start justify-between gap-2 border-b border-[#E5E5EA] pb-2">
+              <div>
+                <p className="text-[8px] font-extrabold uppercase tracking-[0.2em] text-[#0071E3]">Confirm stock changes</p>
+                <h3 className="mt-0.5 text-sm font-black text-[#111111]">Review before saving</h3>
+                <p className="mt-0.5 text-[10px] font-semibold text-[#111111]">Approve only when the list below looks right.</p>
+              </div>
+              <button type="button" onClick={() => setShowInlineSaveConfirm(false)} className="rounded-lg p-1 text-[#111111] hover:bg-[#F5F5F7] hover:text-[#0071E3]" title="Close">
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+              <div className="rounded-xl border border-[#E5E5EA] bg-[#FAFAFA] px-3 py-2">
+                <p className="text-[8px] font-bold uppercase tracking-wide text-[#86868B]">Total changes</p>
+                <p className="mt-0.5 text-sm font-black text-[#111111]">{totalChangeCount}</p>
+              </div>
+              <div className="rounded-xl border border-[#E5E5EA] bg-[#FAFAFA] px-3 py-2">
+                <p className="text-[8px] font-bold uppercase tracking-wide text-[#86868B]">Category changes</p>
+                <p className="mt-0.5 text-sm font-black text-[#111111]">{categoryChangeCount}</p>
+              </div>
+              <div className="rounded-xl border border-[#E5E5EA] bg-[#FAFAFA] px-3 py-2">
+                <p className="text-[8px] font-bold uppercase tracking-wide text-[#86868B]">Rows affected</p>
+                <p className="mt-0.5 text-sm font-black text-[#111111]">{inlineSaveReview.length}</p>
+              </div>
+            </div>
+
+            <div className="max-h-[52vh] space-y-2.5 overflow-y-auto pr-1">
+              {inlineSaveReview.length ? (
+                inlineSaveReview.map(({ part, changes }) => (
+                  <div key={part.id} className="rounded-xl border border-[#E5E5EA] bg-white p-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="truncate text-[11px] font-black text-[#111111]">{part.name}</p>
+                        <p className="mt-0.5 font-mono text-[9px] font-bold text-[#111111]">{part.sku}</p>
+                      </div>
+                      <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[9px] font-extrabold text-[#0071E3]">{changes.length} change{changes.length === 1 ? '' : 's'}</span>
+                    </div>
+                    <div className="mt-2 grid gap-1.5">
+                      {changes.map((change) => (
+                        <div key={`${part.id}-${change.label}`} className="flex items-center justify-between gap-2 rounded-lg bg-[#FAFAFA] px-2.5 py-1.5">
+                          <span className="text-[9px] font-bold uppercase tracking-wide text-[#111111]">{change.label}</span>
+                          <span className="font-mono text-[9px] font-black text-[#111111]">{change.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="rounded-xl border border-dashed border-[#D2D2D7] bg-white p-4 text-center">
+                  <p className="text-[9px] font-bold text-[#111111]">No pending changes to save.</p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 border-t border-[#E5E5EA] pt-3">
+              <button
+                type="button"
+                onClick={() => setShowInlineSaveConfirm(false)}
+                className="rounded-lg border border-[#E5E5EA] bg-white px-4 py-2 text-[11px] font-bold text-[#111111] hover:bg-[#F5F5F7]"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmInlineSave}
+                disabled={!inlineSaveReview.length}
+                className="rounded-lg bg-[#0071E3] px-5 py-2 text-[11px] font-extrabold text-white shadow-xs transition-all hover:bg-[#0051B3] disabled:cursor-not-allowed disabled:bg-[#A5A5AA]"
+              >
+                Approve & Save
+              </button>
+            </div>
+                </>
+              );
+            })()}
+          </div>
         </div>
       )}
     </div>

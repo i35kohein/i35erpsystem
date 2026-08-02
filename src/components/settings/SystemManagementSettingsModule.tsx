@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { 
   Sliders, 
   Users, 
@@ -51,7 +51,8 @@ import {
   MessageSquare,
   Sparkles,
   RefreshCw,
-  Truck
+  Truck,
+  ChevronDown
 } from 'lucide-react';
 import { Technician, SystemSettings, TechnicianLevel, PaymentMethodConfig, WorkOrder, NotificationTemplate, AppUser, UserRole, UserPermissions, PartItem, Supplier } from '../../types';
 import { DEFAULT_PAYMENT_METHODS, getActivePaymentMethods, DEFAULT_NOTIFICATION_TEMPLATES } from '../../data/seedData';
@@ -168,6 +169,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   const [editingQualityTier, setEditingQualityTier] = useState<string | null>(null);
   const [editingQualityTierLabel, setEditingQualityTierLabel] = useState('');
   const [binDraft, setBinDraft] = useState('');
+  const [expandedBinName, setExpandedBinName] = useState<string | null>(null);
   const receiptFooterEditorRef = useRef<HTMLTextAreaElement>(null);
   const [selectedFooterLineIndexes, setSelectedFooterLineIndexes] = useState<number[]>([0]);
 
@@ -745,6 +747,17 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   };
 
   const inventoryBinNames = settings.inventoryBinNames || [];
+  const partsByBin = useMemo(() => {
+    const grouped = new Map<string, PartItem[]>();
+    (parts || []).forEach((part) => {
+      const bin = part.locationBin?.trim();
+      if (!bin) return;
+      const current = grouped.get(bin) || [];
+      current.push(part);
+      grouped.set(bin, current);
+    });
+    return grouped;
+  }, [parts]);
   const handleAddInventoryBin = () => {
     const bin = binDraft.trim().toUpperCase();
     if (!bin || inventoryBinNames.some((item) => item.toLowerCase() === bin.toLowerCase())) return;
@@ -2385,7 +2398,54 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               <span className="rounded-full bg-[#0071E3]/10 px-2 py-0.5 text-[10px] font-bold text-[#0071E3]">{inventoryBinNames.length} bins</span>
             </div>
             <div className="flex gap-2"><input value={binDraft} onChange={(event) => setBinDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleAddInventoryBin(); } }} placeholder="e.g. BIN-A01" className="h-9 min-w-0 flex-1 rounded-xl border border-[#D2D2D7] bg-[#F5F5F7] px-3 text-xs font-mono font-bold outline-none focus:border-[#0071E3] focus:bg-white" /><button type="button" onClick={handleAddInventoryBin} disabled={!binDraft.trim()} className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-[#0071E3] px-3 text-xs font-extrabold text-white hover:bg-[#0051B3] disabled:opacity-45"><Plus className="h-3.5 w-3.5" /> Add bin</button></div>
-            <div className="flex flex-wrap gap-2 rounded-xl border border-[#E5E5EA] bg-[#F8F9FA] p-3">{inventoryBinNames.length ? inventoryBinNames.map((bin) => <span key={bin} className="inline-flex items-center gap-2 rounded-lg bg-white px-2.5 py-1.5 font-mono text-xs font-bold text-[#1D1D1F] shadow-sm"><MapPin className="h-3.5 w-3.5 text-[#0071E3]" />{bin}<button type="button" onClick={() => onUpdateSettings({ ...settings, inventoryBinNames: inventoryBinNames.filter((item) => item !== bin) })} className="text-rose-600" aria-label={`Delete ${bin}`}>×</button></span>) : <p className="text-xs text-[#86868B]">No saved bins yet.</p>}</div>
+            <div className="space-y-2 rounded-xl border border-[#E5E5EA] bg-[#F8F9FA] p-3">
+              {inventoryBinNames.length ? inventoryBinNames.map((bin) => {
+                const binParts = partsByBin.get(bin) || [];
+                const isOpen = expandedBinName === bin;
+                return (
+                  <div key={bin} className="rounded-lg border border-[#E5E5EA] bg-white">
+                    <div className="flex items-center justify-between gap-2 px-3 py-2">
+                      <button
+                        type="button"
+                        onClick={() => setExpandedBinName((current) => current === bin ? null : bin)}
+                        className="inline-flex min-w-0 flex-1 items-center gap-2 text-left"
+                        aria-expanded={isOpen}
+                        aria-label={`Show parts in ${bin}`}
+                      >
+                        <MapPin className="h-3.5 w-3.5 shrink-0 text-[#0071E3]" />
+                        <span className="truncate font-mono text-xs font-bold text-[#1D1D1F]">{bin}</span>
+                        <span className="rounded-full bg-[#F5F5F7] px-2 py-0.5 text-[10px] font-bold text-[#86868B]">{binParts.length} parts</span>
+                      </button>
+                      <div className="flex items-center gap-2">
+                        <button type="button" onClick={() => setExpandedBinName((current) => current === bin ? null : bin)} className="rounded-lg p-1 text-[#86868B] hover:bg-[#F5F5F7]" aria-label={isOpen ? `Collapse ${bin}` : `Expand ${bin}`}>
+                          <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180 text-[#0071E3]' : ''}`} />
+                        </button>
+                        <button type="button" onClick={() => onUpdateSettings({ ...settings, inventoryBinNames: inventoryBinNames.filter((item) => item !== bin) })} className="text-rose-600" aria-label={`Delete ${bin}`}>×</button>
+                      </div>
+                    </div>
+                    {isOpen && (
+                      <div className="border-t border-[#E5E5EA] bg-[#FAFAFA] px-3 py-2">
+                        {binParts.length ? (
+                          <div className="space-y-1.5">
+                            {binParts.map((part) => (
+                              <div key={part.id} className="flex items-center justify-between gap-2 rounded-md bg-white px-2.5 py-1.5 text-[11px] text-[#1D1D1F] shadow-sm">
+                                <div className="min-w-0">
+                                  <p className="truncate font-bold">{part.name}</p>
+                                  <p className="truncate font-mono text-[10px] text-[#86868B]">{part.sku}</p>
+                                </div>
+                                <span className="rounded-full bg-[#0071E3]/10 px-2 py-0.5 text-[10px] font-bold text-[#0071E3]">{part.quantityInStock} stock</span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-[11px] text-[#86868B]">No parts are assigned to this bin yet.</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              }) : <p className="text-xs text-[#86868B]">No saved bins yet.</p>}
+            </div>
           </section>
 
           <div className={`${inventoryDataTab === 'rules' ? 'grid' : 'hidden'} grid-cols-1 md:grid-cols-2 gap-5 text-xs`}>

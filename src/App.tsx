@@ -194,12 +194,6 @@ export default function App() {
         })(),
       })) as PartItem[];
       setParts(normalized);
-      // One-time data correction for legacy part rows. The normalized rows are
-      // persisted so filters and future edits use the same category vocabulary.
-      normalized.forEach((part, index) => {
-        const raw = data[index] as any;
-        if (raw?.category !== part.category) saveDocument('parts', part).catch(console.error);
-      });
     }, []);
 
     const unsubSuppliers = subscribeToCollection<Supplier>('suppliers', (data) => {
