@@ -77,4 +77,5 @@ export const REPAIR_CATEGORIES: RepairCategoryDef[] = [
   { key: 'Apple_Pay_NFC', label: 'Apple Pay & NFC IC Repair', group: 'Network' },
   { key: 'Power_Volume_Key', label: 'Power & Volume Key Flex', group: 'Sensors & Keys' },
   { key: 'Face_iD', label: 'Face ID / TrueDepth Repair', group: 'Sensors & Keys' },
+  { key: 'Green_White_Screen', label: 'Green/White Screen', group: 'Display' },
 ];

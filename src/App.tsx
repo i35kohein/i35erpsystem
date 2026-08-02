@@ -548,6 +548,75 @@ export default function App() {
     );
   };
 
+  const handleConsumeInventoryFromWorkOrder = (workOrder: WorkOrder, paymentMethod: string) => {
+    const inventoryLines = (workOrder.lineItems || []).filter((item) => item.partId && !item.isLabor && item.quantity > 0);
+    if (!inventoryLines.length || workOrder.inventoryConsumedAt) return;
+
+    const nowIso = new Date().toISOString();
+    const aggregate = inventoryLines.reduce((acc, item) => {
+      const partId = item.partId as string;
+      const existing = acc.get(partId);
+      const lineCost = (Number(item.unitCost) || 0) * (Number(item.quantity) || 0);
+      if (existing) {
+        existing.quantity += Number(item.quantity) || 0;
+        existing.totalCost += lineCost;
+      } else {
+        acc.set(partId, {
+          partId,
+          partName: item.partName || item.description || partId,
+          quantity: Number(item.quantity) || 0,
+          unitCost: Number(item.unitCost) || 0,
+          totalCost: lineCost,
+        });
+      }
+      return acc;
+    }, new Map<string, { partId: string; partName: string; quantity: number; unitCost: number; totalCost: number }>());
+
+    const usageItems = [...aggregate.values()];
+    if (!usageItems.length) return;
+
+    const totalInventoryCost = usageItems.reduce((sum, item) => sum + item.totalCost, 0);
+    const updatedWorkOrder: WorkOrder = {
+      ...workOrder,
+      inventoryConsumedAt: nowIso,
+      inventoryConsumptionAmount: totalInventoryCost,
+      inventoryConsumptionNote: `Inventory used for ${workOrder.orderNumber}`,
+      updatedAt: nowIso,
+    };
+
+    setParts((prev) => {
+      const next = prev.map((part) => {
+        const consumed = aggregate.get(part.id);
+        if (!consumed) return part;
+        const updated = {
+          ...part,
+          quantityInStock: Math.max(0, Number(part.quantityInStock || 0) - consumed.quantity),
+        };
+        saveDocument('parts', updated).catch(console.error);
+        return updated;
+      });
+      return next;
+    });
+
+    saveDocument('workOrders', updatedWorkOrder).catch(console.error);
+
+    const inventoryExpense: Omit<ExpenseItem, 'id'> = {
+      category: 'Inventory Consumption',
+      description: `${workOrder.orderNumber} • ${workOrder.deviceModel} • ${usageItems.length} part(s) used from stock`,
+      amount: totalInventoryCost,
+      date: nowIso.split('T')[0],
+      paymentMethod: 'Inventory Settlement',
+      payee: workOrder.customerName,
+      createdByName: currentUser.name,
+    };
+    handleAddExpense(inventoryExpense);
+    addToast(
+      `Inventory stock deducted for ${workOrder.orderNumber}: ${usageItems.length} part(s), ${totalInventoryCost.toLocaleString()} MMK recorded.`,
+      'success',
+      'Inventory Settled'
+    );
+  };
+
   const handleAddRma = (rma: RmaItem) => {
     setRmas((prev) => [rma, ...prev]);
     saveDocument('rmas', rma).catch(console.error);
@@ -592,10 +661,12 @@ export default function App() {
     );
   };
 
-  const handleMarkPaid = (workOrderId: string, paymentMethod: string) => {
+  const handleMarkPaid = (workOrder: WorkOrder, paymentMethod: string) => {
+    const current = workOrders.find((w) => w.id === workOrder.id) || workOrder;
+    handleConsumeInventoryFromWorkOrder(current, paymentMethod);
     setWorkOrders((prev) =>
       prev.map((w) => {
-        if (w.id === workOrderId) {
+        if (w.id === workOrder.id) {
           const updated: WorkOrder = {
             ...w,
             isPaid: true,
@@ -609,7 +680,7 @@ export default function App() {
         return w;
       })
     );
-    addToast(`Payment recorded for ${workOrderId} via ${paymentMethod} — Moved to Takeout`, 'success', 'Payment Received');
+    addToast(`Payment recorded for ${workOrder.orderNumber} via ${paymentMethod} — Moved to Takeout`, 'success', 'Payment Received');
   };
 
   const handleSaveMicroSolderingLog = (workOrderId: string, log: MicroSolderingLog) => {
@@ -1380,6 +1451,7 @@ export default function App() {
                 <PosInvoicingModule
                   workOrders={activeWorkOrders}
                   customers={customers}
+                  parts={parts}
                   systemSettings={systemSettings}
                   onMarkPaid={handleMarkPaid}
                   onSaveWorkOrder={handleSaveWorkOrder}

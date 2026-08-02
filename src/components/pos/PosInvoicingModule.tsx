@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { DateFilterState, filterByDateRange } from '../common/DateFilterSelector';
 import { 
   CreditCard, 
@@ -19,20 +19,83 @@ import {
   ChevronLeft,
   ChevronRight,
   BellRing,
-  AlertTriangle,
-  XCircle,
-  Split
+  AlertTriangle, 
+  XCircle, 
+  Split,
+  Filter
 } from 'lucide-react';
-import { WorkOrder, Customer, SystemSettings } from '../../types';
+import { WorkOrder, Customer, SystemSettings, PartItem } from '../../types';
 import { getActivePaymentMethods } from '../../data/seedData';
 import { PrintableInvoiceModal } from '../common/PrintableInvoiceModal';
 import { CustomerNotificationModal } from '../common/CustomerNotificationModal';
 
+const isSameDeviceModel = (left: string, right: string) =>
+  left.trim().toLocaleLowerCase() === right.trim().toLocaleLowerCase();
+
+const normalizeText = (value: string) =>
+  value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim();
+
+const INVENTORY_CATEGORY_GROUPS: Array<{ match: RegExp; categories: string[] }> = [
+  {
+    match: /\bbattery\b/,
+    categories: ['Battery', 'Battery Cell', 'Battery Genuine'],
+  },
+  {
+    match: /\bback\s*glass\b|\bbackglass\b/,
+    categories: ['Backglass', 'Backglass Ring', 'Back Glass', 'Back Glass Ring', 'Backglass Replacement'],
+  },
+  {
+    match: /\bdisplay\b|\boled\b|\blcd\b/,
+    categories: ['Display', 'Display GX (OLED)', 'Display Soft-OLED', 'Display Original', 'Display Original IDM', 'LCD'],
+  },
+  {
+    match: /\bcharging\b|\bcharge\b|\bport\b/,
+    categories: ['Charging Flex', 'Charging Board', 'Charging Port'],
+  },
+  {
+    match: /\bear speaker\b|\bspeaker\b/,
+    categories: ['Ear Speaker', 'Ring Speaker / Loudspeaker', 'Loudspeaker', 'Ring Speaker'],
+  },
+  {
+    match: /\bmicrophone\b/,
+    categories: ['Microphone', 'Mic', 'Audio IC'],
+  },
+  {
+    match: /\bface id\b|\btruedepth\b/,
+    categories: ['Face ID', 'TrueDepth', 'Face ID / TrueDepth'],
+  },
+  {
+    match: /\bwifi\b|\bbluetooth\b/,
+    categories: ['Wifi & Bluetooth IC Repair', 'WiFi & Bluetooth IC', 'Wifi / Bluetooth'],
+  },
+  {
+    match: /\bnetwork\b|\bbaseband\b/,
+    categories: ['Network / Baseband IC Repair', 'RF Layer Swap (Baseband)', 'Baseband Layer', 'RF Layer'],
+  },
+  {
+    match: /\bapple pay\b|\bnfc\b/,
+    categories: ['Apple Pay & NFC IC Repair', 'NFC', 'Apple Pay'],
+  },
+  {
+    match: /\bpower\b|\bvolume\b|\bkey\b/,
+    categories: ['Power & Volume Key Flex', 'Power Button', 'Volume Key Flex'],
+  },
+  {
+    match: /\bcamera\b|\bfront cam\b|\brear cam\b|\bois\b/,
+    categories: ['Front Camera', 'Rear Camera', 'Camera Module', 'Main Camera', 'Camera'],
+  },
+  {
+    match: /\blogic board\b|\bmicro\s*soldering\b|\bic\b|\bno power\b/,
+    categories: ['Logic Board Micro-Soldering', 'Logic Layer Swap (Double Deck)', 'RF Layer Swap (Baseband)', 'No Power Short Circuit Repair', 'No Power Logic IC Repair'],
+  },
+];
+
 interface PosInvoicingModuleProps {
   workOrders: WorkOrder[];
   customers: Customer[];
+  parts?: PartItem[];
   systemSettings?: SystemSettings;
-  onMarkPaid: (workOrderId: string, method: string) => void;
+  onMarkPaid: (workOrder: WorkOrder, method: string) => void;
   onSaveWorkOrder?: (wo: WorkOrder) => void;
   searchQuery?: string;
   setSearchQuery?: (q: string) => void;
@@ -45,6 +108,7 @@ interface PosInvoicingModuleProps {
 export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   workOrders,
   customers,
+  parts = [],
   systemSettings,
   onMarkPaid,
   onSaveWorkOrder,
@@ -64,6 +128,8 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   const [localDateFilter, setLocalDateFilter] = useState<DateFilterState>({ preset: 'all' });
   const [isNotifModalOpen, setIsNotifModalOpen] = useState(false);
   const [notifWo, setNotifWo] = useState<WorkOrder | null>(null);
+  const [inventoryPartId, setInventoryPartId] = useState<string>('');
+  const [inventoryPartQty, setInventoryPartQty] = useState<number>(1);
 
   const [splitPayments, setSplitPayments] = useState<{ method: string; amount: number }[]>([
     { method: 'Cash', amount: 0 },
@@ -113,6 +179,111 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   const paginatedWorkOrders = filteredWorkOrders.slice((safeCurrentPage - 1) * ITEMS_PER_PAGE, safeCurrentPage * ITEMS_PER_PAGE);
 
   const selectedWo = filteredWorkOrders.find((w) => w.id === selectedWoId) || filteredWorkOrders[0] || null;
+  const inventoryPartsUsed = (selectedWo?.lineItems || []).filter((item) => item.partId && !item.isLabor && item.quantity > 0);
+  const inventoryUsageTotal = inventoryPartsUsed.reduce((sum, item) => sum + (Number(item.unitCost) || 0) * (Number(item.quantity) || 0), 0);
+  const filteredInventoryParts = useMemo(() => {
+    if (!selectedWo) return parts;
+
+    const model = selectedWo.deviceModel || '';
+    const repairText = (selectedWo.lineItems || [])
+      .filter((item) => !item.isLabor)
+      .map((item) => `${item.description || ''} ${item.partName || ''}`)
+      .join(' ');
+    const normalizedRepairText = normalizeText(repairText);
+
+    const matchedCategories = Array.from(
+      new Set(
+        INVENTORY_CATEGORY_GROUPS
+          .filter((group) => group.match.test(normalizedRepairText))
+          .flatMap((group) => group.categories)
+      )
+    );
+
+    return parts.filter((part) => {
+      const matchesModel =
+        !model ||
+        part.deviceCompatibility.some((device) => isSameDeviceModel(device, model));
+
+      const matchesCategory =
+        matchedCategories.length === 0 ||
+        matchedCategories.some((category) => normalizeText(category) === normalizeText(part.category || ''));
+
+      return matchesModel && matchesCategory;
+    });
+  }, [parts, selectedWo]);
+
+  const selectedInventoryPart = filteredInventoryParts.find((part) => part.id === inventoryPartId) || filteredInventoryParts[0] || null;
+  const taxRate = ((systemSettings?.taxPercentage ?? 6) || 0) / 100;
+
+  useEffect(() => {
+    if (!selectedInventoryPart && filteredInventoryParts[0]) {
+      setInventoryPartId(filteredInventoryParts[0].id);
+    }
+    if (selectedInventoryPart && !filteredInventoryParts.some((part) => part.id === selectedInventoryPart.id)) {
+      setInventoryPartId(filteredInventoryParts[0]?.id || '');
+    }
+  }, [filteredInventoryParts, selectedInventoryPart]);
+
+  const recalculateTotals = (lineItems: WorkOrder['lineItems'], discountAmount: number, depositAmount: number) => {
+    const subtotal = lineItems.reduce((sum, item) => sum + (Number(item.unitPrice) || 0) * (Number(item.quantity) || 0), 0);
+    const taxAmount = Math.round(subtotal * taxRate);
+    const totalAmount = Math.max(0, subtotal + taxAmount - discountAmount - depositAmount);
+    return { subtotal, taxAmount, totalAmount };
+  };
+
+  const handleAddInventoryPartToWorkOrder = () => {
+    if (!selectedWo || !selectedInventoryPart) return;
+
+    const qty = Math.max(1, Math.floor(Number(inventoryPartQty) || 1));
+    const partLineId = `${selectedInventoryPart.id}-${Date.now()}`;
+    const existingLines = [...(selectedWo.lineItems || [])];
+    const samePartIndex = existingLines.findIndex(
+      (item) =>
+        !item.isLabor &&
+        item.partId === selectedInventoryPart.id &&
+        item.unitCost === selectedInventoryPart.costPrice &&
+        item.unitPrice === selectedInventoryPart.sellingPrice
+    );
+
+    let nextLineItems: WorkOrder['lineItems'];
+    if (samePartIndex >= 0) {
+      nextLineItems = existingLines.map((item, idx) =>
+        idx === samePartIndex
+          ? {
+              ...item,
+              quantity: (Number(item.quantity) || 0) + qty,
+            }
+          : item
+      );
+    } else {
+      nextLineItems = [
+        ...existingLines,
+        {
+          id: partLineId,
+          description: selectedInventoryPart.name,
+          partId: selectedInventoryPart.id,
+          partName: selectedInventoryPart.name,
+          partQuality: selectedInventoryPart.qualityTier,
+          unitCost: selectedInventoryPart.costPrice,
+          unitPrice: selectedInventoryPart.sellingPrice,
+          quantity: qty,
+          isLabor: false,
+        },
+      ];
+    }
+
+    const totals = recalculateTotals(nextLineItems, selectedWo.discountAmount, selectedWo.depositAmount);
+    const updatedWo: WorkOrder = {
+      ...selectedWo,
+      lineItems: nextLineItems,
+      subtotal: totals.subtotal,
+      taxAmount: totals.taxAmount,
+      totalAmount: totals.totalAmount,
+      updatedAt: new Date().toISOString(),
+    };
+    onSaveWorkOrder?.(updatedWo);
+    setInventoryPartQty(1);
+  };
 
   const handleProcessPayment = () => {
     if (!selectedWo) return;
@@ -125,7 +296,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
       }
       finalMethod = `Split Payment (${validSplits.map((s) => `${s.method}: ${s.amount.toLocaleString()} MMK`).join(' + ')})`;
     }
-    onMarkPaid(selectedWo.id, finalMethod);
+    onMarkPaid(selectedWo, finalMethod);
     setIsReceiptModalOpen(true);
   };
 
@@ -388,6 +559,123 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     </tbody>
                   </table>
                 </div>
+
+                <div className="bg-white border border-[#E5E5EA] rounded-xl p-3 space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <h4 className="text-xs font-extrabold text-[#1D1D1F]">Add Inventory Part Used</h4>
+                      <p className="text-[10px] text-[#86868B]">Pick the stock part used on this ticket before payment.</p>
+                    </div>
+                    <span className="text-[10px] font-mono font-bold text-[#0071E3] bg-[#F0F6FF] px-2 py-0.5 rounded-full border border-[#D6E7FF]">
+                      {filteredInventoryParts.length} parts
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-[1.5fr_80px_auto] gap-2 items-end">
+                    <label className="block">
+                      <span className="block text-[10px] font-bold text-[#86868B] mb-1">Inventory part</span>
+                      <select
+                        value={inventoryPartId || selectedInventoryPart?.id || ''}
+                        onChange={(e) => setInventoryPartId(e.target.value)}
+                        className="w-full rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] px-2.5 py-2 text-[11px] font-semibold text-[#1D1D1F] outline-none focus:border-[#0071E3] focus:ring-1 focus:ring-[#0071E3]/20"
+                      >
+                        {filteredInventoryParts.map((part) => (
+                          <option key={part.id} value={part.id}>
+                            {part.name} • {part.locationBin || 'No bin'}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className="block">
+                      <span className="block text-[10px] font-bold text-[#86868B] mb-1">Qty</span>
+                      <input
+                        type="number"
+                        min={1}
+                        value={inventoryPartQty}
+                        onChange={(e) => setInventoryPartQty(Number(e.target.value))}
+                        className="w-full rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] px-2.5 py-2 text-[11px] font-mono font-bold text-[#1D1D1F] outline-none focus:border-[#0071E3] focus:ring-1 focus:ring-[#0071E3]/20"
+                      />
+                    </label>
+
+                    <button
+                      type="button"
+                      onClick={handleAddInventoryPartToWorkOrder}
+                      disabled={!selectedInventoryPart}
+                      className="inline-flex items-center justify-center rounded-lg bg-[#0071E3] px-3 py-2 text-[11px] font-extrabold text-white transition-all hover:bg-[#005BBB] disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      Add Part
+                    </button>
+                  </div>
+
+                  {selectedInventoryPart && (
+                    <div className="grid grid-cols-3 gap-2 text-[10px]">
+                      <div className="rounded-lg bg-[#F5F5F7] px-2 py-1.5">
+                        <span className="block text-[#86868B]">Stock</span>
+                        <span className="font-mono font-bold text-[#1D1D1F]">{selectedInventoryPart.quantityInStock.toLocaleString()}</span>
+                      </div>
+                      <div className="rounded-lg bg-[#F5F5F7] px-2 py-1.5">
+                        <span className="block text-[#86868B]">Purchase</span>
+                        <span className="font-mono font-bold text-[#1D1D1F]">{selectedInventoryPart.costPrice.toLocaleString()} MMK</span>
+                      </div>
+                      <div className="rounded-lg bg-[#F5F5F7] px-2 py-1.5">
+                        <span className="block text-[#86868B]">Selling</span>
+                        <span className="font-mono font-bold text-[#1D1D1F]">{selectedInventoryPart.sellingPrice.toLocaleString()} MMK</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-start gap-2 rounded-lg bg-[#F5F5F7] px-2.5 py-2 text-[10px] text-[#86868B]">
+                    <Filter className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#0071E3]" />
+                    <p className="leading-snug">
+                      Showing parts for <span className="font-bold text-[#1D1D1F]">{selectedWo?.deviceModel || 'selected device'}</span>
+                      {filteredInventoryParts.length !== parts.length ? (
+                        <>
+                          {' '}and only categories that match the repair items on this ticket.
+                        </>
+                      ) : (
+                        <>
+                          {' '}with compatible stock from inventory.
+                        </>
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+                {!!inventoryPartsUsed.length && (
+                  <div className="bg-amber-50/90 border border-amber-200 rounded-xl p-3 space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="text-xs font-extrabold text-amber-900">Inventory Usage Settlement</h4>
+                      <span className="text-[10px] font-mono font-bold text-amber-800 bg-white/70 px-2 py-0.5 rounded-full border border-amber-200">
+                        {inventoryPartsUsed.length} item(s)
+                      </span>
+                    </div>
+                    <div className="space-y-1 text-[11px]">
+                      {inventoryPartsUsed.map((item) => {
+                        const matchedPart = parts.find((part) => part.id === item.partId);
+                        return (
+                          <div key={item.id} className="flex items-center justify-between gap-2 rounded-lg bg-white/80 border border-amber-100 px-2 py-1.5">
+                            <div className="min-w-0">
+                              <div className="font-semibold text-[#1D1D1F] truncate">{item.partName || item.description}</div>
+                              <div className="text-[10px] text-[#86868B]">
+                                {item.quantity} × {(item.unitCost || 0).toLocaleString()} MMK {matchedPart?.locationBin ? `• ${matchedPart.locationBin}` : ''}
+                              </div>
+                            </div>
+                            <div className="font-mono font-bold text-amber-900 whitespace-nowrap">
+                              {((Number(item.unitCost) || 0) * (Number(item.quantity) || 0)).toLocaleString()} MMK
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="flex items-center justify-between border-t border-amber-200 pt-2">
+                      <span className="text-[10px] font-bold text-amber-800">Auto-deducts from inventory on payment</span>
+                      <span className="text-[11px] font-mono font-bold text-amber-900">
+                        Total Cost: {inventoryUsageTotal.toLocaleString()} MMK
+                      </span>
+                    </div>
+                  </div>
+                )}
 
                 {/* Calculation Summary */}
                 <div className="bg-[#F5F5F7]/80 p-3 rounded-xl border border-[#E5E5EA] space-y-1.5 text-right">

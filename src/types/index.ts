@@ -170,6 +170,9 @@ export interface WorkOrder {
   paidAmount?: number;
   isPaid: boolean;
   paymentMethod?: 'Credit Card' | 'Cash' | 'Apple Pay' | 'Split Payment' | 'Net 30';
+  inventoryConsumedAt?: string;
+  inventoryConsumptionAmount?: number;
+  inventoryConsumptionNote?: string;
   
   // Warranty & Signatures
   warrantyDays: number; // e.g. 30, 90, 180, 365, 0

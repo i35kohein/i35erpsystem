@@ -74,6 +74,13 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
   );
   const selectedWo = filteredWorkOrders.find((w) => w.id === selectedWoId);
   const [qaSavedNotice, setQaSavedNotice] = useState<boolean>(false);
+  const repairCategorySummary = selectedWo?.selectedRepairs?.length
+    ? Array.from(new Set(selectedWo.selectedRepairs.map((repair) => repair.name.trim()).filter(Boolean))).join(' • ')
+    : (selectedWo?.lineItems || [])
+        .filter((item) => !item.isLabor)
+        .map((item) => item.partName || item.description)
+        .filter(Boolean)
+        .join(' • ');
 
   useEffect(() => {
     if (!filteredWorkOrders.some((workOrder) => workOrder.id === selectedWoId)) {
@@ -176,6 +183,16 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
   const handleDiagnosticNoteChange = (id: string, note: string) => {
     setQaDiagnostics((prev) =>
       prev.map((item) => (item.id === id ? { ...item, note } : item))
+    );
+  };
+
+  const handleMarkAllPass = () => {
+    setQaDiagnostics((prev) =>
+      prev.map((item) => ({
+        ...item,
+        status: 'Pass',
+        note: item.note?.trim() || '',
+      }))
     );
   };
 
@@ -298,16 +315,33 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                 <div>
                   <span className="font-mono text-[#0071E3] font-bold">{selectedWo.orderNumber}</span>
                   <h2 className="text-base font-bold text-[#1D1D1F]">{selectedWo.deviceModel} Post-Repair QA Verification</h2>
+                  {repairCategorySummary && (
+                    <p className="mt-1 text-[11px] font-semibold text-[#86868B]">
+                      Repair Category: <span className="text-[#1D1D1F]">{repairCategorySummary}</span>
+                    </p>
+                  )}
                 </div>
 
-                <button
-                  onClick={handleSaveQaPass}
-                  title="Confirm QA pass and mark device ready"
-                  className="px-4 py-2 bg-[#34C759] hover:bg-[#30B753] text-white font-extrabold rounded-xl shadow-xs transition-all active:scale-95 flex items-center space-x-1.5"
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Confirm QA Pass</span>
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleMarkAllPass}
+                    title="Mark every checklist item as Pass"
+                    className="px-4 py-2 bg-white hover:bg-[#F5F5F7] text-[#1D1D1F] font-extrabold rounded-xl border border-[#D2D2D7] shadow-xs transition-all active:scale-95 flex items-center space-x-1.5"
+                  >
+                    <Check className="w-4 h-4 text-[#16A34A]" />
+                    <span>Mark All Pass</span>
+                  </button>
+
+                  <button
+                    onClick={handleSaveQaPass}
+                    title="Confirm QA pass and mark device ready"
+                    className="px-4 py-2 bg-[#34C759] hover:bg-[#30B753] text-white font-extrabold rounded-xl shadow-xs transition-all active:scale-95 flex items-center space-x-1.5"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Confirm QA Pass</span>
+                  </button>
+                </div>
               </div>
 
               {/* 21-Point Post-Repair Hardware Diagnostic Checklist */}

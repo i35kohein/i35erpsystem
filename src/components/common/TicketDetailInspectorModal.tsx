@@ -84,6 +84,14 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
       : `${shopDays > 0 ? `${shopDays} ${shopDays === 1 ? 'day' : 'days'} ` : ''}${shopHours} ${
           shopHours === 1 ? 'hour' : 'hours'
         }`.trim();
+  const repairSummary = workOrder.selectedRepairs?.length
+    ? Array.from(new Set(workOrder.selectedRepairs.map((repair) => repair.name.trim()).filter(Boolean))).join(' • ')
+    : (workOrder.lineItems || [])
+        .filter((item) => !item.isLabor)
+        .map((item) => item.partName || item.description)
+        .filter(Boolean)
+        .join(' • ');
+  const repairCategoryLabel = repairSummary || 'Not specified';
   const savedRepairLogs = workOrder.repairLogs || [];
   const intakeLog = {
     id: `intake-${workOrder.id}`,
@@ -231,6 +239,12 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                 <div className="flex items-start gap-2">
                   <Smartphone className="mt-0.5 h-4 w-4 shrink-0 text-[var(--primary)]" />
                   <h3 className="text-lg font-black leading-6 text-[var(--text-main)]">{workOrder.deviceModel}</h3>
+                </div>
+                <div className="mt-2 rounded-md border border-[var(--border)] bg-[var(--card-bg)] px-2.5 py-2">
+                  <p className="text-[9px] font-black uppercase tracking-wider text-[var(--text-muted)]">Repair Category</p>
+                  <p className="mt-0.5 text-[11px] font-bold leading-snug text-[var(--text-main)]">
+                    {repairCategoryLabel}
+                  </p>
                 </div>
                 <div
                   className={`mt-2 h-2.5 w-full overflow-hidden rounded-sm border border-white shadow-sm ${deviceColor.border}`}
