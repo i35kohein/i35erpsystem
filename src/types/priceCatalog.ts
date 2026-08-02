@@ -60,7 +60,7 @@ export const REPAIR_CATEGORIES: RepairCategoryDef[] = [
   { key: 'Battery_Original', label: 'Battery Original', group: 'Battery' },
   { key: 'Display_Original', label: 'Display Original', group: 'Display' },
   { key: 'Display_Original_IDM', label: 'Display Original IDM', group: 'Display' },
-  { key: 'Display_GX', label: 'Display GX (OLED)', group: 'Display' },
+  { key: 'Display_GX', label: 'Display (Gx-OLED)', group: 'Display' },
   { key: 'Display_LCD_AA', label: 'Display LCD AA', group: 'Display' },
   { key: 'Backglass', label: 'Backglass', group: 'Housing' },
   { key: 'Charing_Board_Repair', label: 'Charging Board Repair', group: 'Charging' },

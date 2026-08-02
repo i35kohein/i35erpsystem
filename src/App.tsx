@@ -157,11 +157,9 @@ export default function App() {
   // Inventory Categories are independent from the Price List categories.
   const inventoryCategories = systemSettings.inventoryCategories || [];
 
-  // Keep top-bar inventory filters aligned with the saved inventory categories and stock data.
-  const inventoryCategoryOptions = Array.from(new Set([
-    ...inventoryCategories,
-    ...parts.map((part) => part.category).filter(Boolean),
-  ])).sort((a, b) => a.localeCompare(b));
+  // Inventory filters use only the categories explicitly managed in
+  // System Management. Part rows must not create new filter options.
+  const inventoryCategoryOptions = [...inventoryCategories].sort((a, b) => a.localeCompare(b));
   const inventoryQualityOptions = Array.from(new Set(parts.map((part) => part.qualityTier).filter(Boolean))).sort((a, b) => a.localeCompare(b));
 
   const normalizeInventoryPartCategory = (category: unknown) => {
