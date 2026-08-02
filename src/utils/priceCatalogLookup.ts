@@ -76,6 +76,9 @@ export function getModelPriceCatalogItems(
         isCatalogMatch: true,
         modelMatchedName,
       });
+    } else if (cat.key === 'Green_White_Screen') {
+      // Model-specific service: only show when the selected device model has a
+      // real catalog price (e.g. iPhone 13 Pro / 13 Pro Max). No fallback price.
     } else {
       // Provide tier-adjusted baseline fallback price so UI is complete
       const fallbackPrice = getFallbackPriceForCategory(cat.key, lowerTarget);
