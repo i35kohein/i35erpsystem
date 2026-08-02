@@ -165,7 +165,7 @@ export default function App() {
   const normalizeInventoryPartCategory = (category: unknown) => {
     const value = String(category || '').trim().toLowerCase().replace(/\s+/g, ' ');
     if (value === 'back glass' || value === 'backglass') return 'Backglass';
-    if (value === 'battery') return 'Battery Original';
+    if (value === 'battery') return 'Battery';
     if (value === 'battery cell') return 'Battery Cell';
     return String(category || '').trim();
   };
