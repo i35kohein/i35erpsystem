@@ -156,8 +156,25 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
   const renderA4VoucherContent = (copyLabel?: string) => {
     const isMono = a4ColorMode === 'monochrome';
 
+    const isPaidWo = !!workOrder.isPaid;
+
     return (
-      <div className={`a4-voucher-content space-y-4 font-sans text-xs ${isMono ? 'text-black' : 'text-slate-900'}`}>
+      <div className={`a4-voucher-content relative space-y-4 font-sans text-xs ${isMono ? 'text-black' : 'text-slate-900'}`}>
+        {/* PAID watermark — large diagonal stamp across the body */}
+        {isPaidWo && (
+          <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center overflow-hidden">
+            <div className={`-rotate-[24deg] select-none border-4 px-10 py-3 font-black uppercase tracking-[0.35em] ${
+              isMono
+                ? 'border-black text-black/25'
+                : 'border-[#34C759] text-[#34C759]/25'
+            }`}
+              style={{ fontSize: '64px', lineHeight: 1 }}
+            >
+              PAID
+            </div>
+          </div>
+        )}
+
         {/* Top Banner Header */}
         <div className={`a4-voucher-header flex flex-col sm:flex-row justify-between items-start sm:items-center pb-3 border-b ${
           isMono ? 'border-black' : 'border-slate-300'
@@ -233,6 +250,11 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
               </div>
               <p className="text-[11px] text-slate-700">Date: {new Date(workOrder.createdAt).toLocaleDateString()}</p>
               <p className="text-[10px] text-slate-600">Est. Return: {workOrder.estimatedCompletion}</p>
+              {isPaidWo && (
+                <p className="text-[10px] font-bold text-slate-700">
+                  Taken Out: {new Date(workOrder.updatedAt || Date.now()).toLocaleString()}
+                </p>
+              )}
             </div>
 
             <div className={`print-qr p-1.5 bg-white border rounded-lg flex flex-col items-center shrink-0 ${
