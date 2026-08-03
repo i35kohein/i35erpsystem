@@ -453,6 +453,23 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     [parts]
   );
 
+  // Column totals: sum stock per category directly from part records (not the
+  // matrix cells) so vertically-shared parts (12 & 12 Pro) are NOT double counted.
+  const matrixCategoryTotals = useMemo(() => {
+    const totals: Record<string, number> = {};
+    matrixCategories.forEach((category) => {
+      totals[category] = parts
+        .filter((p) => p.category === category)
+        .reduce((sum, p) => sum + Number(p.quantityInStock || 0), 0);
+    });
+    return totals;
+  }, [matrixCategories, parts]);
+
+  const matrixGrandTotal = useMemo(
+    () => Object.values(matrixCategoryTotals).reduce((a, b) => a + b, 0),
+    [matrixCategoryTotals]
+  );
+
   // Merge vertically-shared cells (e.g. iPhone 12 & 12 Pro share the same
   // Battery / Display parts) so the matrix shows ONE number spanning both rows.
   const matrixMergeGroups = useMemo(() => {
@@ -1358,6 +1375,18 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     </tr>
                   ))}
                 </tbody>
+                <tfoot>
+                  <tr className="border-t-2 border-[#1D1D1F] bg-[#F5F5F7]">
+                    <td className="sticky left-0 z-10 bg-[#F5F5F7] p-2.5 font-black text-[#1D1D1F]">
+                      Total ({matrixGrandTotal.toLocaleString()})
+                    </td>
+                    {matrixCategories.map((category) => (
+                      <td key={category} className="p-2 text-center font-mono text-xs font-black text-[#1D1D1F]">
+                        {matrixCategoryTotals[category]?.toLocaleString() ?? 0}
+                      </td>
+                    ))}
+                  </tr>
+                </tfoot>
               </table>
             </div>
           ) : (
@@ -2578,6 +2607,18 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       </tr>
                     ))}
                   </tbody>
+                  <tfoot>
+                    <tr className="border-t-2 border-[#1D1D1F]">
+                      <td className="border border-[#D2D2D7] bg-[#F5F5F7] p-1.5 font-black text-[#1D1D1F]">
+                        Total ({matrixGrandTotal.toLocaleString()})
+                      </td>
+                      {matrixCategories.map((category) => (
+                        <td key={category} className="border border-[#D2D2D7] bg-[#F5F5F7] p-1 text-center font-mono font-black">
+                          {matrixCategoryTotals[category]?.toLocaleString() ?? 0}
+                        </td>
+                      ))}
+                    </tr>
+                  </tfoot>
                 </table>
               </div>
 
