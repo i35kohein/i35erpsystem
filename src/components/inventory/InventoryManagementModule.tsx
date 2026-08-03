@@ -2928,15 +2928,13 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       </div>
                       <p className="mt-1.5 text-[11px] font-extrabold leading-snug text-[#1D1D1F]">{part.name}</p>
                       <p className="mt-0.5 truncate font-mono text-[8px] text-[#86868B]" title={part.sku}>SKU: {part.sku}</p>
-                      <div className="mt-1.5 flex items-end justify-between gap-1">
+                      <div className="mt-1.5 flex items-center justify-between gap-1">
                         <div className="min-w-0 text-[9px] leading-tight text-[#86868B]">
-                          <p>Stock: <span className="font-bold text-[#1D1D1F]">{part.quantityInStock}</span></p>
                           <p>Bin: <span className="font-bold text-[#1D1D1F]">{part.locationBin || '—'}</span></p>
-                          <p>Cost: <span className="font-bold text-[#1D1D1F]">{Number(part.costPrice || 0).toLocaleString()}</span></p>
                         </div>
                         <div className="shrink-0 text-right">
-                          <p className="text-[8px] text-[#86868B]">Price</p>
-                          <p className="font-mono text-[11px] font-black text-[#1D1D1F]">{Number(part.sellingPrice || 0).toLocaleString()} MMK</p>
+                          <p className="text-[8px] font-bold text-[#86868B]">Price</p>
+                          <p className="font-mono text-[16px] font-black leading-none text-[#1D1D1F]">{Number(part.sellingPrice || 0).toLocaleString()} MMK</p>
                         </div>
                       </div>
                       <div className="tag-barcode mt-1.5 border-t border-dashed border-[#C7C7CC] pt-1.5">
