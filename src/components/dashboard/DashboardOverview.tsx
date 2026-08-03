@@ -414,6 +414,21 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     return counts;
   }, [filteredWorkOrders]);
 
+  // Unique customers currently in the active pipeline (Receive → Finished).
+  // The status chips count tickets; this counts distinct customers so the
+  // "Active Pipeline Customers" summary reflects people in the shop, not
+  // repair line items (one customer may hold several devices).
+  const activePipelineCustomerCount = useMemo(() => {
+    const seen = new Set<string>();
+    filteredWorkOrders.forEach((wo) => {
+      if (pipelineStatuses.includes(wo.status)) {
+        const key = wo.customerId || `${wo.customerName || ''}|${wo.customerPhone || ''}`;
+        if (key) seen.add(key);
+      }
+    });
+    return seen.size;
+  }, [filteredWorkOrders, pipelineStatuses]);
+
   const stagnantWorkOrders = useMemo(() => {
     const now = Date.now();
     return filteredWorkOrders.filter((wo) => {
@@ -834,8 +849,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             {[
               { 
                 id: 'PIPELINE', 
-                label: 'Active Pipeline Data', 
-                count: statusQueueCounts['Receive'] + statusQueueCounts['In Progress'] + statusQueueCounts['Pending'] + statusQueueCounts['Finished'], 
+                label: 'Active Pipeline Customers', 
+                count: activePipelineCustomerCount, 
                 activeBg: 'bg-indigo-50/90', 
                 activeBorder: 'border-indigo-600', 
                 textColor: 'text-indigo-700', 
@@ -982,17 +997,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   )}
                 </div>
                 <p className="text-xs text-[#86868B]">Read-only analytic ticket roster filtered by repair stage, technician, and priority</p>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => onNavigateToTab('pipeline')}
-                  className="px-3.5 py-1.5 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#0071E3] border border-[#E5E5EA] font-extrabold text-xs rounded-xl shadow-2xs flex items-center space-x-1.5 transition-all cursor-pointer active:scale-95"
-                >
-                  <span>Go to Repair Pipeline for Control</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </button>
               </div>
             </div>
 

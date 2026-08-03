@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   LogOut, 
   CircleDot, 
-  LayoutDashboard, 
   ClipboardList, 
   Kanban, 
   Boxes, 
@@ -337,27 +336,10 @@ export const Navigation: React.FC<NavigationProps> = ({
 
         {/* Navigation List */}
         <nav aria-label="Sidebar Navigation" className="flex-1 overflow-y-auto p-2 space-y-3 text-xs touch-pan-y overscroll-y-contain scrollbar-thin scrollbar-thumb-gray-200">
-          {/* Dashboard Main Link */}
+          {/* Dashboard is the landing view — the sidebar logo already navigates
+              there, so a separate "Dashboard Overview" entry is redundant. */}
           <div className="pb-2 border-b border-[#E5E5EA]/80">
-            <button
-              onClick={() => handleTabSelect('dashboard')}
-              aria-current={activeTab === 'dashboard' ? 'page' : undefined}
-              className={`w-full flex items-center ${
-                isCollapsed ? 'w-10 h-10 mx-auto justify-center p-0' : 'justify-between px-3.5 py-2.5'
-              } rounded-xl font-bold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071E3] ${
-                activeTab === 'dashboard'
-                  ? 'bg-[#EAF2FF] text-[#1559A6] border border-[#B8D3F4]'
-                  : 'text-[#1D1D1F] bg-white hover:bg-[#F3F4F6] border border-transparent'
-              }`}
-              title="Overview Dashboard"
-            >
-              <div className="flex items-center justify-center min-w-0">
-                <LayoutDashboard className={`w-4 h-4 shrink-0 ${activeTab === 'dashboard' ? 'text-[#1559A6]' : 'text-[#667085]'}`} />
-                {!isCollapsed && <span className="ml-2.5">Dashboard Overview</span>}
-              </div>
-            </button>
-
-            {/* New Intake Ticket — primary action under Dashboard Overview */}
+            {/* New Intake Ticket — primary action */}
             <button
               onClick={() => {
                 onOpenNewWorkOrder?.();
