@@ -40,7 +40,8 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  ChevronDown
+  ChevronDown,
+  Printer
 } from 'lucide-react';
 import { PartItem, PartQualityTier, Supplier, SystemSettings, RmaItem } from '../../types';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
@@ -120,6 +121,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const [localSearchQuery, setLocalSearchQuery] = useState<string>('');
   const [localShowAddModal, setLocalShowAddModal] = useState(false);
   const [viewMode, setViewMode] = useState<'stock' | 'profit' | 'matrix'>('stock');
+  const [isMatrixPrintOpen, setIsMatrixPrintOpen] = useState(false);
   const [inlineEditMode, setInlineEditMode] = useState(false);
   const [inlineDrafts, setInlineDrafts] = useState<Record<string, InlineDraft>>({});
   const [showInlineSaveConfirm, setShowInlineSaveConfirm] = useState(false);
@@ -1259,7 +1261,18 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 <p className="text-[10px] text-[#86868B]">Live totals from saved inventory components</p>
               </div>
             </div>
-            <span className="text-[10px] font-bold text-[#86868B]">{matrixModels.length} models · {matrixCategories.length} categories</span>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold text-[#86868B]">{matrixModels.length} models · {matrixCategories.length} categories</span>
+              <button
+                type="button"
+                onClick={() => setIsMatrixPrintOpen(true)}
+                className="flex items-center gap-1.5 rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] px-2.5 py-1.5 text-[11px] font-bold text-[#1D1D1F] transition hover:border-[#0071E3] hover:text-[#0071E3]"
+                title="Print ground stock checking sheet"
+              >
+                <Printer className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Print Stock Sheet</span>
+              </button>
+            </div>
           </div>
 
           {matrixModels.length && matrixCategories.length ? (
@@ -2363,6 +2376,138 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 </>
               );
             })()}
+          </div>
+        </div>
+      )}
+
+      {/* PRINT: Ground Stock Checking Matrix Sheet */}
+      {isMatrixPrintOpen && (
+        <div className="printable-print-root fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 p-2 backdrop-blur-sm sm:p-4">
+          <style>{`
+            @media print {
+              body:has(.printable-print-root) .basic-ui > *:not(:has(.printable-print-root)):not(.printable-print-root):not(.printable-print-root *),
+              body:has(.printable-print-root) main *:not(:has(.printable-print-root)):not(.printable-print-root):not(.printable-print-root *) {
+                display: none !important;
+              }
+              .printable-print-root,
+              .printable-print-root .matrix-print-sheet {
+                display: block !important;
+                width: 100% !important;
+                max-width: none !important;
+                min-width: 0 !important;
+                height: auto !important;
+                max-height: none !important;
+                overflow: visible !important;
+                position: static !important;
+                background: #fff !important;
+                color: #000 !important;
+                border: none !important;
+                box-shadow: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+              }
+              .matrix-print-sheet .matrix-print-no-print {
+                display: none !important;
+              }
+              nav, header, footer, aside, .no-print {
+                display: none !important;
+              }
+              html, body, #root, #main-content-scroll, main {
+                background: #ffffff !important;
+                color: #000000 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: visible !important;
+                height: auto !important;
+                max-height: none !important;
+              }
+              .fixed, .inset-0 {
+                position: static !important;
+                background: transparent !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow: visible !important;
+              }
+              @page { size: A4 landscape; margin: 8mm; }
+            }
+          `}</style>
+
+          <div className="matrix-print-sheet mx-auto my-4 w-full max-w-5xl rounded-2xl border border-[#E5E5EA] bg-white p-6 shadow-xl">
+            {/* Screen-only header with close/print actions */}
+            <div className="matrix-print-no-print mb-4 flex items-center justify-between">
+              <h3 className="text-sm font-extrabold text-[#1D1D1F]">Ground Stock Checking Sheet</h3>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="flex items-center gap-1.5 rounded-lg bg-[#0071E3] px-3 py-2 text-[11px] font-extrabold text-white transition hover:bg-[#0051B3]"
+                >
+                  <Printer className="h-3.5 w-3.5" /> Print
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsMatrixPrintOpen(false)}
+                  className="rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] px-3 py-2 text-[11px] font-bold text-[#1D1D1F] transition hover:bg-[#E5E5EA]"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+
+            {/* Printable sheet */}
+            <div className="rounded-xl border border-[#E5E5EA] p-4">
+              <div className="mb-3 flex items-start justify-between border-b border-[#E5E5EA] pb-3">
+                <div>
+                  <h1 className="text-base font-black text-[#1D1D1F]">i35 Apple Service — Ground Stock Checking</h1>
+                  <p className="text-[10px] text-[#86868B]">Device Model × Component Stock Matrix</p>
+                </div>
+                <div className="text-right text-[10px] text-[#86868B]">
+                  <p>Date: <span className="font-bold text-[#1D1D1F]">{new Date().toLocaleDateString()}</span></p>
+                  <p>Time: <span className="font-bold text-[#1D1D1F]">{new Date().toLocaleTimeString()}</span></p>
+                  <p className="mt-1">Checker: ______________________</p>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse text-[10px]">
+                  <thead>
+                    <tr className="border-b-2 border-[#1D1D1F]">
+                      <th className="border border-[#D2D2D7] bg-[#F5F5F7] p-1.5 text-left font-black">Device Model</th>
+                      {matrixCategories.map((category) => (
+                        <th key={category} className="border border-[#D2D2D7] bg-[#F5F5F7] p-1.5 text-center font-black">{category}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {matrixModels.map((model) => (
+                      <tr key={model} className="break-inside-avoid">
+                        <td className="border border-[#D2D2D7] p-1.5 font-bold text-[#1D1D1F]">{model}</td>
+                        {matrixCategories.map((category) => {
+                          const matchingParts = parts.filter((part) =>
+                            part.category === category && part.deviceCompatibility.some((device) => device.toLowerCase() === model.toLowerCase())
+                          );
+                          const quantity = matchingParts.reduce((total, part) => total + part.quantityInStock, 0);
+                          return (
+                            <td key={category} className="border border-[#D2D2D7] p-1 text-center font-mono">
+                              {matchingParts.length ? (
+                                <span className={quantity === 0 ? 'font-black text-[#C7C7CC]' : 'font-black'}>{quantity}</span>
+                              ) : (
+                                <span className="text-[#C7C7CC]">—</span>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="mt-3 flex justify-between text-[9px] text-[#86868B]">
+                <span>i35 Apple Service · No 1031, Pyi Htaung Su Main Rd, North Dagon, Yangon</span>
+                <span>Sheet generated {new Date().toLocaleString()}</span>
+              </div>
+            </div>
           </div>
         </div>
       )}
