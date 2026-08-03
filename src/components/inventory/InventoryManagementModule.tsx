@@ -2464,23 +2464,33 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         <div className="printable-print-root fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 p-2 backdrop-blur-sm sm:p-4">
           <style>{`
             @media print {
-              /* Visibility pattern: hide everything, reveal only the sheet. */
-              body * {
-                visibility: hidden !important;
-              }
-              #matrix-print-sheet,
-              #matrix-print-sheet * {
-                visibility: visible !important;
-              }
-              #matrix-print-sheet {
-                position: absolute !important;
-                left: 0 !important;
-                top: 0 !important;
-                width: 100% !important;
-                max-width: none !important;
-                min-width: 0 !important;
+              html, body, #root, #main-content-scroll, main, .basic-ui {
+                background: #ffffff !important;
+                color: #000000 !important;
                 margin: 0 !important;
-                padding: 4mm !important;
+                padding: 0 !important;
+                width: 100% !important;
+                min-width: 0 !important;
+                max-width: 100% !important;
+                overflow: visible !important;
+              }
+              /* Hide the whole app shell, keep only the print overlay. */
+              body:has(.printable-print-root) .basic-ui > *:not(:has(.printable-print-root)):not(.printable-print-root):not(.printable-print-root *),
+              body:has(.printable-print-root) .basic-ui main *:not(:has(.printable-print-root)):not(.printable-print-root):not(.printable-print-root *) {
+                display: none !important;
+              }
+              /* The overlay + sheet flow normally so multi-page paginates correctly. */
+              .printable-print-root,
+              #matrix-print-sheet {
+                position: static !important;
+                display: block !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                height: auto !important;
+                max-height: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
                 border: none !important;
                 box-shadow: none !important;
                 background: #ffffff !important;
@@ -2647,18 +2657,31 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         <div className="printable-print-root fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 p-2 backdrop-blur-sm sm:p-4">
           <style>{`
             @media print {
-              body * { visibility: hidden !important; }
-              #spare-tags-sheet,
-              #spare-tags-sheet * { visibility: visible !important; }
-              #spare-tags-sheet {
-                position: absolute !important;
-                left: 0 !important;
-                top: 0 !important;
-                width: 100% !important;
-                max-width: none !important;
-                min-width: 0 !important;
+              html, body, #root, #main-content-scroll, main, .basic-ui {
+                background: #ffffff !important;
+                color: #000000 !important;
                 margin: 0 !important;
-                padding: 4mm !important;
+                padding: 0 !important;
+                width: 100% !important;
+                min-width: 0 !important;
+                max-width: 100% !important;
+                overflow: visible !important;
+              }
+              body:has(.printable-print-root) .basic-ui > *:not(:has(.printable-print-root)):not(.printable-print-root):not(.printable-print-root *),
+              body:has(.printable-print-root) .basic-ui main *:not(:has(.printable-print-root)):not(.printable-print-root):not(.printable-print-root *) {
+                display: none !important;
+              }
+              .printable-print-root,
+              #spare-tags-sheet {
+                position: static !important;
+                display: block !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                height: auto !important;
+                max-height: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
                 border: none !important;
                 box-shadow: none !important;
                 background: #ffffff !important;
@@ -2668,8 +2691,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               #spare-tags-sheet .tags-no-print { display: none !important; }
               #spare-tags-sheet .tags-grid {
                 display: grid !important;
-                grid-template-columns: repeat(3, 1fr) !important;
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
                 gap: 4mm !important;
+                width: 100% !important;
               }
               #spare-tags-sheet .tag-card {
                 break-inside: avoid !important;
@@ -2677,6 +2701,10 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 border-radius: 2mm !important;
                 padding: 3mm !important;
                 background: #fff !important;
+                min-width: 0 !important;
+                max-width: 100% !important;
+                overflow-wrap: break-word !important;
+                word-break: break-word !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
               }
