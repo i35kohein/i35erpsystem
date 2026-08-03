@@ -846,7 +846,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         </div>
 
         {/* Action Controls & View Switcher */}
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex flex-1 flex-wrap items-center justify-end gap-1.5">
           {/* Dual View Switcher */}
           <div className="bg-[#F5F5F7] rounded-xl border border-[#E5E5EA] flex h-8 items-center p-1">
             <button
