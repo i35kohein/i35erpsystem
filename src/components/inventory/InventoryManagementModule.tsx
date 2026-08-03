@@ -833,7 +833,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   return (
     <div className="space-y-3">
       {/* Module Title Header Bar */}
-      <div className="module-toolbar flex flex-col md:flex-row md:items-center justify-between gap-2 bg-white p-3 rounded-xl border border-[#E5E5EA] shadow-xs">
+      <div className="module-toolbar overflow-visible flex flex-col md:flex-row md:items-center justify-between gap-2 bg-white p-3 rounded-xl border border-[#E5E5EA] shadow-xs">
         <div className="module-subheader">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 rounded-lg bg-[#0071E3] text-white flex items-center justify-center font-bold shadow-2xs">

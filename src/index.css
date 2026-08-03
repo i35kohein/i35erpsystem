@@ -323,7 +323,8 @@ body {
   background: var(--border-subtle) !important;
   border: 1px solid var(--border) !important;
   border-radius: 12px;
-  overflow-x: auto;
+  /* visible so dropdown menus (absolute-positioned) are not clipped */
+  overflow: visible;
   scrollbar-width: none;
 }
 
