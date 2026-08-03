@@ -47,6 +47,7 @@ import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
 import { getAvailableColorsForModel, getRealisticColorStyle } from '../intake/deviceData';
 import { toast } from '../../lib/toast';
+import { sortModelsNewestFirst } from '../../utils/modelSort';
 
 const isSameDeviceModel = (left: string, right: string) =>
   left.trim().toLocaleLowerCase() === right.trim().toLocaleLowerCase();
@@ -263,13 +264,12 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   };
 
   const activeDeviceModels = useMemo(() => {
-    return [...new Set(deviceModels?.filter(Boolean) || [])].sort((a, b) => a.localeCompare(b));
+    return sortModelsNewestFirst([...new Set(deviceModels?.filter(Boolean) || [])]);
   }, [deviceModels]);
 
   // Inventory filters should only list models with an actual saved stock row.
   const inventoryDeviceModels = useMemo(() => {
-    return [...new Set(parts.flatMap((part) => part.deviceCompatibility || []).filter(Boolean))]
-      .sort((a, b) => a.localeCompare(b));
+    return sortModelsNewestFirst([...new Set(parts.flatMap((part) => part.deviceCompatibility || []).filter(Boolean))]);
   }, [parts]);
 
   // Edit Part Modal state
@@ -442,11 +442,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       const unique = new Map<string, string>();
       [...activeDeviceModels, ...parts.flatMap((part) => part.deviceCompatibility.filter(Boolean))]
         .forEach((model) => unique.set(model.trim().toLowerCase(), model.trim()));
-      return [...unique.values()].sort((a, b) => {
-        const numberOf = (model: string) => Number(model.match(/iPhone\s+(\d+)/i)?.[1] || 0);
-        const generation = numberOf(b) - numberOf(a);
-        return generation || b.localeCompare(a, undefined, { numeric: true, sensitivity: 'base' });
-      });
+      return sortModelsNewestFirst([...unique.values()]);
     },
     [activeDeviceModels, parts]
   );
