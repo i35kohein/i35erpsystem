@@ -51,6 +51,7 @@ import {
 } from 'lucide-react';
 import { WorkOrder, PartItem, RmaItem, Technician, WorkOrderStatus } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
+import { get21Diagnostics, get21AfterDiagnostics } from '../../utils/diagnosticUtils';
 import { DateFilterState, filterByDateRange, DateFilterSelector } from '../common/DateFilterSelector';
 import { TechnicianPerformanceTab } from './TechnicianPerformanceTab';
 import { TechnicianLeaderboardView } from './TechnicianLeaderboardView';
@@ -338,7 +339,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
     filteredWorkOrders.forEach((wo) => {
       const s = (wo.serviceType || '').toLowerCase();
-      const desc = (wo.issueDescription || '').toLowerCase();
+      const desc = (wo.symptomsReported || '').toLowerCase();
       const rev = wo.subtotal || 0;
 
       if (s.includes('screen') || s.includes('display') || s.includes('oled') || desc.includes('screen') || desc.includes('cracked')) {
@@ -428,16 +429,27 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const diagnostic21Analytics = useMemo(() => {
     let totalPass = 0;
     let totalFail = 0;
+    let totalNA = 0;
     const testFailMap: Record<string, number> = {};
+    const testPassMap: Record<string, number> = {};
+    const testCountMap: Record<string, number> = {};
 
+    // Normalize each ticket's diagnostics the same way Intake / QA do
+    // (get21Diagnostics merges stored results with symptom-based inference),
+    // so the dashboard matches what staff see in the other tabs.
     filteredWorkOrders.forEach((wo) => {
-      const diags = wo.beforeDiagnostics || {};
-      Object.entries(diags).forEach(([testName, status]) => {
+      const normalized = get21Diagnostics(wo.beforeDiagnostics, wo.symptomsReported, wo.intakeChecklist);
+      normalized.forEach((d) => {
+        const status = d.status;
+        testCountMap[d.name] = (testCountMap[d.name] || 0) + 1;
         if (status === 'Pass') {
           totalPass += 1;
+          testPassMap[d.name] = (testPassMap[d.name] || 0) + 1;
         } else if (status === 'Fail') {
           totalFail += 1;
-          testFailMap[testName] = (testFailMap[testName] || 0) + 1;
+          testFailMap[d.name] = (testFailMap[d.name] || 0) + 1;
+        } else {
+          totalNA += 1;
         }
       });
     });
@@ -447,10 +459,52 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
 
+    const topPerformingTests = Object.entries(testPassMap)
+      .map(([test, count]) => ({
+        test,
+        count,
+        total: testCountMap[test] || 1,
+        passRate: Math.round((count / (testCountMap[test] || 1)) * 100),
+      }))
+      .filter((t) => t.total >= 2)
+      .sort((a, b) => b.passRate - a.passRate)
+      .slice(0, 5);
+
     const totalDiag = totalPass + totalFail;
     const passRate = totalDiag > 0 ? Math.round((totalPass / totalDiag) * 100) : 100;
 
-    return { totalPass, totalFail, passRate, topFailingTests };
+    // First-Time Fix Rate: tickets whose every before-repair Fail component
+    // passed in post-repair QA (afterDiagnostics). Computed from real QA data
+    // instead of a static estimate, so it syncs with the QA tab. Only tickets
+    // that actually went through QA count — pending QA doesn't penalize the rate.
+    let ftfTickets = 0;
+    let ftfPassed = 0;
+    filteredWorkOrders.forEach((wo) => {
+      const before = get21Diagnostics(wo.beforeDiagnostics, wo.symptomsReported, wo.intakeChecklist);
+      const failedBefore = before.filter((d) => d.status === 'Fail');
+      if (failedBefore.length === 0) return;
+      const after = get21AfterDiagnostics(wo.afterDiagnostics, wo.beforeDiagnostics, wo.symptomsReported, wo.intakeChecklist);
+      // Skip tickets that never went through post-repair QA.
+      const hasQaResults = (wo.afterDiagnostics || []).some((d) => d.status === 'Pass' || d.status === 'Fail');
+      if (!hasQaResults) return;
+      const afterMap = new Map(after.map((d) => [d.name, d.status]));
+      ftfTickets += 1;
+      const allFixed = failedBefore.every((d) => afterMap.get(d.name) === 'Pass');
+      if (allFixed) ftfPassed += 1;
+    });
+    const firstTimeFixRate = ftfTickets > 0 ? Math.round((ftfPassed / ftfTickets) * 100) : null;
+
+    return {
+      totalPass,
+      totalFail,
+      totalNA,
+      passRate,
+      topFailingTests,
+      topPerformingTests,
+      firstTimeFixRate,
+      ftfTickets,
+      ftfPassed,
+    };
   }, [filteredWorkOrders]);
 
   // Financial Analytics
@@ -1184,6 +1238,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   <span className="w-2 h-2 rounded-full bg-rose-500"></span>
                   <span>Failed Components: {diagnostic21Analytics.totalFail}</span>
                 </span>
+                <span className="text-slate-500 flex items-center space-x-1.5">
+                  <span className="w-2 h-2 rounded-full bg-slate-400"></span>
+                  <span>Not Tested: {diagnostic21Analytics.totalNA}</span>
+                </span>
               </div>
               <div className="w-full h-3 bg-[#E5E5EA] rounded-full overflow-hidden p-0.5 flex space-x-0.5">
                 <div 
@@ -1211,9 +1269,15 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               </div>
 
               <div className="p-4 bg-blue-50/50 border border-blue-200/80 rounded-xl text-center space-y-1">
-                <p className="text-xs font-bold text-blue-800 uppercase tracking-wider">First-Time Fix Verification</p>
-                <p className="text-3xl font-extrabold text-[#0071E3] font-mono">98.2%</p>
-                <p className="text-[11px] text-blue-700 font-medium">Post-repair quality standard verified</p>
+                <p className="text-xs font-bold text-blue-800 uppercase tracking-wider">First-Time Fix Rate</p>
+                <p className="text-3xl font-extrabold text-[#0071E3] font-mono">
+                  {diagnostic21Analytics.firstTimeFixRate === null ? '—' : `${diagnostic21Analytics.firstTimeFixRate}%`}
+                </p>
+                <p className="text-[11px] text-blue-700 font-medium">
+                  {diagnostic21Analytics.ftfTickets > 0
+                    ? `${diagnostic21Analytics.ftfPassed}/${diagnostic21Analytics.ftfTickets} tickets — failed components passed post-repair QA`
+                    : 'Awaiting post-repair QA results'}
+                </p>
               </div>
             </div>
 
@@ -1229,6 +1293,24 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     <div key={test} className="p-2.5 bg-rose-50/70 border border-rose-200 rounded-xl space-y-0.5 text-center">
                       <p className="font-extrabold text-xs text-rose-900 capitalize truncate">{test}</p>
                       <p className="text-xs font-bold text-rose-600 font-mono">{count} Flagged Failures</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Top Performing Component List — mirrors the QA tab's healthy modules */}
+            {diagnostic21Analytics.topPerformingTests.length > 0 && (
+              <div className="pt-2 space-y-2 border-t border-[#E5E5EA]">
+                <h4 className="text-xs font-extrabold text-[#1D1D1F] uppercase tracking-wider flex items-center space-x-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Top Performing Hardware Components</span>
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
+                  {diagnostic21Analytics.topPerformingTests.map(({ test, passRate, count, total }) => (
+                    <div key={test} className="p-2.5 bg-emerald-50/70 border border-emerald-200 rounded-xl space-y-0.5 text-center">
+                      <p className="font-extrabold text-xs text-emerald-900 capitalize truncate">{test}</p>
+                      <p className="text-xs font-bold text-emerald-600 font-mono">{passRate}% pass ({count}/{total})</p>
                     </div>
                   ))}
                 </div>
