@@ -315,9 +315,12 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
   };
 
   return (
-    <>
-      <button type="button" aria-label="Close AI Assistant" onClick={onClose} className="fixed inset-0 z-40 bg-black/10 cursor-default" />
-      <aside className="fixed right-0 top-[52px] bottom-0 z-50 w-full sm:w-[440px] bg-white border-l border-[var(--border)] shadow-2xl flex flex-col">
+    <aside
+      role="dialog"
+      aria-modal="true"
+      aria-label="Operations Copilot chat"
+      className="fixed bottom-0 left-0 right-0 sm:left-auto sm:right-4 sm:bottom-4 sm:w-[400px] sm:max-w-[calc(100vw-2rem)] h-[82dvh] sm:h-[min(70vh,560px)] z-50 bg-white border-t sm:border border-[var(--border)] rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-i35-slide-up"
+    >
         <div className="px-4 py-3 border-b border-[var(--border)] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 bg-[var(--primary)] text-white flex items-center justify-center rounded-lg"><Bot className="w-4 h-4" /></div>
@@ -400,6 +403,5 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
           <p className="mt-1.5 text-[9px] text-[var(--text-muted)] text-center">Enter to send · Shift + Enter for a new line · Confirm critical decisions before acting.</p>
         </form>
       </aside>
-    </>
   );
 };

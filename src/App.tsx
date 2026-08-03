@@ -1843,13 +1843,14 @@ export default function App() {
         </main>
       </div>
 
-      {/* AI FAB: hidden on POS (its mobile checkout bar owns that bottom zone)
-          and raised above the bottom nav + home indicator on other tabs. */}
-      {!isAiAssistantOpen && activeTab !== 'pos' && (
+      {/* AI FAB: available from every tab & every screen size. On mobile it sits
+          above the bottom nav / POS checkout bar; on desktop it's a bottom-right
+          launcher for the chat widget (which slides up from the corner). */}
+      {!isAiAssistantOpen && (
         <button
           type="button"
           onClick={() => setIsAiAssistantOpen(true)}
-          className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-4 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent)] text-white shadow-lg lg:hidden"
+          className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-4 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent)] text-white shadow-lg lg:bottom-5 lg:right-5 cursor-pointer active:scale-95 transition-transform hover:scale-105"
           aria-label="Open AI Assistant"
           title="Open AI Assistant"
         >
