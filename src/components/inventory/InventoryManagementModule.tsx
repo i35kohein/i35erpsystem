@@ -2522,12 +2522,15 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       <tr key={model} className="break-inside-avoid">
                         <td className="border border-[#D2D2D7] p-1.5 font-bold text-[#1D1D1F]">{model}</td>
                         {matrixCategories.map((category) => {
+                          const merge = matrixMergeGroups[category]?.[model];
+                          // Cell is consumed by the rowSpan of the row above it.
+                          if (merge && !merge.isFirst) return null;
                           const matchingParts = parts.filter((part) =>
                             part.category === category && part.deviceCompatibility.some((device) => device.toLowerCase() === model.toLowerCase())
                           );
                           const quantity = matchingParts.reduce((total, part) => total + part.quantityInStock, 0);
                           return (
-                            <td key={category} className="border border-[#D2D2D7] p-1 text-center font-mono">
+                            <td key={category} rowSpan={merge?.rowSpan ?? 1} className="border border-[#D2D2D7] p-1 text-center font-mono align-middle">
                               {matchingParts.length ? (
                                 <span className={quantity === 0 ? 'font-black text-[#C7C7CC]' : 'font-black'}>{quantity}</span>
                               ) : (
