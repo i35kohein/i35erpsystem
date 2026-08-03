@@ -51,7 +51,6 @@ import {
 } from 'lucide-react';
 import { WorkOrder, PartItem, RmaItem, Technician, WorkOrderStatus } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
-import { get21Diagnostics, get21AfterDiagnostics } from '../../utils/diagnosticUtils';
 import { DateFilterState, filterByDateRange, DateFilterSelector } from '../common/DateFilterSelector';
 import { TechnicianPerformanceTab } from './TechnicianPerformanceTab';
 import { TechnicianLeaderboardView } from './TechnicianLeaderboardView';
@@ -327,75 +326,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const minTechLoad = Math.min(...techQueueData.map((t) => t.activeCount), 0);
   const isQueueImbalanced = totalActiveTechJobs >= 2 && (maxTechLoad - minTechLoad) >= 3;
 
-  // Analytical Breakdown: Repair Service Category Distribution
-  const serviceCategoryAnalytics = useMemo(() => {
-    const totalCount = filteredWorkOrders.length || 1;
-    const stats = [
-      { id: 'screen', label: 'Screen & Display OLED', icon: Smartphone, color: 'bg-[#0071E3]', textCol: 'text-[#0071E3]', bgLight: 'bg-[#F0F6FF]', count: 0, revenue: 0 },
-      { id: 'battery', label: 'Battery & Charging System', icon: Zap, color: 'bg-[#34C759]', textCol: 'text-[#34C759]', bgLight: 'bg-[#EAF8ED]', count: 0, revenue: 0 },
-      { id: 'board', label: 'Logic Board & Micro-Soldering', icon: Activity, color: 'bg-[#AF52DE]', textCol: 'text-[#AF52DE]', bgLight: 'bg-purple-50', count: 0, revenue: 0 },
-      { id: 'housing', label: 'Glass, Port, Camera & Housing', icon: Smartphone, color: 'bg-[#FF9500]', textCol: 'text-[#FF9500]', bgLight: 'bg-[#FFF8ED]', count: 0, revenue: 0 },
-    ];
-
-    filteredWorkOrders.forEach((wo) => {
-      const s = (wo.serviceType || '').toLowerCase();
-      const desc = (wo.symptomsReported || '').toLowerCase();
-      const rev = wo.subtotal || 0;
-
-      if (s.includes('screen') || s.includes('display') || s.includes('oled') || desc.includes('screen') || desc.includes('cracked')) {
-        stats[0].count += 1;
-        stats[0].revenue += rev;
-      } else if (s.includes('battery') || s.includes('charging') || s.includes('power') || desc.includes('battery') || desc.includes('charge')) {
-        stats[1].count += 1;
-        stats[1].revenue += rev;
-      } else if (s.includes('soldering') || s.includes('board') || s.includes('ic') || s.includes('micro') || desc.includes('power') || desc.includes('short')) {
-        stats[2].count += 1;
-        stats[2].revenue += rev;
-      } else {
-        stats[3].count += 1;
-        stats[3].revenue += rev;
-      }
-    });
-
-    return stats.map((st) => ({
-      ...st,
-      percentage: Math.round((st.count / totalCount) * 100),
-    }));
-  }, [filteredWorkOrders]);
-
-  // Analytical Breakdown: Device Family Distribution
-  const deviceFamilyAnalytics = useMemo(() => {
-    const totalCount = filteredWorkOrders.length || 1;
-    let iphone = { name: 'iPhone', count: 0, revenue: 0, color: 'bg-[#0071E3]', textCol: 'text-[#0071E3]' };
-    let macbook = { name: 'MacBook', count: 0, revenue: 0, color: 'bg-[#AF52DE]', textCol: 'text-[#AF52DE]' };
-    let ipad = { name: 'iPad', count: 0, revenue: 0, color: 'bg-[#FF9500]', textCol: 'text-[#FF9500]' };
-    let watch = { name: 'Apple Watch & Other', count: 0, revenue: 0, color: 'bg-emerald-500', textCol: 'text-emerald-600' };
-
-    filteredWorkOrders.forEach((wo) => {
-      const model = (wo.deviceModel || '').toLowerCase();
-      const rev = wo.subtotal || 0;
-      if (model.includes('iphone')) {
-        iphone.count += 1;
-        iphone.revenue += rev;
-      } else if (model.includes('macbook') || model.includes('mac')) {
-        macbook.count += 1;
-        macbook.revenue += rev;
-      } else if (model.includes('ipad')) {
-        ipad.count += 1;
-        ipad.revenue += rev;
-      } else {
-        watch.count += 1;
-        watch.revenue += rev;
-      }
-    });
-
-    const items = [iphone, macbook, ipad, watch];
-    return items.map((item) => ({
-      ...item,
-      percentage: Math.round((item.count / totalCount) * 100),
-    }));
-  }, [filteredWorkOrders]);
-
   // Status Queue Breakdown Analytics
   const statusQueueCounts = useMemo(() => {
     const counts = {
@@ -415,6 +345,61 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     return counts;
   }, [filteredWorkOrders]);
 
+  // Top Repair Devices — most-repaired models by ticket count + revenue
+  const topRepairDevices = useMemo(() => {
+    const byModel = new Map<string, { count: number; revenue: number }>();
+    filteredWorkOrders.forEach((wo) => {
+      const model = (wo.deviceModel || 'Unknown Device').trim() || 'Unknown Device';
+      const entry = byModel.get(model) || { count: 0, revenue: 0 };
+      entry.count += 1;
+      entry.revenue += wo.subtotal || 0;
+      byModel.set(model, entry);
+    });
+    return Array.from(byModel.entries())
+      .map(([name, stats]) => ({ name, ...stats }))
+      .sort((a, b) => b.count - a.count || b.revenue - a.revenue)
+      .slice(0, 8);
+  }, [filteredWorkOrders]);
+
+  // Top Repair Categories with income — ticket + revenue per repair category
+  const topRepairCategories = useMemo(() => {
+    const totalRevenue = filteredWorkOrders.reduce((sum, wo) => sum + (wo.subtotal || 0), 0);
+    const stats = [
+      { id: 'screen', label: 'Screen & Display OLED', icon: Smartphone, color: 'bg-[#0071E3]', textCol: 'text-[#0071E3]', bgLight: 'bg-[#F0F6FF]', count: 0, revenue: 0 },
+      { id: 'battery', label: 'Battery & Charging System', icon: Zap, color: 'bg-[#34C759]', textCol: 'text-[#34C759]', bgLight: 'bg-[#EAF8ED]', count: 0, revenue: 0 },
+      { id: 'board', label: 'Logic Board & Micro-Soldering', icon: Activity, color: 'bg-[#AF52DE]', textCol: 'text-[#AF52DE]', bgLight: 'bg-purple-50', count: 0, revenue: 0 },
+      { id: 'housing', label: 'Glass, Port, Camera & Housing', icon: Smartphone, color: 'bg-[#FF9500]', textCol: 'text-[#FF9500]', bgLight: 'bg-[#FFF8ED]', count: 0, revenue: 0 },
+    ];
+
+    filteredWorkOrders.forEach((wo) => {
+      const s = (wo.serviceType || '').toLowerCase();
+      const desc = (wo.symptomsReported || '').toLowerCase();
+      const rev = wo.subtotal || 0;
+
+      if (s.includes('screen') || s.includes('display') || s.includes('oled') || desc.includes('screen') || desc.includes('cracked') || desc.includes('glass')) {
+        stats[0].count += 1;
+        stats[0].revenue += rev;
+      } else if (s.includes('battery') || s.includes('charging') || s.includes('power') || desc.includes('battery') || desc.includes('charge')) {
+        stats[1].count += 1;
+        stats[1].revenue += rev;
+      } else if (s.includes('soldering') || s.includes('board') || s.includes('ic') || s.includes('micro') || desc.includes('short')) {
+        stats[2].count += 1;
+        stats[2].revenue += rev;
+      } else {
+        stats[3].count += 1;
+        stats[3].revenue += rev;
+      }
+    });
+
+    return stats
+      .map((st) => ({
+        ...st,
+        percentage: totalRevenue > 0 ? Math.round((st.revenue / totalRevenue) * 100) : 0,
+      }))
+      .filter((st) => st.count > 0)
+      .sort((a, b) => b.revenue - a.revenue);
+  }, [filteredWorkOrders]);
+
   const stagnantWorkOrders = useMemo(() => {
     const now = Date.now();
     return filteredWorkOrders.filter((wo) => {
@@ -426,88 +411,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   }, [filteredWorkOrders]);
 
   // Diagnostic 21-Point Analytics
-  const diagnostic21Analytics = useMemo(() => {
-    let totalPass = 0;
-    let totalFail = 0;
-    let totalNA = 0;
-    const testFailMap: Record<string, number> = {};
-    const testPassMap: Record<string, number> = {};
-    const testCountMap: Record<string, number> = {};
-
-    // Normalize each ticket's diagnostics the same way Intake / QA do
-    // (get21Diagnostics merges stored results with symptom-based inference),
-    // so the dashboard matches what staff see in the other tabs.
-    filteredWorkOrders.forEach((wo) => {
-      const normalized = get21Diagnostics(wo.beforeDiagnostics, wo.symptomsReported, wo.intakeChecklist);
-      normalized.forEach((d) => {
-        const status = d.status;
-        testCountMap[d.name] = (testCountMap[d.name] || 0) + 1;
-        if (status === 'Pass') {
-          totalPass += 1;
-          testPassMap[d.name] = (testPassMap[d.name] || 0) + 1;
-        } else if (status === 'Fail') {
-          totalFail += 1;
-          testFailMap[d.name] = (testFailMap[d.name] || 0) + 1;
-        } else {
-          totalNA += 1;
-        }
-      });
-    });
-
-    const topFailingTests = Object.entries(testFailMap)
-      .map(([test, count]) => ({ test, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
-
-    const topPerformingTests = Object.entries(testPassMap)
-      .map(([test, count]) => ({
-        test,
-        count,
-        total: testCountMap[test] || 1,
-        passRate: Math.round((count / (testCountMap[test] || 1)) * 100),
-      }))
-      .filter((t) => t.total >= 2)
-      .sort((a, b) => b.passRate - a.passRate)
-      .slice(0, 5);
-
-    const totalDiag = totalPass + totalFail;
-    const passRate = totalDiag > 0 ? Math.round((totalPass / totalDiag) * 100) : 100;
-
-    // First-Time Fix Rate: tickets whose every before-repair Fail component
-    // passed in post-repair QA (afterDiagnostics). Computed from real QA data
-    // instead of a static estimate, so it syncs with the QA tab. Only tickets
-    // that actually went through QA count — pending QA doesn't penalize the rate.
-    let ftfTickets = 0;
-    let ftfPassed = 0;
-    filteredWorkOrders.forEach((wo) => {
-      const before = get21Diagnostics(wo.beforeDiagnostics, wo.symptomsReported, wo.intakeChecklist);
-      const failedBefore = before.filter((d) => d.status === 'Fail');
-      if (failedBefore.length === 0) return;
-      const after = get21AfterDiagnostics(wo.afterDiagnostics, wo.beforeDiagnostics, wo.symptomsReported, wo.intakeChecklist);
-      // Skip tickets that never went through post-repair QA.
-      const hasQaResults = (wo.afterDiagnostics || []).some((d) => d.status === 'Pass' || d.status === 'Fail');
-      if (!hasQaResults) return;
-      const afterMap = new Map(after.map((d) => [d.name, d.status]));
-      ftfTickets += 1;
-      const allFixed = failedBefore.every((d) => afterMap.get(d.name) === 'Pass');
-      if (allFixed) ftfPassed += 1;
-    });
-    const firstTimeFixRate = ftfTickets > 0 ? Math.round((ftfPassed / ftfTickets) * 100) : null;
-
-    return {
-      totalPass,
-      totalFail,
-      totalNA,
-      passRate,
-      topFailingTests,
-      topPerformingTests,
-      firstTimeFixRate,
-      ftfTickets,
-      ftfPassed,
-    };
-  }, [filteredWorkOrders]);
-
-  // Financial Analytics
   const financialAnalytics = useMemo(() => {
     let totalCollected = 0;
     let totalUnpaidBalance = 0;
@@ -1202,173 +1105,104 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       {/* SUBTAB 2: REPAIR DATA */}
       {activeDashboardSubTab === 'repair-data' && (
         <div className="space-y-6">
-          {/* 21-Point Hardware Diagnostic Pass/Fail Executive Analytics */}
-          <div className="bg-white border border-[#E5E5EA] rounded-2xl p-5 shadow-2xs space-y-5">
+          {/* Top Repair Devices */}
+          <div className="bg-white border border-[#E5E5EA] rounded-2xl p-5 shadow-xs space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-[#E5E5EA]">
+              <div className="space-y-0.5">
+                <div className="flex items-center space-x-2">
+                  <div className="p-2 bg-[#AF52DE]/10 text-[#AF52DE] rounded-xl border border-[#AF52DE]/20">
+                    <Smartphone className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-base font-extrabold text-[#1D1D1F]">Top Repair Devices</h3>
+                </div>
+                <p className="text-xs text-[#86868B]">Most-repaired device models ranked by ticket volume</p>
+              </div>
+              <span className="text-xs font-extrabold bg-[#F0F6FF] text-[#0071E3] px-3.5 py-1.5 rounded-full border border-[#0071E3]/20 flex items-center space-x-1.5 shrink-0">
+                <Smartphone className="w-4 h-4" />
+                <span>{topRepairDevices.length} Models · {filteredWorkOrders.length} Tickets</span>
+              </span>
+            </div>
+
+            <div className="space-y-2.5">
+              {topRepairDevices.length === 0 ? (
+                <div className="p-8 text-center text-xs text-[#86868B] bg-[#F8F9FA] rounded-xl border border-dashed border-[#D2D2D7]">
+                  No repair tickets in the selected date range.
+                </div>
+              ) : (
+                topRepairDevices.map((dev, idx) => {
+                  const maxCount = topRepairDevices[0]?.count || 1;
+                  const barPct = Math.max(8, Math.round((dev.count / maxCount) * 100));
+                  const medal = idx === 0 ? 'bg-[#FFD60A]/20 text-[#B25000] border-[#FFD60A]/50' : idx === 1 ? 'bg-slate-100 text-slate-600 border-slate-200' : idx === 2 ? 'bg-orange-50 text-orange-700 border-orange-200' : 'bg-[#F5F5F7] text-[#86868B] border-[#E5E5EA]';
+                  return (
+                    <div key={dev.name} className="p-3 bg-[#F8F9FA] border border-[#E5E5EA] rounded-xl space-y-2">
+                      <div className="flex items-center justify-between gap-2 text-xs">
+                        <div className="flex items-center space-x-2 min-w-0">
+                          <span className={`w-6 h-6 rounded-full border flex items-center justify-center font-black text-[10px] shrink-0 ${medal}`}>
+                            {idx + 1}
+                          </span>
+                          <span className="font-extrabold text-[#1D1D1F] truncate">{dev.name}</span>
+                        </div>
+                        <div className="flex items-center space-x-3 shrink-0">
+                          <span className="font-mono font-bold text-[#1D1D1F]">{dev.count} Repairs</span>
+                          <span className="font-mono font-bold text-[#0071E3]">{dev.revenue.toLocaleString()} MMK</span>
+                        </div>
+                      </div>
+                      <div className="w-full bg-[#E5E5EA] rounded-full h-2 overflow-hidden">
+                        <div className="h-full rounded-full bg-[#AF52DE]" style={{ width: `${barPct}%` }} />
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+          {/* Top Repair Categories with Income */}
+          <div className="bg-white border border-[#E5E5EA] rounded-2xl p-5 shadow-xs space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-[#E5E5EA]">
               <div className="space-y-0.5">
                 <div className="flex items-center space-x-2">
                   <div className="p-2 bg-[#0071E3]/10 text-[#0071E3] rounded-xl border border-[#0071E3]/20">
-                    <ShieldCheck className="w-5 h-5" />
+                    <BarChart3 className="w-5 h-5" />
                   </div>
-                  <h3 className="text-base font-extrabold text-[#1D1D1F]">
-                    21-Point Hardware Diagnostic Analytics
-                  </h3>
+                  <h3 className="text-base font-extrabold text-[#1D1D1F]">Top Repair Categories with Income</h3>
                 </div>
-                <p className="text-xs text-[#86868B]">
-                  Component pass/fail diagnostics telemetry across all incoming and outgoing repair tickets
-                </p>
-              </div>
-
-              <div className="flex items-center space-x-2 shrink-0">
-                <span className="text-xs font-extrabold bg-emerald-50 text-emerald-700 px-3.5 py-1.5 rounded-full border border-emerald-200 flex items-center space-x-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  <span>{diagnostic21Analytics.passRate}% Pass Rate</span>
-                </span>
+                <p className="text-xs text-[#86868B]">Repair category breakdown by tickets and revenue</p>
               </div>
             </div>
 
-            {/* Diagnostic Ratio Visual Bar */}
-            <div className="space-y-2 bg-[#F8FBFD] p-3.5 rounded-xl border border-[#D8E5ED]">
-              <div className="flex items-center justify-between text-xs font-mono font-extrabold">
-                <span className="text-emerald-700 flex items-center space-x-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                  <span>Passed Components: {diagnostic21Analytics.totalPass}</span>
-                </span>
-                <span className="text-rose-600 flex items-center space-x-1.5">
-                  <span className="w-2 h-2 rounded-full bg-rose-500"></span>
-                  <span>Failed Components: {diagnostic21Analytics.totalFail}</span>
-                </span>
-                <span className="text-slate-500 flex items-center space-x-1.5">
-                  <span className="w-2 h-2 rounded-full bg-slate-400"></span>
-                  <span>Not Tested: {diagnostic21Analytics.totalNA}</span>
-                </span>
-              </div>
-              <div className="w-full h-3 bg-[#E5E5EA] rounded-full overflow-hidden p-0.5 flex space-x-0.5">
-                <div 
-                  className="h-full bg-emerald-500 rounded-l-full transition-all duration-500" 
-                  style={{ width: `${Math.max(5, diagnostic21Analytics.passRate)}%` }} 
-                />
-                <div 
-                  className="h-full bg-rose-500 rounded-r-full transition-all duration-500" 
-                  style={{ width: `${Math.max(0, 100 - diagnostic21Analytics.passRate)}%` }} 
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-              <div className="p-4 bg-emerald-50/50 border border-emerald-200/80 rounded-xl text-center space-y-1">
-                <p className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Total Passed Components</p>
-                <p className="text-3xl font-extrabold text-emerald-600 font-mono">{diagnostic21Analytics.totalPass}</p>
-                <p className="text-[11px] text-emerald-700 font-medium">Verified healthy hardware modules</p>
-              </div>
-
-              <div className="p-4 bg-rose-50/50 border border-rose-200/80 rounded-xl text-center space-y-1">
-                <p className="text-xs font-bold text-rose-800 uppercase tracking-wider">Total Failed Components</p>
-                <p className="text-3xl font-extrabold text-rose-600 font-mono">{diagnostic21Analytics.totalFail}</p>
-                <p className="text-[11px] text-rose-700 font-medium">Flagged for repair or replacement</p>
-              </div>
-
-              <div className="p-4 bg-blue-50/50 border border-blue-200/80 rounded-xl text-center space-y-1">
-                <p className="text-xs font-bold text-blue-800 uppercase tracking-wider">First-Time Fix Rate</p>
-                <p className="text-3xl font-extrabold text-[#0071E3] font-mono">
-                  {diagnostic21Analytics.firstTimeFixRate === null ? '—' : `${diagnostic21Analytics.firstTimeFixRate}%`}
-                </p>
-                <p className="text-[11px] text-blue-700 font-medium">
-                  {diagnostic21Analytics.ftfTickets > 0
-                    ? `${diagnostic21Analytics.ftfPassed}/${diagnostic21Analytics.ftfTickets} tickets — failed components passed post-repair QA`
-                    : 'Awaiting post-repair QA results'}
-                </p>
-              </div>
-            </div>
-
-            {/* Top Failing Component List */}
-            {diagnostic21Analytics.topFailingTests.length > 0 && (
-              <div className="pt-2 space-y-2 border-t border-[#E5E5EA]">
-                <h4 className="text-xs font-extrabold text-[#1D1D1F] uppercase tracking-wider flex items-center space-x-1.5">
-                  <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
-                  <span>Top Failing Hardware Components</span>
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
-                  {diagnostic21Analytics.topFailingTests.map(({ test, count }) => (
-                    <div key={test} className="p-2.5 bg-rose-50/70 border border-rose-200 rounded-xl space-y-0.5 text-center">
-                      <p className="font-extrabold text-xs text-rose-900 capitalize truncate">{test}</p>
-                      <p className="text-xs font-bold text-rose-600 font-mono">{count} Flagged Failures</p>
-                    </div>
-                  ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+              {topRepairCategories.length === 0 ? (
+                <div className="p-8 text-center text-xs text-[#86868B] bg-[#F8F9FA] rounded-xl border border-dashed border-[#D2D2D7] md:col-span-2">
+                  No repair tickets in the selected date range.
                 </div>
-              </div>
-            )}
-
-            {/* Top Performing Component List — mirrors the QA tab's healthy modules */}
-            {diagnostic21Analytics.topPerformingTests.length > 0 && (
-              <div className="pt-2 space-y-2 border-t border-[#E5E5EA]">
-                <h4 className="text-xs font-extrabold text-[#1D1D1F] uppercase tracking-wider flex items-center space-x-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Top Performing Hardware Components</span>
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
-                  {diagnostic21Analytics.topPerformingTests.map(({ test, passRate, count, total }) => (
-                    <div key={test} className="p-2.5 bg-emerald-50/70 border border-emerald-200 rounded-xl space-y-0.5 text-center">
-                      <p className="font-extrabold text-xs text-emerald-900 capitalize truncate">{test}</p>
-                      <p className="text-xs font-bold text-emerald-600 font-mono">{passRate}% pass ({count}/{total})</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Service Mix & Device Family Breakdown */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Service Category Breakdown */}
-            <div className="bg-white border border-[#E5E5EA] rounded-2xl p-5 shadow-xs space-y-4">
-              <h3 className="text-sm font-extrabold text-[#1D1D1F] flex items-center space-x-2">
-                <BarChart3 className="w-4 h-4 text-[#0071E3]" />
-                <span>Service Category Revenue Mix</span>
-              </h3>
-
-              <div className="space-y-3">
-                {serviceCategoryAnalytics.map((item) => {
-                  const IconComp = item.icon;
+              ) : (
+                topRepairCategories.map((cat) => {
+                  const IconComp = cat.icon;
+                  const maxRevenue = topRepairCategories[0]?.revenue || 1;
+                  const barPct = Math.max(8, Math.round((cat.revenue / maxRevenue) * 100));
                   return (
-                    <div key={item.id} className="p-3 bg-[#F8F9FA] border border-[#E5E5EA] rounded-xl space-y-2">
+                    <div key={cat.id} className="p-3.5 bg-[#F8F9FA] border border-[#E5E5EA] rounded-xl space-y-2.5">
                       <div className="flex items-center justify-between text-xs">
                         <div className="flex items-center space-x-2">
-                          <div className={`p-1.5 rounded-md ${item.bgLight} ${item.textCol}`}>
+                          <div className={`p-1.5 rounded-md ${cat.bgLight} ${cat.textCol}`}>
                             <IconComp className="w-3.5 h-3.5" />
                           </div>
-                          <span className="font-extrabold text-[#1D1D1F]">{item.label}</span>
+                          <span className="font-extrabold text-[#1D1D1F]">{cat.label}</span>
                         </div>
-                        <span className="font-mono font-bold text-[#1D1D1F]">{item.revenue.toLocaleString()} MMK</span>
+                        <span className="text-[10px] font-bold text-[#86868B] bg-white border border-[#E5E5EA] px-2 py-0.5 rounded-full">{cat.count} Tickets</span>
+                      </div>
+                      <div className="flex items-baseline justify-between">
+                        <span className="font-mono font-black text-lg text-[#1D1D1F]">{cat.revenue.toLocaleString()} MMK</span>
+                        <span className={`font-bold text-xs ${cat.textCol}`}>{cat.percentage}% of income</span>
                       </div>
                       <div className="w-full bg-[#E5E5EA] rounded-full h-2 overflow-hidden">
-                        <div className={`h-full rounded-full ${item.color}`} style={{ width: `${Math.max(8, item.percentage)}%` }} />
+                        <div className={`h-full rounded-full ${cat.color}`} style={{ width: `${barPct}%` }} />
                       </div>
                     </div>
                   );
-                })}
-              </div>
-            </div>
-
-            {/* Device Family Breakdown */}
-            <div className="bg-white border border-[#E5E5EA] rounded-2xl p-5 shadow-xs space-y-4">
-              <h3 className="text-sm font-extrabold text-[#1D1D1F] flex items-center space-x-2">
-                <Smartphone className="w-4 h-4 text-[#AF52DE]" />
-                <span>Device Model Distribution</span>
-              </h3>
-
-              <div className="grid grid-cols-2 gap-3">
-                {deviceFamilyAnalytics.map((dev) => (
-                  <div key={dev.name} className="p-3 bg-[#F8F9FA] border border-[#E5E5EA] rounded-xl space-y-1">
-                    <p className="text-[10px] font-bold text-[#86868B] truncate">{dev.name}</p>
-                    <p className="text-base font-extrabold text-[#1D1D1F]">{dev.count} Repairs</p>
-                    <div className="flex items-center justify-between text-[10px]">
-                      <span className="text-[#86868B] font-mono">{dev.revenue.toLocaleString()} MMK</span>
-                      <span className={`font-bold ${dev.textCol}`}>{dev.percentage}%</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                })
+              )}
             </div>
           </div>
         </div>
