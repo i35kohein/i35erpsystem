@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   LogOut, 
   CircleDot, 
+  LayoutDashboard,
   ClipboardList, 
   Kanban, 
   Boxes, 
@@ -356,6 +357,25 @@ export const Navigation: React.FC<NavigationProps> = ({
               <div className="flex items-center justify-center min-w-0">
                 <Plus className={`w-4 h-4 shrink-0 ${isCollapsed ? '' : 'mr-2'}`} />
                 {!isCollapsed && <span className="truncate text-xs">+ Intake Ticket</span>}
+              </div>
+            </button>
+
+            {/* Dashboard — landing view shortcut (logo also navigates here) */}
+            <button
+              onClick={() => handleTabSelect('dashboard')}
+              aria-current={activeTab === 'dashboard' ? 'page' : undefined}
+              className={`w-full flex items-center mt-1.5 ${
+                isCollapsed ? 'w-10 h-10 mx-auto justify-center p-0 relative' : 'justify-between px-3.5 py-2.5'
+              } rounded-xl font-semibold transition-all cursor-pointer border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071E3] ${
+                activeTab === 'dashboard'
+                  ? 'bg-[#EAF2FF] text-[#1559A6] font-bold border-[#B8D3F4]'
+                  : 'bg-white text-[#344054] border-transparent hover:text-[#1D1D1F] hover:bg-[#F3F4F6]'
+              }`}
+              title="Dashboard"
+            >
+              <div className="flex items-center justify-center min-w-0">
+                <LayoutDashboard className={`w-4 h-4 shrink-0 ${activeTab === 'dashboard' ? 'text-[#0071E3]' : 'text-[#86868B]'}`} />
+                {!isCollapsed && <span className="truncate text-xs ml-2.5">Dashboard</span>}
               </div>
             </button>
           </div>
