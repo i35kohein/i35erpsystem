@@ -1358,6 +1358,7 @@ export default function App() {
                   customers={customers}
                   technicians={technicians}
                   systemSettings={systemSettings}
+                  priceCatalog={priceCatalog.catalog}
                   prefill={ticketPrefill}
                   onSaveWorkOrder={handleSaveWorkOrder}
                   onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
