@@ -88,6 +88,7 @@ interface SystemManagementSettingsModuleProps {
   archivedCount?: number;
   onRegisterActions?: (actions: { reset: () => void; save: () => void }) => void;
   initialSubTab?: 'users' | 'ai';
+  onAiRescanTickets?: () => Promise<{ classified: number; failed: number }>;
 }
 
 const RECEIPT_FOOTER_ALIGNMENT_OPTIONS = [
@@ -150,6 +151,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   archivedCount = 0,
   onRegisterActions,
   initialSubTab,
+  onAiRescanTickets,
 }) => {
   const { theme, setTheme, geometry, setGeometry } = useTheme();
   const { t, language, setLanguage } = useLanguage();
@@ -552,6 +554,8 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
           specialty: 'Apple Repair Specialist',
           status: 'Active',
           commissionRate: 12,
+          commissionRateParts: 12,
+          commissionRateHardware: 15,
           activeJobsCount: 0,
           completedThisMonth: 0,
           warrantyReturnCount: 0,
@@ -575,6 +579,8 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
     specialty: string;
     status: 'Active' | 'On Leave' | 'Inactive';
     commissionRate: number;
+    commissionRateParts: number;
+    commissionRateHardware: number;
   }>({
     name: '',
     email: '',
@@ -583,9 +589,33 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
     specialty: '',
     status: 'Active',
     commissionRate: 10,
+    commissionRateParts: 10,
+    commissionRateHardware: 15,
   });
 
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
+  // AI repair-type re-scan state (Settings → AI Assistant & API)
+  const [aiRescanning, setAiRescanning] = useState(false);
+  const [aiRescanResult, setAiRescanResult] = useState<string | null>(null);
+
+  const handleAiRescan = async () => {
+    if (!onAiRescanTickets || aiRescanning) return;
+    setAiRescanning(true);
+    setAiRescanResult(null);
+    try {
+      const result = await onAiRescanTickets();
+      setAiRescanResult(
+        result.classified > 0 || result.failed > 0
+          ? `${result.classified} classified · ${result.failed} skipped/failed`
+          : 'Nothing to do — check the AI provider is configured.'
+      );
+    } catch {
+      setAiRescanResult('Re-scan failed — check the AI provider.');
+    } finally {
+      setAiRescanning(false);
+    }
+  };
 
   // Handle Save Settings
   const handleSaveSettings = (e?: React.FormEvent) => {
@@ -606,6 +636,8 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
       specialty: '',
       status: 'Active',
       commissionRate: 12,
+      commissionRateParts: 12,
+      commissionRateHardware: 15,
     });
     setTechModalOpen(true);
   };
@@ -621,6 +653,8 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
       specialty: tech.specialty || '',
       status: tech.status || 'Active',
       commissionRate: tech.commissionRate || 10,
+      commissionRateParts: tech.commissionRateParts ?? tech.commissionRate ?? 10,
+      commissionRateHardware: tech.commissionRateHardware ?? tech.commissionRate ?? 10,
     });
     setTechModalOpen(true);
   };
@@ -640,6 +674,8 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
         specialty: techFormData.specialty.trim(),
         status: techFormData.status,
         commissionRate: Number(techFormData.commissionRate) || 0,
+        commissionRateParts: Number(techFormData.commissionRateParts) || 0,
+        commissionRateHardware: Number(techFormData.commissionRateHardware) || 0,
       };
       onUpdateTechnician(updated);
     } else {
@@ -652,6 +688,8 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
         specialty: techFormData.specialty.trim() || 'Apple Modular & Logic Repairs',
         status: techFormData.status,
         commissionRate: Number(techFormData.commissionRate) || 10,
+        commissionRateParts: Number(techFormData.commissionRateParts) || 10,
+        commissionRateHardware: Number(techFormData.commissionRateHardware) || 10,
         activeJobsCount: 0,
         completedThisMonth: 0,
         warrantyReturnCount: 0,
@@ -916,6 +954,35 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                 className="w-full p-2.5 border border-[#E5E5EA] rounded-xl bg-white"
               />
             </label>
+          </div>
+
+          {/* AI Repair-Type Classification — re-scan finished tickets */}
+          <div className="p-4 rounded-xl border border-[#0071E3]/20 bg-gradient-to-br from-[#F0F6FF]/50 to-[#F0F6FF]/20 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="space-y-0.5">
+                <p className="text-xs font-extrabold text-[#1D1D1F] flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-[#0071E3]" />
+                  AI Repair-Type Classification
+                </p>
+                <p className="text-[11px] text-[#86868B]">
+                  Finished tickets are auto-classified as Spareparts Change or Hardware Repair. Re-scan applies AI to every finished ticket without a verdict (including previously failed ones).
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleAiRescan}
+                disabled={aiRescanning || !onAiRescanTickets}
+                className="px-4 py-2 bg-[#0071E3] hover:bg-[#0051B3] disabled:opacity-50 text-white font-bold text-xs rounded-xl flex items-center justify-center space-x-1.5 transition-all shadow-2xs cursor-pointer shrink-0"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${aiRescanning ? 'animate-spin' : ''}`} />
+                <span>{aiRescanning ? 'Classifying…' : 'Re-scan Finished Tickets with AI'}</span>
+              </button>
+            </div>
+            {aiRescanResult && (
+              <p className="text-[11px] font-bold text-[#0071E3] bg-white/80 border border-[#0071E3]/20 rounded-lg px-3 py-2">
+                {aiRescanResult}
+              </p>
+            )}
           </div>
 
           <label className="block space-y-1.5 text-xs font-bold text-[#1D1D1F]">
@@ -1849,7 +1916,9 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                       </div>
                       <div>
                         <p className="text-[#86868B] font-semibold">Commission</p>
-                        <p className="font-extrabold text-[#1D1D1F] text-xs">{tech.commissionRate || 10}%</p>
+                        <p className="font-extrabold text-[#1D1D1F] text-xs">
+                          {(tech.commissionRateParts ?? tech.commissionRate ?? 10)}% SP · {(tech.commissionRateHardware ?? tech.commissionRate ?? 10)}% HW
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -3231,126 +3300,159 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
 
       {/* Add / Edit Technician Modal */}
       {techModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-5 space-y-4 border border-[#D2D2D7] shadow-xl animate-scale-in">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-xl w-full p-6 space-y-5 border border-[#D2D2D7] shadow-2xl animate-scale-in my-8">
             <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-3">
-              <h3 className="font-extrabold text-sm text-[#1D1D1F]">
-                {editingTech ? 'Edit Technician Record' : 'Add New Technical Staff'}
-              </h3>
+              <div className="flex items-center space-x-2">
+                <span className="p-1.5 bg-purple-50 text-[#AF52DE] rounded-lg">
+                  <Award className="w-5 h-5" />
+                </span>
+                <div>
+                  <h3 className="font-extrabold text-base text-[#1D1D1F]">
+                    {editingTech ? 'Edit Technician Record' : 'Add New Technical Staff'}
+                  </h3>
+                  <p className="text-[11px] text-[#86868B]">
+                    {editingTech ? 'Update staff details and commission rates' : 'Register a new technician on the roster'}
+                  </p>
+                </div>
+              </div>
               <button
                 type="button"
                 onClick={() => setTechModalOpen(false)}
-                className="p-1 text-[#86868B] hover:text-[#1D1D1F] rounded-lg cursor-pointer"
+                className="p-1.5 text-[#86868B] hover:text-[#1D1D1F] hover:bg-[#F5F5F7] rounded-lg cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleTechSubmit} className="space-y-3 text-xs">
+            <form onSubmit={handleTechSubmit} className="space-y-4 text-xs">
               <div>
-                <label className="font-bold text-[#1D1D1F] block mb-1">Technician Full Name *</label>
+                <label className="font-bold text-[#1D1D1F] block mb-1.5">Technician Full Name *</label>
                 <input
                   type="text"
                   required
                   value={techFormData.name}
                   onChange={(e) => setTechFormData({ ...techFormData, name: e.target.value })}
                   placeholder="e.g. Alex Rivera"
-                  className="w-full bg-[#F5F5F7] text-[#1D1D1F] font-medium px-3 py-2 rounded-xl border border-[#D2D2D7] focus:bg-white focus:outline-none focus:border-[#0071E3]"
+                  className="w-full h-10 bg-[#F5F5F7] text-[#1D1D1F] font-medium px-3 rounded-xl border border-[#D2D2D7] focus:bg-white focus:outline-none focus:border-[#0071E3]"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-bold text-[#1D1D1F] block mb-1">Email Address</label>
-                  <input
-                    type="email"
-                    value={techFormData.email}
-                    onChange={(e) => setTechFormData({ ...techFormData, email: e.target.value })}
-                    placeholder="alex@applerepairpro.com"
-                    className="w-full bg-[#F5F5F7] text-[#1D1D1F] font-medium px-3 py-2 rounded-xl border border-[#D2D2D7] focus:bg-white focus:outline-none focus:border-[#0071E3]"
-                  />
-                </div>
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-black text-[#86868B] uppercase tracking-wider">Contact Information</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="font-bold text-[#1D1D1F] block mb-1.5">Email Address</label>
+                    <input
+                      type="email"
+                      value={techFormData.email}
+                      onChange={(e) => setTechFormData({ ...techFormData, email: e.target.value })}
+                      placeholder="alex@applerepairpro.com"
+                      className="w-full h-10 bg-[#F5F5F7] text-[#1D1D1F] font-medium px-3 rounded-xl border border-[#D2D2D7] focus:bg-white focus:outline-none focus:border-[#0071E3]"
+                    />
+                  </div>
 
-                <div>
-                  <label className="font-bold text-[#1D1D1F] block mb-1">Phone Number</label>
-                  <input
-                    type="text"
-                    value={techFormData.phone}
-                    onChange={(e) => setTechFormData({ ...techFormData, phone: e.target.value })}
-                    placeholder="+95 9 700 000 000"
-                    className="w-full bg-[#F5F5F7] text-[#1D1D1F] font-medium px-3 py-2 rounded-xl border border-[#D2D2D7] focus:bg-white focus:outline-none focus:border-[#0071E3]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-bold text-[#1D1D1F] block mb-1">Skill Tier Level</label>
-                  <CustomDropdownMenu
-                    value={techFormData.level}
-                    onChange={(level) => setTechFormData({ ...techFormData, level: level as TechnicianLevel })}
-                    options={[
-                      { value: 'Level 1 Spareparts', label: 'Level 1 Spareparts' },
-                      { value: 'Level 2 Spareparts + Hardware', label: 'Level 2 Spareparts + Hardware' },
-                      { value: 'Level 3 Master', label: 'Level 3 Master' },
-                    ]}
-                    className="w-full"
-                    buttonClassName="!w-full !h-10 !rounded-xl !border-[#D2D2D7] !bg-[#F5F5F7] !px-3"
-                    menuAlign="left"
-                    size="md"
-                  />
-                </div>
-
-                <div>
-                  <label className="font-bold text-[#1D1D1F] block mb-1">Status</label>
-                  <select
-                    value={techFormData.status}
-                    onChange={(e) => setTechFormData({ ...techFormData, status: e.target.value as any })}
-                    className="w-full bg-[#F5F5F7] text-[#1D1D1F] font-bold px-3 py-2 rounded-xl border border-[#D2D2D7] focus:bg-white focus:outline-none focus:border-[#0071E3]"
-                  >
-                    <option value="Active">Active</option>
-                    <option value="On Leave">On Leave</option>
-                    <option value="Inactive">Inactive</option>
-                  </select>
+                  <div>
+                    <label className="font-bold text-[#1D1D1F] block mb-1.5">Phone Number</label>
+                    <input
+                      type="text"
+                      value={techFormData.phone}
+                      onChange={(e) => setTechFormData({ ...techFormData, phone: e.target.value })}
+                      placeholder="+95 9 700 000 000"
+                      className="w-full h-10 bg-[#F5F5F7] text-[#1D1D1F] font-medium px-3 rounded-xl border border-[#D2D2D7] focus:bg-white focus:outline-none focus:border-[#0071E3]"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-bold text-[#1D1D1F] block mb-1">Specialty / Hardware Focus</label>
-                  <input
-                    type="text"
-                    value={techFormData.specialty}
-                    onChange={(e) => setTechFormData({ ...techFormData, specialty: e.target.value })}
-                    placeholder="e.g. MacBook Logic Boards, Display Repair"
-                    className="w-full bg-[#F5F5F7] text-[#1D1D1F] font-medium px-3 py-2 rounded-xl border border-[#D2D2D7] focus:bg-white focus:outline-none focus:border-[#0071E3]"
-                  />
-                </div>
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-black text-[#86868B] uppercase tracking-wider">Role & Status</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="font-bold text-[#1D1D1F] block mb-1.5">Skill Tier Level</label>
+                    <CustomDropdownMenu
+                      value={techFormData.level}
+                      onChange={(level) => setTechFormData({ ...techFormData, level: level as TechnicianLevel })}
+                      options={[
+                        { value: 'Level 1 Spareparts', label: 'Level 1 Spareparts' },
+                        { value: 'Level 2 Spareparts + Hardware', label: 'Level 2 Spareparts + Hardware' },
+                        { value: 'Level 3 Master', label: 'Level 3 Master' },
+                      ]}
+                      className="w-full"
+                      buttonClassName="!w-full !h-10 !rounded-xl !border-[#D2D2D7] !bg-[#F5F5F7] !px-3"
+                      menuAlign="left"
+                      size="md"
+                    />
+                  </div>
 
-                <div>
-                  <label className="font-bold text-[#1D1D1F] block mb-1">Commission Rate (%)</label>
-                  <input
-                    type="number"
-                    value={techFormData.commissionRate}
-                    onChange={(e) => setTechFormData({ ...techFormData, commissionRate: Number(e.target.value) })}
-                    min="0"
-                    max="50"
-                    className="w-full bg-[#F5F5F7] text-[#1D1D1F] font-bold px-3 py-2 rounded-xl border border-[#D2D2D7] focus:bg-white focus:outline-none focus:border-[#0071E3]"
-                  />
+                  <div>
+                    <label className="font-bold text-[#1D1D1F] block mb-1.5">Status</label>
+                    <select
+                      value={techFormData.status}
+                      onChange={(e) => setTechFormData({ ...techFormData, status: e.target.value as any })}
+                      className="w-full h-10 bg-[#F5F5F7] text-[#1D1D1F] font-bold px-3 rounded-xl border border-[#D2D2D7] focus:bg-white focus:outline-none focus:border-[#0071E3]"
+                    >
+                      <option value="Active">Active</option>
+                      <option value="On Leave">On Leave</option>
+                      <option value="Inactive">Inactive</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-[#E5E5EA]">
+              <div>
+                <label className="font-bold text-[#1D1D1F] block mb-1.5">Specialty / Hardware Focus</label>
+                <input
+                  type="text"
+                  value={techFormData.specialty}
+                  onChange={(e) => setTechFormData({ ...techFormData, specialty: e.target.value })}
+                  placeholder="e.g. MacBook Logic Boards, Display Repair"
+                  className="w-full h-10 bg-[#F5F5F7] text-[#1D1D1F] font-medium px-3 rounded-xl border border-[#D2D2D7] focus:bg-white focus:outline-none focus:border-[#0071E3]"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-black text-[#86868B] uppercase tracking-wider">Commission Rates</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="bg-[#F8F9FA] border border-[#E5E5EA] rounded-xl p-3">
+                    <label className="font-bold text-[#1D1D1F] block mb-1.5">Spareparts Change (%)</label>
+                    <input
+                      type="number"
+                      value={techFormData.commissionRateParts}
+                      onChange={(e) => setTechFormData({ ...techFormData, commissionRateParts: Number(e.target.value) })}
+                      min="0"
+                      max="50"
+                      className="w-full h-9 bg-white text-[#1D1D1F] font-bold px-3 rounded-lg border border-[#D2D2D7] focus:outline-none focus:border-[#0071E3]"
+                    />
+                    <p className="text-[10px] text-[#86868B] mt-1.5">Standard Modular (parts-swap) jobs</p>
+                  </div>
+
+                  <div className="bg-[#F8F9FA] border border-[#E5E5EA] rounded-xl p-3">
+                    <label className="font-bold text-[#1D1D1F] block mb-1.5">Hardware Repair (%)</label>
+                    <input
+                      type="number"
+                      value={techFormData.commissionRateHardware}
+                      onChange={(e) => setTechFormData({ ...techFormData, commissionRateHardware: Number(e.target.value) })}
+                      min="0"
+                      max="50"
+                      className="w-full h-9 bg-white text-[#1D1D1F] font-bold px-3 rounded-lg border border-[#D2D2D7] focus:outline-none focus:border-[#0071E3]"
+                    />
+                    <p className="text-[10px] text-[#86868B] mt-1.5">Micro-Soldering (board-level) jobs</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end space-x-2 pt-4 border-t border-[#E5E5EA]">
                 <button
                   type="button"
                   onClick={() => setTechModalOpen(false)}
-                  className="px-3 py-2 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] font-bold rounded-xl cursor-pointer"
+                  className="px-4 py-2 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] font-bold rounded-xl cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#0071E3] hover:bg-[#0051B3] text-white font-extrabold rounded-xl shadow-2xs cursor-pointer active:scale-95"
+                  className="px-5 py-2 bg-[#0071E3] hover:bg-[#0051B3] text-white font-extrabold rounded-xl shadow-2xs cursor-pointer active:scale-95"
                 >
                   {editingTech ? 'Update Record' : 'Save Technician'}
                 </button>

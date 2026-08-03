@@ -197,6 +197,19 @@ export interface WorkOrder {
   createdAt: string; // ISO date
   updatedAt: string;
   estimatedCompletion: string;
+  /** ISO — stamped once when the repair reaches Finished / Taken Out.
+   *  Serves as the warranty clock anchor (never moves on later edits). */
+  completedAt?: string;
+
+  // AI repair-type classification (Spareparts Change vs Hardware Repair)
+  repairTypeAI?: 'spareparts' | 'hardware'; // AI verdict, overrides rule-based
+  aiClassifyFailed?: boolean; // true when the last AI attempt errored (re-scan resets)
+
+  // Inventory Fund settlement: parts taken from stock create an internal debt
+  // to the shop's parts fund. Stays 'pending' until the money is set aside /
+  // restock happens — the dashboard reminder keeps showing until settled.
+  inventorySettlementStatus?: 'pending' | 'settled';
+  inventorySettledAt?: string;
 }
 
 export interface PartItem {
@@ -282,7 +295,9 @@ export interface Technician {
   level: TechnicianLevel;
   specialty?: string;
   status?: 'Active' | 'On Leave' | 'Inactive';
-  commissionRate?: number; // e.g. 15 for 15%
+  commissionRate?: number; // e.g. 15 for 15% (legacy combined rate; fallback for the two below)
+  commissionRateParts?: number; // % commission on Spareparts Change (Standard Modular) jobs
+  commissionRateHardware?: number; // % commission on Hardware Repair (Micro-Soldering) jobs
   activeJobsCount: number;
   completedThisMonth: number;
   warrantyReturnCount: number;

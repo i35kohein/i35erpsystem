@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { DateFilterState, filterByDateRange } from '../common/DateFilterSelector';
 import { 
-  CreditCard, 
-  DollarSign, 
-  Receipt, 
+  CreditCard,
+  DollarSign,
+  Receipt,
+  Coins,
   CheckCircle2, 
   Printer, 
   ShieldCheck, 
@@ -754,6 +755,17 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       {selectedWo.totalAmount.toLocaleString()} <span className="text-sm font-extrabold">MMK</span>
                     </span>
                   </div>
+                  {selectedWo.inventoryConsumptionAmount > 0 && selectedWo.inventorySettlementStatus !== 'settled' && (
+                    <div className="rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 flex items-center justify-between text-[10px]">
+                      <span className="font-bold text-amber-800 flex items-center gap-1">
+                        <Coins className="w-3 h-3 text-amber-600 shrink-0" />
+                        Parts cost used from stock — settle Inventory Fund
+                      </span>
+                      <span className="font-mono font-black text-amber-800">
+                        {selectedWo.inventoryConsumptionAmount.toLocaleString()} MMK
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 

@@ -3,6 +3,49 @@ import { AnimatePresence, motion } from 'motion/react';
 import { Sparkles, Plus, CircleDot, Search, Filter, Calculator, Folder, Settings, Download, Database, ExternalLink, ClipboardList, Kanban, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, Menu, ChevronDown, PhoneCall, Truck, Boxes, CreditCard, Users, DollarSign, LayoutDashboard, Timer } from 'lucide-react';
 import { subscribeToCollection, saveDocument, saveBatchDocuments, deleteDocument, clearCollection } from './lib/supabase';
 import { setActiveUserId, notifyAccountChanged } from './utils/accountSettings';
+
+// ---- AI repair-type classification (Spareparts Change vs Hardware Repair) ----
+const AI_CLASSIFY_SYSTEM_PROMPT =
+  'You are a repair-shop ticket classifier. Reply with EXACTLY ONE WORD only: SPAREPARTS or HARDWARE.\n' +
+  'SPAREPARTS = modular parts replacement (display/screen, battery, camera, speaker, flex, back glass, charging port connector/flex, buttons, vibrator, microphone, earpiece).\n' +
+  'HARDWARE = board-level work (logic board, motherboard, IC or chip replacement, micro-soldering, reballing, jumpers, trace repair, water/liquid damage, no power, charging IC, audio IC, wifi IC, baseband, NAND, MOSFET, short circuit, boot loop).\n' +
+  'If a ticket mixes both, choose board-level work if present. No explanations, no punctuation.';
+
+async function classifyRepairWithAI(wo: WorkOrder, settings: SystemSettings): Promise<'spareparts' | 'hardware' | null> {
+  const provider = settings.aiProvider || 'local';
+  if (provider === 'local') return null;
+  const repairs = (wo.selectedRepairs || []).map((r) => r.name).join(', ') || '—';
+  try {
+    const res = await fetch('/api/ai/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        provider,
+        // DeepSeek uses the server-only DEEPSEEK_API_KEY — never send a key from the browser.
+        apiKey: provider === 'deepseek' ? undefined : settings.aiApiKey,
+        model: settings.aiModel,
+        baseUrl: settings.aiBaseUrl,
+        systemPrompt: AI_CLASSIFY_SYSTEM_PROMPT,
+        messages: [
+          {
+            role: 'user',
+            content: `Ticket ${wo.orderNumber} | Service: ${wo.serviceType} | Repairs: ${repairs} | Symptoms: ${wo.symptomsReported || '—'}\n\nReply with exactly one word.`,
+          },
+        ],
+      }),
+    });
+    const text = await res.text();
+    const data = text ? JSON.parse(text) : {};
+    if (!res.ok || !data.success || !data.answer) return null;
+    const answer = String(data.answer).trim().toUpperCase();
+    if (answer.includes('HARDWARE')) return 'hardware';
+    if (answer.includes('SPAREPARTS')) return 'spareparts';
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 import { DEFAULT_SYSTEM_SETTINGS, INITIAL_USERS } from './data/seedData';
 import { 
   WorkOrder, 
@@ -377,6 +420,81 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activeTab]);
 
+  // AI repair-type classification: auto-classify recently completed tickets
+  // (Finished / Taken Out within the last 3 days). One ticket per pass, so
+  // completed orders trickle through the queue without API bursts. The verdict
+  // is persisted as repairTypeAI; failures get aiClassifyFailed (no retry loop).
+  const aiClassifyInFlight = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    const provider = systemSettings.aiProvider || 'local';
+    if (provider === 'local') return;
+    const cutoff = Date.now() - 3 * 24 * 60 * 60 * 1000;
+    const candidate = workOrders.find(
+      (wo) =>
+        (wo.status === 'Finished' || wo.status === 'Taken Out') &&
+        !wo.repairTypeAI &&
+        !wo.aiClassifyFailed &&
+        !aiClassifyInFlight.current.has(wo.id) &&
+        new Date(wo.completedAt || wo.updatedAt || wo.createdAt).getTime() >= cutoff
+    );
+    if (!candidate) return;
+    aiClassifyInFlight.current.add(candidate.id);
+    classifyRepairWithAI(candidate, systemSettings).then((verdict) => {
+      aiClassifyInFlight.current.delete(candidate.id);
+      const updated = {
+        ...candidate,
+        repairTypeAI: verdict || undefined,
+        aiClassifyFailed: verdict ? false : true,
+      };
+      setWorkOrders((prev) => prev.map((w) => (w.id === candidate.id ? updated : w)));
+      saveDocument('workOrders', updated).catch(reportSaveError);
+    });
+  }, [workOrders, systemSettings.aiProvider, systemSettings.aiModel, systemSettings.aiApiKey, systemSettings.aiBaseUrl]);
+
+  // Manual AI re-scan: classify every finished ticket lacking a verdict
+  // (including previously failed ones). Sequential + polite delay.
+  const handleAiRescanTickets = async (): Promise<{ classified: number; failed: number }> => {
+    const provider = systemSettings.aiProvider || 'local';
+    if (provider === 'local') {
+      addToast('Configure an AI provider first (Settings → AI Assistant & API).', 'error', 'AI Not Configured');
+      return { classified: 0, failed: 0 };
+    }
+    const pending = workOrders.filter(
+      (wo) =>
+        (wo.status === 'Finished' || wo.status === 'Taken Out') &&
+        !wo.repairTypeAI &&
+        !aiClassifyInFlight.current.has(wo.id)
+    );
+    if (pending.length === 0) {
+      addToast('No finished tickets need classification — all already have an AI verdict.', 'info', 'AI Re-scan');
+      return { classified: 0, failed: 0 };
+    }
+    let classified = 0;
+    let failed = 0;
+    for (const wo of pending) {
+      aiClassifyInFlight.current.add(wo.id);
+      const verdict = await classifyRepairWithAI(wo, systemSettings);
+      aiClassifyInFlight.current.delete(wo.id);
+      const updated = {
+        ...wo,
+        repairTypeAI: verdict || undefined,
+        aiClassifyFailed: verdict ? false : true,
+      };
+      setWorkOrders((prev) => prev.map((w) => (w.id === wo.id ? updated : w)));
+      saveDocument('workOrders', updated).catch(reportSaveError);
+      if (verdict) classified++;
+      else failed++;
+      await new Promise((r) => setTimeout(r, 200));
+    }
+    addToast(
+      `AI re-scan complete: ${classified} classified, ${failed} skipped/failed.`,
+      classified > 0 ? 'success' : 'info',
+      'AI Re-scan'
+    );
+    return { classified, failed };
+  };
+
+
   // Modals State
   const [isAiAssistantOpen, setIsAiAssistantOpen] = useState(false);
   const [settingsInitialSubTab, setSettingsInitialSubTab] = useState<'users' | 'ai'>('users');
@@ -616,7 +734,16 @@ export default function App() {
     setWorkOrders((prev) =>
       prev.map((w) => {
         if (w.id === workOrderId) {
-          const updated = { ...w, status: newStatus, updatedAt: new Date().toISOString() };
+          const updated = {
+            ...w,
+            status: newStatus,
+            // Anchor the warranty clock the moment a repair completes; keep
+            // the original completion stamp even if the ticket is edited later.
+            ...((newStatus === 'Finished' || newStatus === 'Taken Out') && !w.completedAt
+              ? { completedAt: new Date().toISOString() }
+              : {}),
+            updatedAt: new Date().toISOString(),
+          };
           saveDocument('workOrders', updated).catch(reportSaveError);
           return updated;
         }
@@ -692,6 +819,7 @@ export default function App() {
       inventoryConsumedAt: nowIso,
       inventoryConsumptionAmount: totalInventoryCost,
       inventoryConsumptionNote: `Inventory used for ${workOrder.orderNumber}`,
+      inventorySettlementStatus: 'pending',
       updatedAt: nowIso,
     };
 
@@ -725,6 +853,35 @@ export default function App() {
       `Inventory stock deducted for ${workOrder.orderNumber}: ${usageItems.length} part(s), ${totalInventoryCost.toLocaleString()} MMK recorded.`,
       'success',
       'Inventory Settled'
+    );
+  };
+
+  // Inventory Fund settlement: mark consumed parts as settled once the shop
+  // has set the money aside / restocked. Clears the dashboard reminder.
+  const handleSettleInventoryFund = (ids: string[]) => {
+    if (!ids.length) return;
+    const nowIso = new Date().toISOString();
+    let settledCost = 0;
+    setWorkOrders((prev) =>
+      prev.map((w) => {
+        if (ids.includes(w.id) && w.inventoryConsumptionAmount && w.inventorySettlementStatus !== 'settled') {
+          settledCost += w.inventoryConsumptionAmount;
+          const updated = {
+            ...w,
+            inventorySettlementStatus: 'settled' as const,
+            inventorySettledAt: nowIso,
+            updatedAt: nowIso,
+          };
+          saveDocument('workOrders', updated).catch(reportSaveError);
+          return updated;
+        }
+        return w;
+      })
+    );
+    addToast(
+      `Inventory fund settled: ${ids.length} ticket${ids.length > 1 ? 's' : ''} · ${settledCost.toLocaleString()} MMK parts cost covered.`,
+      'success',
+      'Inventory Fund'
     );
   };
 
@@ -783,6 +940,7 @@ export default function App() {
             isPaid: true,
             paymentMethod: paymentMethod as any,
             status: 'Taken Out' as WorkOrderStatus,
+            completedAt: w.completedAt || new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           };
           saveDocument('workOrders', updated).catch(reportSaveError);
@@ -821,6 +979,7 @@ export default function App() {
             postRepairChecklist: checklist,
             ...(afterDiagnostics ? { afterDiagnostics } : {}),
             status: 'Finished' as WorkOrderStatus,
+            completedAt: w.completedAt || new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           };
           saveDocument('workOrders', updated).catch(reportSaveError);
@@ -1406,6 +1565,7 @@ export default function App() {
                   onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
                   dateFilter={dateFilter}
                   setDateFilter={setDateFilter}
+                  onSettleInventoryFund={handleSettleInventoryFund}
                 />
               )}
 
@@ -1599,6 +1759,7 @@ export default function App() {
                   onAddExpense={handleAddExpense}
                   onRecordSupplierPayment={handleRecordSupplierPayment}
                   onUpdatePayoutStatus={handleUpdatePayoutStatus}
+                  onSettleInventoryFund={handleSettleInventoryFund}
                   dateFilter={dateFilter.preset === 'today' ? 'TODAY' : dateFilter.preset === '7days' ? 'THIS_WEEK' : dateFilter.preset === '30days' ? 'THIS_MONTH' : 'ALL'}
                   setDateFilter={(f) => {
                     if (f === 'TODAY') setDateFilter({ preset: 'today' });
@@ -1675,6 +1836,7 @@ export default function App() {
                     settingsResetRef.current = actions.reset;
                     settingsSaveRef.current = actions.save;
                   }}
+                  onAiRescanTickets={handleAiRescanTickets}
                 />
               )}
           </div>

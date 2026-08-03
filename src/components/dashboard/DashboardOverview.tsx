@@ -11,7 +11,6 @@ import {
   RotateCcw,
   Sparkles,
   ChevronRight,
-  Scale,
   BarChart3,
   LayoutDashboard,
   Smartphone,
@@ -53,6 +52,8 @@ import { useLanguage } from '../../context/LanguageContext';
 import { DateFilterState, filterByDateRange, DateFilterSelector } from '../common/DateFilterSelector';
 import { TechnicianPerformanceTab } from './TechnicianPerformanceTab';
 import { TechnicianLeaderboardView } from './TechnicianLeaderboardView';
+import { TechnicianDetailModal } from './TechnicianDetailModal';
+import { computeTechStats } from '../../utils/techAnalytics';
 import { StatusBadge } from '../common/StatusBadge';
 import { PriorityBadge } from '../common/PriorityBadge';
 import { TicketDetailInspectorModal } from '../common/TicketDetailInspectorModal';
@@ -70,12 +71,103 @@ interface DashboardOverviewProps {
   onSelectPrintTag?: (wo: WorkOrder) => void;
   dateFilter?: DateFilterState;
   setDateFilter?: (filter: DateFilterState) => void;
+  onSettleInventoryFund?: (ids: string[]) => void;
 }
 
 const REPAIR_CATEGORIES_KEYWORDS = [
   'display', 'battery', 'logic board', 'chip', 'charging', 'port', 
   'back glass', 'camera', 'audio', 'flex', 'screen', 'touch', 'speaker'
 ];
+
+/* Lightweight dependency-free SVG chart: revenue bars + completed-repairs
+   line, each normalized to its own scale (dual-axis style). */
+const TrendChart: React.FC<{
+  buckets: { label: string }[];
+  revenue: number[];
+  repairs: number[];
+  maxRevenue: number;
+  maxRepairs: number;
+}> = ({ buckets, revenue, repairs, maxRevenue, maxRepairs }) => {
+  const W = 640;
+  const H = 170;
+  const TOP = 12;
+  const BOTTOM = 26;
+  const plotH = H - TOP - BOTTOM;
+  const n = Math.max(buckets.length, 1);
+  const slot = W / n;
+  const barW = Math.max(3, slot * 0.55);
+  const yFor = (v: number, max: number) => TOP + plotH - (max > 0 ? (v / max) * plotH : 0);
+  const linePoints = repairs
+    .map((v, i) => `${(slot * i + slot / 2).toFixed(1)},${yFor(v, maxRepairs).toFixed(1)}`)
+    .join(' ');
+  const labelStep = Math.max(1, Math.ceil(n / 6));
+  const hasAny = revenue.some((v) => v > 0) || repairs.some((v) => v > 0);
+
+  if (!hasAny) return null;
+
+  return (
+    <div>
+      <div className="overflow-x-auto">
+        <svg
+          viewBox={`0 0 ${W} ${H}`}
+          className="block w-full min-w-[460px]"
+          role="img"
+          aria-label="Revenue bars and completed repairs line over the selected period"
+        >
+          {[0, 0.25, 0.5, 0.75, 1].map((f) => (
+            <line
+              key={f}
+              x1={0}
+              x2={W}
+              y1={TOP + plotH * f}
+              y2={TOP + plotH * f}
+              stroke="#E5E5EA"
+              strokeWidth={1}
+              strokeDasharray={f === 1 ? undefined : '3 3'}
+            />
+          ))}
+          {revenue.map((v, i) => (
+            <rect
+              key={i}
+              x={slot * i + (slot - barW) / 2}
+              y={yFor(v, maxRevenue)}
+              width={barW}
+              height={Math.max(0, TOP + plotH - yFor(v, maxRevenue))}
+              rx={2}
+              fill={v > 0 ? '#0071E3' : '#E5E5EA'}
+              opacity={v > 0 ? 0.85 : 0.35}
+            />
+          ))}
+          {repairs.some((v) => v > 0) && (
+            <polyline points={linePoints} fill="none" stroke="#34C759" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+          )}
+          {repairs.map((v, i) =>
+            v > 0 ? (
+              <circle key={i} cx={slot * i + slot / 2} cy={yFor(v, maxRepairs)} r={3} fill="#34C759" />
+            ) : null
+          )}
+          {buckets.map((b, i) =>
+            i % labelStep === 0 || i === n - 1 ? (
+              <text key={i} x={slot * i + slot / 2} y={H - 8} textAnchor="middle" fontSize={10} fill="#86868B">
+                {b.label}
+              </text>
+            ) : null
+          )}
+        </svg>
+      </div>
+      <div className="flex items-center space-x-4 pt-2 text-[10px] font-bold text-[#86868B]">
+        <span className="flex items-center space-x-1.5">
+          <span className="inline-block h-2.5 w-2.5 rounded-sm bg-[#0071E3]/85" />
+          Revenue (MMK)
+        </span>
+        <span className="flex items-center space-x-1.5">
+          <span className="inline-block h-0.5 w-3 rounded-full bg-[#34C759]" />
+          Completed repairs
+        </span>
+      </div>
+    </div>
+  );
+};
 
 export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   workOrders,
@@ -90,6 +182,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   onSelectPrintTag,
   dateFilter: externalDateFilter,
   setDateFilter: externalSetDateFilter,
+  onSettleInventoryFund,
 }) => {
   const { t } = useLanguage();
   const [internalDateFilter, setInternalDateFilter] = useState<DateFilterState>({ preset: 'all' });
@@ -97,6 +190,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const setDateFilter = externalSetDateFilter || setInternalDateFilter;
 
   const [activeDashboardSubTab, setActiveDashboardSubTab] = useState<'status-queue' | 'repair-data' | 'tech-kpi' | 'inventory' | 'finance' | 'warranty-watch'>('status-queue');
+
+  // Technician drill-down modal (tech-kpi tab)
+  const [detailTechId, setDetailTechId] = useState<string | null>(null);
+  const detailTech = detailTechId ? technicians.find((t) => t.id === detailTechId) || null : null;
 
   const [statusQueueFilter, setStatusQueueFilter] = useState<string>('ALL');
   const [queueSearchQuery, setQueueSearchQuery] = useState<string>('');
@@ -124,7 +221,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       if (warrantyDays <= 0) return null;
 
       // Completion Date or Intake Reference Date
-      const startDateMs = new Date(wo.updatedAt || wo.createdAt).getTime();
+      // Warranty clock anchors to when the repair actually completed
+      // (completedAt, stamped on Finished/Taken Out) — never to updatedAt,
+      // which moves on every edit and would reset the clock.
+      const startDateMs = new Date(wo.completedAt || wo.createdAt).getTime();
       if (isNaN(startDateMs)) return null;
 
       const expiryDateMs = startDateMs + (warrantyDays * ONE_DAY_MS);
@@ -191,7 +291,12 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     return filterByDateRange<WorkOrder>(workOrders, dateFilter);
   }, [workOrders, dateFilter]);
 
-  // Filter work orders for the Status Queue roster table
+  // Inventory Fund reminder: parts taken from stock that haven't been settled
+  // (money set aside / restocked). Stays visible until settled.
+  const pendingFundTickets = filteredWorkOrders.filter(
+    (wo) => wo.inventoryConsumptionAmount && wo.inventorySettlementStatus !== 'settled'
+  );
+  const pendingFundTotal = pendingFundTickets.reduce((sum, wo) => sum + (wo.inventoryConsumptionAmount || 0), 0);
   const statusQueueWorkOrders = useMemo(() => {
     return filteredWorkOrders.filter((wo) => {
       // 1. Filter by Status Chip / Mode
@@ -230,10 +335,20 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     });
   }, [filteredWorkOrders, statusQueueFilter, queueTechFilter, queuePriorityFilter, queueSearchQuery, pipelineStatuses]);
 
+  // Revenue-eligible statuses only: quoted subtotals on tickets that were
+  // never repaired (Cant Repair / Customer Not Repair) are NOT revenue, and
+  // unpaid-but-finished work is still billed revenue (collected is tracked
+  // separately in the Finance tab).
+  const REVENUE_STATUSES: WorkOrderStatus[] = ['Finished', 'Taken Out'];
+  const revenueWorkOrders = useMemo(
+    () => filteredWorkOrders.filter((w) => REVENUE_STATUSES.includes(w.status)),
+    [filteredWorkOrders]
+  );
+
   // Financial calculations
   const totalRevenue = useMemo(() => {
-    return filteredWorkOrders.reduce((sum, wo) => sum + (wo.subtotal || 0), 0);
-  }, [filteredWorkOrders]);
+    return revenueWorkOrders.reduce((sum, wo) => sum + (wo.subtotal || 0), 0);
+  }, [revenueWorkOrders]);
 
   const totalPartsCost = useMemo(() => {
     return filteredWorkOrders.reduce((sum, wo) => {
@@ -244,22 +359,24 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
   const totalMargin = totalRevenue - totalPartsCost;
   const marginPercent = totalRevenue > 0 ? Math.round((totalMargin / totalRevenue) * 100) : 0;
-  const avgTicketValue = filteredWorkOrders.length > 0 ? Math.round(totalRevenue / filteredWorkOrders.length) : 0;
+  const avgTicketValue = revenueWorkOrders.length > 0 ? Math.round(totalRevenue / revenueWorkOrders.length) : 0;
 
   // Monthly Repairs & Turnaround Metrics
   const monthlyRepairsCount = technicians.reduce((sum, tech) => sum + tech.completedThisMonth, 0);
-  
-  const completedOrActive = filteredWorkOrders.filter((w) => w.createdAt);
+
+  // Average turnaround over COMPLETED tickets only (Finished / Taken Out).
+  // Open tickets are excluded — mixing them in with Date.now() inflated the
+  // average over time.
+  const completedWorkOrders = filteredWorkOrders.filter((w) => w.status === 'Finished' || w.status === 'Taken Out');
   let avgTurnaroundHours = 0;
-  if (completedOrActive.length > 0) {
-    const totalHours = completedOrActive.reduce((acc, wo) => {
+  if (completedWorkOrders.length > 0) {
+    const totalHours = completedWorkOrders.reduce((acc, wo) => {
       const created = new Date(wo.createdAt).getTime();
-      const isClosed = ['Taken Out', 'Cant Repair', 'Customer Not Repair'].includes(wo.status);
-      const endTime = isClosed ? new Date(wo.updatedAt || wo.createdAt).getTime() : Date.now();
+      const endTime = new Date(wo.completedAt || wo.updatedAt || wo.createdAt).getTime();
       const diffHours = Math.max(0, (endTime - created) / (1000 * 60 * 60));
       return acc + diffHours;
     }, 0);
-    avgTurnaroundHours = Number((totalHours / completedOrActive.length).toFixed(1));
+    avgTurnaroundHours = Number((totalHours / completedWorkOrders.length).toFixed(1));
   }
 
   // Filter ONLY Repair-Related Low Stock Parts
@@ -276,50 +393,27 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   }, [parts]);
 
   const activeRepairs = filteredWorkOrders.filter((w) => w.status !== 'Taken Out' && w.status !== 'Finished' && w.status !== 'Cant Repair' && w.status !== 'Customer Not Repair');
-  const readyForPickup = filteredWorkOrders.filter((w) => w.status === 'Finished' || w.status === 'Taken Out');
+  // "Ready for Pickup" = Finished only. Taken Out tickets have already been
+  // collected — counting them inflated the card.
+  const readyForPickup = filteredWorkOrders.filter((w) => w.status === 'Finished');
 
   const inRepair = filteredWorkOrders.filter((w) => w.status === 'In Progress' || w.status === 'Receive');
   const pendingRmas = rmas.filter((r) => r.status === 'Shipped to Vendor' || r.status === 'Draft');
 
-  // Technician Workload Data
-  const techQueueData = useMemo(() => {
+    // Technician load imbalance — drives the amber suggestion banner (single source: computeTechStats)
+  const techLoadData = useMemo(() => {
     return technicians.map((tech) => {
-      const techActiveOrders = filteredWorkOrders.filter(
-        (wo) => wo.assignedTechId === tech.id && wo.status !== 'Finished' && wo.status !== 'Taken Out' && wo.status !== 'Cant Repair' && wo.status !== 'Customer Not Repair'
-      );
-      const activeCount = techActiveOrders.length > 0 ? techActiveOrders.length : tech.activeJobsCount;
-      const inProgressCount = techActiveOrders.filter((wo) => wo.status === 'In Progress').length;
-      const receiveCount = techActiveOrders.filter((wo) => wo.status === 'Receive').length;
-      const pendingCount = techActiveOrders.filter((wo) => wo.status === 'Pending').length;
-
-      const maxCapacity = 5;
-      const loadPercent = Math.min(100, Math.round((activeCount / maxCapacity) * 100));
-
-      let loadBadge = { label: 'Optimal Load', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
-      if (activeCount >= 5) {
-        loadBadge = { label: 'Overloaded', color: 'bg-rose-50 text-rose-700 border-rose-200' };
-      } else if (activeCount >= 3) {
-        loadBadge = { label: 'Heavy Queue', color: 'bg-amber-50 text-amber-700 border-amber-200' };
-      } else if (activeCount === 0) {
-        loadBadge = { label: 'Available', color: 'bg-blue-50 text-blue-700 border-blue-200' };
-      }
-
-      return {
-        tech,
-        activeCount,
-        inProgressCount,
-        receiveCount,
-        pendingCount,
-        loadPercent,
-        loadBadge,
-      };
+      const stats = computeTechStats(filteredWorkOrders, tech);
+      return { tech, activeCount: stats.activeCount };
     });
   }, [technicians, filteredWorkOrders]);
 
-  const totalActiveTechJobs = techQueueData.reduce((sum, item) => sum + item.activeCount, 0);
-  const maxTechLoad = Math.max(...techQueueData.map((t) => t.activeCount), 0);
-  const minTechLoad = Math.min(...techQueueData.map((t) => t.activeCount), 0);
+  const maxTechLoad = Math.max(...techLoadData.map((t) => t.activeCount), 0);
+  const minTechLoad = Math.min(...techLoadData.map((t) => t.activeCount), 0);
+  const totalActiveTechJobs = techLoadData.reduce((sum, item) => sum + item.activeCount, 0);
   const isQueueImbalanced = totalActiveTechJobs >= 2 && (maxTechLoad - minTechLoad) >= 3;
+  const maxLoadTechs = techLoadData.filter((t) => t.activeCount === maxTechLoad);
+  const minLoadTechs = techLoadData.filter((t) => t.activeCount === minTechLoad && t.activeCount < maxTechLoad);
 
   // Status Queue Breakdown Analytics
   const statusQueueCounts = useMemo(() => {
@@ -414,7 +508,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
     filteredWorkOrders.forEach((wo) => {
       const total = wo.subtotal || wo.totalAmount || 0;
-      const paid = wo.depositPaid || 0;
+      // Single source of truth with the Paid/Unpaid badge: a fully-paid
+      // ticket (isPaid) counts the whole amount; otherwise what was actually
+      // collected (paidAmount at checkout, else the intake deposit).
+      const paid = wo.isPaid ? total : (wo.paidAmount || wo.depositAmount || 0);
       const balance = Math.max(0, total - paid);
 
       totalCollected += paid;
@@ -438,16 +535,277 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     return { totalValuation, totalItems, lowStockCount };
   }, [parts]);
 
+  // ===== Revenue & Repairs Trend (previous-period comparison) =====
+  const DASHBOARD_TAB_IDS = ['status-queue', 'repair-data', 'tech-kpi', 'inventory', 'finance', 'warranty-watch'];
+
+  const handleDashboardTabKeyDown = (e: React.KeyboardEvent, currentTab: string) => {
+    const idx = DASHBOARD_TAB_IDS.indexOf(currentTab);
+    if (idx === -1) return;
+    let next: string | null = null;
+    if (e.key === 'ArrowRight') next = DASHBOARD_TAB_IDS[(idx + 1) % DASHBOARD_TAB_IDS.length];
+    else if (e.key === 'ArrowLeft') next = DASHBOARD_TAB_IDS[(idx - 1 + DASHBOARD_TAB_IDS.length) % DASHBOARD_TAB_IDS.length];
+    else if (e.key === 'Home') next = DASHBOARD_TAB_IDS[0];
+    else if (e.key === 'End') next = DASHBOARD_TAB_IDS[DASHBOARD_TAB_IDS.length - 1];
+    if (next) {
+      e.preventDefault();
+      setActiveDashboardSubTab(next as typeof activeDashboardSubTab);
+      document.getElementById(`dash-tab-${next}`)?.focus();
+    }
+  };
+
+  const DAY_MS = 1000 * 60 * 60 * 24;
+  const trendSeries = useMemo(() => {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayStartMs = todayStart.getTime();
+    const endOfTodayMs = todayStartMs + DAY_MS - 1;
+
+    // Window mirrors the header date filter (all = trailing 30 days).
+    let windowStartMs: number;
+    if (!dateFilter || dateFilter.preset === 'all') windowStartMs = todayStartMs - 29 * DAY_MS;
+    else if (dateFilter.preset === 'today') windowStartMs = todayStartMs;
+    else if (dateFilter.preset === '7days') windowStartMs = todayStartMs - 6 * DAY_MS;
+    else if (dateFilter.preset === '30days') windowStartMs = todayStartMs - 29 * DAY_MS;
+    else if (dateFilter.preset === '60days') windowStartMs = todayStartMs - 59 * DAY_MS;
+    else {
+      const s = dateFilter.startDate ? new Date(dateFilter.startDate + 'T00:00:00').getTime() : todayStartMs - 29 * DAY_MS;
+      const e = dateFilter.endDate ? new Date(dateFilter.endDate + 'T23:59:59').getTime() : endOfTodayMs;
+      windowStartMs = Math.min(s, e);
+    }
+    const windowEndMs =
+      dateFilter?.preset === 'custom' && dateFilter.endDate
+        ? Math.max(windowStartMs, new Date(dateFilter.endDate + 'T23:59:59').getTime())
+        : endOfTodayMs;
+    const windowEnd = Math.max(windowEndMs, windowStartMs);
+
+    const spanMs = windowEnd - windowStartMs + 1;
+    const bucketDays = spanMs / DAY_MS > 90 ? 7 : 1;
+    const bucketCount = Math.max(1, Math.ceil(spanMs / (bucketDays * DAY_MS)));
+
+    const buckets = Array.from({ length: bucketCount }, (_, i) => {
+      const bStart = windowStartMs + i * bucketDays * DAY_MS;
+      return {
+        startMs: bStart,
+        endMs: Math.min(windowEnd, bStart + bucketDays * DAY_MS - 1),
+        label: new Date(bStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      };
+    });
+
+    const isRevenueStatus = (s: string) => s === 'Finished' || s === 'Taken Out';
+    const currentRevenue = buckets.map(() => 0);
+    const currentRepairs = buckets.map(() => 0);
+    let curRev = 0, curRep = 0, prevRev = 0, prevRep = 0;
+    const prevStartMs = windowStartMs - spanMs;
+    const prevEndMs = windowStartMs - 1;
+
+    workOrders.forEach((wo) => {
+      const t = new Date(wo.createdAt || Date.now()).getTime();
+      if (isNaN(t)) return;
+      const rev = isRevenueStatus(wo.status) ? wo.subtotal || 0 : 0;
+      const rep = isRevenueStatus(wo.status) ? 1 : 0;
+      if (t >= prevStartMs && t <= prevEndMs) {
+        prevRev += rev;
+        prevRep += rep;
+        return;
+      }
+      if (t < windowStartMs || t > windowEnd) return;
+      const idx = Math.min(bucketCount - 1, Math.floor((t - windowStartMs) / (bucketDays * DAY_MS)));
+      currentRevenue[idx] += rev;
+      currentRepairs[idx] += rep;
+      curRev += rev;
+      curRep += rep;
+    });
+
+    return {
+      buckets,
+      currentRevenue,
+      currentRepairs,
+      curRev,
+      curRep,
+      prevRev,
+      prevRep,
+      maxRevenue: Math.max(...currentRevenue, 1),
+      maxRepairs: Math.max(...currentRepairs, 1),
+      windowLabel: `${new Date(windowStartMs).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${new Date(windowEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`,
+      bucketDays,
+      revenueDeltaPct: prevRev > 0 ? Math.round(((curRev - prevRev) / prevRev) * 100) : null,
+      repairsDeltaPct: prevRep > 0 ? Math.round(((curRep - prevRep) / prevRep) * 100) : null,
+    };
+  }, [workOrders, dateFilter]);
+
   return (
     <div className="space-y-3">
-      {/* Top Dashboard Navigation Subtabs Bar */}
-      <div className="bg-[#F5F5F7] p-1.5 rounded-2xl border border-[#E5E5EA] flex items-center space-x-1.5 overflow-x-auto no-scrollbar w-full text-xs shadow-2xs">
+      {/* Inventory Fund reminder — parts used from stock, not settled yet */}
+      {pendingFundTickets.length > 0 && (
+        <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-amber-50 border border-amber-200 rounded-2xl text-xs shadow-2xs">
+          <div className="flex items-center gap-2 min-w-0">
+            <Coins className="w-4 h-4 text-amber-600 shrink-0" />
+            <span className="font-bold text-amber-800 min-w-0">
+              Inventory fund reminder — {pendingFundTickets.length} ticket{pendingFundTickets.length > 1 ? 's' : ''} used parts worth{' '}
+              <span className="font-black">{pendingFundTotal.toLocaleString()} MMK</span> from stock, not settled yet
+            </span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => onNavigateToTab('finance')}
+              className="px-3 py-1.5 bg-white hover:bg-[#F5F5F7] text-amber-800 font-bold rounded-xl border border-amber-300 transition-all cursor-pointer"
+            >
+              View Details
+            </button>
+            <button
+              onClick={() => onSettleInventoryFund?.(pendingFundTickets.map((wo) => wo.id))}
+              className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-extrabold rounded-xl transition-all cursor-pointer"
+            >
+              Mark All Settled
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Headline summary cards — always visible above the subtab tabs. */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        {/* Card 1: Active In-Shop Repairs */}
+        <div 
+          onClick={() => {
+            setActiveDashboardSubTab('status-queue');
+            setStatusQueueFilter('ALL');
+          }}
+          className="group relative bg-white p-4 rounded-2xl border border-[#E5E5EA] shadow-2xs hover:shadow-md hover:border-[#0071E3]/50 transition-all cursor-pointer overflow-hidden select-none"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#86868B]">
+              Active Repairs
+            </span>
+            <div className="w-8 h-8 rounded-xl bg-[#F0F6FF] text-[#0071E3] flex items-center justify-center group-hover:scale-110 transition-transform">
+              <ClipboardList className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-2.5 flex items-baseline justify-between">
+            <span className="text-2xl sm:text-3xl font-black text-[#1D1D1F] tracking-tight">
+              {activeRepairs.length}
+            </span>
+            <span className="text-[10px] font-bold text-[#0071E3] bg-[#F0F6FF] px-2 py-0.5 rounded-full border border-[#0071E3]/20">
+              {inRepair.length} In Progress / Received
+            </span>
+          </div>
+          <div className="mt-3 pt-2.5 border-t border-[#F5F5F7] flex items-center justify-between text-[11px] text-[#86868B]">
+            <span>In-shop workload</span>
+            <span className="font-bold text-[#0071E3] group-hover:underline flex items-center space-x-0.5">
+              <span>View Queue</span>
+              <ChevronRight className="w-3 h-3" />
+            </span>
+          </div>
+        </div>
+
+        {/* Card 2: Ready for Pickup */}
+        <div 
+          onClick={() => {
+            setActiveDashboardSubTab('status-queue');
+            setStatusQueueFilter('Finished');
+          }}
+          className="group relative bg-white p-4 rounded-2xl border border-[#E5E5EA] shadow-2xs hover:shadow-md hover:border-emerald-500/50 transition-all cursor-pointer overflow-hidden select-none"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#86868B]">
+              Ready for Pickup
+            </span>
+            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-2.5 flex items-baseline justify-between">
+            <span className="text-2xl sm:text-3xl font-black text-[#1D1D1F] tracking-tight">
+              {readyForPickup.length}
+            </span>
+            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+              Completed
+            </span>
+          </div>
+          <div className="mt-3 pt-2.5 border-t border-[#F5F5F7] flex items-center justify-between text-[11px] text-[#86868B]">
+            <span>Awaiting customer</span>
+            <span className="font-bold text-emerald-600 group-hover:underline flex items-center space-x-0.5">
+              <span>View Finished</span>
+              <ChevronRight className="w-3 h-3" />
+            </span>
+          </div>
+        </div>
+
+        {/* Card 3: Total Revenue */}
+        <div 
+          onClick={() => setActiveDashboardSubTab('finance')}
+          className="group relative bg-white p-4 rounded-2xl border border-[#E5E5EA] shadow-2xs hover:shadow-md hover:border-indigo-500/50 transition-all cursor-pointer overflow-hidden select-none"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#86868B]">
+              Total Revenue
+            </span>
+            <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Coins className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-2.5 flex items-baseline justify-between">
+            <span className="text-xl sm:text-2xl font-black text-[#1D1D1F] tracking-tight truncate">
+              {totalRevenue.toLocaleString()} <span className="text-xs font-bold text-[#86868B]">MMK</span>
+            </span>
+            <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200 shrink-0 ml-1">
+              {marginPercent}% Margin
+            </span>
+          </div>
+          <div className="mt-3 pt-2.5 border-t border-[#F5F5F7] flex items-center justify-between text-[11px] text-[#86868B]">
+            <span>Avg: {avgTicketValue.toLocaleString()} MMK</span>
+            <span className="font-bold text-indigo-600 group-hover:underline flex items-center space-x-0.5">
+              <span>Finance</span>
+              <ChevronRight className="w-3 h-3" />
+            </span>
+          </div>
+        </div>
+
+        {/* Card 4: Average Turnaround Time (completed tickets only) */}
+        <div 
+          onClick={() => setActiveDashboardSubTab('tech-kpi')}
+          className="group relative bg-white p-4 rounded-2xl border border-[#E5E5EA] shadow-2xs hover:shadow-md hover:border-teal-500/50 transition-all cursor-pointer overflow-hidden select-none"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#86868B]">
+              Avg Turnaround
+            </span>
+            <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Clock className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-2.5 flex items-baseline justify-between">
+            <span className="text-2xl sm:text-3xl font-black text-[#1D1D1F] tracking-tight">
+              {avgTurnaroundHours > 0
+                ? avgTurnaroundHours >= 24
+                  ? `${(avgTurnaroundHours / 24).toFixed(1)}d`
+                  : `${avgTurnaroundHours}h`
+                : '—'}
+            </span>
+            <span className="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200">
+              Intake → Ready
+            </span>
+          </div>
+          <div className="mt-3 pt-2.5 border-t border-[#F5F5F7] flex items-center justify-between text-[11px] text-[#86868B]">
+            <span>{completedWorkOrders.length} completed tickets</span>
+            <span className="font-bold text-teal-600 group-hover:underline flex items-center space-x-0.5">
+              <span>Tech KPIs</span>
+              <ChevronRight className="w-3 h-3" />
+            </span>
+          </div>
+        </div>
+      </div>
+
+{/* Top Dashboard Navigation Subtabs Bar */}
+      <div role="tablist" aria-label="Dashboard sections" className="bg-[#F5F5F7] p-1.5 rounded-2xl border border-[#E5E5EA] flex items-center space-x-1.5 overflow-x-auto no-scrollbar w-full text-xs shadow-2xs">
         {/* Subtab 1: Status Queue */}
         <button
           type="button"
           role="tab"
+          id="dash-tab-status-queue"
+          aria-controls="dash-panel-status-queue"
           aria-selected={activeDashboardSubTab === 'status-queue'}
           onClick={() => setActiveDashboardSubTab('status-queue')}
+          onKeyDown={(e) => handleDashboardTabKeyDown(e, 'status-queue')}
           className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'status-queue'
               ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-xs'
@@ -469,8 +827,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         <button
           type="button"
           role="tab"
+          id="dash-tab-repair-data"
+          aria-controls="dash-panel-repair-data"
           aria-selected={activeDashboardSubTab === 'repair-data'}
           onClick={() => setActiveDashboardSubTab('repair-data')}
+          onKeyDown={(e) => handleDashboardTabKeyDown(e, 'repair-data')}
           className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'repair-data'
               ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-xs'
@@ -492,8 +853,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         <button
           type="button"
           role="tab"
+          id="dash-tab-tech-kpi"
+          aria-controls="dash-panel-tech-kpi"
           aria-selected={activeDashboardSubTab === 'tech-kpi'}
           onClick={() => setActiveDashboardSubTab('tech-kpi')}
+          onKeyDown={(e) => handleDashboardTabKeyDown(e, 'tech-kpi')}
           className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'tech-kpi'
               ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-xs'
@@ -501,7 +865,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           }`}
         >
           <Users className="w-4 h-4" />
-          <span>Technician KPI & Leaderboard</span>
+          <span>Technicians</span>
           <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold ${
             activeDashboardSubTab === 'tech-kpi'
               ? 'bg-white/20 text-white'
@@ -515,8 +879,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         <button
           type="button"
           role="tab"
+          id="dash-tab-inventory"
+          aria-controls="dash-panel-inventory"
           aria-selected={activeDashboardSubTab === 'inventory'}
           onClick={() => setActiveDashboardSubTab('inventory')}
+          onKeyDown={(e) => handleDashboardTabKeyDown(e, 'inventory')}
           className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'inventory'
               ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-xs'
@@ -548,8 +915,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         <button
           type="button"
           role="tab"
+          id="dash-tab-finance"
+          aria-controls="dash-panel-finance"
           aria-selected={activeDashboardSubTab === 'finance'}
           onClick={() => setActiveDashboardSubTab('finance')}
+          onKeyDown={(e) => handleDashboardTabKeyDown(e, 'finance')}
           className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'finance'
               ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-xs'
@@ -571,8 +941,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         <button
           type="button"
           role="tab"
+          id="dash-tab-warranty-watch"
+          aria-controls="dash-panel-warranty-watch"
           aria-selected={activeDashboardSubTab === 'warranty-watch'}
           onClick={() => setActiveDashboardSubTab('warranty-watch')}
+          onKeyDown={(e) => handleDashboardTabKeyDown(e, 'warranty-watch')}
           className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'warranty-watch'
               ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-xs'
@@ -654,110 +1027,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </div>
       )}
 
-      {/* Queue summary cards belong only to the Status Queue view. */}
-      {activeDashboardSubTab === 'status-queue' && (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-        {/* Card 1: Active In-Shop Repairs */}
-        <div 
-          onClick={() => {
-            setActiveDashboardSubTab('status-queue');
-            setStatusQueueFilter('ALL');
-          }}
-          className="group relative bg-white p-4 rounded-2xl border border-[#E5E5EA] shadow-2xs hover:shadow-md hover:border-[#0071E3]/50 transition-all cursor-pointer overflow-hidden select-none"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#86868B]">
-              Active Repairs
-            </span>
-            <div className="w-8 h-8 rounded-xl bg-[#F0F6FF] text-[#0071E3] flex items-center justify-center group-hover:scale-110 transition-transform">
-              <ClipboardList className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-2.5 flex items-baseline justify-between">
-            <span className="text-2xl sm:text-3xl font-black text-[#1D1D1F] tracking-tight">
-              {activeRepairs.length}
-            </span>
-            <span className="text-[10px] font-bold text-[#0071E3] bg-[#F0F6FF] px-2 py-0.5 rounded-full border border-[#0071E3]/20">
-              {inRepair.length} In Progress
-            </span>
-          </div>
-          <div className="mt-3 pt-2.5 border-t border-[#F5F5F7] flex items-center justify-between text-[11px] text-[#86868B]">
-            <span>In-shop workload</span>
-            <span className="font-bold text-[#0071E3] group-hover:underline flex items-center space-x-0.5">
-              <span>View Queue</span>
-              <ChevronRight className="w-3 h-3" />
-            </span>
-          </div>
-        </div>
-
-        {/* Card 2: Ready for Pickup */}
-        <div 
-          onClick={() => {
-            setActiveDashboardSubTab('status-queue');
-            setStatusQueueFilter('Finished');
-          }}
-          className="group relative bg-white p-4 rounded-2xl border border-[#E5E5EA] shadow-2xs hover:shadow-md hover:border-emerald-500/50 transition-all cursor-pointer overflow-hidden select-none"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#86868B]">
-              Ready for Pickup
-            </span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <CheckCircle2 className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-2.5 flex items-baseline justify-between">
-            <span className="text-2xl sm:text-3xl font-black text-[#1D1D1F] tracking-tight">
-              {readyForPickup.length}
-            </span>
-            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-              Completed
-            </span>
-          </div>
-          <div className="mt-3 pt-2.5 border-t border-[#F5F5F7] flex items-center justify-between text-[11px] text-[#86868B]">
-            <span>Awaiting customer</span>
-            <span className="font-bold text-emerald-600 group-hover:underline flex items-center space-x-0.5">
-              <span>View Finished</span>
-              <ChevronRight className="w-3 h-3" />
-            </span>
-          </div>
-        </div>
-
-        {/* Card 3: Total Revenue */}
-        <div 
-          onClick={() => setActiveDashboardSubTab('finance')}
-          className="group relative bg-white p-4 rounded-2xl border border-[#E5E5EA] shadow-2xs hover:shadow-md hover:border-indigo-500/50 transition-all cursor-pointer overflow-hidden select-none"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#86868B]">
-              Total Revenue
-            </span>
-            <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Coins className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-2.5 flex items-baseline justify-between">
-            <span className="text-xl sm:text-2xl font-black text-[#1D1D1F] tracking-tight truncate">
-              {totalRevenue.toLocaleString()} <span className="text-xs font-bold text-[#86868B]">MMK</span>
-            </span>
-            <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200 shrink-0 ml-1">
-              {marginPercent}% Margin
-            </span>
-          </div>
-          <div className="mt-3 pt-2.5 border-t border-[#F5F5F7] flex items-center justify-between text-[11px] text-[#86868B]">
-            <span>Avg: {avgTicketValue.toLocaleString()} MMK</span>
-            <span className="font-bold text-indigo-600 group-hover:underline flex items-center space-x-0.5">
-              <span>Finance</span>
-              <ChevronRight className="w-3 h-3" />
-            </span>
-          </div>
-        </div>
-      </div>
-      )}
-
       {/* SUBTAB 1: STATUS QUEUE */}
       {activeDashboardSubTab === 'status-queue' && (
-        <div className="space-y-6">
+        <div role="tabpanel" id="dash-panel-status-queue" aria-labelledby="dash-tab-status-queue" className="space-y-6">
           {/* Stagnant Bottlenecks Notice */}
           {stagnantWorkOrders.length > 0 && (
             <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-between gap-3 text-xs text-amber-900 shadow-2xs">
@@ -958,9 +1230,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                       <th className="py-2.5 px-3">Ticket # & Date</th>
                       <th className="py-2.5 px-3">Customer & Contact</th>
                       <th className="py-2.5 px-3">Device & Serial/IMEI</th>
-                      <th className="py-2.5 px-3">Symptoms / Service</th>
-                      <th className="py-2.5 px-3">Assigned Tech</th>
-                      <th className="py-2.5 px-3">Priority</th>
+                      <th className="py-2.5 px-3 hidden lg:table-cell">Symptoms / Service</th>
+                      <th className="py-2.5 px-3 hidden lg:table-cell">Assigned Tech</th>
+                      <th className="py-2.5 px-3 hidden lg:table-cell">Priority</th>
                       <th className="py-2.5 px-3">Stage & Status</th>
                       <th className="py-2.5 px-3">Amount</th>
                       <th className="py-2.5 px-3 text-right">Actions</th>
@@ -997,14 +1269,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                           </td>
 
                           {/* Symptoms / Service */}
-                          <td className="py-3 px-3">
+                          <td className="py-3 px-3 hidden lg:table-cell">
                             <p className="text-xs text-[#1D1D1F] line-clamp-1 max-w-[180px]" title={wo.symptomsReported || wo.serviceType}>
                               {wo.symptomsReported || wo.serviceType || 'General Repair'}
                             </p>
                           </td>
 
                           {/* Assigned Tech */}
-                          <td className="py-3 px-3">
+                          <td className="py-3 px-3 hidden lg:table-cell">
                             <div className="flex items-center space-x-1.5">
                               <div className="w-5 h-5 rounded-full bg-slate-200 text-slate-700 font-bold text-[10px] flex items-center justify-center shrink-0">
                                 {(wo.assignedTechName || 'U').charAt(0)}
@@ -1016,7 +1288,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                           </td>
 
                           {/* Priority */}
-                          <td className="py-3 px-3">
+                          <td className="py-3 px-3 hidden lg:table-cell">
                             <PriorityBadge priority={wo.priority} />
                           </td>
 
@@ -1076,7 +1348,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
       {/* SUBTAB 2: REPAIR DATA */}
       {activeDashboardSubTab === 'repair-data' && (
-        <div className="space-y-6">
+        <div role="tabpanel" id="dash-panel-repair-data" aria-labelledby="dash-tab-repair-data" className="space-y-6">
           {/* Top Repair Devices */}
           <div className="bg-white border border-[#E5E5EA] rounded-2xl p-5 shadow-xs space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-[#E5E5EA]">
@@ -1182,73 +1454,24 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
       {/* SUBTAB 3: ASSIGN TECHNICIAN KPI */}
       {activeDashboardSubTab === 'tech-kpi' && (
-        <div className="space-y-6">
-          {/* Workload Balancer Widget */}
-          <div className="bg-white border border-[#E5E5EA] rounded-2xl p-5 shadow-xs space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E5E5EA]">
-              <div className="space-y-0.5">
-                <div className="flex items-center space-x-2">
-                  <div className="p-1.5 bg-[#F0F6FF] text-[#0071E3] rounded-lg">
-                    <Scale className="w-4 h-4" />
-                  </div>
-                  <h3 className="text-sm font-bold text-[#1D1D1F]">
-                    Technician Workload & Queue Balancer
-                  </h3>
-                  <span className="text-[10px] bg-[#0071E3]/10 text-[#0071E3] font-mono font-bold px-2 py-0.5 rounded-full border border-[#0071E3]/20">
-                    {totalActiveTechJobs} Active Jobs In Queue
-                  </span>
-                </div>
-              </div>
-
-              <button
-                onClick={() => onNavigateToTab('pipeline')}
-                className="px-3.5 py-1.5 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#0071E3] font-bold text-xs rounded-xl border border-[#E5E5EA] flex items-center space-x-1.5 transition-all shrink-0 cursor-pointer"
-              >
-                <span>Pipeline Queue</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
+        <div role="tabpanel" id="dash-panel-tech-kpi" aria-labelledby="dash-tab-tech-kpi" className="space-y-6">
+          {/* Queue imbalance suggestion — unique decision-support, kept at top */}
+          {isQueueImbalanced && maxLoadTechs.length > 0 && minLoadTechs.length > 0 && (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs">
+              <span className="font-bold text-amber-800 flex items-center gap-1.5">
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                Queue imbalanced — reassign 1–2 tickets from {maxLoadTechs.map((t) => t.tech.name).join(' / ')} ({maxTechLoad}) to {minLoadTechs.map((t) => t.tech.name).join(' / ')} ({minTechLoad})
+              </span>
+              <span className="text-amber-700/80 text-[10px] font-semibold shrink-0">Load gap: {maxTechLoad - minTechLoad} tickets</span>
             </div>
-
-            {/* Technician Capacity Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              {techQueueData.map(({ tech, activeCount, inProgressCount, receiveCount, pendingCount, loadPercent, loadBadge }) => (
-                <div
-                  key={tech.id}
-                  className="p-3.5 bg-[#F8F9FA] border border-[#E5E5EA] rounded-xl space-y-2.5 shadow-2xs"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2 min-w-0">
-                      <div className="w-7 h-7 rounded-full bg-purple-100 text-[#AF52DE] font-bold text-xs flex items-center justify-center shrink-0">
-                        {tech.name.charAt(0)}
-                      </div>
-                      <div className="min-w-0">
-                        <h4 className="font-bold text-xs text-[#1D1D1F] truncate">{tech.name}</h4>
-                        <p className="text-[10px] text-[#86868B] truncate">{tech.level}</p>
-                      </div>
-                    </div>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border shrink-0 ${loadBadge.color}`}>
-                      {loadBadge.label}
-                    </span>
-                  </div>
-
-                  <div className="flex items-baseline justify-between pt-1">
-                    <span className="text-xl font-extrabold text-[#1D1D1F]">{activeCount} Active</span>
-                    <span className="text-[10px] text-[#86868B] font-mono">{loadPercent}% Capacity</span>
-                  </div>
-
-                  <div className="w-full bg-[#E5E5EA] rounded-full h-1.5 overflow-hidden">
-                    <div className="h-full bg-[#0071E3] rounded-full" style={{ width: `${Math.max(8, loadPercent)}%` }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          )}
 
           {/* Full Technician Performance Tab Component */}
           <TechnicianPerformanceTab
             technicians={technicians}
             workOrders={filteredWorkOrders}
             onNavigateToTab={onNavigateToTab}
+            onOpenTechDetail={(tech) => setDetailTechId(tech.id)}
           />
 
           {/* Technician Leaderboard (merged into this tab) */}
@@ -1256,13 +1479,15 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             technicians={technicians}
             workOrders={filteredWorkOrders}
             onNavigateToTab={onNavigateToTab}
+            onOpenTechDetail={(tech) => setDetailTechId(tech.id)}
+            periodLabel={trendSeries.windowLabel}
           />
         </div>
       )}
 
       {/* SUBTAB 4: INVENTORY */}
       {activeDashboardSubTab === 'inventory' && (
-        <div className="space-y-6">
+        <div role="tabpanel" id="dash-panel-inventory" aria-labelledby="dash-tab-inventory" className="space-y-6">
           {/* Inventory Valuation & Parts Summary */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="bg-white border border-[#E5E5EA] rounded-2xl p-4 shadow-2xs space-y-1">
@@ -1337,7 +1562,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
       {/* SUBTAB 5: FINANCE */}
       {activeDashboardSubTab === 'finance' && (
-        <div className="space-y-6">
+        <div role="tabpanel" id="dash-panel-finance" aria-labelledby="dash-tab-finance" className="space-y-6">
           {/* Financial Performance KPI Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white border border-[#E5E5EA] rounded-2xl p-4 shadow-2xs space-y-1">
@@ -1363,6 +1588,54 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <p className="text-2xl font-extrabold text-rose-600">{financialAnalytics.totalUnpaidBalance.toLocaleString()} MMK</p>
               <p className="text-[11px] text-rose-600 font-semibold">{financialAnalytics.unpaidCount} Tickets Outstanding</p>
             </div>
+          </div>
+
+          {/* Revenue & Repairs Trend — with previous-period comparison */}
+          <div className="bg-white border border-[#E5E5EA] rounded-2xl p-5 shadow-xs space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-[#E5E5EA]">
+              <div className="space-y-0.5">
+                <div className="flex items-center space-x-2">
+                  <div className="p-2 bg-[#0071E3]/10 text-[#0071E3] rounded-xl border border-[#0071E3]/20">
+                    <TrendingUp className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-base font-extrabold text-[#1D1D1F]">Revenue & Repairs Trend</h3>
+                </div>
+                <p className="text-xs text-[#86868B]">{trendSeries.windowLabel} · {trendSeries.bucketDays === 7 ? 'weekly' : 'daily'} buckets · completed tickets only</p>
+              </div>
+              <div className="flex items-center space-x-2 flex-wrap gap-y-1.5">
+                {trendSeries.revenueDeltaPct !== null && (
+                  <span className={`px-2.5 py-1 rounded-full border flex items-center space-x-1 text-[10px] font-extrabold ${trendSeries.revenueDeltaPct >= 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}>
+                    <ArrowUpRight className={`w-3 h-3 ${trendSeries.revenueDeltaPct >= 0 ? '' : 'rotate-90'}`} />
+                    <span>Revenue {trendSeries.revenueDeltaPct >= 0 ? '+' : ''}{trendSeries.revenueDeltaPct}% vs prev period</span>
+                  </span>
+                )}
+                {trendSeries.repairsDeltaPct !== null && (
+                  <span className={`px-2.5 py-1 rounded-full border flex items-center space-x-1 text-[10px] font-extrabold ${trendSeries.repairsDeltaPct >= 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}>
+                    <ArrowUpRight className={`w-3 h-3 ${trendSeries.repairsDeltaPct >= 0 ? '' : 'rotate-90'}`} />
+                    <span>Repairs {trendSeries.repairsDeltaPct >= 0 ? '+' : ''}{trendSeries.repairsDeltaPct}% vs prev period</span>
+                  </span>
+                )}
+                {trendSeries.revenueDeltaPct === null && (
+                  <span className="px-2.5 py-1 rounded-full border border-[#E5E5EA] bg-[#F5F5F7] text-[#86868B] text-[10px] font-bold">No previous-period data</span>
+                )}
+              </div>
+            </div>
+
+            {trendSeries.curRev === 0 && trendSeries.curRep === 0 ? (
+              <div className="p-8 text-center text-xs text-[#86868B] bg-[#F8F9FA] rounded-xl border border-dashed border-[#D2D2D7] space-y-1">
+                <TrendingUp className="w-6 h-6 mx-auto opacity-50" />
+                <p className="font-extrabold text-sm text-[#1D1D1F]">No completed repairs in this period</p>
+                <p className="text-[11px]">Completed (Finished / Taken Out) tickets will appear here.</p>
+              </div>
+            ) : (
+              <TrendChart
+                buckets={trendSeries.buckets}
+                revenue={trendSeries.currentRevenue}
+                repairs={trendSeries.currentRepairs}
+                maxRevenue={trendSeries.maxRevenue}
+                maxRepairs={trendSeries.maxRepairs}
+              />
+            )}
           </div>
 
           {/* Revenue Breakdown by Service & Ticket Value */}
@@ -1403,7 +1676,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
       {/* SUBTAB 6: WARRANTY WATCH (BACKGROUND MONITOR) */}
       {activeDashboardSubTab === 'warranty-watch' && (
-        <div className="space-y-6">
+        <div role="tabpanel" id="dash-panel-warranty-watch" aria-labelledby="dash-tab-warranty-watch" className="space-y-6">
           {/* Header & Live Scanner Banner */}
           <div className="p-5 bg-gradient-to-r from-slate-900 via-rose-950 to-slate-900 text-white rounded-2xl shadow-md space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -1426,21 +1699,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               </div>
 
               <div className="flex items-center space-x-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const btn = document.getElementById('warranty-scan-trigger');
-                    if (btn) {
-                      btn.innerText = 'Scanning...';
-                      setTimeout(() => { btn.innerText = 'Scan Complete'; setTimeout(() => { btn.innerText = 'Run Re-Scan'; }, 1500); }, 600);
-                    }
-                  }}
-                  id="warranty-scan-trigger"
-                  className="px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white font-extrabold text-xs rounded-xl border border-white/20 transition-all flex items-center space-x-1.5 cursor-pointer"
+                <div
+                  className="px-3.5 py-2 bg-white/10 text-white font-extrabold text-xs rounded-xl border border-white/20 flex items-center space-x-1.5"
+                  title="Warranty data recomputes live from ticket data — no manual scan needed"
                 >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  <span>Run Re-Scan</span>
-                </button>
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin [animation-duration:4s]" />
+                  <span>Live monitor · {warrantyCheckData.length} tickets</span>
+                </div>
               </div>
             </div>
 
@@ -1610,7 +1875,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                         <th className="py-2.5 px-3">Ticket #</th>
                         <th className="py-2.5 px-3">Customer & Contact</th>
                         <th className="py-2.5 px-3">Device & Serial</th>
-                        <th className="py-2.5 px-3">Warranty Dates</th>
+                        <th className="py-2.5 px-3 hidden md:table-cell">Warranty Dates</th>
                         <th className="py-2.5 px-3">90-Day Elapsed</th>
                         <th className="py-2.5 px-3">Warranty Health Status</th>
                         <th className="py-2.5 px-3 text-right">Actions</th>
@@ -1636,7 +1901,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                               <p className="text-[10px] font-mono text-[#86868B]">SN: {item.wo.serialNumber || 'N/A'}</p>
                             </td>
 
-                            <td className="py-3 px-3 text-[11px]">
+                            <td className="py-3 px-3 text-[11px] hidden md:table-cell">
                               <p className="text-[#86868B]">Start: <strong className="text-[#1D1D1F]">{item.startDateFormatted}</strong></p>
                               <p className="text-[#86868B]">Expires: <strong className="text-rose-700">{item.expiryDateFormatted}</strong></p>
                             </td>
@@ -1732,6 +1997,16 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           onClose={() => setRosterTicket(null)}
           onPrint={onSelectPrintTag}
           onEdit={(wo) => onOpenNewWorkOrder({ editWorkOrder: wo })}
+        />
+      )}
+
+      {detailTech && (
+        <TechnicianDetailModal
+          tech={detailTech}
+          workOrders={filteredWorkOrders}
+          periodLabel={trendSeries.windowLabel}
+          onClose={() => setDetailTechId(null)}
+          onNavigateToTab={onNavigateToTab}
         />
       )}
     </div>

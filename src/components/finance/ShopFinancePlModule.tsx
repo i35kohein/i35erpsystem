@@ -55,6 +55,7 @@ interface ShopFinancePlModuleProps {
   onAddExpense: (expense: Omit<ExpenseItem, 'id'>) => void;
   onRecordSupplierPayment: (debtId: string, paymentAmount: number, paymentMethod: string, note: string) => void;
   onUpdatePayoutStatus: (payoutId: string, status: 'Pending' | 'Approved' | 'Paid') => void;
+  onSettleInventoryFund?: (ids: string[]) => void;
   dateFilter: string;
   setDateFilter: (filter: string) => void;
 }
@@ -71,11 +72,12 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
   onAddExpense,
   onRecordSupplierPayment,
   onUpdatePayoutStatus,
+  onSettleInventoryFund,
   dateFilter,
   setDateFilter,
 }) => {
   const activePaymentMethods = getActivePaymentMethods(systemSettings).filter((m) => m.enabled);
-  const [activeTab, setActiveTab] = useState<'overview' | 'revenue' | 'expenses' | 'inventory-asset' | 'commissions' | 'accounts-payable'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'revenue' | 'expenses' | 'inventory-asset' | 'commissions' | 'accounts-payable' | 'inventory-fund' | 'parts-revenue'>('overview');
   const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
   const [selectedDebtForPayment, setSelectedDebtForPayment] = useState<SupplierDebtRecord | null>(null);
 
@@ -117,11 +119,30 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
     });
   }, [workOrders, dateFilter]);
 
+  // Inventory Fund: parts taken from stock awaiting settlement (internal debt
+  // to the shop's parts fund — set aside money / restock to clear it).
+  const fundTickets = filteredWorkOrders.filter((wo) => wo.inventoryConsumptionAmount);
+  const pendingFundTickets = fundTickets.filter((wo) => wo.inventorySettlementStatus !== 'settled');
+  const pendingFundCount = pendingFundTickets.length;
+  const pendingFundTotal = pendingFundTickets.reduce((sum, wo) => sum + (wo.inventoryConsumptionAmount || 0), 0);
+  const settledFundTotal = fundTickets
+    .filter((wo) => wo.inventorySettlementStatus === 'settled')
+    .reduce((sum, wo) => sum + (wo.inventoryConsumptionAmount || 0), 0);
+
+  // Parts revenue per ticket: selling price of the inventory parts sold (same
+  // lines that consumed stock — partId, non-labor).
+  const partsRevenueOf = (wo: WorkOrder) =>
+    (wo.lineItems || [])
+      .filter((li) => li.partId && !li.isLabor && li.quantity > 0)
+      .reduce((s, li) => s + li.unitPrice * li.quantity, 0);
+  const partsRevenueTotal = fundTickets.reduce((s, wo) => s + partsRevenueOf(wo), 0);
+
   // Financial Calculations
   const financialSummary = useMemo(() => {
     let laborIncome = 0;
     let partsSalesIncome = 0;
     let cogsTotal = 0;
+    let partsUnitsSold = 0;
 
     const paymentMethodsBreakdown = {
       cashDrawer: 0,
@@ -141,6 +162,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
           } else {
             partsSalesIncome += lineTotal;
             cogsTotal += lineCost;
+            partsUnitsSold += li.quantity;
           }
         });
       } else {
@@ -166,6 +188,10 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
     const totalRevenue = laborIncome + partsSalesIncome;
     const grossProfit = totalRevenue - cogsTotal;
     const grossMarginPercent = totalRevenue > 0 ? Math.round((grossProfit / totalRevenue) * 100) : 0;
+
+    // Parts-specific P&L: sold units, revenue, COGS, gross profit, margin %
+    const partsProfit = partsSalesIncome - cogsTotal;
+    const partsMarginPercent = partsSalesIncome > 0 ? Math.round((partsProfit / partsSalesIncome) * 100) : 0;
 
     // Total Expenses
     const totalOpEx = expenses.reduce((acc, curr) => acc + curr.amount, 0);
@@ -194,8 +220,11 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
     return {
       laborIncome,
       partsSalesIncome,
-      totalRevenue,
+      partsUnitsSold,
       cogsTotal,
+      partsProfit,
+      partsMarginPercent,
+      totalRevenue,
       grossProfit,
       grossMarginPercent,
       totalOpEx,
@@ -210,6 +239,44 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
       pendingCommissionsAmount,
     };
   }, [filteredWorkOrders, expenses, parts, supplierDebts, technicianPayouts]);
+
+  // Parts profit by category: which parts make the money this period.
+  const partsCategoryProfit = useMemo(() => {
+    const map = new Map<string, { units: number; revenue: number; cost: number }>();
+    filteredWorkOrders.forEach((wo) => {
+      (wo.lineItems || []).forEach((li) => {
+        if (li.partId && !li.isLabor && li.quantity > 0) {
+          const part = parts.find((p) => p.id === li.partId);
+          const category = part?.category || 'Uncategorized';
+          const entry = map.get(category) || { units: 0, revenue: 0, cost: 0 };
+          entry.units += li.quantity;
+          entry.revenue += li.unitPrice * li.quantity;
+          entry.cost += (li.unitCost || part?.costPrice || 0) * li.quantity;
+          map.set(category, entry);
+        }
+      });
+    });
+    return [...map.entries()]
+      .map(([category, v]) => ({ category, ...v, profit: v.revenue - v.cost }))
+      .sort((a, b) => b.profit - a.profit);
+  }, [filteredWorkOrders, parts]);
+
+  // Parts sold per ticket (only tickets with part line items)
+  const partsTickets = useMemo(() => {
+    return filteredWorkOrders
+      .map((wo) => {
+        const lines = (wo.lineItems || []).filter((li) => li.partId && !li.isLabor && li.quantity > 0);
+        if (!lines.length) return null;
+        return {
+          wo,
+          units: lines.reduce((s, li) => s + li.quantity, 0),
+          revenue: lines.reduce((s, li) => s + li.unitPrice * li.quantity, 0),
+          cost: lines.reduce((s, li) => s + (li.unitCost || 0) * li.quantity, 0),
+        };
+      })
+      .filter((x): x is NonNullable<typeof x> => x !== null)
+      .sort((a, b) => b.revenue - a.revenue);
+  }, [filteredWorkOrders]);
 
   const handleSaveExpenseSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -283,6 +350,8 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
           { id: 'inventory-asset', label: '3. Parts Asset Valuation', icon: Boxes },
           { id: 'commissions', label: '4. Tech Commissions', icon: Users },
           { id: 'accounts-payable', label: '5. Accounts Payable / Debts', icon: Truck, badge: financialSummary.overdueDebtsCount > 0 ? `${financialSummary.overdueDebtsCount} Overdue` : undefined },
+          { id: 'inventory-fund', label: '6. Inventory Fund', icon: Coins, badge: pendingFundCount > 0 ? `${pendingFundCount} To Settle` : undefined },
+          { id: 'parts-revenue', label: '7. Parts Revenue & Profit', icon: Boxes, badge: financialSummary.partsUnitsSold > 0 ? `${financialSummary.partsUnitsSold} Sold` : undefined },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -357,9 +426,15 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                   {financialSummary.grossMarginPercent}% Gross
                 </span>
               </div>
-              <div className="pt-2 border-t border-[#F5F5F7] text-[11px] font-bold flex justify-between text-[#86868B]">
-                <span>Parts COGS Cost:</span>
-                <span className="text-rose-600 font-mono">-{financialSummary.cogsTotal.toLocaleString()} MMK</span>
+              <div className="pt-2 border-t border-[#F5F5F7] text-[11px] font-bold space-y-0.5">
+                <div className="flex justify-between text-[#86868B]">
+                  <span>Parts COGS Cost:</span>
+                  <span className="text-rose-600 font-mono">-{financialSummary.cogsTotal.toLocaleString()} MMK</span>
+                </div>
+                <div className="flex justify-between text-[#1E7E34]">
+                  <span>Parts Profit:</span>
+                  <span className="font-mono">+{financialSummary.partsProfit.toLocaleString()} MMK</span>
+                </div>
               </div>
             </div>
 
@@ -1072,6 +1147,241 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                 Submit Payment
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* SUB-VIEW 7: INVENTORY FUND */}
+      {activeTab === 'inventory-fund' && (
+        <div className="bg-white border border-[#E5E5EA] rounded-2xl p-5 space-y-5 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E5E5EA]">
+            <div>
+              <h3 className="font-extrabold text-base text-[#1D1D1F]">Inventory Fund — Parts Cost Settlement</h3>
+              <p className="text-xs text-[#86868B] font-medium">
+                Parts taken from stock are an internal debt to the shop's parts fund. Settle once the money is set aside or replacement stock is bought.
+              </p>
+            </div>
+            <div className="flex items-center gap-3 text-right font-mono">
+              <div>
+                <span className="text-[10px] text-[#86868B] block">Parts Revenue</span>
+                <span className="text-lg font-black text-[#16A34A]">{partsRevenueTotal.toLocaleString()} MMK</span>
+              </div>
+              <div className="h-8 w-px bg-[#E5E5EA]" />
+              <div>
+                <span className="text-[10px] text-[#86868B] block">Pending Settlement</span>
+                <span className="text-lg font-black text-amber-600">{pendingFundTotal.toLocaleString()} MMK</span>
+              </div>
+              <div className="h-8 w-px bg-[#E5E5EA]" />
+              <div>
+                <span className="text-[10px] text-[#86868B] block">Settled This Period</span>
+                <span className="text-lg font-black text-emerald-600">{settledFundTotal.toLocaleString()} MMK</span>
+              </div>
+            </div>
+          </div>
+
+          {pendingFundTickets.length > 0 && (
+            <button
+              type="button"
+              onClick={() => onSettleInventoryFund?.(pendingFundTickets.map((wo) => wo.id))}
+              className="w-full p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs font-extrabold text-amber-800 hover:bg-amber-100 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              Mark All {pendingFundTickets.length} Pending Tickets Settled ({pendingFundTotal.toLocaleString()} MMK)
+            </button>
+          )}
+
+          <div className="overflow-x-auto border border-[#E5E5EA] rounded-xl text-xs">
+            <table className="w-full text-left">
+              <thead className="bg-[#F5F5F7] text-[#86868B] uppercase font-mono text-[10px]">
+                <tr>
+                  <th className="p-3">Ticket</th>
+                  <th className="p-3">Device</th>
+                  <th className="p-3">Parts Revenue</th>
+                  <th className="p-3">Parts Cost</th>
+                  <th className="p-3">Parts Margin</th>
+                  <th className="p-3">Consumed</th>
+                  <th className="p-3">Status</th>
+                  <th className="p-3 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#E5E5EA]">
+                {fundTickets.map((wo) => {
+                  const pending = wo.inventorySettlementStatus !== 'settled';
+                  const partsRev = partsRevenueOf(wo);
+                  const partsCost = wo.inventoryConsumptionAmount || 0;
+                  return (
+                    <tr key={wo.id} className="hover:bg-slate-50">
+                      <td className="p-3 font-mono font-bold text-[#0071E3]">{wo.orderNumber}</td>
+                      <td className="p-3 font-extrabold text-[#1D1D1F]">{wo.deviceModel}</td>
+                      <td className="p-3 font-mono font-bold text-[#16A34A]">{partsRev.toLocaleString()} MMK</td>
+                      <td className="p-3 font-mono font-black text-[#1D1D1F]">{partsCost.toLocaleString()} MMK</td>
+                      <td className="p-3 font-mono font-black text-[#0071E3]">+{(partsRev - partsCost).toLocaleString()} MMK</td>
+                      <td className="p-3 font-mono text-[#86868B]">
+                        {wo.inventoryConsumedAt ? new Date(wo.inventoryConsumedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}
+                      </td>
+                      <td className="p-3">
+                        <span className={`text-[10px] font-black px-2.5 py-1 rounded-md ${
+                          pending ? 'bg-amber-100 text-amber-900' : 'bg-emerald-100 text-[#16A34A]'
+                        }`}>
+                          {pending ? 'PENDING SETTLE' : 'SETTLED'}
+                        </span>
+                      </td>
+                      <td className="p-3 text-right">
+                        {pending ? (
+                          <button
+                            type="button"
+                            onClick={() => onSettleInventoryFund?.([wo.id])}
+                            className="px-3 py-1.5 bg-[#0071E3] hover:bg-[#0051B3] text-white font-extrabold text-xs rounded-xl shadow-2xs cursor-pointer"
+                          >
+                            Mark Settled
+                          </button>
+                        ) : (
+                          <span className="text-[10px] text-emerald-700 font-bold">
+                            ✓ {wo.inventorySettledAt ? new Date(wo.inventorySettledAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            {fundTickets.length === 0 && (
+              <div className="p-8 text-center text-xs text-[#86868B] space-y-1">
+                <Coins className="w-6 h-6 mx-auto opacity-50" />
+                <p className="font-extrabold text-sm text-[#1D1D1F]">No parts used from inventory in this period</p>
+                <p>When a ticket consumes stock at checkout, its parts cost appears here for settlement.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      {/* SUB-VIEW 8: PARTS REVENUE & PROFIT (standalone) */}
+      {activeTab === 'parts-revenue' && (
+        <div className="bg-white border border-[#E5E5EA] rounded-2xl p-5 space-y-5 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E5E5EA]">
+            <div>
+              <h3 className="font-extrabold text-base text-[#1D1D1F]">Parts Revenue & Profit</h3>
+              <p className="text-xs text-[#86868B] font-medium">
+                How much parts sold this period and how much profit they made — by category and by ticket.
+              </p>
+            </div>
+            <div className="text-right font-mono">
+              <span className="text-xs text-[#86868B]">Parts Sold This Period:</span>
+              <span className="block text-lg font-black text-[#16A34A]">{financialSummary.partsSalesIncome.toLocaleString()} MMK</span>
+            </div>
+          </div>
+
+          {/* P&L summary cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="p-3.5 bg-white border border-[#E5E5EA] rounded-xl shadow-2xs">
+              <span className="text-[10px] font-bold text-[#86868B] uppercase block">Units Sold</span>
+              <p className="text-xl font-black text-[#1D1D1F] mt-1">{financialSummary.partsUnitsSold}</p>
+              <span className="text-[10px] text-[#86868B] font-bold">parts this period</span>
+            </div>
+            <div className="p-3.5 bg-white border border-[#E5E5EA] rounded-xl shadow-2xs">
+              <span className="text-[10px] font-bold text-[#86868B] uppercase block">Parts Revenue</span>
+              <p className="text-xl font-black text-[#16A34A] mt-1">{financialSummary.partsSalesIncome.toLocaleString()} MMK</p>
+              <span className="text-[10px] text-[#86868B] font-bold">selling price</span>
+            </div>
+            <div className="p-3.5 bg-white border border-[#E5E5EA] rounded-xl shadow-2xs">
+              <span className="text-[10px] font-bold text-[#86868B] uppercase block">Parts COGS</span>
+              <p className="text-xl font-black text-rose-600 mt-1">-{financialSummary.cogsTotal.toLocaleString()} MMK</p>
+              <span className="text-[10px] text-[#86868B] font-bold">unit cost</span>
+            </div>
+            <div className="p-3.5 bg-gradient-to-br from-emerald-50 to-white border border-[#34C759]/30 rounded-xl shadow-2xs">
+              <span className="text-[10px] font-bold text-[#86868B] uppercase block">Parts Profit</span>
+              <div className="flex items-baseline justify-between mt-1">
+                <p className="text-xl font-black text-[#1E7E34]">+{financialSummary.partsProfit.toLocaleString()} MMK</p>
+                <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full ${
+                  financialSummary.partsMarginPercent >= 40 ? 'bg-emerald-100 text-[#16A34A]' : 'bg-amber-100 text-amber-800'
+                }`}>
+                  {financialSummary.partsMarginPercent}%
+                </span>
+              </div>
+              <span className="text-[10px] text-[#86868B] font-bold">gross margin</span>
+            </div>
+          </div>
+
+          {/* Top parts categories by profit */}
+          <div className="space-y-2">
+            <h4 className="font-extrabold text-xs text-[#1D1D1F] uppercase tracking-wider">Profit by Parts Category</h4>
+            {partsCategoryProfit.length === 0 ? (
+              <div className="p-8 text-center text-xs text-[#86868B] bg-[#F8F9FA] rounded-xl border border-dashed border-[#D2D2D7]">
+                <Boxes className="w-6 h-6 mx-auto opacity-50" />
+                <p className="font-extrabold text-sm text-[#1D1D1F]">No parts sold in this period</p>
+                <p>Parts sold on repair tickets will appear here grouped by category.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto border border-[#E5E5EA] rounded-xl">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-[#F5F5F7] text-[#86868B] uppercase font-mono text-[10px]">
+                    <tr>
+                      <th className="p-3">Parts Category</th>
+                      <th className="p-3 text-center">Units</th>
+                      <th className="p-3 text-center">Revenue</th>
+                      <th className="p-3 text-center">COGS</th>
+                      <th className="p-3 text-center">Profit</th>
+                      <th className="p-3 text-right">Margin</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#E5E5EA]">
+                    {partsCategoryProfit.slice(0, 10).map((row) => (
+                      <tr key={row.category} className="hover:bg-slate-50">
+                        <td className="p-3 font-extrabold text-[#1D1D1F]">{row.category}</td>
+                        <td className="p-3 text-center font-mono font-bold">{row.units}</td>
+                        <td className="p-3 text-center font-mono text-[#16A34A]">{row.revenue.toLocaleString()} MMK</td>
+                        <td className="p-3 text-center font-mono text-rose-600">{row.cost.toLocaleString()} MMK</td>
+                        <td className="p-3 text-center font-mono font-black text-[#1E7E34]">+{row.profit.toLocaleString()} MMK</td>
+                        <td className="p-3 text-right font-mono font-bold text-[#0071E3]">
+                          {row.revenue > 0 ? Math.round((row.profit / row.revenue) * 100) : 0}%
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* Parts sold per ticket */}
+          <div className="space-y-2">
+            <h4 className="font-extrabold text-xs text-[#1D1D1F] uppercase tracking-wider">Parts Sold by Ticket ({partsTickets.length})</h4>
+            {partsTickets.length === 0 ? (
+              <div className="p-8 text-center text-xs text-[#86868B] bg-[#F8F9FA] rounded-xl border border-dashed border-[#D2D2D7]">
+                <p className="font-extrabold text-sm text-[#1D1D1F]">No tickets with parts in this period</p>
+                <p>Repair tickets that used/sold inventory parts will be listed here.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto border border-[#E5E5EA] rounded-xl">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-[#F5F5F7] text-[#86868B] uppercase font-mono text-[10px]">
+                    <tr>
+                      <th className="p-3">Ticket</th>
+                      <th className="p-3">Device / Customer</th>
+                      <th className="p-3 text-center">Parts Units</th>
+                      <th className="p-3 text-center">Parts Revenue</th>
+                      <th className="p-3 text-center">Parts COGS</th>
+                      <th className="p-3 text-right">Parts Profit</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#E5E5EA]">
+                    {partsTickets.map(({ wo, units, revenue, cost }) => (
+                      <tr key={wo.id} className="hover:bg-slate-50">
+                        <td className="p-3 font-mono font-bold text-[#0071E3]">{wo.orderNumber}</td>
+                        <td className="p-3">
+                          <span className="font-bold text-[#1D1D1F] block">{wo.deviceModel}</span>
+                          <span className="text-[10px] text-[#86868B]">{wo.customerName}</span>
+                        </td>
+                        <td className="p-3 text-center font-mono font-bold">{units}</td>
+                        <td className="p-3 text-center font-mono text-[#16A34A]">{revenue.toLocaleString()} MMK</td>
+                        <td className="p-3 text-center font-mono text-rose-600">{cost.toLocaleString()} MMK</td>
+                        <td className="p-3 text-right font-mono font-black text-[#1E7E34]">+{(revenue - cost).toLocaleString()} MMK</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       )}
