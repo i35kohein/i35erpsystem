@@ -52,11 +52,11 @@ export const UserRoleSwitcher: React.FC<UserRoleSwitcherProps> = ({
   const CurrentIcon = currentBadge.icon;
 
   return (
-    <div className="relative inline-block text-left">
+    <div className="relative inline-block w-full min-w-0 text-left">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center space-x-2 rounded-xl border transition-all cursor-pointer shadow-2xs active:scale-95 w-full ${
+        className={`flex items-center space-x-2 rounded-xl border transition-all cursor-pointer shadow-2xs active:scale-95 w-full min-w-0 ${
           currentUser.role === 'Admin'
             ? 'bg-purple-50/80 hover:bg-purple-100/90 border-purple-200 text-purple-900'
             : currentUser.role === 'Technician'
@@ -73,7 +73,7 @@ export const UserRoleSwitcher: React.FC<UserRoleSwitcherProps> = ({
           {!compact && (
             <div className="text-left min-w-0">
               <div className="flex items-center space-x-1.5">
-                <span className="font-extrabold truncate max-w-[110px]">
+                <span className="font-extrabold truncate max-w-[96px]">
                   {currentUser.name}
                 </span>
                 <span className={`px-1.5 py-0.2 rounded-md text-[9px] font-extrabold border ${currentBadge.bgColor}`}>
@@ -97,7 +97,7 @@ export const UserRoleSwitcher: React.FC<UserRoleSwitcherProps> = ({
             onClick={() => setIsOpen(false)}
           />
           <div className={`absolute z-50 w-56 max-w-[calc(100vw-1rem)] rounded-2xl bg-white border border-[#D2D2D7] shadow-2xl p-2 space-y-1.5 animate-in fade-in zoom-in-95 duration-150 ${
-            compact ? 'left-full bottom-0 ml-2' : 'left-full bottom-0 ml-2'
+            compact ? 'left-full bottom-0 ml-2' : 'left-0 bottom-full mb-2'
           }`}>
             <div className="px-3 py-2 border-b border-[#E5E5EA]">
               <span className="text-[10px] font-extrabold text-[#86868B] uppercase tracking-wider block">
