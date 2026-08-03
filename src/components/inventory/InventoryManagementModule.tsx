@@ -47,7 +47,7 @@ import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
 import { getAvailableColorsForModel, getRealisticColorStyle } from '../intake/deviceData';
 import { toast } from '../../lib/toast';
-import { sortModelsNewestFirst } from '../../utils/modelSort';
+import { sortModelsNewestFirst, compareModelsNewestFirst } from '../../utils/modelSort';
 
 const isSameDeviceModel = (left: string, right: string) =>
   left.trim().toLocaleLowerCase() === right.trim().toLocaleLowerCase();
@@ -554,6 +554,14 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         part.deviceCompatibility.some((d) => d.toLowerCase().includes(query));
 
       return matchesQuality && matchesCategory && matchesModel && matchesLowStock && matchesSearch;
+    }).sort((a, b) => {
+      // Group by device model (newest iPhone first), then category, then name.
+      const modelOf = (p: PartItem) => (p.deviceCompatibility && p.deviceCompatibility[0]) || '';
+      const byModel = compareModelsNewestFirst(modelOf(a), modelOf(b));
+      if (byModel !== 0) return byModel;
+      const byCategory = (a.category || '').localeCompare(b.category || '');
+      if (byCategory !== 0) return byCategory;
+      return (a.name || '').localeCompare(b.name || '', undefined, { numeric: true, sensitivity: 'base' });
     });
   }, [parts, selectedQuality, selectedCategory, selectedModelFilter, showLowStockOnly, activeSearchQuery]);
 
