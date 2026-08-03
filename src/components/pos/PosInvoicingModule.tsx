@@ -185,9 +185,12 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     if (!selectedWo) return parts;
 
     const model = selectedWo.deviceModel || '';
+    // Include ALL line items (labor + parts) so a "Battery" labor line or a
+    // "Back Glass" part line both drive the category filter. Previously only
+    // non-labor items were used, so battery/display repairs added as labor
+    // items showed every inventory category (incl. Backglass).
     const repairText = (selectedWo.lineItems || [])
-      .filter((item) => !item.isLabor)
-      .map((item) => `${item.description || ''} ${item.partName || ''}`)
+      .map((item) => `${item.description || ''} ${item.partName || ''} ${item.name || ''} ${item.category || ''}`)
       .join(' ');
     const normalizedRepairText = normalizeText(repairText);
 
