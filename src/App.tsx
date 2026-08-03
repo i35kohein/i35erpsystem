@@ -51,10 +51,18 @@ import { usePriceCatalog } from './hooks/usePriceCatalog';
 import { OfflineSyncStatusBadge } from './components/common/OfflineSyncStatusBadge';
 import { HoverTooltip } from './components/common/HoverTooltip';
 import { registerToastHandler, unregisterToastHandler } from './lib/toast';
+import { LoginPage } from './components/auth/LoginPage';
 
 export default function App() {
   const { t } = useLanguage();
   const [isOnline, setIsOnline] = useState(() => typeof navigator === 'undefined' || navigator.onLine);
+  const [authUser, setAuthUser] = useState<{ email: string; name: string } | null>(() => {
+    try {
+      const raw = localStorage.getItem('i35_session_user');
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  });
+  const [authChecking, setAuthChecking] = useState(true);
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [searchQuery, setSearchQuery] = useState<string>('');
   
@@ -314,7 +322,32 @@ export default function App() {
   useEffect(() => {
     registerToastHandler(addToast);
     return () => unregisterToastHandler();
+  }, [addToast]);
+
+  // Verify stored session against the server on first load
+  useEffect(() => {
+    const token = localStorage.getItem('i35_session_token');
+    if (!token) { setAuthChecking(false); return; }
+    (async () => {
+      try {
+        const res = await fetch('/api/auth/verify', { headers: { 'x-session-token': token } });
+        if (!res.ok) {
+          localStorage.removeItem('i35_session_token');
+          localStorage.removeItem('i35_session_user');
+          setAuthUser(null);
+        }
+      } catch { /* offline: keep session */ }
+      setAuthChecking(false);
+    })();
   }, []);
+
+  const handleLogout = () => {
+    const token = localStorage.getItem('i35_session_token');
+    if (token) { fetch('/api/auth/logout', { method: 'POST', headers: { 'x-session-token': token } }).catch(() => {}); }
+    localStorage.removeItem('i35_session_token');
+    localStorage.removeItem('i35_session_user');
+    setAuthUser(null);
+  };
 
   // Smooth scroll to top & reset search on tab change for tab-isolated searching
   useEffect(() => {
@@ -846,6 +879,18 @@ export default function App() {
     );
   }
 
+  if (authChecking) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#F5F5F7]">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#E5E5EA] border-t-[#0071E3]" />
+      </div>
+    );
+  }
+
+  if (!authUser) {
+    return <LoginPage onLoginSuccess={(u) => setAuthUser(u)} />;
+  }
+
   return (
     <div className="basic-ui h-screen h-dvh w-full bg-[#F5F5F7] text-[#1D1D1F] font-sans antialiased flex flex-col lg:flex-row overflow-hidden selection:bg-[#0071E3] selection:text-white">
       {/* Persistent Left Sidebar Navigation */}
@@ -857,6 +902,7 @@ export default function App() {
         currentUser={currentUser}
         users={users}
         onSwitchUser={handleSwitchUser}
+        onLogout={handleLogout}
         onOpenUserManagement={() => setActiveTab('settings')}
         onOpenNewWorkOrder={() => handleOpenNewWorkOrder()}
         onOpenAiAssistant={() => setIsAiAssistantOpen(true)}

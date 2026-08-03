@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { 
+import {
+  LogOut, 
   CircleDot, 
   LayoutDashboard, 
   ClipboardList, 
@@ -36,6 +37,7 @@ interface NavigationProps {
   currentUser?: AppUser;
   users?: AppUser[];
   onSwitchUser?: (user: AppUser) => void;
+  onLogout?: () => void;
   onOpenUserManagement?: () => void;
   onOpenNewWorkOrder: () => void;
   onOpenAiAssistant: () => void;
@@ -57,6 +59,7 @@ export const Navigation: React.FC<NavigationProps> = ({
   currentUser,
   users = [],
   onSwitchUser,
+  onLogout,
   onOpenUserManagement,
   onOpenNewWorkOrder,
   onOpenAiAssistant,
@@ -416,6 +419,20 @@ export const Navigation: React.FC<NavigationProps> = ({
                 compact={isCollapsed}
               />
             </div>
+          )}
+
+          {/* Logout */}
+          {onLogout && (
+            <button
+              type="button"
+              onClick={onLogout}
+              title="Logout"
+              aria-label="Logout"
+              className="w-full flex items-center justify-center gap-2 rounded-lg border border-[#E5E5EA] bg-white py-2 text-[11px] font-bold text-[#1D1D1F] transition hover:bg-[#FF3B30]/5 hover:text-[#FF3B30]"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              {!isCollapsed && <span>Logout</span>}
+            </button>
           )}
 
           {/* System Online Status Pill */}

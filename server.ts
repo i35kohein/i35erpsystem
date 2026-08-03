@@ -3,6 +3,7 @@ import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
+import { randomBytes } from "crypto";
 
 async function startServer() {
   const app = express();
@@ -43,6 +44,37 @@ async function startServer() {
   // Health check
   app.get("/api/health", (_req, res) => {
     res.json({ status: "ok", service: "Apple Repair ERP API", timestamp: new Date().toISOString() });
+  });
+
+
+  // Simple email/password auth — credentials from .env
+  // POST /api/auth/login { email, password } -> { user } | 401
+  const SESSION_TOKENS = new Set<string>();
+  app.post("/api/auth/login", async (req, res) => {
+    const { email, password } = req.body || {};
+    const authEmail = (process.env.AUTH_EMAIL || "").trim().toLowerCase();
+    const authPass = process.env.AUTH_PASSWORD || "";
+    if (!authEmail || !authPass) {
+      res.status(503).json({ success: false, error: "Auth not configured on server" });
+      return;
+    }
+    if (String(email || "").trim().toLowerCase() === authEmail && password === authPass) {
+      const token = randomBytes(24).toString("hex");
+      SESSION_TOKENS.add(token);
+      res.json({ success: true, token, user: { email: authEmail, name: "Ko Hein" } });
+    } else {
+      res.status(401).json({ success: false, error: "Invalid email or password" });
+    }
+  });
+  app.post("/api/auth/logout", (req, res) => {
+    const token = (req.headers["x-session-token"] as string) || "";
+    SESSION_TOKENS.delete(token);
+    res.json({ success: true });
+  });
+  app.post("/api/auth/verify", (req, res) => {
+    const token = (req.headers["x-session-token"] as string) || "";
+    if (SESSION_TOKENS.has(token)) { res.json({ success: true }); }
+    else { res.status(401).json({ success: false }); }
   });
 
   // AI Repair Diagnostics & Panic Log Analyzer
