@@ -297,7 +297,48 @@ ${JSON.stringify(context)}`;
       return res.json();
     };
     const TELEGRAM_SYSTEM_PROMPT =
-      "You are the i35 Apple Service shop copilot (ERP AI assistant). ALWAYS reply in Myanmar (Burmese) language, regardless of the language the user writes in — keep technical terms in English where natural. Be concise, operational, and direct: lead with the conclusion, then give prioritized next actions. If you lack ERP live data, say so rather than inventing it. Do not claim to have completed actions.";
+      "You are the i35 Apple Service shop copilot (ERP AI assistant). ALWAYS reply in Myanmar (Burmese) language, regardless of the language the user writes in — keep technical terms in English where natural. Be concise, operational, and direct: lead with the conclusion, then give prioritized next actions. Use the LIVE ERP CONTEXT below when provided; if ERP data is unavailable, say so honestly rather than inventing it. Do not claim to have completed actions.";
+    // Optional live ERP context for Telegram answers (requires service role key).
+    const SUPABASE_URL = process.env.SUPABASE_URL || "";
+    const SUPABASE_SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE || "";
+    const fetchErpContext = async (): Promise<string> => {
+      if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE) {
+        return "No live ERP context configured (SUPABASE_SERVICE_ROLE missing).";
+      }
+      try {
+        const headers = { apikey: SUPABASE_SERVICE_ROLE, Authorization: `Bearer ${SUPABASE_SERVICE_ROLE}` };
+        const [wosRaw, partsRaw] = await Promise.all([
+          fetch(`${SUPABASE_URL}/rest/v1/erp_records?select=data&collection_name=eq.workOrders`, { headers }),
+          fetch(`${SUPABASE_URL}/rest/v1/erp_records?select=data&collection_name=eq.parts`, { headers }),
+        ]);
+        const wosArr = await wosRaw.json();
+        const wosData: any[] = (Array.isArray(wosArr) ? wosArr : []).map((r: any) => r?.data).filter(Boolean);
+        const partsArr = await partsRaw.json();
+        const partData: any[] = (Array.isArray(partsArr) ? partsArr : []).map((r: any) => r?.data).filter(Boolean);
+        const today = new Date().toISOString().slice(0, 10);
+        const done = ["Finished", "Taken Out"];
+        const active = wosData.filter((w) => !done.includes(w.status) && w.status !== "Cant Repair" && w.status !== "Customer Not Repair");
+        const completedToday = wosData.filter((w) => done.includes(w.status) && (w.completedAt || w.updatedAt || "").slice(0, 10) === today);
+        const unpaid = wosData.filter((w) => !w.isPaid);
+        const lowStock = partData.filter((p) => Number(p.quantityInStock || 0) <= Number(p.reorderPoint || 0)).slice(0, 8);
+        const recent = [...wosData]
+          .sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")))
+          .slice(0, 8)
+          .map((w) => `${w.orderNumber} ${w.deviceModel} ${w.customerName} ${w.status} ${(w.totalAmount || 0).toLocaleString()}MMK`);
+        return JSON.stringify({
+          activeTickets: active.length,
+          completedToday: completedToday.length,
+          unpaidTickets: unpaid.length,
+          outstandingMMK: unpaid.reduce((s, w) => s + ((w.totalAmount || 0) - (w.paidAmount || 0)), 0),
+          partsTotal: partData.length,
+          lowStockParts: lowStock.map((p) => `${p.name}: ${p.quantityInStock} left`),
+          recentTickets: recent,
+        });
+      } catch (err) {
+        console.error("Supabase context error:", err);
+        return "Live ERP context temporarily unavailable.";
+      }
+    };
     const telegramAiAnswer = async (chatId: string, text: string): Promise<string> => {
       const provider = process.env.DEEPSEEK_API_KEY ? "deepseek" : process.env.GEMINI_API_KEY ? "gemini" : "";
       if (!provider) {
@@ -307,7 +348,9 @@ ${JSON.stringify(context)}`;
       const history = tgHistory[chatId] || [];
       const messages = [...history.slice(-20), { role: "user", content: text }];
       try {
-        return await callAiProvider({ provider, apiKey: key, systemPrompt: TELEGRAM_SYSTEM_PROMPT, messages });
+        const context = await fetchErpContext();
+        const systemPrompt = `${TELEGRAM_SYSTEM_PROMPT}\n\nLIVE ERP CONTEXT:\n${context}`;
+        return await callAiProvider({ provider, apiKey: key, systemPrompt, messages });
       } catch (err: any) {
         console.error("Telegram AI error:", err);
         return "AI ခေါ်တဲ့အခါ အမှားဖြစ်သွားပါတယ် — နောက်တစ်ခါ ပြန်စမ်းကြည့်ပါ။";
