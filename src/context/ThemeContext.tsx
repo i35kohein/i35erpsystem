@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { scopedSettingsKey, ACCOUNT_CHANGED_EVENT } from '../utils/accountSettings';
 
 export type ThemeMode = 'minimalist-clean' | 'nunito-navy' | 'apple-clean' | 'dark-slate';
 export type ComponentGeometry = 'square' | 'curved';
@@ -92,26 +93,55 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme, setThemeState] = useState<ThemeMode>(() => {
-    const saved = localStorage.getItem('app_theme');
-    return (saved as ThemeMode) || 'minimalist-clean';
-  });
+const DEFAULT_THEME: ThemeMode = 'minimalist-clean';
 
-  const [geometry, setGeometryState] = useState<ComponentGeometry>(() => {
-    const saved = localStorage.getItem('app_geometry');
-    return (saved as ComponentGeometry) || 'square';
-  });
+const loadTheme = (): ThemeMode => {
+  const key = scopedSettingsKey('app_theme');
+  const saved = localStorage.getItem(key);
+  if (saved) return saved as ThemeMode;
+  // Migration: first per-account read falls back to the legacy global value.
+  if (key !== 'app_theme') {
+    const legacy = localStorage.getItem('app_theme');
+    if (legacy) return legacy as ThemeMode;
+  }
+  return DEFAULT_THEME;
+};
+
+const loadGeometry = (): ComponentGeometry => {
+  const key = scopedSettingsKey('app_geometry');
+  const saved = localStorage.getItem(key);
+  if (saved) return saved as ComponentGeometry;
+  if (key !== 'app_geometry') {
+    const legacy = localStorage.getItem('app_geometry');
+    if (legacy) return legacy as ComponentGeometry;
+  }
+  return 'square';
+};
+
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [theme, setThemeState] = useState<ThemeMode>(loadTheme);
+
+  const [geometry, setGeometryState] = useState<ComponentGeometry>(loadGeometry);
 
   const setTheme = (newTheme: ThemeMode) => {
     setThemeState(newTheme);
-    localStorage.setItem('app_theme', newTheme);
+    localStorage.setItem(scopedSettingsKey('app_theme'), newTheme);
   };
 
   const setGeometry = (newGeometry: ComponentGeometry) => {
     setGeometryState(newGeometry);
-    localStorage.setItem('app_geometry', newGeometry);
+    localStorage.setItem(scopedSettingsKey('app_geometry'), newGeometry);
   };
+
+  // Re-hydrate when the active account changes (login / profile switch / logout).
+  useEffect(() => {
+    const onAccountChanged = () => {
+      setThemeState(loadTheme());
+      setGeometryState(loadGeometry());
+    };
+    window.addEventListener(ACCOUNT_CHANGED_EVENT, onAccountChanged);
+    return () => window.removeEventListener(ACCOUNT_CHANGED_EVENT, onAccountChanged);
+  }, []);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);

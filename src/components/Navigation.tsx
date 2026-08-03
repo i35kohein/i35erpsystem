@@ -251,7 +251,7 @@ export const Navigation: React.FC<NavigationProps> = ({
 
       {/* Main Left Sidebar Navigation */}
       <aside className={`
-        fixed top-0 left-0 z-50 h-full h-dvh shrink-0
+        app-sidebar fixed top-0 left-0 z-50 h-full h-dvh shrink-0
         bg-white border-r border-[#E5E5EA]
         flex flex-col justify-between
         transition-all duration-300 ease-in-out select-none
@@ -471,7 +471,7 @@ export const Navigation: React.FC<NavigationProps> = ({
       </aside>
 
       {/* Mobile Bottom Navigation Bar (Touch-First UI) */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#E5E5EA] px-1 py-1.5 flex items-center justify-around shadow-lg">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#E5E5EA] px-1 pt-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom))] flex items-center justify-around shadow-lg">
         {isTech ? (
           <>
             <button

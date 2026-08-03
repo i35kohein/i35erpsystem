@@ -642,6 +642,30 @@ html[data-theme] [class~="bg-[#ED7132]"] {
   scrollbar-gutter: stable;
 }
 
+/* Fade the right edge of wide (horizontally scrollable) tables on mobile
+   until the user scrolls to the end. Class toggled by the modules that
+   render .workspace-panel__scroll. Only active on touch-sized screens so
+   desktop keeps a crisp edge. */
+@media (max-width: 767px) {
+  .workspace-panel__scroll.scroll-shadow-right {
+    -webkit-mask-image: linear-gradient(to left, transparent 0, black 18px);
+    mask-image: linear-gradient(to left, transparent 0, black 18px);
+  }
+}
+
+/* Landscape phones (e.g. 844x390): the fixed bottom nav eats ~13% of the
+   short viewport height. Hide it — the hamburger drawer still reaches every
+   module — and let <main> reclaim its clearance padding. */
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 1023px) {
+  .basic-ui nav.lg\:hidden {
+    display: none;
+  }
+
+  .basic-ui main {
+    padding-bottom: 1.25rem;
+  }
+}
+
 .workspace-panel__footer {
   flex: 0 0 auto;
 }
@@ -918,4 +942,61 @@ html[data-theme] :is(
    for small text (needs 4.5:1). Darken muted text used at 12-13px sizes. */
 @media screen {
   .text-\[\#86868B\] { color: #6E6E73 !important; }
+}
+
+/* ==========================================================================
+   PWA safe-area insets (viewport-fit=cover is set in index.html).
+   env() resolves to 0 in normal browser tabs, so these are no-ops there;
+   in standalone PWA mode they keep the topbar/drawer clear of the status
+   bar / Dynamic Island and the bottom nav clear of the home indicator.
+   ========================================================================== */
+.app-topbar {
+  height: calc(52px + env(safe-area-inset-top)) !important;
+  min-height: calc(52px + env(safe-area-inset-top)) !important;
+  max-height: calc(52px + env(safe-area-inset-top)) !important;
+  padding-top: env(safe-area-inset-top);
+}
+
+.app-sidebar {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* ==========================================================================
+   Mobile touch floor (UI/UX audit): HIG recommends ≈44px tap targets.
+   Desktop keeps the compact 32px control height; phones/tablets get a
+   40px floor for buttons, inputs and selects, and 36px for table-row
+   icon actions so mis-taps in dense tables are less likely.
+   ========================================================================== */
+@media (max-width: 767px) {
+  .basic-ui button,
+  .basic-ui [role="button"],
+  .basic-ui input,
+  .basic-ui select {
+    min-height: 40px;
+  }
+
+  /* Beat the module-toolbar / app-control 32px rule (higher specificity). */
+  .basic-ui .module-toolbar button,
+  .basic-ui .app-control,
+  .basic-ui [role="tab"] {
+    min-height: 40px;
+  }
+
+  .basic-ui table button {
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  /* Keep tiny text badges/chips from stretching — they are not controls. */
+  .basic-ui button:has(svg:only-child) {
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  /* Icon-only buttons inside table rows stay compact (dense data grids) but
+     no smaller than 36px so they remain tappable. */
+  .basic-ui table button:has(svg:only-child) {
+    min-width: 36px;
+    min-height: 36px;
+  }
 }

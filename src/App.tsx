@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Sparkles, Plus, CircleDot, Search, Filter, Calculator, Folder, Settings, Download, Database, ExternalLink, ClipboardList, Kanban, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, Menu, ChevronDown, PhoneCall, Truck, Boxes, CreditCard, Users, DollarSign, LayoutDashboard, Timer } from 'lucide-react';
 import { subscribeToCollection, saveDocument, saveBatchDocuments, deleteDocument, clearCollection } from './lib/supabase';
+import { setActiveUserId, notifyAccountChanged } from './utils/accountSettings';
 import { DEFAULT_SYSTEM_SETTINGS, INITIAL_USERS } from './data/seedData';
 import { 
   WorkOrder, 
@@ -335,6 +336,8 @@ export default function App() {
           localStorage.removeItem('i35_session_token');
           localStorage.removeItem('i35_session_user');
           setAuthUser(null);
+          setActiveUserId(null);
+          notifyAccountChanged();
         }
       } catch { /* offline: keep session */ }
       setAuthChecking(false);
@@ -347,7 +350,22 @@ export default function App() {
     localStorage.removeItem('i35_session_token');
     localStorage.removeItem('i35_session_user');
     setAuthUser(null);
+    // Settings (theme/language/geometry) revert to the anonymous defaults.
+    setActiveUserId(null);
+    notifyAccountChanged();
   };
+
+  // Per-account settings: persist the active profile id so theme / language /
+  // geometry follow the account, and re-hydrate providers on login & switch.
+  useEffect(() => {
+    if (authUser && currentUser) {
+      setActiveUserId(currentUser.id);
+      // Defer past mount: provider listeners attach after App's effect runs
+      // (child effects fire before parent effects), so a direct dispatch here
+      // would be lost on first load.
+      setTimeout(() => notifyAccountChanged(), 0);
+    }
+  }, [authUser, currentUser]);
 
   // Smooth scroll to top & reset search on tab change for tab-isolated searching
   useEffect(() => {
@@ -364,7 +382,11 @@ export default function App() {
   const [settingsInitialSubTab, setSettingsInitialSubTab] = useState<'users' | 'ai'>('users');
   const [printableTagWo, setPrintableTagWo] = useState<WorkOrder | null>(null);
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  // iPad landscape / small laptops: start with the sidebar collapsed so the
+  // content area keeps usable width (user can still expand it manually).
+  const [isCollapsed, setIsCollapsed] = useState(
+    () => typeof window !== 'undefined' && window.innerWidth >= 1024 && window.innerWidth < 1280
+  );
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Quick Filter Helper States & Resetter
@@ -966,7 +988,7 @@ export default function App() {
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-1.5 bg-[#F5F5F7] hover:bg-[#E5E5EA] border border-[#E5E5EA] text-[#1D1D1F] rounded-xl active:scale-95 transition-all shrink-0 cursor-pointer"
+              className="lg:hidden min-h-11 min-w-11 flex items-center justify-center bg-[#F5F5F7] hover:bg-[#E5E5EA] border border-[#E5E5EA] text-[#1D1D1F] rounded-xl active:scale-95 transition-all shrink-0 cursor-pointer"
               aria-label="Toggle Navigation Menu"
               title="Toggle Navigation Menu"
             >
@@ -1019,7 +1041,7 @@ export default function App() {
             {/* Price Catalog Header Controls */}
             {activeTab === 'price-catalog' ? (
               <>
-                <div className="relative w-28 sm:w-36 md:w-44 lg:w-52 shrink-0">
+                <div className="relative w-32 sm:w-36 md:w-44 lg:w-52 shrink-0">
                   <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#86868B]" />
                   <input
                     type="text"
@@ -1078,7 +1100,7 @@ export default function App() {
               </>
             ) : ['intake', 'pipeline', 'pos', 'inventory', 'crm', 'suppliers', 'qa'].includes(activeTab) ? (
               /* Contextual Search Input */
-              <div className="relative w-28 sm:w-36 md:w-44 lg:w-52 shrink-0">
+              <div className="relative w-32 sm:w-36 md:w-44 lg:w-52 shrink-0">
                 <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#86868B]" />
                 <input
                   type="text"
@@ -1368,7 +1390,7 @@ export default function App() {
           </div>
         </header>
 
-        <main className="min-h-0 flex-1 w-full max-w-full px-3 sm:px-4 lg:px-5 pt-3 pb-5 flex flex-col">
+        <main className="min-h-0 flex-1 w-full max-w-full px-3 sm:px-4 lg:px-5 pt-3 pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-5 flex flex-col">
           <div key={activeTab} className="app-module-content flex-1 w-full min-w-0 flex flex-col">
               {activeTab === 'dashboard' && (
                 <DashboardOverview
@@ -1659,11 +1681,13 @@ export default function App() {
         </main>
       </div>
 
-      {!isAiAssistantOpen && (
+      {/* AI FAB: hidden on POS (its mobile checkout bar owns that bottom zone)
+          and raised above the bottom nav + home indicator on other tabs. */}
+      {!isAiAssistantOpen && activeTab !== 'pos' && (
         <button
           type="button"
           onClick={() => setIsAiAssistantOpen(true)}
-          className="fixed bottom-20 right-4 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent)] text-white shadow-lg lg:hidden"
+          className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-4 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent)] text-white shadow-lg lg:hidden"
           aria-label="Open AI Assistant"
           title="Open AI Assistant"
         >
@@ -1709,7 +1733,7 @@ export default function App() {
       <HoverTooltip />
 
       {/* Floating Toast Notification Container */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none">
+      <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] lg:bottom-6 right-3 sm:right-6 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none">
         <AnimatePresence>
           {toasts.map((toast) => (
             <motion.div

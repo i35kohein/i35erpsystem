@@ -164,7 +164,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                 : 'bg-white hover:bg-slate-100 text-[#6E6E73] hover:text-[#1D1D1F] border-[#E5E5EA]'
             }`}
           >
-            <span>Customer Portal View Simulator</span>
+            <span>Portal Simulator</span>
           </button>
         </div>
       </div>
@@ -172,7 +172,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
       {activeTab === 'CRM' ? (
         <div className="workspace-grid grid grid-cols-1 gap-3 overflow-hidden md:grid-cols-12">
           {/* Customer Directory List */}
-          <div className="flex min-h-0 h-full flex-col md:col-span-5 bg-white border border-[#E5E5EA] rounded-2xl p-4 shadow-xs">
+          <div className="flex min-h-0 h-full flex-col md:col-span-6 xl:col-span-5 bg-white border border-[#E5E5EA] rounded-2xl p-4 shadow-xs">
             <div className="flex justify-between items-center border-b border-[#E5E5EA] pb-2">
               <h2 className="font-bold text-[#1D1D1F] text-xs">Customer Account Roster</h2>
               <span className="text-[10px] font-semibold text-[#86868B]">{filteredCustomers.length} accounts</span>
@@ -339,7 +339,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
           </div>
 
           {/* Customer Details & History */}
-          <div className="flex min-h-0 h-full flex-col md:col-span-7 bg-white border border-[#E5E5EA] rounded-2xl p-5 shadow-xs">
+          <div className="flex min-h-0 h-full flex-col md:col-span-6 xl:col-span-7 bg-white border border-[#E5E5EA] rounded-2xl p-5 shadow-xs">
             {selectedCustomer ? (
               <div className="flex min-h-0 flex-1 flex-col gap-5">
                 <div className="border-b border-[#E5E5EA] pb-3">

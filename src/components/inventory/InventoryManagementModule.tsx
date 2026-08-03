@@ -598,6 +598,29 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     if (showAddModal) resetNewPartData();
   }, [showAddModal]);
 
+  // Scroll-shadow affordance (mobile UX): wide Stock/Matrix tables scroll
+  // horizontally inside .workspace-panel__scroll; fade the right edge while
+  // more content is hidden to the right, and remove the fade at the end.
+  useEffect(() => {
+    const containers = Array.from(document.querySelectorAll<HTMLElement>('.workspace-panel__scroll'));
+    const update = (el: HTMLElement) => {
+      const scrollable = el.scrollWidth - el.clientWidth > 4;
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+      el.classList.toggle('scroll-shadow-right', scrollable && !atEnd);
+    };
+    const onScroll = (e: Event) => update(e.currentTarget as HTMLElement);
+    containers.forEach((el) => {
+      update(el);
+      el.addEventListener('scroll', onScroll, { passive: true });
+    });
+    const ro = new ResizeObserver(() => containers.forEach(update));
+    containers.forEach((el) => ro.observe(el));
+    return () => {
+      containers.forEach((el) => el.removeEventListener('scroll', onScroll));
+      ro.disconnect();
+    };
+  }, [viewMode]);
+
   // Analytics Metrics
   const metrics = useMemo(() => {
     const totalCount = parts.length;
@@ -1131,11 +1154,11 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <thead className="sticky top-0 z-20 bg-[#F5F5F7] text-[#86868B] text-[10px] uppercase font-mono border-b border-[#E5E5EA] shadow-2xs">
                 <tr>
                   <th className="w-[34%] px-2 py-2 bg-[#F5F5F7]">Part Name & SKU</th>
-                  <th className="w-[108px] px-2 py-2 bg-[#F5F5F7]">Quality</th>
+                  <th className="w-[108px] px-2 py-2 bg-[#F5F5F7] hidden md:table-cell">Quality</th>
                   <th className="w-[96px] px-1.5 py-2 bg-[#F5F5F7]">Stock</th>
                   <th className="w-[104px] px-1.5 py-2 bg-[#F5F5F7]">Selling Price</th>
                   {inlineEditMode && <th className="w-[150px] px-1.5 py-2 bg-[#F5F5F7]">Supplier</th>}
-                  <th className="px-2 py-2 bg-[#F5F5F7]">Bin</th>
+                  <th className="px-2 py-2 bg-[#F5F5F7] hidden md:table-cell">Bin</th>
                   {!inlineEditMode && <th className="px-2 py-2 text-right bg-[#F5F5F7]">Detail</th>}
                 </tr>
               </thead>
@@ -1185,7 +1208,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         </td>
 
                         {/* Quality Tier */}
-                        <td className="w-[108px] px-2 py-2">
+                        <td className="w-[108px] px-2 py-2 hidden md:table-cell">
                           {part.qualityTier === 'Original' || part.qualityTier.includes('Original') ? (
                             <span className="inline-flex max-w-[112px] items-center gap-1 truncate rounded-md border border-blue-200 bg-blue-50 px-1.5 py-0.5 text-[10px] font-extrabold text-blue-800">
                               <ShieldCheck className="h-3 w-3 shrink-0 text-blue-600" />
@@ -1311,7 +1334,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         ) : null}
 
                         {/* Location Bin */}
-                        <td className="w-[104px] max-w-[104px] px-1.5 py-2">
+                        <td className="w-[104px] max-w-[104px] px-1.5 py-2 hidden md:table-cell">
                           {inlineEditMode ? (
                             <div className="flex min-w-0 flex-col gap-0.5 text-[9px] font-bold uppercase tracking-wide text-[#86868B]">
                               <span>Bin</span>

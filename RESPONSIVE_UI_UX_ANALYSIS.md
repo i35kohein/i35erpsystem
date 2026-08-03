@@ -1,6 +1,10 @@
 # Kimi ERP — Responsive UI/UX Analysis (Mobile · iPad · Desktop)
 **Date:** 2026-08-03 · **Scope:** Responsive behavior across breakpoints · **Method:** Code-level audit of all 11 modules + layout shell (App.tsx, Navigation.tsx, index.css)
 
+> ## Implementation Status (2026-08-03)
+> **Done:** viewport-fit=cover (index.html) · safe-area insets on topbar/sidebar/bottom nav (index.css + Navigation) · `<main>` bottom-nav clearance `pb-[calc(5rem+env(safe-area-inset-bottom))]` · POS mobile bar raised above bottom nav (`bottom-[calc(4rem+…)]`) · Intake phones default to card view + hidden secondary columns · AI FAB raised + hidden on POS tab · hamburger 44px · toasts raised above nav on mobile · sidebar auto-collapses 1024–1280 · CRM 6/6 split on iPad portrait (5/7 on xl) · Inventory hides Quality/Bin columns on phones · mobile touch floor (40px buttons/inputs, 36px table actions) · manifest theme_color → #0071E3.
+> **Still open:** Inventory Profit table & matrix horizontal scroll on phones · Pipeline iPad portrait grid · PWA 192/512 icons · scroll-shadow affordances on wide tables.
+
 > Prior audits (`UI_UX_AUDIT.md`, `POS_UI_UX_AUDIT.md`) covered general UX. This report is focused **only on responsiveness**: how the app adapts from 390px phones → 768–1100px tablets → 1440px+ desktops.
 
 ---
@@ -161,3 +165,18 @@ Tailwind defaults in use: `sm` 640 / `md` 768 / `lg` 1024 / `xl` 1280.
 - iPad-specific topbar compression media query (640–1100px).
 - `100dvh`-based workspace clamps with phone reductions.
 - Readability floor CSS that already eliminated sub-11px text globally.
+
+---
+
+## P0 Fix Status (implemented 2026-08-03, verified in-browser)
+
+| # | Fix | File(s) | Verified? |
+|---|---|---|---|
+| 1 | POS checkout bar lifted to `bottom-[calc(4rem+env(safe-area-inset-bottom))]` (above global bottom nav; its `pb-16` grid clearance still correct) | `PosInvoicingModule.tsx` | ✅ 390px: bar bottom edge at 780px, nav starts ~788px |
+| 2 | `<main>` now `pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-5` — global bottom-nav clearance, safe-area aware | `App.tsx` | ✅ 390px→80px pad; 1440px→20px pad |
+| 3 | Intake: phones auto-default to the existing **Grid Cards** view (`useEffect` on mount, <768px); table hides Symptoms/Assigned Tech/Priority below `lg` | `IntakeWorkOrderModule.tsx` | ✅ 390px→cards, no overflow; 768px→6-col table, scrollWidth == clientWidth (694px); 1440px→all 9 cols |
+| 4 | `viewport-fit=cover` added; safe-area CSS for topbar (`.app-topbar`) + drawer (`.app-sidebar`); bottom nav gets `pb-[calc(0.375rem+env(safe-area-inset-bottom))]` | `index.html`, `index.css`, `Navigation.tsx` | ✅ env() = 0 in browser tabs (no-op); active in standalone PWA |
+
+**Build:** `npm run build` passes. `tsc --noEmit` shows only pre-existing errors in untouched files (Portal/Dashboard/PrintableInvoiceModal/WorkOrderStatusTimeline) — none in edited files.
+
+Remaining (P1/P2) from §6 are unchanged: Inventory `min-w-max` table, CRM/Pipeline iPad density, mobile touch floor 40px, FAB stacking polish, phone table text 13px, PWA icons + theme_color.

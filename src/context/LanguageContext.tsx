@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Language, translations } from '../data/translations';
+import { scopedSettingsKey, ACCOUNT_CHANGED_EVENT } from '../utils/accountSettings';
 
 interface LanguageContextType {
   language: Language;
@@ -10,11 +11,20 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+const loadLanguage = (): Language => {
+  const key = scopedSettingsKey('app_language');
+  const saved = localStorage.getItem(key);
+  if (saved === 'mm' || saved === 'en') return saved;
+  // Migration: first per-account read falls back to the legacy global value.
+  if (key !== 'app_language') {
+    const legacy = localStorage.getItem('app_language');
+    if (legacy === 'mm' || legacy === 'en') return legacy;
+  }
+  return 'mm';
+};
+
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguageState] = useState<Language>(() => {
-    const saved = localStorage.getItem('app_language');
-    return saved === 'mm' || saved === 'en' ? saved : 'mm';
-  });
+  const [language, setLanguageState] = useState<Language>(loadLanguage);
 
   useEffect(() => {
     document.documentElement.lang = language;
@@ -28,8 +38,15 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
-    localStorage.setItem('app_language', lang);
+    localStorage.setItem(scopedSettingsKey('app_language'), lang);
   };
+
+  // Re-hydrate when the active account changes (login / profile switch / logout).
+  useEffect(() => {
+    const onAccountChanged = () => setLanguageState(loadLanguage());
+    window.addEventListener(ACCOUNT_CHANGED_EVENT, onAccountChanged);
+    return () => window.removeEventListener(ACCOUNT_CHANGED_EVENT, onAccountChanged);
+  }, []);
 
   const t = (key: string, fallback?: string): string => {
     const item = translations[key];

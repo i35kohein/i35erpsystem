@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DateFilterState, filterByDateRange } from '../common/DateFilterSelector';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 import { StatusBadge } from '../common/StatusBadge';
@@ -153,6 +153,12 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   const [isCameraScannerOpen, setIsCameraScannerOpen] = useState<boolean>(false);
   const [ticketToDelete, setTicketToDelete] = useState<WorkOrder | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
+
+  // Phones default to the card grid — the 9-column table is unusable below md.
+  // (User can still switch back to Table; manual choice is preserved.)
+  useEffect(() => {
+    if (window.innerWidth < 768) setViewMode('cards');
+  }, []);
   const [localFilterStatus, setLocalFilterStatus] = useState<string>('ALL');
   const [localDateFilter, setLocalDateFilter] = useState<DateFilterState>({ preset: 'all' });
 
@@ -419,9 +425,9 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                   <th className="w-[132px] px-2 py-2 bg-[#F5F5F7]">Ticket # & Date</th>
                   <th className="w-[148px] px-2 py-2 bg-[#F5F5F7]">Customer & Contact</th>
                   <th className="w-[158px] px-2 py-2 bg-[#F5F5F7]">Device & Serial/IMEI</th>
-                  <th className="px-2 py-2 bg-[#F5F5F7]">Symptoms / Service</th>
-                  <th className="w-[112px] px-2 py-2 bg-[#F5F5F7]">Assigned Tech</th>
-                  <th className="w-[92px] px-2 py-2 bg-[#F5F5F7]">Priority</th>
+                  <th className="px-2 py-2 bg-[#F5F5F7] hidden lg:table-cell">Symptoms / Service</th>
+                  <th className="w-[112px] px-2 py-2 bg-[#F5F5F7] hidden lg:table-cell">Assigned Tech</th>
+                  <th className="w-[92px] px-2 py-2 bg-[#F5F5F7] hidden lg:table-cell">Priority</th>
                   <th className="w-[114px] px-2 py-2 bg-[#F5F5F7]">Stage & Status</th>
                   <th className="w-[112px] px-2 py-2 bg-[#F5F5F7]">Amount</th>
                   <th className="w-[44px] px-2 py-2 text-right bg-[#F5F5F7]">Detail</th>
@@ -473,14 +479,14 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                       </td>
 
                       {/* Symptoms / Service */}
-                      <td className="px-2 py-2 text-[#1D1D1F]">
+                      <td className="px-2 py-2 text-[#1D1D1F] hidden lg:table-cell">
                         <p className="line-clamp-1 max-w-[180px] text-[11px] font-semibold" title={wo.symptomsReported || wo.serviceType}>
                           {wo.symptomsReported || wo.serviceType || 'General Repair'}
                         </p>
                       </td>
 
                       {/* Assigned Tech */}
-                      <td className="px-2 py-2 text-[#1D1D1F]">
+                      <td className="px-2 py-2 text-[#1D1D1F] hidden lg:table-cell">
                         <div className="flex items-center space-x-1.5">
                           <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-200 text-[10px] font-bold text-slate-700">
                             {(wo.assignedTechName || 'U').charAt(0)}
@@ -489,7 +495,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                         </div>
                       </td>
 
-                      <td className="px-2 py-2">
+                      <td className="px-2 py-2 hidden lg:table-cell">
                         <PriorityBadge priority={wo.priority} size="xs" />
                       </td>
 

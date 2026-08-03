@@ -10,7 +10,7 @@
   ],
   "start_url": "/",
   "background_color": "#F5F5F7",
-  "theme_color": "#7360F2",
+  "theme_color": "#0071E3",
   "display": "standalone",
   "orientation": "any",
   "description": "Apple Repair Shop Management ERP with Offline Support and Automatic IndexedDB Data Sync"
