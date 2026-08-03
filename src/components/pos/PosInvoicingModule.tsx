@@ -612,60 +612,56 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 </div>
 
                 <div className="bg-white border border-[#E5E5EA] rounded-xl p-3 space-y-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <div>
-                      <h4 className="text-xs font-extrabold text-[#1D1D1F]">Add Inventory Part Used</h4>
-                      <p className="text-[10px] text-[#86868B]">Pick the stock part used on this ticket before payment.</p>
-                    </div>
-                    <span className="text-[10px] font-mono font-bold text-[#0071E3] bg-[#F0F6FF] px-2 py-0.5 rounded-full border border-[#D6E7FF]">
-                      {filteredInventoryParts.length} parts
-                    </span>
+                  <div>
+                    <h4 className="text-xs font-extrabold text-[#1D1D1F]">Add Inventory Part Used</h4>
+                    <p className="text-[10px] text-[#86868B]">Pick the stock part used on this ticket before payment.</p>
                   </div>
 
-                  <div className="grid grid-cols-[1fr_auto] gap-2 items-end">
-                    <label className="block">
+                  <div className="flex items-center gap-2">
+                    <label className="block min-w-0 flex-1">
                       <span className="block text-[10px] font-bold text-[#86868B] mb-1">Inventory part</span>
-                      <select
-                        value={inventoryPartId || selectedInventoryPart?.id || ''}
-                        onChange={(e) => setInventoryPartId(e.target.value)}
-                        className="w-full rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] px-2.5 py-2 text-[11px] font-semibold text-[#1D1D1F] outline-none focus:border-[#0071E3] focus:ring-1 focus:ring-[#0071E3]/20"
-                      >
-                        {filteredInventoryParts.map((part) => (
-                          <option key={part.id} value={part.id}>
-                            {part.name} • Stock: {part.quantityInStock} • {part.locationBin || 'No bin'}
-                          </option>
-                        ))}
-                      </select>
-                      {selectedInventoryPart && (
-                        <span className={`mt-1 inline-flex items-center gap-1 text-[10px] font-bold ${
-                          selectedInventoryPart.quantityInStock <= 0
-                            ? 'text-rose-600'
-                            : selectedInventoryPart.quantityInStock <= selectedInventoryPart.reorderPoint
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={inventoryPartId || (selectedInventoryPart ? selectedInventoryPart.id : '')}
+                          onChange={(e) => setInventoryPartId(e.target.value)}
+                          className="min-w-0 flex-1 truncate rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] px-2.5 py-2 text-[11px] font-semibold text-[#1D1D1F] outline-none focus:border-[#0071E3] focus:ring-1 focus:ring-[#0071E3]/20"
+                        >
+                          {filteredInventoryParts
+                            .filter((part) => part.quantityInStock > 0)
+                            .map((part) => (
+                              <option key={part.id} value={part.id}>
+                                {part.name} • Stock: {part.quantityInStock}
+                              </option>
+                            ))}
+                          {filteredInventoryParts.filter((part) => part.quantityInStock > 0).length === 0 && (
+                            <option value="">No parts in stock</option>
+                          )}
+                        </select>
+                        {selectedInventoryPart && selectedInventoryPart.quantityInStock > 0 && (
+                          <span className={`inline-flex shrink-0 items-center gap-1 text-[10px] font-bold ${
+                            selectedInventoryPart.quantityInStock <= selectedInventoryPart.reorderPoint
                               ? 'text-amber-600'
                               : 'text-[#34C759]'
-                        }`}>
-                          {selectedInventoryPart.quantityInStock <= 0 ? (
-                            <PackageX className="h-3 w-3" />
-                          ) : selectedInventoryPart.quantityInStock <= selectedInventoryPart.reorderPoint ? (
-                            <AlertTriangle className="h-3 w-3" />
-                          ) : (
-                            <PackageCheck className="h-3 w-3" />
-                          )}
-                          Stock: {selectedInventoryPart.quantityInStock}
-                          {selectedInventoryPart.quantityInStock <= 0
-                            ? ' — Out of stock'
-                            : selectedInventoryPart.quantityInStock <= selectedInventoryPart.reorderPoint
+                          }`}>
+                            {selectedInventoryPart.quantityInStock <= selectedInventoryPart.reorderPoint ? (
+                              <AlertTriangle className="h-3 w-3" />
+                            ) : (
+                              <PackageCheck className="h-3 w-3" />
+                            )}
+                            Stock: {selectedInventoryPart.quantityInStock}
+                            {selectedInventoryPart.quantityInStock <= selectedInventoryPart.reorderPoint
                               ? ` — Low (min ${selectedInventoryPart.reorderPoint})`
                               : ' available'}
-                        </span>
-                      )}
+                          </span>
+                        )}
+                      </div>
                     </label>
 
                     <button
                       type="button"
                       onClick={handleAddInventoryPartToWorkOrder}
                       disabled={!selectedInventoryPart}
-                      className="inline-flex items-center justify-center rounded-lg bg-[#0071E3] px-3 py-2 text-[11px] font-extrabold text-white transition-all hover:bg-[#005BBB] disabled:cursor-not-allowed disabled:opacity-40"
+                      className="mt-5 inline-flex h-9 shrink-0 items-center justify-center rounded-lg bg-[#0071E3] px-3.5 py-2 text-[11px] font-extrabold text-white transition-all hover:bg-[#005BBB] disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       Add Part
                     </button>
