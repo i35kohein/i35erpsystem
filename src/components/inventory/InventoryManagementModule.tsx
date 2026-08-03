@@ -453,6 +453,41 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     [parts]
   );
 
+  // Merge vertically-shared cells (e.g. iPhone 12 & 12 Pro share the same
+  // Battery / Display parts) so the matrix shows ONE number spanning both rows.
+  const matrixMergeGroups = useMemo(() => {
+    const result: Record<string, Record<string, { rowSpan: number; isFirst: boolean; models: string[] }>> = {};
+    matrixCategories.forEach((category) => {
+      const perModel: Record<string, string> = {};
+      matrixModels.forEach((model) => {
+        const ids = parts
+          .filter((p) => p.category === category && p.deviceCompatibility.some((d) => d.toLowerCase() === model.toLowerCase()))
+          .map((p) => p.id)
+          .sort()
+          .join(',');
+        perModel[model] = ids;
+      });
+      const info: Record<string, { rowSpan: number; isFirst: boolean; models: string[] }> = {};
+      let i = 0;
+      while (i < matrixModels.length) {
+        const model = matrixModels[i];
+        const ids = perModel[model];
+        let j = i + 1;
+        while (j < matrixModels.length && perModel[matrixModels[j]] === ids && ids !== '') j++;
+        const span = j - i;
+        if (span > 1) {
+          const models = matrixModels.slice(i, j);
+          models.forEach((m, idx) => {
+            info[m] = { rowSpan: span, isFirst: idx === 0, models };
+          });
+        }
+        i = j;
+      }
+      result[category] = info;
+    });
+    return result;
+  }, [matrixModels, matrixCategories, parts]);
+
   // Inventory category options are owned by System Management / Price List.
   // Old part records must not add obsolete values back into this selector.
   useEffect(() => {
@@ -1289,14 +1324,18 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     <tr key={model} className="hover:bg-slate-50/80">
                       <td className="sticky left-0 z-10 bg-white p-2.5 font-bold text-[#1D1D1F]">{model}</td>
                       {matrixCategories.map((category) => {
+                        const merge = matrixMergeGroups[category]?.[model];
+                        // Cell is consumed by the rowSpan of the row above it.
+                        if (merge && !merge.isFirst) return null;
                         const matchingParts = parts.filter((part) =>
                           part.category === category && part.deviceCompatibility.some((device) => device.toLowerCase() === model.toLowerCase())
                         );
                         const quantity = matchingParts.reduce((total, part) => total + part.quantityInStock, 0);
                         const reorderPoint = matchingParts.reduce((total, part) => total + part.reorderPoint, 0);
                         const isLow = matchingParts.length > 0 && quantity <= reorderPoint;
+                        const sharedLabel = merge && merge.models.length > 1 ? ` · Shared: ${merge.models.join(' + ')}` : '';
                         return (
-                          <td key={category} className="p-1.5 text-center">
+                          <td key={category} rowSpan={merge?.rowSpan ?? 1} className="p-1.5 text-center align-middle">
                             {matchingParts.length ? (
                               <button
                                 type="button"
@@ -1308,7 +1347,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                                 className={`min-w-14 rounded-lg border px-2 py-1 font-mono text-xs font-black ${
                                   quantity === 0 ? 'border-rose-200 bg-rose-50 text-rose-600' : isLow ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'
                                 }`}
-                                title={`${matchingParts.length} SKU${matchingParts.length === 1 ? '' : 's'} · ${quantity} units`}
+                                title={`${matchingParts.length} SKU${matchingParts.length === 1 ? '' : 's'} · ${quantity} units${sharedLabel}`}
                               >
                                 {quantity}
                               </button>
