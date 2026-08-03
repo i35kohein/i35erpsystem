@@ -165,8 +165,8 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
           <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center overflow-hidden">
             <div className={`-rotate-[24deg] select-none border-4 px-10 py-3 font-black uppercase tracking-[0.35em] ${
               isMono
-                ? 'border-black text-black/25'
-                : 'border-[#34C759] text-[#34C759]/25'
+                ? 'border-black/20 text-black/25'
+                : 'border-[#34C759]/20 text-[#34C759]/25'
             }`}
               style={{ fontSize: '64px', lineHeight: 1 }}
             >
