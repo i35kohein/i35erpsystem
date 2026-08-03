@@ -2424,54 +2424,90 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         <div className="printable-print-root fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 p-2 backdrop-blur-sm sm:p-4">
           <style>{`
             @media print {
-              body:has(.printable-print-root) .basic-ui > *:not(:has(.printable-print-root)):not(.printable-print-root):not(.printable-print-root *),
-              body:has(.printable-print-root) main *:not(:has(.printable-print-root)):not(.printable-print-root):not(.printable-print-root *) {
-                display: none !important;
+              /* Visibility pattern: hide everything, reveal only the sheet. */
+              body * {
+                visibility: hidden !important;
               }
-              .printable-print-root,
-              .printable-print-root .matrix-print-sheet {
-                display: block !important;
+              #matrix-print-sheet,
+              #matrix-print-sheet * {
+                visibility: visible !important;
+              }
+              #matrix-print-sheet {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
                 width: 100% !important;
                 max-width: none !important;
                 min-width: 0 !important;
-                height: auto !important;
-                max-height: none !important;
-                overflow: visible !important;
-                position: static !important;
-                background: #fff !important;
-                color: #000 !important;
+                margin: 0 !important;
+                padding: 4mm !important;
                 border: none !important;
                 box-shadow: none !important;
-                margin: 0 !important;
-                padding: 0 !important;
-              }
-              .matrix-print-sheet .matrix-print-no-print {
-                display: none !important;
-              }
-              nav, header, footer, aside, .no-print {
-                display: none !important;
-              }
-              html, body, #root, #main-content-scroll, main {
                 background: #ffffff !important;
                 color: #000000 !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                overflow: visible !important;
-                height: auto !important;
-                max-height: none !important;
-              }
-              .fixed, .inset-0 {
-                position: static !important;
-                background: transparent !important;
-                padding: 0 !important;
-                margin: 0 !important;
                 overflow: visible !important;
               }
-              @page { size: A4 landscape; margin: 8mm; }
+              #matrix-print-sheet .matrix-print-no-print {
+                display: none !important;
+              }
+              #matrix-print-sheet .overflow-x-auto {
+                overflow: visible !important;
+                width: 100% !important;
+              }
+              #matrix-print-sheet .printable-box {
+                border: none !important;
+                padding: 0 !important;
+                border-radius: 0 !important;
+              }
+              #matrix-print-sheet table {
+                width: 100% !important;
+                table-layout: fixed !important;
+                border-collapse: collapse !important;
+                font-size: 8px !important;
+                line-height: 1.25 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+              /* Model column wider; category columns share the rest */
+              #matrix-print-sheet table th:first-child,
+              #matrix-print-sheet table td:first-child {
+                width: 21% !important;
+              }
+              #matrix-print-sheet table th:not(:first-child),
+              #matrix-print-sheet table td:not(:first-child) {
+                width: auto !important;
+              }
+              #matrix-print-sheet table th,
+              #matrix-print-sheet table td {
+                padding: 3px 4px !important;
+                border: 1px solid #888 !important;
+                overflow-wrap: break-word !important;
+                word-break: break-word !important;
+              }
+              /* Keep merged (rowSpan) cells visually clear in B&W print */
+              #matrix-print-sheet table td[rowspan] {
+                border-top: 2px solid #555 !important;
+                border-bottom: 2px solid #555 !important;
+              }
+              #matrix-print-sheet table th {
+                font-size: 7px !important;
+                font-weight: 700 !important;
+                background: #eee !important;
+              }
+              #matrix-print-sheet h1 {
+                font-size: 14px !important;
+              }
+              #matrix-print-sheet thead {
+                display: table-header-group !important;
+              }
+              #matrix-print-sheet tr {
+                break-inside: avoid !important;
+              }
+              @page { size: A4 landscape; margin: 6mm; }
             }
           `}</style>
 
-          <div className="matrix-print-sheet mx-auto my-4 w-full max-w-5xl rounded-2xl border border-[#E5E5EA] bg-white p-6 shadow-xl">
+          <div id="matrix-print-sheet" className="matrix-print-sheet mx-auto my-4 w-full max-w-6xl rounded-2xl border border-[#E5E5EA] bg-white p-4 shadow-xl">
             {/* Screen-only header with close/print actions */}
             <div className="matrix-print-no-print mb-4 flex items-center justify-between">
               <h3 className="text-sm font-extrabold text-[#1D1D1F]">Ground Stock Checking Sheet</h3>
@@ -2494,7 +2530,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             </div>
 
             {/* Printable sheet */}
-            <div className="rounded-xl border border-[#E5E5EA] p-4">
+            <div className="printable-box rounded-xl border border-[#E5E5EA] p-4">
               <div className="mb-3 flex items-start justify-between border-b border-[#E5E5EA] pb-3">
                 <div>
                   <h1 className="text-base font-black text-[#1D1D1F]">i35 Apple Service — Ground Stock Checking</h1>
