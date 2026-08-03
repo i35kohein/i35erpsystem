@@ -145,7 +145,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
   // Customer Form State (Replaced Email with Town / City)
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
-  const [customerTown, setCustomerTown] = useState('Yangon');
+  const [customerTown, setCustomerTown] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
   const [customerType, setCustomerType] = useState<'Retail' | 'B2B Corporate' | 'Wholesale Mail-In'>('Retail');
 
@@ -172,7 +172,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
     if (editWorkOrder) {
       setCustomerName(editWorkOrder.customerName || '');
       setCustomerPhone(editWorkOrder.customerPhone || '');
-      setCustomerTown(editWorkOrder.customerAddress || 'Yangon');
+      setCustomerTown(editWorkOrder.customerAddress || '');
       setCustomerAddress(editWorkOrder.customerAddress || '');
       setCustomerType(editWorkOrder.customerType || 'Retail');
       setDeviceModel(editWorkOrder.deviceModel || '');
@@ -278,7 +278,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       if (found) {
         setMatchedCustomer(found);
         setCustomerName(found.name);
-        setCustomerTown(found.company || 'Yangon');
+        setCustomerTown(found.company || '');
         setCustomerType(found.type);
       } else {
         setMatchedCustomer(null);
@@ -352,13 +352,14 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       customerId: baseWorkOrder?.customerId || (matchedCustomer ? matchedCustomer.id : `cust-${Date.now()}`),
       customerName,
       customerPhone,
-      customerEmail: `${(customerTown || 'yangon').toLowerCase().replace(/\s+/g, '')}@customer.mm`,
-      customerAddress: customerTown || customerAddress || 'Yangon',
+      customerEmail: baseWorkOrder?.customerEmail || '',
+      customerAddress: customerTown || customerAddress || '',
       customerType,
       deviceCategory: baseWorkOrder?.deviceCategory || (deviceModel.includes('iPad') ? 'iPad' : deviceModel.includes('MacBook') ? 'MacBook' : 'iPhone'),
       deviceModel,
-      serialNumber: serialNumber || `SN-${Math.floor(Math.random() * 900000 + 100000)}`,
-      imei: imei || `35${Math.floor(Math.random() * 8999999999993 + 1000000000000)}`,
+      // No fake auto-generated serial/IMEI — left empty so the real values are entered manually.
+      serialNumber: serialNumber.trim() || '',
+      imei: imei.trim() || '',
       deviceColor,
       passcode: passcode || 'None',
       findMyStatus,
@@ -398,7 +399,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           id: `log-${Date.now()}`,
           timestamp: formattedDate,
           author: 'Intake Desk',
-          note: `Repair ticket ${newOrderNumber} created. Customer Town: ${customerTown}. Device: ${deviceModel} (${deviceColor}).`,
+          note: `Repair ticket ${newOrderNumber} created. Device: ${deviceModel} (${deviceColor}).`,
           statusChange: 'Receive'
         }
       ],
@@ -433,7 +434,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
     setCreatedTicket(null);
     setCustomerName('');
     setCustomerPhone('');
-    setCustomerTown('Yangon');
+    setCustomerTown('');
     setCustomerAddress('');
     setSerialNumber('');
     setImei('');
@@ -473,7 +474,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               <span className="text-[#86868B]">Town / City:</span>
               <span className="font-bold text-[#1D1D1F] flex items-center space-x-1">
                 <MapPin className="w-3.5 h-3.5 text-[#0071E3]" />
-                <span>{createdTicket.customerAddress || customerTown || 'Yangon'}</span>
+                <span>{createdTicket.customerAddress || customerTown || '—'}</span>
               </span>
             </div>
             <div className="flex justify-between items-center">

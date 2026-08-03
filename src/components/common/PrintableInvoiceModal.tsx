@@ -281,7 +281,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
               </div>
 
               <p className="font-extrabold text-sm text-[#1D1D1F]">{workOrder.customerName}</p>
-              <p className="text-[#86868B]">Town / City: <strong className="text-[#1D1D1F]">{workOrder.customerAddress || 'Yangon'}</strong></p>
+              <p className="text-[#86868B]">Town / City: <strong className="text-[#1D1D1F]">{workOrder.customerAddress || ''}</strong></p>
               <p className="text-[#86868B]">Phone: <strong className="text-[#1D1D1F]">{workOrder.customerPhone}</strong></p>
               {workOrder.customerEmail && <p className="text-[#86868B]">Email: <strong className="text-[#1D1D1F]">{workOrder.customerEmail}</strong></p>}
               <div className="pt-1">

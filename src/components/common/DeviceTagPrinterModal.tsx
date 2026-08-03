@@ -278,7 +278,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
             <div className="space-y-0.5 text-[11px]">
               <p><strong>Name:</strong> {workOrder.customerName}</p>
               <p><strong>Phone:</strong> {workOrder.customerPhone}</p>
-              <p><strong>Town / City:</strong> {workOrder.customerAddress || 'Yangon'}</p>
+              <p><strong>Town / City:</strong> {workOrder.customerAddress || ''}</p>
               <p><strong>Account Type:</strong> <span className="font-semibold text-black">{workOrder.customerType}</span></p>
             </div>
           </div>

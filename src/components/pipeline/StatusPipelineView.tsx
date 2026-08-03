@@ -812,7 +812,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                     <span>Town / City</span>
                   </span>
                   <div className="font-bold text-[#1D1D1F] text-xs truncate">
-                    {detailModalWo.customerAddress || 'Yangon'}
+                    {detailModalWo.customerAddress || '—'}
                   </div>
                   <div className="text-[11px] text-[#86868B] font-medium">Account: {detailModalWo.customerType || 'Retail'}</div>
                 </div>
