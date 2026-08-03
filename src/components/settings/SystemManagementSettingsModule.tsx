@@ -54,7 +54,7 @@ import {
   Truck,
   ChevronDown
 } from 'lucide-react';
-import { Technician, SystemSettings, TechnicianLevel, PaymentMethodConfig, WorkOrder, NotificationTemplate, AppUser, UserRole, UserPermissions, PartItem, Supplier } from '../../types';
+import { Technician, SystemSettings, TechnicianLevel, PaymentMethodConfig, WorkOrder, NotificationTemplate, AppUser, UserRole, UserPermissions, PartItem, PartQualityTier, Supplier } from '../../types';
 import { DEFAULT_PAYMENT_METHODS, getActivePaymentMethods, DEFAULT_NOTIFICATION_TEMPLATES } from '../../data/seedData';
 import { useTheme, THEME_PRESETS, ThemeMode } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -808,7 +808,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
     const next = editingQualityTierLabel.trim();
     if (!next || (next !== tier && inventoryQualityTiers.some((item) => item.toLowerCase() === next.toLowerCase()))) return;
     saveInventoryQualityTiers(inventoryQualityTiers.map((item) => item === tier ? next : item));
-    parts.filter((part) => part.qualityTier === tier).forEach((part) => onUpdatePart?.({ ...part, qualityTier: next }));
+    parts.filter((part) => part.qualityTier === tier).forEach((part) => onUpdatePart?.({ ...part, qualityTier: next as PartQualityTier }));
     setEditingQualityTier(null);
     setEditingQualityTierLabel('');
   };
@@ -817,7 +817,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
     const remaining = inventoryQualityTiers.filter((item) => item !== tier);
     if (!remaining.length || !window.confirm(`Delete quality tier “${tier}”? Parts using it will change to “${remaining[0]}”.`)) return;
     saveInventoryQualityTiers(remaining);
-    parts.filter((part) => part.qualityTier === tier).forEach((part) => onUpdatePart?.({ ...part, qualityTier: remaining[0] }));
+    parts.filter((part) => part.qualityTier === tier).forEach((part) => onUpdatePart?.({ ...part, qualityTier: remaining[0] as PartQualityTier }));
   };
 
   return (

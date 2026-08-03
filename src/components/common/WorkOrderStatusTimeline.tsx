@@ -119,8 +119,8 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
       if (log.statusChange) {
         eventType = 'STATUS_TRANSITION';
         fromS = previousStatus;
-        toS = log.statusChange;
-        previousStatus = log.statusChange;
+        toS = log.statusChange as WorkOrderStatus;
+        previousStatus = log.statusChange as WorkOrderStatus;
       } else if (noteLower.includes('status') || noteLower.includes('transition') || noteLower.includes('moved to') || noteLower.includes('changed to')) {
         eventType = 'STATUS_TRANSITION';
         fromS = previousStatus;
@@ -143,7 +143,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
         author: log.author || 'Technician',
         type: eventType,
         fromStatus: fromS,
-        toStatus: toS || log.statusChange,
+        toStatus: toS || (log.statusChange as WorkOrderStatus),
         note: log.note,
       });
     });

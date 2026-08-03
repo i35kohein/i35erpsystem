@@ -69,7 +69,15 @@ interface PriceCatalogModuleProps {
   applyGlobalPriceAdjustment?: (folderId: string | 'ALL', categoryKey: string | 'ALL', percentChange: number, flatChange: number) => void;
   applyGlobalWarranty?: (folderId: string | 'ALL', categoryKey: string | 'ALL', warrantyTerm: string) => void;
   formatPrice: (amount: number | null | undefined) => string;
-  onOpenNewWorkOrder?: (prefill?: { model?: string; service?: string; price?: number }) => void;
+  onOpenNewWorkOrder?: (prefill?: {
+    model?: string;
+    service?: string;
+    price?: number;
+    selectedRepairs?: { id: string; name: string; basePrice: number; discountPercent: number; finalPrice: number }[];
+    subtotal?: number;
+    discountAmount?: number;
+    discountPercent?: number;
+  }) => void;
   searchQuery?: string;
   setSearchQuery?: (q: string) => void;
   isQuickCalcOpen?: boolean;

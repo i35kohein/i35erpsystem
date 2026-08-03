@@ -291,8 +291,8 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                       <Icon className="h-3.5 w-3.5" />
                     </span>
                     <div className="min-w-0">
-                      <dt className="text-[9px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">{label}</dt>
-                      <dd className="mt-0.5 truncate font-bold text-[var(--text-main)]">{value}</dd>
+                      <dt className="text-[9px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">{typeof label === 'string' ? label : null}</dt>
+                      <dd className="mt-0.5 truncate font-bold text-[var(--text-main)]">{typeof value === 'string' ? value : null}</dd>
                     </div>
                   </div>
                 ))}

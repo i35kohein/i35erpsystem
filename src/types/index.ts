@@ -14,7 +14,7 @@ export type WorkOrderStatus =
   | 'Cant Repair'
   | 'Customer Not Repair';
 
-export type RepairPriority = 'Normal' | 'Urgent' | 'B2B Priority' | 'Warranty Redo';
+export type RepairPriority = 'Normal' | 'Urgent' | 'Rush' | 'B2B Priority' | 'Warranty Redo';
 
 export type TechnicianLevel = 'Level 1 Spareparts' | 'Level 2 Spareparts + Hardware' | 'Level 3 Master';
 
@@ -205,6 +205,12 @@ export interface WorkOrder {
   repairTypeAI?: 'spareparts' | 'hardware'; // AI verdict, overrides rule-based
   aiClassifyFailed?: boolean; // true when the last AI attempt errored (re-scan resets)
 
+  // Customer portal — estimate approval flow & inquiry thread
+  estimateStatus?: 'Pending Approval' | 'Approved' | 'Rejected';
+  estimateApprovedAt?: string;
+  estimateRejectionReason?: string;
+  customerInquiries?: { id: string; sender: string; text: string; timestamp: string }[];
+
   // Inventory Fund settlement: parts taken from stock create an internal debt
   // to the shop's parts fund. Stays 'pending' until the money is set aside /
   // restock happens — the dashboard reminder keeps showing until settled.
@@ -323,6 +329,7 @@ export interface SystemSettings {
   shopEmail: string;
   shopAddress: string;
   shopWebsite?: string;
+  taxRatePercent?: number; // used by printable invoice (defaults to 6)
   taxId: string;
   shopInfo?: string;
 
