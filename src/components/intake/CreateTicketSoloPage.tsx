@@ -61,6 +61,7 @@ import {
   DIAGNOSTIC_NAMES,
   getRealisticColorStyle
 } from './deviceData';
+import { toast } from '../../lib/toast';
 
 export interface TicketPrefillData {
   model?: string;
@@ -71,6 +72,7 @@ export interface TicketPrefillData {
   subtotal?: number;
   discountAmount?: number;
   discountPercent?: number;
+  editWorkOrder?: WorkOrder | null;
 }
 
 interface CreateTicketSoloPageProps {
@@ -126,6 +128,9 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
 }) => {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [createdTicket, setCreatedTicket] = useState<WorkOrder | null>(null);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const editWorkOrder = prefill?.editWorkOrder ?? null;
+  const isEditMode = !!editWorkOrder;
 
   // Modals inside form
   const [isModelModalOpen, setIsModelModalOpen] = useState(false);
@@ -145,24 +150,44 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
   const [customerType, setCustomerType] = useState<'Retail' | 'B2B Corporate' | 'Wholesale Mail-In'>('Retail');
 
   // Device Form State - Default empty to force selecting model first if no prefill
-  const [deviceModel, setDeviceModel] = useState<string>(prefill?.model || '');
+  const [deviceModel, setDeviceModel] = useState<string>(editWorkOrder?.deviceModel || prefill?.model || '');
   const [deviceColor, setDeviceColor] = useState<string>(
-    prefill?.model ? (getAvailableColorsForModel(prefill.model)[0] || 'Standard') : ''
+    editWorkOrder?.deviceColor ||
+      (prefill?.model ? (getAvailableColorsForModel(prefill.model)[0] || 'Standard') : '')
   );
-  const [serialNumber, setSerialNumber] = useState('');
-  const [imei, setImei] = useState('');
-  const [passcode, setPasscode] = useState('');
-  const [findMyStatus, setFindMyStatus] = useState<'ON' | 'OFF' | 'UNKNOWN'>('OFF');
+  const [serialNumber, setSerialNumber] = useState(editWorkOrder?.serialNumber || '');
+  const [imei, setImei] = useState(editWorkOrder?.imei || '');
+  const [passcode, setPasscode] = useState(editWorkOrder?.passcode || '');
+  const [findMyStatus, setFindMyStatus] = useState<'ON' | 'OFF' | 'UNKNOWN'>(editWorkOrder?.findMyStatus || 'OFF');
 
-  const [warrantyDays, setWarrantyDays] = useState(systemSettings?.defaultWarrantyDays || 90);
-  const [warrantyLabel, setWarrantyLabel] = useState(`${systemSettings?.defaultWarrantyDays || 90} Days Standard Warranty`);
+  const [warrantyDays, setWarrantyDays] = useState(editWorkOrder?.warrantyDays || systemSettings?.defaultWarrantyDays || 90);
+  const [warrantyLabel, setWarrantyLabel] = useState(editWorkOrder?.warrantyLabel || `${systemSettings?.defaultWarrantyDays || 90} Days Standard Warranty`);
   const [customWarrantyInput, setCustomWarrantyInput] = useState('');
 
   // Default Repairs in MMK
-  const [selectedRepairs, setSelectedRepairs] = useState<SelectedRepairItem[]>([]);
+  const [selectedRepairs, setSelectedRepairs] = useState<SelectedRepairItem[]>(editWorkOrder?.selectedRepairs || []);
 
   // Effect to process prefill from Price Catalog
   useEffect(() => {
+    if (editWorkOrder) {
+      setCustomerName(editWorkOrder.customerName || '');
+      setCustomerPhone(editWorkOrder.customerPhone || '');
+      setCustomerTown(editWorkOrder.customerAddress || 'Yangon');
+      setCustomerAddress(editWorkOrder.customerAddress || '');
+      setCustomerType(editWorkOrder.customerType || 'Retail');
+      setDeviceModel(editWorkOrder.deviceModel || '');
+      setDeviceColor(editWorkOrder.deviceColor || getAvailableColorsForModel(editWorkOrder.deviceModel)[0] || 'Standard');
+      setSerialNumber(editWorkOrder.serialNumber || '');
+      setImei(editWorkOrder.imei || '');
+      setPasscode(editWorkOrder.passcode || '');
+      setFindMyStatus(editWorkOrder.findMyStatus || 'OFF');
+      setWarrantyDays(editWorkOrder.warrantyDays || systemSettings?.defaultWarrantyDays || 90);
+      setWarrantyLabel(editWorkOrder.warrantyLabel || `${editWorkOrder.warrantyDays || systemSettings?.defaultWarrantyDays || 90} Days Standard Warranty`);
+      setSelectedRepairs(editWorkOrder.selectedRepairs || []);
+      setBeforeDiagnostics(editWorkOrder.beforeDiagnostics || beforeDiagnostics);
+      setExtraReportedNotes(editWorkOrder.symptomsReported || '');
+      return;
+    }
     if (prefill) {
       if (prefill.model) {
         setDeviceModel(prefill.model);
@@ -185,7 +210,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         ]);
       }
     }
-  }, [prefill]);
+  }, [prefill, editWorkOrder, systemSettings?.defaultWarrantyDays]);
 
   // Price Catalog search & group filter state
   const [priceSearchQuery, setPriceSearchQuery] = useState('');
@@ -217,7 +242,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
     }
   };
 
-  const [extraReportedNotes, setExtraReportedNotes] = useState('Screen cracked and battery degrades quickly under load.');
+  const [extraReportedNotes, setExtraReportedNotes] = useState('');
 
   // 21 Diagnostics with comment notes
   const [beforeDiagnostics, setBeforeDiagnostics] = useState<DiagnosticItemResult[]>(
@@ -299,60 +324,53 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
     }
   };
 
-  const repairSummaryString = selectedRepairs.length > 0
-    ? `Requested Repairs: ${selectedRepairs.map(r => `${r.name} (${r.finalPrice.toLocaleString()} MMK)`).join(', ')}`
-    : '';
-
-  const townCityString = `Town / City: ${customerTown || 'Yangon'}`;
-  const extraNotesString = extraReportedNotes ? `Notes: ${extraReportedNotes}` : '';
-
-  const fullIntakeNote = [repairSummaryString, townCityString, extraNotesString]
-    .filter(Boolean)
-    .join('\n\n');
-
   // Submit / Register Device
   const handleRegisterDevice = () => {
+    if (isRegistering) return;
     if (!customerName.trim() || !customerPhone.trim()) {
-      alert('Please enter Customer Name and Phone Number.');
+      toast.error('Please enter customer name and phone number.', 'Missing Customer Info');
       return;
     }
     if (!deviceModel.trim()) {
-      alert('Please select a Device Model.');
+      toast.error('Please select a device model.', 'Missing Device');
       return;
     }
+    setIsRegistering(true);
 
     const prefix = systemSettings?.ticketPrefix || 'WO-';
-    const newOrderNumber = `${prefix}2026-${1000 + workOrders.length + 1}`;
+    const baseWorkOrder = editWorkOrder || null;
+    const newOrderNumber = baseWorkOrder?.orderNumber || `${prefix}2026-${1000 + workOrders.length + 1}`;
     const nowIso = new Date().toISOString();
     const formattedDate = new Date().toLocaleString('en-US', {
       month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true
     });
 
     const newWorkOrder: WorkOrder = {
-      id: `wo-${Date.now()}`,
+      ...(baseWorkOrder || {}),
+      id: baseWorkOrder?.id || `wo-${Date.now()}`,
       orderNumber: newOrderNumber,
-      customerId: matchedCustomer ? matchedCustomer.id : `cust-${Date.now()}`,
+      customerId: baseWorkOrder?.customerId || (matchedCustomer ? matchedCustomer.id : `cust-${Date.now()}`),
       customerName,
       customerPhone,
       customerEmail: `${(customerTown || 'yangon').toLowerCase().replace(/\s+/g, '')}@customer.mm`,
       customerAddress: customerTown || customerAddress || 'Yangon',
       customerType,
-      deviceCategory: deviceModel.includes('iPad') ? 'iPad' : deviceModel.includes('MacBook') ? 'MacBook' : 'iPhone',
+      deviceCategory: baseWorkOrder?.deviceCategory || (deviceModel.includes('iPad') ? 'iPad' : deviceModel.includes('MacBook') ? 'MacBook' : 'iPhone'),
       deviceModel,
       serialNumber: serialNumber || `SN-${Math.floor(Math.random() * 900000 + 100000)}`,
       imei: imei || `35${Math.floor(Math.random() * 8999999999993 + 1000000000000)}`,
       deviceColor,
       passcode: passcode || 'None',
       findMyStatus,
-      status: 'Receive',
-      priority: 'Normal',
+      status: baseWorkOrder?.status || 'Receive',
+      priority: baseWorkOrder?.priority || 'Normal',
       // New intake tickets stay unassigned until the repair coordinator assigns a technician.
-      assignedTechId: '',
-      assignedTechName: '',
-      serviceType: 'Standard Modular',
+      assignedTechId: baseWorkOrder?.assignedTechId || '',
+      assignedTechName: baseWorkOrder?.assignedTechName || '',
+      serviceType: baseWorkOrder?.serviceType || 'Standard Modular',
       selectedRepairs,
-      beforeDiagnostics,
-      symptomsReported: fullIntakeNote,
+      beforeDiagnostics: baseWorkOrder?.beforeDiagnostics || beforeDiagnostics,
+      symptomsReported: extraReportedNotes.trim() || baseWorkOrder?.symptomsReported || '',
       diagnosticResult: beforeDiagnostics.some(d => d.status === 'Pass' || d.status === 'Fail')
         ? 'Initial 21-point repair diagnostic completed during intake.'
         : 'Diagnostic Pending',
@@ -365,15 +383,17 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         isLabor: true
       })),
       subtotal: baseTotal,
-      depositAmount: 0,
+      depositAmount: baseWorkOrder?.depositAmount || 0,
       discountAmount: savedAmount,
-      taxAmount: 0,
+      taxAmount: baseWorkOrder?.taxAmount || 0,
       totalAmount: finalEstimate,
-      isPaid: false,
+      isPaid: baseWorkOrder?.isPaid || false,
+      paidAmount: baseWorkOrder?.paidAmount,
+      paymentMethod: baseWorkOrder?.paymentMethod,
       warrantyDays,
       warrantyLabel,
-      intakePhotos,
-      repairLogs: [
+      intakePhotos: baseWorkOrder?.intakePhotos || intakePhotos,
+      repairLogs: baseWorkOrder?.repairLogs || [
         {
           id: `log-${Date.now()}`,
           timestamp: formattedDate,
@@ -382,10 +402,10 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           statusChange: 'Receive'
         }
       ],
-      createdAt: nowIso,
+      createdAt: baseWorkOrder?.createdAt || nowIso,
       updatedAt: nowIso,
-      estimatedCompletion: new Date(Date.now() + 86400000).toISOString(),
-      intakeChecklist: {
+      estimatedCompletion: baseWorkOrder?.estimatedCompletion || new Date(Date.now() + 86400000).toISOString(),
+      intakeChecklist: baseWorkOrder?.intakeChecklist || {
         powerOn: true,
         screenDisplay: true,
         touchGrid: true,
@@ -400,12 +420,13 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         wirelessCharging: true,
         liquidIndicatorTriggered: false,
         batteryHealthPercent: 88,
-        physicalDamageNotes: fullIntakeNote,
+        physicalDamageNotes: extraReportedNotes.trim() || baseWorkOrder?.intakeChecklist?.physicalDamageNotes || '',
       }
     };
 
     onSaveWorkOrder(newWorkOrder);
     setCreatedTicket(newWorkOrder);
+    setIsRegistering(false);
   };
 
   const handleResetForm = () => {
@@ -418,6 +439,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
     setImei('');
     setPasscode('');
     setSelectedRepairs([]);
+    setExtraReportedNotes('');
   };
 
   if (createdTicket) {
@@ -434,9 +456,11 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             <span className="font-mono text-sm font-extrabold text-[#0071E3] px-3 py-1 bg-[#E5F1FF] rounded-full">
               {createdTicket.orderNumber}
             </span>
-            <h1 className="text-2xl font-black text-[#1D1D1F] pt-2">Repair Ticket Successfully Created!</h1>
+            <h1 className="text-2xl font-black text-[#1D1D1F] pt-2">
+              {isEditMode ? 'Repair Ticket Successfully Updated!' : 'Repair Ticket Successfully Created!'}
+            </h1>
             <p className="text-xs text-[#86868B]">
-              Registered {createdTicket.deviceModel} for {createdTicket.customerName}
+              {isEditMode ? 'Updated' : 'Registered'} {createdTicket.deviceModel} for {createdTicket.customerName}
             </p>
           </div>
 
@@ -473,27 +497,29 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-            <button
-              onClick={() => onSelectPrintTag(createdTicket)}
-              className="w-full sm:w-auto px-5 py-3 bg-white border border-[#D2D2D7] hover:bg-slate-50 text-[#1D1D1F] font-bold text-xs rounded-xl flex items-center justify-center space-x-2"
-            >
-              <Printer className="w-4 h-4 text-[#0071E3]" />
-              <span>Print Sticker Tag Voucher</span>
-            </button>
+            {!isEditMode && (
+              <button
+                onClick={() => onSelectPrintTag(createdTicket)}
+                className="w-full sm:w-auto px-5 py-3 bg-white border border-[#D2D2D7] hover:bg-slate-50 text-[#1D1D1F] font-bold text-xs rounded-xl flex items-center justify-center space-x-2"
+              >
+                <Printer className="w-4 h-4 text-[#0071E3]" />
+                <span>Print Sticker Tag Voucher</span>
+              </button>
+            )}
 
             <button
               onClick={onViewRepairTickets}
               className="w-full sm:w-auto px-5 py-3 bg-[#0071E3] hover:bg-[#0077ED] text-white font-extrabold text-xs rounded-xl shadow-sm flex items-center justify-center space-x-2"
             >
               <List className="w-4 h-4" />
-              <span>View in Work Orders List</span>
+              <span>{isEditMode ? 'Back to Ticket List' : 'View in Work Orders List'}</span>
             </button>
 
             <button
               onClick={handleResetForm}
               className="w-full sm:w-auto px-4 py-3 bg-[#F8F9FA] hover:bg-slate-200 text-[#1D1D1F] font-semibold text-xs rounded-xl border border-[#D2D2D7]"
             >
-              + Create Another Ticket
+              {isEditMode ? 'Discard Changes' : '+ Create Another Ticket'}
             </button>
           </div>
         </div>
@@ -512,8 +538,8 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             <Smartphone className="w-4 h-4" />
           </div>
           <div className="min-w-0">
-            <h1 className="text-sm font-extrabold text-[#1D1D1F] truncate">New Intake Ticket Registration</h1>
-            <p className="text-[10px] text-[#86868B] truncate">Customer, device, repair estimate and intake diagnostics</p>
+            <h1 className="text-sm font-extrabold text-[#1D1D1F] truncate">{isEditMode ? 'Edit Intake Ticket' : 'New Intake Ticket Registration'}</h1>
+            <p className="text-[10px] text-[#86868B] truncate">{isEditMode ? 'Update customer, device and repair details' : 'Customer, device, repair estimate and intake diagnostics'}</p>
           </div>
         </div>
         <button
@@ -521,7 +547,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           className="text-[11px] text-[#0071E3] font-bold flex items-center gap-1 hover:bg-[#F0F6FF] rounded-lg px-2 py-1.5 shrink-0"
         >
           <ArrowLeft className="w-3 h-3" />
-          <span className="hidden sm:inline">Back to Tickets</span>
+          <span className="hidden sm:inline">{isEditMode ? 'Back to Ticket' : 'Back to Tickets'}</span>
           <span className="sm:hidden">Back</span>
         </button>
       </div>
@@ -545,7 +571,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             {matchedCustomer && (
               <span className="text-[10px] bg-[#EAF8ED] text-[#28A745] px-2.5 py-0.5 rounded-full font-bold flex items-center space-x-1 border border-[#34C759]/20 shadow-2xs">
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Existing Customer Profile Matched!</span>
+                <span>{isEditMode ? 'Editing Existing Ticket' : 'Existing Customer Profile Matched!'}</span>
               </span>
             )}
           </div>
@@ -895,17 +921,11 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             <span>Intake Notes & Customer Symptoms</span>
           </h3>
 
-          {repairSummaryString && (
-            <div className="p-2.5 bg-slate-100 border border-[#D2D2D7] rounded-xl text-xs font-mono text-[#1D1D1F]">
-              {repairSummaryString}
-            </div>
-          )}
-
           <textarea
             rows={2}
             value={extraReportedNotes}
             onChange={(e) => setExtraReportedNotes(e.target.value)}
-            placeholder="Describe extra customer reported issues (e.g. liquid spill, screen flicker, heavy usage)"
+            placeholder="Enter customer symptoms or intake notes"
             className="w-full bg-white border border-[#D2D2D7] rounded-xl p-3 text-xs text-[#1D1D1F] focus:border-[#0071E3]"
           />
         </div>
@@ -1052,10 +1072,24 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         <div className="pt-2">
           <button
             onClick={handleRegisterDevice}
-            className="w-full py-4 bg-[#0071E3] hover:bg-[#0077ED] text-white font-black text-sm rounded-2xl shadow-xs transition-all flex items-center justify-center space-x-2 active:scale-95"
+            disabled={isRegistering}
+            className={`w-full py-4 font-black text-sm rounded-2xl shadow-xs transition-all flex items-center justify-center space-x-2 ${
+              isRegistering
+                ? 'bg-[#86868B] text-white cursor-not-allowed opacity-80'
+                : 'bg-[#0071E3] hover:bg-[#0077ED] text-white active:scale-95'
+            }`}
           >
-            <CheckCircle2 className="w-5 h-5" />
-            <span>Register Device & Generate Repair Ticket Voucher</span>
+            {isRegistering ? (
+              <>
+                <span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                <span>Registering…</span>
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="w-5 h-5" />
+                <span>{isEditMode ? 'Save Ticket Changes' : 'Register Device & Generate Repair Ticket Voucher'}</span>
+              </>
+            )}
           </button>
         </div>
       </div>

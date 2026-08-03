@@ -327,9 +327,9 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <button type="button" onClick={clearConversation} disabled={isLoading} title="New conversation" className="p-2 text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--blue-tint)] rounded-lg disabled:opacity-40"><RotateCcw className="w-4 h-4" /></button>
-            <button type="button" onClick={onOpenAiSettings} title="AI provider settings" className="p-2 text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--blue-tint)] rounded-lg"><Settings2 className="w-4 h-4" /></button>
-            <button type="button" onClick={onClose} title="Close assistant" className="p-2 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--blue-tint)] rounded-lg"><X className="w-4 h-4" /></button>
+            <button type="button" onClick={clearConversation} disabled={isLoading} title="New conversation" aria-label="New conversation" className="p-2 text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--blue-tint)] rounded-lg disabled:opacity-40"><RotateCcw className="w-4 h-4" /></button>
+            <button type="button" onClick={onOpenAiSettings} title="AI provider settings" aria-label="AI provider settings" className="p-2 text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--blue-tint)] rounded-lg"><Settings2 className="w-4 h-4" /></button>
+            <button type="button" onClick={onClose} title="Close assistant" aria-label="Close assistant" className="p-2 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--blue-tint)] rounded-lg"><X className="w-4 h-4" /></button>
           </div>
         </div>
 
@@ -393,7 +393,7 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
               placeholder="Ask a business question…"
               className="flex-1 min-h-[42px] max-h-28 resize-none border border-[var(--border)] bg-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[var(--primary)]"
             />
-            <button type="submit" disabled={!input.trim() || isLoading} title="Send message" className="w-10 h-10 bg-[var(--primary)] text-white rounded-xl flex items-center justify-center disabled:opacity-40">
+            <button type="submit" disabled={!input.trim() || isLoading} title="Send message" aria-label="Send message" className="w-10 h-10 bg-[var(--primary)] text-white rounded-xl flex items-center justify-center disabled:opacity-40">
               <Send className="w-4 h-4" />
             </button>
           </div>

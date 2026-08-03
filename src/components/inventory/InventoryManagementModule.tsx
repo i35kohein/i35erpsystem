@@ -46,6 +46,7 @@ import { PartItem, PartQualityTier, Supplier, SystemSettings, RmaItem } from '..
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
 import { getAvailableColorsForModel, getRealisticColorStyle } from '../intake/deviceData';
+import { toast } from '../../lib/toast';
 
 const isSameDeviceModel = (left: string, right: string) =>
   left.trim().toLocaleLowerCase() === right.trim().toLocaleLowerCase();
@@ -121,6 +122,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const [inlineEditMode, setInlineEditMode] = useState(false);
   const [inlineDrafts, setInlineDrafts] = useState<Record<string, InlineDraft>>({});
   const [showInlineSaveConfirm, setShowInlineSaveConfirm] = useState(false);
+  const [isInlineSaving, setIsInlineSaving] = useState(false);
   const [showLowStockOnly, setShowLowStockOnly] = useState(false);
 
   // Supplier & Quality Tier Edit States
@@ -170,7 +172,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     if (onAddSupplier) {
       onAddSupplier(createdSup);
     }
-    alert(`Supplier Vendor "${createdSup.name}" registered successfully!`);
+    toast.success(`Supplier vendor "${createdSup.name}" registered.`, 'Supplier Added');
     setNewSupplierForm({
       name: '',
       code: '',
@@ -235,7 +237,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     if (onUpdatePart) {
       parts.forEach((p) => {
         if (p.qualityTier === oldName) {
-          onUpdatePart({ ...p, qualityTier: newName });
+          onUpdatePart({ ...p, qualityTier: newName as PartQualityTier });
         }
       });
     }
@@ -254,7 +256,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       const fallbackTier = updated[0];
       parts.forEach((p) => {
         if (p.qualityTier === tierName) {
-          onUpdatePart({ ...p, qualityTier: fallbackTier });
+          onUpdatePart({ ...p, qualityTier: fallbackTier as PartQualityTier });
         }
       });
     }
@@ -341,7 +343,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       });
     }
 
-    alert(`Parts warranty claim submitted to ${resolvedSupName}! Tracking RMA #: ${rmaRecord.rmaNumber}`);
+    toast.success(`Warranty claim submitted to ${resolvedSupName}. RMA # ${rmaRecord.rmaNumber}`, 'RMA Submitted');
     setClaimingWarrantyPart(null);
   };
 
@@ -565,7 +567,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
   const handleSaveNewPart = () => {
     if (!newPartData.name || !newPartData.sku || !newPartData.category || !newPartData.qualityTier || !newPartData.supplierId || !newPartData.deviceCompatibility?.[0] || (isBackGlassCategory && !newPartData.backGlassColor)) {
-      alert('Choose a device model, category, quality tier, and supplier. Back Glass parts also need a color. Then enter the part name and SKU.');
+      toast.error('Choose a device model, category, quality tier, and supplier. Back Glass parts also need a color. Then enter the part name and SKU.', 'Incomplete Part Details');
       return;
     }
 
@@ -680,11 +682,13 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   }, [inlineDrafts, parts, suppliers]);
 
   const confirmInlineSave = () => {
-    if (!inlineSaveReview.length || !onUpdatePart) {
-      setShowInlineSaveConfirm(false);
+    if (!inlineSaveReview.length || !onUpdatePart || isInlineSaving) {
+      if (!isInlineSaving) setShowInlineSaveConfirm(false);
       return;
     }
 
+    setIsInlineSaving(true);
+    try {
       inlineSaveReview.forEach(({ part, changes }) => {
         const draft = inlineDrafts[part.id];
         if (!draft) return;
@@ -708,6 +712,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     setInlineDrafts({});
     setInlineEditMode(false);
     setShowInlineSaveConfirm(false);
+    } finally {
+      window.setTimeout(() => setIsInlineSaving(false), 800);
+    }
   };
 
   return (
@@ -2009,278 +2016,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         </div>
       )}
 
-      {/* Legacy settings content is intentionally disabled: management lives in System Management. */}
-      {false && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-[#E5E5EA] rounded-2xl max-w-3xl w-full p-6 space-y-5 text-xs shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center border-b border-[#E5E5EA] pb-3">
-              <h3 className="text-base font-extrabold text-[#1D1D1F] flex items-center space-x-2">
-                <Settings className="w-5 h-5 text-[#0071E3]" />
-                <span>Inventory System Data & Quality Settings</span>
-              </h3>
-              <button
-                onClick={() => setShowInventorySettingsModal(false)}
-                className="text-[#86868B] hover:text-[#1D1D1F] p-1 rounded-lg cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Tab Switcher */}
-            <div className="flex items-center space-x-2 border-b border-[#E5E5EA] pb-2">
-              <button
-                type="button"
-                onClick={() => setSettingsTab('SUPPLIERS')}
-                className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center space-x-1.5 transition-all cursor-pointer ${
-                  settingsTab === 'SUPPLIERS'
-                    ? 'bg-[#0071E3] text-white shadow-xs'
-                    : 'bg-[#F5F5F7] text-[#1D1D1F] hover:bg-[#E5E5EA]'
-                }`}
-              >
-                <Truck className="w-4 h-4" />
-                <span>Supplier Name Data ({suppliers.length})</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setSettingsTab('QUALITY_TIERS')}
-                className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center space-x-1.5 transition-all cursor-pointer ${
-                  settingsTab === 'QUALITY_TIERS'
-                    ? 'bg-purple-600 text-white shadow-xs'
-                    : 'bg-[#F5F5F7] text-[#1D1D1F] hover:bg-[#E5E5EA]'
-                }`}
-              >
-                <ShieldCheck className="w-4 h-4" />
-                <span>Quality Tiers ({customQualityTiers.length})</span>
-              </button>
-            </div>
-
-            {/* TAB 1: SUPPLIER NAME DATA */}
-            {settingsTab === 'SUPPLIERS' && (
-              <div className="space-y-5">
-                {/* Add New Supplier Form */}
-                <form onSubmit={handleCreateSupplier} className="p-4 bg-[#F5F5F7] border border-[#E5E5EA] rounded-2xl space-y-3">
-                  <h4 className="font-extrabold text-[#1D1D1F] text-xs flex items-center space-x-1.5">
-                    <PlusCircle className="w-4 h-4 text-[#0071E3]" />
-                    <span>Register New Hardware Component Supplier Vendor</span>
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    <div>
-                      <label className="block font-bold text-[#1D1D1F] mb-1">Supplier Name *</label>
-                      <input
-                        type="text"
-                        required
-                        value={newSupplierForm.name}
-                        onChange={(e) => setNewSupplierForm({ ...newSupplierForm, name: e.target.value })}
-                        placeholder="e.g. MobileSentrix / InjuredGadgets"
-                        className="w-full bg-white border border-[#E5E5EA] rounded-xl p-2 text-xs font-bold text-[#1D1D1F]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block font-bold text-[#1D1D1F] mb-1">Supplier Code *</label>
-                      <input
-                        type="text"
-                        required
-                        value={newSupplierForm.code}
-                        onChange={(e) => setNewSupplierForm({ ...newSupplierForm, code: e.target.value })}
-                        placeholder="e.g. MS-US / IG-HK"
-                        className="w-full bg-white border border-[#E5E5EA] rounded-xl p-2 text-xs font-mono font-bold text-[#1D1D1F]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block font-bold text-[#1D1D1F] mb-1">Avg RMA Turnaround (Days)</label>
-                      <input
-                        type="number"
-                        value={newSupplierForm.avgRmaTurnaroundDays}
-                        onChange={(e) => setNewSupplierForm({ ...newSupplierForm, avgRmaTurnaroundDays: Number(e.target.value) })}
-                        className="w-full bg-white border border-[#E5E5EA] rounded-xl p-2 text-xs font-mono text-[#1D1D1F]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block font-bold text-[#1D1D1F] mb-1">Contact Phone</label>
-                      <input
-                        type="text"
-                        value={newSupplierForm.phone}
-                        onChange={(e) => setNewSupplierForm({ ...newSupplierForm, phone: e.target.value })}
-                        placeholder="+1 800 555 0199"
-                        className="w-full bg-white border border-[#E5E5EA] rounded-xl p-2 text-xs text-[#1D1D1F]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block font-bold text-[#1D1D1F] mb-1">Contact Email</label>
-                      <input
-                        type="email"
-                        value={newSupplierForm.contactEmail}
-                        onChange={(e) => setNewSupplierForm({ ...newSupplierForm, contactEmail: e.target.value })}
-                        placeholder="rma@mobilesentrix.com"
-                        className="w-full bg-white border border-[#E5E5EA] rounded-xl p-2 text-xs text-[#1D1D1F]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block font-bold text-[#1D1D1F] mb-1">Website URL</label>
-                      <input
-                        type="text"
-                        value={newSupplierForm.website}
-                        onChange={(e) => setNewSupplierForm({ ...newSupplierForm, website: e.target.value })}
-                        placeholder="https://www.supplier.com"
-                        className="w-full bg-white border border-[#E5E5EA] rounded-xl p-2 text-xs text-[#1D1D1F]"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex justify-end pt-1">
-                    <button
-                      type="submit"
-                      className="px-4 py-2 bg-[#0071E3] hover:bg-[#0051B3] text-white font-extrabold rounded-xl shadow-xs flex items-center space-x-1.5 cursor-pointer"
-                    >
-                      <Plus className="w-4 h-4" />
-                      <span>Save Supplier Vendor Data</span>
-                    </button>
-                  </div>
-                </form>
-
-                {/* Suppliers List */}
-                <div className="space-y-2">
-                  <h4 className="font-extrabold text-[#1D1D1F]">Active Supplier Vendors Database</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {suppliers.map((sup) => {
-                      const countParts = parts.filter((p) => p.supplierId === sup.id || p.supplierName === sup.name).length;
-                      return (
-                        <div key={sup.id} className="p-3.5 bg-white border border-[#E5E5EA] rounded-2xl space-y-2 shadow-2xs">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h5 className="font-black text-xs text-[#1D1D1F] flex items-center space-x-1.5">
-                                <Truck className="w-4 h-4 text-[#0071E3]" />
-                                <span>{sup.name}</span>
-                              </h5>
-                              <span className="font-mono text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-700 font-bold">
-                                CODE: {sup.code}
-                              </span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <span className="bg-[#0071E3]/10 text-[#0071E3] text-[10px] font-extrabold px-2 py-0.5 rounded-full">
-                                {countParts} Parts
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => setEditingSupplier(sup)}
-                                title="Edit Supplier"
-                                className="p-1.5 text-slate-500 hover:text-[#0071E3] hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
-                              >
-                                <Edit2 className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteSupplierClick(sup.id, sup.name)}
-                                title="Delete Supplier"
-                                className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </div>
-                          <div className="text-[11px] text-[#86868B] space-y-1 pt-1 border-t border-[#F5F5F7]">
-                            <p className="flex items-center space-x-1">
-                              <Phone className="w-3 h-3 text-slate-400" />
-                              <span>{sup.phone}</span>
-                            </p>
-                            <p className="flex items-center space-x-1">
-                              <Mail className="w-3 h-3 text-slate-400" />
-                              <span>{sup.contactEmail}</span>
-                            </p>
-                            <p className="flex items-center space-x-1">
-                              <RotateCcw className="w-3 h-3 text-amber-500" />
-                              <span>Avg RMA Turnaround: {sup.avgRmaTurnaroundDays} Days</span>
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* TAB 2: QUALITY TIERS DATA */}
-            {settingsTab === 'QUALITY_TIERS' && (
-              <div className="space-y-5">
-                {/* Create Custom Quality Tier */}
-                <form onSubmit={handleCreateQualityTier} className="p-4 bg-purple-50/60 border border-purple-200 rounded-2xl space-y-3">
-                  <h4 className="font-extrabold text-purple-900 text-xs flex items-center space-x-1.5">
-                    <PlusCircle className="w-4 h-4 text-purple-600" />
-                    <span>Create Custom Hardware Quality Tier</span>
-                  </h4>
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="text"
-                      required
-                      value={newQualityForm.name}
-                      onChange={(e) => setNewQualityForm({ name: e.target.value })}
-                      placeholder="e.g. OEM / Original / Genuine"
-                      className="flex-1 bg-white border border-purple-200 rounded-xl p-2 text-xs font-bold text-[#1D1D1F]"
-                    />
-                    <button
-                      type="submit"
-                      className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-extrabold rounded-xl shadow-xs flex items-center space-x-1 cursor-pointer"
-                    >
-                      <Plus className="w-4 h-4" />
-                      <span>Add Tier</span>
-                    </button>
-                  </div>
-                </form>
-
-                {/* Quality Tier List */}
-                <div className="space-y-2">
-                  <h4 className="font-extrabold text-[#1D1D1F]">Configured Quality Tiers in System</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    {customQualityTiers.map((tier) => {
-                      const countParts = parts.filter((p) => p.qualityTier === tier).length;
-                      return (
-                        <div key={tier} className="p-3 bg-white border border-[#E5E5EA] rounded-xl flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <ShieldCheck className="w-4 h-4 text-purple-600 shrink-0" />
-                            <span className="font-extrabold text-xs text-[#1D1D1F]">{tier}</span>
-                          </div>
-                          <div className="flex items-center space-x-1.5">
-                            <span className="bg-slate-100 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-200">
-                              {countParts} in stock
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => setEditingQualityTier({ oldName: tier, newName: tier })}
-                              title="Edit Tier Name"
-                              className="p-1 text-slate-500 hover:text-purple-600 hover:bg-purple-50 rounded transition-colors cursor-pointer"
-                            >
-                              <Edit2 className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteQualityTierClick(tier)}
-                              title="Delete Tier"
-                              className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors cursor-pointer"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="flex justify-end pt-3 border-t border-[#E5E5EA]">
-              <button
-                type="button"
-                onClick={() => setShowInventorySettingsModal(false)}
-                className="px-5 py-2 bg-[#0071E3] hover:bg-[#0051B3] text-white font-extrabold rounded-xl cursor-pointer"
-              >
-                Done
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* MINI MODAL: QUICK ADD SUPPLIER */}
       {showAddSupplierMiniModal && (
@@ -2614,10 +2349,11 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <button
                 type="button"
                 onClick={confirmInlineSave}
-                disabled={!inlineSaveReview.length}
-                className="rounded-lg bg-[#0071E3] px-5 py-2 text-[11px] font-extrabold text-white shadow-xs transition-all hover:bg-[#0051B3] disabled:cursor-not-allowed disabled:bg-[#A5A5AA]"
+                disabled={!inlineSaveReview.length || isInlineSaving}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[#0071E3] px-5 py-2 text-[11px] font-extrabold text-white shadow-xs transition-all hover:bg-[#0051B3] disabled:cursor-not-allowed disabled:bg-[#A5A5AA]"
               >
-                Approve & Save
+                {isInlineSaving && <span className="h-3 w-3 rounded-full border-2 border-white/40 border-t-white animate-spin" />}
+                {isInlineSaving ? 'Saving…' : 'Approve & Save'}
               </button>
             </div>
                 </>

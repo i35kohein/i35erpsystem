@@ -41,6 +41,7 @@ import {
   SystemSettings 
 } from '../../types';
 import { getActivePaymentMethods } from '../../data/seedData';
+import { toast } from '../../lib/toast';
 
 interface ShopFinancePlModuleProps {
   workOrders: WorkOrder[];
@@ -213,7 +214,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
   const handleSaveExpenseSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newExpense.amount || newExpense.amount <= 0 || !newExpense.description) {
-      alert('Please fill out expense description and valid amount.');
+      toast.error('Please fill out expense description and a valid amount.', 'Invalid Expense');
       return;
     }
 

@@ -50,6 +50,7 @@ import { ShopFinancePlModule } from './components/finance/ShopFinancePlModule';
 import { usePriceCatalog } from './hooks/usePriceCatalog';
 import { OfflineSyncStatusBadge } from './components/common/OfflineSyncStatusBadge';
 import { HoverTooltip } from './components/common/HoverTooltip';
+import { registerToastHandler, unregisterToastHandler } from './lib/toast';
 
 export default function App() {
   const { t } = useLanguage();
@@ -111,13 +112,13 @@ export default function App() {
   // User Management Handlers
   const handleAddUser = (newUser: AppUser) => {
     setUsers((prev) => [...prev, newUser]);
-    saveDocument('users', newUser).catch(console.error);
+    saveDocument('users', newUser).catch(reportSaveError);
     addToast(`User account "${newUser.name}" (${newUser.role}) created successfully!`, 'success');
   };
 
   const handleUpdateUser = (updatedUser: AppUser) => {
     setUsers((prev) => prev.map((u) => (u.id === updatedUser.id ? updatedUser : u)));
-    saveDocument('users', updatedUser).catch(console.error);
+    saveDocument('users', updatedUser).catch(reportSaveError);
     if (currentUser.id === updatedUser.id) {
       setCurrentUser(updatedUser);
     }
@@ -130,7 +131,7 @@ export default function App() {
       return;
     }
     setUsers((prev) => prev.filter((u) => u.id !== id));
-    deleteDocument('users', id).catch(console.error);
+    deleteDocument('users', id).catch(reportSaveError);
     addToast('User account deleted.', 'info');
   };
 
@@ -278,6 +279,12 @@ export default function App() {
   }
   const [toasts, setToasts] = useState<ToastNotification[]>([]);
 
+  const reportSaveError = (err: unknown) => {
+    console.error(err);
+    const detail = err instanceof Error ? err.message : String(err);
+    addToast(`Database save failed: ${detail}`, 'error', 'Save Error — Check Connection');
+  };
+
   const addToast = (
     message: string, 
     type: 'success' | 'info' | 'error' = 'success', 
@@ -300,6 +307,14 @@ export default function App() {
   const removeToast = (id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
+
+  // Expose the toast system globally so deeply-nested modules (POS, Pipeline,
+  // Settings, Inventory…) can fire toasts without prop-drilling. Replaces the
+  // remaining native alert() calls flagged in the UI/UX audit.
+  useEffect(() => {
+    registerToastHandler(addToast);
+    return () => unregisterToastHandler();
+  }, []);
 
   // Smooth scroll to top & reset search on tab change for tab-isolated searching
   useEffect(() => {
@@ -357,17 +372,17 @@ export default function App() {
       inventoryBinNames: newSettings.inventoryBinNames ?? systemSettings.inventoryBinNames,
     };
     setSystemSettings(mergedSettings);
-    saveDocument('systemSettings', { id: 'global', ...mergedSettings }).catch(console.error);
+    saveDocument('systemSettings', { id: 'global', ...mergedSettings }).catch(reportSaveError);
   };
 
   const handleAddTechnician = (tech: Technician) => {
     setTechnicians((prev) => [...prev, tech]);
-    saveDocument('technicians', tech).catch(console.error);
+    saveDocument('technicians', tech).catch(reportSaveError);
   };
 
   const handleUpdateTechnician = (tech: Technician) => {
     setTechnicians((prev) => prev.map((t) => (t.id === tech.id ? tech : t)));
-    saveDocument('technicians', tech).catch(console.error);
+    saveDocument('technicians', tech).catch(reportSaveError);
   };
 
   const handleDeleteTechnician = (id: string) => {
@@ -376,7 +391,7 @@ export default function App() {
       return;
     }
     setTechnicians((prev) => prev.filter((t) => t.id !== id));
-    deleteDocument('technicians', id).catch(console.error);
+    deleteDocument('technicians', id).catch(reportSaveError);
   };
 
   // Archive / Delete Work Order -> Move to Recycle Bin
@@ -394,7 +409,7 @@ export default function App() {
       archivedAt: new Date().toISOString(),
     };
     setWorkOrders((prev) => prev.map((w) => (w.id === id ? updatedWo : w)));
-    saveDocument('workOrders', updatedWo).catch(console.error);
+    saveDocument('workOrders', updatedWo).catch(reportSaveError);
     addToast(`Work order ${woLabel} moved to Recycle Bin`, 'info', 'Moved to Recycle Bin');
   };
 
@@ -409,7 +424,7 @@ export default function App() {
       archivedAt: undefined,
     };
     setWorkOrders((prev) => prev.map((w) => (w.id === id ? restoredWo : w)));
-    saveDocument('workOrders', restoredWo).catch(console.error);
+    saveDocument('workOrders', restoredWo).catch(reportSaveError);
     addToast(`Work order ${woLabel} restored to active pipeline`, 'success', 'Ticket Restored');
   };
 
@@ -422,7 +437,7 @@ export default function App() {
     const wo = workOrders.find((w) => w.id === id);
     const woLabel = wo ? `${wo.orderNumber || wo.id}` : id;
     setWorkOrders((prev) => prev.filter((w) => w.id !== id));
-    deleteDocument('workOrders', id).catch(console.error);
+    deleteDocument('workOrders', id).catch(reportSaveError);
     addToast(`Work order ${woLabel} permanently deleted`, 'info', 'Permanently Deleted');
   };
 
@@ -434,7 +449,7 @@ export default function App() {
       prev.map((w) => {
         if (w.isArchived) {
           const restored = { ...w, isArchived: false, archivedAt: undefined };
-          saveDocument('workOrders', restored).catch(console.error);
+          saveDocument('workOrders', restored).catch(reportSaveError);
           return restored;
         }
         return w;
@@ -447,7 +462,7 @@ export default function App() {
   const handleEmptyRecycleBin = () => {
     const archived = workOrders.filter((w) => w.isArchived);
     archived.forEach((w) => {
-      deleteDocument('workOrders', w.id).catch(console.error);
+      deleteDocument('workOrders', w.id).catch(reportSaveError);
     });
     setWorkOrders((prev) => prev.filter((w) => !w.isArchived));
     addToast(`Permanently deleted ${archived.length} archived work orders`, 'info', 'Recycle Bin Emptied');
@@ -455,7 +470,7 @@ export default function App() {
 
   const handleClearAllWorkOrders = () => {
     setWorkOrders([]);
-    clearCollection('workOrders').catch(console.error);
+    clearCollection('workOrders').catch(reportSaveError);
     addToast('All work orders have been cleared', 'info', 'Work Orders Cleared');
   };
 
@@ -473,7 +488,7 @@ export default function App() {
       }
       return [wo, ...prev];
     });
-    saveDocument('workOrders', wo).catch(console.error);
+    saveDocument('workOrders', wo).catch(reportSaveError);
     if (isUpdate) {
       addToast(`Work order ${wo.id} updated successfully`, 'success', 'Work Order Saved');
     } else {
@@ -506,7 +521,7 @@ export default function App() {
       prev.map((w) => {
         if (w.id === workOrderId) {
           const updated = { ...w, status: newStatus, updatedAt: new Date().toISOString() };
-          saveDocument('workOrders', updated).catch(console.error);
+          saveDocument('workOrders', updated).catch(reportSaveError);
           return updated;
         }
         return w;
@@ -516,12 +531,12 @@ export default function App() {
 
   const handleAddPart = (part: PartItem) => {
     setParts((prev) => [part, ...prev]);
-    saveDocument('parts', part).catch(console.error);
+    saveDocument('parts', part).catch(reportSaveError);
   };
 
   const handleUpdatePart = (part: PartItem) => {
     setParts((prev) => prev.map((p) => (p.id === part.id ? part : p)));
-    saveDocument('parts', part).catch(console.error);
+    saveDocument('parts', part).catch(reportSaveError);
   };
 
   const handleDeletePart = (partId: string) => {
@@ -531,7 +546,7 @@ export default function App() {
     }
     const p = parts.find((x) => x.id === partId);
     setParts((prev) => prev.filter((x) => x.id !== partId));
-    deleteDocument('parts', partId).catch(console.error);
+    deleteDocument('parts', partId).catch(reportSaveError);
     addToast(`Part SKU "${p ? p.name : partId}" deleted from inventory`, 'info', 'Part Deleted');
   };
 
@@ -540,7 +555,7 @@ export default function App() {
       prev.map((p) => {
         if (p.id === partId) {
           const updated = { ...p, quantityInStock: Math.max(0, newStock) };
-          saveDocument('parts', updated).catch(console.error);
+          saveDocument('parts', updated).catch(reportSaveError);
           return updated;
         }
         return p;
@@ -592,13 +607,13 @@ export default function App() {
           ...part,
           quantityInStock: Math.max(0, Number(part.quantityInStock || 0) - consumed.quantity),
         };
-        saveDocument('parts', updated).catch(console.error);
+        saveDocument('parts', updated).catch(reportSaveError);
         return updated;
       });
       return next;
     });
 
-    saveDocument('workOrders', updatedWorkOrder).catch(console.error);
+    saveDocument('workOrders', updatedWorkOrder).catch(reportSaveError);
 
     const inventoryExpense: Omit<ExpenseItem, 'id'> = {
       category: 'Inventory Consumption',
@@ -619,17 +634,17 @@ export default function App() {
 
   const handleAddRma = (rma: RmaItem) => {
     setRmas((prev) => [rma, ...prev]);
-    saveDocument('rmas', rma).catch(console.error);
+    saveDocument('rmas', rma).catch(reportSaveError);
   };
 
   const handleAddSupplier = (supplier: Supplier) => {
     setSuppliers((prev) => [...prev, supplier]);
-    saveDocument('suppliers', supplier).catch(console.error);
+    saveDocument('suppliers', supplier).catch(reportSaveError);
   };
 
   const handleUpdateSupplier = (supplier: Supplier) => {
     setSuppliers((prev) => prev.map((s) => (s.id === supplier.id ? supplier : s)));
-    saveDocument('suppliers', supplier).catch(console.error);
+    saveDocument('suppliers', supplier).catch(reportSaveError);
     addToast(`Supplier "${supplier.name}" updated successfully`, 'success', 'Supplier Updated');
   };
 
@@ -640,7 +655,7 @@ export default function App() {
     }
     const sup = suppliers.find((s) => s.id === supplierId);
     setSuppliers((prev) => prev.filter((s) => s.id !== supplierId));
-    deleteDocument('suppliers', supplierId).catch(console.error);
+    deleteDocument('suppliers', supplierId).catch(reportSaveError);
     addToast(`Supplier "${sup ? sup.name : supplierId}" deleted from system`, 'info', 'Supplier Deleted');
   };
 
@@ -653,7 +668,7 @@ export default function App() {
             status,
             vendorCreditAmount: creditAmount !== undefined ? creditAmount : r.vendorCreditAmount,
           };
-          saveDocument('rmas', updated).catch(console.error);
+          saveDocument('rmas', updated).catch(reportSaveError);
           return updated;
         }
         return r;
@@ -674,7 +689,7 @@ export default function App() {
             status: 'Taken Out' as WorkOrderStatus,
             updatedAt: new Date().toISOString(),
           };
-          saveDocument('workOrders', updated).catch(console.error);
+          saveDocument('workOrders', updated).catch(reportSaveError);
           return updated;
         }
         return w;
@@ -688,7 +703,7 @@ export default function App() {
       prev.map((w) => {
         if (w.id === workOrderId) {
           const updated = { ...w, microSolderingLog: log };
-          saveDocument('workOrders', updated).catch(console.error);
+          saveDocument('workOrders', updated).catch(reportSaveError);
           return updated;
         }
         return w;
@@ -712,7 +727,7 @@ export default function App() {
             status: 'Finished' as WorkOrderStatus,
             updatedAt: new Date().toISOString(),
           };
-          saveDocument('workOrders', updated).catch(console.error);
+          saveDocument('workOrders', updated).catch(reportSaveError);
           return updated;
         }
         return w;
@@ -723,7 +738,7 @@ export default function App() {
 
   const handleAddCustomer = (cust: Customer) => {
     setCustomers((prev) => [cust, ...prev]);
-    saveDocument('customers', cust).catch(console.error);
+    saveDocument('customers', cust).catch(reportSaveError);
   };
 
   const handleDeleteCustomer = (customerId: string) => {
@@ -733,7 +748,7 @@ export default function App() {
     }
     const cust = customers.find((c) => c.id === customerId);
     setCustomers((prev) => prev.filter((c) => c.id !== customerId));
-    deleteDocument('customers', customerId).catch(console.error);
+    deleteDocument('customers', customerId).catch(reportSaveError);
     addToast(`Customer "${cust ? cust.name : customerId}" removed from database`, 'info', 'Customer Deleted');
   };
 
@@ -743,7 +758,7 @@ export default function App() {
       id: `exp-${Date.now()}`
     };
     setExpenses((prev) => [newExp, ...prev]);
-    saveDocument('expenses', newExp).catch(console.error);
+    saveDocument('expenses', newExp).catch(reportSaveError);
     addToast('Operating expense recorded successfully.', 'success', 'Expense Recorded');
   };
 
@@ -754,7 +769,7 @@ export default function App() {
     }
     const exp = expenses.find((e) => e.id === expenseId);
     setExpenses((prev) => prev.filter((e) => e.id !== expenseId));
-    deleteDocument('expenses', expenseId).catch(console.error);
+    deleteDocument('expenses', expenseId).catch(reportSaveError);
     addToast(`Expense record "${exp ? exp.description : expenseId}" deleted`, 'info', 'Expense Deleted');
   };
 
@@ -772,7 +787,7 @@ export default function App() {
             { date: new Date().toISOString().split('T')[0], amount: paymentAmount, method: paymentMethod, note }
           ]
         };
-        saveDocument('supplierDebts', updated).catch(console.error);
+        saveDocument('supplierDebts', updated).catch(reportSaveError);
         return updated;
       }
       return d;
@@ -788,7 +803,7 @@ export default function App() {
           status,
           paidAt: status === 'Paid' ? new Date().toISOString() : p.paidAt
         };
-        saveDocument('technicianPayouts', updated).catch(console.error);
+        saveDocument('technicianPayouts', updated).catch(reportSaveError);
         return updated;
       }
       return p;
@@ -1315,6 +1330,7 @@ export default function App() {
                   onSaveWorkOrder={handleSaveWorkOrder}
                   onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
                   onOpenAiAssistant={() => setIsAiAssistantOpen(true)}
+                  onOpenNewWorkOrder={(prefill) => handleOpenNewWorkOrder(prefill)}
                   onDeleteWorkOrder={handleDeleteWorkOrder}
                   onClearAllWorkOrders={handleClearAllWorkOrders}
                   searchQuery={searchQuery}
@@ -1348,6 +1364,7 @@ export default function App() {
                   showBottlenecksOnly={showBottlenecksOnly}
                   setShowBottlenecksOnly={setShowBottlenecksOnly}
                   onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
+                  onOpenNewWorkOrder={(prefill) => handleOpenNewWorkOrder(prefill)}
                 />
               )}
 

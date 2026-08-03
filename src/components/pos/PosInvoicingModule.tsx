@@ -28,6 +28,7 @@ import { WorkOrder, Customer, SystemSettings, PartItem } from '../../types';
 import { getActivePaymentMethods } from '../../data/seedData';
 import { PrintableInvoiceModal } from '../common/PrintableInvoiceModal';
 import { CustomerNotificationModal } from '../common/CustomerNotificationModal';
+import { toast } from '../../lib/toast';
 
 const isSameDeviceModel = (left: string, right: string) =>
   left.trim().toLocaleLowerCase() === right.trim().toLocaleLowerCase();
@@ -131,6 +132,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   const [inventoryPartId, setInventoryPartId] = useState<string>('');
   const [inventoryPartQty, setInventoryPartQty] = useState<number>(1);
 
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [splitPayments, setSplitPayments] = useState<{ method: string; amount: number }[]>([
     { method: 'Cash', amount: 0 },
     { method: 'KBZPay', amount: 0 },
@@ -179,8 +181,6 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   const paginatedWorkOrders = filteredWorkOrders.slice((safeCurrentPage - 1) * ITEMS_PER_PAGE, safeCurrentPage * ITEMS_PER_PAGE);
 
   const selectedWo = filteredWorkOrders.find((w) => w.id === selectedWoId) || filteredWorkOrders[0] || null;
-  const inventoryPartsUsed = (selectedWo?.lineItems || []).filter((item) => item.partId && !item.isLabor && item.quantity > 0);
-  const inventoryUsageTotal = inventoryPartsUsed.reduce((sum, item) => sum + (Number(item.unitCost) || 0) * (Number(item.quantity) || 0), 0);
   const filteredInventoryParts = useMemo(() => {
     if (!selectedWo) return parts;
 
@@ -285,19 +285,41 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     setInventoryPartQty(1);
   };
 
+  const handleRemoveInventoryPartFromWorkOrder = (lineItemId: string) => {
+    if (!selectedWo || !onSaveWorkOrder) return;
+
+    const nextLineItems = (selectedWo.lineItems || []).filter((item) => item.id !== lineItemId);
+    const totals = recalculateTotals(nextLineItems, selectedWo.discountAmount, selectedWo.depositAmount);
+    const updatedWo: WorkOrder = {
+      ...selectedWo,
+      lineItems: nextLineItems,
+      subtotal: totals.subtotal,
+      taxAmount: totals.taxAmount,
+      totalAmount: totals.totalAmount,
+      updatedAt: new Date().toISOString(),
+    };
+    onSaveWorkOrder(updatedWo);
+  };
+
   const handleProcessPayment = () => {
-    if (!selectedWo) return;
+    if (!selectedWo || isProcessingPayment) return;
     let finalMethod = paymentMethod;
     if (paymentMethod === 'Split Payment') {
       const validSplits = splitPayments.filter((s) => s.amount > 0);
       if (validSplits.length === 0) {
-        alert('Please enter at least one split payment amount.');
+        toast.error('Please enter at least one split payment amount.', 'Split Payment Incomplete');
         return;
       }
       finalMethod = `Split Payment (${validSplits.map((s) => `${s.method}: ${s.amount.toLocaleString()} MMK`).join(' + ')})`;
     }
-    onMarkPaid(selectedWo, finalMethod);
-    setIsReceiptModalOpen(true);
+    setIsProcessingPayment(true);
+    try {
+      onMarkPaid(selectedWo, finalMethod);
+      setIsReceiptModalOpen(true);
+    } finally {
+      // Release after a short window so rapid double-clicks cannot double-charge.
+      window.setTimeout(() => setIsProcessingPayment(false), 1200);
+    }
   };
 
   // Quick Action to charge Diagnostic Fee Only (စက်စစ်ခ) for Cant Repair / Customer Cancelled
@@ -550,10 +572,34 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     </thead>
                     <tbody className="divide-y divide-[#E5E5EA]">
                       {selectedWo.lineItems.map((li) => (
-                        <tr key={li.id}>
-                          <td className="p-2.5 text-[#1D1D1F]">{li.description}</td>
+                        <tr key={li.id} className={li.partId && !li.isLabor ? 'bg-[#F8FBFF]' : ''}>
+                          <td className="p-2.5 text-[#1D1D1F]">
+                            <div className="space-y-1">
+                              <div className="font-medium">{li.description}</div>
+                              {li.partId && !li.isLabor && (
+                                <span className="inline-flex items-center rounded-full border border-[#D6E7FF] bg-[#F0F6FF] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-[#0071E3]">
+                                  Inventory Part
+                                </span>
+                              )}
+                            </div>
+                          </td>
                           <td className="p-2.5 text-[#86868B]">{li.quantity}</td>
-                          <td className="p-2.5 text-right font-mono text-[#1D1D1F]">{(li.unitPrice * li.quantity).toLocaleString()} MMK</td>
+                          <td className="p-2.5 text-right font-mono text-[#1D1D1F]">
+                            <div className="inline-flex items-center justify-end gap-2">
+                              <span>{(li.unitPrice * li.quantity).toLocaleString()} MMK</span>
+                              {li.partId && !li.isLabor && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveInventoryPartFromWorkOrder(li.id)}
+                                  className="inline-flex h-6 w-6 items-center justify-center rounded-full text-rose-500 transition-colors hover:bg-rose-50 hover:text-rose-600"
+                                  title="Remove inventory part"
+                                  aria-label={`Remove ${li.description}`}
+                                >
+                                  <XCircle className="h-4 w-4" />
+                                </button>
+                              )}
+                            </div>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -608,74 +654,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     </button>
                   </div>
 
-                  {selectedInventoryPart && (
-                    <div className="grid grid-cols-3 gap-2 text-[10px]">
-                      <div className="rounded-lg bg-[#F5F5F7] px-2 py-1.5">
-                        <span className="block text-[#86868B]">Stock</span>
-                        <span className="font-mono font-bold text-[#1D1D1F]">{selectedInventoryPart.quantityInStock.toLocaleString()}</span>
-                      </div>
-                      <div className="rounded-lg bg-[#F5F5F7] px-2 py-1.5">
-                        <span className="block text-[#86868B]">Purchase</span>
-                        <span className="font-mono font-bold text-[#1D1D1F]">{selectedInventoryPart.costPrice.toLocaleString()} MMK</span>
-                      </div>
-                      <div className="rounded-lg bg-[#F5F5F7] px-2 py-1.5">
-                        <span className="block text-[#86868B]">Selling</span>
-                        <span className="font-mono font-bold text-[#1D1D1F]">{selectedInventoryPart.sellingPrice.toLocaleString()} MMK</span>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex items-start gap-2 rounded-lg bg-[#F5F5F7] px-2.5 py-2 text-[10px] text-[#86868B]">
-                    <Filter className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#0071E3]" />
-                    <p className="leading-snug">
-                      Showing parts for <span className="font-bold text-[#1D1D1F]">{selectedWo?.deviceModel || 'selected device'}</span>
-                      {filteredInventoryParts.length !== parts.length ? (
-                        <>
-                          {' '}and only categories that match the repair items on this ticket.
-                        </>
-                      ) : (
-                        <>
-                          {' '}with compatible stock from inventory.
-                        </>
-                      )}
-                    </p>
-                  </div>
                 </div>
-
-                {!!inventoryPartsUsed.length && (
-                  <div className="bg-amber-50/90 border border-amber-200 rounded-xl p-3 space-y-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <h4 className="text-xs font-extrabold text-amber-900">Inventory Usage Settlement</h4>
-                      <span className="text-[10px] font-mono font-bold text-amber-800 bg-white/70 px-2 py-0.5 rounded-full border border-amber-200">
-                        {inventoryPartsUsed.length} item(s)
-                      </span>
-                    </div>
-                    <div className="space-y-1 text-[11px]">
-                      {inventoryPartsUsed.map((item) => {
-                        const matchedPart = parts.find((part) => part.id === item.partId);
-                        return (
-                          <div key={item.id} className="flex items-center justify-between gap-2 rounded-lg bg-white/80 border border-amber-100 px-2 py-1.5">
-                            <div className="min-w-0">
-                              <div className="font-semibold text-[#1D1D1F] truncate">{item.partName || item.description}</div>
-                              <div className="text-[10px] text-[#86868B]">
-                                {item.quantity} × {(item.unitCost || 0).toLocaleString()} MMK {matchedPart?.locationBin ? `• ${matchedPart.locationBin}` : ''}
-                              </div>
-                            </div>
-                            <div className="font-mono font-bold text-amber-900 whitespace-nowrap">
-                              {((Number(item.unitCost) || 0) * (Number(item.quantity) || 0)).toLocaleString()} MMK
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <div className="flex items-center justify-between border-t border-amber-200 pt-2">
-                      <span className="text-[10px] font-bold text-amber-800">Auto-deducts from inventory on payment</span>
-                      <span className="text-[11px] font-mono font-bold text-amber-900">
-                        Total Cost: {inventoryUsageTotal.toLocaleString()} MMK
-                      </span>
-                    </div>
-                  </div>
-                )}
 
                 {/* Calculation Summary */}
                 <div className="bg-[#F5F5F7]/80 p-3 rounded-xl border border-[#E5E5EA] space-y-1.5 text-right">
@@ -997,10 +976,24 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 <button
                   type="button"
                   onClick={handleProcessPayment}
-                  className="w-full sm:w-1/2 py-3 bg-[#34C759] hover:bg-[#30B753] text-white font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center space-x-1.5 cursor-pointer active:scale-95"
+                  disabled={isProcessingPayment}
+                  className={`w-full sm:w-1/2 py-3 font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center space-x-1.5 ${
+                    isProcessingPayment
+                      ? 'bg-[#86868B] text-white cursor-not-allowed opacity-80'
+                      : 'bg-[#34C759] hover:bg-[#30B753] text-white cursor-pointer active:scale-95'
+                  }`}
                 >
-                  <CreditCard className="w-4 h-4" />
-                  <span>Pay & Print Receipt</span>
+                  {isProcessingPayment ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                      <span>Processing…</span>
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard className="w-4 h-4" />
+                      <span>Pay & Print Receipt</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>

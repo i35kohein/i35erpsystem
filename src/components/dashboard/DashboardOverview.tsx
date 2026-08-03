@@ -1908,6 +1908,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           workOrder={rosterTicket}
           onClose={() => setRosterTicket(null)}
           onPrint={onSelectPrintTag}
+          onEdit={(wo) => onOpenNewWorkOrder({ editWorkOrder: wo })}
         />
       )}
     </div>

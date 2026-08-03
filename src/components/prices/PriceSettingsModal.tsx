@@ -30,6 +30,7 @@ import {
   Globe
 } from 'lucide-react';
 import { ModelRepairPrice, PriceCatalogImportRow, REPAIR_CATEGORIES, RepairCategoryDef, FolderConfig, getModelFolderId } from '../../types/priceCatalog';
+import { toast } from '../../lib/toast';
 
 const normalizeCsvHeader = (value: string) => value.replace(/^\uFEFF/, '').trim().toLowerCase().replace(/\s+/g, ' ');
 
@@ -281,7 +282,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
   const handleApplyGlobalAdjustment = () => {
     if (!applyGlobalPriceAdjustment) return;
     if (globalAdjPercent === 0 && globalAdjFlat === 0) {
-      alert('Please enter a percentage or flat adjustment amount.');
+      toast.error('Please enter a percentage or flat adjustment amount.', 'Invalid Adjustment');
       return;
     }
     applyGlobalPriceAdjustment(globalAdjFolder, globalAdjCategory, globalAdjPercent, globalAdjFlat);
@@ -388,7 +389,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
       triggerToast(`Replaced Price List categories with ${csvCategories.length} CSV services and imported ${imported} model(s).${skippedNote}`);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Could not read this CSV file.';
-      alert(message);
+      toast.info(message, 'Price Update');
     }
   };
 

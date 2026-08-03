@@ -64,6 +64,7 @@ import { WorkOrderStatusTimeline } from '../common/WorkOrderStatusTimeline';
 import { useLanguage } from '../../context/LanguageContext';
 import { CustomerNotificationModal } from '../common/CustomerNotificationModal';
 import { TicketDetailInspectorModal } from '../common/TicketDetailInspectorModal';
+import { toast } from '../../lib/toast';
 
 interface StatusPipelineViewProps {
   workOrders: WorkOrder[];
@@ -85,6 +86,7 @@ interface StatusPipelineViewProps {
   showBottlenecksOnly?: boolean;
   setShowBottlenecksOnly?: (b: boolean) => void;
   onSelectPrintTag?: (wo: WorkOrder) => void;
+  onOpenNewWorkOrder?: (prefill?: any) => void;
 }
 
 export const KANBAN_STAGES: { id: WorkOrderStatus; title: string; subtitle: string; color: string; badgeColor: string }[] = [
@@ -117,6 +119,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
   showBottlenecksOnly: propShowBottlenecksOnly,
   setShowBottlenecksOnly: propSetShowBottlenecksOnly,
   onSelectPrintTag,
+  onOpenNewWorkOrder,
 }) => {
   const { t } = useLanguage();
   const activePaymentMethods = getActivePaymentMethods(systemSettings).filter((m) => m.enabled);
@@ -243,7 +246,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
     if (onSaveWorkOrder) onSaveWorkOrder(updatedWo);
     setAddLogModalWo(null);
     setLogText('');
-    alert('✓ Repair log entry saved to ticket!');
+    toast.success('Repair log entry saved to ticket.', 'Log Saved');
   };
 
   const handleAssignTechnician = (techId: string) => {
@@ -300,7 +303,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
     if (onSaveWorkOrder) onSaveWorkOrder(updatedWo);
     onUpdateWorkOrderStatus(checkoutModalWo.id, 'Taken Out');
     setCheckoutModalWo(null);
-    alert(`✓ Payment of ${amount.toLocaleString()} MMK confirmed! Ticket moved to Taken Out.`);
+    toast.success(`Payment of ${amount.toLocaleString()} MMK confirmed. Ticket moved to Taken Out.`, 'Payment Confirmed');
   };
 
   const handleSaveAfterDiagnostic = () => {
@@ -326,7 +329,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
 
     if (onSaveWorkOrder) onSaveWorkOrder(updatedWo);
     setAfterDiagModalWo(null);
-    alert('✓ After-Repair diagnostic inspection saved!');
+    toast.success('After-repair diagnostic inspection saved.', 'Inspection Saved');
   };
 
   // Check if active filters exist
@@ -1035,6 +1038,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
           currentUser={currentUser}
           onClose={() => setDetailModalWo(null)}
           onPrint={onSelectPrintTag}
+          onEdit={onOpenNewWorkOrder ? (wo) => onOpenNewWorkOrder({ editWorkOrder: wo }) : undefined}
           onDelete={onDeleteWorkOrder}
         />
       )}

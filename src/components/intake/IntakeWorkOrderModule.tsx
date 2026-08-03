@@ -91,6 +91,7 @@ interface IntakeWorkOrderModuleProps {
   onSaveWorkOrder: (wo: WorkOrder) => void;
   onSelectPrintTag: (wo: WorkOrder) => void;
   onOpenAiAssistant: () => void;
+  onOpenNewWorkOrder?: (prefill?: any) => void;
   onDeleteWorkOrder?: (id: string) => void;
   onClearAllWorkOrders?: () => void;
   searchQuery: string;
@@ -136,6 +137,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   onSaveWorkOrder,
   onSelectPrintTag,
   onOpenAiAssistant,
+  onOpenNewWorkOrder,
   onDeleteWorkOrder,
   onClearAllWorkOrders,
   searchQuery,
@@ -441,17 +443,17 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           /* TABLE VIEW */
           <div className="workspace-panel__scroll rounded-xl">
             <table className="w-full min-w-[1120px] text-left border-collapse">
-              <thead className="sticky top-0 z-20 bg-[#F8FBFD] shadow-2xs">
-                <tr className="border-b border-[#E5E5EA] bg-[#F8FBFD] text-[11px] font-black uppercase text-[#7F7F7F] tracking-wider">
-                  <th className="py-3 px-4 rounded-tl-xl bg-[#F8FBFD]">Ticket # & Date</th>
-                  <th className="py-3 px-4 bg-[#F8FBFD]">Customer & Contact</th>
-                  <th className="py-3 px-4 bg-[#F8FBFD]">Device & Serial/IMEI</th>
-                  <th className="py-3 px-4 bg-[#F8FBFD]">Symptoms / Service</th>
-                  <th className="py-3 px-4 bg-[#F8FBFD]">Assigned Tech</th>
-                  <th className="py-3 px-4 bg-[#F8FBFD]">Priority</th>
-                  <th className="py-3 px-4 bg-[#F8FBFD]">Stage & Status</th>
-                  <th className="py-3 px-4 bg-[#F8FBFD]">Amount</th>
-                  <th className="py-3 px-4 text-center rounded-tr-xl bg-[#F8FBFD]">Action</th>
+              <thead className="sticky top-0 z-20 border-b border-[#E5E5EA] bg-[#F5F5F7] font-mono text-[10px] uppercase text-[#86868B] shadow-2xs">
+                <tr>
+                  <th className="px-2 py-2 bg-[#F5F5F7]">Ticket # & Date</th>
+                  <th className="px-2 py-2 bg-[#F5F5F7]">Customer & Contact</th>
+                  <th className="px-2 py-2 bg-[#F5F5F7]">Device & Serial/IMEI</th>
+                  <th className="px-2 py-2 bg-[#F5F5F7]">Symptoms / Service</th>
+                  <th className="px-2 py-2 bg-[#F5F5F7]">Assigned Tech</th>
+                  <th className="px-2 py-2 bg-[#F5F5F7]">Priority</th>
+                  <th className="px-2 py-2 bg-[#F5F5F7]">Stage & Status</th>
+                  <th className="px-2 py-2 bg-[#F5F5F7]">Amount</th>
+                  <th className="px-2 py-2 text-right bg-[#F5F5F7]">Detail</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E5E5EA] text-xs">
@@ -466,74 +468,81 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                     <tr
                       key={wo.id}
                       onClick={() => handleOpenTicketDetail(wo)}
-                      className="hover:bg-[#F8FBFD] transition-colors cursor-pointer group"
+                      className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
                     >
                       {/* Ticket # & Date */}
-                      <td className="py-3.5 px-4 font-mono font-black text-[#136F9A]">
-                        <p>{wo.orderNumber || wo.id}</p>
-                        <span className="text-[10px] font-medium text-[#7F7F7F]">{createdDate}</span>
+                      <td className="px-2 py-2">
+                        <div className="flex items-start space-x-2">
+                          <div className="mt-0.5 shrink-0 rounded-md bg-[#0071E3]/10 p-1 text-[#0071E3]">
+                            <Ticket className="h-3 w-3" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-mono text-[11px] font-extrabold leading-snug text-[#0071E3]">{wo.orderNumber || wo.id}</p>
+                            <p className="mt-0.5 text-[9px] font-medium text-[#86868B]">{createdDate}</p>
+                          </div>
+                        </div>
                       </td>
 
                       {/* Customer & Contact */}
-                      <td className="py-3.5 px-4 text-[#2C3E50]">
+                      <td className="px-2 py-2 text-[#1D1D1F]">
                         <div className="space-y-0.5">
-                          <span className="block max-w-[140px] truncate font-bold">{wo.customerName}</span>
-                          <span className="block font-mono text-[10px] text-[#7F7F7F]">{wo.customerPhone}</span>
+                          <span className="block max-w-[140px] truncate text-[11px] font-extrabold leading-snug">{wo.customerName}</span>
+                          <span className="block font-mono text-[9px] font-medium text-[#86868B]">{wo.customerPhone}</span>
                         </div>
                       </td>
 
                       {/* Device & Serial */}
-                      <td className="py-3.5 px-4 text-[#2C3E50]">
+                      <td className="px-2 py-2 text-[#1D1D1F]">
                         <div className="space-y-0.5">
-                          <span className="block max-w-[150px] truncate font-semibold">{wo.deviceModel}</span>
-                          <span className="block max-w-[150px] truncate font-mono text-[10px] text-[#7F7F7F]">
+                          <span className="block max-w-[150px] truncate text-[11px] font-extrabold leading-snug">{wo.deviceModel}</span>
+                          <span className="block max-w-[150px] truncate font-mono text-[9px] font-medium text-[#86868B]">
                             {wo.serialNumber || wo.imei ? `SN: ${wo.serialNumber || wo.imei}` : 'No Serial'}
                           </span>
                         </div>
                       </td>
 
                       {/* Symptoms / Service */}
-                      <td className="py-3.5 px-4 text-[#2C3E50]">
-                        <p className="line-clamp-1 max-w-[180px]" title={wo.symptomsReported || wo.serviceType}>
+                      <td className="px-2 py-2 text-[#1D1D1F]">
+                        <p className="line-clamp-1 max-w-[180px] text-[11px] font-semibold" title={wo.symptomsReported || wo.serviceType}>
                           {wo.symptomsReported || wo.serviceType || 'General Repair'}
                         </p>
                       </td>
 
                       {/* Assigned Tech */}
-                      <td className="py-3.5 px-4 text-[#2C3E50]">
+                      <td className="px-2 py-2 text-[#1D1D1F]">
                         <div className="flex items-center space-x-1.5">
                           <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-200 text-[10px] font-bold text-slate-700">
                             {(wo.assignedTechName || 'U').charAt(0)}
                           </div>
-                          <span className="max-w-[100px] truncate font-medium">{wo.assignedTechName || 'Unassigned'}</span>
+                          <span className="max-w-[100px] truncate text-[11px] font-semibold">{wo.assignedTechName || 'Unassigned'}</span>
                         </div>
                       </td>
 
-                      <td className="py-3.5 px-4">
+                      <td className="px-2 py-2">
                         <PriorityBadge priority={wo.priority} size="xs" />
                       </td>
 
-                      <td className="py-3.5 px-4">
+                      <td className="px-2 py-2">
                         <StatusBadge status={wo.status} size="xs" />
                       </td>
 
                       {/* Amount & payment */}
-                      <td className="py-3.5 px-4">
-                        <p className="font-mono font-black text-[#2C3E50]">{totalAmount.toLocaleString()} MMK</p>
-                        <span className={`rounded px-1.5 py-0.5 text-[9px] font-bold ${
-                          wo.isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                      <td className="px-2 py-2">
+                        <p className="whitespace-nowrap font-sans text-[12px] font-semibold text-[#16A34A]">{totalAmount.toLocaleString()} MMK</p>
+                        <span className={`mt-0.5 inline-flex rounded-md border px-1.5 py-0.5 text-[9px] font-extrabold ${
+                          wo.isPaid ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-rose-200 bg-rose-50 text-rose-800'
                         }`}>
                           {wo.isPaid ? 'Paid' : 'Unpaid'}
                         </span>
                       </td>
 
                       {/* Action */}
-                      <td className="py-3.5 px-4 text-center">
-                        <div className="flex items-center justify-center space-x-1.5" onClick={(e) => e.stopPropagation()}>
+                      <td className="px-2 py-2 text-right">
+                        <div className="flex items-center justify-end" onClick={(e) => e.stopPropagation()}>
                           <button
                             type="button"
                             onClick={() => handleOpenTicketDetail(wo)}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--blue-tint)] text-[var(--primary)] transition-colors hover:bg-[var(--primary)] hover:text-white"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] text-[#1D1D1F] transition-colors hover:border-[#0071E3] hover:bg-blue-50 hover:text-[#0071E3]"
                             title="View Ticket Status"
                             aria-label={`View status for ${wo.orderNumber || wo.id}`}
                           >
@@ -938,6 +947,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           currentUser={currentUser}
           onClose={() => setIsDetailModalOpen(false)}
           onPrint={onSelectPrintTag}
+          onEdit={onOpenNewWorkOrder ? (wo) => onOpenNewWorkOrder({ editWorkOrder: wo }) : undefined}
           onDelete={onDeleteWorkOrder}
         />
       )}

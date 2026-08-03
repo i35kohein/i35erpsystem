@@ -106,7 +106,6 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
 
   // 21-Point Post-Repair Diagnostic Checklist State
   const [qaDiagnostics, setQaDiagnostics] = useState<DiagnosticItemResult[]>([]);
-
   // Update QA form & 21-point checklist whenever selectedWoId changes
   useEffect(() => {
     if (!selectedWo) return;
@@ -202,9 +201,6 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
     setQaSavedNotice(true);
     setTimeout(() => setQaSavedNotice(false), 4000);
   };
-
-  const passCount = qaDiagnostics.filter(d => d.status === 'Pass').length;
-  const failCount = qaDiagnostics.filter(d => d.status === 'Fail').length;
 
   return (
     <div className="space-y-3 text-xs">
@@ -345,81 +341,91 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
               </div>
 
               {/* 21-Point Post-Repair Hardware Diagnostic Checklist */}
-              <div className="space-y-2 rounded-xl border border-[#E5E5EA] bg-[#F5F5F7] p-3">
+              <div className="space-y-2.5 rounded-xl border border-[#E5E5EA] bg-[#F5F5F7] p-3">
                 <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-2">
                   <h3 className="text-xs font-extrabold text-[#1D1D1F] flex items-center space-x-2">
-                    <ShieldCheck className="w-4 h-4 text-[#0071E3]" />
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0071E3] text-[10px] text-white">7</span>
                     <span>21-Point Post-Repair Hardware Inspection</span>
                   </h3>
-                  <div className="flex items-center space-x-2 text-[10px] font-bold">
-                    <span className="bg-[#16A34A] text-white px-2.5 py-0.5 rounded-md font-black shadow-2xs">Pass: {passCount}</span>
-                    {failCount > 0 && <span className="bg-[#DC2626] text-white px-2.5 py-0.5 rounded-md font-black shadow-2xs animate-pulse">Fail: {failCount}</span>}
+                  <div className="flex space-x-2">
+                    <button
+                      type="button"
+                      onClick={handleMarkAllPass}
+                      className="rounded-full bg-[#34C759] px-3 py-1 text-[10px] font-bold text-white shadow-xs transition-colors hover:bg-[#28A745]"
+                    >
+                      Mark All Pass
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setQaDiagnostics((prev) => prev.map((diagnostic) => ({ ...diagnostic, status: 'N/A' })))}
+                      className="rounded-full border border-[#D2D2D7] bg-[#F5F5F7] px-3 py-1 text-[10px] font-bold text-[#1D1D1F] shadow-xs transition-colors hover:bg-[#E5E5EA]"
+                    >
+                      Mark All N/A
+                    </button>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-1.5 text-xs sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div className="grid grid-cols-1 gap-2.5 text-xs sm:grid-cols-2 lg:grid-cols-3">
                   {qaDiagnostics.map((item, idx) => {
                     const IconComp = getDiagnosticIcon(item.name);
 
                     return (
-                      <div key={item.id} className="flex flex-col justify-between space-y-1 rounded-lg border border-[#E5E5EA] bg-white p-1.5 text-xs transition-colors hover:border-[#0071E3]/50">
-                        <div className="space-y-1">
-                          <div className="font-bold text-[#1D1D1F] flex justify-between items-center">
-                            <div className="flex min-w-0 items-center gap-1 truncate">
-                              <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded bg-[#F5F5F7] text-[#0071E3]">
-                                <IconComp className="h-3 w-3" />
-                              </div>
-                              <span className="truncate text-[10px] font-extrabold">{idx + 1}. {item.name}</span>
+                      <div key={item.id} className="space-y-1.5 rounded-xl border border-[#E5E5EA] bg-white p-2.5 text-xs shadow-xs transition-all hover:border-[#0071E3]/50">
+                        <div className="font-bold text-[#1D1D1F] flex justify-between items-center">
+                          <div className="flex items-center space-x-1.5 truncate">
+                            <div className="w-5 h-5 rounded-md bg-[#F5F5F7] text-[#0071E3] flex items-center justify-center shrink-0">
+                              <IconComp className="w-3.5 h-3.5" />
                             </div>
-
-                            <span className={`shrink-0 rounded px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wide ${
-                              item.status === 'Pass' ? 'bg-[#16A34A] text-white' :
-                              item.status === 'Fail' ? 'bg-[#DC2626] text-white' : 'bg-[#475569] text-white'
-                            }`}>
-                              {item.status}
-                            </span>
+                            <span className="text-[11px] font-extrabold truncate">{idx + 1}. {item.name}</span>
                           </div>
 
-                          {/* Status Toggle Buttons */}
-                          <div className="flex items-center gap-0.5 text-[9px]">
-                            <button
-                              type="button"
-                              onClick={() => handleDiagnosticStatusChange(item.id, 'Pass')}
-                              className={`h-6 !min-h-6 flex-1 rounded font-black transition-colors ${
-                                item.status === 'Pass' ? 'bg-[#16A34A] text-white' : 'bg-[#F5F5F7] text-[#1D1D1F] hover:bg-slate-200'
-                              }`}
-                            >
-                              Pass
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDiagnosticStatusChange(item.id, 'Fail')}
-                              className={`h-6 !min-h-6 flex-1 rounded font-black transition-colors ${
-                                item.status === 'Fail' ? 'bg-[#DC2626] text-white' : 'bg-[#F5F5F7] text-[#1D1D1F] hover:bg-slate-200'
-                              }`}
-                            >
-                              Fail
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDiagnosticStatusChange(item.id, 'N/A')}
-                              className={`h-6 !min-h-6 flex-1 rounded font-black transition-colors ${
-                                item.status === 'N/A' ? 'bg-[#475569] text-white' : 'bg-[#F5F5F7] text-[#1D1D1F] hover:bg-slate-200'
-                              }`}
-                            >
-                              N/A
-                            </button>
-                          </div>
+                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-md tracking-wider uppercase shrink-0 shadow-2xs ${
+                            item.status === 'Pass' ? 'bg-[#16A34A] text-white' :
+                            item.status === 'Fail' ? 'bg-[#DC2626] text-white animate-pulse' : 'bg-[#475569] text-white'
+                          }`}>
+                            {item.status === 'Pass' ? '✓ PASS' : item.status === 'Fail' ? '✕ FAIL' : 'N/A'}
+                          </span>
                         </div>
 
-                        {/* Optional Comment Input */}
-                        <div>
+                        {/* Status Toggle Buttons */}
+                        <div className="flex space-x-1 text-[10px]">
+                          <button
+                            type="button"
+                            onClick={() => handleDiagnosticStatusChange(item.id, 'Pass')}
+                            className={`flex-1 py-1 rounded-lg font-black transition-all ${
+                              item.status === 'Pass' ? 'bg-[#16A34A] text-white shadow-xs' : 'bg-[#F5F5F7] text-[#1D1D1F] hover:bg-slate-200'
+                            }`}
+                          >
+                            Pass
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDiagnosticStatusChange(item.id, 'Fail')}
+                            className={`flex-1 py-1 rounded-lg font-black transition-all ${
+                              item.status === 'Fail' ? 'bg-[#DC2626] text-white shadow-xs' : 'bg-[#F5F5F7] text-[#1D1D1F] hover:bg-slate-200'
+                            }`}
+                          >
+                            Fail
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDiagnosticStatusChange(item.id, 'N/A')}
+                            className={`flex-1 py-1 rounded-lg font-black transition-all ${
+                              item.status === 'N/A' ? 'bg-[#475569] text-white shadow-xs' : 'bg-[#F5F5F7] text-[#1D1D1F] hover:bg-slate-200'
+                            }`}
+                          >
+                            N/A
+                          </button>
+                        </div>
+
+                        {/* Diagnostic Comment Box */}
+                        <div className="relative pt-1">
                           <input
                             type="text"
                             value={item.note || ''}
                             onChange={(e) => handleDiagnosticNoteChange(item.id, e.target.value)}
-                            placeholder="Optional note…"
-                            className="h-6 !min-h-6 w-full rounded border border-[#E5E5EA] bg-[#F5F5F7] px-1.5 text-[9px] text-[#1D1D1F] placeholder:text-[#A1A1A6] focus:border-[#0071E3] focus:bg-white focus:outline-none"
+                            placeholder={`Comment for ${item.name}...`}
+                            className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-lg px-2.5 py-1 text-[11px] text-[#1D1D1F] focus:bg-white focus:border-[#0071E3] focus:outline-none"
                           />
                         </div>
                       </div>

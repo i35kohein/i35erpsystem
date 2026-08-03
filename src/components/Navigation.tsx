@@ -381,6 +381,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                           : 'bg-white text-[#344054] border-transparent hover:text-[#1D1D1F] hover:bg-[#F3F4F6]'
                       }`}
                       title={item.label}
+                      aria-label={item.badge !== undefined && (typeof item.badge === 'string' || item.badge > 0) ? `${item.label} (${item.badge} pending)` : item.label}
                     >
                       <div className="flex items-center justify-center min-w-0">
                         <ItemIcon className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#0071E3]' : 'text-[#86868B]'}`} />

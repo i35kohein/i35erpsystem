@@ -12,6 +12,7 @@ import {
   Layers
 } from 'lucide-react';
 import { WorkOrder, MicroSolderingLog } from '../../types';
+import { toast } from '../../lib/toast';
 
 interface MicroSolderingModuleProps {
   workOrders: WorkOrder[];
@@ -74,7 +75,7 @@ export const MicroSolderingModule: React.FC<MicroSolderingModuleProps> = ({
     };
 
     onSaveMicroSolderingLog(selectedWo.id, log);
-    alert('Micro-Soldering Diagnostic Worksheet saved successfully to Work Order!');
+    toast.success('Micro-soldering diagnostic worksheet saved to work order.', 'Worksheet Saved');
   };
 
   return (

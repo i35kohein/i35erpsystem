@@ -62,6 +62,7 @@ import { LanguageSwitcher } from '../common/LanguageSwitcher';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 import { QRCodeSVG } from 'qrcode.react';
 import { DeviceTagPrinterModal } from '../common/DeviceTagPrinterModal';
+import { toast } from '../../lib/toast';
 
 interface SystemManagementSettingsModuleProps {
   settings: SystemSettings;
@@ -410,7 +411,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
 
   const handleDeleteNotificationTemplate = (id: string) => {
     if (currentNotificationTemplates.length <= 1) {
-      alert('You must keep at least one notification template.');
+      toast.error('You must keep at least one notification template.', 'Cannot Delete');
       return;
     }
     if (window.confirm('Are you sure you want to delete this notification template?')) {
@@ -505,7 +506,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
 
   const handleSaveUser = () => {
     if (!userFormData.name.trim()) {
-      alert('Please enter user name.');
+      toast.error('Please enter user name.', 'Missing Name');
       return;
     }
 
