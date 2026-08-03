@@ -848,11 +848,11 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         {/* Action Controls & View Switcher */}
         <div className="flex flex-wrap items-center gap-1.5">
           {/* Dual View Switcher */}
-          <div className="bg-[#F5F5F7] p-1 rounded-xl border border-[#E5E5EA] flex items-center space-x-1">
+          <div className="bg-[#F5F5F7] rounded-xl border border-[#E5E5EA] flex h-8 items-center p-1">
             <button
               type="button"
               onClick={() => setViewMode('stock')}
-              className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer ${
+              className={`h-8 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer ${
                 viewMode === 'stock'
                   ? 'bg-white text-[#0071E3] shadow-xs border border-[#0071E3]/20'
                   : 'text-[#86868B] hover:text-[#1D1D1F]'
@@ -864,7 +864,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             <button
               type="button"
               onClick={() => setViewMode('profit')}
-              className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer ${
+              className={`h-8 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer ${
                 viewMode === 'profit'
                   ? 'bg-white text-[#0071E3] shadow-xs border border-[#0071E3]/20'
                   : 'text-[#86868B] hover:text-[#1D1D1F]'
@@ -876,7 +876,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             <button
               type="button"
               onClick={() => setViewMode('matrix')}
-              className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer ${
+              className={`h-8 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer ${
                 viewMode === 'matrix'
                   ? 'bg-white text-[#0071E3] shadow-xs border border-[#0071E3]/20'
                   : 'text-[#86868B] hover:text-[#1D1D1F]'
@@ -889,9 +889,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
           {/* Model → Category → Tier filters, same line as view switcher */}
           <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-            <div className="flex items-center gap-1 rounded-lg bg-[#F5F5F7] p-1">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white text-[#0071E3]">
-                <Smartphone className="h-3.5 w-3.5" />
+            <div className="flex h-8 items-center gap-1 rounded-lg bg-[#F5F5F7] p-1">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white text-[#0071E3]">
+                <Smartphone className="h-3 w-3" />
               </span>
               <CustomDropdownMenu
                 value={selectedModelFilter}
@@ -915,9 +915,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               />
             </div>
 
-            <div className="flex items-center gap-1 rounded-lg bg-[#F5F5F7] p-1">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white text-[#0071E3]">
-                <Layers className="h-3.5 w-3.5" />
+            <div className="flex h-8 items-center gap-1 rounded-lg bg-[#F5F5F7] p-1">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white text-[#0071E3]">
+                <Layers className="h-3 w-3" />
               </span>
               <CustomDropdownMenu
                 value={selectedCategory}
@@ -937,9 +937,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               />
             </div>
 
-            <div className="flex items-center gap-1 rounded-lg bg-[#F5F5F7] p-1">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white text-[#0071E3]">
-                <Filter className="h-3.5 w-3.5" />
+            <div className="flex h-8 items-center gap-1 rounded-lg bg-[#F5F5F7] p-1">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white text-[#0071E3]">
+                <Filter className="h-3 w-3" />
               </span>
               <CustomDropdownMenu
                 value={selectedQuality}
@@ -962,7 +962,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 <button
                   type="button"
                   onClick={() => setShowInlineSaveConfirm(true)}
-                  className="inline-flex h-8 items-center justify-center rounded-lg border border-[#0071E3] bg-[#0071E3] px-2.5 text-[10px] font-bold text-white transition-colors hover:bg-blue-700"
+                  className="inline-flex items-center justify-center rounded-lg border border-[#0071E3] bg-[#0071E3] px-2.5 py-1.5 text-xs font-bold text-white transition-colors hover:bg-blue-700"
                   title="Save inline edits"
                 >
                   Save
@@ -978,15 +978,16 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   setInlineEditMode((value) => !value);
                   setInlineDrafts({});
                 }}
-                className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border transition-colors ${inlineEditMode ? 'border-[#0071E3] bg-blue-50 text-[#0071E3]' : 'border-[#E5E5EA] bg-white text-[#1D1D1F] hover:border-[#0071E3]'}`}
+                className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-bold transition-colors ${inlineEditMode ? 'border-[#0071E3] bg-blue-50 text-[#0071E3]' : 'border-[#E5E5EA] bg-white text-[#1D1D1F] hover:border-[#0071E3] hover:text-[#0071E3]'}`}
                 title="Edit stock rows"
               >
                 <Edit2 className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Edit</span>
               </button>
               <button
                 type="button"
                 onClick={() => { setIsTagsPrintOpen(true); setSelectedTagIds(new Set()); }}
-                className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-[#E5E5EA] bg-white px-2.5 text-[10px] font-bold text-[#1D1D1F] transition-colors hover:border-[#0071E3] hover:text-[#0071E3]"
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#E5E5EA] bg-white px-2.5 py-1.5 text-xs font-bold text-[#1D1D1F] transition-colors hover:border-[#0071E3] hover:text-[#0071E3]"
                 title="Print spare parts tags (A4)"
               >
                 <Printer className="h-3.5 w-3.5" />
