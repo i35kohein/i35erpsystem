@@ -393,6 +393,47 @@ export default function App() {
   const activeWorkOrders = workOrders.filter((w) => !w.isArchived);
   const archivedWorkOrders = workOrders.filter((w) => w.isArchived);
 
+  // CRM roster: Supabase customer accounts + customers derived from existing
+  // tickets — every ticket's customer is visible even without a standalone
+  // customer account (no demo/seed data needed).
+  const rosterCustomers = useMemo(() => {
+    const cloudIds = new Set(customers.map((c) => c.id));
+    const byKey = new Map<string, { base: Customer; orders: WorkOrder[] }>();
+    activeWorkOrders.forEach((wo) => {
+      const key = wo.customerId || `${(wo.customerName || '').trim().toLowerCase()}|${(wo.customerPhone || '').trim()}`;
+      if (!key || cloudIds.has(key)) return;
+      const entry = byKey.get(key);
+      if (entry) {
+        entry.orders.push(wo);
+      } else {
+        byKey.set(key, {
+          base: {
+            id: key,
+            name: wo.customerName || 'Unknown Customer',
+            email: wo.customerEmail || '',
+            phone: wo.customerPhone || '',
+            type: (wo.customerType as Customer['type']) || 'Retail',
+            discountPercentage: 0,
+            totalOrdersCount: 0,
+            totalSpent: 0,
+            createdAt: wo.createdAt,
+          },
+          orders: [wo],
+        });
+      }
+    });
+    const derived: Customer[] = [];
+    byKey.forEach(({ base, orders }) => {
+      derived.push({
+        ...base,
+        totalOrdersCount: orders.length,
+        totalSpent: orders.reduce((sum, o) => sum + (o.totalAmount || 0), 0),
+        createdAt: orders.map((o) => o.createdAt || '').sort()[0] || base.createdAt,
+      });
+    });
+    return [...customers, ...derived];
+  }, [customers, activeWorkOrders]);
+
   // --- Handlers ---
   const handleUpdateSettings = (newSettings: SystemSettings) => {
     // Preserve independently managed inventory data when another settings
@@ -1349,7 +1390,7 @@ export default function App() {
               {activeTab === 'create-ticket' && (
                 <CreateTicketSoloPage
                   workOrders={activeWorkOrders}
-                  customers={customers}
+                  customers={rosterCustomers}
                   technicians={technicians}
                   systemSettings={systemSettings}
                   priceCatalog={priceCatalog.catalog}
@@ -1365,7 +1406,7 @@ export default function App() {
                 <IntakeWorkOrderModule
                   workOrders={activeWorkOrders}
                   parts={parts}
-                  customers={customers}
+                  customers={rosterCustomers}
                   technicians={technicians}
                   currentUser={currentUser}
                   onSaveWorkOrder={handleSaveWorkOrder}
@@ -1508,7 +1549,7 @@ export default function App() {
               {activeTab === 'pos' && (
                 <PosInvoicingModule
                   workOrders={activeWorkOrders}
-                  customers={customers}
+                  customers={rosterCustomers}
                   parts={parts}
                   systemSettings={systemSettings}
                   onMarkPaid={handleMarkPaid}
@@ -1548,7 +1589,7 @@ export default function App() {
 
               {activeTab === 'crm' && (
                 <CrmCustomerPortalModule
-                  customers={customers}
+                  customers={rosterCustomers}
                   workOrders={activeWorkOrders}
                   onAddCustomer={handleAddCustomer}
                   onDeleteCustomer={handleDeleteCustomer}
@@ -1564,7 +1605,7 @@ export default function App() {
               {activeTab === 'portal' && (
                 <CustomerFacingWebPortal
                   workOrders={activeWorkOrders}
-                  customers={customers}
+                  customers={rosterCustomers}
                   systemSettings={systemSettings}
                   onUpdateWorkOrder={handleSaveWorkOrder}
                   onExitPortalMode={() => setActiveTab('dashboard')}
@@ -1636,7 +1677,7 @@ export default function App() {
         onClose={() => setIsAiAssistantOpen(false)}
         workOrders={activeWorkOrders}
         parts={parts}
-        customers={customers}
+        customers={rosterCustomers}
         technicians={technicians}
         suppliers={suppliers}
         systemSettings={systemSettings}

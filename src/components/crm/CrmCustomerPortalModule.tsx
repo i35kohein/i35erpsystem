@@ -102,23 +102,16 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
     return matchesSearch && matchesType;
   });
 
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const ITEMS_PER_PAGE = 5;
-  const totalPages = Math.ceil(filteredCustomers.length / ITEMS_PER_PAGE) || 1;
-  const safeCurrentPage = Math.min(Math.max(currentPage, 1), totalPages);
-  const paginatedCustomers = filteredCustomers.slice((safeCurrentPage - 1) * ITEMS_PER_PAGE, safeCurrentPage * ITEMS_PER_PAGE);
-
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(filteredCustomers[0] || customers[0] || null);
 
-  // Keep list, detail, and pagination stable when customers are added, removed,
-  // or filtered. A deleted customer must not remain in the detail panel.
+  // Keep detail panel stable when customers are added, removed, or filtered.
+  // A deleted customer must not remain in the detail panel.
   useEffect(() => {
-    setCurrentPage((page) => Math.min(Math.max(page, 1), totalPages));
     setSelectedCustomer((selected) => {
       if (selected && customers.some((customer) => customer.id === selected.id)) return selected;
       return customers[0] || null;
     });
-  }, [customers, totalPages]);
+  }, [customers]);
 
   const toggleExpandCustomer = (custId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -186,14 +179,14 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
             </div>
 
             <div className="min-h-0 flex-1 space-y-2 overflow-y-auto py-3 pr-1">
-              {paginatedCustomers.length === 0 && (
+              {filteredCustomers.length === 0 && (
                 <div className="flex h-full min-h-[260px] flex-col items-center justify-center rounded-xl border border-dashed border-[#E5E5EA] bg-[#F8F9FA] px-5 text-center text-[#86868B]">
                   <Users className="mb-2 h-7 w-7 text-[#86868B]/50" />
                   <p className="font-semibold">No customer accounts found</p>
                   <p className="mt-1 text-[11px]">Customers from new intake tickets will appear here.</p>
                 </div>
               )}
-              {paginatedCustomers.map((cust) => {
+              {filteredCustomers.map((cust) => {
                 const custOrders = getCustomerWorkOrders(cust);
                 const isExpanded = expandedCustomerIds.includes(cust.id);
                 const isSelected = selectedCustomer?.id === cust.id;
@@ -343,62 +336,6 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                 );
               })}
             </div>
-
-            {/* Fixed pagination footer: it stays in the same place even when the roster is empty. */}
-            <div className="mt-auto min-h-11 border-t border-[#E5E5EA] pt-3 flex items-center justify-between text-xs text-[#86868B]">
-                <span className="font-semibold text-[11px]">
-                  {filteredCustomers.length > 0
-                    ? `${(safeCurrentPage - 1) * ITEMS_PER_PAGE + 1}-${Math.min(safeCurrentPage * ITEMS_PER_PAGE, filteredCustomers.length)} of ${filteredCustomers.length}`
-                    : '0 of 0'}
-                </span>
-
-                <div className="flex items-center space-x-1">
-                  <button
-                    type="button"
-                    onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                    disabled={safeCurrentPage === 1}
-                    className="p-1 rounded-lg border border-[#E5E5EA] hover:bg-slate-100 disabled:opacity-40 text-[#1D1D1F] transition-all cursor-pointer"
-                    title="Previous Page"
-                  >
-                    <ChevronLeft className="w-3.5 h-3.5" />
-                  </button>
-
-                  <div className="flex items-center space-x-1">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1)
-                      .filter((p) => p === 1 || p === totalPages || Math.abs(p - safeCurrentPage) <= 1)
-                      .map((p, idx, arr) => {
-                        const prev = arr[idx - 1];
-                        const showEllipsis = prev && p - prev > 1;
-                        return (
-                          <React.Fragment key={p}>
-                            {showEllipsis && <span className="text-[10px] text-[#86868B]">..</span>}
-                            <button
-                              type="button"
-                              onClick={() => setCurrentPage(p)}
-                              className={`w-6 h-6 rounded-lg text-[11px] font-extrabold transition-all cursor-pointer ${
-                                safeCurrentPage === p
-                                  ? 'bg-[#0071E3] text-white shadow-2xs'
-                                  : 'text-[#1D1D1F] hover:bg-slate-100 border border-[#E5E5EA]'
-                              }`}
-                            >
-                              {p}
-                            </button>
-                          </React.Fragment>
-                        );
-                      })}
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                    disabled={safeCurrentPage === totalPages}
-                    className="p-1 rounded-lg border border-[#E5E5EA] hover:bg-slate-100 disabled:opacity-40 text-[#1D1D1F] transition-all cursor-pointer"
-                    title="Next Page"
-                  >
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
           </div>
 
           {/* Customer Details & History */}

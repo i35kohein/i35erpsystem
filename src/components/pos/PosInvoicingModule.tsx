@@ -200,12 +200,6 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     return matchesSearch && matchesStatus;
   });
 
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const ITEMS_PER_PAGE = 5;
-  const totalPages = Math.ceil(filteredWorkOrders.length / ITEMS_PER_PAGE) || 1;
-  const safeCurrentPage = Math.min(Math.max(currentPage, 1), totalPages);
-  const paginatedWorkOrders = filteredWorkOrders.slice((safeCurrentPage - 1) * ITEMS_PER_PAGE, safeCurrentPage * ITEMS_PER_PAGE);
-
   const selectedWo = filteredWorkOrders.find((w) => w.id === selectedWoId) || filteredWorkOrders[0] || null;
   const filteredInventoryParts = useMemo(() => {
     if (!selectedWo) return parts;
@@ -401,7 +395,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
           </div>
 
           <div className="space-y-2 min-h-[360px] max-h-[calc(100dvh-280px)] overflow-y-auto">
-            {paginatedWorkOrders.length === 0 ? (
+            {filteredWorkOrders.length === 0 ? (
               <div className="p-8 text-center text-[#86868B] space-y-2 bg-[#F5F5F7] rounded-xl border border-dashed border-[#D2D2D7] my-4">
                 <CheckCircle2 className="w-8 h-8 mx-auto text-emerald-500 opacity-70" />
                 <p className="font-extrabold text-[#1D1D1F] text-xs">No Devices with Finished Diagnostics</p>
@@ -410,7 +404,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 </p>
               </div>
             ) : (
-              paginatedWorkOrders.map((wo) => {
+              filteredWorkOrders.map((wo) => {
                 const isSelected = wo.id === selectedWoId;
                 const handleSelectWo = () => {
                   setSelectedWoId(wo.id);
@@ -499,71 +493,6 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               })
             )}
           </div>
-
-          {/* Pagination Bar */}
-          {filteredWorkOrders.length > 0 && (
-            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#E5E5EA] pt-2 text-[10px] text-[#86868B]">
-              <span className="whitespace-nowrap font-semibold">
-                <strong className="text-[#1D1D1F]">
-                  {(safeCurrentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(safeCurrentPage * ITEMS_PER_PAGE, filteredWorkOrders.length)}
-                </strong>
-                {' '}of {filteredWorkOrders.length} devices
-              </span>
-
-              {totalPages > 1 && (
-              <div className="inline-flex items-center gap-1 rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] p-1">
-                <button
-                  type="button"
-                  onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                  disabled={safeCurrentPage === 1}
-                  className="inline-flex h-7 w-7 !min-h-7 items-center justify-center rounded-md bg-white text-[#1D1D1F] transition-colors hover:bg-[var(--blue-tint)] disabled:cursor-not-allowed disabled:opacity-35"
-                  title="Previous Page"
-                  aria-label="Previous page"
-                >
-                  <ChevronLeft className="w-3.5 h-3.5" />
-                </button>
-
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1)
-                    .filter((p) => p === 1 || p === totalPages || Math.abs(p - safeCurrentPage) <= 1)
-                    .map((p, idx, arr) => {
-                      const prev = arr[idx - 1];
-                      const showEllipsis = prev && p - prev > 1;
-                      return (
-                        <React.Fragment key={p}>
-                          {showEllipsis && <span className="px-0.5 text-[10px] text-[#86868B]">…</span>}
-                          <button
-                            type="button"
-                            onClick={() => setCurrentPage(p)}
-                            aria-label={`Page ${p}`}
-                            aria-current={safeCurrentPage === p ? 'page' : undefined}
-                            className={`inline-flex h-7 w-7 !min-h-7 items-center justify-center rounded-md text-[10px] font-extrabold transition-colors cursor-pointer ${
-                              safeCurrentPage === p
-                                ? 'bg-[#0071E3] text-white'
-                                : 'bg-white text-[#1D1D1F] hover:bg-[var(--blue-tint)]'
-                            }`}
-                          >
-                            {p}
-                          </button>
-                        </React.Fragment>
-                      );
-                    })}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                  disabled={safeCurrentPage === totalPages}
-                  className="inline-flex h-7 w-7 !min-h-7 items-center justify-center rounded-md bg-white text-[#1D1D1F] transition-colors hover:bg-[var(--blue-tint)] disabled:cursor-not-allowed disabled:opacity-35"
-                  title="Next Page"
-                  aria-label="Next page"
-                >
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-              )}
-            </div>
-          )}
         </div>
 
         {/* Right Column: Dynamic Invoice & Terminal Checkout (7 cols) */}

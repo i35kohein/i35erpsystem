@@ -162,15 +162,8 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   const dateFilter = propDateFilter !== undefined ? propDateFilter : localDateFilter;
   const setDateFilter = propSetDateFilter || setLocalDateFilter;
 
-  // Pagination State for Repair Tickets Roster
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(5);
+  // Roster State (no pagination — all matching tickets shown, like Parts Inventory)
   const [sortByPriority, setSortByPriority] = useState<boolean>(false);
-
-  // Auto-reset pagination to page 1 whenever search, filter, or page size changes
-  React.useEffect(() => {
-    setCurrentPage(1);
-  }, [filterStatus, searchQuery, dateFilter, pageSize, sortByPriority]);
 
   const getPriorityWeight = (priority: string) => {
     switch (priority) {
@@ -231,13 +224,6 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
     finished: dateFilteredOrders.filter(w => w.status === 'Finished').length,
     rush: dateFilteredOrders.filter(w => w.priority === 'Urgent' || w.priority === 'Warranty Redo').length,
   };
-
-  // Pagination Calculations
-  const totalPages = Math.ceil(filteredOrders.length / pageSize) || 1;
-  const safeCurrentPage = Math.min(Math.max(currentPage, 1), totalPages);
-  const startIndex = (safeCurrentPage - 1) * pageSize;
-  const endIndex = Math.min(startIndex + pageSize, filteredOrders.length);
-  const paginatedOrders = filteredOrders.slice(startIndex, endIndex);
 
   const handleOpenTicketDetail = (wo: WorkOrder) => {
     setSelectedWorkOrder(wo);
@@ -393,21 +379,6 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
               </button>
             )}
 
-            {/* Page Size Selector */}
-            <div className="h-8 inline-flex items-center space-x-1.5 text-xs text-[#7F7F7F] font-bold">
-              <span>Show:</span>
-              <select
-                value={pageSize}
-                onChange={(e) => setPageSize(Number(e.target.value))}
-                className="h-8 bg-[#F8FBFD] text-[#2C3E50] border border-[#D8E5ED] rounded-lg px-2.5 text-xs focus:outline-none font-bold cursor-pointer"
-              >
-                <option value={5}>5 per page</option>
-                <option value={10}>10 per page</option>
-                <option value={15}>15 per page</option>
-                <option value={25}>25 per page</option>
-              </select>
-            </div>
-
             {/* Sort By Urgency Toggle */}
             <button
               type="button"
@@ -442,22 +413,22 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
         ) : viewMode === 'table' ? (
           /* TABLE VIEW */
           <div className="workspace-panel__scroll rounded-xl">
-            <table className="w-full min-w-[1120px] text-left border-collapse">
+            <table className="w-full text-left border-collapse">
               <thead className="sticky top-0 z-20 border-b border-[#E5E5EA] bg-[#F5F5F7] font-mono text-[10px] uppercase text-[#86868B] shadow-2xs">
                 <tr>
-                  <th className="px-2 py-2 bg-[#F5F5F7]">Ticket # & Date</th>
-                  <th className="px-2 py-2 bg-[#F5F5F7]">Customer & Contact</th>
-                  <th className="px-2 py-2 bg-[#F5F5F7]">Device & Serial/IMEI</th>
+                  <th className="w-[132px] px-2 py-2 bg-[#F5F5F7]">Ticket # & Date</th>
+                  <th className="w-[148px] px-2 py-2 bg-[#F5F5F7]">Customer & Contact</th>
+                  <th className="w-[158px] px-2 py-2 bg-[#F5F5F7]">Device & Serial/IMEI</th>
                   <th className="px-2 py-2 bg-[#F5F5F7]">Symptoms / Service</th>
-                  <th className="px-2 py-2 bg-[#F5F5F7]">Assigned Tech</th>
-                  <th className="px-2 py-2 bg-[#F5F5F7]">Priority</th>
-                  <th className="px-2 py-2 bg-[#F5F5F7]">Stage & Status</th>
-                  <th className="px-2 py-2 bg-[#F5F5F7]">Amount</th>
-                  <th className="px-2 py-2 text-right bg-[#F5F5F7]">Detail</th>
+                  <th className="w-[112px] px-2 py-2 bg-[#F5F5F7]">Assigned Tech</th>
+                  <th className="w-[92px] px-2 py-2 bg-[#F5F5F7]">Priority</th>
+                  <th className="w-[114px] px-2 py-2 bg-[#F5F5F7]">Stage & Status</th>
+                  <th className="w-[112px] px-2 py-2 bg-[#F5F5F7]">Amount</th>
+                  <th className="w-[44px] px-2 py-2 text-right bg-[#F5F5F7]">Detail</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E5E5EA] text-xs">
-                {paginatedOrders.map((wo) => {
+                {filteredOrders.map((wo) => {
                   const createdDate = new Date(wo.createdAt || Date.now()).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
@@ -559,7 +530,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
         ) : (
           /* GRID CARDS VIEW */
           <div className="workspace-panel__scroll grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 content-start rounded-xl">
-            {paginatedOrders.map((wo) => {
+            {filteredOrders.map((wo) => {
               const woColorStyle = getRealisticColorStyle(wo.deviceColor);
               const diag21 = get21Diagnostics(wo.beforeDiagnostics, wo.symptomsReported, wo.intakeChecklist);
               const passCount = diag21.filter((d) => d.status === 'Pass').length;
@@ -631,62 +602,6 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                 </div>
               );
             })}
-          </div>
-        )}
-
-        {/* Pagination Bar */}
-        {filteredOrders.length > 0 && (
-          <div className="workspace-panel__footer pt-4 border-t border-[#E5E5EA] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#7F7F7F]">
-            <span className="font-bold">
-              Showing <strong className="text-[#2C3E50]">{startIndex + 1}-{endIndex}</strong> of <strong className="text-[#2C3E50]">{filteredOrders.length}</strong> repair tickets
-            </span>
-
-            <div className="flex items-center space-x-1.5">
-              <button
-                type="button"
-                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                disabled={safeCurrentPage === 1}
-                className="p-2 rounded-xl border border-[#E5E5EA] hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-transparent text-[#2C3E50] transition-all cursor-pointer"
-                title="Previous Page"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-
-              <div className="flex items-center space-x-1 px-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .filter((p) => p === 1 || p === totalPages || Math.abs(p - safeCurrentPage) <= 1)
-                  .map((p, idx, arr) => {
-                    const prev = arr[idx - 1];
-                    const showEllipsis = prev && p - prev > 1;
-                    return (
-                      <React.Fragment key={p}>
-                        {showEllipsis && <span className="text-xs text-[#7F7F7F] px-1">...</span>}
-                        <button
-                          type="button"
-                          onClick={() => setCurrentPage(p)}
-                          className={`w-8 h-8 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
-                            safeCurrentPage === p
-                              ? 'bg-[#136F9A] text-white shadow-2xs'
-                              : 'text-[#2C3E50] hover:bg-slate-100 border border-[#E5E5EA]'
-                          }`}
-                        >
-                          {p}
-                        </button>
-                      </React.Fragment>
-                    );
-                  })}
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                disabled={safeCurrentPage === totalPages}
-                className="p-2 rounded-xl border border-[#E5E5EA] hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-transparent text-[#2C3E50] transition-all cursor-pointer"
-                title="Next Page"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
           </div>
         )}
       </div>
