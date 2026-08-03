@@ -307,27 +307,45 @@ ${JSON.stringify(context)}`;
       }
       try {
         const headers = { apikey: SUPABASE_SERVICE_ROLE, Authorization: `Bearer ${SUPABASE_SERVICE_ROLE}` };
-        const [wosRaw, partsRaw] = await Promise.all([
+        const [wosRaw, partsRaw, techRaw] = await Promise.all([
           fetch(`${SUPABASE_URL}/rest/v1/erp_records?select=data&collection_name=eq.workOrders`, { headers }),
           fetch(`${SUPABASE_URL}/rest/v1/erp_records?select=data&collection_name=eq.parts`, { headers }),
+          fetch(`${SUPABASE_URL}/rest/v1/erp_records?select=data&collection_name=eq.technicians`, { headers }),
         ]);
         const wosArr = await wosRaw.json();
         const wosData: any[] = (Array.isArray(wosArr) ? wosArr : []).map((r: any) => r?.data).filter(Boolean);
         const partsArr = await partsRaw.json();
         const partData: any[] = (Array.isArray(partsArr) ? partsArr : []).map((r: any) => r?.data).filter(Boolean);
+        const techArr = await techRaw.json();
+        const techData: any[] = (Array.isArray(techArr) ? techArr : []).map((r: any) => r?.data).filter(Boolean);
         const today = new Date().toISOString().slice(0, 10);
         const done = ["Finished", "Taken Out"];
         const active = wosData.filter((w) => !done.includes(w.status) && w.status !== "Cant Repair" && w.status !== "Customer Not Repair");
         const completedToday = wosData.filter((w) => done.includes(w.status) && (w.completedAt || w.updatedAt || "").slice(0, 10) === today);
         const unpaid = wosData.filter((w) => !w.isPaid);
         const lowStock = partData.filter((p) => Number(p.quantityInStock || 0) <= Number(p.reorderPoint || 0)).slice(0, 30);
+        const completedTodayTickets = completedToday.slice(0, 8).map((w) =>
+          `${w.orderNumber} ${w.deviceModel} ${w.customerName} technician:${w.assignedTechName || "unassigned"} ${w.status}`
+        );
+        const todayPartsUsedMap = new Map<string, number>();
+        completedToday.forEach((w) => {
+          (w.lineItems || []).forEach((li: any) => {
+            if (li.partId && !li.isLabor && li.quantity > 0) {
+              const key = li.partName || li.description || "part";
+              todayPartsUsedMap.set(key, (todayPartsUsedMap.get(key) || 0) + li.quantity);
+            }
+          });
+        });
         const recent = [...wosData]
           .sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")))
           .slice(0, 8)
-          .map((w) => `${w.orderNumber} ${w.deviceModel} ${w.customerName} ${w.status} ${(w.totalAmount || 0).toLocaleString()}MMK`);
+          .map((w) => `${w.orderNumber} ${w.deviceModel} ${w.customerName} technician:${w.assignedTechName || "unassigned"} ${w.status} ${(w.totalAmount || 0).toLocaleString()}MMK`);
         const context: any = {
           activeTickets: active.length,
           completedToday: completedToday.length,
+          completedTodayTickets,
+          todayPartsUsed: [...todayPartsUsedMap.entries()].map(([name, qty]) => `${name}: ${qty}`),
+          technicians: techData.map((t) => `${t.name} (${t.level || ""})`),
           unpaidTickets: unpaid.length,
           outstandingMMK: unpaid.reduce((s, w) => s + ((w.totalAmount || 0) - (w.paidAmount || 0)), 0),
           partsTotal: partData.length,
