@@ -123,6 +123,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const [viewMode, setViewMode] = useState<'stock' | 'profit' | 'matrix'>('stock');
   const [isMatrixPrintOpen, setIsMatrixPrintOpen] = useState(false);
   const [isTagsPrintOpen, setIsTagsPrintOpen] = useState(false);
+  const [selectedTagIds, setSelectedTagIds] = useState<Set<string>>(new Set());
   const [inlineEditMode, setInlineEditMode] = useState(false);
   const [inlineDrafts, setInlineDrafts] = useState<Record<string, InlineDraft>>({});
   const [showInlineSaveConfirm, setShowInlineSaveConfirm] = useState(false);
@@ -862,7 +863,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               </button>
               <button
                 type="button"
-                onClick={() => setIsTagsPrintOpen(true)}
+                onClick={() => { setIsTagsPrintOpen(true); setSelectedTagIds(new Set()); }}
                 className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-[#E5E5EA] bg-white px-2.5 text-[10px] font-bold text-[#1D1D1F] transition-colors hover:border-[#0071E3] hover:text-[#0071E3]"
                 title="Print spare parts tags (A4)"
               >
@@ -2679,30 +2680,67 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
               }
+              /* Selected-only mode: hide unselected cards when printing */
+              #spare-tags-sheet.print-selected-only .tag-card:not(.tag-selected) {
+                display: none !important;
+              }
+              #spare-tags-sheet .tag-card .tag-selector {
+                display: none !important;
+              }
               @page { size: A4 portrait; margin: 6mm; }
             }
           `}</style>
 
           <div id="spare-tags-sheet" className="mx-auto my-4 w-full max-w-3xl rounded-2xl border border-[#E5E5EA] bg-white p-5 shadow-xl">
-            <div className="tags-no-print mb-4 flex items-center justify-between">
-              <h3 className="text-sm font-extrabold text-[#1D1D1F]">
-                Spare Parts Tags — A4 ({filteredParts.length} parts)
-              </h3>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => window.print()}
-                  className="flex items-center gap-1.5 rounded-lg bg-[#0071E3] px-3 py-2 text-[11px] font-extrabold text-white transition hover:bg-[#0051B3]"
-                >
-                  <Printer className="h-3.5 w-3.5" /> Print
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsTagsPrintOpen(false)}
-                  className="rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] px-3 py-2 text-[11px] font-bold text-[#1D1D1F] transition hover:bg-[#E5E5EA]"
-                >
-                  Close
-                </button>
+            <div className="tags-no-print mb-4 space-y-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className="text-sm font-extrabold text-[#1D1D1F]">
+                  Spare Parts Tags — A4 ({filteredParts.length} parts)
+                </h3>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => window.print()}
+                    className="flex items-center gap-1.5 rounded-lg bg-[#0071E3] px-3 py-2 text-[11px] font-extrabold text-white transition hover:bg-[#0051B3]"
+                  >
+                    <Printer className="h-3.5 w-3.5" /> Print All
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const sheet = document.getElementById('spare-tags-sheet');
+                      if (sheet) sheet.classList.add('print-selected-only');
+                      window.print();
+                    }}
+                    disabled={selectedTagIds.size === 0}
+                    className="flex items-center gap-1.5 rounded-lg bg-[#1D1D1F] px-3 py-2 text-[11px] font-extrabold text-white transition hover:bg-[#2C3E50] disabled:cursor-not-allowed disabled:bg-[#A5A5AA]"
+                  >
+                    <Check className="h-3.5 w-3.5" /> Print Selected ({selectedTagIds.size})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsTagsPrintOpen(false)}
+                    className="rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] px-3 py-2 text-[11px] font-bold text-[#1D1D1F] transition hover:bg-[#E5E5EA]"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-[10px] font-bold text-[#86868B]">
+                <label className="flex cursor-pointer items-center gap-1.5">
+                  <input
+                    type="checkbox"
+                    checked={selectedTagIds.size === filteredParts.length && filteredParts.length > 0}
+                    onChange={(e) => {
+                      if (e.target.checked) setSelectedTagIds(new Set(filteredParts.map((p) => p.id)));
+                      else setSelectedTagIds(new Set());
+                    }}
+                    className="h-3.5 w-3.5 accent-[#0071E3]"
+                  />
+                  Select All
+                </label>
+                <span>·</span>
+                <span>Click a card to toggle its tag for selected printing</span>
               </div>
             </div>
 
@@ -2716,8 +2754,33 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               </div>
 
               <div className="tags-grid grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-                {filteredParts.map((part) => (
-                  <div key={part.id} className="tag-card flex flex-col rounded-lg border border-[#1D1D1F] bg-white p-2.5">
+                {filteredParts.map((part) => {
+                  const isSelected = selectedTagIds.has(part.id);
+                  const toggleSelect = () => {
+                    setSelectedTagIds((prev) => {
+                      const next = new Set(prev);
+                      if (next.has(part.id)) next.delete(part.id);
+                      else next.add(part.id);
+                      return next;
+                    });
+                  };
+                  return (
+                  <div
+                    key={part.id}
+                    onClick={toggleSelect}
+                    className={`tag-card relative flex cursor-pointer flex-col rounded-lg border bg-white p-2.5 transition-colors ${
+                      isSelected ? 'tag-selected border-[#0071E3] ring-2 ring-[#0071E3]/30' : 'border-[#1D1D1F] hover:border-[#0071E3]'
+                    }`}
+                  >
+                    <div className="tag-selector absolute -left-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full border bg-white shadow-xs">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={toggleSelect}
+                        onClick={(e) => e.stopPropagation()}
+                        className="h-3.5 w-3.5 accent-[#0071E3]"
+                      />
+                    </div>
                     <div className="flex items-center justify-between border-b border-dashed border-[#C7C7CC] pb-1.5">
                       <span className="pr-1 text-[9px] font-black uppercase leading-tight text-[#1D1D1F]">{part.category}</span>
                       <span className="ml-1 shrink-0 rounded bg-[#1D1D1F] px-1.5 py-0.5 text-[8px] font-black uppercase text-white">{part.qualityTier}</span>
@@ -2735,7 +2798,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
