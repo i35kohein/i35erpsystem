@@ -339,8 +339,8 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
         },
       ],
       subtotal: diagFee,
-      taxAmount: Math.round(diagFee * 0.06),
-      totalAmount: Math.round(diagFee * 1.06) - selectedWo.discountAmount - selectedWo.depositAmount,
+      taxAmount: Math.round(diagFee * taxRate),
+      totalAmount: Math.round(diagFee * (1 + taxRate)) - selectedWo.discountAmount - selectedWo.depositAmount,
       updatedAt: new Date().toISOString(),
     };
     onSaveWorkOrder(updatedWo);
@@ -663,7 +663,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     <span className="font-mono text-[#1D1D1F]">{selectedWo.subtotal.toLocaleString()} MMK</span>
                   </div>
                   <div className="flex justify-between text-[#86868B]">
-                    <span>Sales Tax (6%):</span>
+                    <span>Sales Tax ({Math.round(taxRate * 100)}%):</span>
                     <span className="font-mono text-[#1D1D1F]">{selectedWo.taxAmount.toLocaleString()} MMK</span>
                   </div>
                   {selectedWo.discountAmount > 0 && (
