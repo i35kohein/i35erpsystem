@@ -99,7 +99,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
   const [activeDashboardSubTab, setActiveDashboardSubTab] = useState<'status-queue' | 'repair-data' | 'tech-kpi' | 'leaderboard' | 'inventory' | 'finance' | 'warranty-watch'>('status-queue');
 
-  const [statusQueueFilter, setStatusQueueFilter] = useState<string>('PIPELINE');
+  const [statusQueueFilter, setStatusQueueFilter] = useState<string>('ALL');
   const [queueSearchQuery, setQueueSearchQuery] = useState<string>('');
   const [queueTechFilter, setQueueTechFilter] = useState<string>('ALL');
   const [queuePriorityFilter, setQueuePriorityFilter] = useState<string>('ALL');
@@ -413,21 +413,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     });
     return counts;
   }, [filteredWorkOrders]);
-
-  // Unique customers currently in the active pipeline (Receive → Finished).
-  // The status chips count tickets; this counts distinct customers so the
-  // "Active Pipeline Customers" summary reflects people in the shop, not
-  // repair line items (one customer may hold several devices).
-  const activePipelineCustomerCount = useMemo(() => {
-    const seen = new Set<string>();
-    filteredWorkOrders.forEach((wo) => {
-      if (pipelineStatuses.includes(wo.status)) {
-        const key = wo.customerId || `${wo.customerName || ''}|${wo.customerPhone || ''}`;
-        if (key) seen.add(key);
-      }
-    });
-    return seen.size;
-  }, [filteredWorkOrders, pipelineStatuses]);
 
   const stagnantWorkOrders = useMemo(() => {
     const now = Date.now();
@@ -844,58 +829,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       {/* SUBTAB 1: STATUS QUEUE */}
       {activeDashboardSubTab === 'status-queue' && (
         <div className="space-y-6">
-          {/* Status Breakdown Chips Bar - Clean 8-Column Layout */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-8 gap-2.5">
-            {[
-              { 
-                id: 'PIPELINE', 
-                label: 'Active Pipeline Customers', 
-                count: activePipelineCustomerCount, 
-                activeBg: 'bg-indigo-50/90', 
-                activeBorder: 'border-indigo-600', 
-                textColor: 'text-indigo-700', 
-                dot: 'bg-indigo-600' 
-              },
-              { id: 'Receive', label: 'Intake (Receive)', count: statusQueueCounts['Receive'], activeBg: 'bg-blue-50/80', activeBorder: 'border-[#0071E3]', textColor: 'text-[#0071E3]', dot: 'bg-[#0071E3]' },
-              { id: 'In Progress', label: 'In Progress', count: statusQueueCounts['In Progress'], activeBg: 'bg-emerald-50/80', activeBorder: 'border-[#34C759]', textColor: 'text-[#34C759]', dot: 'bg-[#34C759]' },
-              { id: 'Pending', label: 'Pending Approval', count: statusQueueCounts['Pending'], activeBg: 'bg-amber-50/80', activeBorder: 'border-amber-400', textColor: 'text-amber-600', dot: 'bg-amber-500' },
-              { id: 'Finished', label: 'Ready (Finished)', count: statusQueueCounts['Finished'], activeBg: 'bg-teal-50/80', activeBorder: 'border-teal-500', textColor: 'text-teal-700', dot: 'bg-teal-600' },
-              { id: 'Taken Out', label: 'Taken Out', count: statusQueueCounts['Taken Out'], activeBg: 'bg-slate-100/80', activeBorder: 'border-slate-400', textColor: 'text-slate-700', dot: 'bg-slate-500' },
-              { id: 'Cant Repair', label: 'Cant Repair', count: statusQueueCounts['Cant Repair'], activeBg: 'bg-rose-50/80', activeBorder: 'border-rose-400', textColor: 'text-rose-600', dot: 'bg-rose-600' },
-              { id: 'Customer Not Repair', label: 'Customer Not Repair', count: statusQueueCounts['Customer Not Repair'], activeBg: 'bg-orange-50/80', activeBorder: 'border-orange-400', textColor: 'text-orange-600', dot: 'bg-orange-600' },
-            ].map((st) => {
-              const isSelected = statusQueueFilter === st.id;
-              return (
-                <div
-                  key={st.id}
-                  onClick={() => setStatusQueueFilter(isSelected ? 'ALL' : st.id)}
-                  className={`p-3 rounded-xl border transition-all cursor-pointer shadow-2xs flex flex-col justify-between select-none ${
-                    isSelected
-                      ? `${st.activeBg} ${st.activeBorder} ring-2 ring-offset-1 ring-black/5`
-                      : 'bg-white border-[#E5E5EA] hover:border-slate-300 hover:bg-[#F8F9FA]'
-                  }`}
-                >
-                  <div className="flex items-center justify-between space-x-1">
-                    <span className="text-[10px] font-extrabold text-[#86868B] uppercase tracking-tight truncate">
-                      {st.label}
-                    </span>
-                    <span className={`w-2 h-2 rounded-full shrink-0 ${st.dot}`} />
-                  </div>
-                  <div className="flex items-baseline justify-between mt-1.5">
-                    <p className={`text-2xl font-black ${st.textColor}`}>
-                      {st.count}
-                    </p>
-                    {isSelected && (
-                      <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-black/5 text-slate-700">
-                        Active Filter
-                      </span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
           {/* Stagnant Bottlenecks Notice */}
           {stagnantWorkOrders.length > 0 && (
             <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-between gap-3 text-xs text-amber-900 shadow-2xs">
@@ -1049,11 +982,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   <option value="Warranty Redo">Warranty Redo</option>
                 </select>
 
-                {(statusQueueFilter !== 'PIPELINE' || queueTechFilter !== 'ALL' || queuePriorityFilter !== 'ALL' || queueSearchQuery) && (
+                {(statusQueueFilter !== 'ALL' || queueTechFilter !== 'ALL' || queuePriorityFilter !== 'ALL' || queueSearchQuery) && (
                   <button
                     type="button"
                     onClick={() => {
-                      setStatusQueueFilter('PIPELINE');
+                      setStatusQueueFilter('ALL');
                       setQueueTechFilter('ALL');
                       setQueuePriorityFilter('ALL');
                       setQueueSearchQuery('');
