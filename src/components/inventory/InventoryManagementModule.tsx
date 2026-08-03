@@ -122,6 +122,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const [localShowAddModal, setLocalShowAddModal] = useState(false);
   const [viewMode, setViewMode] = useState<'stock' | 'profit' | 'matrix'>('stock');
   const [isMatrixPrintOpen, setIsMatrixPrintOpen] = useState(false);
+  const [isTagsPrintOpen, setIsTagsPrintOpen] = useState(false);
   const [inlineEditMode, setInlineEditMode] = useState(false);
   const [inlineDrafts, setInlineDrafts] = useState<Record<string, InlineDraft>>({});
   const [showInlineSaveConfirm, setShowInlineSaveConfirm] = useState(false);
@@ -858,6 +859,15 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 title="Edit stock rows"
               >
                 <Edit2 className="h-3.5 w-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsTagsPrintOpen(true)}
+                className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-[#E5E5EA] bg-white px-2.5 text-[10px] font-bold text-[#1D1D1F] transition-colors hover:border-[#0071E3] hover:text-[#0071E3]"
+                title="Print spare parts tags (A4)"
+              >
+                <Printer className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Print Tags</span>
               </button>
             </div>
           )}
@@ -2625,6 +2635,107 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <div className="mt-3 flex justify-between text-[9px] text-[#86868B]">
                 <span>i35 Apple Service · No 1031, Pyi Htaung Su Main Rd, North Dagon, Yangon</span>
                 <span>Sheet generated {new Date().toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* PRINT: A4 Spare Parts Tags */}
+      {isTagsPrintOpen && (
+        <div className="printable-print-root fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 p-2 backdrop-blur-sm sm:p-4">
+          <style>{`
+            @media print {
+              body * { visibility: hidden !important; }
+              #spare-tags-sheet,
+              #spare-tags-sheet * { visibility: visible !important; }
+              #spare-tags-sheet {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                max-width: none !important;
+                min-width: 0 !important;
+                margin: 0 !important;
+                padding: 4mm !important;
+                border: none !important;
+                box-shadow: none !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+                overflow: visible !important;
+              }
+              #spare-tags-sheet .tags-no-print { display: none !important; }
+              #spare-tags-sheet .tags-grid {
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 4mm !important;
+              }
+              #spare-tags-sheet .tag-card {
+                break-inside: avoid !important;
+                border: 1.5px solid #000 !important;
+                border-radius: 2mm !important;
+                padding: 3mm !important;
+                background: #fff !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+              @page { size: A4 portrait; margin: 6mm; }
+            }
+          `}</style>
+
+          <div id="spare-tags-sheet" className="mx-auto my-4 w-full max-w-3xl rounded-2xl border border-[#E5E5EA] bg-white p-5 shadow-xl">
+            <div className="tags-no-print mb-4 flex items-center justify-between">
+              <h3 className="text-sm font-extrabold text-[#1D1D1F]">
+                Spare Parts Tags — A4 ({filteredParts.length} parts)
+              </h3>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="flex items-center gap-1.5 rounded-lg bg-[#0071E3] px-3 py-2 text-[11px] font-extrabold text-white transition hover:bg-[#0051B3]"
+                >
+                  <Printer className="h-3.5 w-3.5" /> Print
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsTagsPrintOpen(false)}
+                  className="rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] px-3 py-2 text-[11px] font-bold text-[#1D1D1F] transition hover:bg-[#E5E5EA]"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-[#E5E5EA] p-3">
+              <div className="mb-3 flex items-start justify-between border-b border-[#E5E5EA] pb-2">
+                <div>
+                  <h1 className="text-sm font-black text-[#1D1D1F]">i35 Apple Service — Spare Parts Tags</h1>
+                  <p className="text-[10px] text-[#86868B]">{new Date().toLocaleDateString()}</p>
+                </div>
+                <span className="text-[10px] font-bold text-[#86868B]">{filteredParts.length} parts</span>
+              </div>
+
+              <div className="tags-grid grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+                {filteredParts.map((part) => (
+                  <div key={part.id} className="tag-card flex flex-col rounded-lg border border-[#1D1D1F] bg-white p-2.5">
+                    <div className="flex items-center justify-between border-b border-dashed border-[#C7C7CC] pb-1.5">
+                      <span className="pr-1 text-[9px] font-black uppercase leading-tight text-[#1D1D1F]">{part.category}</span>
+                      <span className="ml-1 shrink-0 rounded bg-[#1D1D1F] px-1.5 py-0.5 text-[8px] font-black uppercase text-white">{part.qualityTier}</span>
+                    </div>
+                    <p className="mt-1.5 text-[11px] font-extrabold leading-snug text-[#1D1D1F]">{part.name}</p>
+                    <p className="font-mono text-[8px] text-[#86868B]">SKU: {part.sku}</p>
+                    <div className="mt-1.5 flex items-end justify-between">
+                      <div className="text-[9px] leading-tight text-[#86868B]">
+                        <p>Stock: <span className="font-bold text-[#1D1D1F]">{part.quantityInStock}</span></p>
+                        <p>Bin: <span className="font-bold text-[#1D1D1F]">{part.locationBin || '—'}</span></p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[8px] text-[#86868B]">Price</p>
+                        <p className="font-mono text-[12px] font-black text-[#1D1D1F]">{Number(part.sellingPrice || 0).toLocaleString()} MMK</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
