@@ -35,7 +35,6 @@ import {
   Layers,
   FileCheck,
   AlertCircle,
-  Trophy,
   Crown,
   Trash2,
   Copy,
@@ -97,7 +96,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const dateFilter = externalDateFilter || internalDateFilter;
   const setDateFilter = externalSetDateFilter || setInternalDateFilter;
 
-  const [activeDashboardSubTab, setActiveDashboardSubTab] = useState<'status-queue' | 'repair-data' | 'tech-kpi' | 'leaderboard' | 'inventory' | 'finance' | 'warranty-watch'>('status-queue');
+  const [activeDashboardSubTab, setActiveDashboardSubTab] = useState<'status-queue' | 'repair-data' | 'tech-kpi' | 'inventory' | 'finance' | 'warranty-watch'>('status-queue');
 
   const [statusQueueFilter, setStatusQueueFilter] = useState<string>('ALL');
   const [queueSearchQuery, setQueueSearchQuery] = useState<string>('');
@@ -279,10 +278,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const activeRepairs = filteredWorkOrders.filter((w) => w.status !== 'Taken Out' && w.status !== 'Finished' && w.status !== 'Cant Repair' && w.status !== 'Customer Not Repair');
   const readyForPickup = filteredWorkOrders.filter((w) => w.status === 'Finished' || w.status === 'Taken Out');
 
-  // Top Technicians for Monthly Leaderboard Quick Widget
-  const topTechniciansLeaderboard = useMemo(() => {
-    return [...technicians].sort((a, b) => b.completedThisMonth - a.completedThisMonth);
-  }, [technicians]);
   const inRepair = filteredWorkOrders.filter((w) => w.status === 'In Progress' || w.status === 'Receive');
   const pendingRmas = rmas.filter((r) => r.status === 'Shipped to Vendor' || r.status === 'Draft');
 
@@ -493,7 +488,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </span>
         </button>
 
-        {/* Subtab 3: Assign Technician KPI */}
+        {/* Subtab 3: Technician KPI & Leaderboard (merged) */}
         <button
           type="button"
           role="tab"
@@ -506,7 +501,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           }`}
         >
           <Users className="w-4 h-4" />
-          <span>Assign Technician KPI</span>
+          <span>Technician KPI & Leaderboard</span>
           <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold ${
             activeDashboardSubTab === 'tech-kpi'
               ? 'bg-white/20 text-white'
@@ -516,30 +511,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </span>
         </button>
 
-        {/* Subtab 4: Technician Leaderboard */}
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeDashboardSubTab === 'leaderboard'}
-          onClick={() => setActiveDashboardSubTab('leaderboard')}
-          className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
-            activeDashboardSubTab === 'leaderboard'
-              ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-xs'
-              : 'bg-white hover:bg-slate-100 text-[#6E6E73] hover:text-[#1D1D1F] border-[#E5E5EA]'
-          }`}
-        >
-          <Trophy className="w-4 h-4" />
-          <span>Leaderboard</span>
-          <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold ${
-            activeDashboardSubTab === 'leaderboard'
-              ? 'bg-white/20 text-white'
-              : 'bg-[#E5E5EA] text-[#1D1D1F]'
-          }`}>
-            July 2026
-          </span>
-        </button>
-
-        {/* Subtab 5: Inventory */}
+        {/* Subtab 4: Inventory */}
         <button
           type="button"
           role="tab"
@@ -1278,19 +1250,17 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             workOrders={filteredWorkOrders}
             onNavigateToTab={onNavigateToTab}
           />
+
+          {/* Technician Leaderboard (merged into this tab) */}
+          <TechnicianLeaderboardView
+            technicians={technicians}
+            workOrders={filteredWorkOrders}
+            onNavigateToTab={onNavigateToTab}
+          />
         </div>
       )}
 
-      {/* SUBTAB 4: TECHNICIAN LEADERBOARD */}
-      {activeDashboardSubTab === 'leaderboard' && (
-        <TechnicianLeaderboardView
-          technicians={technicians}
-          workOrders={filteredWorkOrders}
-          onNavigateToTab={onNavigateToTab}
-        />
-      )}
-
-      {/* SUBTAB 5: INVENTORY */}
+      {/* SUBTAB 4: INVENTORY */}
       {activeDashboardSubTab === 'inventory' && (
         <div className="space-y-6">
           {/* Inventory Valuation & Parts Summary */}
