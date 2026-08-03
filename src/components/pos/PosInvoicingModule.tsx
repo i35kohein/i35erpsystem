@@ -24,7 +24,9 @@ import {
   AlertTriangle, 
   XCircle, 
   Split,
-  Filter
+  Filter,
+  Wrench,
+  Palette,
 } from 'lucide-react';
 import { WorkOrder, Customer, SystemSettings, PartItem } from '../../types';
 import { getActivePaymentMethods } from '../../data/seedData';
@@ -411,9 +413,30 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     </div>
 
                     <p className="font-semibold text-[#1D1D1F] mt-1">{wo.deviceModel}</p>
+                    <div className="flex flex-wrap items-center gap-1 mt-1">
+                      {(wo.selectedRepairs || []).filter((r) => r && r.name).slice(0, 3).map((r, i) => (
+                        <span key={i} className="inline-flex items-center gap-1 rounded-md border border-[#0071E3]/20 bg-[#0071E3]/8 px-1.5 py-0.5 text-[9px] font-extrabold text-[#0071E3]">
+                          <Wrench className="h-2.5 w-2.5" />
+                          {r.name}
+                        </span>
+                      ))}
+                      {(wo.selectedRepairs || []).filter((r) => r && r.name).length > 3 && (
+                        <span className="text-[9px] font-bold text-[#86868B]">+{((wo.selectedRepairs || []).filter((r) => r && r.name).length) - 3}</span>
+                      )}
+                      {wo.deviceColor && (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-[#F5F5F7] px-1.5 py-0.5 text-[9px] font-bold text-[#1D1D1F] border border-[#E5E5EA]">
+                          <Palette className="h-2.5 w-2.5 text-[#86868B]" />
+                          {wo.deviceColor}
+                        </span>
+                      )}
+                    </div>
                     <div className="flex justify-between items-center text-[#86868B] text-[11px] mt-1">
                       <span>Cust: {wo.customerName}</span>
                       <span className="font-bold text-[#1D1D1F]">{wo.totalAmount.toLocaleString()} MMK</span>
+                    </div>
+                    <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[9px] font-mono text-[#86868B] mt-1">
+                      {wo.imei && <span title="IMEI">IMEI: {wo.imei}</span>}
+                      {wo.serialNumber && <span title="Serial">S/N: {wo.serialNumber}</span>}
                     </div>
 
                     <div className="mt-2 flex items-center justify-between text-[10px]">
@@ -584,11 +607,26 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#E5E5EA]">
-                      {selectedWo.lineItems.map((li) => (
+                      {selectedWo.lineItems.map((li) => {
+                        // Match line item to its original repair quote so we can
+                        // show the ORIGINAL price (before any discount).
+                        const quote = (selectedWo.selectedRepairs || []).find(
+                          (r) => r && r.name && r.name.toLowerCase() === String(li.description || '').toLowerCase()
+                        );
+                        const originalPrice = quote && typeof quote.basePrice === 'number' && quote.basePrice > 0
+                          ? quote.basePrice
+                          : li.unitPrice;
+                        const hasDiscount = quote && typeof quote.discountPercent === 'number' && quote.discountPercent > 0;
+                        return (
                         <tr key={li.id} className={li.partId && !li.isLabor ? 'bg-[#F8FBFF]' : ''}>
                           <td className="p-2.5 text-[#1D1D1F]">
                             <div className="space-y-1">
                               <div className="font-medium">{li.description}</div>
+                              {hasDiscount && (
+                                <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[9px] font-bold text-amber-700">
+                                  Discount {quote.discountPercent}% off
+                                </span>
+                              )}
                               {li.partId && !li.isLabor && (
                                 <span className="inline-flex items-center rounded-full border border-[#D6E7FF] bg-[#F0F6FF] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-[#0071E3]">
                                   Inventory Part
@@ -599,7 +637,19 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           <td className="p-2.5 text-[#86868B]">{li.quantity}</td>
                           <td className="p-2.5 text-right font-mono text-[#1D1D1F]">
                             <div className="inline-flex items-center justify-end gap-2">
-                              <span>{(li.unitPrice * li.quantity).toLocaleString()} MMK</span>
+                              <span className="text-right">
+                                {hasDiscount && (
+                                  <>
+                                    <span className="mr-1.5 text-[10px] text-[#A5A5AA] line-through">
+                                      {originalPrice.toLocaleString()} MMK
+                                    </span>
+                                    <span className="text-[#28A745] font-black">
+                                      {(li.unitPrice * li.quantity).toLocaleString()} MMK
+                                    </span>
+                                  </>
+                                )}
+                                {!hasDiscount && <span>{(li.unitPrice * li.quantity).toLocaleString()} MMK</span>}
+                              </span>
                               {li.partId && !li.isLabor && (
                                 <button
                                   type="button"
@@ -614,7 +664,8 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                             </div>
                           </td>
                         </tr>
-                      ))}
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
