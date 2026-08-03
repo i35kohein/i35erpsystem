@@ -994,7 +994,16 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               {inlineEditMode && (
                 <button
                   type="button"
-                  onClick={() => setShowInlineSaveConfirm(true)}
+                  onClick={() => {
+                    // Nothing changed → skip the confirm modal, just exit edit mode.
+                    if (!inlineSaveReview.length) {
+                      setInlineEditMode(false);
+                      setInlineDrafts({});
+                      toast.info('No changes to save', 'Nothing Changed');
+                      return;
+                    }
+                    setShowInlineSaveConfirm(true);
+                  }}
                   className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#0071E3] bg-[#0071E3] px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition-colors hover:bg-blue-700"
                   title="Save all inline edits"
                 >
