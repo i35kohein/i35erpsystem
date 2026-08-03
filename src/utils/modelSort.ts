@@ -3,6 +3,8 @@
 // dropdown order is consistent app-wide.
 
 const IPHONE_ORDER: string[] = [
+  // iPhone 17 series
+  'iPhone 17 Pro Max', 'iPhone 17 Pro', 'iPhone 17 Air', 'iPhone 17',
   // iPhone 16 series
   'iPhone 16 Pro Max', 'iPhone 16 Pro', 'iPhone 16 Plus', 'iPhone 16', 'iPhone 16e',
   // iPhone 15 series
@@ -65,5 +67,12 @@ export function compareModelsNewestFirst(a: string, b: string): number {
 }
 
 export function sortModelsNewestFirst(models: string[]): string[] {
-  return [...models].sort(compareModelsNewestFirst);
+  const seen = new Set<string>();
+  const unique = models.filter((m) => {
+    const key = m.trim().toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  return unique.sort(compareModelsNewestFirst);
 }
