@@ -242,7 +242,11 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                 Voucher #: {workOrder.orderNumber}
               </p>
               <p className="text-[11px] text-slate-700">Date: {new Date(workOrder.createdAt).toLocaleDateString()}</p>
-              <p className="text-[10px] text-slate-600">Est. Return: {workOrder.estimatedCompletion}</p>
+              <p className="text-[10px] text-slate-600">
+                Est. Return: {workOrder.estimatedCompletion
+                  ? new Date(workOrder.estimatedCompletion).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+                  : '—'}
+              </p>
               {isPaidWo && (
                 <p className="text-[10px] font-bold text-slate-700">
                   Taken Out: {new Date(workOrder.updatedAt || Date.now()).toLocaleString()}
