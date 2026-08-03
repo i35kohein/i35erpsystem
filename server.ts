@@ -162,7 +162,7 @@ Return JSON with key "message".`;
       if (!resolvedApiKey) return res.status(400).json({ success: false, error: "AI API key is not configured on the server." });
 
       const instruction = `${systemPrompt || "You are a professional repair-shop operations copilot."}
-Use only the supplied live ERP context. If data is unavailable, say so rather than inventing it. ALWAYS reply in Myanmar (Burmese) language, regardless of the language the user writes in — keep technical terms (device models, part names, ticket numbers, prices) in English where natural. Be concise, operational, and direct: lead with the conclusion, then give prioritized next actions. Identify records by ticket, part, device, customer, or technician where possible. Use short bullets only when they improve scanability. Do not claim to have completed changes, contacted a customer, or performed an action.
+Use only the supplied live ERP context. If data is unavailable, say so rather than inventing it. NEVER invent SKUs, part names, models, prices, stock counts, or ticket numbers that are not explicitly listed in the LIVE ERP CONTEXT — if a model or part is not listed, it does not exist in the data. ALWAYS reply in Myanmar (Burmese) language, regardless of the language the user writes in — keep technical terms (device models, part names, ticket numbers, prices) in English where natural. Be concise, operational, and direct: lead with the conclusion, then give prioritized next actions. Identify records by ticket, part, device, customer, or technician where possible. Use short bullets only when they improve scanability. Do not claim to have completed changes, contacted a customer, or performed an action.
 
 LIVE ERP CONTEXT:
 ${JSON.stringify(context)}`;
@@ -297,11 +297,11 @@ ${JSON.stringify(context)}`;
       return res.json();
     };
     const TELEGRAM_SYSTEM_PROMPT =
-      "You are the i35 Apple Service shop copilot (ERP AI assistant). ALWAYS reply in Myanmar (Burmese) language, regardless of the language the user writes in — keep technical terms in English where natural. Be concise, operational, and direct: lead with the conclusion, then give prioritized next actions. Use the LIVE ERP CONTEXT below when provided; if ERP data is unavailable, say so honestly rather than inventing it. Do not claim to have completed actions.";
+      "You are the i35 Apple Service shop copilot (ERP AI assistant). ALWAYS reply in Myanmar (Burmese) language, regardless of the language the user writes in — keep technical terms in English where natural. Be concise, operational, and direct: lead with the conclusion, then give prioritized next actions. Use the LIVE ERP CONTEXT below when provided. NEVER invent SKUs, part names, models, prices, stock counts, or ticket numbers that are not explicitly listed in the context — if a model or part is not listed, it does not exist in the data; say so honestly. Do not claim to have completed actions.";
     // Optional live ERP context for Telegram answers (requires service role key).
     const SUPABASE_URL = process.env.SUPABASE_URL || "";
     const SUPABASE_SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE || "";
-    const fetchErpContext = async (): Promise<string> => {
+    const fetchErpContext = async (userText: string): Promise<string> => {
       if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE) {
         return "No live ERP context configured (SUPABASE_SERVICE_ROLE missing).";
       }
@@ -320,20 +320,43 @@ ${JSON.stringify(context)}`;
         const active = wosData.filter((w) => !done.includes(w.status) && w.status !== "Cant Repair" && w.status !== "Customer Not Repair");
         const completedToday = wosData.filter((w) => done.includes(w.status) && (w.completedAt || w.updatedAt || "").slice(0, 10) === today);
         const unpaid = wosData.filter((w) => !w.isPaid);
-        const lowStock = partData.filter((p) => Number(p.quantityInStock || 0) <= Number(p.reorderPoint || 0)).slice(0, 8);
+        const lowStock = partData.filter((p) => Number(p.quantityInStock || 0) <= Number(p.reorderPoint || 0)).slice(0, 30);
         const recent = [...wosData]
           .sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")))
           .slice(0, 8)
           .map((w) => `${w.orderNumber} ${w.deviceModel} ${w.customerName} ${w.status} ${(w.totalAmount || 0).toLocaleString()}MMK`);
-        return JSON.stringify({
+        const context: any = {
           activeTickets: active.length,
           completedToday: completedToday.length,
           unpaidTickets: unpaid.length,
           outstandingMMK: unpaid.reduce((s, w) => s + ((w.totalAmount || 0) - (w.paidAmount || 0)), 0),
           partsTotal: partData.length,
-          lowStockParts: lowStock.map((p) => `${p.name}: ${p.quantityInStock} left`),
+          lowStockParts: lowStock.map((p) => `${p.sku || p.id} ${p.name}: stock ${p.quantityInStock} (reorder ${p.reorderPoint || 0})`),
           recentTickets: recent,
-        });
+        };
+        // Category-specific answer: when the user names a part category,
+        // include the FULL stock state of that category so the AI never guesses.
+        const catMatch = /(battery\s*genuine|battery\s*original|battery\s*cell|battery|display|screen|back\s*glass|camera|flex)/i.exec(userText);
+        if (catMatch) {
+          const catName = catMatch[1].toLowerCase().includes("genuine")
+            ? "Battery Genuine"
+            : catMatch[1].toLowerCase().includes("original")
+              ? "Battery"
+              : catMatch[1].toLowerCase().includes("cell")
+                ? "Battery Cell"
+                : catMatch[1].toLowerCase().includes("back")
+                  ? "Backglass"
+                  : catMatch[1].toLowerCase();
+          const catParts = partData
+            .filter((p) => (p.category || "").toLowerCase().includes(catName.toLowerCase()))
+            .sort((a, b) => Number(a.quantityInStock || 0) - Number(b.quantityInStock || 0))
+            .slice(0, 40)
+            .map((p) => `${p.sku || p.id} ${p.name}: stock ${p.quantityInStock} (reorder ${p.reorderPoint || 0})`);
+          if (catParts.length > 0) {
+            context.categoryParts = { category: catName, count: catParts.length, parts: catParts };
+          }
+        }
+        return JSON.stringify(context);
       } catch (err) {
         console.error("Supabase context error:", err);
         return "Live ERP context temporarily unavailable.";
@@ -348,7 +371,7 @@ ${JSON.stringify(context)}`;
       const history = tgHistory[chatId] || [];
       const messages = [...history.slice(-20), { role: "user", content: text }];
       try {
-        const context = await fetchErpContext();
+        const context = await fetchErpContext(text);
         const systemPrompt = `${TELEGRAM_SYSTEM_PROMPT}\n\nLIVE ERP CONTEXT:\n${context}`;
         return await callAiProvider({ provider, apiKey: key, systemPrompt, messages });
       } catch (err: any) {
