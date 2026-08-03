@@ -15,6 +15,8 @@ import {
   QrCode,
   Landmark,
   Copy,
+  PackageX,
+  PackageCheck,
   Check,
   ChevronLeft,
   ChevronRight,
@@ -630,10 +632,33 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       >
                         {filteredInventoryParts.map((part) => (
                           <option key={part.id} value={part.id}>
-                            {part.name} • {part.locationBin || 'No bin'}
+                            {part.name} • Stock: {part.quantityInStock} • {part.locationBin || 'No bin'}
                           </option>
                         ))}
                       </select>
+                      {selectedInventoryPart && (
+                        <span className={`mt-1 inline-flex items-center gap-1 text-[10px] font-bold ${
+                          selectedInventoryPart.quantityInStock <= 0
+                            ? 'text-rose-600'
+                            : selectedInventoryPart.quantityInStock <= selectedInventoryPart.reorderPoint
+                              ? 'text-amber-600'
+                              : 'text-[#34C759]'
+                        }`}>
+                          {selectedInventoryPart.quantityInStock <= 0 ? (
+                            <PackageX className="h-3 w-3" />
+                          ) : selectedInventoryPart.quantityInStock <= selectedInventoryPart.reorderPoint ? (
+                            <AlertTriangle className="h-3 w-3" />
+                          ) : (
+                            <PackageCheck className="h-3 w-3" />
+                          )}
+                          Stock: {selectedInventoryPart.quantityInStock}
+                          {selectedInventoryPart.quantityInStock <= 0
+                            ? ' — Out of stock'
+                            : selectedInventoryPart.quantityInStock <= selectedInventoryPart.reorderPoint
+                              ? ` — Low (min ${selectedInventoryPart.reorderPoint})`
+                              : ' available'}
+                        </span>
+                      )}
                     </label>
 
                     <label className="block">
