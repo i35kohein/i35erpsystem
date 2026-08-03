@@ -671,7 +671,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   </div>
                   {selectedWo.discountAmount > 0 && (
                     <div className="flex justify-between text-[#28A745]">
-                      <span>B2B Account Discount:</span>
+                      <span>Discount:</span>
                       <span className="font-mono">-{selectedWo.discountAmount.toLocaleString()} MMK</span>
                     </div>
                   )}
