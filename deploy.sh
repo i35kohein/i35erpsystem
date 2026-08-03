@@ -24,7 +24,8 @@ echo "==> [2/4] Uploading to VPS ($HOST:$REMOTE_DIR)..."
 rsync -az --delete -e "ssh -i $KEY" dist package.json package-lock.json "$HOST:$REMOTE_DIR/"
 
 echo "==> [3/4] Installing deps + restarting service..."
-ssh -i "$KEY" "$HOST" "cd $REMOTE_DIR && npm install --omit=dev --no-audit --no-fund && systemctl restart i35erp"
+# Keep the previous release for instant rollback (rollback.sh swaps dist.prev).
+ssh -i "$KEY" "$HOST" "cd $REMOTE_DIR && rm -rf dist.prev && cp -r dist dist.prev && npm install --omit=dev --no-audit --no-fund && systemctl restart i35erp"
 
 echo "==> [4/4] Health check..."
 sleep 3

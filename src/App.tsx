@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, lazy, Suspense } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Sparkles, Plus, CircleDot, Search, Filter, Calculator, Folder, Settings, Download, Database, ExternalLink, ClipboardList, Kanban, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, Menu, ChevronDown, PhoneCall, Truck, Boxes, CreditCard, Users, DollarSign, LayoutDashboard, Timer } from 'lucide-react';
-import { subscribeToCollection, saveDocument, saveBatchDocuments, deleteDocument, clearCollection } from './lib/supabase';
+import { subscribeToCollection, fetchCloudCollection, saveDocument, saveBatchDocuments, deleteDocument, clearCollection } from './lib/supabase';
 import { setActiveUserId, notifyAccountChanged } from './utils/accountSettings';
 
 // ---- AI repair-type classification (Spareparts Change vs Hardware Repair) ----
@@ -73,22 +73,24 @@ import { CustomDropdownMenu } from './components/common/CustomDropdownMenu';
 import { UserRoleSwitcher } from './components/common/UserRoleSwitcher';
 import { useLanguage } from './context/LanguageContext';
 import { Navigation } from './components/Navigation';
-import { DashboardOverview } from './components/dashboard/DashboardOverview';
-import { IntakeWorkOrderModule } from './components/intake/IntakeWorkOrderModule';
-import { CreateTicketSoloPage } from './components/intake/CreateTicketSoloPage';
-import { StatusPipelineView } from './components/pipeline/StatusPipelineView';
-import { InventoryManagementModule } from './components/inventory/InventoryManagementModule';
-import { SupplierRmaModule } from './components/suppliers/SupplierRmaModule';
-import { PosInvoicingModule } from './components/pos/PosInvoicingModule';
-import { CrmCustomerPortalModule } from './components/crm/CrmCustomerPortalModule';
-import { MicroSolderingModule } from './components/microsoldering/MicroSolderingModule';
-import { QualityAssuranceModule } from './components/qa/QualityAssuranceModule';
+// Heavy modules are code-split (React.lazy) so the initial bundle stays lean.
+const DashboardOverview = lazy(() => import('./components/dashboard/DashboardOverview').then((m) => ({ default: m.DashboardOverview })));
+const IntakeWorkOrderModule = lazy(() => import('./components/intake/IntakeWorkOrderModule').then((m) => ({ default: m.IntakeWorkOrderModule })));
+const CreateTicketSoloPage = lazy(() => import('./components/intake/CreateTicketSoloPage').then((m) => ({ default: m.CreateTicketSoloPage })));
+const StatusPipelineView = lazy(() => import('./components/pipeline/StatusPipelineView').then((m) => ({ default: m.StatusPipelineView })));
+const InventoryManagementModule = lazy(() => import('./components/inventory/InventoryManagementModule').then((m) => ({ default: m.InventoryManagementModule })));
+const SupplierRmaModule = lazy(() => import('./components/suppliers/SupplierRmaModule').then((m) => ({ default: m.SupplierRmaModule })));
+const PosInvoicingModule = lazy(() => import('./components/pos/PosInvoicingModule').then((m) => ({ default: m.PosInvoicingModule })));
+const CrmCustomerPortalModule = lazy(() => import('./components/crm/CrmCustomerPortalModule').then((m) => ({ default: m.CrmCustomerPortalModule })));
+const MicroSolderingModule = lazy(() => import('./components/microsoldering/MicroSolderingModule').then((m) => ({ default: m.MicroSolderingModule })));
+const QualityAssuranceModule = lazy(() => import('./components/qa/QualityAssuranceModule').then((m) => ({ default: m.QualityAssuranceModule })));
+const PriceCatalogModule = lazy(() => import('./components/prices/PriceCatalogModule').then((m) => ({ default: m.PriceCatalogModule })));
+const SystemManagementSettingsModule = lazy(() => import('./components/settings/SystemManagementSettingsModule').then((m) => ({ default: m.SystemManagementSettingsModule })));
+const CustomerFacingWebPortal = lazy(() => import('./components/portal/CustomerFacingWebPortal').then((m) => ({ default: m.CustomerFacingWebPortal })));
+// Small/modals stay eager-loaded (used in the root render).
 import { AiDiagnosticAssistantModal } from './components/ai/AiDiagnosticAssistantModal';
 import { DeviceTagPrinterModal } from './components/common/DeviceTagPrinterModal';
 import { RecycleBinModal } from './components/common/RecycleBinModal';
-import { PriceCatalogModule } from './components/prices/PriceCatalogModule';
-import { SystemManagementSettingsModule } from './components/settings/SystemManagementSettingsModule';
-import { CustomerFacingWebPortal } from './components/portal/CustomerFacingWebPortal';
 import { CompletedDeviceFollowUpModule } from './components/followup/CompletedDeviceFollowUpModule';
 import { ShopFinancePlModule } from './components/finance/ShopFinancePlModule';
 import { usePriceCatalog } from './hooks/usePriceCatalog';
@@ -308,6 +310,32 @@ export default function App() {
     };
   }, []);
 
+  // Realtime safety net: Supabase realtime does not push for collections outside
+  // the supabase_realtime publication, so periodically refetch key collections
+  // (only while the tab is visible) to keep tickets/parts fresh.
+  useEffect(() => {
+    let cancelled = false;
+    const refresh = async () => {
+      if (cancelled || document.visibilityState !== 'visible') return;
+      try {
+        const [freshWos, freshParts] = await Promise.all([
+          fetchCloudCollection<WorkOrder>('workOrders'),
+          fetchCloudCollection<PartItem>('parts'),
+        ]);
+        if (cancelled) return;
+        setWorkOrders(freshWos);
+        setParts(freshParts);
+      } catch {
+        // offline — keep current state, retry next tick
+      }
+    };
+    const id = window.setInterval(refresh, 45_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, []);
+
   useEffect(() => {
     const goOnline = () => setIsOnline(true);
     const goOffline = () => setIsOnline(false);
@@ -420,8 +448,7 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activeTab]);
 
-  // AI repair-type classification: auto-classify recently completed tickets
-  // (Finished / Taken Out within the last 3 days). One ticket per pass, so
+  // AI repair-type classification: auto-classify recently completed tickets  // (Finished / Taken Out within the last 3 days). One ticket per pass, so
   // completed orders trickle through the queue without API bursts. The verdict
   // is persisted as repairTypeAI; failures get aiClassifyFailed (no retry loop).
   const aiClassifyInFlight = useRef<Set<string>>(new Set());
@@ -1550,6 +1577,7 @@ export default function App() {
         </header>
 
         <main className="min-h-0 flex-1 w-full max-w-full px-3 sm:px-4 lg:px-5 pt-3 pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-5 flex flex-col">
+          <Suspense fallback={<div className="flex-1 flex items-center justify-center text-xs text-[#86868B]">Loading…</div>}>
           <div key={activeTab} className="app-module-content flex-1 w-full min-w-0 flex flex-col">
               {activeTab === 'dashboard' && (
                 <DashboardOverview
@@ -1840,6 +1868,7 @@ export default function App() {
                 />
               )}
           </div>
+          </Suspense>
         </main>
       </div>
 

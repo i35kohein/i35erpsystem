@@ -84,6 +84,18 @@ Intake ──► Pipeline ──► QA ──► POS ──► Follow-Up ──�
 | 9 | **VPS has no backups** of Supabase data | Data loss risk | Scheduled `supabase db dump` / erp_records export to droplet |
 | 10 | **Deploy lacks rollback** | Bad release sticks | Keep previous dist/ dir + symlink |
 
+### ✅ Upgrades shipped 2026-08-04 (commit series bc4a5bf → 5b2f6f5)
+| # | Upgrade | Status |
+|---|---|---|
+| 1 | **Auth session persistence** | ✅ tokens in `auth-tokens.json` (cwd) with 30-day expiry; verify checks expiry; survives restarts |
+| 2 | **Realtime safety net** | ✅ app refetches workOrders+parts every 45s while tab visible (publication change still needs Supabase dashboard SQL: `alter publication supabase_realtime add table erp_records;`) |
+| 3 | **Code splitting** | ✅ React.lazy on 13 heavy modules — bundle 2,089 KB → 877 KB (gzip 509→240 KB); Suspense fallback |
+| 4 | **Vitest smoke tests** | ✅ `src/utils/techAnalytics.test.ts` — 12 tests (load badges, repair-type rules, AI override, durations, labor revenue, est commission split, no-fabrication); `npm test` |
+| 5 | **Git identity** | ✅ local+global set to i35kohein / i35kohein@gmail.com (future commits) |
+| 6 | **Backup cron** | ✅ `/opt/i35erp/backup.sh` nightly 02:30 (erp_records JSON, keeps 14 days, log at backup.log); first backup ran (628 KB) |
+| 7 | **Deploy rollback** | ✅ deploy.sh keeps `dist.prev`; `./rollback.sh` swaps + restarts |
+| 8 | **Parts category normalization** | ✅ `Backglass ( Ring )` → `Backglass (Ring)` (134 parts, name-only, no merge) |
+
 ---
 
 ## 4. TypeScript Errors — Fixed (30 → 0)

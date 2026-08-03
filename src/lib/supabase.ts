@@ -60,7 +60,7 @@ function toRows<T extends { id: string }>(collectionName: string, items: T[]): E
   }));
 }
 
-async function fetchCloudCollection<T>(collectionName: string): Promise<T[]> {
+export async function fetchCloudCollection<T>(collectionName: string): Promise<T[]> {
   const { data, error } = await supabase
     .from('erp_records')
     .select('data')

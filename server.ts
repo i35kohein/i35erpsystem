@@ -50,7 +50,34 @@ async function startServer() {
 
   // Simple email/password auth — credentials from .env
   // POST /api/auth/login { email, password } -> { user } | 401
-  const SESSION_TOKENS = new Set<string>();
+  // Persistent auth sessions: tokens survive server restarts (written to
+  // auth-tokens.json in cwd) and expire after TOKEN_TTL_DAYS.
+  const AUTH_TOKENS_FILE = path.join(process.cwd(), "auth-tokens.json");
+  const TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+  const authTokens: Record<string, { email: string; expiresAt: number }> = (() => {
+    try {
+      return JSON.parse(fs.readFileSync(AUTH_TOKENS_FILE, "utf8"));
+    } catch {
+      return {};
+    }
+  })();
+  const saveAuthTokens = () => {
+    try {
+      fs.writeFileSync(AUTH_TOKENS_FILE, JSON.stringify(authTokens));
+    } catch (err) {
+      console.error("Auth token save failed:", err);
+    }
+  };
+  const isTokenValid = (token: string) => {
+    const entry = authTokens[token];
+    if (!entry) return false;
+    if (entry.expiresAt < Date.now()) {
+      delete authTokens[token];
+      saveAuthTokens();
+      return false;
+    }
+    return true;
+  };
   app.post("/api/auth/login", async (req, res) => {
     const { email, password } = req.body || {};
     const authEmail = (process.env.AUTH_EMAIL || "").trim().toLowerCase();
@@ -61,7 +88,8 @@ async function startServer() {
     }
     if (String(email || "").trim().toLowerCase() === authEmail && password === authPass) {
       const token = randomBytes(24).toString("hex");
-      SESSION_TOKENS.add(token);
+      authTokens[token] = { email: authEmail, expiresAt: Date.now() + TOKEN_TTL_MS };
+      saveAuthTokens();
       res.json({ success: true, token, user: { email: authEmail, name: "Ko Hein" } });
     } else {
       res.status(401).json({ success: false, error: "Invalid email or password" });
@@ -69,13 +97,17 @@ async function startServer() {
   });
   app.post("/api/auth/logout", (req, res) => {
     const token = (req.headers["x-session-token"] as string) || "";
-    SESSION_TOKENS.delete(token);
+    delete authTokens[token];
+    saveAuthTokens();
     res.json({ success: true });
   });
   app.post("/api/auth/verify", (req, res) => {
     const token = (req.headers["x-session-token"] as string) || "";
-    if (SESSION_TOKENS.has(token)) { res.json({ success: true }); }
-    else { res.status(401).json({ success: false }); }
+    if (isTokenValid(token)) {
+      res.json({ success: true });
+    } else {
+      res.status(401).json({ success: false });
+    }
   });
 
   // AI Repair Diagnostics & Panic Log Analyzer
