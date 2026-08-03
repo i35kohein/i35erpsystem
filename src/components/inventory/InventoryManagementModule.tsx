@@ -887,6 +887,75 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             </button>
           </div>
 
+          {/* Model → Category → Tier filters, same line as view switcher */}
+          <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+            <div className="flex items-center gap-1 rounded-lg bg-[#F5F5F7] p-1">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white text-[#0071E3]">
+                <Smartphone className="h-3.5 w-3.5" />
+              </span>
+              <CustomDropdownMenu
+                value={selectedModelFilter}
+                onChange={setSelectedModelFilter}
+                options={[
+                  { value: 'ALL', label: 'All Models', badge: inventoryDeviceModels.length },
+                  ...inventoryDeviceModels.map((model) => ({
+                    value: model,
+                    label: model,
+                    badge: parts.filter((part) =>
+                      part.deviceCompatibility.some(
+                        (device) => isSameDeviceModel(device, model),
+                      ),
+                    ).length,
+                  })),
+                ]}
+                className="min-w-0"
+                buttonClassName="min-w-[130px] border-0 bg-transparent hover:bg-white"
+                size="sm"
+                menuAlign="group-left"
+              />
+            </div>
+
+            <div className="flex items-center gap-1 rounded-lg bg-[#F5F5F7] p-1">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white text-[#0071E3]">
+                <Layers className="h-3.5 w-3.5" />
+              </span>
+              <CustomDropdownMenu
+                value={selectedCategory}
+                onChange={setSelectedCategory}
+                options={[
+                  { value: 'ALL', label: 'All Categories', badge: categories.length },
+                  ...categories.map((category) => ({
+                    value: category,
+                    label: category,
+                    badge: parts.filter((part) => part.category === category).length,
+                  })),
+                ]}
+                className="min-w-0"
+                buttonClassName="min-w-[130px] border-0 bg-transparent hover:bg-white"
+                size="sm"
+                menuAlign="group-left"
+              />
+            </div>
+
+            <div className="flex items-center gap-1 rounded-lg bg-[#F5F5F7] p-1">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white text-[#0071E3]">
+                <Filter className="h-3.5 w-3.5" />
+              </span>
+              <CustomDropdownMenu
+                value={selectedQuality}
+                onChange={setSelectedQuality}
+                options={[
+                  { value: 'ALL', label: 'All Tiers' },
+                  ...customQualityTiers.map((tier) => ({ value: tier, label: tier })),
+                ]}
+                className="min-w-0"
+                buttonClassName="min-w-[120px] border-0 bg-transparent hover:bg-white"
+                size="sm"
+                menuAlign="group-left"
+              />
+            </div>
+          </div>
+
           {viewMode === 'stock' && (
             <div className="ml-auto flex items-center gap-1.5">
               {inlineEditMode && (
@@ -1006,82 +1075,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       </div>
       )}
 
-      {/* Filter Toolbar */}
-      {viewMode !== 'matrix' && (
-      <div className="space-y-2 rounded-xl border border-[var(--border)] bg-[var(--card-bg)] p-2.5">
-        <div className="flex flex-wrap items-center justify-start gap-1.5 text-xs">
-          {/* Model → Category → Tier */}
-          <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-            <div className="flex items-center gap-1 rounded-lg bg-[var(--border-subtle)] p-1">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[var(--card-bg)] text-[var(--primary)]">
-                <Smartphone className="h-3.5 w-3.5" />
-              </span>
-              <CustomDropdownMenu
-                value={selectedModelFilter}
-                onChange={setSelectedModelFilter}
-                options={[
-                  { value: 'ALL', label: 'All Models', badge: inventoryDeviceModels.length },
-                  ...inventoryDeviceModels.map((model) => ({
-                    value: model,
-                    label: model,
-                    badge: parts.filter((part) =>
-                      part.deviceCompatibility.some(
-                        (device) => isSameDeviceModel(device, model),
-                      ),
-                    ).length,
-                  })),
-                ]}
-                className="min-w-0"
-                buttonClassName="min-w-[150px] border-0 bg-transparent hover:bg-[var(--card-bg)]"
-                size="sm"
-                menuAlign="group-left"
-              />
-            </div>
 
-            <div className="flex items-center gap-1 rounded-lg bg-[var(--border-subtle)] p-1">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[var(--card-bg)] text-[var(--primary)]">
-                <Layers className="h-3.5 w-3.5" />
-              </span>
-              <CustomDropdownMenu
-                value={selectedCategory}
-                onChange={setSelectedCategory}
-                options={[
-                  { value: 'ALL', label: 'All Categories', badge: categories.length },
-                  ...categories.map((category) => ({
-                    value: category,
-                    label: category,
-                    badge: parts.filter((part) => part.category === category).length,
-                  })),
-                ]}
-                className="min-w-0"
-                buttonClassName="min-w-[150px] border-0 bg-transparent hover:bg-[var(--card-bg)]"
-                size="sm"
-                menuAlign="group-left"
-              />
-            </div>
-
-            <div className="flex items-center gap-1 rounded-lg bg-[var(--border-subtle)] p-1">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[var(--card-bg)] text-[var(--primary)]">
-                <Filter className="h-3.5 w-3.5" />
-              </span>
-              <CustomDropdownMenu
-                value={selectedQuality}
-                onChange={setSelectedQuality}
-                options={[
-                  { value: 'ALL', label: 'All Tiers' },
-                  ...customQualityTiers.map((tier) => ({ value: tier, label: tier })),
-                ]}
-                className="min-w-0"
-                buttonClassName="min-w-[142px] border-0 bg-transparent hover:bg-[var(--card-bg)]"
-                size="sm"
-                menuAlign="group-left"
-              />
-            </div>
-
-          </div>
-        </div>
-      </div>
-      )}
 
       {/* VIEW MODE 1: STOCK TABLE */}
       {viewMode === 'stock' && (
