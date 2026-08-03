@@ -1315,6 +1315,7 @@ export default function App() {
                   onSaveWorkOrder={handleSaveWorkOrder}
                   onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
                   onOpenAiAssistant={() => setIsAiAssistantOpen(true)}
+                  onOpenNewWorkOrder={(prefill) => handleOpenNewWorkOrder(prefill)}
                   onDeleteWorkOrder={handleDeleteWorkOrder}
                   onClearAllWorkOrders={handleClearAllWorkOrders}
                   searchQuery={searchQuery}
@@ -1348,6 +1349,7 @@ export default function App() {
                   showBottlenecksOnly={showBottlenecksOnly}
                   setShowBottlenecksOnly={setShowBottlenecksOnly}
                   onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
+                  onOpenNewWorkOrder={(prefill) => handleOpenNewWorkOrder(prefill)}
                 />
               )}
 

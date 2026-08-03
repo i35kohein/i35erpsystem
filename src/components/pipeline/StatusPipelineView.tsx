@@ -85,6 +85,7 @@ interface StatusPipelineViewProps {
   showBottlenecksOnly?: boolean;
   setShowBottlenecksOnly?: (b: boolean) => void;
   onSelectPrintTag?: (wo: WorkOrder) => void;
+  onOpenNewWorkOrder?: (prefill?: any) => void;
 }
 
 export const KANBAN_STAGES: { id: WorkOrderStatus; title: string; subtitle: string; color: string; badgeColor: string }[] = [
@@ -117,6 +118,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
   showBottlenecksOnly: propShowBottlenecksOnly,
   setShowBottlenecksOnly: propSetShowBottlenecksOnly,
   onSelectPrintTag,
+  onOpenNewWorkOrder,
 }) => {
   const { t } = useLanguage();
   const activePaymentMethods = getActivePaymentMethods(systemSettings).filter((m) => m.enabled);
@@ -1035,6 +1037,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
           currentUser={currentUser}
           onClose={() => setDetailModalWo(null)}
           onPrint={onSelectPrintTag}
+          onEdit={onOpenNewWorkOrder ? (wo) => onOpenNewWorkOrder({ editWorkOrder: wo }) : undefined}
           onDelete={onDeleteWorkOrder}
         />
       )}

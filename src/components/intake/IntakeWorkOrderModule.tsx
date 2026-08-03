@@ -91,6 +91,7 @@ interface IntakeWorkOrderModuleProps {
   onSaveWorkOrder: (wo: WorkOrder) => void;
   onSelectPrintTag: (wo: WorkOrder) => void;
   onOpenAiAssistant: () => void;
+  onOpenNewWorkOrder?: (prefill?: any) => void;
   onDeleteWorkOrder?: (id: string) => void;
   onClearAllWorkOrders?: () => void;
   searchQuery: string;
@@ -136,6 +137,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   onSaveWorkOrder,
   onSelectPrintTag,
   onOpenAiAssistant,
+  onOpenNewWorkOrder,
   onDeleteWorkOrder,
   onClearAllWorkOrders,
   searchQuery,
@@ -938,6 +940,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           currentUser={currentUser}
           onClose={() => setIsDetailModalOpen(false)}
           onPrint={onSelectPrintTag}
+          onEdit={onOpenNewWorkOrder ? (wo) => onOpenNewWorkOrder({ editWorkOrder: wo }) : undefined}
           onDelete={onDeleteWorkOrder}
         />
       )}

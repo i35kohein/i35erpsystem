@@ -12,6 +12,7 @@ import {
   MessageSquareWarning,
   Phone,
   Printer,
+  PencilLine,
   ScanLine,
   Smartphone,
   Ticket,
@@ -28,6 +29,7 @@ interface TicketDetailInspectorModalProps {
   currentUser?: AppUser;
   onClose: () => void;
   onPrint?: (workOrder: WorkOrder) => void;
+  onEdit?: (workOrder: WorkOrder) => void;
   onDelete?: (id: string) => void;
 }
 
@@ -36,6 +38,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
   currentUser,
   onClose,
   onPrint,
+  onEdit,
   onDelete,
 }) => {
   const [activeTab, setActiveTab] = React.useState<'details' | 'log'>('details');
@@ -149,6 +152,18 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
           </div>
 
           <div className="flex shrink-0 items-center gap-1">
+            {onEdit && (
+              <button
+                type="button"
+                onClick={() => onEdit(workOrder)}
+                aria-label="Edit ticket"
+                title="Edit ticket"
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-muted)] transition-colors hover:bg-[var(--bg)] hover:text-[var(--primary)]"
+              >
+                <PencilLine className="h-4 w-4" />
+              </button>
+            )}
+
             {onPrint && (
               <button
                 type="button"
