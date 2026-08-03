@@ -249,7 +249,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
               </p>
               {isPaidWo && (
                 <p className="text-[10px] font-bold text-slate-700">
-                  Taken Out: {new Date(workOrder.updatedAt || Date.now()).toLocaleString()}
+                  Taken Out: {new Date(workOrder.updatedAt || Date.now()).toLocaleDateString()}
                 </p>
               )}
             </div>
