@@ -238,16 +238,9 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
 
           <div className="flex items-center space-x-3">
             <div className="text-left sm:text-right font-mono space-y-0.5">
-              <div className="flex items-center justify-end space-x-1.5">
-                <p className={`text-xs font-black ${isMono ? 'text-black' : 'text-[#0071E3]'}`}>
-                  Voucher #: {workOrder.orderNumber}
-                </p>
-                {workOrder.isPaid && (
-                  <span className="inline-flex items-center gap-0.5 rounded bg-[#34C759] px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-white">
-                    <Check className="h-2.5 w-2.5" /> PAID
-                  </span>
-                )}
-              </div>
+              <p className={`text-xs font-black ${isMono ? 'text-black' : 'text-[#0071E3]'}`}>
+                Voucher #: {workOrder.orderNumber}
+              </p>
               <p className="text-[11px] text-slate-700">Date: {new Date(workOrder.createdAt).toLocaleDateString()}</p>
               <p className="text-[10px] text-slate-600">Est. Return: {workOrder.estimatedCompletion}</p>
               {isPaidWo && (
