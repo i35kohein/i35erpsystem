@@ -99,6 +99,7 @@ interface PosInvoicingModuleProps {
   parts?: PartItem[];
   systemSettings?: SystemSettings;
   onMarkPaid: (workOrder: WorkOrder, method: string) => void;
+  onOpenPrintTag?: (wo: WorkOrder) => void;
   onSaveWorkOrder?: (wo: WorkOrder) => void;
   searchQuery?: string;
   setSearchQuery?: (q: string) => void;
@@ -114,6 +115,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   parts = [],
   systemSettings,
   onMarkPaid,
+  onOpenPrintTag,
   onSaveWorkOrder,
   searchQuery = '',
   dateFilter: propDateFilter,
@@ -320,7 +322,13 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     setIsProcessingPayment(true);
     try {
       onMarkPaid(selectedWo, finalMethod);
-      setIsReceiptModalOpen(true);
+      // Reuse the intake A4 voucher printer (same document as intake) with PAID badge.
+      if (onOpenPrintTag) {
+        const paidWo = { ...selectedWo, isPaid: true, paymentMethod: finalMethod as any };
+        onOpenPrintTag(paidWo);
+      } else {
+        setIsReceiptModalOpen(true);
+      }
     } finally {
       // Release after a short window so rapid double-clicks cannot double-charge.
       window.setTimeout(() => setIsProcessingPayment(false), 1200);
@@ -650,7 +658,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                             )}
                             Stock: {selectedInventoryPart.quantityInStock}
                             {selectedInventoryPart.quantityInStock <= selectedInventoryPart.reorderPoint
-                              ? ` — Low (min ${selectedInventoryPart.reorderPoint})`
+                              ? ' — Low'
                               : ' available'}
                           </span>
                         )}

@@ -1518,6 +1518,7 @@ export default function App() {
                   parts={parts}
                   systemSettings={systemSettings}
                   onMarkPaid={handleMarkPaid}
+                  onOpenPrintTag={(wo) => setPrintableTagWo(wo)}
                   onSaveWorkOrder={handleSaveWorkOrder}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
