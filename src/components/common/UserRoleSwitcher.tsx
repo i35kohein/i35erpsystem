@@ -96,8 +96,8 @@ export const UserRoleSwitcher: React.FC<UserRoleSwitcherProps> = ({
             className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
           />
-          <div className={`absolute z-50 w-72 rounded-2xl bg-white border border-[#D2D2D7] shadow-2xl p-2 space-y-1.5 animate-in fade-in zoom-in-95 duration-150 ${
-            compact ? 'left-full bottom-0 ml-2' : 'left-0 bottom-full mb-2'
+          <div className={`absolute z-50 w-56 max-w-[calc(100vw-1rem)] rounded-2xl bg-white border border-[#D2D2D7] shadow-2xl p-2 space-y-1.5 animate-in fade-in zoom-in-95 duration-150 ${
+            compact ? 'left-full bottom-0 ml-2' : 'left-full bottom-0 ml-2'
           }`}>
             <div className="px-3 py-2 border-b border-[#E5E5EA]">
               <span className="text-[10px] font-extrabold text-[#86868B] uppercase tracking-wider block">
