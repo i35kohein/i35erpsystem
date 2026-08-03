@@ -41,7 +41,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  Printer
+  Printer,
+  ScanLine
 } from 'lucide-react';
 import { PartItem, PartQualityTier, Supplier, SystemSettings, RmaItem } from '../../types';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
@@ -311,6 +312,26 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   // Edit Part Modal state
   const [editingPart, setEditingPart] = useState<PartItem | null>(null);
   const [selectedPartForDetails, setSelectedPartForDetails] = useState<PartItem | null>(null);
+  const [scanQuery, setScanQuery] = useState('');
+  const scanInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Barcode scanner = keyboard wedge: types SKU then Enter. Look up exact SKU
+  // (case-insensitive) and open the part detail modal; beep/flash on miss.
+  const handleScanSubmit = () => {
+    const q = scanQuery.trim().toLowerCase();
+    if (!q) return;
+    const match = parts.find((p) => String(p.sku || '').trim().toLowerCase() === q)
+      || parts.find((p) => String(p.id || '').toLowerCase() === q);
+    if (match) {
+      setSelectedPartForDetails(match);
+      toast.success(`Scanned: ${match.name}`, 'Part Found');
+    } else {
+      toast.error(`No part with SKU "${scanQuery.trim()}"`, 'Scan Not Found');
+    }
+    setScanQuery('');
+    // Keep focus so the next scan lands in the same box.
+    requestAnimationFrame(() => scanInputRef.current?.focus());
+  };
   const [isDeviceModelChooserOpen, setIsDeviceModelChooserOpen] = useState(false);
   const [isLocationBinMenuOpen, setIsLocationBinMenuOpen] = useState(false);
   const [isEditLocationBinMenuOpen, setIsEditLocationBinMenuOpen] = useState(false);
@@ -1064,6 +1085,30 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
       {/* VIEW MODE 1: STOCK TABLE */}
       {viewMode === 'stock' && (
+        <>
+        {/* Barcode scan bar — keyboard-wedge scanners type the SKU + Enter here */}
+        <div className="flex items-center gap-2 rounded-xl border border-[#0071E3]/25 bg-blue-50/50 px-3 py-2">
+          <ScanLine className="h-4 w-4 shrink-0 text-[#0071E3]" />
+          <input
+            ref={scanInputRef}
+            value={scanQuery}
+            onChange={(e) => setScanQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') { e.preventDefault(); handleScanSubmit(); }
+            }}
+            placeholder="Scan barcode — or type SKU then press Enter"
+            autoComplete="off"
+            autoFocus
+            className="min-w-0 flex-1 rounded-lg border border-[#D2D2D7] bg-white px-3 py-1.5 font-mono text-xs font-semibold text-[#1D1D1F] outline-none transition focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
+          />
+          <button
+            type="button"
+            onClick={handleScanSubmit}
+            className="shrink-0 rounded-lg bg-[#0071E3] px-3 py-1.5 text-[11px] font-extrabold text-white transition hover:bg-[#0051B3]"
+          >
+            Lookup
+          </button>
+        </div>
         <div className="workspace-panel workspace-panel--standard rounded-2xl border border-[#E5E5EA] bg-white text-xs shadow-xs">
           <div className="workspace-panel__scroll rounded-xl">
             <table className="w-full text-left border-collapse">
@@ -1297,6 +1342,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             </div>
           )}
         </div>
+        </>
       )}
 
       {/* VIEW MODE 2: PROFIT TABLE */}
