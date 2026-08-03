@@ -1868,6 +1868,7 @@ export default function App() {
         technicians={technicians}
         suppliers={suppliers}
         systemSettings={systemSettings}
+        currentUserId={currentUser?.id}
         onOpenAiSettings={() => {
           setIsAiAssistantOpen(false);
           setSettingsInitialSubTab('ai');

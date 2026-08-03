@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import path from "path";
+import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import { randomBytes } from "crypto";
@@ -161,83 +162,16 @@ Return JSON with key "message".`;
       if (!resolvedApiKey) return res.status(400).json({ success: false, error: "AI API key is not configured on the server." });
 
       const instruction = `${systemPrompt || "You are a professional repair-shop operations copilot."}
-Use only the supplied live ERP context. If data is unavailable, say so rather than inventing it. Reply in the same language as the user's question (Burmese when the user writes Burmese). Be concise, operational, and direct: lead with the conclusion, then give prioritized next actions. Identify records by ticket, part, device, customer, or technician where possible. Use short bullets only when they improve scanability. Do not claim to have completed changes, contacted a customer, or performed an action.
+Use only the supplied live ERP context. If data is unavailable, say so rather than inventing it. ALWAYS reply in Myanmar (Burmese) language, regardless of the language the user writes in — keep technical terms (device models, part names, ticket numbers, prices) in English where natural. Be concise, operational, and direct: lead with the conclusion, then give prioritized next actions. Identify records by ticket, part, device, customer, or technician where possible. Use short bullets only when they improve scanability. Do not claim to have completed changes, contacted a customer, or performed an action.
 
 LIVE ERP CONTEXT:
 ${JSON.stringify(context)}`;
 
       let answer = "";
-
-      if (provider === "anthropic") {
-        const response = await fetch(`${baseUrl || "https://api.anthropic.com"}/v1/messages`, {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-            "x-api-key": resolvedApiKey,
-            "anthropic-version": "2023-06-01",
-          },
-          body: JSON.stringify({
-            model: model || "claude-3-5-haiku-latest",
-            max_tokens: 900,
-            system: instruction,
-            messages,
-          }),
-        });
-        const data: any = await readProviderJson(response, "Anthropic");
-        if (!response.ok) throw new Error(data?.error?.message || "Anthropic request failed.");
-        answer = data.content?.map((item: any) => item.text || "").join("\n") || "";
-      } else if (provider === "gemini") {
-        const selectedModel = model || "gemini-2.0-flash";
-        const response = await fetch(
-          `${baseUrl || "https://generativelanguage.googleapis.com/v1beta"}/models/${selectedModel}:generateContent?key=${encodeURIComponent(resolvedApiKey)}`,
-          {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({
-              systemInstruction: { parts: [{ text: instruction }] },
-              contents: messages.map((message: any) => ({
-                role: message.role === "assistant" ? "model" : "user",
-                parts: [{ text: message.content }],
-              })),
-            }),
-          }
-        );
-        const data: any = await readProviderJson(response, "Gemini");
-        if (!response.ok) throw new Error(data?.error?.message || "Gemini request failed.");
-        answer = data.candidates?.[0]?.content?.parts?.map((part: any) => part.text || "").join("\n") || "";
-      } else {
-        const providerBase =
-          baseUrl ||
-          (provider === "groq"
-            ? "https://api.groq.com/openai/v1"
-            : provider === "deepseek"
-              ? "https://api.deepseek.com"
-            : provider === "openrouter"
-              ? "https://openrouter.ai/api/v1"
-              : "https://api.openai.com/v1");
-        const defaultModel =
-          provider === "groq"
-            ? "llama-3.1-8b-instant"
-            : provider === "deepseek"
-              ? "deepseek-chat"
-            : provider === "openrouter"
-              ? "openai/gpt-4o-mini"
-              : "gpt-4o-mini";
-        const response = await fetch(`${providerBase.replace(/\/$/, "")}/chat/completions`, {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-            authorization: `Bearer ${resolvedApiKey}`,
-          },
-          body: JSON.stringify({
-            model: model || defaultModel,
-            temperature: 0.2,
-            messages: [{ role: "system", content: instruction }, ...messages],
-          }),
-        });
-        const data: any = await readProviderJson(response, provider === "deepseek" ? "DeepSeek" : "AI provider");
-        if (!response.ok) throw new Error(data?.error?.message || "AI provider request failed.");
-        answer = data.choices?.[0]?.message?.content || "";
+      try {
+        answer = await callAiProvider({ provider, apiKey: resolvedApiKey, model, baseUrl, systemPrompt: instruction, messages });
+      } catch (err: any) {
+        throw new Error(err.message || "AI provider request failed.");
       }
 
       res.json({ success: true, answer });
@@ -246,6 +180,183 @@ ${JSON.stringify(context)}`;
       res.status(500).json({ success: false, error: err.message || "AI assistant request failed." });
     }
   });
+
+  // --- Shared AI provider call (used by /api/ai/chat and the Telegram bot) ---
+  async function callAiProvider(opts: {
+    provider: string;
+    apiKey: string;
+    model?: string;
+    baseUrl?: string;
+    systemPrompt: string;
+    messages: { role: string; content: string }[];
+  }): Promise<string> {
+    const { provider, apiKey, model, baseUrl, systemPrompt, messages } = opts;
+    if (provider === "anthropic") {
+      const response = await fetch(`${baseUrl || "https://api.anthropic.com"}/v1/messages`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model: model || "claude-3-5-haiku-latest",
+          max_tokens: 900,
+          system: systemPrompt,
+          messages,
+        }),
+      });
+      const data: any = await readProviderJson(response, "Anthropic");
+      if (!response.ok) throw new Error(data?.error?.message || "Anthropic request failed.");
+      return data.content?.map((item: any) => item.text || "").join("\n") || "";
+    }
+    if (provider === "gemini") {
+      const selectedModel = model || "gemini-2.0-flash";
+      const response = await fetch(
+        `${baseUrl || "https://generativelanguage.googleapis.com/v1beta"}/models/${selectedModel}:generateContent?key=${encodeURIComponent(apiKey)}`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: systemPrompt }] },
+            contents: messages.map((message: any) => ({
+              role: message.role === "assistant" ? "model" : "user",
+              parts: [{ text: message.content }],
+            })),
+          }),
+        }
+      );
+      const data: any = await readProviderJson(response, "Gemini");
+      if (!response.ok) throw new Error(data?.error?.message || "Gemini request failed.");
+      return data.candidates?.[0]?.content?.parts?.map((part: any) => part.text || "").join("\n") || "";
+    }
+    const providerBase =
+      baseUrl ||
+      (provider === "groq"
+        ? "https://api.groq.com/openai/v1"
+        : provider === "deepseek"
+          ? "https://api.deepseek.com"
+          : provider === "openrouter"
+            ? "https://openrouter.ai/api/v1"
+            : "https://api.openai.com/v1");
+    const defaultModel =
+      provider === "groq"
+        ? "llama-3.1-8b-instant"
+        : provider === "deepseek"
+          ? "deepseek-chat"
+          : provider === "openrouter"
+            ? "openai/gpt-4o-mini"
+            : "gpt-4o-mini";
+    const response = await fetch(`${providerBase.replace(/\/$/, "")}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: model || defaultModel,
+        temperature: 0.2,
+        messages: [{ role: "system", content: systemPrompt }, ...messages],
+      }),
+    });
+    const data: any = await readProviderJson(response, provider === "deepseek" ? "DeepSeek" : "AI provider");
+    if (!response.ok) throw new Error(data?.error?.message || "AI provider request failed.");
+    return data.choices?.[0]?.message?.content || "";
+  }
+
+  // --- Telegram bot: chat with the ERP copilot from anywhere ---
+  const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "";
+  const TELEGRAM_ALLOWED_CHAT_IDS = new Set(
+    (process.env.TELEGRAM_ALLOWED_CHAT_IDS || "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)
+  );
+  if (TELEGRAM_BOT_TOKEN) {
+    const historyFile = path.join(process.cwd(), "ai-chat-history.json");
+    const tgHistory: Record<string, { role: string; content: string }[]> = (() => {
+      try {
+        return JSON.parse(fs.readFileSync(historyFile, "utf8"));
+      } catch {
+        return {};
+      }
+    })();
+    const saveTgHistory = () => {
+      try {
+        fs.writeFileSync(historyFile, JSON.stringify(tgHistory));
+      } catch (err) {
+        console.error("Telegram history save failed:", err);
+      }
+    };
+    const tgCall = async (method: string, body: Record<string, unknown>) => {
+      const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/${method}`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      return res.json();
+    };
+    const TELEGRAM_SYSTEM_PROMPT =
+      "You are the i35 Apple Service shop copilot (ERP AI assistant). ALWAYS reply in Myanmar (Burmese) language, regardless of the language the user writes in — keep technical terms in English where natural. Be concise, operational, and direct: lead with the conclusion, then give prioritized next actions. If you lack ERP live data, say so rather than inventing it. Do not claim to have completed actions.";
+    const telegramAiAnswer = async (chatId: string, text: string): Promise<string> => {
+      const provider = process.env.DEEPSEEK_API_KEY ? "deepseek" : process.env.GEMINI_API_KEY ? "gemini" : "";
+      if (!provider) {
+        return "AI ကို configure မလုပ်ရသေးပါ — server မှာ GEMINI_API_KEY သို့မဟုတ် DEEPSEEK_API_KEY ထည့်ပေးပါ။";
+      }
+      const key = provider === "deepseek" ? process.env.DEEPSEEK_API_KEY! : process.env.GEMINI_API_KEY!;
+      const history = tgHistory[chatId] || [];
+      const messages = [...history.slice(-20), { role: "user", content: text }];
+      try {
+        return await callAiProvider({ provider, apiKey: key, systemPrompt: TELEGRAM_SYSTEM_PROMPT, messages });
+      } catch (err: any) {
+        console.error("Telegram AI error:", err);
+        return "AI ခေါ်တဲ့အခါ အမှားဖြစ်သွားပါတယ် — နောက်တစ်ခါ ပြန်စမ်းကြည့်ပါ။";
+      }
+    };
+    let tgOffset = 0;
+    const pollTelegram = async () => {
+      try {
+        const updates: any = await tgCall("getUpdates", {
+          offset: tgOffset,
+          timeout: 25,
+          allowed_updates: ["message"],
+        });
+        for (const update of updates?.result || []) {
+          tgOffset = Math.max(tgOffset, update.update_id + 1);
+          const msg = update.message;
+          if (!msg || !msg.text) continue;
+          const chatId = String(msg.chat.id);
+          if (TELEGRAM_ALLOWED_CHAT_IDS.size && !TELEGRAM_ALLOWED_CHAT_IDS.has(chatId)) continue;
+          const text = String(msg.text).trim();
+          if (text === "/start" || text === "/help") {
+            await tgCall("sendMessage", {
+              chat_id: chatId,
+              text: "🤖 i35 ERP Copilot\n\nမင်္ဂလာပါ! ဒီ bot ကနေ ERP ရဲ့ AI assistant ကို စကားပြောလို့ရပါတယ်။\n\nCommands:\n/start — စတင်မည်\n/clear — စကားပြောမှတ်တမ်း ရှင်းမည်\n/help — အကူအညီ\n\nဘာမေးမယ်ဆို ရိုက်ထည့်လိုက်ပါ — မြန်မာလိုပဲ ဖြေပေးပါမယ်။",
+            });
+            continue;
+          }
+          if (text === "/clear") {
+            tgHistory[chatId] = [];
+            saveTgHistory();
+            await tgCall("sendMessage", { chat_id: chatId, text: "စကားပြောမှတ်တမ်း ရှင်းပြီးပါပြီ ✅" });
+            continue;
+          }
+          await tgCall("sendChatAction", { chat_id: chatId, action: "typing" });
+          const answer = await telegramAiAnswer(chatId, text);
+          tgHistory[chatId] = [...(tgHistory[chatId] || []), { role: "user", content: text }, { role: "assistant", content: answer }].slice(-30);
+          saveTgHistory();
+          await tgCall("sendMessage", { chat_id: chatId, text: answer });
+        }
+      } catch (err) {
+        console.error("Telegram poll error:", err);
+      }
+      setTimeout(pollTelegram, 1000);
+    };
+    pollTelegram();
+    console.log("Telegram bot started (long-polling).");
+  } else {
+    console.log("Telegram bot disabled — set TELEGRAM_BOT_TOKEN to enable.");
+  }
 
   // --- Vite Middleware or Static Production Serving ---
   if (process.env.NODE_ENV !== "production") {

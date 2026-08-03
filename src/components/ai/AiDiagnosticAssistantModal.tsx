@@ -19,20 +19,21 @@ interface AiDiagnosticAssistantModalProps {
   suppliers: Supplier[];
   systemSettings: SystemSettings;
   onOpenAiSettings: () => void;
+  currentUserId?: string;
 }
 
 const QUICK_PROMPTS = [
-  { label: 'Today’s priorities', prompt: 'Give me a concise operations brief and priorities for today.', icon: Activity },
-  { label: 'Repair delays', prompt: 'What are the current repair bottlenecks and what should the team do next?', icon: AlertTriangle },
-  { label: 'Follow-ups', prompt: 'Which customers and devices need follow-up first?', icon: PhoneCall },
-  { label: 'Parts & stock', prompt: 'Which parts are top used and which stock needs attention?', icon: PackageSearch },
+  { label: 'ဒီနေ့ ဦးစားပေးများ', prompt: 'Give me a concise operations brief and priorities for today.', icon: Activity },
+  { label: 'Repair ကြန့်ကြားမှုများ', prompt: 'What are the current repair bottlenecks and what should the team do next?', icon: AlertTriangle },
+  { label: 'Follow-up များ', prompt: 'Which customers and devices need follow-up first?', icon: PhoneCall },
+  { label: 'ပစ္စည်း & stock', prompt: 'Which parts are top used and which stock needs attention?', icon: PackageSearch },
 ];
 
 const WELCOME_MESSAGE: ChatMessage = {
   id: 'welcome',
   role: 'assistant',
   source: 'local',
-  content: 'Hello — I am your ERP Operations Copilot. I can turn today’s live ticket, stock, follow-up, technician, and finance data into clear next actions. What would you like to review?',
+  content: 'မင်္ဂလာပါ — ကျွန်တော်က မင်းရဲ့ ERP Operations Copilot ပါ။ ဒီနေ့ရဲ့ ticket, ပစ္စည်းစာရင်း (stock), follow-up, ပညာရှင်တွေရဲ့အလုပ် နဲ့ ငွေရေးကြေးရေး data တွေကို ရှင်းရှင်းလင်းလင်း နောက်တစ်ဆင့်အလုပ်တွေအဖြစ် ပြောပြနိုင်ပါတယ်။ ဘာကိုကြည့်ချင်လဲ — မေးလိုက်ပါ။',
 };
 
 export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProps> = ({
@@ -45,11 +46,45 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
   suppliers,
   systemSettings,
   onOpenAiSettings,
+  currentUserId,
 }) => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE]);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Per-account chat history: each logged-in user keeps their own conversation
+  // (localStorage keyed by user id). Loaded when the assistant opens.
+  const historyKey = currentUserId ? `i35_ai_chat_${currentUserId}` : '';
+  useEffect(() => {
+    if (!isOpen || !historyKey) return;
+    try {
+      const raw = localStorage.getItem(historyKey);
+      if (raw) {
+        const stored = JSON.parse(raw) as ChatMessage[];
+        if (Array.isArray(stored) && stored.length > 0) {
+          setMessages([WELCOME_MESSAGE, ...stored]);
+        }
+      }
+    } catch {
+      // ignore corrupt history
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || !historyKey) return;
+    if (messages.length <= 1) return;
+    const persist = messages
+      .filter((m) => m.id !== 'welcome' && m.role !== 'system')
+      .slice(-50);
+    try {
+      localStorage.setItem(historyKey, JSON.stringify(persist));
+    } catch {
+      // storage full / unavailable — history best-effort
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, isOpen]);
 
   const context = useMemo(() => {
     const now = Date.now();
@@ -175,43 +210,36 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
 
   const localAnswer = (question: string) => {
     const normalized = question.toLowerCase();
-    const isBurmese = /[\u1000-\u109f]/.test(question);
     const asksToday = normalized.includes('today') || question.includes('ဒီနေ့');
     const asksCompletedRepair =
       normalized.includes('completed') || normalized.includes('finished') || normalized.includes('repaired') || normalized.includes('repair')
       || question.includes('ပြင်ပြီး') || question.includes('ပြင်') || question.includes('ပြီးလဲ') || question.includes('ပြီး');
 
     if (asksToday && asksCompletedRepair) {
-      if (isBurmese) {
-        const completedList = context.completedToday.length
-          ? `\n${context.completedToday.slice(0, 8).map((item) => `• ${item.ticket} — ${item.device} (${item.status})`).join('\n')}`
-          : '';
-        return `ဒီနေ့ ပြီးစီးထားတဲ့ repair ticket ${context.summary.completedToday} လုံးရှိပါတယ်။${completedList}\n\nFinished / Taken Out status ဖြစ်ပြီး ဒီနေ့ update လုပ်ထားတဲ့ ticket တွေကိုတွက်ထားတာပါ။`;
-      }
       const completedList = context.completedToday.length
         ? `\n${context.completedToday.slice(0, 8).map((item) => `• ${item.ticket} — ${item.device} (${item.status})`).join('\n')}`
         : '';
-      return `${context.summary.completedToday} repair ticket(s) were completed today.${completedList}\n\nThis counts Finished and Taken Out tickets updated today.`;
+      return `ဒီနေ့ ပြီးစီးထားတဲ့ repair ticket ${context.summary.completedToday} လုံးရှိပါတယ်။${completedList}\n\nFinished / Taken Out status ဖြစ်ပြီး ဒီနေ့ update လုပ်ထားတဲ့ ticket တွေကိုတွက်ထားတာပါ။`;
     }
     if (normalized.includes('bottleneck') || normalized.includes('stuck') || normalized.includes('delay')) {
-      if (!context.bottlenecks.length) return 'No active ticket has gone 48 hours without an update. The repair pipeline currently has no aging bottleneck.';
-      return `There are ${context.bottlenecks.length} aging tickets:\n${context.bottlenecks
+      if (!context.bottlenecks.length) return 'နာရီ ၄၈ နာရီထက် update မရှိတဲ့ active ticket မရှိပါ။ Repair pipeline မှာ လက်ရှိ ကြန့်ကြာနေတဲ့ bottleneck မရှိပါဘူး။';
+      return `ကြန့်ကြာနေတဲ့ ticket ${context.bottlenecks.length} ခုရှိပါတယ်:\n${context.bottlenecks
         .slice(0, 8)
-        .map((item) => `• ${item.ticket} — ${item.device}, ${item.status}, ${item.hoursWithoutUpdate}h, ${item.technician}`)
+        .map((item) => `• ${item.ticket} — ${item.device}, ${item.status}, ${item.hoursWithoutUpdate}နာရီ, ${item.technician}`)
         .join('\n')}`;
     }
-    if (normalized.includes('part') || normalized.includes('selling') || normalized.includes('stock')) {
+    if (normalized.includes('part') || normalized.includes('selling') || normalized.includes('stock') || question.includes('ပစ္စည်း')) {
       const top = context.topUsedParts.length
-        ? context.topUsedParts.map((item, index) => `${index + 1}. ${item.name}: ${item.quantity} used`).join('\n')
-        : 'No non-labor part usage is recorded yet.';
+        ? context.topUsedParts.map((item, index) => `${index + 1}. ${item.name}: ${item.quantity} ခုသုံး`).join('\n')
+        : 'Non-labor part usage မှတ်တမ်းမရှိသေးပါ။';
       const low = context.lowStockParts.length
-        ? `\n\nLow stock:\n${context.lowStockParts.slice(0, 8).map((item) => `• ${item.name}: ${item.stock} available (reorder at ${item.reorderPoint})`).join('\n')}`
-        : '\n\nNo parts are currently at or below their reorder point.';
-      return `Top used parts:\n${top}${low}`;
+        ? `\n\nပစ္စည်းနည်းနေတဲ့စာရင်း:\n${context.lowStockParts.slice(0, 8).map((item) => `• ${item.name}: ကျန် ${item.stock} (reorder ${item.reorderPoint})`).join('\n')}`
+        : '\n\nလက်ရှိ reorder point အောက်ရောက်နေတဲ့ ပစ္စည်းမရှိပါ။';
+      return `အသုံးအများဆုံး ပစ္စည်းများ:\n${top}${low}`;
     }
-    if (normalized.includes('follow') || normalized.includes('call') || normalized.includes('customer')) {
-      if (!context.followUps.length) return 'No completed device currently requires a follow-up.';
-      return `${context.followUps.length} completed devices need follow-up:\n${context.followUps
+    if (normalized.includes('follow') || normalized.includes('call') || normalized.includes('customer') || question.includes('နောက်လိုက်')) {
+      if (!context.followUps.length) return 'လက်ရှိ follow-up လိုအပ်နေတဲ့ ပြီးစီးထားတဲ့ device မရှိပါ။';
+      return `Follow-up လိုတဲ့ device ${context.followUps.length} ခုရှိပါတယ်:\n${context.followUps
         .slice(0, 10)
         .map((item) => `• ${item.ticket} — ${item.customer}, ${item.device}, ${item.followUpStatus}`)
         .join('\n')}`;
@@ -221,15 +249,16 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
       normalized.includes('revenue') ||
       normalized.includes('balance') ||
       normalized.includes('unpaid') ||
-      normalized.includes('money')
+      normalized.includes('money') ||
+      question.includes('ငွေ')
     ) {
       const collectionPriority =
         context.finance.outstanding > 0
-          ? `Priority: review and collect the ${context.finance.outstanding.toLocaleString()} ${systemSettings.currencySymbol} outstanding balance across ${context.summary.unpaidTickets} unpaid ticket(s).`
-          : 'No outstanding repair balance requires collection.';
-      return `Finance summary:\n• Paid revenue: ${context.finance.totalRevenue.toLocaleString()} ${systemSettings.currencySymbol}.\n• Outstanding balance: ${context.finance.outstanding.toLocaleString()} ${systemSettings.currencySymbol}.\n• Unpaid tickets: ${context.summary.unpaidTickets}.\n\n${collectionPriority}`;
+          ? `ဦးစားပေး: unpaid ticket ${context.summary.unpaidTickets} ခုက ကျန်နေတဲ့ ${context.finance.outstanding.toLocaleString()} ${systemSettings.currencySymbol} ကို သွားရှင်းသင့်ပါတယ်။`
+          : 'ကျန်နေတဲ့ ရရန်ငွေ မရှိပါဘူး။';
+      return `ငွေရေးကြေးရေး အကျဉ်းချုပ်:\n• ရရှိငွေ: ${context.finance.totalRevenue.toLocaleString()} ${systemSettings.currencySymbol}.\n• ကျန်ရှိငွေ: ${context.finance.outstanding.toLocaleString()} ${systemSettings.currencySymbol}.\n• Unpaid ticket: ${context.summary.unpaidTickets}.\n\n${collectionPriority}`;
     }
-    return `Shop brief:\n• ${context.summary.activeTickets} active tickets; ${context.summary.completedTickets} completed.\n• ${context.bottlenecks.length} ticket(s) aging over 48 hours.\n• ${context.followUps.length} completed device(s) need follow-up.\n• ${context.lowStockParts.length} part(s) are at or below reorder level.\n• Paid revenue: ${context.finance.totalRevenue.toLocaleString()} ${systemSettings.currencySymbol}.\n• Outstanding balance: ${context.finance.outstanding.toLocaleString()} ${systemSettings.currencySymbol}.\n\nAsk about bottlenecks, top parts, stock, follow-ups, technicians, or finance for details.`;
+    return `ဆိုင်ရဲ့ အကျဉ်းချုပ်:\n• Active ticket ${context.summary.activeTickets} ခု; ပြီးစီး ${context.summary.completedTickets} ခု.\n• နာရီ ၄၈ ကျော် ကြန့်ကြာနေတဲ့ ticket ${context.bottlenecks.length} ခု.\n• Follow-up လိုတဲ့ device ${context.followUps.length} ခု.\n• Reorder အောက် ပစ္စည်း ${context.lowStockParts.length} ခု.\n• ရရှိငွေ: ${context.finance.totalRevenue.toLocaleString()} ${systemSettings.currencySymbol}.\n• ကျန်ရှိငွေ: ${context.finance.outstanding.toLocaleString()} ${systemSettings.currencySymbol}.\n\nBottlenecks, ပစ္စည်းစာရင်း, follow-up, ငွေရေးကြေးရေး အသေးစိတ် မေးချင်ရင် မေးလိုက်ပါ။`;
   };
 
   const sendMessage = async (question = input) => {
@@ -304,6 +333,13 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
     if (isLoading) return;
     setMessages([WELCOME_MESSAGE]);
     setInput('');
+    if (historyKey) {
+      try {
+        localStorage.removeItem(historyKey);
+      } catch {
+        // ignore
+      }
+    }
   };
 
   const copyMessage = async (content: string) => {
