@@ -9,7 +9,9 @@ import {
   Smartphone,
   Check,
   AlertTriangle,
-  MinusCircle
+  MinusCircle,
+  Wrench,
+  Palette
 } from 'lucide-react';
 import { WorkOrder, PostRepairChecklist, Technician, DiagnosticItemResult, AppUser } from '../../types';
 import { DIAGNOSTIC_NAMES, getDiagnosticIcon } from '../intake/deviceData';
@@ -221,7 +223,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-12">
         {/* Left Column: Work Orders Awaiting QA (4 cols) */}
-        <div className="space-y-2 rounded-xl border border-[#E5E5EA] bg-white p-3 md:col-span-3">
+        <div className="space-y-2 rounded-xl border border-[#E5E5EA] bg-white p-3 md:col-span-3 md:self-start">
           <div className="flex items-center justify-between gap-2 border-b border-[#E5E5EA] pb-2">
             <h2 className="min-w-0 truncate font-bold text-[#1D1D1F] text-xs">QA Queue</h2>
             <span className="shrink-0 text-[10px] font-mono font-bold bg-[#0071E3]/10 text-[#0071E3] px-2 py-0.5 rounded-full">
@@ -229,7 +231,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
             </span>
           </div>
 
-          <div className="space-y-2 max-h-[700px] overflow-y-auto pr-1">
+          <div className="space-y-2 max-h-[calc(100dvh-260px)] overflow-y-auto pr-1">
             {filteredWorkOrders.length === 0 ? (
               <div className="p-6 text-center text-[#86868B] space-y-2">
                 <CheckCircle2 className="w-8 h-8 text-[#34C759] mx-auto opacity-50" />
@@ -240,50 +242,84 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
               filteredWorkOrders.map((wo) => {
                 const isSelected = wo.id === selectedWoId;
                 const isQaPassed = !!wo.postRepairChecklist;
+                const handleSelect = () => setSelectedWoId(wo.id);
+                const repairs = (wo.selectedRepairs || []).filter((r) => r && r.name);
 
                 return (
                   <div
                     key={wo.id}
-                    onClick={() => setSelectedWoId(wo.id)}
+                    role="button"
+                    tabIndex={0}
+                    onClick={handleSelect}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleSelect();
+                      }
+                    }}
                     className={`p-3 rounded-xl border transition-all cursor-pointer ${
-                      isQaPassed
-                        ? isSelected
-                          ? 'bg-[#E8F8EE] border-[#34C759] ring-2 ring-[#34C759]/30 shadow-xs'
-                          : 'bg-[#F0FDF4] border-[#34C759]/60 hover:border-[#34C759] shadow-2xs'
-                        : isSelected
-                        ? 'bg-[#F0F6FF] border-[#0071E3] ring-2 ring-[#0071E3]/20 shadow-xs'
+                      isSelected
+                        ? 'bg-[#F0F6FF] border-[#0071E3] shadow-xs'
                         : 'bg-[#F5F5F7] border-[#E5E5EA] hover:bg-slate-100'
                     }`}
                   >
-                    <div className="flex justify-between items-center">
-                      <span className={`font-mono font-bold ${isQaPassed ? 'text-[#1E7E34]' : 'text-[#0071E3]'}`}>
+                    <div className="flex justify-between items-center gap-1">
+                      <span className="font-mono font-bold text-[#0071E3] flex items-center gap-1">
+                        {isSelected && <Check className="w-3 h-3 shrink-0" />}
                         {wo.orderNumber}
                       </span>
-                      {isQaPassed ? (
-                        <span className="bg-[#34C759] text-white text-[10px] px-2 py-0.5 rounded-md font-extrabold shadow-2xs">
-                          Ready for Checkout
+                      <div className="flex items-center space-x-1">
+                        <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-md border uppercase ${
+                          wo.status === 'Taken Out' ? 'bg-slate-100 text-slate-600 border-slate-300' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        }`}>
+                          {wo.status}
                         </span>
-                      ) : (
-                        <span className="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded-md border border-amber-200 font-semibold">
-                          Finished • QA Pending
+                        {isQaPassed ? (
+                          <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md border bg-[#EAF8ED] text-[#28A745] border-[#34C759]/20 uppercase">
+                            Ready
+                          </span>
+                        ) : (
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md border bg-[#FFF4E5] text-[#D97706] border-[#FF9F0A]/20 uppercase">
+                            QA Pending
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-center gap-2 mt-1">
+                      <p className="font-semibold text-[#1D1D1F] truncate">{wo.deviceModel}</p>
+                      <span className="font-mono font-bold text-[#1D1D1F] shrink-0">{wo.totalAmount.toLocaleString()} MMK</span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-1 mt-1">
+                      {repairs.slice(0, 2).map((r, i) => (
+                        <span key={i} className="inline-flex items-center gap-1 rounded-md border border-[#0071E3]/20 bg-[#0071E3]/8 px-1.5 py-0.5 text-[9px] font-extrabold text-[#0071E3]">
+                          <Wrench className="h-2.5 w-2.5" />
+                          {r.name}
+                        </span>
+                      ))}
+                      {repairs.length > 2 && (
+                        <span className="text-[9px] font-bold text-[#86868B]">+{repairs.length - 2}</span>
+                      )}
+                      {wo.deviceColor && (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-white px-1.5 py-0.5 text-[9px] font-bold text-[#1D1D1F] border border-[#E5E5EA]">
+                          <Palette className="h-2.5 w-2.5 text-[#86868B]" />
+                          {wo.deviceColor}
                         </span>
                       )}
                     </div>
 
-                    <p className="font-bold text-[#1D1D1F] mt-1">{wo.deviceModel}</p>
-                    <p className="text-[11px] text-[#86868B]">Cust: {wo.customerName}</p>
-
-                    {isQaPassed ? (
-                      <div className="mt-2 text-[10px] text-[#1E7E34] font-extrabold flex items-center space-x-1">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#34C759]" />
-                        <span>QA Pass Verified • Ready for Pickup</span>
-                      </div>
-                    ) : (
-                      <div className="mt-2 text-[10px] text-[#D97706] font-bold flex items-center space-x-1">
-                        <ShieldCheck className="w-3.5 h-3.5 text-[#D97706]" />
-                        <span>Awaiting QA Inspection</span>
-                      </div>
-                    )}
+                    <div className="flex items-center justify-between gap-2 text-[11px] text-[#86868B] mt-1">
+                      <span className="truncate">
+                        Cust: {wo.customerName}
+                        {wo.depositAmount > 0 && (
+                          <span className="text-[#0071E3] font-bold"> · Deposit {wo.depositAmount.toLocaleString()} MMK</span>
+                        )}
+                      </span>
+                      <span className="font-mono text-[10px] shrink-0 truncate">
+                        {(wo.imei || wo.serialNumber) && <>#{wo.imei || wo.serialNumber}</>}
+                      </span>
+                    </div>
                   </div>
                 );
               })
@@ -319,16 +355,6 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={handleMarkAllPass}
-                    title="Mark every checklist item as Pass"
-                    className="px-4 py-2 bg-white hover:bg-[#F5F5F7] text-[#1D1D1F] font-extrabold rounded-xl border border-[#D2D2D7] shadow-xs transition-all active:scale-95 flex items-center space-x-1.5"
-                  >
-                    <Check className="w-4 h-4 text-[#16A34A]" />
-                    <span>Mark All Pass</span>
-                  </button>
-
                   <button
                     onClick={handleSaveQaPass}
                     title="Confirm QA pass and mark device ready"

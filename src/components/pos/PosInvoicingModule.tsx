@@ -20,6 +20,7 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   BellRing,
   AlertTriangle, 
   XCircle, 
@@ -27,8 +28,9 @@ import {
   Filter,
   Wrench,
   Palette,
+  type LucideIcon,
 } from 'lucide-react';
-import { WorkOrder, Customer, SystemSettings, PartItem } from '../../types';
+import { WorkOrder, Customer, SystemSettings, PartItem, WorkOrderLineItem } from '../../types';
 import { getActivePaymentMethods } from '../../data/seedData';
 import { PrintableInvoiceModal } from '../common/PrintableInvoiceModal';
 import { CustomerNotificationModal } from '../common/CustomerNotificationModal';
@@ -95,6 +97,22 @@ const INVENTORY_CATEGORY_GROUPS: Array<{ match: RegExp; categories: string[] }> 
   },
 ];
 
+// Brand meta for payment method tiles (icon + brand color) so the grid is
+// scannable at a glance instead of text-only tiles.
+const PAYMENT_METHOD_META: Record<string, { icon: LucideIcon; color: string }> = {
+  'Cash': { icon: DollarSign, color: '#34C759' },
+  'KBZ Pay': { icon: Smartphone, color: '#E4002B' },
+  'UAB Pay': { icon: Landmark, color: '#0F4C81' },
+  'AYA Pay': { icon: Landmark, color: '#0F7B3E' },
+  'MMQR (National QR)': { icon: QrCode, color: '#0A66C2' },
+  'Wave Money': { icon: Smartphone, color: '#00B5E2' },
+  'CB Bank (CB Pay)': { icon: Landmark, color: '#E4002B' },
+  'Yoma Bank (Next)': { icon: Landmark, color: '#6C1D45' },
+  'KBZ Bank (iBanking)': { icon: Landmark, color: '#E4002B' },
+  'AYA Bank (mBanking)': { icon: Landmark, color: '#0F7B3E' },
+};
+const getPaymentMeta = (name: string) => PAYMENT_METHOD_META[name] || { icon: DollarSign, color: '#0071E3' };
+
 interface PosInvoicingModuleProps {
   workOrders: WorkOrder[];
   customers: Customer[];
@@ -137,6 +155,8 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   const [notifWo, setNotifWo] = useState<WorkOrder | null>(null);
   const [inventoryPartId, setInventoryPartId] = useState<string>('');
   const [inventoryPartQty, setInventoryPartQty] = useState<number>(1);
+  const [isAddPartOpen, setIsAddPartOpen] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [splitPayments, setSplitPayments] = useState<{ method: string; amount: number }[]>([
@@ -196,7 +216,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     // non-labor items were used, so battery/display repairs added as labor
     // items showed every inventory category (incl. Backglass).
     const repairText = (selectedWo.lineItems || [])
-      .map((item) => `${item.description || ''} ${item.partName || ''} ${item.name || ''} ${item.category || ''}`)
+      .map((item) => {
+        const extra = item as WorkOrderLineItem & { name?: string; category?: string };
+        return `${item.description || ''} ${item.partName || ''} ${extra.name || ''} ${extra.category || ''}`;
+      })
       .join(' ');
     const normalizedRepairText = normalizeText(repairText);
 
@@ -312,6 +335,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
   const handleProcessPayment = () => {
     if (!selectedWo || isProcessingPayment) return;
+    if (activePaymentMethods.length === 0) {
+      toast.error('No payment methods enabled. Enable one in Settings → Payment Methods.', 'Payment Unavailable');
+      return;
+    }
     let finalMethod = paymentMethod;
     if (paymentMethod === 'Split Payment') {
       const validSplits = splitPayments.filter((s) => s.amount > 0);
@@ -363,9 +390,9 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-1 gap-3 text-xs md:grid-cols-12">
+      <div className="grid grid-cols-1 gap-3 text-xs md:grid-cols-12 pb-16 md:pb-0">
         {/* Left Column: Select Work Order to Checkout (5 cols) */}
-        <div className="md:col-span-5 bg-white border border-[#E5E5EA] rounded-2xl p-4 space-y-3 shadow-xs">
+        <div className="md:col-span-5 bg-white border border-[#E5E5EA] rounded-2xl p-4 space-y-3 shadow-xs md:self-start">
           <div className="flex justify-between items-center border-b border-[#E5E5EA] pb-2">
             <h2 className="font-bold text-[#1D1D1F] text-xs">Diagnostic Completed Devices ({filteredWorkOrders.length})</h2>
             <span className="text-[10px] font-mono font-bold bg-[#34C759]/10 text-[#28A745] px-2 py-0.5 rounded-full border border-[#34C759]/20">
@@ -373,7 +400,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
             </span>
           </div>
 
-          <div className="space-y-2 min-h-[360px] max-h-[520px] overflow-y-auto">
+          <div className="space-y-2 min-h-[360px] max-h-[calc(100dvh-280px)] overflow-y-auto">
             {paginatedWorkOrders.length === 0 ? (
               <div className="p-8 text-center text-[#86868B] space-y-2 bg-[#F5F5F7] rounded-xl border border-dashed border-[#D2D2D7] my-4">
                 <CheckCircle2 className="w-8 h-8 mx-auto text-emerald-500 opacity-70" />
@@ -385,19 +412,40 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
             ) : (
               paginatedWorkOrders.map((wo) => {
                 const isSelected = wo.id === selectedWoId;
+                const handleSelectWo = () => {
+                  setSelectedWoId(wo.id);
+                  // Reset per-transaction state so a previous customer's cash/split
+                  // amounts never leak into the next checkout.
+                  setCashTendered(0);
+                  setSplitPayments([
+                    { method: activePaymentMethods[0]?.name || 'Cash', amount: 0 },
+                    { method: activePaymentMethods[1]?.name || 'KBZPay', amount: 0 },
+                  ]);
+                };
 
                 return (
                   <div
                     key={wo.id}
-                    onClick={() => setSelectedWoId(wo.id)}
-                    className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
+                    role="button"
+                    tabIndex={0}
+                    onClick={handleSelectWo}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleSelectWo();
+                      }
+                    }}
+                    className={`p-3 rounded-xl border transition-all cursor-pointer ${
                       isSelected
                         ? 'bg-[#F0F6FF] border-[#0071E3] shadow-xs'
                         : 'bg-[#F5F5F7] border-[#E5E5EA] hover:bg-slate-100'
                     }`}
                   >
                     <div className="flex justify-between items-center gap-1">
-                      <span className="font-mono font-bold text-[#0071E3]">{wo.orderNumber}</span>
+                      <span className="font-mono font-bold text-[#0071E3] flex items-center gap-1">
+                        {isSelected && <Check className="w-3 h-3 shrink-0" />}
+                        {wo.orderNumber}
+                      </span>
                       <div className="flex items-center space-x-1">
                         <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-md border uppercase ${
                           wo.status === 'Taken Out' ? 'bg-slate-100 text-slate-600 border-slate-300' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
@@ -412,43 +460,39 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       </div>
                     </div>
 
-                    <p className="font-semibold text-[#1D1D1F] mt-1">{wo.deviceModel}</p>
+                    <div className="flex justify-between items-center gap-2 mt-1">
+                      <p className="font-semibold text-[#1D1D1F] truncate">{wo.deviceModel}</p>
+                      <span className="font-mono font-bold text-[#1D1D1F] shrink-0">{wo.totalAmount.toLocaleString()} MMK</span>
+                    </div>
+
                     <div className="flex flex-wrap items-center gap-1 mt-1">
-                      {(wo.selectedRepairs || []).filter((r) => r && r.name).slice(0, 3).map((r, i) => (
+                      {(wo.selectedRepairs || []).filter((r) => r && r.name).slice(0, 2).map((r, i) => (
                         <span key={i} className="inline-flex items-center gap-1 rounded-md border border-[#0071E3]/20 bg-[#0071E3]/8 px-1.5 py-0.5 text-[9px] font-extrabold text-[#0071E3]">
                           <Wrench className="h-2.5 w-2.5" />
                           {r.name}
                         </span>
                       ))}
-                      {(wo.selectedRepairs || []).filter((r) => r && r.name).length > 3 && (
-                        <span className="text-[9px] font-bold text-[#86868B]">+{((wo.selectedRepairs || []).filter((r) => r && r.name).length) - 3}</span>
+                      {(wo.selectedRepairs || []).filter((r) => r && r.name).length > 2 && (
+                        <span className="text-[9px] font-bold text-[#86868B]">+{((wo.selectedRepairs || []).filter((r) => r && r.name).length) - 2}</span>
                       )}
                       {wo.deviceColor && (
-                        <span className="inline-flex items-center gap-1 rounded-md bg-[#F5F5F7] px-1.5 py-0.5 text-[9px] font-bold text-[#1D1D1F] border border-[#E5E5EA]">
+                        <span className="inline-flex items-center gap-1 rounded-md bg-white px-1.5 py-0.5 text-[9px] font-bold text-[#1D1D1F] border border-[#E5E5EA]">
                           <Palette className="h-2.5 w-2.5 text-[#86868B]" />
                           {wo.deviceColor}
                         </span>
                       )}
                     </div>
-                    <div className="flex justify-between items-center text-[#86868B] text-[11px] mt-1">
-                      <span>Cust: {wo.customerName}</span>
-                      <span className="font-bold text-[#1D1D1F]">{wo.totalAmount.toLocaleString()} MMK</span>
-                    </div>
-                    <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[9px] font-mono text-[#86868B] mt-1">
-                      {wo.imei && <span title="IMEI">IMEI: {wo.imei}</span>}
-                      {wo.serialNumber && <span title="Serial">S/N: {wo.serialNumber}</span>}
-                    </div>
 
-                    <div className="mt-2 flex items-center justify-between text-[10px]">
-                      <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 font-extrabold rounded-md border border-emerald-200/60 flex items-center space-x-1">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" />
-                        <span>Diag Finished</span>
+                    <div className="flex items-center justify-between gap-2 text-[11px] text-[#86868B] mt-1">
+                      <span className="truncate">
+                        Cust: {wo.customerName}
+                        {wo.depositAmount > 0 && (
+                          <span className="text-[#0071E3] font-bold"> · Deposit {wo.depositAmount.toLocaleString()} MMK</span>
+                        )}
                       </span>
-                      {wo.depositAmount > 0 && (
-                        <span className="text-[#0071E3] font-bold">
-                          Deposit: {wo.depositAmount.toLocaleString()} MMK
-                        </span>
-                      )}
+                      <span className="font-mono text-[10px] shrink-0 truncate">
+                        {(wo.imei || wo.serialNumber) && <>#{wo.imei || wo.serialNumber}</>}
+                      </span>
                     </div>
                   </div>
                 );
@@ -551,7 +595,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     className="px-3 py-1.5 bg-[#7360F2]/10 hover:bg-[#7360F2]/20 text-[#7360F2] font-extrabold text-xs rounded-xl border border-[#7360F2]/30 transition-all flex items-center space-x-1.5 cursor-pointer"
                     title="Send SMS / Viber / Telegram Notification"
                   >
-                    <BellRing className="w-3.5 h-3.5 animate-bounce text-[#7360F2]" />
+                    <BellRing className="w-3.5 h-3.5 text-[#7360F2]" />
                     <span>Notify Customer</span>
                   </button>
 
@@ -602,7 +646,8 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     <thead className="bg-[#F5F5F7] text-[#86868B] text-[10px] uppercase font-mono border-b border-[#E5E5EA]">
                       <tr>
                         <th className="p-2.5">Item</th>
-                        <th className="p-2.5">Qty</th>
+                        <th className="p-2.5 text-right">Qty</th>
+                        <th className="p-2.5 text-right">Unit Price</th>
                         <th className="p-2.5 text-right">Amount</th>
                       </tr>
                     </thead>
@@ -634,7 +679,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                               )}
                             </div>
                           </td>
-                          <td className="p-2.5 text-[#86868B]">{li.quantity}</td>
+                          <td className="p-2.5 text-right text-[#86868B]">{li.quantity}</td>
+                          <td className="p-2.5 text-right font-mono text-[#86868B]">
+                            {Number(li.unitPrice || 0).toLocaleString()}
+                          </td>
                           <td className="p-2.5 text-right font-mono text-[#1D1D1F]">
                             <div className="inline-flex items-center justify-end gap-2">
                               <span className="text-right">
@@ -671,12 +719,21 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 </div>
 
                 <div className="bg-white border border-[#E5E5EA] rounded-xl p-3 space-y-2">
-                  <div>
-                    <h4 className="text-xs font-extrabold text-[#1D1D1F]">Add Inventory Part Used</h4>
-                    <p className="text-[10px] text-[#86868B]">Pick the stock part used on this ticket before payment.</p>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsAddPartOpen(!isAddPartOpen)}
+                    aria-expanded={isAddPartOpen}
+                    className="w-full flex items-center justify-between gap-2 text-left cursor-pointer"
+                  >
+                    <span>
+                      <h4 className="text-xs font-extrabold text-[#1D1D1F]">Add Inventory Part Used</h4>
+                      <p className="text-[10px] text-[#86868B]">Pick the stock part used on this ticket before payment.</p>
+                    </span>
+                    <ChevronDown className={`w-4 h-4 text-[#86868B] shrink-0 transition-transform ${isAddPartOpen ? 'rotate-180' : ''}`} />
+                  </button>
 
-                  <div className="flex items-center gap-2">
+                  {isAddPartOpen && (
+                  <div className="flex items-end gap-2 pt-1">
                     <label className="block min-w-0 flex-1">
                       <span className="block text-[10px] font-bold text-[#86868B] mb-1">Inventory part</span>
                       <div className="flex items-center gap-2">
@@ -716,16 +773,28 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       </div>
                     </label>
 
+                    <label className="block shrink-0">
+                      <span className="block text-[10px] font-bold text-[#86868B] mb-1">Qty</span>
+                      <input
+                        type="number"
+                        min={1}
+                        max={selectedInventoryPart?.quantityInStock || 99}
+                        value={inventoryPartQty || ''}
+                        onChange={(e) => setInventoryPartQty(Math.max(1, Math.floor(Number(e.target.value) || 1)))}
+                        className="w-16 rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] px-2 py-2 text-[11px] font-mono font-bold text-[#1D1D1F] outline-none focus:border-[#0071E3] focus:ring-1 focus:ring-[#0071E3]/20"
+                      />
+                    </label>
+
                     <button
                       type="button"
                       onClick={handleAddInventoryPartToWorkOrder}
                       disabled={!selectedInventoryPart}
-                      className="mt-5 inline-flex h-9 shrink-0 items-center justify-center rounded-lg bg-[#0071E3] px-3.5 py-2 text-[11px] font-extrabold text-white transition-all hover:bg-[#005BBB] disabled:cursor-not-allowed disabled:opacity-40"
+                      className="inline-flex h-9 shrink-0 items-center justify-center rounded-lg bg-[#0071E3] px-3.5 py-2 text-[11px] font-extrabold text-white transition-all hover:bg-[#005BBB] disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       Add Part
                     </button>
                   </div>
-
+                  )}
                 </div>
 
                 {/* Calculation Summary */}
@@ -750,9 +819,11 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       <span className="font-mono">-{selectedWo.depositAmount.toLocaleString()} MMK</span>
                     </div>
                   )}
-                  <div className="flex justify-between items-center pt-2 border-t border-[#E5E5EA] font-extrabold text-sm">
-                    <span className="text-[#1D1D1F]">Amount Due Now:</span>
-                    <span className="text-[#0071E3] font-mono text-lg">{selectedWo.totalAmount.toLocaleString()} MMK</span>
+                  <div className="rounded-xl bg-[#F0F6FF] border border-[#0071E3]/20 p-3 flex items-center justify-between">
+                    <span className="text-sm font-extrabold text-[#1D1D1F]">Amount Due Now:</span>
+                    <span className="text-[#0071E3] font-mono text-2xl font-black tracking-tight">
+                      {selectedWo.totalAmount.toLocaleString()} <span className="text-sm font-extrabold">MMK</span>
+                    </span>
                   </div>
                 </div>
               </div>
@@ -767,20 +838,32 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   <span className="text-[10px] text-[#86868B]">Configured in Settings → Payment Methods</span>
                 </div>
 
+                {activePaymentMethods.length === 0 ? (
+                  <div className="p-4 text-center bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 space-y-1">
+                    <AlertTriangle className="w-5 h-5 mx-auto text-amber-600" />
+                    <p className="font-extrabold">No payment methods enabled</p>
+                    <p>Enable one in Settings → Payment Methods to accept payment.</p>
+                  </div>
+                ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                   {activePaymentMethods.map((m) => {
                     const isSelected = paymentMethod === m.name;
+                    const meta = getPaymentMeta(m.name);
+                    const Icon = meta.icon;
                     return (
                       <button
                         key={m.id}
                         type="button"
                         onClick={() => setPaymentMethod(m.name)}
-                        className={`p-2.5 rounded-xl border text-left font-bold text-xs transition-all cursor-pointer flex items-center space-x-2.5 ${
+                        className={`min-h-[56px] p-2.5 rounded-xl border text-left font-bold text-xs transition-all cursor-pointer flex items-center space-x-2.5 ${
                           isSelected
                             ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-2xs'
                             : 'bg-white text-[#1D1D1F] border-[#E5E5EA] hover:bg-[#F5F5F7]'
                         }`}
                       >
+                        <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#F5F5F7]">
+                          <Icon className="w-4 h-4" style={{ color: isSelected ? '#FFFFFF' : meta.color }} />
+                        </span>
                         <div className="truncate min-w-0 flex-1">
                           <div className="truncate font-extrabold">{m.name}</div>
                           <div className={`text-[10px] font-normal truncate ${isSelected ? 'text-blue-100' : 'text-[#86868B]'}`}>
@@ -804,13 +887,15 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         ]);
                       }
                     }}
-                    className={`p-2.5 rounded-xl border text-left font-bold text-xs transition-all cursor-pointer flex items-center space-x-2 ${
+                    className={`min-h-[56px] p-2.5 rounded-xl border text-left font-bold text-xs transition-all cursor-pointer flex items-center space-x-2.5 ${
                       paymentMethod === 'Split Payment'
                         ? 'bg-[#7360F2] text-white border-[#7360F2] shadow-2xs'
                         : 'bg-white text-[#1D1D1F] border-[#E5E5EA] hover:bg-[#F5F5F7]'
                     }`}
                   >
-                    <Split className="w-4 h-4 shrink-0" />
+                    <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#F5F5F7]">
+                      <Split className="w-4 h-4" style={{ color: paymentMethod === 'Split Payment' ? '#FFFFFF' : '#7360F2' }} />
+                    </span>
                     <div className="truncate min-w-0 flex-1">
                       <div className="truncate font-extrabold">Split Payment</div>
                       <div className={`text-[10px] font-normal truncate ${paymentMethod === 'Split Payment' ? 'text-purple-100' : 'text-[#86868B]'}`}>
@@ -819,6 +904,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     </div>
                   </button>
                 </div>
+                )}
 
                 {/* Split Payment Interactive Breakdown UI */}
                 {paymentMethod === 'Split Payment' && (
@@ -868,7 +954,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                 value={sp.amount || ''}
                                 onChange={(e) => {
                                   const updated = [...splitPayments];
-                                  updated[idx].amount = Number(e.target.value);
+                                  updated[idx].amount = Math.max(0, Number(e.target.value) || 0);
                                   setSplitPayments(updated);
                                 }}
                                 placeholder="Amount MMK"
@@ -959,7 +1045,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   <div className="p-3.5 bg-blue-50/80 border border-blue-200 rounded-xl space-y-2 text-xs animate-fade-in">
                     <div className="flex items-center justify-between">
                       <span className="font-extrabold text-[#1D1D1F] flex items-center space-x-1.5">
-                        <QrCode className="w-4 h-4 text-[#0071E3]" />
+                        <Landmark className="w-4 h-4 text-[#0071E3]" />
                         <span>{selectedMethodConfig.name} - Account Transfer Details</span>
                       </span>
                       {selectedMethodConfig.accountNumber && (
@@ -1012,14 +1098,39 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
                 {paymentMethod === 'Cash' && (
                   <div className="p-3 bg-[#F5F5F7]/80 border border-[#E5E5EA] rounded-xl space-y-2">
-                    <label className="block text-[#86868B] text-xs">Cash Amount Tendered (MMK):</label>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <label className="block text-xs font-extrabold text-[#1D1D1F]">Cash Amount Tendered (MMK):</label>
+                      <div className="flex flex-wrap items-center gap-1">
+                        {[selectedWo.totalAmount, 50000, 100000, 200000, 500000]
+                          .filter((v, i, arr) => arr.indexOf(v) === i)
+                          .map((amt) => (
+                            <button
+                              key={amt}
+                              type="button"
+                              onClick={() => setCashTendered(amt)}
+                              className={`px-2 py-1 rounded-lg border text-[10px] font-extrabold transition-all cursor-pointer ${
+                                cashTendered === amt
+                                  ? 'bg-[#0071E3] text-white border-[#0071E3]'
+                                  : 'bg-white text-[#1D1D1F] border-[#E5E5EA] hover:bg-[#F0F6FF]'
+                              }`}
+                            >
+                              {amt === selectedWo.totalAmount ? 'Exact' : amt.toLocaleString()}
+                            </button>
+                          ))}
+                      </div>
+                    </div>
                     <input
                       type="number"
                       value={cashTendered || ''}
-                      onChange={(e) => setCashTendered(Number(e.target.value))}
+                      onChange={(e) => setCashTendered(Math.max(0, Number(e.target.value) || 0))}
                       placeholder="e.g. 250000"
                       className="w-full bg-white border border-[#E5E5EA] rounded-lg p-2 text-[#1D1D1F] font-mono focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
                     />
+                    {cashTendered > 0 && cashTendered < selectedWo.totalAmount && (
+                      <p className="text-rose-600 font-bold text-xs">
+                        Short: {(selectedWo.totalAmount - cashTendered).toLocaleString()} MMK
+                      </p>
+                    )}
                     {cashTendered >= selectedWo.totalAmount && (
                       <p className="text-[#28A745] font-bold text-xs">
                         Change Due: {(cashTendered - selectedWo.totalAmount).toLocaleString()} MMK
@@ -1047,7 +1158,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
                 <button
                   type="button"
-                  onClick={handleProcessPayment}
+                  onClick={() => setIsConfirmOpen(true)}
                   disabled={isProcessingPayment}
                   className={`w-full sm:w-1/2 py-3 font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center space-x-1.5 ${
                     isProcessingPayment
@@ -1080,6 +1191,115 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
           )}
         </div>
       </div>
+
+      {/* Mobile sticky checkout bar: keeps Amount Due + Pay visible without
+          scrolling past the device list (md:hidden so desktop keeps the
+          in-flow action row). */}
+      {selectedWo && (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#E5E5EA] bg-white/95 backdrop-blur-sm px-4 py-2.5 md:hidden shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0 shrink-0">
+              <p className="text-[10px] font-bold text-[#86868B] uppercase tracking-wide">Amount Due</p>
+              <p className="font-mono font-black text-[#0071E3] text-base leading-tight">{selectedWo.totalAmount.toLocaleString()} MMK</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsConfirmOpen(true)}
+              disabled={isProcessingPayment}
+              className="flex-1 max-w-[220px] py-3 rounded-xl bg-[#34C759] hover:bg-[#30B753] text-white font-extrabold text-xs shadow-xs transition-all flex items-center justify-center space-x-1.5 cursor-pointer active:scale-95"
+            >
+              <CreditCard className="w-4 h-4" />
+              <span>Pay & Print Receipt</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Payment Confirmation */}
+      {isConfirmOpen && selectedWo && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white border border-[#E5E5EA] rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-xl">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center space-x-2">
+                <ShieldCheck className="w-5 h-5 text-[#34C759]" />
+                <h3 className="font-extrabold text-sm text-[#1D1D1F]">Confirm Payment</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsConfirmOpen(false)}
+                className="text-[#86868B] hover:text-[#1D1D1F] cursor-pointer"
+                aria-label="Close confirmation"
+              >
+                <XCircle className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between">
+                <span className="text-[#86868B]">Order</span>
+                <span className="font-mono font-bold text-[#0071E3]">{selectedWo.orderNumber}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#86868B]">Device</span>
+                <span className="font-bold text-[#1D1D1F]">{selectedWo.deviceModel}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#86868B]">Method</span>
+                <span className="font-bold text-[#1D1D1F]">{paymentMethod}</span>
+              </div>
+              {paymentMethod === 'Cash' && cashTendered > 0 && (
+                <>
+                  <div className="flex justify-between">
+                    <span className="text-[#86868B]">Tendered</span>
+                    <span className="font-mono">{cashTendered.toLocaleString()} MMK</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#86868B]">Change</span>
+                    <span className="font-mono font-bold text-[#34C759]">
+                      {Math.max(0, cashTendered - selectedWo.totalAmount).toLocaleString()} MMK
+                    </span>
+                  </div>
+                </>
+              )}
+              {paymentMethod === 'Cash' && cashTendered > 0 && cashTendered < selectedWo.totalAmount && (
+                <div className="flex justify-between">
+                  <span className="text-[#86868B]">Short</span>
+                  <span className="font-mono font-bold text-rose-600">
+                    {(selectedWo.totalAmount - cashTendered).toLocaleString()} MMK
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-xl bg-[#F0F6FF] border border-[#0071E3]/20 p-3 flex items-center justify-between">
+              <span className="text-xs font-extrabold text-[#1D1D1F]">Total to collect</span>
+              <span className="text-[#0071E3] font-mono text-lg font-black">{selectedWo.totalAmount.toLocaleString()} MMK</span>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setIsConfirmOpen(false)}
+                className="flex-1 py-2.5 bg-[#F5F5F7] hover:bg-[#E5E5EA] border border-[#D2D2D7] text-[#1D1D1F] font-bold text-xs rounded-xl transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsConfirmOpen(false);
+                  handleProcessPayment();
+                }}
+                disabled={isProcessingPayment}
+                className="flex-1 py-2.5 bg-[#34C759] hover:bg-[#30B753] text-white font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                <span>Confirm & Print</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Digital Receipt Modal */}
       {isReceiptModalOpen && selectedWo && (

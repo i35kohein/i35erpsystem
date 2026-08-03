@@ -251,12 +251,13 @@ export const Navigation: React.FC<NavigationProps> = ({
 
       {/* Main Left Sidebar Navigation */}
       <aside className={`
-        fixed lg:sticky top-0 left-0 z-50 lg:z-30 h-full h-dvh lg:h-screen shrink-0
+        fixed top-0 left-0 z-50 h-full h-dvh shrink-0
         bg-white border-r border-[#E5E5EA]
         flex flex-col justify-between
         transition-all duration-300 ease-in-out select-none
         ${isMobileMenuOpen ? 'translate-x-0 w-64' : '-translate-x-full lg:translate-x-0'}
         ${isCollapsed ? 'lg:w-14' : 'lg:w-56'}
+        ${!isCollapsed ? 'lg:shadow-xl lg:shadow-[#1D1D1F]/10' : ''}
       `}>
         {/* Sidebar Header & Toggle */}
         <div className="p-2.5 border-b border-[#E5E5EA] flex flex-col gap-2">
@@ -353,6 +354,26 @@ export const Navigation: React.FC<NavigationProps> = ({
               <div className="flex items-center justify-center min-w-0">
                 <LayoutDashboard className={`w-4 h-4 shrink-0 ${activeTab === 'dashboard' ? 'text-[#1559A6]' : 'text-[#667085]'}`} />
                 {!isCollapsed && <span className="ml-2.5">Dashboard Overview</span>}
+              </div>
+            </button>
+
+            {/* New Intake Ticket — primary action under Dashboard Overview */}
+            <button
+              onClick={() => {
+                onOpenNewWorkOrder?.();
+                setIsMobileMenuOpen(false);
+              }}
+              aria-current={activeTab === 'create-ticket' ? 'page' : undefined}
+              className={`w-full flex items-center mt-1.5 ${
+                isCollapsed ? 'w-10 h-10 mx-auto justify-center p-0' : 'justify-center px-3.5 py-2.5'
+              } rounded-xl font-bold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 ${
+                activeTab === 'create-ticket' ? 'bg-[#0051B3] text-white' : 'bg-[#0071E3] hover:bg-[#0051B3] text-white'
+              }`}
+              title="New Intake Ticket"
+            >
+              <div className="flex items-center justify-center min-w-0">
+                <Plus className={`w-4 h-4 shrink-0 ${isCollapsed ? '' : 'mr-2'}`} />
+                {!isCollapsed && <span className="truncate text-xs">+ Intake Ticket</span>}
               </div>
             </button>
           </div>

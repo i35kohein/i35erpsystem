@@ -917,7 +917,7 @@ export default function App() {
       />
 
       {/* Main Right Content Column */}
-      <div id="main-content-scroll" className="relative flex h-full h-dvh min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-gutter:stable]">
+      <div id="main-content-scroll" className="relative flex h-full h-dvh min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-gutter:stable] lg:pl-14">
         {/* Top Navigation Bar Header */}
         <header className="app-topbar flex flex-row items-center justify-between px-3 sm:px-5 h-[52px] min-h-[52px] bg-white border-b border-[#E5E5EA] sticky top-0 z-40 gap-2 shrink-0">
           {/* Active Tab Title & Mobile Toggle */}
@@ -1035,7 +1035,7 @@ export default function App() {
                   <span className="hidden md:inline">Export</span>
                 </button>
               </>
-            ) : ['intake', 'pipeline', 'inventory', 'crm', 'suppliers', 'qa'].includes(activeTab) ? (
+            ) : ['intake', 'pipeline', 'pos', 'inventory', 'crm', 'suppliers', 'qa'].includes(activeTab) ? (
               /* Contextual Search Input */
               <div className="relative w-28 sm:w-36 md:w-44 lg:w-52 shrink-0">
                 <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#86868B]" />
@@ -1056,6 +1056,8 @@ export default function App() {
                       ? "Search Vendor, Part, RMA #..."
                       : activeTab === 'qa'
                       ? "Search Ticket #, Model, Tech..."
+                      : activeTab === 'pos'
+                      ? "Search Ticket #, Customer, Model, IMEI..."
                       : `Search ${currentTab.title}...`
                   }
                   className="w-full bg-[#F5F5F7] text-xs text-[#1D1D1F] placeholder-[#86868B] pl-7 pr-5 py-1.5 rounded-xl border border-[#E5E5EA] focus:bg-white focus:outline-none focus:border-[#0071E3] transition-all shadow-2xs"
@@ -1318,15 +1320,7 @@ export default function App() {
                 <Plus className="w-3.5 h-3.5" />
                 <span>{t('flagRma')}</span>
               </button>
-            ) : activeTab === 'price-catalog' || activeTab === 'create-ticket' || activeTab === 'portal' || activeTab === 'settings' ? null : (
-              <button
-                onClick={() => setActiveTab('create-ticket')}
-                className="flex items-center space-x-1.5 px-3.5 py-1.5 bg-[#0071E3] hover:bg-[#0051B3] text-white text-xs font-bold rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>+ Intake Ticket</span>
-              </button>
-            )}
+            ) : null}
 
             {/* Live Supabase connection indicator */}
             <OfflineSyncStatusBadge />
