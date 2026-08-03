@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { 
   Boxes, 
   Search, 
@@ -49,6 +49,7 @@ import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
 import { getAvailableColorsForModel, getRealisticColorStyle } from '../intake/deviceData';
 import { toast } from '../../lib/toast';
 import { sortModelsNewestFirst, compareModelsNewestFirst } from '../../utils/modelSort';
+import JsBarcode from 'jsbarcode';
 
 const isSameDeviceModel = (left: string, right: string) =>
   left.trim().toLocaleLowerCase() === right.trim().toLocaleLowerCase();
@@ -90,6 +91,37 @@ interface InventoryManagementModuleProps {
   setSelectedQuality?: (q: string) => void;
   showAddModal?: boolean;
   setShowAddModal?: (s: boolean) => void;
+}
+
+/** Renders a scannable CODE128 barcode for a part (SKU fallback id). */
+const PartBarcode: React.FC<{ value: string; height?: number }> = ({ value, height = 22 }) => {
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  useEffect(() => {
+    if (!svgRef.current || !value) return;
+    try {
+      JsBarcode(svgRef.current, value, {
+        format: 'CODE128',
+        width: 1,
+        height,
+        displayValue: false,
+        margin: 0,
+        background: '#ffffff',
+        lineColor: '#000000',
+      });
+    } catch {
+      // Invalid barcode value — leave blank
+    }
+  }, [value, height]);
+  return <svg ref={svgRef} className="h-full w-full" preserveAspectRatio="xMidYMid meet" />;
+};
+
+/** Split parts into A4 pages of at most 18 tags (3 cols x 6 rows). */
+function paginateTags(parts: PartItem[], perPage = 18): PartItem[][] {
+  const pages: PartItem[][] = [];
+  for (let i = 0; i < parts.length; i += perPage) {
+    pages.push(parts.slice(i, i + perPage));
+  }
+  return pages;
 }
 
 export const InventoryManagementModule: React.FC<InventoryManagementModuleProps> = ({
@@ -2689,11 +2721,19 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 overflow: visible !important;
               }
               #spare-tags-sheet .tags-no-print { display: none !important; }
-              #spare-tags-sheet .tags-grid {
+              /* One A4 page per chunk of 18 tags */
+              #spare-tags-sheet .tags-page {
                 display: grid !important;
                 grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                grid-template-rows: repeat(6, auto) !important;
                 gap: 4mm !important;
                 width: 100% !important;
+                page-break-after: always !important;
+                break-after: page !important;
+              }
+              #spare-tags-sheet .tags-page:last-child {
+                page-break-after: auto !important;
+                break-after: auto !important;
               }
               #spare-tags-sheet .tag-card {
                 break-inside: avoid !important;
@@ -2707,6 +2747,32 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 word-break: break-word !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
+              }
+              /* Barcode area keeps scan size even if tag is small */
+              #spare-tags-sheet .tag-barcode {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                min-height: 6mm !important;
+                padding: 0.5mm 0 !important;
+              }
+              /* Compact tag typography so 6 rows (18 tags) fit one A4 page */
+              #spare-tags-sheet .tag-card {
+                font-size: 7px !important;
+                padding: 2mm !important;
+              }
+              #spare-tags-sheet .tag-card > p {
+                margin: 0.5mm 0 !important;
+                font-size: 7px !important;
+              }
+              #spare-tags-sheet .tag-card .tag-barcode svg {
+                max-height: 6mm !important;
+              }
+              #spare-tags-sheet .tag-card [class*='font-black'] {
+                font-size: 7px !important;
+              }
+              #spare-tags-sheet .tag-card [class*='font-mono'] {
+                font-size: 6px !important;
               }
               /* Selected-only mode: hide unselected cards when printing */
               #spare-tags-sheet.print-selected-only .tag-card:not(.tag-selected) {
@@ -2781,54 +2847,60 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 <span className="text-[10px] font-bold text-[#86868B]">{filteredParts.length} parts</span>
               </div>
 
-              <div className="tags-grid grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-                {filteredParts.map((part) => {
-                  const isSelected = selectedTagIds.has(part.id);
-                  const toggleSelect = () => {
-                    setSelectedTagIds((prev) => {
-                      const next = new Set(prev);
-                      if (next.has(part.id)) next.delete(part.id);
-                      else next.add(part.id);
-                      return next;
-                    });
-                  };
-                  return (
-                  <div
-                    key={part.id}
-                    onClick={toggleSelect}
-                    className={`tag-card relative flex cursor-pointer flex-col rounded-lg border bg-white p-2.5 transition-colors ${
-                      isSelected ? 'tag-selected border-[#0071E3] ring-2 ring-[#0071E3]/30' : 'border-[#1D1D1F] hover:border-[#0071E3]'
-                    }`}
-                  >
-                    <div className="tag-selector absolute -left-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full border bg-white shadow-xs">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={toggleSelect}
-                        onClick={(e) => e.stopPropagation()}
-                        className="h-3.5 w-3.5 accent-[#0071E3]"
-                      />
-                    </div>
-                    <div className="flex items-center justify-between border-b border-dashed border-[#C7C7CC] pb-1.5">
-                      <span className="pr-1 text-[9px] font-black uppercase leading-tight text-[#1D1D1F]">{part.category}</span>
-                      <span className="ml-1 shrink-0 rounded bg-[#1D1D1F] px-1.5 py-0.5 text-[8px] font-black uppercase text-white">{part.qualityTier}</span>
-                    </div>
-                    <p className="mt-1.5 text-[11px] font-extrabold leading-snug text-[#1D1D1F]">{part.name}</p>
-                    <p className="font-mono text-[8px] text-[#86868B]">SKU: {part.sku}</p>
-                    <div className="mt-1.5 flex items-end justify-between">
-                      <div className="text-[9px] leading-tight text-[#86868B]">
-                        <p>Stock: <span className="font-bold text-[#1D1D1F]">{part.quantityInStock}</span></p>
-                        <p>Bin: <span className="font-bold text-[#1D1D1F]">{part.locationBin || '—'}</span></p>
+              {paginateTags(filteredParts, 18).map((pageParts, pageIdx) => (
+                <div key={pageIdx} className="tags-page mb-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+                  {pageParts.map((part) => {
+                    const isSelected = selectedTagIds.has(part.id);
+                    const toggleSelect = () => {
+                      setSelectedTagIds((prev) => {
+                        const next = new Set(prev);
+                        if (next.has(part.id)) next.delete(part.id);
+                        else next.add(part.id);
+                        return next;
+                      });
+                    };
+                    return (
+                    <div
+                      key={part.id}
+                      onClick={toggleSelect}
+                      className={`tag-card relative flex cursor-pointer flex-col rounded-lg border bg-white p-2.5 transition-colors ${
+                        isSelected ? 'tag-selected border-[#0071E3] ring-2 ring-[#0071E3]/30' : 'border-[#1D1D1F] hover:border-[#0071E3]'
+                      }`}
+                    >
+                      <div className="tag-selector absolute right-1 top-1 z-10 flex h-5 w-5 items-center justify-center rounded-full border bg-white shadow-xs">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={toggleSelect}
+                          onClick={(e) => e.stopPropagation()}
+                          className="h-3.5 w-3.5 accent-[#0071E3]"
+                        />
                       </div>
-                      <div className="text-right">
-                        <p className="text-[8px] text-[#86868B]">Price</p>
-                        <p className="font-mono text-[12px] font-black text-[#1D1D1F]">{Number(part.sellingPrice || 0).toLocaleString()} MMK</p>
+                      <div className="flex items-center justify-between border-b border-dashed border-[#C7C7CC] pb-1.5">
+                        <span className="pr-1 text-[9px] font-black uppercase leading-tight text-[#1D1D1F]">{part.category}</span>
+                        <span className="ml-1 shrink-0 rounded bg-[#1D1D1F] px-1.5 py-0.5 text-[8px] font-black uppercase text-white">{part.qualityTier}</span>
+                      </div>
+                      <p className="mt-1.5 text-[11px] font-extrabold leading-snug text-[#1D1D1F]">{part.name}</p>
+                      <p className="mt-0.5 truncate font-mono text-[8px] text-[#86868B]" title={part.sku}>SKU: {part.sku}</p>
+                      <div className="mt-1.5 flex items-end justify-between gap-1">
+                        <div className="min-w-0 text-[9px] leading-tight text-[#86868B]">
+                          <p>Stock: <span className="font-bold text-[#1D1D1F]">{part.quantityInStock}</span></p>
+                          <p>Bin: <span className="font-bold text-[#1D1D1F]">{part.locationBin || '—'}</span></p>
+                          <p>Cost: <span className="font-bold text-[#1D1D1F]">{Number(part.costPrice || 0).toLocaleString()}</span></p>
+                        </div>
+                        <div className="shrink-0 text-right">
+                          <p className="text-[8px] text-[#86868B]">Price</p>
+                          <p className="font-mono text-[11px] font-black text-[#1D1D1F]">{Number(part.sellingPrice || 0).toLocaleString()} MMK</p>
+                        </div>
+                      </div>
+                      <div className="tag-barcode mt-1.5 border-t border-dashed border-[#C7C7CC] pt-1.5">
+                        <PartBarcode value={part.sku || part.id} />
                       </div>
                     </div>
-                  </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              ))}
             </div>
           </div>
         </div>
