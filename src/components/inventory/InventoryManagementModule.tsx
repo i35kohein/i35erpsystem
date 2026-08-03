@@ -958,16 +958,17 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
           {viewMode === 'stock' && (
             <div className="ml-auto flex items-center gap-1.5">
-              {inlineEditMode && (
-                <button
-                  type="button"
-                  onClick={() => setShowInlineSaveConfirm(true)}
-                  className="inline-flex items-center justify-center rounded-lg border border-[#0071E3] bg-[#0071E3] px-2.5 py-1.5 text-xs font-bold text-white transition-colors hover:bg-blue-700"
-                  title="Save inline edits"
-                >
-                  Save
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => { setIsTagsPrintOpen(true); setSelectedTagIds(new Set()); }}
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#E5E5EA] bg-white px-2.5 py-1.5 text-xs font-bold text-[#1D1D1F] transition-colors hover:border-[#0071E3] hover:text-[#0071E3]"
+                title="Print spare parts tags (A4)"
+              >
+                <Printer className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Print Tags</span>
+              </button>
+
+              {/* Edit / Done toggle */}
               <button
                 type="button"
                 onClick={() => {
@@ -978,21 +979,29 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   setInlineEditMode((value) => !value);
                   setInlineDrafts({});
                 }}
-                className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-bold transition-colors ${inlineEditMode ? 'border-[#0071E3] bg-blue-50 text-[#0071E3]' : 'border-[#E5E5EA] bg-white text-[#1D1D1F] hover:border-[#0071E3] hover:text-[#0071E3]'}`}
-                title="Edit stock rows"
+                className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-bold transition-colors ${
+                  inlineEditMode
+                    ? 'border-amber-300 bg-amber-50 text-amber-700 hover:border-amber-400'
+                    : 'border-[#E5E5EA] bg-white text-[#1D1D1F] hover:border-[#0071E3] hover:text-[#0071E3]'
+                }`}
+                title={inlineEditMode ? 'Cancel inline edit mode' : 'Edit stock rows'}
               >
                 <Edit2 className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Edit</span>
+                <span className="hidden sm:inline">{inlineEditMode ? 'Done' : 'Edit'}</span>
               </button>
-              <button
-                type="button"
-                onClick={() => { setIsTagsPrintOpen(true); setSelectedTagIds(new Set()); }}
-                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#E5E5EA] bg-white px-2.5 py-1.5 text-xs font-bold text-[#1D1D1F] transition-colors hover:border-[#0071E3] hover:text-[#0071E3]"
-                title="Print spare parts tags (A4)"
-              >
-                <Printer className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Print Tags</span>
-              </button>
+
+              {/* Save — far right end, only while editing */}
+              {inlineEditMode && (
+                <button
+                  type="button"
+                  onClick={() => setShowInlineSaveConfirm(true)}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#0071E3] bg-[#0071E3] px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition-colors hover:bg-blue-700"
+                  title="Save all inline edits"
+                >
+                  <Check className="h-3.5 w-3.5" />
+                  Save
+                </button>
+              )}
             </div>
           )}
 
