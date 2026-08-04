@@ -20,7 +20,10 @@ const loadLanguage = (): Language => {
     const legacy = localStorage.getItem('app_language');
     if (legacy === 'mm' || legacy === 'en') return legacy;
   }
-  return 'mm';
+  // i18n policy (2026-08-04): UI defaults to English; Burmese is used only in
+  // customer-facing messages (SMS / notifications / AI assistant). Staff can
+  // still opt into Burmese via Settings → System Language & Localization.
+  return 'en';
 };
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

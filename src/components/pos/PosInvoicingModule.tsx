@@ -377,7 +377,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
       lineItems: [
         {
           id: 'diag-fee-item',
-          description: 'Diagnostic & Inspection Fee (စက်စစ်ဆေးခ)',
+          description: 'Diagnostic & Inspection Fee',
           quantity: 1,
           unitCost: 0,
           unitPrice: diagFee,
@@ -565,7 +565,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       <XCircle className="w-4 h-4 text-rose-600 shrink-0" />
                       <div>
                         <span className="font-extrabold text-rose-900 text-xs block">
-                          {selectedWo.status === 'Cant Repair' ? "Unrepairable Device (ပြင်၍မရပါ)" : "Customer Cancelled (မပြင်တော့ပါ)"}
+                          {selectedWo.status === 'Cant Repair' ? "Unrepairable Device" : "Customer Cancelled"}
                         </span>
                         <span className="text-[11px] text-rose-700">
                           Option to charge Diagnostic / Inspection fee only before handing back device.

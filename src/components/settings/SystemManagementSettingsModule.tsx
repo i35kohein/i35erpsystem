@@ -1698,10 +1698,10 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               <div>
                 <h3 className="text-base font-extrabold text-[#2C3E50] flex items-center space-x-2">
                   <span className="text-xl">🇲🇲</span>
-                  <span>System Language & Localization (ဘာသာစကား)</span>
+                  <span>System Language & Localization</span>
                 </h3>
                 <p className="text-xs text-[#7F7F7F] mt-1">
-                  Select your preferred system interface language. Supports English and Burmese (မြန်မာဘာသာ).
+                  Select your preferred system interface language. Supports English and Burmese (မြန်မာဘာသာ). UI defaults to English; Burmese is used for customer-facing messages.
                 </p>
               </div>
               <LanguageSwitcher variant="pills" />
