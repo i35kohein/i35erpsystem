@@ -1542,9 +1542,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 onClick={() => onNavigateToTab('inventory')}
                 className="px-3.5 py-1.5 bg-[#0071E3] hover:bg-[#0077ED] text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
               >
-                Go to Inventory Module
+                Open Parts Inventory
               </button>
             </div>
+
+            {/* Preview note — full module has stock/profit/matrix views */}
+            <p className="text-[10px] text-[#86868B] -mt-1">
+              Quick glance — full stock, profit & matrix views live in the Parts Inventory module.
+            </p>
 
             {repairLowStockParts.length === 0 ? (
               <div className="p-8 text-center text-xs text-[#34C759] bg-[#EAF8ED] border border-[#34C759]/20 rounded-xl space-y-1">
@@ -1667,13 +1672,26 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <p className="text-xs text-[#86868B]">Average ticket value and margin metrics</p>
               </div>
 
-              <button
-                onClick={() => onNavigateToTab('pos')}
-                className="px-3.5 py-1.5 bg-[#0071E3] hover:bg-[#0077ED] text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
-              >
-                POS Register
-              </button>
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  onClick={() => onNavigateToTab('finance')}
+                  className="px-3.5 py-1.5 bg-[#0071E3] hover:bg-[#0077ED] text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+                >
+                  Open Shop Finance
+                </button>
+                <button
+                  onClick={() => onNavigateToTab('pos')}
+                  className="px-3.5 py-1.5 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] border border-[#E5E5EA] font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+                >
+                  POS Register
+                </button>
+              </div>
             </div>
+
+            {/* Preview note — full module has revenue/opex/commissions/parts asset */}
+            <p className="text-[10px] text-[#86868B] -mt-2">
+              Quick glance — full revenue, expenses, commissions & inventory fund details live in Shop Finance.
+            </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="p-4 bg-[#F8F9FA] border border-[#E5E5EA] rounded-xl space-y-1">
