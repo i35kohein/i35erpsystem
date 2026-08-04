@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { DateFilterState, filterByDateRange } from '../common/DateFilterSelector';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
+import { timeAgoShort } from '../../utils/timeAgo';
 import { StatusBadge } from '../common/StatusBadge';
 import { PriorityBadge } from '../common/PriorityBadge';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
@@ -435,7 +436,8 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
               </thead>
               <tbody className="divide-y divide-[#E5E5EA] text-xs">
                 {filteredOrders.map((wo) => {
-                  const createdDate = new Date(wo.createdAt || Date.now()).toLocaleDateString('en-US', {
+                  const createdDate = timeAgoShort(wo.createdAt);
+                  const createdDateFull = new Date(wo.createdAt || Date.now()).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
                   });
@@ -455,7 +457,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                           </div>
                           <div className="min-w-0">
                             <p className="font-mono text-[11px] font-extrabold leading-snug text-[#0071E3]">{wo.orderNumber || wo.id}</p>
-                            <p className="mt-0.5 text-[9px] font-medium text-[#86868B]">{createdDate}</p>
+                            <p className="mt-0.5 text-[9px] font-medium text-[#86868B]" title={createdDateFull}>{createdDate}</p>
                           </div>
                         </div>
                       </td>

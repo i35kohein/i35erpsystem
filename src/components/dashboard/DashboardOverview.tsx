@@ -50,6 +50,7 @@ import {
 import { WorkOrder, PartItem, RmaItem, Technician, WorkOrderStatus } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import { DateFilterState, filterByDateRange, DateFilterSelector } from '../common/DateFilterSelector';
+import { timeAgoShort } from '../../utils/timeAgo';
 import { TechnicianPerformanceTab } from './TechnicianPerformanceTab';
 import { TechnicianLeaderboardView } from './TechnicianLeaderboardView';
 import { TechnicianDetailModal } from './TechnicianDetailModal';
@@ -1256,7 +1257,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   </thead>
                   <tbody className="divide-y divide-[#E5E5EA]">
                     {statusQueueWorkOrders.map((wo) => {
-                      const createdDate = new Date(wo.createdAt || Date.now()).toLocaleDateString('en-US', {
+                      const createdDate = timeAgoShort(wo.createdAt);
+                      const createdDateFull = new Date(wo.createdAt || Date.now()).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
                       });
@@ -1267,7 +1269,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                           {/* Ticket # & Date */}
                           <td className="py-3 px-3">
                             <p className="font-mono font-black text-[#0071E3] text-xs">{wo.orderNumber || wo.id}</p>
-                            <span className="text-[10px] text-[#86868B]">{createdDate}</span>
+                            <span className="text-[10px] text-[#86868B]" title={createdDateFull}>{createdDate}</span>
                           </td>
 
                           {/* Customer */}

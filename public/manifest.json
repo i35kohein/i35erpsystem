@@ -1,17 +1,25 @@
 {
-  "short_name": "Apple ERP",
-  "name": "Apple Repair Management ERP",
+  "short_name": "i35 ERP",
+  "name": "i35 Apple Service ERP",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
   "start_url": "/",
+  "scope": "/",
   "background_color": "#F5F5F7",
   "theme_color": "#0071E3",
   "display": "standalone",
   "orientation": "any",
-  "description": "Apple Repair Shop Management ERP with Offline Support and Automatic IndexedDB Data Sync"
+  "description": "i35 Apple Service Repair Management ERP with Offline Support and Automatic Data Sync"
 }
