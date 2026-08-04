@@ -1,17 +1,15 @@
 import React, { useState } from 'react';
 import {
-  LogOut, 
-  CircleDot, 
+  LogOut,
+  CircleDot,
   LayoutDashboard,
-  ClipboardList, 
-  Kanban, 
-  Boxes, 
-  Truck, 
-  CreditCard, 
-  Users, 
-  ShieldCheck, 
-  Sparkles, 
-  Search, 
+  ClipboardList,
+  Kanban,
+  Boxes,
+  Truck,
+  CreditCard,
+  Users,
+  ShieldCheck,
   Menu,
   X,
   Plus,
@@ -19,14 +17,11 @@ import {
   PanelLeftOpen,
   Tag,
   Settings,
-  ExternalLink,
   PhoneCall,
-  Trash2,
   DollarSign
 } from 'lucide-react';
 import { WorkOrder, SystemSettings, AppUser } from '../types';
 import { useLanguage } from '../context/LanguageContext';
-import { LanguageSwitcher } from './common/LanguageSwitcher';
 import { UserRoleSwitcher } from './common/UserRoleSwitcher';
 import { Button } from './ui';
 import { Badge } from './ui';
@@ -42,11 +37,9 @@ interface NavigationProps {
   onLogout?: () => void;
   onOpenUserManagement?: () => void;
   onOpenNewWorkOrder: () => void;
-  onOpenAiAssistant: () => void;
   onOpenRecycleBin?: () => void;
-  archivedCount?: number;
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
+  /** Real low-stock count computed in App from parts (qty <= reorderPoint). */
+  lowStockCount?: number;
   isCollapsed: boolean;
   setIsCollapsed: (collapsed: boolean | ((prev: boolean) => boolean)) => void;
   isMobileMenuOpen?: boolean;
@@ -64,11 +57,8 @@ export const Navigation: React.FC<NavigationProps> = ({
   onLogout,
   onOpenUserManagement,
   onOpenNewWorkOrder,
-  onOpenAiAssistant,
   onOpenRecycleBin,
-  archivedCount = 0,
-  searchQuery,
-  setSearchQuery,
+  lowStockCount = 0,
   isCollapsed,
   setIsCollapsed,
   isMobileMenuOpen: externalMobileMenuOpen,
@@ -99,21 +89,15 @@ export const Navigation: React.FC<NavigationProps> = ({
   const qaFinishedCount = myWorkOrders.filter(
     (w) => (w.status === 'Finished' || w.status === 'Taken Out') && !w.postRepairChecklist
   ).length;
-  const posReadyCount = myWorkOrders.filter((w) => {
-    const hasRecordedDiagnostic =
-      (w.beforeDiagnostics && w.beforeDiagnostics.some((diagnostic) => diagnostic.status === 'Pass' || diagnostic.status === 'Fail')) ||
-      (w.diagnosticResult && w.diagnosticResult.trim().length > 0 && w.diagnosticResult !== 'Diagnostic Pending');
-    const isDeclinedDiagnostic =
-      (w.status === 'Cant Repair' || w.status === 'Customer Not Repair') &&
-      hasRecordedDiagnostic;
-
-    return Boolean(w.postRepairChecklist) || isDeclinedDiagnostic;
-  }).length;
+  // POS-ready = tickets past QA (have a postRepairChecklist). Declined/cant-repair
+  // tickets are NOT payable work — don't count them here (P0 #2).
+  const posReadyCount = myWorkOrders.filter((w) => Boolean(w.postRepairChecklist)).length;
   const pendingFollowUpCount = myWorkOrders.filter(
     (w) => (w.status === 'Finished' || w.status === 'Taken Out') && (!w.followUpStatus || w.followUpStatus === 'Pending Call')
   ).length;
 
-  const lowStockCount = 2; // sample trigger
+  // lowStockCount comes from App (real: parts at/below reorderPoint) — P0 #1 fix.
+  const inventoryLowStock = lowStockCount;
 
   const allNavGroups = [
     {
@@ -178,7 +162,7 @@ export const Navigation: React.FC<NavigationProps> = ({
           id: 'inventory',
           label: isCollapsed ? t('navPartsMatrix') : 'Parts & Stock Matrix',
           icon: Boxes,
-          badge: lowStockCount,
+          badge: inventoryLowStock > 0 ? inventoryLowStock : undefined,
           badgeColor: 'bg-[#FF9500]',
         },
         {

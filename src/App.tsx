@@ -1154,11 +1154,8 @@ export default function App() {
         onLogout={handleLogout}
         onOpenUserManagement={() => setActiveTab('settings')}
         onOpenNewWorkOrder={() => handleOpenNewWorkOrder()}
-        onOpenAiAssistant={() => setIsAiAssistantOpen(true)}
         onOpenRecycleBin={() => setIsRecycleBinOpen(true)}
-        archivedCount={archivedWorkOrders.length}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
+        lowStockCount={parts.filter((p) => p.quantityInStock <= p.reorderPoint).length}
         isCollapsed={isCollapsed}
         setIsCollapsed={setIsCollapsed}
         isMobileMenuOpen={isMobileMenuOpen}
@@ -1897,6 +1894,7 @@ export default function App() {
         customers={rosterCustomers}
         technicians={technicians}
         suppliers={suppliers}
+        priceCatalog={priceCatalog.catalog}
         systemSettings={systemSettings}
         currentUserId={currentUser?.id}
         onOpenAiSettings={() => {

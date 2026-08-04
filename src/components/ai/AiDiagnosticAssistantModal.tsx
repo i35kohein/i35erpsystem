@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { Bot, Send, Sparkles, X, AlertTriangle, PackageSearch, PhoneCall, Activity, Settings2, Copy, Database, RotateCcw } from 'lucide-react';
-import { Customer, PartItem, Supplier, SystemSettings, Technician, WorkOrder } from '../../types';
+import { Customer, PartItem, Supplier, SystemSettings, Technician, TechnicianPayoutRecord, WorkOrder } from '../../types';
+import { ModelRepairPrice as PriceCatalogItem } from '../../types/priceCatalog';
 
 type ChatMessage = {
   id: string;
@@ -17,6 +18,8 @@ interface AiDiagnosticAssistantModalProps {
   customers: Customer[];
   technicians: Technician[];
   suppliers: Supplier[];
+  technicianPayouts?: TechnicianPayoutRecord[];
+  priceCatalog?: PriceCatalogItem[];
   systemSettings: SystemSettings;
   onOpenAiSettings: () => void;
   currentUserId?: string;
@@ -44,6 +47,8 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
   customers,
   technicians,
   suppliers,
+  technicianPayouts = [],
+  priceCatalog = [],
   systemSettings,
   onOpenAiSettings,
   currentUserId,
@@ -86,17 +91,20 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages, isOpen]);
 
+  // Shared date helper: is the ISO timestamp on today's calendar date?
+  const isToday = (value?: string) => {
+    if (!value) return false;
+    const date = new Date(value);
+    const now = new Date();
+    return !Number.isNaN(date.getTime())
+      && date.getFullYear() === now.getFullYear()
+      && date.getMonth() === now.getMonth()
+      && date.getDate() === now.getDate();
+  };
+
   const context = useMemo(() => {
     const now = Date.now();
     const today = new Date(now);
-    const isToday = (value?: string) => {
-      if (!value) return false;
-      const date = new Date(value);
-      return !Number.isNaN(date.getTime())
-        && date.getFullYear() === today.getFullYear()
-        && date.getMonth() === today.getMonth()
-        && date.getDate() === today.getDate();
-    };
     const active = workOrders.filter((order) => !['Finished', 'Taken Out', 'Cant Repair', 'Customer Not Repair'].includes(order.status));
     const completedToday = workOrders
       .filter((order) => ['Finished', 'Taken Out'].includes(order.status))
@@ -108,6 +116,19 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
         status: order.status,
         technician: order.assignedTechName || 'Unassigned',
       }));
+    // MONTHLY REPORT — the ERP's real monthly report (technicianPayouts records,
+    // shown in Finance → Commissions). Authoritative for "ဒီလ ဘယ်နှစ်လုံး" answers.
+    const currentPeriod = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+    const monthlyReport = technicianPayouts.map((p) => ({
+      period: p.period,
+      technicianName: p.technicianName,
+      technicianId: p.technicianId,
+      totalTicketsClosed: p.totalTicketsClosed ?? p.totalJobsCompleted ?? 0,
+      totalLaborRevenue: p.totalLaborRevenue ?? p.grossLaborRevenue ?? 0,
+      commissionAmount: p.commissionAmount ?? 0,
+      netPayout: p.netPayout ?? p.payoutAmount ?? 0,
+      status: p.status,
+    }));
     const bottlenecks = active
       .map((order) => {
         const ageHours = Math.floor((now - new Date(order.updatedAt || order.createdAt).getTime()) / 3_600_000);
@@ -182,6 +203,8 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
         .slice(0, 20),
       followUps,
       completedToday,
+      currentPeriod,
+      monthlyReport,
       technicianLoad: technicians.map((tech) => ({
         name: tech.name,
         status: tech.status,
@@ -192,8 +215,15 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
         totalRevenue: workOrders.filter((order) => order.isPaid).reduce((sum, order) => sum + order.totalAmount, 0),
         outstanding: workOrders.reduce((sum, order) => sum + Math.max(0, order.totalAmount - (order.paidAmount || 0)), 0),
       },
+      // PRICE LIST — full repair price catalog so the assistant quotes real prices.
+      priceList: priceCatalog.map((p) => {
+        const priced = Object.entries(p.prices || {})
+          .filter(([, v]) => v != null && Number(v) > 0)
+          .map(([key, value]) => `${key}: ${Number(value).toLocaleString()} ${systemSettings.currencySymbol || 'MMK'}`);
+        return `${p.model}: ${priced.length ? priced.join(', ') : 'no prices'}`;
+      }),
     };
-  }, [workOrders, parts, customers, technicians, suppliers]);
+  }, [workOrders, parts, customers, technicians, suppliers, technicianPayouts, priceCatalog]);
 
   const isExternalAi = Boolean(
     systemSettings.aiProvider
@@ -211,10 +241,30 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
   const localAnswer = (question: string) => {
     const normalized = question.toLowerCase();
     const asksToday = normalized.includes('today') || question.includes('ဒီနေ့');
+    const asksThisMonth = normalized.includes('this month') || normalized.includes('monthly') || question.includes('ဒီလ');
     const asksCompletedRepair =
       normalized.includes('completed') || normalized.includes('finished') || normalized.includes('repaired') || normalized.includes('repair')
       || question.includes('ပြင်ပြီး') || question.includes('ပြင်') || question.includes('ပြီးလဲ') || question.includes('ပြီး');
 
+    // Technician-specific: "<name> ဒီလ ဘယ်နှစ်စောင် ပြီးလဲ" — the bot's data only
+    // has today's completed tickets; monthly figures live in the ERP monthly report.
+    const askedTech = technicians.find((t) => question.toLowerCase().includes((t.name || '').toLowerCase()));
+    if (askedTech) {
+      const techOrders = workOrders.filter((o) => o.assignedTechId === askedTech.id || o.assignedTechName === askedTech.name);
+      const todayDone = techOrders.filter((o) => ['Finished', 'Taken Out'].includes(o.status) && isToday(o.completedAt || o.updatedAt || o.createdAt));
+      const activeNow = techOrders.filter((o) => !['Finished', 'Taken Out', 'Cant Repair', 'Customer Not Repair'].includes(o.status));
+      const todayLine = todayDone.length
+        ? `ဒီနေ့ ပြီးစီး: ${todayDone.length} စောင် (${todayDone.map((o) => o.orderNumber).join(', ')})`
+        : 'ဒီနေ့ ပြီးစီးတဲ့ ticket မရှိသေးပါ။';
+      const monthlyNote = asksThisMonth
+        ? '\n\nဒီလ (monthly) စာရင်းကို ကျွန်တော့် data ထဲမှာ မပါပါဘူး — ဆိုင်ရဲ့ ERP စနစ်ထဲက monthly report (Finance → Commissions) မှာ ကြည့်ပေးပါ။'
+        : '';
+      return `${askedTech.name} ရဲ့ စာရင်း:\n• ${todayLine}\n• လက်ရှိ active: ${activeNow.length} စောင်${monthlyNote}`;
+    }
+
+    if (asksThisMonth && asksCompletedRepair) {
+      return `ဒီလ (monthly) ပြီးစီးစာရင်းကို ကျွန်တော့် data ထဲမှာ မပါပါဘူး — ကျွန်တော့်မှာ ဒီနေ့ ပြီးစီးတဲ့ ticket တွေရဲ့ စာရင်းပဲ ရှိပါတယ်။\n\nဒီလ စာရင်းကို သိချင်ရင် ဆိုင်ရဲ့ ERP စနစ်ထဲက monthly report (Finance → Commissions tab) ကို ကြည့်ပေးပါ။`;
+    }
     if (asksToday && asksCompletedRepair) {
       const completedList = context.completedToday.length
         ? `\n${context.completedToday.slice(0, 8).map((item) => `• ${item.ticket} — ${item.device} (${item.status})`).join('\n')}`
@@ -257,6 +307,19 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
           ? `ဦးစားပေး: unpaid ticket ${context.summary.unpaidTickets} ခုက ကျန်နေတဲ့ ${context.finance.outstanding.toLocaleString()} ${systemSettings.currencySymbol} ကို သွားရှင်းသင့်ပါတယ်။`
           : 'ကျန်နေတဲ့ ရရန်ငွေ မရှိပါဘူး။';
       return `ငွေရေးကြေးရေး အကျဉ်းချုပ်:\n• ရရှိငွေ: ${context.finance.totalRevenue.toLocaleString()} ${systemSettings.currencySymbol}.\n• ကျန်ရှိငွေ: ${context.finance.outstanding.toLocaleString()} ${systemSettings.currencySymbol}.\n• Unpaid ticket: ${context.summary.unpaidTickets}.\n\n${collectionPriority}`;
+    }
+    // Price lookup: when the user names a device model, quote real prices.
+    const modelMatch = priceCatalog.find((p) =>
+      (p.model || '').toLowerCase().split(/\s+/).every((tok) =>
+        tok.length > 1 && normalized.includes(tok.toLowerCase())
+      )
+    );
+    if (modelMatch && (normalized.includes('price') || normalized.includes('cost') || normalized.includes('ဘယ်လောက်') || normalized.includes('ဈေး') || normalized.includes('နှုန်း') || normalized.includes('ကျသင့်') || normalized.includes('ဖိုး'))) {
+      const priced = Object.entries(modelMatch.prices || {})
+        .filter(([, v]) => v != null && Number(v) > 0)
+        .map(([key, value]) => `• ${key}: ${Number(value).toLocaleString()} ${systemSettings.currencySymbol || 'MMK'}`);
+      if (!priced.length) return `${modelMatch.model} အတွက် စျေးနှုန်းစာရင်း မရှိသေးပါ။`;
+      return `${modelMatch.model} ပြင်ဆင်ခများ:\n${priced.join('\n')}\n\nအသေးစိတ် warranty နဲ့ စျေးနှုန်းအတွက် Price List ကို ကြည့်ပါ။`;
     }
     return `ဆိုင်ရဲ့ အကျဉ်းချုပ်:\n• Active ticket ${context.summary.activeTickets} ခု; ပြီးစီး ${context.summary.completedTickets} ခု.\n• နာရီ ၄၈ ကျော် ကြန့်ကြာနေတဲ့ ticket ${context.bottlenecks.length} ခု.\n• Follow-up လိုတဲ့ device ${context.followUps.length} ခု.\n• Reorder အောက် ပစ္စည်း ${context.lowStockParts.length} ခု.\n• ရရှိငွေ: ${context.finance.totalRevenue.toLocaleString()} ${systemSettings.currencySymbol}.\n• ကျန်ရှိငွေ: ${context.finance.outstanding.toLocaleString()} ${systemSettings.currencySymbol}.\n\nBottlenecks, ပစ္စည်းစာရင်း, follow-up, ငွေရေးကြေးရေး အသေးစိတ် မေးချင်ရင် မေးလိုက်ပါ။`;
   };

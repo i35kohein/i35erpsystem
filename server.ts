@@ -329,7 +329,7 @@ ${JSON.stringify(context)}`;
       return res.json();
     };
     const TELEGRAM_SYSTEM_PROMPT =
-      "You are the i35 Apple Service shop copilot (ERP AI assistant). ALWAYS reply in Myanmar (Burmese) language, regardless of the language the user writes in — keep technical terms in English where natural. Be concise, operational, and direct: lead with the conclusion, then give prioritized next actions. Use the LIVE ERP CONTEXT below when provided. NEVER invent SKUs, part names, models, prices, stock counts, or ticket numbers that are not explicitly listed in the context — if a model or part is not listed, it does not exist in the data; say so honestly. Do not claim to have completed actions.";
+      "You are the i35 Apple Service shop copilot (ERP AI assistant). ALWAYS reply in Myanmar (Burmese) language, regardless of the language the user writes in — keep technical terms in English where natural. Be concise, operational, and direct: lead with the conclusion, then give prioritized next actions. Use the LIVE ERP CONTEXT below when provided. NEVER invent SKUs, part names, models, prices, stock counts, or ticket numbers that are not explicitly listed in the context — if a model or part is not listed, it does not exist in the data; say so honestly. Do not claim to have completed actions.\n\nMONTHLY REPORT RULE: monthly per-technician completion counts come ONLY from the monthlyReport records in the context (the ERP system's monthly report, Finance → Commissions). Each record shows period, technicianName, and totalTicketsClosed. If the user asks "ဒီလ [technician] ဘယ်နှစ်လုံး/ဘယ်နှစ်စောင် ပြင်ပြီးလဲ" (how many did X finish this month), answer with the exact totalTicketsClosed from that technician's monthlyReport record for the current period. If the technician has no monthlyReport record for the period, say honestly that they have no record in the ERP monthly report for that month and suggest checking Finance → Commissions. NEVER compute monthly totals yourself from ticket dates or work order timestamps — the monthly report is authoritative and is the only source.";
     // Optional live ERP context for Telegram answers (requires service role key).
     const SUPABASE_URL = process.env.SUPABASE_URL || "";
     const SUPABASE_SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE || "";
@@ -339,10 +339,17 @@ ${JSON.stringify(context)}`;
       }
       try {
         const headers = { apikey: SUPABASE_SERVICE_ROLE, Authorization: `Bearer ${SUPABASE_SERVICE_ROLE}` };
-        const [wosRaw, partsRaw, techRaw] = await Promise.all([
+        const [wosRaw, partsRaw, techRaw, payoutsRaw, priceRaw, catRaw, settingsRaw, supRaw, custRaw, rmaRaw] = await Promise.all([
           fetch(`${SUPABASE_URL}/rest/v1/erp_records?select=data&collection_name=eq.workOrders`, { headers }),
           fetch(`${SUPABASE_URL}/rest/v1/erp_records?select=data&collection_name=eq.parts`, { headers }),
           fetch(`${SUPABASE_URL}/rest/v1/erp_records?select=data&collection_name=eq.technicians`, { headers }),
+          fetch(`${SUPABASE_URL}/rest/v1/erp_records?select=data&collection_name=eq.technicianPayouts`, { headers }),
+          fetch(`${SUPABASE_URL}/rest/v1/erp_records?select=data&collection_name=eq.priceCatalog`, { headers }),
+          fetch(`${SUPABASE_URL}/rest/v1/erp_records?select=data&collection_name=eq.priceCategories`, { headers }),
+          fetch(`${SUPABASE_URL}/rest/v1/erp_records?select=data&collection_name=eq.systemSettings`, { headers }),
+          fetch(`${SUPABASE_URL}/rest/v1/erp_records?select=data&collection_name=eq.suppliers`, { headers }),
+          fetch(`${SUPABASE_URL}/rest/v1/erp_records?select=data&collection_name=eq.customers`, { headers }),
+          fetch(`${SUPABASE_URL}/rest/v1/erp_records?select=data&collection_name=eq.rmas`, { headers }),
         ]);
         const wosArr = await wosRaw.json();
         const wosData: any[] = (Array.isArray(wosArr) ? wosArr : []).map((r: any) => r?.data).filter(Boolean);
@@ -350,7 +357,37 @@ ${JSON.stringify(context)}`;
         const partData: any[] = (Array.isArray(partsArr) ? partsArr : []).map((r: any) => r?.data).filter(Boolean);
         const techArr = await techRaw.json();
         const techData: any[] = (Array.isArray(techArr) ? techArr : []).map((r: any) => r?.data).filter(Boolean);
-        const today = new Date().toISOString().slice(0, 10);
+        const payoutsArr = await payoutsRaw.json();
+        const payoutsData: any[] = (Array.isArray(payoutsArr) ? payoutsArr : []).map((r: any) => r?.data).filter(Boolean);
+        const priceArr = await priceRaw.json();
+        const priceData: any[] = (Array.isArray(priceArr) ? priceArr : []).map((r: any) => r?.data).filter(Boolean);
+        const catArr = await catRaw.json();
+        const catData: any[] = (Array.isArray(catArr) ? catArr : []).map((r: any) => r?.data).filter(Boolean);
+        const settingsArr = await settingsRaw.json();
+        const settingsData: any[] = (Array.isArray(settingsArr) ? settingsArr : []).map((r: any) => r?.data).filter(Boolean);
+        const supArr = await supRaw.json();
+        const supData: any[] = (Array.isArray(supArr) ? supArr : []).map((r: any) => r?.data).filter(Boolean);
+        const custArr = await custRaw.json();
+        const custData: any[] = (Array.isArray(custArr) ? custArr : []).map((r: any) => r?.data).filter(Boolean);
+        const rmaArr = await rmaRaw.json();
+        const rmaData: any[] = (Array.isArray(rmaArr) ? rmaArr : []).map((r: any) => r?.data).filter(Boolean);
+        const settings = settingsData[0] || {};
+        const currency = settings.currencySymbol || "MMK";
+        // Category key -> human label (e.g. Display_Original -> Display Original).
+        const catLabelMap = new Map<string, string>();
+        catData.forEach((c) => { if (c?.key && c?.label) catLabelMap.set(c.key, c.label); });
+        const fmtPrice = (v: any) => (v == null ? null : `${Number(v).toLocaleString()}${currency}`);
+        // PRICE LIST: model -> [label: price], filtered to non-null prices only.
+        const priceList = priceData
+          .sort((a, b) => String(a.model || "").localeCompare(String(b.model || "")))
+          .map((p) => {
+            const priced = Object.entries(p.prices || {})
+              .filter(([, v]) => v != null && Number(v) > 0)
+              .map(([k, v]) => `${catLabelMap.get(k) || k}: ${fmtPrice(v)}`);
+            return `${p.model}: ${priced.length ? priced.join(", ") : "no prices"}`;
+          });
+        const now = new Date();
+        const today = now.toISOString().slice(0, 10);
         const done = ["Finished", "Taken Out"];
         const active = wosData.filter((w) => !done.includes(w.status) && w.status !== "Cant Repair" && w.status !== "Customer Not Repair");
         const completedToday = wosData.filter((w) => done.includes(w.status) && (w.completedAt || w.updatedAt || "").slice(0, 10) === today);
@@ -372,7 +409,36 @@ ${JSON.stringify(context)}`;
           .sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")))
           .slice(0, 8)
           .map((w) => `${w.orderNumber} ${w.deviceModel} ${w.customerName} technician:${w.assignedTechName || "unassigned"} ${w.status} ${(w.totalAmount || 0).toLocaleString()}MMK`);
+        // MONTHLY REPORT (ERP monthly report = technicianPayouts records, shown in
+        // Finance → Commissions). This is the authoritative source for "ဒီလ ဘယ်နှစ်လုံး".
+        const currentPeriod = today.slice(0, 7);
+        const monthlyReport = payoutsData.map((p) => ({
+          period: p.period || "",
+          technicianName: p.technicianName || p.technicianId || "?",
+          technicianId: p.technicianId || "",
+          totalTicketsClosed: p.totalTicketsClosed ?? p.totalJobsCompleted ?? 0,
+          totalLaborRevenue: p.totalLaborRevenue ?? p.grossLaborRevenue ?? 0,
+          commissionAmount: p.commissionAmount ?? 0,
+          netPayout: p.netPayout ?? p.payoutAmount ?? 0,
+          status: p.status || "?",
+        }));
         const context: any = {
+          shop: {
+            name: settings.shopName || "i35 Apple Service",
+            phone: settings.shopPhone || settings.shopPhones?.join(", ") || "",
+            address: settings.shopAddress || "",
+            email: settings.shopEmail || "",
+            website: settings.shopWebsite || "",
+            currency,
+            ticketPrefix: settings.ticketPrefix || "WO",
+            warrantyDays: settings.defaultWarrantyDays ?? 90,
+          },
+          // MONTHLY REPORT — ERP monthly report records (authoritative for monthly counts).
+          currentPeriod,
+          monthlyReport,
+          monthlyReportSummary: monthlyReport.map((m) =>
+            `${m.period} ${m.technicianName}: ${m.totalTicketsClosed} ticket(s), labor ${m.totalLaborRevenue.toLocaleString()}${currency}, commission ${m.commissionAmount.toLocaleString()}${currency}, payout ${m.netPayout.toLocaleString()}${currency} (${m.status})`
+          ),
           activeTickets: active.length,
           completedToday: completedToday.length,
           completedTodayTickets,
@@ -383,6 +449,16 @@ ${JSON.stringify(context)}`;
           partsTotal: partData.length,
           lowStockParts: lowStock.map((p) => `${p.sku || p.id} ${p.name}: stock ${p.quantityInStock} (reorder ${p.reorderPoint || 0})`),
           recentTickets: recent,
+          // PRICE LIST — full repair price catalog (37 models).
+          priceList,
+          // SHOP SUPPLIERS (parts vendors).
+          suppliers: supData.map((s) => `${s.name} (${s.code || ""}) phone ${s.phone || "-"} rating ${s.rating ?? "-"}⭐`),
+          // CUSTOMERS (for lookup questions).
+          customers: custData.slice(0, 100).map((c) => `${c.name}${c.company ? " (" + c.company + ")" : ""} ${c.phone || ""} ${c.type || ""} spent ${Number(c.totalSpent || 0).toLocaleString()}${currency}`),
+          // RMA / warranty returns currently open.
+          rmasOpen: rmaData
+            .filter((r) => !["Replacement Received", "Rejected"].includes(r.status))
+            .map((r) => `${r.rmaNumber} ${r.partName} qty ${r.quantity} supplier ${r.supplierName} status ${r.status}`),
         };
         // Category-specific answer: when the user names a part category,
         // include the FULL stock state of that category so the AI never guesses.
@@ -405,6 +481,68 @@ ${JSON.stringify(context)}`;
           if (catParts.length > 0) {
             context.categoryParts = { category: catName, count: catParts.length, parts: catParts };
           }
+        }
+        // Technician-specific answer: when the user names a technician, include
+        // that tech's full monthly stats so the AI never guesses or conflates.
+        const techNameMatch = techData.find((t) =>
+          userText.toLowerCase().includes((t.name || "").toLowerCase())
+        );
+        if (techNameMatch) {
+          const tName = techNameMatch.name;
+          const techId = techNameMatch.id;
+          const techToday = completedToday.filter((w) =>
+            w.assignedTechId === techId || w.assignedTechName === tName
+          );
+          const techActive = active.filter((w) =>
+            w.assignedTechId === techId || w.assignedTechName === tName
+          );
+          const techMonthlyRecord = monthlyReport.find(
+            (m) => m.technicianId === techId || m.technicianName === tName
+          );
+          context.technicianDetail = {
+            name: tName,
+            level: techNameMatch.level || "",
+            activeNow: techActive.length,
+            completedToday: techToday.length,
+            todayTickets: techToday.slice(0, 10).map((w) => `${w.orderNumber} ${w.deviceModel}`),
+            // Monthly count comes from the ERP monthly report record (authoritative).
+            monthlyReportRecord: techMonthlyRecord
+              ? `${techMonthlyRecord.period}: ${techMonthlyRecord.totalTicketsClosed} ticket(s) closed, labor ${techMonthlyRecord.totalLaborRevenue.toLocaleString()}${currency}, commission ${techMonthlyRecord.commissionAmount.toLocaleString()}${currency}, payout ${techMonthlyRecord.netPayout.toLocaleString()}${currency} (${techMonthlyRecord.status})`
+              : null,
+          };
+        }
+        // Model price lookup: when the user names a device model (e.g. "iPhone 13"),
+        // include that model's FULL price list so the bot quotes real prices.
+        const priceMatch = priceData.find((p) =>
+          (p.model || "").toLowerCase().split(/\s+/).every((tok) =>
+            tok.length > 1 && userText.toLowerCase().includes(tok.toLowerCase())
+          )
+        );
+        if (priceMatch) {
+          const priced = Object.entries(priceMatch.prices || {})
+            .filter(([, v]) => v != null && Number(v) > 0)
+            .map(([k, v]) => `${catLabelMap.get(k) || k}: ${fmtPrice(v)} (warranty ${priceMatch.warranties?.[k] || "-"})`);
+          context.modelPrice = {
+            model: priceMatch.model,
+            prices: priced,
+          };
+        }
+        // Customer lookup: if the user includes a phone number or a customer
+        // name that exists in the roster, surface that customer's record.
+        const custMatch = custData.find((c) =>
+          (c.phone && userText.includes(String(c.phone))) ||
+          ((c.name || "").toLowerCase().length > 3 && userText.toLowerCase().includes((c.name || "").toLowerCase()))
+        );
+        if (custMatch) {
+          context.customerDetail = {
+            name: custMatch.name,
+            company: custMatch.company || null,
+            phone: custMatch.phone || null,
+            type: custMatch.type || null,
+            discountPercent: custMatch.discountPercentage ?? null,
+            totalOrders: custMatch.totalOrdersCount ?? null,
+            totalSpent: Number(custMatch.totalSpent || 0).toLocaleString() + currency,
+          };
         }
         return JSON.stringify(context);
       } catch (err) {
