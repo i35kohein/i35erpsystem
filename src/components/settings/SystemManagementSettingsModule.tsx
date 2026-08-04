@@ -103,6 +103,25 @@ const RECEIPT_FOOTER_SIZE_OPTIONS = [
   { value: 'large', label: 'Large' },
 ] as const;
 
+// Quick-select model presets per provider (OpenRouter IDs verified against
+// openrouter.ai/api/v1/models on 2026-08-05).
+const AI_MODEL_PRESETS: Record<string, { id: string; label: string }[]> = {
+  openrouter: [
+    { id: 'anthropic/claude-opus-5', label: 'Claude Opus 5 (flagship)' },
+    { id: 'anthropic/claude-opus-4.8', label: 'Claude Opus 4.8' },
+    { id: 'anthropic/claude-opus-4', label: 'Claude Opus 4' },
+    { id: 'anthropic/claude-sonnet-5', label: 'Claude Sonnet 5' },
+    { id: 'anthropic/claude-haiku-4.5', label: 'Claude Haiku 4.5' },
+    { id: 'deepseek/deepseek-v4-pro', label: 'DeepSeek V4 Pro' },
+    { id: 'deepseek/deepseek-v4-flash', label: 'DeepSeek V4 Flash' },
+  ],
+  anthropic: [{ id: 'claude-3-5-haiku-latest', label: 'Claude 3.5 Haiku (server default)' }],
+  openai: [{ id: 'gpt-4o-mini', label: 'GPT-4o mini (server default)' }],
+  gemini: [{ id: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash (server default)' }],
+  deepseek: [{ id: 'deepseek-chat', label: 'DeepSeek Chat (server default)' }],
+  groq: [{ id: 'llama-3.1-8b-instant', label: 'Llama 3.1 8B Instant (server default)' }],
+};
+
 const splitFooterTextBySize = (text: string, start: number, ranges: Array<{ start: number; end: number; size: 'small' | 'medium' | 'large' }>, fallback: 'small' | 'medium' | 'large') => {
   const end = start + text.length;
   const boundaries = new Set([start, end]);
@@ -916,11 +935,44 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             <label className="space-y-1.5 text-xs font-bold text-[#1D1D1F]">
               <span>Model</span>
               <input
+                list="ai-model-presets"
                 value={formData.aiModel || ''}
                 onChange={(event) => setFormData({ ...formData, aiModel: event.target.value })}
-                placeholder={formData.aiProvider === 'deepseek' ? 'deepseek-chat (default)' : 'Leave blank for provider default'}
+                placeholder={
+                  formData.aiProvider === 'deepseek'
+                    ? 'deepseek-chat (default)'
+                    : formData.aiProvider === 'openrouter'
+                      ? 'e.g. anthropic/claude-opus-5'
+                      : 'Leave blank for provider default'
+                }
                 className="w-full p-2.5 border border-[#E5E5EA] rounded-xl bg-white"
               />
+              <datalist id="ai-model-presets">
+                {(AI_MODEL_PRESETS[formData.aiProvider] || []).map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.label}
+                  </option>
+                ))}
+              </datalist>
+              {(AI_MODEL_PRESETS[formData.aiProvider] || []).length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {(AI_MODEL_PRESETS[formData.aiProvider] || []).map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, aiModel: m.id })}
+                      title={m.id}
+                      className={`px-2.5 py-1 rounded-full text-[10px] font-bold border transition-all cursor-pointer ${
+                        formData.aiModel === m.id
+                          ? 'bg-[#0071E3] text-white border-[#0071E3]'
+                          : 'bg-[#F5F5F7] text-[#51525C] border-[#E5E5EA] hover:border-[#0071E3] hover:text-[#0071E3]'
+                      }`}
+                    >
+                      {m.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </label>
 
             {formData.aiProvider === 'deepseek' ? (

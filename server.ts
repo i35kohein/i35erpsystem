@@ -188,9 +188,16 @@ Return JSON with key "message".`;
   app.post("/api/ai/chat", async (req, res) => {
     try {
       const { provider, apiKey, model, baseUrl, systemPrompt, messages, context } = req.body;
-      // DeepSeek is configured once on the server, never exposed to the browser
-      // or committed with the application source.
-      const resolvedApiKey = apiKey || (provider === "deepseek" ? process.env.DEEPSEEK_API_KEY : undefined);
+      // DeepSeek / OpenRouter are configured once on the server, never exposed
+      // to the browser or committed with the application source. A browser
+      // provided key still wins when the user configures one in Settings → AI.
+      const resolvedApiKey =
+        apiKey ||
+        (provider === "deepseek"
+          ? process.env.DEEPSEEK_API_KEY
+          : provider === "openrouter"
+            ? process.env.OPENROUTER_API_KEY
+            : undefined);
       if (!resolvedApiKey) return res.status(400).json({ success: false, error: "AI API key is not configured on the server." });
 
       const instruction = `${systemPrompt || "You are a professional repair-shop operations copilot."}
@@ -567,17 +574,34 @@ ${JSON.stringify(context)}`;
       }
     };
     const telegramAiAnswer = async (chatId: string, text: string): Promise<string> => {
-      const provider = process.env.DEEPSEEK_API_KEY ? "deepseek" : process.env.GEMINI_API_KEY ? "gemini" : "";
+      const provider = process.env.DEEPSEEK_API_KEY
+        ? "deepseek"
+        : process.env.GEMINI_API_KEY
+          ? "gemini"
+          : process.env.OPENROUTER_API_KEY
+            ? "openrouter"
+            : "";
       if (!provider) {
-        return "AI ကို configure မလုပ်ရသေးပါ — server မှာ GEMINI_API_KEY သို့မဟုတ် DEEPSEEK_API_KEY ထည့်ပေးပါ။";
+        return "AI ကို configure မလုပ်ရသေးပါ — server မှာ GEMINI_API_KEY, DEEPSEEK_API_KEY သို့မဟုတ် OPENROUTER_API_KEY ထည့်ပေးပါ။";
       }
-      const key = provider === "deepseek" ? process.env.DEEPSEEK_API_KEY! : process.env.GEMINI_API_KEY!;
+      const key =
+        provider === "deepseek"
+          ? process.env.DEEPSEEK_API_KEY!
+          : provider === "gemini"
+            ? process.env.GEMINI_API_KEY!
+            : process.env.OPENROUTER_API_KEY!;
       const history = tgHistory[chatId] || [];
       const messages = [...history.slice(-20), { role: "user", content: text }];
       try {
         const context = await fetchErpContext(text);
         const systemPrompt = `${TELEGRAM_SYSTEM_PROMPT}\n\nLIVE ERP CONTEXT:\n${context}`;
-        return await callAiProvider({ provider, apiKey: key, systemPrompt, messages });
+        return await callAiProvider({
+          provider,
+          apiKey: key,
+          model: provider === "openrouter" ? "anthropic/claude-opus-5" : undefined,
+          systemPrompt,
+          messages,
+        });
       } catch (err: any) {
         console.error("Telegram AI error:", err);
         return "AI ခေါ်တဲ့အခါ အမှားဖြစ်သွားပါတယ် — နောက်တစ်ခါ ပြန်စမ်းကြည့်ပါ။";
