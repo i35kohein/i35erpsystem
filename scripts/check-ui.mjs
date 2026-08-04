@@ -49,7 +49,8 @@ const hexByColor = new Map();
 const divSamples = [];
 
 for (const file of files) {
-  const lines = readFileSync(file, 'utf8').split('\n');
+  const content = readFileSync(file, 'utf8');
+  const lines = content.split('\n');
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     // raw hex utilities
@@ -59,18 +60,23 @@ for (const file of files) {
       hexCount++;
       hexByColor.set(`#${m[1].toUpperCase()}`, (hexByColor.get(`#${m[1].toUpperCase()}`) || 0) + 1);
     }
-    // clickable divs without role/tabIndex (skip stopPropagation wrappers)
-    let d;
-    const dre = /<div\b/g;
-    while ((d = dre.exec(line)) !== null) {
-      const tagEnd = findTagEnd(line, d.index + 1);
-      if (tagEnd === -1) break;
-      const tag = line.slice(d.index, tagEnd + 1);
-      if (!/onClick|onMouseDown/.test(tag)) continue;
-      if (/role=|tabIndex/.test(tag)) continue;
-      if (tag.includes('stopPropagation')) continue;
-      divCount++;
-      if (divSamples.length < 5) divSamples.push(`${file.replace(SRC + '/', '')}:${i + 1} ${line.trim().slice(0, 80)}`);
+  }
+  // clickable divs without role/tabIndex (skip stopPropagation wrappers).
+  // Whole-file scan so multiline tags like <div \n onClick={...}> are caught
+  // (the old per-line scan silently missed those — false "0").
+  const dre = /<div\b/g;
+  let d;
+  while ((d = dre.exec(content)) !== null) {
+    const tagEnd = findTagEnd(content, d.index + 1);
+    if (tagEnd === -1) break;
+    const tag = content.slice(d.index, tagEnd + 1);
+    if (!/onClick|onMouseDown/.test(tag)) continue;
+    if (/role=|tabIndex/.test(tag)) continue;
+    if (tag.includes('stopPropagation')) continue;
+    divCount++;
+    if (divSamples.length < 5) {
+      const lineNo = content.slice(0, d.index).split('\n').length;
+      divSamples.push(`${file.replace(SRC + '/', '')}:${lineNo} ${tag.replace(/\s+/g, ' ').trim().slice(0, 80)}`);
     }
   }
 }

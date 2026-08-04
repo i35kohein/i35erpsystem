@@ -146,6 +146,13 @@ export default function App() {
     }
     setActiveTab('create-ticket');
   };
+
+  // Leaving edit mode must fully clear the prefill — otherwise the form stays
+  // armed against the original ticket and a later save overwrites it (P0 fix).
+  const handleCancelEdit = () => {
+    setTicketPrefill(null);
+    setActiveTab('intake');
+  };
   
   // Primary ERP State
   const [systemSettings, setSystemSettings] = useState<SystemSettings>(DEFAULT_SYSTEM_SETTINGS);
@@ -1596,7 +1603,7 @@ export default function App() {
 
               {activeTab === 'create-ticket' && (
                 <CreateTicketSoloPage
-                  workOrders={activeWorkOrders}
+                  workOrders={workOrders}
                   customers={rosterCustomers}
                   technicians={technicians}
                   systemSettings={systemSettings}
@@ -1605,7 +1612,11 @@ export default function App() {
                   onSaveWorkOrder={handleSaveWorkOrder}
                   onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
                   onOpenAiAssistant={() => setIsAiAssistantOpen(true)}
-                  onViewRepairTickets={() => setActiveTab('intake')}
+                  onViewRepairTickets={() => {
+                    setTicketPrefill(null);
+                    setActiveTab('intake');
+                  }}
+                  onCancelEdit={handleCancelEdit}
                 />
               )}
 
@@ -1628,7 +1639,10 @@ export default function App() {
                   setFilterStatus={setStatusFilter}
                   dateFilter={dateFilter}
                   setDateFilter={setDateFilter}
-                  onNavigateToCreateTicket={() => setActiveTab('create-ticket')}
+                  onNavigateToCreateTicket={(prefill) => {
+                    if (prefill) setTicketPrefill(prefill);
+                    setActiveTab('create-ticket');
+                  }}
                 />
               )}
 

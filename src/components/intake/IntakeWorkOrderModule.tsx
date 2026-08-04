@@ -8,6 +8,7 @@ import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
 import { CameraQrScannerModal } from '../common/CameraQrScannerModal';
 import { ConfirmDeleteModal } from '../common/ConfirmDeleteModal';
 import { TicketDetailInspectorModal } from '../common/TicketDetailInspectorModal';
+import type { TicketPrefillData } from './CreateTicketSoloPage';
 import { 
   ClipboardList, 
   Search, 
@@ -101,7 +102,7 @@ interface IntakeWorkOrderModuleProps {
   setFilterStatus?: (s: string) => void;
   dateFilter?: DateFilterState;
   setDateFilter?: (d: DateFilterState) => void;
-  onNavigateToCreateTicket?: () => void;
+  onNavigateToCreateTicket?: (prefill?: TicketPrefillData) => void;
 }
 
 const getDiagnosticIcon = (name: string) => {
@@ -894,8 +895,15 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
         isOpen={isCameraScannerOpen}
         onClose={() => setIsCameraScannerOpen(false)}
         onScanSuccess={(scannedText) => {
+          // Pass the scan through to the intake form instead of dropping it
+          // (15 digits = IMEI, anything else = serial, same rule as the form).
+          const clean = scannedText.trim();
           if (onNavigateToCreateTicket) {
-            onNavigateToCreateTicket();
+            onNavigateToCreateTicket(
+              /^\d{15}$/.test(clean)
+                ? { imei: clean }
+                : { serialNumber: clean.toUpperCase() }
+            );
           }
         }}
       />

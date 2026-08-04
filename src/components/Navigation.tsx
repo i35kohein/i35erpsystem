@@ -408,17 +408,17 @@ export const Navigation: React.FC<NavigationProps> = ({
                           ? 'bg-[#EAF2FF] text-[#1559A6] font-bold border-[#B8D3F4]'
                           : 'border-transparent hover:text-[#1D1D1F] hover:bg-[#F3F4F6]'
                       }`}
-                      title={item.label}
+                      title={item.badge !== undefined && (typeof item.badge === 'string' || item.badge > 0) ? `${item.label} (${item.badge})` : item.label}
                       aria-label={item.badge !== undefined && (typeof item.badge === 'string' || item.badge > 0) ? `${item.label} (${item.badge} pending)` : item.label}
                     >
-                      <div className="flex items-center flex-1 min-w-0">
+                      <div className={`flex items-center min-w-0 ${isCollapsed ? 'justify-center' : 'flex-1'}`}>
                         <ItemIcon className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#0071E3]' : 'text-[#86868B]'}`} />
                         {!isCollapsed && <span className="truncate text-xs ml-2.5">{item.label}</span>}
                       </div>
 
                       {item.badge !== undefined && (typeof item.badge === 'string' || item.badge > 0) && (
-                        <Badge className={`text-[9px] py-0.2 px-1.5 text-white shrink-0 ${item.badgeColor || 'bg-[#0071E3]'} ${isCollapsed ? 'absolute -top-1 -right-1 px-1 py-0 text-[8px] border border-white shadow-2xs' : ''}`}>
-                          {item.badge}
+                        <Badge className={`text-[9px] py-0.2 px-1.5 text-white shrink-0 ${item.badgeColor || 'bg-[#0071E3]'} ${isCollapsed ? 'absolute -top-1.5 -right-1.5 px-[5px] py-[2px] text-[length:8px] leading-none min-w-[16px] text-center border border-white shadow-2xs' : ''}`}>
+                          {isCollapsed && typeof item.badge === 'number' && item.badge > 99 ? '99+' : item.badge}
                         </Badge>
                       )}
                     </Button>

@@ -206,6 +206,17 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
       completedToday,
       currentPeriod,
       monthlyReport,
+      // Per-technician work history (answers "ဘာတွေပြင်ထားလဲ" / what did X fix).
+      technicianWorkHistory: technicians.map((tech) => {
+        const techOrders = workOrders
+          .filter((o) => o.assignedTechId === tech.id || o.assignedTechName === tech.name)
+          .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')))
+          .map((o) => {
+            const repairs = (o.selectedRepairs || []).map((r) => r.name).filter(Boolean).join(', ');
+            return `${o.orderNumber} ${o.deviceModel}${repairs ? ' — ' + repairs : ''} ${o.status}`;
+          });
+        return { name: tech.name, totalWorkOrders: techOrders.length, workOrders: techOrders };
+      }),
       technicianLoad: technicians.map((tech) => ({
         name: tech.name,
         status: tech.status,
@@ -247,13 +258,25 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
       normalized.includes('completed') || normalized.includes('finished') || normalized.includes('repaired') || normalized.includes('repair')
       || question.includes('ပြင်ပြီး') || question.includes('ပြင်') || question.includes('ပြီးလဲ') || question.includes('ပြီး');
 
-    // Technician-specific: "<name> ဒီလ ဘယ်နှစ်လုံး ပြင်ပြီးလဲ" — answer from the ERP
-    // monthly report (technicianPayouts), the authoritative source.
+    // Technician-specific: "<name> ဘာတွေပြင်ထားလဲ" → full work history;
+    // "<name> ဒီလ ဘယ်နှစ်လုံး" → ERP monthly report (technicianPayouts).
     const askedTech = technicians.find((t) => question.toLowerCase().includes((t.name || '').toLowerCase()));
     if (askedTech) {
       const techOrders = workOrders.filter((o) => o.assignedTechId === askedTech.id || o.assignedTechName === askedTech.name);
       const todayDone = techOrders.filter((o) => ['Finished', 'Taken Out'].includes(o.status) && isToday(o.completedAt || o.updatedAt || o.createdAt));
       const activeNow = techOrders.filter((o) => !['Finished', 'Taken Out', 'Cant Repair', 'Customer Not Repair'].includes(o.status));
+      const asksWhatRepaired = question.includes('ဘာတွေ') || question.includes('ဘယ်ဟာ') || normalized.includes('what did') || normalized.includes('fixed') || normalized.includes('repaired') || normalized.includes('ပြင်ထား');
+      // Full work history — answers "ဘာတွေပြင်ထားလဲ".
+      if (asksWhatRepaired) {
+        const history = [...techOrders]
+          .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')))
+          .map((o) => {
+            const repairs = (o.selectedRepairs || []).map((r) => r.name).filter(Boolean).join(', ');
+            return `• ${o.orderNumber} — ${o.deviceModel}${repairs ? ` — ${repairs}` : ''} (${o.status}, ${(o.completedAt || o.updatedAt || o.createdAt || '').slice(0, 10)})`;
+          });
+        if (!history.length) return `${askedTech.name} ရဲ့ work order မရှိသေးပါ။`;
+        return `${askedTech.name} ပြင်ထားတဲ့အလုပ်များ (${techOrders.length} ခု):\n${history.join('\n')}\n\nအသေးစိတ်ကို Work Orders → Ticket History မှာ ကြည့်ပါ။`;
+      }
       const todayLine = todayDone.length
         ? `ဒီနေ့ ပြီးစီး: ${todayDone.length} စောင် (${todayDone.map((o) => o.orderNumber).join(', ')})`
         : 'ဒီနေ့ ပြီးစီးတဲ့ ticket မရှိသေးပါ။';

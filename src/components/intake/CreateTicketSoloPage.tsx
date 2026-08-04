@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
 import { CameraQrScannerModal } from '../common/CameraQrScannerModal';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
@@ -67,6 +67,8 @@ export interface TicketPrefillData {
   model?: string;
   category?: string;
   service?: string;
+  serialNumber?: string;
+  imei?: string;
   selectedRepairs?: SelectedRepairItem[];
   price?: number;
   subtotal?: number;
@@ -86,6 +88,7 @@ interface CreateTicketSoloPageProps {
   onSelectPrintTag: (wo: WorkOrder) => void;
   onOpenAiAssistant: () => void;
   onViewRepairTickets: () => void;
+  onCancelEdit?: () => void;
 }
 
 const getDiagnosticIcon = (name: string) => {
@@ -125,6 +128,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
   onSelectPrintTag,
   onOpenAiAssistant,
   onViewRepairTickets,
+  onCancelEdit,
 }) => {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [createdTicket, setCreatedTicket] = useState<WorkOrder | null>(null);
@@ -138,6 +142,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
   const [isWarrantyModalOpen, setIsWarrantyModalOpen] = useState(false);
   const [isRepairsModalOpen, setIsRepairsModalOpen] = useState(false);
   const [isCameraScannerOpen, setIsCameraScannerOpen] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   // Customer lookup match
   const [matchedCustomer, setMatchedCustomer] = useState<Customer | null>(null);
@@ -186,6 +191,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       setSelectedRepairs(editWorkOrder.selectedRepairs || []);
       setBeforeDiagnostics(editWorkOrder.beforeDiagnostics || beforeDiagnostics);
       setExtraReportedNotes(editWorkOrder.symptomsReported || '');
+      setIntakePhotos(editWorkOrder.intakePhotos || []);
       return;
     }
     if (prefill) {
@@ -196,6 +202,8 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           setDeviceColor(colors[0]);
         }
       }
+      if (prefill.serialNumber) setSerialNumber(prefill.serialNumber);
+      if (prefill.imei) setImei(prefill.imei);
       if (prefill.selectedRepairs && prefill.selectedRepairs.length > 0) {
         setSelectedRepairs(prefill.selectedRepairs);
       } else if (prefill.service) {
@@ -339,7 +347,13 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
 
     const prefix = systemSettings?.ticketPrefix || 'WO-';
     const baseWorkOrder = editWorkOrder || null;
-    const newOrderNumber = baseWorkOrder?.orderNumber || `${prefix}2026-${1000 + workOrders.length + 1}`;
+    // Order numbers must never be reused: derive from the highest existing number
+    // across ALL tickets (never the filtered list length) + current year.
+    const maxExistingNum = workOrders.reduce((max, wo) => {
+      const match = /(\d+)\s*$/.exec(wo.orderNumber || '');
+      return match ? Math.max(max, parseInt(match[1], 10)) : max;
+    }, 1000);
+    const newOrderNumber = baseWorkOrder?.orderNumber || `${prefix}${new Date().getFullYear()}-${maxExistingNum + 1}`;
     const nowIso = new Date().toISOString();
     const formattedDate = new Date().toLocaleString('en-US', {
       month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true
@@ -406,23 +420,28 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       createdAt: baseWorkOrder?.createdAt || nowIso,
       updatedAt: nowIso,
       estimatedCompletion: baseWorkOrder?.estimatedCompletion || new Date(Date.now() + 86400000).toISOString(),
-      intakeChecklist: baseWorkOrder?.intakeChecklist || {
-        powerOn: true,
-        screenDisplay: true,
-        touchGrid: true,
-        faceIdOrTouchId: true,
-        trueTonePresent: true,
-        frontCamera: true,
-        rearCamera: true,
-        microphones: true,
-        speakers: true,
-        wifiBluetooth: true,
-        cellularSignal: true,
-        wirelessCharging: true,
-        liquidIndicatorTriggered: false,
-        batteryHealthPercent: 88,
-        physicalDamageNotes: extraReportedNotes.trim() || baseWorkOrder?.intakeChecklist?.physicalDamageNotes || '',
-      }
+      intakeChecklist: baseWorkOrder?.intakeChecklist || (() => {
+        // No fabricated values: derive from the real 21-point diagnostics.
+        const statusOf = (name: string) => beforeDiagnostics.find((d) => d.name === name)?.status;
+        const passed = (name: string) => statusOf(name) === 'Pass';
+        return {
+          powerOn: passed('Display'),
+          screenDisplay: passed('Display'),
+          touchGrid: passed('Touch'),
+          faceIdOrTouchId: passed('Face ID'),
+          trueTonePresent: false, // no True Tone diagnostic item at intake
+          frontCamera: passed('Front Camera'),
+          rearCamera: passed('Main Camera'),
+          microphones: passed('Microphone'),
+          speakers: passed('Sound'),
+          wifiBluetooth: passed('WiFi') || passed('Bluetooth'),
+          cellularSignal: passed('SIM'),
+          wirelessCharging: false, // no wireless-charging diagnostic item at intake
+          liquidIndicatorTriggered: false, // only set when a liquid claim is logged
+          batteryHealthPercent: undefined, // real % belongs in the Battery Health diagnostic note
+          physicalDamageNotes: extraReportedNotes.trim() || '',
+        };
+      })(),
     };
 
     onSaveWorkOrder(newWorkOrder);
@@ -431,16 +450,30 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
   };
 
   const handleResetForm = () => {
+    // FULL reset — never leak the previous ticket's device, color, warranty,
+    // diagnostics or photos into the next intake (stale Fail marks are a data risk).
     setCreatedTicket(null);
     setCustomerName('');
     setCustomerPhone('');
     setCustomerTown('');
     setCustomerAddress('');
+    setCustomerType('Retail');
+    setDeviceModel('');
+    setDeviceColor('');
     setSerialNumber('');
     setImei('');
     setPasscode('');
+    setFindMyStatus('OFF');
+    setWarrantyDays(systemSettings?.defaultWarrantyDays || 90);
+    setWarrantyLabel(`${systemSettings?.defaultWarrantyDays || 90} Days Standard Warranty`);
+    setCustomWarrantyInput('');
     setSelectedRepairs([]);
     setExtraReportedNotes('');
+    setBeforeDiagnostics(
+      DIAGNOSTIC_NAMES.map((name, idx) => ({ id: `diag-${idx}`, name, status: 'N/A' as const, note: '' }))
+    );
+    setIntakePhotos([]);
+    setMatchedCustomer(null);
   };
 
   if (createdTicket) {
@@ -517,7 +550,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             </button>
 
             <button
-              onClick={handleResetForm}
+              onClick={isEditMode && onCancelEdit ? onCancelEdit : handleResetForm}
               className="w-full sm:w-auto px-4 py-3 bg-[#F8F9FA] hover:bg-slate-200 text-[#1D1D1F] font-semibold text-xs rounded-xl border border-[#D2D2D7]"
             >
               {isEditMode ? 'Discard Changes' : '+ Create Another Ticket'}
@@ -670,9 +703,10 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         </div>
 
         {/* STEP 2: Choose Device Model */}
-        <div 
+        <button
+          type="button"
           onClick={() => setIsModelModalOpen(true)}
-          className="p-3 bg-[#F5F5F7]/80 rounded-xl border border-[#E5E5EA] space-y-2.5 cursor-pointer hover:border-[#0071E3]/50 hover:bg-[#F5F5F7] transition-all group"
+          className="w-full text-left p-3 bg-[#F5F5F7]/80 rounded-xl border border-[#E5E5EA] space-y-2.5 cursor-pointer hover:border-[#0071E3]/50 hover:bg-[#F5F5F7] transition-all group"
         >
           <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-2">
             <h3 className="text-xs font-extrabold text-[#1D1D1F] flex items-center space-x-2">
@@ -708,14 +742,15 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               </span>
             </div>
           )}
-        </div>
+        </button>
 
         {/* STEP 3 & STEP 4: Color (REAL DEVICE COLOR BIG CIRCLE WITH SHADOW) & Warranty */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* STEP 3: Real Official Color Selection */}
-          <div 
+          <button
+            type="button"
             onClick={() => setIsColorModalOpen(true)}
-            className="p-3 bg-[#F8F9FA] rounded-xl border border-[#E5E5EA] space-y-2.5 cursor-pointer hover:border-[#0071E3]/50 transition-all group"
+            className="w-full text-left p-3 bg-[#F8F9FA] rounded-xl border border-[#E5E5EA] space-y-2.5 cursor-pointer hover:border-[#0071E3]/50 transition-all group"
           >
             <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-2.5">
               <h3 className="text-xs font-extrabold text-[#1D1D1F] flex items-center space-x-2">
@@ -735,12 +770,13 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 style={{ background: activeColorStyle.gradient }}
               />
             </div>
-          </div>
+          </button>
 
           {/* STEP 4: Warranty Selection */}
-          <div 
+          <button
+            type="button"
             onClick={() => setIsWarrantyModalOpen(true)}
-            className="p-3 bg-[#F8F9FA] rounded-xl border border-[#E5E5EA] space-y-2.5 cursor-pointer hover:border-[#0071E3]/50 transition-all group"
+            className="w-full text-left p-3 bg-[#F8F9FA] rounded-xl border border-[#E5E5EA] space-y-2.5 cursor-pointer hover:border-[#0071E3]/50 transition-all group"
           >
             <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-2.5">
               <h3 className="text-xs font-extrabold text-[#1D1D1F] flex items-center space-x-2">
@@ -759,7 +795,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 <ShieldCheck className="w-5 h-5" />
               </div>
             </div>
-          </div>
+          </button>
         </div>
 
         {/* Serial / IMEI Input */}
@@ -814,6 +850,30 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 placeholder="Passcode / PIN"
                 className="w-full bg-white border border-[#E5E5EA] rounded-xl px-3 py-2 font-mono text-[#1D1D1F] focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20 focus:outline-none transition-all"
               />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between gap-3 pt-1">
+            <span className="text-[#86868B] font-medium">Find My Status</span>
+            <div className="flex rounded-xl overflow-hidden border border-[#E5E5EA] bg-white" role="group" aria-label="Find My status">
+              {(['ON', 'OFF', 'UNKNOWN'] as const).map((opt) => (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => setFindMyStatus(opt)}
+                  className={`px-4 py-1.5 text-[11px] font-bold transition-colors ${
+                    findMyStatus === opt
+                      ? opt === 'ON'
+                        ? 'bg-[#0071E3] text-white'
+                        : opt === 'OFF'
+                        ? 'bg-[#34C759] text-white'
+                        : 'bg-[#86868B] text-white'
+                      : 'bg-white text-[#86868B] hover:bg-slate-50'
+                  }`}
+                >
+                  {opt}
+                </button>
+              ))}
             </div>
           </div>
         </div>
@@ -1093,15 +1153,37 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               </div>
             ))}
 
-            <button
-              onClick={() => {
-                const newPhoto = prompt('Enter photo URL:');
-                if (newPhoto) setIntakePhotos(prev => [...prev, newPhoto]);
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                const files = Array.from(e.target.files || []);
+                files.forEach((file) => {
+                  if (file.size > 4_000_000) {
+                    toast.error(`${file.name} is over 4MB — skipping. Use a smaller photo.`, 'Photo Too Large');
+                    return;
+                  }
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    const dataUrl = String(reader.result || '');
+                    setIntakePhotos((prev) => [...prev, dataUrl]);
+                  };
+                  reader.readAsDataURL(file);
+                });
+                e.target.value = '';
               }}
+            />
+            <button
+              type="button"
+              onClick={() => photoInputRef.current?.click()}
               className="w-20 h-20 rounded-xl border-2 border-dashed border-[#E5E5EA] hover:border-[#0071E3] flex flex-col items-center justify-center text-[#86868B] hover:text-[#0071E3] text-[10px] space-y-1 bg-white transition-all"
             >
               <Camera className="w-5 h-5" />
-              <span>Add Photo</span>
+              <span>Take / Add Photo</span>
             </button>
           </div>
         </div>
@@ -1317,10 +1399,11 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                     (s) => s.id === item.id || s.name.toLowerCase() === item.name.toLowerCase()
                   );
                   return (
-                    <div
+                    <button
+                      type="button"
                       key={item.id}
                       onClick={() => toggleCatalogRepair(item)}
-                      className={`p-3 rounded-xl border text-xs cursor-pointer flex justify-between items-center transition-all ${
+                      className={`w-full text-left p-3 rounded-xl border text-xs cursor-pointer flex justify-between items-center transition-all ${
                         isSelected
                           ? 'border-[#0071E3] bg-[#F0F6FF] text-[#0071E3] font-bold shadow-2xs'
                           : 'border-[#E5E5EA] bg-white text-[#1D1D1F] hover:bg-slate-50'
@@ -1351,7 +1434,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                           <span className="block text-[9px] text-[#34C759] font-bold">Catalog Verified</span>
                         )}
                       </div>
-                    </div>
+                    </button>
                   );
                 })}
             </div>

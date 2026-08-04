@@ -329,7 +329,7 @@ ${JSON.stringify(context)}`;
       return res.json();
     };
     const TELEGRAM_SYSTEM_PROMPT =
-      "You are the i35 Apple Service shop copilot (ERP AI assistant). ALWAYS reply in Myanmar (Burmese) language, regardless of the language the user writes in — keep technical terms in English where natural. Be concise, operational, and direct: lead with the conclusion, then give prioritized next actions. Use the LIVE ERP CONTEXT below when provided. NEVER invent SKUs, part names, models, prices, stock counts, or ticket numbers that are not explicitly listed in the context — if a model or part is not listed, it does not exist in the data; say so honestly. Do not claim to have completed actions.\n\nMONTHLY REPORT RULE: monthly per-technician completion counts come ONLY from the monthlyReport records in the context (the ERP system's monthly report, Finance → Commissions). Each record shows period, technicianName, and totalTicketsClosed. If the user asks 'ဒီလ [technician] ဘယ်နှစ်လုံး/ဘယ်နှစ်စောင် ပြင်ပြီးလဲ' (how many did X finish this month), answer with the exact totalTicketsClosed from that technician's monthlyReport record for the current period. If the technician has no monthlyReport record for the period, say honestly that they have no record in the ERP monthly report for that month and suggest checking Finance → Commissions. NEVER compute monthly totals yourself from ticket dates or work order timestamps — the monthly report is authoritative and is the only source.";
+      "You are the i35 Apple Service shop copilot (ERP AI assistant). ALWAYS reply in Myanmar (Burmese) language, regardless of the language the user writes in — keep technical terms in English where natural. Be concise, operational, and direct: lead with the conclusion, then give prioritized next actions. Use the LIVE ERP CONTEXT below when provided. NEVER invent SKUs, part names, models, prices, stock counts, or ticket numbers that are not explicitly listed in the context — if a model or part is not listed, it does not exist in the data; say so honestly. Do not claim to have completed actions.\n\nMONTHLY REPORT RULE: monthly per-technician completion counts come ONLY from the monthlyReport records in the context (the ERP system's monthly report, Finance → Commissions). Each record shows period, technicianName, and totalTicketsClosed. If the user asks 'ဒီလ [technician] ဘယ်နှစ်လုံး/ဘယ်နှစ်စောင် ပြင်ပြီးလဲ' (how many did X finish this month), answer with the exact totalTicketsClosed from that technician's monthlyReport record for the current period. If the technician has no monthlyReport record for the period, say honestly that they have no record in the ERP monthly report for that month and suggest checking Finance → Commissions. NEVER compute monthly totals yourself from ticket dates or work order timestamps — the monthly report is authoritative and is the only source.\n\nWORK HISTORY RULE: when the user asks what a technician has repaired (e.g. Wai Yan Hein ဘာတွေပြင်ထားလဲ, what did X fix, X ရဲ့ ပြင်ထားတဲ့အလုပ်), answer from the technicianDetail.workHistory list in the context — it lists that technician's actual work orders (order number, device model, repair items, status). If workHistory is empty, say the technician has no work orders in the data. Never invent tickets or devices.";
     // Optional live ERP context for Telegram answers (requires service role key).
     const SUPABASE_URL = process.env.SUPABASE_URL || "";
     const SUPABASE_SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE || "";
@@ -490,6 +490,9 @@ ${JSON.stringify(context)}`;
         if (techNameMatch) {
           const tName = techNameMatch.name;
           const techId = techNameMatch.id;
+          const techWos = wosData.filter((w) =>
+            w.assignedTechId === techId || w.assignedTechName === tName
+          );
           const techToday = completedToday.filter((w) =>
             w.assignedTechId === techId || w.assignedTechName === tName
           );
@@ -499,12 +502,25 @@ ${JSON.stringify(context)}`;
           const techMonthlyRecord = monthlyReport.find(
             (m) => m.technicianId === techId || m.technicianName === tName
           );
+          // WORK HISTORY: every work order assigned to this technician, newest first,
+          // with device model + repair items + status (answers "ဘာတွေပြင်ထားလဲ").
+          const workHistory = [...techWos]
+            .sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")))
+            .map((w) => {
+              const repairs = (w.selectedRepairs || [])
+                .map((r: any) => r.name)
+                .filter(Boolean)
+                .join(", ");
+              return `${w.orderNumber} ${w.deviceModel}${repairs ? " — " + repairs : ""} ${w.status}${(w.completedAt || w.updatedAt || "").slice(0, 10) ? " (" + (w.completedAt || w.updatedAt || "").slice(0, 10) + ")" : ""}`;
+            });
           context.technicianDetail = {
             name: tName,
             level: techNameMatch.level || "",
             activeNow: techActive.length,
             completedToday: techToday.length,
             todayTickets: techToday.slice(0, 10).map((w) => `${w.orderNumber} ${w.deviceModel}`),
+            totalWorkOrders: techWos.length,
+            workHistory,
             // Monthly count comes from the ERP monthly report record (authoritative).
             monthlyReportRecord: techMonthlyRecord
               ? `${techMonthlyRecord.period}: ${techMonthlyRecord.totalTicketsClosed} ticket(s) closed, labor ${techMonthlyRecord.totalLaborRevenue.toLocaleString()}${currency}, commission ${techMonthlyRecord.commissionAmount.toLocaleString()}${currency}, payout ${techMonthlyRecord.netPayout.toLocaleString()}${currency} (${techMonthlyRecord.status})`
