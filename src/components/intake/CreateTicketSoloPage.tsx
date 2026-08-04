@@ -564,7 +564,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
   const activeColorStyle = getRealisticColorStyle(deviceColor);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-3 pb-5">
+    <div className="max-w-3xl mx-auto space-y-3 pb-5">
       {/* Top Banner Header */}
       <div className="module-toolbar bg-white px-3.5 py-3 rounded-xl border border-[#E5E5EA] shadow-2xs flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2.5">
@@ -986,7 +986,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               </div>
 
               {/* Discount & Estimate Summary Box in MMK */}
-              <div className="bg-[#E5F1FF]/60 border border-[#0071E3]/30 rounded-xl p-4 grid grid-cols-2 md:grid-cols-5 gap-4 text-center text-xs shadow-sm">
+              <div className="bg-[#E5F1FF]/60 border border-[#0071E3]/30 rounded-xl p-4 grid grid-cols-2 md:grid-cols-3 gap-3 text-center text-xs shadow-sm">
                 <div className="bg-white/60 p-2 rounded-lg">
                   <span className="block text-[10px] text-[#86868B] font-semibold">Repairs Count</span>
                   <span className="font-extrabold text-[#1D1D1F] text-sm">{repairCount} items</span>
@@ -1003,7 +1003,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                   <span className="block text-[10px] text-[#86868B] font-semibold">Overall Discount</span>
                   <span className="font-extrabold text-[#AF52DE] text-sm">{overallDiscountPercent}%</span>
                 </div>
-                <div className="col-span-2 md:col-span-1 bg-[#0071E3] text-white rounded-xl p-2.5 flex flex-col justify-center">
+                <div className="col-span-2 md:col-span-2 bg-[#0071E3] text-white rounded-xl p-2.5 flex flex-col justify-center">
                   <span className="block text-[9px] opacity-90 uppercase font-bold tracking-wider">Final Estimate</span>
                   <span className="font-black text-base">{finalEstimate.toLocaleString()} MMK</span>
                 </div>

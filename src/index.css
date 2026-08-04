@@ -587,13 +587,12 @@ html[data-theme] [class~="bg-[#ED7132]"] {
   background-color: var(--orange) !important;
 }
 
-/* Keep every primary workspace module on the same usable content width. */
+/* Keep every primary workspace module stable: full-width by default, but
+   let module roots that opt into max-w-* + mx-auto keep their designed width
+   (intake form 3xl, roster/follow-up 7xl, customer portal 6xl). */
 .app-module-content > * {
   width: 100%;
-  max-width: none !important;
   min-width: 0;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
 }
 
 .app-module-content {
