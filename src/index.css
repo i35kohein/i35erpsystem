@@ -227,11 +227,16 @@ body {
   background: var(--bg);
 }
 
-.basic-ui button,
+.basic-ui button {
+  font: inherit;
+}
+
+/* Form controls: inherit family but NOT size — lets Tailwind text-sm/text-xs utilities win
+   (font: inherit on inputs silently overrode text-sm, leaving every input at 12px). */
 .basic-ui input,
 .basic-ui select,
 .basic-ui textarea {
-  font: inherit;
+  font-family: inherit;
 }
 
 .basic-ui button {
