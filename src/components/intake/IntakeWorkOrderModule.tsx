@@ -239,7 +239,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   };
 
   return (
-    <div className="space-y-3 max-w-7xl mx-auto">
+    <div className="space-y-3">
       {/* Top Header Banner & Actions */}
       <div className="bg-white border border-[#E5E5EA] rounded-2xl p-5 shadow-xs space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#E5E5EA]">
@@ -303,7 +303,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
         </div>
 
         {/* Quick Stats Filter Chips */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10 gap-3.5">
           {[
             { id: 'ALL', label: 'All Active Tickets', count: counts.total, color: 'text-[#136F9A]', bg: 'bg-blue-50/60', border: 'border-blue-200' },
             { id: 'Receive', label: 'Intake (Receive)', count: counts.receive, color: 'text-[#136F9A]', bg: 'bg-blue-50/60', border: 'border-blue-200' },

@@ -242,7 +242,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
   ];
 
   return (
-    <div className="space-y-3 max-w-7xl mx-auto pb-4">
+    <div className="space-y-3 pb-4">
       {/* Top Banner / Dashboard Overview */}
       <div className="bg-white border border-[#E5E5EA] rounded-2xl p-5 shadow-2xs space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -277,7 +277,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
         </div>
 
         {/* Analytics Key Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-2.5 pt-2">
+        <div className="grid grid-cols-2 md:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10 gap-2.5 pt-2">
           <div className="bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-3 space-y-1">
             <span className="text-[11px] font-semibold text-[#86868B]">Total Completed</span>
             <div className="text-xl font-extrabold text-[#1D1D1F]">{totalCompleted}</div>
