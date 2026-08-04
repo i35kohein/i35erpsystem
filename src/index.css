@@ -463,6 +463,8 @@ header {
   overflow-anchor: none;
   min-height: 0;
   overscroll-behavior: contain;
+  /* Seatbelt: no child may ever push the page sideways (e.g. sticky steppers) */
+  overflow-x: clip;
 }
 
 /* Media can never grow wider than its reserved container. */

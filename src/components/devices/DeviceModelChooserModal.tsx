@@ -102,10 +102,15 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                 <button
                   key={fam.key}
                   type="button"
-                  onClick={() => setActiveFamilyTab(fam.key as any)}
-                  className={`px-2.5 py-1.5 text-[11px] font-extrabold rounded-lg transition-all flex items-center gap-1.5 shrink-0 cursor-pointer border select-none active:scale-95 ${
+                  onClick={() => { if (count > 0 || fam.key === 'All') setActiveFamilyTab(fam.key as any); }}
+                  disabled={count === 0 && fam.key !== 'All'}
+                  title={count === 0 && fam.key !== 'All' ? 'No models available yet' : undefined}
+                  aria-disabled={count === 0 && fam.key !== 'All'}
+                  className={`px-2.5 py-1.5 text-[11px] font-extrabold rounded-lg transition-all flex items-center gap-1.5 shrink-0 border select-none active:scale-95 ${
                     isActive
                       ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-xs'
+                      : count === 0 && fam.key !== 'All'
+                      ? 'bg-[#F5F5F7] text-[#C7C7CC] border-[#E5E5EA] cursor-not-allowed'
                       : 'bg-white hover:bg-slate-100 text-[#6E6E73] hover:text-[#1D1D1F] border-[#E5E5EA]'
                   }`}
                 >
