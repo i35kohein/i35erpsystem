@@ -775,7 +775,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         </button>
 
         {/* STEP 3 & STEP 4: Color (REAL DEVICE COLOR BIG CIRCLE WITH SHADOW) & Warranty */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* STEP 2b: Real Official Color Selection — only after a model is chosen */}
           {deviceModel ? (
             <button
@@ -791,7 +791,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 <span className="text-xs font-bold text-[#0071E3] group-hover:underline">Change</span>
               </div>
 
-              <div className="bg-white p-3.5 rounded-xl border border-[#E5E5EA] text-xs font-bold text-[#1D1D1F] flex items-center justify-between min-h-[130px]">
+              <div className="grow bg-white p-3.5 rounded-xl border border-[#E5E5EA] text-xs font-bold text-[#1D1D1F] flex items-center justify-between">
                 <div className="space-y-0.5">
                   <span className="block text-[10px] text-[#86868B]">Selected Color:</span>
                   <span className="text-sm font-extrabold text-[#1D1D1F]">{deviceColor}</span>
@@ -810,7 +810,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                   <span className="text-xs">Realistic Color (0 Palette)</span>
                 </h3>
               </div>
-              <div className="bg-white p-3.5 rounded-xl border border-dashed border-[#D2D2D7] flex flex-col items-center justify-center text-center min-h-[130px] space-y-1.5 shadow-2xs">
+              <div className="grow bg-white p-3.5 rounded-xl border border-dashed border-[#D2D2D7] flex flex-col items-center justify-center text-center space-y-1.5 shadow-2xs">
                 <Palette className="w-4 h-4 text-[#B6B6BC]" />
                 <span className="text-[11px] text-[#86868B] font-semibold leading-snug">
                   Select a device model first<br />to see real color options
@@ -833,7 +833,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               <span className="text-xs font-bold text-[#0071E3] group-hover:underline">Change</span>
             </div>
 
-            <div className="bg-white p-3.5 rounded-xl border border-[#E5E5EA] text-xs font-bold text-[#1D1D1F] flex items-center justify-between shadow-2xs group-hover:shadow-sm transition-shadow min-h-[130px]">
+            <div className="grow bg-white p-3.5 rounded-xl border border-[#E5E5EA] text-xs font-bold text-[#1D1D1F] flex items-center justify-between shadow-2xs group-hover:shadow-sm transition-shadow">
               <div>
                 <span className="block text-[10px] text-[#86868B]">Covered Warranty:</span>
                 <span className="text-sm font-extrabold text-[#1D1D1F]">{warrantyLabel}</span>
