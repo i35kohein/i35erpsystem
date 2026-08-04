@@ -616,59 +616,8 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           <span>Enter customer details, choose the device, add repairs, then complete the intake check.</span>
         </div>
 
-        {/* Stepper Progress — 4 phases, sticky under the topbar, clickable to jump to each section */}
-        {(() => {
-          const steps = [
-            { label: 'Customer', id: 'intake-customer', done: Boolean(customerName.trim() && customerPhone.trim()), invalid: Boolean(fieldErrors['field-customer-name'] || fieldErrors['field-customer-phone']) },
-            { label: 'Device', id: 'intake-device', done: Boolean(deviceModel), invalid: Boolean(fieldErrors['intake-device'] || fieldErrors['field-imei']) },
-            { label: 'Repairs', id: 'intake-repairs', done: selectedRepairs.length > 0, invalid: false },
-            { label: 'Diagnostics', id: 'intake-diagnostics', done: beforeDiagnostics.some((d) => d.status === 'Pass' || d.status === 'Fail'), invalid: false },
-          ];
-          const doneCount = steps.filter((s) => s.done).length;
-          const pct = Math.round((doneCount / steps.length) * 100);
-          return (
-            <div className="sticky top-14 z-20 bg-white/95 backdrop-blur rounded-xl border border-[#E5E5EA] shadow-sm px-2.5 py-2" role="group" aria-label="Intake progress">
-              {/* Scrolls inside its own box on narrow screens — never pushes the page sideways */}
-              <div className="flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {steps.map((s, i) => (
-                  <React.Fragment key={s.label}>
-                    <button
-                      type="button"
-                      onClick={() => scrollToSection(s.id)}
-                      title={`Jump to ${s.label} section`}
-                      aria-label={`Jump to ${s.label} section`}
-                      className="flex items-center gap-1.5 shrink-0 rounded-lg px-1.5 py-1 cursor-pointer transition-colors hover:bg-[#F0F6FF] group"
-                    >
-                      <span
-                        className={`w-5 h-5 shrink-0 rounded-full flex items-center justify-center text-[10px] font-black transition-colors ${
-                          s.invalid
-                            ? 'bg-[#DC2626] text-white'
-                            : s.done
-                            ? 'bg-[#34C759] text-white'
-                            : 'bg-[#E5E5EA] text-[#86868B] group-hover:bg-[#D1D1D6]'
-                        }`}
-                      >
-                        {s.invalid ? <X className="w-3 h-3" /> : s.done ? <Check className="w-3 h-3" /> : i + 1}
-                      </span>
-                      <span className={`text-[11px] font-bold whitespace-nowrap ${
-                        s.invalid ? 'text-[#DC2626]' : s.done ? 'text-[#1D1D1F]' : 'text-[#86868B] group-hover:text-[#1D1D1F]'
-                      }`}>{s.label}</span>
-                    </button>
-                    {i < steps.length - 1 && (
-                      <div className="flex-1 h-0.5 rounded-full bg-[#E5E5EA] min-w-2">
-                        <div className="h-full rounded-full bg-[#34C759] transition-all" style={{ width: s.done ? '100%' : '0%' }} />
-                      </div>
-                    )}
-                  </React.Fragment>
-                ))}
-              </div>
-              <div className="mt-2 h-1 rounded-full bg-[#E5E5EA] overflow-hidden">
-                <div className="h-full bg-[#0071E3] rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
-              </div>
-              <p className="mt-1 text-[10px] text-[#86868B] font-medium">{doneCount}/4 complete — {pct}%</p>
-            </div>
-          );
-        })()}
+        {/* Stepper removed per Ko Hein 2026-08-05 — jump anchors (intake-customer/device/repairs/diagnostics)
+           are kept for validation-error scrolling; scroll-mt-40 still applies. */}
 
         {/* Desktop 2-column layout for steps 1–4 (Customer/Device left, Color/Warranty + Serial/IMEI right) */}
         <div className="lg:grid lg:grid-cols-2 lg:gap-4 space-y-3 lg:space-y-0">
