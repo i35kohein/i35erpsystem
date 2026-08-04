@@ -775,7 +775,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         </button>
 
         {/* STEP 3 & STEP 4: Color (REAL DEVICE COLOR BIG CIRCLE WITH SHADOW) & Warranty */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
           {/* STEP 2b: Real Official Color Selection — only after a model is chosen */}
           {deviceModel ? (
             <button
@@ -791,7 +791,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 <span className="text-xs font-bold text-[#0071E3] group-hover:underline">Change</span>
               </div>
 
-              <div className="grow bg-white p-3.5 rounded-xl border border-[#E5E5EA] text-xs font-bold text-[#1D1D1F] flex items-center justify-between">
+              <div className="bg-white p-3.5 rounded-xl border border-[#E5E5EA] text-xs font-bold text-[#1D1D1F] flex items-center justify-between">
                 <div className="space-y-0.5">
                   <span className="block text-[10px] text-[#86868B]">Selected Color:</span>
                   <span className="text-sm font-extrabold text-[#1D1D1F]">{deviceColor}</span>
@@ -810,7 +810,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                   <span className="text-xs">Realistic Color (0 Palette)</span>
                 </h3>
               </div>
-              <div className="grow bg-white p-3.5 rounded-xl border border-dashed border-[#D2D2D7] flex flex-col items-center justify-center text-center min-h-[92px] space-y-1.5 shadow-2xs">
+              <div className="bg-white p-3.5 rounded-xl border border-dashed border-[#D2D2D7] flex flex-col items-center justify-center text-center space-y-1.5 shadow-2xs">
                 <Palette className="w-4 h-4 text-[#B6B6BC]" />
                 <span className="text-[11px] text-[#86868B] font-semibold leading-snug">
                   Select a device model first<br />to see real color options
@@ -833,7 +833,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               <span className="text-xs font-bold text-[#0071E3] group-hover:underline">Change</span>
             </div>
 
-            <div className="grow bg-white p-3.5 rounded-xl border border-[#E5E5EA] text-xs font-bold text-[#1D1D1F] flex items-center justify-between shadow-2xs group-hover:shadow-sm transition-shadow">
+            <div className="bg-white p-3.5 rounded-xl border border-[#E5E5EA] text-xs font-bold text-[#1D1D1F] flex items-center justify-between shadow-2xs group-hover:shadow-sm transition-shadow">
               <div>
                 <span className="block text-[10px] text-[#86868B]">Covered Warranty:</span>
                 <span className="text-sm font-extrabold text-[#1D1D1F]">{warrantyLabel}</span>
@@ -914,35 +914,6 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 placeholder="Passcode / PIN"
                 className="w-full bg-white border border-[#E5E5EA] rounded-xl px-3 py-2.5 text-sm font-mono text-[#1D1D1F] focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20 focus:outline-none transition-all"
               />
-            </div>
-
-            {/* Find My iPhone status — required intake safety check (activation lock blocks repair) */}
-            <div>
-              <span className="block text-[#86868B] mb-1 font-medium">Find My Status</span>
-              <div className="flex rounded-xl overflow-hidden border border-[#E5E5EA] bg-white" role="group" aria-label="Find My status">
-                {(['OFF', 'ON', 'UNKNOWN'] as const).map((opt) => (
-                  <button
-                    key={opt}
-                    type="button"
-                    onClick={() => setFindMyStatus(opt)}
-                    aria-pressed={findMyStatus === opt}
-                    className={`flex-1 py-2 text-[11px] font-black transition-all ${
-                      findMyStatus === opt
-                        ? opt === 'OFF'
-                          ? 'bg-[#34C759] text-white'
-                          : opt === 'ON'
-                          ? 'bg-[#DC2626] text-white'
-                          : 'bg-amber-500 text-white'
-                        : 'bg-white text-[#86868B] hover:bg-slate-100'
-                    }`}
-                  >
-                    {opt}
-                  </button>
-                ))}
-              </div>
-              {findMyStatus === 'ON' && (
-                <p className="mt-1 text-[11px] font-semibold text-[#DC2626]">Ask the customer to turn off Find My before accepting the device.</p>
-              )}
             </div>
           </div>
 
