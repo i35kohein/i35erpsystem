@@ -28,6 +28,8 @@ import { WorkOrder, SystemSettings, AppUser } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { LanguageSwitcher } from './common/LanguageSwitcher';
 import { UserRoleSwitcher } from './common/UserRoleSwitcher';
+import { Button } from './ui';
+import { Badge } from './ui';
 
 interface NavigationProps {
   activeTab: string;
@@ -281,6 +283,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                 onClick={() => setIsCollapsed(false)}
                 className="hidden lg:flex w-10 h-8 items-center justify-center text-[#86868B] hover:text-[#0071E3] hover:bg-[#F0F7FF] rounded-xl transition-all cursor-pointer border border-transparent hover:border-[#0071E3]/20"
                 title="Expand sidebar"
+                aria-label="Expand sidebar"
               >
                 <PanelLeftOpen className="w-4 h-4" />
               </button>
@@ -315,19 +318,27 @@ export const Navigation: React.FC<NavigationProps> = ({
 
               {/* Close / Collapse Toggle Button */}
               <div className="flex items-center space-x-1">
-                <button
+                <Button
+                  type="button"
                   onClick={() => setIsCollapsed(!isCollapsed)}
-                  className="hidden lg:flex p-1.5 text-[#86868B] hover:text-[#1D1D1F] hover:bg-[#F5F5F7] rounded-lg transition-colors cursor-pointer"
+                  variant="ghost"
+                  size="icon"
+                  className="hidden lg:flex p-1.5 text-[#86868B] hover:text-[#1D1D1F] hover:bg-[#F5F5F7] rounded-lg"
                   title="Collapse sidebar"
+                  aria-label="Collapse sidebar"
                 >
                   <PanelLeftClose className="w-4 h-4" />
-                </button>
-                <button
+                </Button>
+                <Button
+                  type="button"
                   onClick={() => setIsMobileMenuOpen(false)}
+                  variant="ghost"
+                  size="icon"
                   className="lg:hidden p-1.5 text-[#86868B] hover:text-[#1D1D1F] rounded-lg"
+                  aria-label="Close menu"
                 >
                   <X className="w-5 h-5" />
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -341,43 +352,47 @@ export const Navigation: React.FC<NavigationProps> = ({
               there, so a separate "Dashboard Overview" entry is redundant. */}
           <div className="pb-2 border-b border-[#E5E5EA]/80">
             {/* New Intake Ticket — primary action */}
-            <button
+            <Button
+              type="button"
               onClick={() => {
                 onOpenNewWorkOrder?.();
                 setIsMobileMenuOpen(false);
               }}
               aria-current={activeTab === 'create-ticket' ? 'page' : undefined}
-              className={`w-full flex items-center mt-1.5 ${
-                isCollapsed ? 'w-10 h-10 mx-auto justify-center p-0' : 'justify-center px-3.5 py-2.5'
-              } rounded-xl font-bold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 ${
-                activeTab === 'create-ticket' ? 'bg-[#0051B3] text-white' : 'bg-[#0071E3] hover:bg-[#0051B3] text-white'
-              }`}
+              variant="default"
+              size="sm"
               title="New Intake Ticket"
+              className={`w-full mt-1.5 ${
+                isCollapsed ? 'w-10 h-10 mx-auto justify-center p-0' : 'justify-center px-3.5 py-2.5'
+              } font-bold ${activeTab === 'create-ticket' ? 'bg-[#0051B3]' : 'hover:bg-[#0051B3]'}`}
             >
               <div className="flex items-center justify-center min-w-0">
                 <Plus className={`w-4 h-4 shrink-0 ${isCollapsed ? '' : 'mr-2'}`} />
                 {!isCollapsed && <span className="truncate text-xs">+ Intake Ticket</span>}
               </div>
-            </button>
+            </Button>
 
             {/* Dashboard — landing view shortcut (logo also navigates here) */}
-            <button
+            <Button
+              type="button"
               onClick={() => handleTabSelect('dashboard')}
               aria-current={activeTab === 'dashboard' ? 'page' : undefined}
-              className={`w-full flex items-center mt-1.5 ${
+              variant="outline"
+              size="sm"
+              title="Dashboard"
+              className={`w-full mt-1.5 ${
                 isCollapsed ? 'w-10 h-10 mx-auto justify-center p-0 relative' : 'justify-between px-3.5 py-2.5'
-              } rounded-xl font-semibold transition-all cursor-pointer border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071E3] ${
+              } ${
                 activeTab === 'dashboard'
                   ? 'bg-[#EAF2FF] text-[#1559A6] font-bold border-[#B8D3F4]'
-                  : 'bg-white text-[#344054] border-transparent hover:text-[#1D1D1F] hover:bg-[#F3F4F6]'
+                  : 'border-transparent hover:text-[#1D1D1F] hover:bg-[#F3F4F6]'
               }`}
-              title="Dashboard"
             >
               <div className="flex items-center justify-center min-w-0">
                 <LayoutDashboard className={`w-4 h-4 shrink-0 ${activeTab === 'dashboard' ? 'text-[#0071E3]' : 'text-[#86868B]'}`} />
                 {!isCollapsed && <span className="truncate text-xs ml-2.5">Dashboard</span>}
               </div>
-            </button>
+            </Button>
           </div>
 
           {/* Grouped Sub-Menus with detail lines */}
@@ -395,16 +410,19 @@ export const Navigation: React.FC<NavigationProps> = ({
                   const isActive = activeTab === item.id || (item.id === 'intake' && activeTab === 'create-ticket');
 
                   return (
-                    <button
+                    <Button
                       key={item.id}
+                      type="button"
                       onClick={() => handleTabSelect(item.id)}
                       aria-current={isActive ? 'page' : undefined}
-                      className={`w-full flex items-center ${
+                      variant="outline"
+                      size="sm"
+                      className={`w-full ${
                         isCollapsed ? 'w-10 h-10 mx-auto justify-center p-0 relative' : 'justify-between px-3.5 py-2.5'
-                      } rounded-xl font-semibold transition-all cursor-pointer border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071E3] ${
+                      } ${
                         isActive
                           ? 'bg-[#EAF2FF] text-[#1559A6] font-bold border-[#B8D3F4]'
-                          : 'bg-white text-[#344054] border-transparent hover:text-[#1D1D1F] hover:bg-[#F3F4F6]'
+                          : 'border-transparent hover:text-[#1D1D1F] hover:bg-[#F3F4F6]'
                       }`}
                       title={item.label}
                       aria-label={item.badge !== undefined && (typeof item.badge === 'string' || item.badge > 0) ? `${item.label} (${item.badge} pending)` : item.label}
@@ -415,13 +433,11 @@ export const Navigation: React.FC<NavigationProps> = ({
                       </div>
 
                       {item.badge !== undefined && (typeof item.badge === 'string' || item.badge > 0) && (
-                        <span className={`px-1.5 py-0.2 text-[9px] font-bold rounded-full text-white shrink-0 ${
-                          item.badgeColor || 'bg-[#0071E3]'
-                        } ${isCollapsed ? 'absolute -top-1 -right-1 px-1 py-0 text-[8px] border border-white shadow-2xs' : ''}`}>
+                        <Badge className={`text-[9px] py-0.2 px-1.5 text-white shrink-0 ${item.badgeColor || 'bg-[#0071E3]'} ${isCollapsed ? 'absolute -top-1 -right-1 px-1 py-0 text-[8px] border border-white shadow-2xs' : ''}`}>
                           {item.badge}
-                        </span>
+                        </Badge>
                       )}
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
@@ -446,16 +462,18 @@ export const Navigation: React.FC<NavigationProps> = ({
 
           {/* Logout */}
           {onLogout && (
-            <button
+            <Button
               type="button"
               onClick={onLogout}
               title="Logout"
               aria-label="Logout"
-              className="w-full flex items-center justify-center gap-2 rounded-lg border border-[#E5E5EA] bg-white py-2 text-[11px] font-bold text-[#1D1D1F] transition hover:bg-[#FF3B30]/5 hover:text-[#FF3B30]"
+              variant="outline"
+              size="sm"
+              className="w-full justify-center gap-2 py-2 text-[11px] hover:bg-[#FF3B30]/5 hover:text-[#FF3B30]"
             >
               <LogOut className="h-3.5 w-3.5" />
               {!isCollapsed && <span>Logout</span>}
-            </button>
+            </Button>
           )}
 
           {/* System Online Status Pill */}

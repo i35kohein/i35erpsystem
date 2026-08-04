@@ -136,3 +136,11 @@ Intake ──► Pipeline ──► QA ──► POS ──► Follow-Up ──�
 - **Supabase service role:** in VPS `.env.production` (`SUPABASE_SERVICE_ROLE`) — server-only, never in client
 - **Data writes:** Supabase REST `Prefer: resolution=merge-duplicates` upsert; JSONB `data` column — **always write the FULL data object** (partial PATCH replaces the whole object — painful lesson from 2026-08-03)
 - **Cleanup convention:** test inserts use `test-*` ids and are deleted after verification
+
+## 7. UI Conventions (2026-08-04)
+
+- **Use the ui/ primitives** for new UI: `import { Button, Badge, Card, Input, Dialog, Tabs } from '../../components/ui'` (barrel export). Reference implementation: `components/Navigation.tsx` (sidebar buttons + badges + collapse toggles all use primitives).
+- **Do not add raw hex utilities** (`bg-[#0071E3]`, `text-[#1D1D1F]`, …) to new code when a primitive/token exists — the theme system remaps these per active theme, but primitives make intent clearer and future-proof. For one-off colors still use theme tokens via `var(--primary)` etc. where possible.
+- **Check:** `npm run check:ui` (soft gate, exits 0) scans for raw-hex utilities + clickable `<div>` without role. Run before committing UI work. Baseline: 5,232 raw hex utilities across app (72 distinct, mostly the 8 token colors) — incremental cleanup; 0 clickable divs since the P1 a11y pass.
+- **Buttons:** `variant` default/success/destructive/outline/secondary/ghost/link + `size` default/sm/lg/icon. Icon-only buttons must carry `aria-label`.
+- **Clickable elements** must be `<button>` or `role="button"` + `tabIndex` + Enter/Space handler (a11y pass 2026-08-04 converted all known cases).
