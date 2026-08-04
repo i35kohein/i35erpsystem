@@ -534,10 +534,10 @@ export default function App() {
   const [settingsInitialSubTab, setSettingsInitialSubTab] = useState<'users' | 'ai'>('users');
   const [printableTagWo, setPrintableTagWo] = useState<WorkOrder | null>(null);
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
-  // iPad landscape / small laptops: start with the sidebar collapsed so the
-  // content area keeps usable width (user can still expand it manually).
+  // Sidebar defaults to collapsed on desktop (Ko Hein 2026-08-05) so the
+  // content area keeps usable width; user can still expand it manually.
   const [isCollapsed, setIsCollapsed] = useState(
-    () => typeof window !== 'undefined' && window.innerWidth >= 1024 && window.innerWidth < 1280
+    () => typeof window !== 'undefined' && window.innerWidth >= 1024
   );
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
