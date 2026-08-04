@@ -21,6 +21,7 @@ import {
   List,
   MapPin,
   Monitor, 
+  Palette,
   Hand, 
   Scan, 
   Video, 
@@ -802,8 +803,19 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               </div>
             </button>
           ) : (
-            <div className="p-3 bg-[#F5F5F7]/60 rounded-xl border border-dashed border-[#D2D2D7] flex items-center justify-center text-[11px] text-[#86868B] font-semibold min-h-[92px]">
-              Select a device model first to see real color options
+            <div className="w-full p-3 bg-[#F8F9FA] rounded-xl border border-[#E5E5EA] space-y-2.5 flex flex-col">
+              <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-2.5">
+                <h3 className="text-xs font-extrabold text-[#1D1D1F] flex items-center space-x-2">
+                  <span className="w-6 h-6 rounded-full bg-[#0071E3]/15 text-[#0071E3] flex items-center justify-center text-[10px] font-black border border-[#0071E3]/30">2a</span>
+                  <span className="text-xs">Realistic Color (0 Palette)</span>
+                </h3>
+              </div>
+              <div className="grow bg-white p-3.5 rounded-xl border border-dashed border-[#D2D2D7] flex flex-col items-center justify-center text-center min-h-[92px] space-y-1.5 shadow-2xs">
+                <Palette className="w-4 h-4 text-[#B6B6BC]" />
+                <span className="text-[11px] text-[#86868B] font-semibold leading-snug">
+                  Select a device model first<br />to see real color options
+                </span>
+              </div>
             </div>
           )}
 
