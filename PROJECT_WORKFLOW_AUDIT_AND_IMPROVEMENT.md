@@ -7,7 +7,7 @@
 
 > **🔄 STATUS UPDATE (2026-08-05 01:33):** While this audit was being written, the working tree was committed **in parallel** (commit `0c23b77`, 01:27:18) — the project-wide upgrade pass (ultra-wide density, content clamp, `GlobalSearchModal`, vendor chunks) plus this doc and the intake R5 doc (`8201c43`) are all committed and **pushed to `origin/main`** (`4a674e2`, 01:33). Items **B-5**, **S-3** and **S-4** below are therefore **RESOLVED** as of this note — kept in the doc for history, marked ✅.
 
-> **🔄 STATUS UPDATE 2 (2026-08-05 01:37, commit `ad40fea`):** **A-1, A-2, A-3 fixed & pushed** (intake page): company→town stuffing removed, order-number collision guard (uniqueness loop over live list), Mark-All-Pass now confirms before overwriting existing verdicts, and the dead `customerAddress` dual state collapsed into `customerTown`. **A-4** (dual state) fixed as part of A-1. **A-7 confirmed live-broken** (realtime test: insert got NO push) — fix SQL below in §5 P0 #4 awaits dashboard/PAT access. Remaining open: **A-6** (portal smoke test), **A-7** (realtime SQL), plus the S-1/S-2 auth hygiene items.
+> **🔄 STATUS UPDATE 3 (2026-08-05 01:42):** **A-7 FIXED & VERIFIED LIVE** — Ko Hein ran `alter publication supabase_realtime add table erp_records;` in the Supabase SQL Editor; re-test confirmed the INSERT push arrives instantly (test row `__rttest2__` received, cleaned up). All P0 items are now **closed except A-6** (portal smoke test).
 
 ---
 
@@ -115,8 +115,8 @@ The header button flips all 21 items to Pass regardless of whether they apply to
 **A-6. Portal flow unverified end-to-end** (carried, WORKFLOW known-issue #6)
 `estimateStatus` / `estimateApprovedAt` / `estimateRejectionReason` are typed but the customer-portal approve/reject → pipeline handoff is not covered by a test. If a customer approves an estimate and it doesn't move the ticket to In Progress, money is lost.
 
-**A-7. Realtime publication may still exclude `erp_records`** (carried, infra)
-Client subscribes correctly (filter by `collection_name=eq.X`), but Supabase only pushes for tables in the `supabase_realtime` publication. One SQL call fixes all tables at once: `alter publication supabase_realtime add table erp_records;` — **do this on the live project**.
+**A-7. Realtime publication may still exclude `erp_records`** — ✅ **FIXED & VERIFIED** (2026-08-05 01:42, Supabase SQL Editor)
+Client subscribes correctly (filter by `collection_name=eq.X`), but Supabase only pushes for tables in the `supabase_realtime` publication. Ko Hein ran `alter publication supabase_realtime add table erp_records;` in the dashboard SQL Editor; a live INSERT test (`__rttest2__`) confirmed the push arrives instantly. Test row cleaned up.
 
 ### 4.2 Security / ops hygiene
 
@@ -150,7 +150,7 @@ Client subscribes correctly (filter by `collection_name=eq.X`), but Supabase onl
 | 1 | **A-1 / A-4**: stop putting company in Town; collapse address state | 30 min | ✅ done `ad40fea` |
 | 2 | **A-2**: order-number dedup/guard | half day | ✅ done `ad40fea` (client-side guard; server-side counter = future hardening) |
 | 3 | **A-3**: confirm/scoped "Mark All Pass" | 15 min | ✅ done `ad40fea` |
-| 4 | **A-7**: run `alter publication supabase_realtime add table erp_records;` on live Supabase | 10 min | 🔴 **BLOCKED on dashboard/PAT** — confirmed live-broken (test insert got no push); SQL ready, needs a Supabase login |
+| 4 | **A-7**: run `alter publication supabase_realtime add table erp_records;` on live Supabase | 10 min | ✅ **DONE & VERIFIED** (01:42) — INSERT push confirmed live |
 | 5 | **S-3**: gitignore backup dirs | 20 min | ✅ done `4a674e2` |
 | 6 | **A-6**: write a portal approve→pipeline vitest smoke test | half day | ⬜ open |
 
