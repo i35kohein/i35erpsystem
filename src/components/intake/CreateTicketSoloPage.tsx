@@ -286,8 +286,16 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
   // Handle Phone change & check customer match
   const handlePhoneChange = (phone: string) => {
     setCustomerPhone(phone);
-    if (phone.trim().length >= 4) {
-      const found = customers.find(c => c.phone.replace(/\D/g, '').includes(phone.replace(/\D/g, '')));
+    const digits = phone.replace(/\D/g, '');
+    const normalize = (p: string) => (p || '').replace(/\D/g, '');
+    if (digits.length >= 7) {
+      // Exact full-number match first; then tolerant last-9 match (handles
+      // 09… / 959… / +959… prefixes). Never substring-match — that auto-filled
+      // unrelated customers (e.g. "Ko Tun") from just a few typed digits.
+      const exact = customers.find((c) => normalize(c.phone) === digits);
+      const found = exact || (digits.length >= 9
+        ? customers.find((c) => normalize(c.phone).slice(-9) === digits.slice(-9))
+        : undefined);
       if (found) {
         setMatchedCustomer(found);
         setCustomerName(found.name);
