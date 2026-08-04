@@ -1864,7 +1864,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 <h3 className="mt-1 truncate text-sm font-extrabold text-[#1D1D1F]">{selectedPartForDetails.name}</h3>
                 <p className="mt-1 text-[11px] text-[#86868B]">{selectedPartForDetails.category} · {selectedPartForDetails.qualityTier}</p>
               </div>
-              <button type="button" onClick={() => setSelectedPartForDetails(null)} className="rounded-lg p-1 text-[#86868B] hover:bg-[#F5F5F7] hover:text-[#1D1D1F]" title="Close details">
+              <button type="button" onClick={() => setSelectedPartForDetails(null)} aria-label="Close part details" title="Close details" className="rounded-lg p-1 text-[#86868B] hover:bg-[#F5F5F7] hover:text-[#1D1D1F]">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -1874,8 +1874,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 <p className="text-[10px] font-bold uppercase tracking-wide text-[#86868B]">In Stock</p>
                 <p className="mt-1 font-mono text-xl font-black text-[#1D1D1F]">{selectedPartForDetails.quantityInStock}</p>
                 <div className="mt-2 flex gap-1.5">
-                  <button type="button" onClick={() => { onUpdatePartStock(selectedPartForDetails.id, Math.max(0, selectedPartForDetails.quantityInStock - 1)); setSelectedPartForDetails({ ...selectedPartForDetails, quantityInStock: Math.max(0, selectedPartForDetails.quantityInStock - 1) }); }} className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#E5E5EA] bg-white font-black hover:bg-rose-50 hover:text-rose-600" title="Subtract one">−</button>
-                  <button type="button" onClick={() => { onUpdatePartStock(selectedPartForDetails.id, selectedPartForDetails.quantityInStock + 1); setSelectedPartForDetails({ ...selectedPartForDetails, quantityInStock: selectedPartForDetails.quantityInStock + 1 }); }} className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#E5E5EA] bg-white font-black text-[#0071E3] hover:bg-emerald-50 hover:text-emerald-600" title="Add one">+</button>
+                  <button type="button" onClick={() => { onUpdatePartStock(selectedPartForDetails.id, Math.max(0, selectedPartForDetails.quantityInStock - 1)); setSelectedPartForDetails({ ...selectedPartForDetails, quantityInStock: Math.max(0, selectedPartForDetails.quantityInStock - 1) }); }} aria-label="Subtract one from stock" title="Subtract one" className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#E5E5EA] bg-white font-black hover:bg-rose-50 hover:text-rose-600">−</button>
+                  <button type="button" onClick={() => { onUpdatePartStock(selectedPartForDetails.id, selectedPartForDetails.quantityInStock + 1); setSelectedPartForDetails({ ...selectedPartForDetails, quantityInStock: selectedPartForDetails.quantityInStock + 1 }); }} aria-label="Add one to stock" title="Add one" className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#E5E5EA] bg-white font-black text-[#0071E3] hover:bg-emerald-50 hover:text-emerald-600">+</button>
                   <span className="self-center text-[10px] font-bold text-[#86868B]">Min: {selectedPartForDetails.reorderPoint}</span>
                 </div>
               </div>
@@ -2503,7 +2503,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 <h3 className="mt-0.5 text-sm font-black text-[#111111]">Review before saving</h3>
                 <p className="mt-0.5 text-[10px] font-semibold text-[#111111]">Approve only when the list below looks right.</p>
               </div>
-              <button type="button" onClick={() => setShowInlineSaveConfirm(false)} className="rounded-lg p-1 text-[#111111] hover:bg-[#F5F5F7] hover:text-[#0071E3]" title="Close">
+              <button type="button" onClick={() => setShowInlineSaveConfirm(false)} aria-label="Close inline save confirmation" title="Close" className="rounded-lg p-1 text-[#111111] hover:bg-[#F5F5F7] hover:text-[#0071E3]">
                 <X className="h-3.5 w-3.5" />
               </button>
             </div>

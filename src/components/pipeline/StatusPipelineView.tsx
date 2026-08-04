@@ -621,7 +621,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         )}
 
                         {/* Model & Customer & Repair Issue */}
-                        <div className="cursor-pointer space-y-1" onClick={() => setDetailModalWo(wo)}>
+                        <div role="button" tabIndex={0} aria-label={`Open detail for ${wo.deviceModel || wo.orderNumber || wo.id}`} className="cursor-pointer space-y-1" onClick={() => setDetailModalWo(wo)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setDetailModalWo(wo); } }}>
                           <p className="font-extrabold text-[#1D1D1F] text-xs line-clamp-1 hover:text-[#0071E3] transition-colors">{wo.deviceModel}</p>
                           <p className="text-[10px] text-[#86868B] truncate">{wo.customerName} • {wo.customerPhone}</p>
                           
@@ -736,7 +736,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
       {detailModalWo && (
         <div className="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 items-center justify-center p-3 sm:p-6">
           <div className="bg-white border border-[#D2D2D7] rounded-2xl max-w-5xl w-full p-6 space-y-4 text-xs shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <button onClick={() => setDetailModalWo(null)} className="absolute right-4 top-4 text-[#86868B] hover:text-[#1D1D1F] cursor-pointer">
+            <button onClick={() => setDetailModalWo(null)} aria-label="Close ticket detail" className="absolute right-4 top-4 text-[#86868B] hover:text-[#1D1D1F] cursor-pointer">
               <X className="w-5 h-5" />
             </button>
 
@@ -1047,7 +1047,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
       {addLogModalWo && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border border-[#D2D2D7] rounded-2xl max-w-md w-full p-6 space-y-4 text-xs shadow-2xl relative">
-            <button onClick={() => setAddLogModalWo(null)} className="absolute right-4 top-4 text-[#86868B] hover:text-[#1D1D1F]">
+            <button onClick={() => setAddLogModalWo(null)} aria-label="Close repair log" className="absolute right-4 top-4 text-[#86868B] hover:text-[#1D1D1F]">
               <X className="w-5 h-5" />
             </button>
 
@@ -1081,7 +1081,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
       {assignTechModalWo && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border border-[#D2D2D7] rounded-2xl max-w-sm w-full p-6 space-y-4 text-xs shadow-2xl relative">
-            <button onClick={() => setAssignTechModalWo(null)} className="absolute right-4 top-4 text-[#86868B] hover:text-[#1D1D1F]">
+            <button onClick={() => setAssignTechModalWo(null)} aria-label="Close technician assignment" className="absolute right-4 top-4 text-[#86868B] hover:text-[#1D1D1F]">
               <X className="w-5 h-5" />
             </button>
 
@@ -1119,7 +1119,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
       {checkoutModalWo && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border border-[#D2D2D7] rounded-2xl max-w-md w-full p-6 space-y-4 text-xs shadow-2xl relative">
-            <button onClick={() => setCheckoutModalWo(null)} className="absolute right-4 top-4 text-[#86868B] hover:text-[#1D1D1F]">
+            <button onClick={() => setCheckoutModalWo(null)} aria-label="Close checkout" className="absolute right-4 top-4 text-[#86868B] hover:text-[#1D1D1F]">
               <X className="w-5 h-5" />
             </button>
 
@@ -1173,7 +1173,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
       {afterDiagModalWo && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border border-[#D2D2D7] rounded-2xl max-w-xl w-full p-6 space-y-4 text-xs shadow-2xl relative max-h-[88vh] overflow-y-auto">
-            <button onClick={() => setAfterDiagModalWo(null)} className="absolute right-4 top-4 text-[#86868B] hover:text-[#1D1D1F]">
+            <button onClick={() => setAfterDiagModalWo(null)} aria-label="Close post-diagnosis" className="absolute right-4 top-4 text-[#86868B] hover:text-[#1D1D1F]">
               <X className="w-5 h-5" />
             </button>
 

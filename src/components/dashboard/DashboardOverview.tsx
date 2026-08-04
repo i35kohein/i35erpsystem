@@ -665,11 +665,15 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       {/* Headline summary cards — always visible above the subtab tabs. */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Card 1: Active In-Shop Repairs */}
-        <div 
+        <div
+          role="button"
+          tabIndex={0}
           onClick={() => {
             setActiveDashboardSubTab('status-queue');
             setStatusQueueFilter('ALL');
           }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveDashboardSubTab('status-queue'); setStatusQueueFilter('ALL'); } }}
+          aria-label="View active repairs queue"
           className="group relative bg-white p-4 rounded-2xl border border-[#E5E5EA] shadow-2xs hover:shadow-md hover:border-[#0071E3]/50 transition-all cursor-pointer overflow-hidden select-none"
         >
           <div className="flex items-center justify-between">
@@ -699,10 +703,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
         {/* Card 2: Ready for Pickup */}
         <div 
+          role="button"
+          tabIndex={0}
           onClick={() => {
             setActiveDashboardSubTab('status-queue');
             setStatusQueueFilter('Finished');
           }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveDashboardSubTab('status-queue'); setStatusQueueFilter('Finished'); } }}
+          aria-label="View ready for pickup"
           className="group relative bg-white p-4 rounded-2xl border border-[#E5E5EA] shadow-2xs hover:shadow-md hover:border-emerald-500/50 transition-all cursor-pointer overflow-hidden select-none"
         >
           <div className="flex items-center justify-between">
@@ -732,7 +740,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
         {/* Card 3: Total Revenue */}
         <div 
+          role="button"
+          tabIndex={0}
           onClick={() => setActiveDashboardSubTab('finance')}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveDashboardSubTab('finance'); } }}
+          aria-label="View finance overview"
           className="group relative bg-white p-4 rounded-2xl border border-[#E5E5EA] shadow-2xs hover:shadow-md hover:border-indigo-500/50 transition-all cursor-pointer overflow-hidden select-none"
         >
           <div className="flex items-center justify-between">
@@ -762,7 +774,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
         {/* Card 4: Average Turnaround Time (completed tickets only) */}
         <div 
+          role="button"
+          tabIndex={0}
           onClick={() => setActiveDashboardSubTab('tech-kpi')}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveDashboardSubTab('tech-kpi'); } }}
+          aria-label="View technician KPI"
           className="group relative bg-white p-4 rounded-2xl border border-[#E5E5EA] shadow-2xs hover:shadow-md hover:border-teal-500/50 transition-all cursor-pointer overflow-hidden select-none"
         >
           <div className="flex items-center justify-between">

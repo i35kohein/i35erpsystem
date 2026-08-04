@@ -174,7 +174,7 @@ export const Navigation: React.FC<NavigationProps> = ({
       items: [
         {
           id: 'inventory',
-          label: t('navPartsMatrix'),
+          label: isCollapsed ? t('navPartsMatrix') : 'Parts & Stock Matrix',
           icon: Boxes,
           badge: lowStockCount,
           badgeColor: 'bg-[#FF9500]',
@@ -256,7 +256,7 @@ export const Navigation: React.FC<NavigationProps> = ({
         flex flex-col justify-between
         transition-all duration-300 ease-in-out select-none
         ${isMobileMenuOpen ? 'translate-x-0 w-64' : '-translate-x-full lg:translate-x-0'}
-        ${isCollapsed ? 'lg:w-14' : 'lg:w-56'}
+        ${isCollapsed ? 'lg:w-14' : 'lg:w-64'}
         ${!isCollapsed ? 'lg:shadow-xl lg:shadow-[#1D1D1F]/10' : ''}
       `}>
         {/* Sidebar Header & Toggle */}
@@ -409,7 +409,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                       title={item.label}
                       aria-label={item.badge !== undefined && (typeof item.badge === 'string' || item.badge > 0) ? `${item.label} (${item.badge} pending)` : item.label}
                     >
-                      <div className="flex items-center justify-center min-w-0">
+                      <div className="flex items-center flex-1 min-w-0">
                         <ItemIcon className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#0071E3]' : 'text-[#86868B]'}`} />
                         {!isCollapsed && <span className="truncate text-xs ml-2.5">{item.label}</span>}
                       </div>

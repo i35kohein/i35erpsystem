@@ -337,7 +337,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     <CheckCircle2 className="w-4 h-4 text-[#34C759]" />
                     <span>QA Inspection Confirmed! Card updated to Green & Ready for Checkout.</span>
                   </div>
-                  <button onClick={() => setQaSavedNotice(false)} className="text-[#1E7E34] hover:opacity-75">
+                  <button onClick={() => setQaSavedNotice(false)} aria-label="Dismiss confirmation" className="text-[#1E7E34] hover:opacity-75">
                     <X className="w-4 h-4" />
                   </button>
                 </div>

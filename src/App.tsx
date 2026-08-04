@@ -1771,6 +1771,7 @@ export default function App() {
                   setDateFilter={setDateFilter}
                   statusFilter={statusFilter}
                   setStatusFilter={setStatusFilter}
+                  onOpenSettings={() => setActiveTab('settings')}
                 />
               )}
 

@@ -400,7 +400,7 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
                 {message.role === 'assistant' && <span className="block mb-1 text-[9px] font-bold uppercase tracking-wide text-[var(--text-muted)]">{message.source === 'ai' ? 'AI analysis' : 'Live ERP analysis'}</span>}
                 {message.content}
                 {message.role === 'assistant' && (
-                  <button type="button" onClick={() => void copyMessage(message.content)} title="Copy response" className="absolute -right-8 top-1.5 p-1 text-[var(--text-muted)] opacity-0 group-hover:opacity-100 hover:text-[var(--primary)]">
+                  <button type="button" onClick={() => void copyMessage(message.content)} aria-label="Copy response" title="Copy response" className="absolute -right-8 top-1.5 p-1 text-[var(--text-muted)] opacity-0 group-hover:opacity-100 hover:text-[var(--primary)]">
                     <Copy className="w-3.5 h-3.5" />
                   </button>
                 )}

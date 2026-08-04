@@ -1077,7 +1077,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
               <h3 className="text-base font-extrabold text-[#1D1D1F]">
                 Record Supplier Debt Payment
               </h3>
-              <button onClick={() => setSelectedDebtForPayment(null)}>
+              <button onClick={() => setSelectedDebtForPayment(null)} aria-label="Close debt payment" className="rounded-lg p-1 hover:bg-[#F5F5F7] transition-colors">
                 <X className="w-5 h-5 text-[#86868B]" />
               </button>
             </div>

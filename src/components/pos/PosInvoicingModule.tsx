@@ -114,6 +114,13 @@ const PAYMENT_METHOD_META: Record<string, { icon: LucideIcon; color: string }> =
 };
 const getPaymentMeta = (name: string) => PAYMENT_METHOD_META[name] || { icon: DollarSign, color: '#0071E3' };
 
+// Group a raw IMEI/S/N into readable chunks: 350627792231777 -> 3506 2779 2231 777
+const formatSerialGrouped = (value: string): string => {
+  const digits = value.replace(/[^0-9a-zA-Z]/g, '');
+  if (/^\d{15}$/.test(digits)) return digits.replace(/(\d{4})(?=\d)/g, '$1 ');
+  return value.trim();
+};
+
 interface PosInvoicingModuleProps {
   workOrders: WorkOrder[];
   customers: Customer[];
@@ -128,6 +135,7 @@ interface PosInvoicingModuleProps {
   setDateFilter?: (d: DateFilterState) => void;
   statusFilter?: string;
   setStatusFilter?: (s: string) => void;
+  onOpenSettings?: () => void;
 }
 
 export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
@@ -142,6 +150,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   dateFilter: propDateFilter,
   setDateFilter: propSetDateFilter,
   statusFilter = 'ALL',
+  onOpenSettings,
 }) => {
   const activePaymentMethods = getActivePaymentMethods(systemSettings).filter((m) => m.enabled);
   const [selectedWoId, setSelectedWoId] = useState<string>(workOrders[0]?.id || '');
@@ -485,9 +494,21 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           <span className="text-[#0071E3] font-bold"> · Deposit {wo.depositAmount.toLocaleString()} MMK</span>
                         )}
                       </span>
-                      <span className="font-mono text-[10px] shrink-0 truncate">
-                        {(wo.imei || wo.serialNumber) && <>#{wo.imei || wo.serialNumber}</>}
-                      </span>
+                      {(wo.imei || wo.serialNumber) && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const raw = wo.imei || wo.serialNumber || '';
+                            navigator.clipboard?.writeText(raw).then(() => toast('IMEI copied')).catch(() => {});
+                          }}
+                          title="Copy IMEI"
+                          aria-label={`Copy IMEI ${wo.imei || wo.serialNumber}`}
+                          className="font-mono text-[10px] shrink-0 truncate text-[#86868B] hover:text-[#0071E3] transition-colors"
+                        >
+                          #{formatSerialGrouped(wo.imei || wo.serialNumber)}
+                        </button>
+                      )}
                     </div>
                   </div>
                 );
@@ -776,7 +797,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     <CreditCard className="w-3.5 h-3.5" />
                     <span>Payment Method Selection ({activePaymentMethods.length} Enabled)</span>
                   </h3>
-                  <span className="text-[10px] text-[#86868B]">Configured in Settings → Payment Methods</span>
+                  <button type="button" onClick={onOpenSettings} className="text-[10px] text-[#0071E3] hover:underline font-semibold cursor-pointer" title="Open Settings → Payment Methods">Configured in Settings → Payment Methods</button>
                 </div>
 
                 {activePaymentMethods.length === 0 ? (

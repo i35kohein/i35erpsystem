@@ -1107,7 +1107,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       {isColorModalOpen && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border border-[#E5E5EA] rounded-2xl max-w-lg w-full p-6 space-y-4 text-xs shadow-2xl relative">
-            <button onClick={() => setIsColorModalOpen(false)} className="absolute right-4 top-4 text-[#86868B] hover:text-[#1D1D1F]">
+            <button onClick={() => setIsColorModalOpen(false)} aria-label="Close color picker" className="absolute right-4 top-4 text-[#86868B] hover:text-[#1D1D1F]">
               <X className="w-5 h-5" />
             </button>
 
@@ -1156,7 +1156,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       {isWarrantyModalOpen && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border border-[#E5E5EA] rounded-2xl max-w-md w-full p-6 space-y-4 text-xs shadow-2xl relative">
-            <button onClick={() => setIsWarrantyModalOpen(false)} className="absolute right-4 top-4 text-[#86868B] hover:text-[#1D1D1F]">
+            <button onClick={() => setIsWarrantyModalOpen(false)} aria-label="Close warranty info" className="absolute right-4 top-4 text-[#86868B] hover:text-[#1D1D1F]">
               <X className="w-5 h-5" />
             </button>
 

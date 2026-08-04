@@ -73,7 +73,7 @@ export const UserRoleSwitcher: React.FC<UserRoleSwitcherProps> = ({
           {!compact && (
             <div className="text-left min-w-0">
               <div className="flex items-center space-x-1.5">
-                <span className="font-extrabold truncate max-w-[96px]">
+                <span className="font-extrabold truncate flex-1 min-w-0">
                   {currentUser.name}
                 </span>
                 <span className={`px-1.5 py-0.2 rounded-md text-[9px] font-extrabold border ${currentBadge.bgColor}`}>
