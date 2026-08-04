@@ -5,6 +5,8 @@
 - **Method:** Full source audit of `App.tsx` (1,994 lines), `CreateTicketSoloPage.tsx` (1,575), `Navigation.tsx`, `server.ts` (675), `supabase.ts`, `schema.ts`, `types/index.ts`, plus every lazy-loaded module; cross-checked against `WORKFLOW.md` + `PROJECT_WIDE_UI_UX_UPGRADE.md`. `tsc --noEmit` = **0 errors**; `vitest` = **12/12 pass**.
 - **Purpose:** "check the whole project, visualize the workflow, find bugs/mistakes, tell me how to make it better." This doc draws the end-to-end flow, then lists **verified** bugs (code-level), **infected** mistakes (architecture/ops), and a prioritized fix roadmap.
 
+> **🔄 STATUS UPDATE (2026-08-05 01:33):** While this audit was being written, the working tree was committed **in parallel** (commit `0c23b77`, 01:27:18) — the project-wide upgrade pass (ultra-wide density, content clamp, `GlobalSearchModal`, vendor chunks) plus this doc and the intake R5 doc (`8201c43`) are all committed and **pushed to `origin/main`** (`4a674e2`, 01:33). Items **B-5**, **S-3** and **S-4** below are therefore **RESOLVED** as of this note — kept in the doc for history, marked ✅. The remaining P0 bugs (A-1…A-7) are still open and are the actionable list.
+
 ---
 
 ## 1. System Architecture (as it actually is)
@@ -85,7 +87,7 @@ Supabase Postgres  —  ONE table: erp_records (collection_name TEXT + data JSON
 | `npm run check:ui` | ⚠️ 5,256 raw-hex utilities (72 colors) · **19 clickable `<div>` w/o role** · exit 0 (warn) |
 | `.env*` in git | ✅ ignored (only `.env.example` tracked) |
 | Deploy script + rollback + nightly backup | ✅ present (`deploy.sh`, `rollback.sh`, `backup.sh`) |
-| Working tree committed? | 🔴 **8 modules modified + untracked `GlobalSearchModal.tsx` + untracked `appleart_Saturday_1107_backup/` — UNCOMMITTED** |
+| Working tree committed? | ✅ **RESOLVED** — `0c23b77` (project-wide pass + GlobalSearchModal) + `8201c43` (docs) + `4a674e2` (gitignore) all pushed; tree clean as of 01:33 |
 
 ---
 
@@ -122,11 +124,11 @@ Client subscribes correctly (filter by `collection_name=eq.X`), but Supabase onl
 **S-2. `AUTH_PASSWORD` present in both `.env` and `.env.local`**
 `.env.local` is a client-vite file (has `VITE_*`); putting server auth there is wrong layering — it ships nowhere (gitignored) but invites accidental exposure. Move `AUTH_*` to server-only `.env`.
 
-**S-3. Stray `appleart_Saturday_1107_backup/` is NOT gitignored**
-`git add -A` would commit a large backup blob into the repo. Add `appleart_*_backup*/` (or `backups/`) to `.gitignore`.
+**S-3. Stray `appleart_Saturday_1107_backup/` is NOT gitignored** — ✅ **RESOLVED** (commit `4a674e2`)
+`git add -A` would commit a large backup blob into the repo. Added `appleart_*_backup*/` + `backups/` to `.gitignore`; verified `git check-ignore` now excludes it.
 
-**S-4. Docs drifted from code (again)**
-`PROJECT_WIDE_UI_UX_UPGRADE.md` committed as "docs" claims the global-search + multi-module plan while **the code implementing it is uncommitted** and `GlobalSearchModal.tsx` is untracked. The commit-and-doc discipline lapses let stale docs mislead the next maintainer (R4's stepper/bottom-nav findings were already invalidated by later commits — same failure mode).
+**S-4. Docs drifted from code (again)** — ✅ **RESOLVED** (commit `0c23b77`)
+`PROJECT_WIDE_UI_UX_UPGRADE.md` was committed as "docs" while the implementing code sat uncommitted. The full upgrade pass (incl. `GlobalSearchModal.tsx`) is now committed and pushed. *Lesson to keep:* docs should land in the same commit as (or immediately after) the code they describe — this happened twice in 24 h.
 
 ### 4.3 UI / a11y (from `check:ui`, cross-project)
 

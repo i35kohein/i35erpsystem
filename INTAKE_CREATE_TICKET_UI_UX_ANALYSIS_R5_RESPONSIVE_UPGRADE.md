@@ -78,9 +78,9 @@ This reads the last number from the `workOrders` prop *at the moment of submit*.
 `CreateTicketSoloPage.tsx` diagnostics header exposes three buttons: **Mark All Pass / Mark All N/A / Reset**. "Mark All Pass" flips *every one of the 21 items* to Pass — including ones that don't apply to the device (e.g. marking "True Tone" or camera items pass on a device where they were never tested). For a repair intake this risks fabricating a clean bill on items the technician didn't actually verify.
 - **Fix (S):** make "Mark All Pass" **explicitly confirm** ("Mark all 21 as Pass — including untested items?") or scope it: only mark items currently `N/A` **and** belonging to the device's relevant set. At minimum, visually distinguish "auto-passed" items afterward so staff can review.
 
-### B-5. Uncommitted project-wide work + new `GlobalSearchModal.tsx` not in git
-`git status` shows 8 modified modules (`App.tsx`, `DashboardOverview`, `ShopFinancePl`, `PosInvoicing`, `PriceCatalog`, `QualityAssurance`, `InventoryManagement`, `SupplierRma`, `index.css`, `vite.config.ts`) and an **untracked `src/components/common/GlobalSearchModal.tsx`** — yet `PROJECT_WIDE_UI_UX_UPGRADE.md` was already committed (message "docs: project-wide UI/UX upgrade plan"). So the docs claim the plan, but the referenced **global-search work and the multi-module changes are uncommitted**.
-- **Fix (XS):** commit the working tree (or decide these are WIP). Stray uncommitted feature code + committed docs is how the docs drift from reality (see the R4-stale-doc problem above). Recommend `git add -A` + a clear commit message, and an `.gitignore` for the stray `appleart_Saturday_1107_backup/` if it's not meant to ship.
+### B-5. Uncommitted project-wide work + new `GlobalSearchModal.tsx` not in git — ✅ RESOLVED (commit `0c23b77`, pushed)
+At analysis time `git status` showed 8 modified modules (`App.tsx`, `DashboardOverview`, `ShopFinancePl`, `PosInvoicing`, `PriceCatalog`, `QualityAssurance`, `InventoryManagement`, `SupplierRma`, `index.css`, `vite.config.ts`) and an **untracked `src/components/common/GlobalSearchModal.tsx`**. The whole pass (incl. global search) was committed in parallel at 01:27:18, plus `.gitignore` backup rules (`4a674e2`) — all on `origin/main`, working tree clean.
+- **Lesson kept:** commit the working tree promptly so docs and code stop diverging (this happened twice in 24 h — R4 stale docs, then this).
 
 ---
 
@@ -120,7 +120,7 @@ This reads the last number from the `workOrders` prop *at the moment of submit*.
 1. **U-01 / U-02** — kill the company-in-Town bug + collapse address state (~30 min, real data bug). Verifiable: a B2B repeat-customer match leaves Town empty, and saved ticket `customerAddress` = typed Town.
 2. **U-03** — Mark-All-Pass confirm (~15 min).
 3. **U-14** — AI FAB offset (XS).
-4. **B-5** — commit the working tree so docs and code stop diverging (XS, ops hygiene).
+4. ~~**B-5**~~ — ✅ done (`0c23b77` + `4a674e2`); docs and code now in sync.
 5. **U-06** mobile collapsible sections (half day) — the single biggest remaining mobile win.
 6. **B-3** order-number race (M) — do before traffic grows.
 7. Then the U-04…U-13 backlog in order.
