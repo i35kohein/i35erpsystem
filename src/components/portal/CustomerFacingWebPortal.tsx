@@ -31,6 +31,7 @@ import {
   Award
 } from 'lucide-react';
 import { WorkOrder, SystemSettings, Customer } from '../../types';
+import { applyEstimateApproval, applyEstimateRejection } from '../../utils/portalWorkflow';
 
 interface CustomerFacingWebPortalProps {
   workOrders: WorkOrder[];
@@ -124,61 +125,36 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
     }
   };
 
-  // Handle Estimate Approval
+  // Handle Estimate Approval — delegates to pure applyEstimateApproval() (see portalWorkflow.test.ts)
   const handleApproveEstimate = () => {
     if (!currentWorkOrder) return;
 
-    const now = new Date().toLocaleString();
-    const updatedLogs = [
-      ...(currentWorkOrder.repairLogs || []),
+    const updatedWo = applyEstimateApproval(
       {
-        id: `log-cust-approve-${Date.now()}`,
-        timestamp: now,
-        author: `Customer (${currentWorkOrder.customerName})`,
-        note: `Estimate of ${currentWorkOrder.totalAmount.toLocaleString()} ${systemSettings.currencySymbol} APPROVED online via Customer Portal. Signee: ${customerNameSig || currentWorkOrder.customerName}.`,
-        statusChange: currentWorkOrder.status === 'Receive' ? 'In Progress' : currentWorkOrder.status,
+        workOrder: currentWorkOrder,
+        customerName: customerNameSig || currentWorkOrder.customerName,
+        currencySymbol: systemSettings.currencySymbol,
       },
-    ];
-
-    const updatedWo: WorkOrder = {
-      ...currentWorkOrder,
-      status: currentWorkOrder.status === 'Receive' ? 'In Progress' : currentWorkOrder.status,
-      estimateStatus: 'Approved',
-      estimateApprovedAt: new Date().toISOString(),
-      repairLogs: updatedLogs,
-      updatedAt: new Date().toISOString(),
-    };
+      new Date().toISOString()
+    );
 
     onUpdateWorkOrder(updatedWo);
     setApprovalModalOpen(false);
   };
 
-  // Handle Estimate Rejection / Request Call
+  // Handle Estimate Rejection / Request Call — delegates to pure applyEstimateRejection()
   const handleRejectEstimate = () => {
     if (!currentWorkOrder) return;
 
-    const now = new Date().toLocaleString();
-    const fullNote = `Customer declined estimate/requested changes. Action: ${rejectionReason}. ${rejectionNotes ? `Notes: ${rejectionNotes}` : ''}`;
-
-    const updatedLogs = [
-      ...(currentWorkOrder.repairLogs || []),
+    const updatedWo = applyEstimateRejection(
       {
-        id: `log-cust-reject-${Date.now()}`,
-        timestamp: now,
-        author: `Customer (${currentWorkOrder.customerName})`,
-        note: fullNote,
-        statusChange: 'Pending',
+        workOrder: currentWorkOrder,
+        customerName: currentWorkOrder.customerName,
+        rejectionReason,
+        rejectionNotes,
       },
-    ];
-
-    const updatedWo: WorkOrder = {
-      ...currentWorkOrder,
-      status: 'Pending',
-      estimateStatus: 'Rejected',
-      estimateRejectionReason: `${rejectionReason}: ${rejectionNotes}`,
-      repairLogs: updatedLogs,
-      updatedAt: new Date().toISOString(),
-    };
+      new Date().toISOString()
+    );
 
     onUpdateWorkOrder(updatedWo);
     setRejectionModalOpen(false);
