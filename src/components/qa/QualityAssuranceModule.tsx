@@ -391,7 +391,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-2.5 text-xs sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-2.5 text-xs sm:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4">
                   {qaDiagnostics.map((item, idx) => {
                     const IconComp = getDiagnosticIcon(item.name);
 

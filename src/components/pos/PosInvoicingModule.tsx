@@ -807,7 +807,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     <p>Enable one in Settings → Payment Methods to accept payment.</p>
                   </div>
                 ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 3xl:grid-cols-6 4xl:grid-cols-8 gap-2">
                   {activePaymentMethods.map((m) => {
                     const isSelected = paymentMethod === m.name;
                     const meta = getPaymentMeta(m.name);

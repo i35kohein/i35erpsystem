@@ -95,6 +95,7 @@ import { CompletedDeviceFollowUpModule } from './components/followup/CompletedDe
 import { ShopFinancePlModule } from './components/finance/ShopFinancePlModule';
 import { usePriceCatalog } from './hooks/usePriceCatalog';
 import { OfflineSyncStatusBadge } from './components/common/OfflineSyncStatusBadge';
+import { GlobalSearchModal } from './components/common/GlobalSearchModal';
 import { HoverTooltip } from './components/common/HoverTooltip';
 import { registerToastHandler, unregisterToastHandler } from './lib/toast';
 import { LoginPage } from './components/auth/LoginPage';
@@ -169,6 +170,7 @@ export default function App() {
   const [supplierDebts, setSupplierDebts] = useState<SupplierDebtRecord[]>([]);
   const [technicianPayouts, setTechnicianPayouts] = useState<TechnicianPayoutRecord[]>([]);
   const [isDbSynced, setIsDbSynced] = useState<boolean>(true);
+  const [isGlobalSearchOpen, setIsGlobalSearchOpen] = useState(false);
 
   // User Management Handlers
   const handleAddUser = (newUser: AppUser) => {
@@ -345,6 +347,18 @@ export default function App() {
       window.clearInterval(id);
       window.removeEventListener('erp-refresh-request', handleRefreshRequest);
     };
+  }, []);
+
+  // Global search: Cmd/Ctrl+K opens the cross-module search modal.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsGlobalSearchOpen(true);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, []);
 
   useEffect(() => {
@@ -1195,6 +1209,16 @@ export default function App() {
 
           {/* Dynamic Header Actions & Quick Filters per Tab */}
           <div className="app-topbar-actions flex min-w-0 items-center flex-nowrap justify-end gap-1.5 sm:gap-2 text-xs py-1 shrink-0 relative z-30">
+            {/* Global Search (Cmd/Ctrl+K) */}
+            <button
+              type="button"
+              onClick={() => setIsGlobalSearchOpen(true)}
+              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#E5E5EA] bg-white text-[#1D1D1F] hover:border-[#0071E3] hover:text-[#0071E3] transition-all cursor-pointer active:scale-95"
+              title="Global search (⌘K)"
+              aria-label="Global search (⌘K)"
+            >
+              <Search className="h-4 w-4" />
+            </button>
             {/* Reset All Filters Pill Button when any filter is active */}
             {hasActiveFilters && (
               <button
@@ -1584,7 +1608,7 @@ export default function App() {
           </div>
         </header>
 
-        <main className="min-h-0 flex-1 w-full max-w-full px-3 sm:px-4 lg:px-5 pt-3 pb-6 lg:pb-5 flex flex-col">
+        <main className="min-h-0 flex-1 w-full max-w-[1920px] mx-auto px-3 sm:px-4 lg:px-5 pt-3 pb-6 lg:pb-5 flex flex-col">
           <Suspense fallback={<div className="flex-1 flex items-center justify-center text-xs text-[#86868B]">Loading…</div>}>
           <div key={activeTab} className="app-module-content flex-1 w-full min-w-0 flex flex-col">
               {activeTab === 'dashboard' && (
@@ -1887,6 +1911,16 @@ export default function App() {
           </Suspense>
         </main>
       </div>
+
+      {/* Global Search Modal (Cmd/Ctrl+K) */}
+      <GlobalSearchModal
+        open={isGlobalSearchOpen}
+        onClose={() => setIsGlobalSearchOpen(false)}
+        workOrders={workOrders}
+        parts={parts}
+        customers={rosterCustomers}
+        onNavigate={(tab) => setActiveTab(tab)}
+      />
 
       {/* AI FAB: available from every tab & every screen size. On mobile it sits
           above the bottom nav / POS checkout bar; on desktop it's a bottom-right

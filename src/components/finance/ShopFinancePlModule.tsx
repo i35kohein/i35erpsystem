@@ -386,7 +386,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
       {activeTab === 'overview' && (
         <div className="space-y-6">
           {/* Key P&L Summary Metric Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 3xl:grid-cols-6 4xl:grid-cols-8 gap-4">
             {/* Total Gross Revenue Card */}
             <div className="bg-white p-5 rounded-2xl border border-[#E5E5EA] shadow-2xs space-y-2">
               <div className="flex items-center justify-between text-[#86868B]">

@@ -664,7 +664,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       )}
 
       {/* Headline summary cards — always visible above the subtab tabs. */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 3xl:grid-cols-6 4xl:grid-cols-8 gap-3.5">
         {/* Card 1: Active In-Shop Repairs */}
         <div
           role="button"
@@ -1095,7 +1095,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </div>
 
             {/* Visual Stage Progress Bars Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 3xl:grid-cols-6 4xl:grid-cols-8 gap-4 pt-1">
               {[
                 { stage: 'Receive', title: 'Intake / Receive', count: statusQueueCounts['Receive'], color: 'bg-blue-500', bg: 'bg-blue-50', text: 'text-blue-700' },
                 { stage: 'In Progress', title: 'In Progress (Active)', count: statusQueueCounts['In Progress'], color: 'bg-emerald-500', bg: 'bg-emerald-50', text: 'text-emerald-700' },
@@ -1587,7 +1587,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       {activeDashboardSubTab === 'finance' && (
         <div role="tabpanel" id="dash-panel-finance" aria-labelledby="dash-tab-finance" className="space-y-6">
           {/* Financial Performance KPI Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 3xl:grid-cols-6 4xl:grid-cols-8 gap-4">
             <div className="bg-white border border-[#E5E5EA] rounded-2xl p-4 shadow-2xs space-y-1">
               <span className="text-xs font-bold text-[#86868B] uppercase">Total Revenue</span>
               <p className="text-2xl font-extrabold text-[#1D1D1F]">{totalRevenue.toLocaleString()} MMK</p>

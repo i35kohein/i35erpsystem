@@ -244,8 +244,8 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                   <th className="p-3">RMA # & Date</th>
                   <th className="p-3">Defective Part & Tier</th>
                   <th className="p-3">Vendor</th>
-                  <th className="p-3">Defect Reason</th>
-                  <th className="p-3">Return Tracking</th>
+                  <th className="p-3 hidden lg:table-cell">Defect Reason</th>
+                  <th className="p-3 hidden xl:table-cell">Return Tracking</th>
                   <th className="p-3">Status</th>
                   <th className="p-3 text-right">Action</th>
                 </tr>
@@ -268,9 +268,9 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
 
                     <td className="p-3.5 font-bold text-[#AF52DE]">{rma.supplierName}</td>
 
-                    <td className="p-3.5 text-[#1D1D1F] max-w-xs text-xs">{rma.reason}</td>
+                    <td className="p-3.5 text-[#1D1D1F] max-w-xs text-xs hidden lg:table-cell">{rma.reason}</td>
 
-                    <td className="p-3.5 font-mono text-[10px] text-[#86868B]">
+                    <td className="p-3.5 font-mono text-[10px] text-[#86868B] hidden xl:table-cell">
                       {rma.trackingNumber || 'No tracking yet'}
                     </td>
 

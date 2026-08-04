@@ -1402,10 +1402,10 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <thead className="sticky top-0 z-20 border-b border-[#E5E5EA] bg-[#F5F5F7] font-mono text-[10px] uppercase text-[#86868B]">
                 <tr>
                   <th className="p-2.5">Part</th>
-                  <th className="p-2.5">Cost</th>
+                  <th className="p-2.5 hidden md:table-cell">Cost</th>
                   <th className="p-2.5">Selling</th>
                   <th className="p-2.5">Profit / Unit</th>
-                  <th className="p-2.5">Margin</th>
+                  <th className="p-2.5 hidden lg:table-cell">Margin</th>
                   <th className="p-2.5 text-right">Detail</th>
                 </tr>
               </thead>
@@ -1416,10 +1416,10 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   return (
                     <tr key={part.id} className="hover:bg-slate-50/80">
                       <td className="p-2.5"><p className="max-w-[260px] truncate font-bold text-[#1D1D1F]">{part.name}</p><p className="mt-0.5 font-mono text-[10px] text-[#86868B]">{part.sku}</p></td>
-                      <td className="p-2.5 font-mono text-[#6E6E73] whitespace-nowrap">{part.costPrice.toLocaleString()} MMK</td>
+                      <td className="p-2.5 font-mono text-[#6E6E73] whitespace-nowrap hidden md:table-cell">{part.costPrice.toLocaleString()} MMK</td>
                       <td className="p-2.5 font-mono font-bold text-[#16A34A] whitespace-nowrap">{part.sellingPrice.toLocaleString()} MMK</td>
                       <td className={`p-2.5 font-mono font-black whitespace-nowrap ${profit >= 0 ? 'text-[#0071E3]' : 'text-rose-600'}`}>{profit >= 0 ? '+' : ''}{profit.toLocaleString()} MMK</td>
-                      <td className="p-2.5"><span className={`rounded-md px-1.5 py-0.5 font-mono text-[10px] font-black ${margin >= 0 ? 'bg-blue-50 text-[#0071E3]' : 'bg-rose-50 text-rose-600'}`}>{margin}%</span></td>
+                      <td className="p-2.5 hidden lg:table-cell"><span className={`rounded-md px-1.5 py-0.5 font-mono text-[10px] font-black ${margin >= 0 ? 'bg-blue-50 text-[#0071E3]' : 'bg-rose-50 text-rose-600'}`}>{margin}%</span></td>
                       <td className="p-2.5 text-right"><button type="button" aria-label={`View ${part.name} details`} title="View part details" onClick={() => setSelectedPartForDetails(part)} className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-[#E5E5EA] bg-white text-[#1D1D1F] hover:border-[#0071E3] hover:text-[#0071E3]"><Eye className="h-3 w-3" /></button></td>
                     </tr>
                   );

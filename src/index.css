@@ -1,5 +1,18 @@
 @import "tailwindcss";
 
+/* Ultra-wide breakpoints (beyond Tailwind's 2xl=1536):
+   3xl = 1920px, 4xl = 2560px — used for extra grid density on big monitors. */
+@theme {
+  --breakpoint-3xl: 120rem;
+  --breakpoint-4xl: 160rem;
+}
+
+/* Global focus ring — consistent visible keyboard focus across the app. */
+:where(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid #0071E3;
+  outline-offset: 2px;
+}
+
 @font-face {
   font-family: "MyanmarChatu";
   src: local('Myanmar Chatu'), url('https://cdn.jsdelivr.net/gh/saturngod/myanmar-unicode-fonts@master/docs/KhmerType/MyanmarChatu.ttf') format('truetype');

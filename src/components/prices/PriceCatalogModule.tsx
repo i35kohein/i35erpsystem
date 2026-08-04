@@ -489,7 +489,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
         <div className="min-h-0 space-y-4 overflow-visible p-2 sm:p-2.5 lg:col-span-8 lg:overflow-y-auto scrollbar-thin [scrollbar-gutter:stable]">
 
           {/* Service Grid - Fixed Height Non-shifting Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3.5 pb-8 pt-0.5 px-0.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-3.5 pb-8 pt-0.5 px-0.5">
             {availableRepairItems.length === 0 ? (
               <div className="col-span-full bg-white border border-[#E5E5EA] rounded-2xl p-10 text-center text-[#86868B]">
                 <ListChecks className="w-8 h-8 mx-auto mb-2 opacity-40 text-[#0071E3]" />
