@@ -1608,7 +1608,7 @@ export default function App() {
           </div>
         </header>
 
-        <main className="min-h-0 flex-1 w-full max-w-[1920px] mx-auto px-3 sm:px-4 lg:px-5 pt-3 pb-6 lg:pb-5 flex flex-col">
+        <main className="min-h-0 flex-1 w-full max-w-[3840px] mx-auto px-3 sm:px-4 lg:px-5 pt-3 pb-6 lg:pb-5 flex flex-col">
           <Suspense fallback={<div className="flex-1 flex items-center justify-center text-xs text-[#86868B]">Loading…</div>}>
           <div key={activeTab} className="app-module-content flex-1 w-full min-w-0 flex flex-col">
               {activeTab === 'dashboard' && (
