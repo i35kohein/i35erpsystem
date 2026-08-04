@@ -399,7 +399,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       assignedTechName: baseWorkOrder?.assignedTechName || '',
       serviceType: baseWorkOrder?.serviceType || 'Standard Modular',
       selectedRepairs,
-      beforeDiagnostics: baseWorkOrder?.beforeDiagnostics || beforeDiagnostics,
+      beforeDiagnostics: baseWorkOrder?.beforeDiagnostics || beforeDiagnostics.map((d) => ({ ...d, note: (d.note || '').trim() || undefined })),
       symptomsReported: extraReportedNotes.trim() || baseWorkOrder?.symptomsReported || '',
       diagnosticResult: beforeDiagnostics.some(d => d.status === 'Pass' || d.status === 'Fail')
         ? 'Initial 21-point repair diagnostic completed during intake.'
@@ -827,7 +827,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             >
               <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-2.5">
                 <h3 className="text-xs font-extrabold text-[#1D1D1F] flex items-center space-x-2">
-                  <span className="w-6 h-6 rounded-full bg-[#0071E3] text-white flex items-center justify-center text-[11px] font-black group-hover:scale-105 transition-transform">2</span>
+                  <span className="w-6 h-6 rounded-full bg-[#0071E3]/15 text-[#0071E3] flex items-center justify-center text-[10px] font-black group-hover:scale-105 transition-transform border border-[#0071E3]/30">2a</span>
                   <span className="text-xs">Realistic Color ({availableRealColors.length} Palette)</span>
                 </h3>
                 <span className="text-xs font-bold text-[#0071E3] group-hover:underline">Change</span>
@@ -858,7 +858,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           >
             <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-2.5">
               <h3 className="text-xs font-extrabold text-[#1D1D1F] flex items-center space-x-2">
-                <span className="w-6 h-6 rounded-full bg-[#0071E3] text-white flex items-center justify-center text-[11px] font-black group-hover:scale-105 transition-transform">2</span>
+                <span className="w-6 h-6 rounded-full bg-[#0071E3]/15 text-[#0071E3] flex items-center justify-center text-[10px] font-black group-hover:scale-105 transition-transform border border-[#0071E3]/30">2b</span>
                 <span className="text-xs">Warranty Policy</span>
               </h3>
               <span className="text-xs font-bold text-[#0071E3] group-hover:underline">Change</span>
@@ -897,8 +897,9 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
 
           <div className="grid grid-cols-1 gap-3 text-xs">
             <div>
-              <label className="block text-[#86868B] mb-1 font-medium">Serial Number</label>
+              <label htmlFor="field-serial" className="block text-[#86868B] mb-1 font-medium">Serial Number</label>
               <input
+                id="field-serial"
                 type="text"
                 value={serialNumber}
                 onChange={(e) => setSerialNumber(e.target.value.toUpperCase())}
@@ -935,8 +936,9 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             </div>
 
             <div>
-              <label className="block text-[#86868B] mb-1 font-medium">Device Passcode</label>
+              <label htmlFor="field-passcode" className="block text-[#86868B] mb-1 font-medium">Device Passcode</label>
               <input
+                id="field-passcode"
                 type="text"
                 value={passcode}
                 onChange={(e) => setPasscode(e.target.value)}
@@ -1120,7 +1122,9 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             <span>Intake Notes & Customer Symptoms</span>
           </h3>
 
+          <label htmlFor="field-notes" className="sr-only">Customer symptoms or intake notes</label>
           <textarea
+            id="field-notes"
             rows={2}
             value={extraReportedNotes}
             onChange={(e) => setExtraReportedNotes(e.target.value)}
@@ -1225,8 +1229,8 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                     </button>
                   </div>
 
-                  {/* Diagnostic Comment Box — only for Fail (or when a note already exists); 90% of comments are on failed items */}
-                  {(item.status === 'Fail' || (item.note || '').trim()) ? (
+                  {/* Diagnostic Comment Box — only for Fail (or when a note exists); 90% of comments are on failed items */}
+                  {(item.status === 'Fail' || (item.note || '').length > 0) ? (
                     <div className="relative pt-1">
                       <input
                         type="text"
@@ -1285,6 +1289,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               accept="image/*"
               capture="environment"
               multiple
+              aria-label="Upload device condition photos"
               className="hidden"
               onChange={(e) => {
                 const files = Array.from(e.target.files || []);
@@ -1314,6 +1319,9 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           </div>
           <p className="text-[10px] text-[#86868B] font-medium">Up to 4MB per photo · hover a thumbnail to delete · on mobile the camera opens directly.</p>
         </div>
+
+        {/* Spacer so the sticky bar never covers the content above it at full scroll */}
+        <div className="h-20 shrink-0" aria-hidden="true" />
 
         {/* Sticky Action Bar — live ticket summary + register, always reachable on desktop */}
         <div className="sticky bottom-0 z-20 -mx-4 -mb-4 mt-1 rounded-b-xl bg-white/95 backdrop-blur border-t border-[#E5E5EA] px-4 py-3 shadow-[0_-6px_16px_rgba(0,0,0,0.06)]">
