@@ -157,7 +157,6 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerTown, setCustomerTown] = useState('');
-  const [customerAddress, setCustomerAddress] = useState('');
   const [customerType, setCustomerType] = useState<'Retail' | 'B2B Corporate' | 'Wholesale Mail-In'>('Retail');
 
   // Device Form State - Default empty to force selecting model first if no prefill
@@ -184,7 +183,6 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       setCustomerName(editWorkOrder.customerName || '');
       setCustomerPhone(editWorkOrder.customerPhone || '');
       setCustomerTown(editWorkOrder.customerAddress || '');
-      setCustomerAddress(editWorkOrder.customerAddress || '');
       setCustomerType(editWorkOrder.customerType || 'Retail');
       setDeviceModel(editWorkOrder.deviceModel || '');
       setDeviceColor(editWorkOrder.deviceColor || getAvailableColorsForModel(editWorkOrder.deviceModel)[0] || 'Standard');
@@ -300,7 +298,9 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       if (found) {
         setMatchedCustomer(found);
         setCustomerName(found.name);
-        setCustomerTown(found.company || '');
+        // Do NOT stuff company into Town/City — a company name is not a town.
+        // The Customer type has no address/town field yet; leave Town for manual
+        // entry (or prefill from a future Customer.city field).
         setCustomerType(found.type);
       } else {
         setMatchedCustomer(null);
@@ -377,7 +377,15 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       const match = /(\d+)\s*$/.exec(wo.orderNumber || '');
       return match ? Math.max(max, parseInt(match[1], 10)) : max;
     }, 1000);
-    const newOrderNumber = baseWorkOrder?.orderNumber || `${prefix}${new Date().getFullYear()}-${maxExistingNum + 1}`;
+    // Collision guard: two rapid submits (or a stale workOrders prop) could compute
+    // the same next number. Keep bumping until the number is actually unused.
+    let nextNum = maxExistingNum + 1;
+    const usedNumbers = new Set(workOrders.map((wo) => wo.orderNumber).filter(Boolean));
+    const year = new Date().getFullYear();
+    while (usedNumbers.has(`${prefix}${year}-${nextNum}`)) {
+      nextNum += 1;
+    }
+    const newOrderNumber = baseWorkOrder?.orderNumber || `${prefix}${year}-${nextNum}`;
     const nowIso = new Date().toISOString();
     const formattedDate = new Date().toLocaleString('en-US', {
       month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true
@@ -391,7 +399,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       customerName,
       customerPhone,
       customerEmail: baseWorkOrder?.customerEmail || '',
-      customerAddress: customerTown || customerAddress || '',
+      customerAddress: customerTown || '',
       customerType,
       deviceCategory: baseWorkOrder?.deviceCategory || (deviceModel.includes('iPad') ? 'iPad' : deviceModel.includes('MacBook') ? 'MacBook' : 'iPhone'),
       deviceModel,
@@ -480,7 +488,6 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
     setCustomerName('');
     setCustomerPhone('');
     setCustomerTown('');
-    setCustomerAddress('');
     setCustomerType('Retail');
     setDeviceModel('');
     setDeviceColor('');
@@ -1086,7 +1093,13 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 <span className="bg-[#DC2626]/10 text-[#DC2626] px-2 py-1 rounded-full">✕ {beforeDiagnostics.filter(d => d.status === 'Fail').length} Fail</span>
               </span>
               <button 
-                onClick={() => setBeforeDiagnostics(prev => prev.map(d => ({ ...d, status: 'Pass' })))}
+                onClick={() => {
+                  if (beforeDiagnostics.some(d => d.status === 'Pass' || d.status === 'Fail')) {
+                    // Never silently overwrite a technician's Pass/Fail verdicts with a bulk Pass.
+                    if (!window.confirm('Mark ALL 21 items as Pass? This will overwrite existing Pass/Fail verdicts.')) return;
+                  }
+                  setBeforeDiagnostics(prev => prev.map(d => ({ ...d, status: 'Pass' })));
+                }}
                 className="text-[10px] text-white font-bold bg-[#34C759] hover:bg-[#28A745] px-3 py-1 rounded-full shadow-xs transition-colors"
               >
                 Mark All Pass
