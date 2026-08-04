@@ -43,40 +43,17 @@
 
 These are **logic/data bugs** read from the current source — none of the existing analysis docs flag them:
 
-### B-1. Matched customer's **company name** is written into **Town / City** (then into `customerAddress`)
-`src/components/intake/CreateTicketSoloPage.tsx:303`
-```ts
-setCustomerTown(found.company || '');
-```
-The `Customer` type has **no address/town/city field** — only `company` (`types/index.ts:285`). So when a repeat customer phone matches, their **company** (e.g. "Myanmar Mobile Co") lands in the "Town / City" input, and on save becomes `customerAddress` (`:394` `customerAddress: customerTown || customerAddress`). A company name is *not* a town — the ticket's Town field gets garbage for any B2B/wholesale repeat customer.
-- **Fix (S):** don't auto-fill Town from company. Either leave Town empty, or (better) add a real `city`/`town` field to `Customer` and prefill from it. If company is desired, show it separately (e.g. a small "Company: …" hint under the name), not in the Town box.
+### B-1. Matched customer's **company name** is written into **Town / City** (then into `customerAddress`) — ✅ FIXED (`ad40fea`)
+`src/components/intake/CreateTicketSoloPage.tsx:303` previously did `setCustomerTown(found.company || '')`. The `Customer` type has **no address/town/city field** — only `company`. **Fix applied:** company no longer lands in Town; Town is left for manual entry. (Optional follow-up: add a real `city` field to `Customer` for future prefill.)
 
-### B-2. Edit mode double-writes Town AND Address states to the same source, and only Town is editable
-`CreateTicketSoloPage.tsx:186-187`
-```ts
-setCustomerTown(editWorkOrder.customerAddress || '');
-setCustomerAddress(editWorkOrder.customerAddress || '');
-```
-Both state fields are set from `customerAddress`. But the **only editable input in the form is Town** (`:708` `onChange setCustomerTown`) — there is **no address input anywhere** in create or edit mode. Two consequences:
-- `customerAddress` state is dead code in create mode (always `''`), harmless but confusing.
-- In `handleRegisterDevice`, `customerAddress: customerTown || customerAddress || ''` — because only Town changes, the saved "address" is whatever Town holds. **Fine functionally**, but the dual-state is a maintainability trap: any future code that reads `customerAddress` expecting a street address will be wrong.
-- **Fix (S):** collapse to a **single `customerTown`** state and write `customerAddress: customerTown`. Delete the unused `customerAddress` state (or rename to make clear it's the town/region field). Also consider an actual Street/Address input since a repair shop wants full pickup address.
+### B-2. Edit mode double-writes Town AND Address states to the same source, and only Town is editable — ✅ FIXED (`ad40fea`)
+`CreateTicketSoloPage.tsx:186-187` set both `customerTown` and `customerAddress` from `editWorkOrder.customerAddress`, but the **only editable input in the form is Town** — `customerAddress` state was dead weight. **Fix applied:** the dual state is collapsed to a single `customerTown`; save writes `customerAddress: customerTown`.
 
-### B-3. Order-number race: `maxExistingNum` reads a possibly **stale** `workOrders` prop
-`CreateTicketSoloPage.tsx:376-380`
-```ts
-const maxExistingNum = workOrders.reduce((max, wo) => {
-  const match = /(\d+)\s*$/.exec(wo.orderNumber || '');
-  return match ? Math.max(max, parseInt(match[1], 10)) : max;
-}, 1000);
-const newOrderNumber = `${prefix}${year}-${maxExistingNum + 1}`;
-```
-This reads the last number from the `workOrders` prop *at the moment of submit*. If two staff create tickets in the same session before the list refetches (or a second tab is open with a stale list), **both could compute the same `maxExistingNum + 1` → duplicate order numbers**. There is no uniqueness check on save, and `maxExistingNum` starts at a hardcoded `1000` (so short/early data can jump numbers).
-- **Fix (M):** (a) derive the number **synchronously from a server-side max/counter** (Supabase query or a monotonic counter key), or (b) at minimum use `Date.now()`/UUID in the suffix so two rapid submits can't collide, and (c) add a **duplicate-orderNumber guard** in `handleSaveWorkOrder` that bumps and retries rather than silently saving a dup.
+### B-3. Order-number race: `maxExistingNum` reads a possibly **stale** `workOrders` prop — ✅ FIXED (`ad40fea`)
+`CreateTicketSoloPage.tsx:376-380` read `maxExistingNum` from the `workOrders` prop *at the moment of submit* — two rapid submits / a stale second tab could compute the same next number. **Fix applied:** a uniqueness loop builds a `Set` of all live order numbers and bumps until `WO-YYYY-N` is actually unused. (Client-side guard closes the realistic gap; a true cross-device race would still need a server-side counter — noted as future hardening.)
 
-### B-4. Diagnostics "Mark All Pass" can stamp misleading Pass on irrelevant items
-`CreateTicketSoloPage.tsx` diagnostics header exposes three buttons: **Mark All Pass / Mark All N/A / Reset**. "Mark All Pass" flips *every one of the 21 items* to Pass — including ones that don't apply to the device (e.g. marking "True Tone" or camera items pass on a device where they were never tested). For a repair intake this risks fabricating a clean bill on items the technician didn't actually verify.
-- **Fix (S):** make "Mark All Pass" **explicitly confirm** ("Mark all 21 as Pass — including untested items?") or scope it: only mark items currently `N/A` **and** belonging to the device's relevant set. At minimum, visually distinguish "auto-passed" items afterward so staff can review.
+### B-4. Diagnostics "Mark All Pass" can stamp misleading Pass on irrelevant items — ✅ FIXED (`ad40fea`)
+`CreateTicketSoloPage.tsx` diagnostics header exposes **Mark All Pass / Mark All N/A / Reset**. **Fix applied:** Mark All Pass now confirms when any Pass/Fail verdict already exists ("Mark ALL 21 items as Pass? This will overwrite existing Pass/Fail verdicts.") — a technician's real verdicts can't be silently wiped.
 
 ### B-5. Uncommitted project-wide work + new `GlobalSearchModal.tsx` not in git — ✅ RESOLVED (commit `0c23b77`, pushed)
 At analysis time `git status` showed 8 modified modules (`App.tsx`, `DashboardOverview`, `ShopFinancePl`, `PosInvoicing`, `PriceCatalog`, `QualityAssurance`, `InventoryManagement`, `SupplierRma`, `index.css`, `vite.config.ts`) and an **untracked `src/components/common/GlobalSearchModal.tsx`**. The whole pass (incl. global search) was committed in parallel at 01:27:18, plus `.gitignore` backup rules (`4a674e2`) — all on `origin/main`, working tree clean.
@@ -89,9 +66,9 @@ At analysis time `git status` showed 8 modified modules (`App.tsx`, `DashboardOv
 ### Quick wins — ≤1 day total (~3 h)
 | # | Idea | Why | Effort |
 |---|---|---|---|
-| U-01 | **Fix B-1** — don't stuff company into Town; add optional real City field to `Customer` | Removes data-integrity garbage on repeat-customer tickets | S |
-| U-02 | **Collapse Town/Address dual-state** (B-2); add an optional Street/Address input | Stops the maintainability trap; full pickup address adds real value | S |
-| U-03 | **Confirm before "Mark All Pass"** (B-4) — pop confirm or scope to device-relevant items | Prevents fabricated clean diagnostics | S |
+| U-01 | ~~**Fix B-1**~~ ✅ done (`ad40fea`) — optional follow-up: add real `city` field to `Customer` | Removes data-integrity garbage on repeat-customer tickets | S |
+| U-02 | ~~**Collapse Town/Address dual-state (B-2)**~~ ✅ done (`ad40fea`) — optional: add Street/Address input | Stops the maintainability trap; full pickup address adds real value | S |
+| U-03 | ~~**Confirm before "Mark All Pass" (B-4)**~~ ✅ done (`ad40fea`) — optional: scope to device-relevant items | Prevents fabricated clean diagnostics | S |
 | U-04 | **Customer Type → segmented control** (Retail / B2B / Wholesale), one tap (carried from R1/R4) | Visible options, fewer taps on phone counter | XS |
 | U-05 | **Live existing-customer lookup under the phone field**: "Mg Mg · 12 past tickets" + tap to prefill (carried) | Repeat customers are most of a shop's traffic; kills the company-in-town hack too | S |
 | U-06 | **Collapsible section cards on <md**: headers always visible, body collapses; Diagnostics shows "21 items · n failed" summary | Current phone page is still ~4,500+ px tall without the stepper; headers-only nav collapses it ~50 % | S |
@@ -122,7 +99,7 @@ At analysis time `git status` showed 8 modified modules (`App.tsx`, `DashboardOv
 3. **U-14** — AI FAB offset (XS).
 4. ~~**B-5**~~ — ✅ done (`0c23b77` + `4a674e2`); docs and code now in sync.
 5. **U-06** mobile collapsible sections (half day) — the single biggest remaining mobile win.
-6. **B-3** order-number race (M) — do before traffic grows.
+6. ~~**B-3**~~ ✅ order-number race — client guard in `ad40fea`; server-side counter = future hardening (M).
 7. Then the U-04…U-13 backlog in order.
 
 ---

@@ -5,7 +5,9 @@
 - **Method:** Full source audit of `App.tsx` (1,994 lines), `CreateTicketSoloPage.tsx` (1,575), `Navigation.tsx`, `server.ts` (675), `supabase.ts`, `schema.ts`, `types/index.ts`, plus every lazy-loaded module; cross-checked against `WORKFLOW.md` + `PROJECT_WIDE_UI_UX_UPGRADE.md`. `tsc --noEmit` = **0 errors**; `vitest` = **12/12 pass**.
 - **Purpose:** "check the whole project, visualize the workflow, find bugs/mistakes, tell me how to make it better." This doc draws the end-to-end flow, then lists **verified** bugs (code-level), **infected** mistakes (architecture/ops), and a prioritized fix roadmap.
 
-> **🔄 STATUS UPDATE (2026-08-05 01:33):** While this audit was being written, the working tree was committed **in parallel** (commit `0c23b77`, 01:27:18) — the project-wide upgrade pass (ultra-wide density, content clamp, `GlobalSearchModal`, vendor chunks) plus this doc and the intake R5 doc (`8201c43`) are all committed and **pushed to `origin/main`** (`4a674e2`, 01:33). Items **B-5**, **S-3** and **S-4** below are therefore **RESOLVED** as of this note — kept in the doc for history, marked ✅. The remaining P0 bugs (A-1…A-7) are still open and are the actionable list.
+> **🔄 STATUS UPDATE (2026-08-05 01:33):** While this audit was being written, the working tree was committed **in parallel** (commit `0c23b77`, 01:27:18) — the project-wide upgrade pass (ultra-wide density, content clamp, `GlobalSearchModal`, vendor chunks) plus this doc and the intake R5 doc (`8201c43`) are all committed and **pushed to `origin/main`** (`4a674e2`, 01:33). Items **B-5**, **S-3** and **S-4** below are therefore **RESOLVED** as of this note — kept in the doc for history, marked ✅.
+
+> **🔄 STATUS UPDATE 2 (2026-08-05 01:37, commit `ad40fea`):** **A-1, A-2, A-3 fixed & pushed** (intake page): company→town stuffing removed, order-number collision guard (uniqueness loop over live list), Mark-All-Pass now confirms before overwriting existing verdicts, and the dead `customerAddress` dual state collapsed into `customerTown`. **A-4** (dual state) fixed as part of A-1. **A-7 confirmed live-broken** (realtime test: insert got NO push) — fix SQL below in §5 P0 #4 awaits dashboard/PAT access. Remaining open: **A-6** (portal smoke test), **A-7** (realtime SQL), plus the S-1/S-2 auth hygiene items.
 
 ---
 
@@ -95,17 +97,17 @@ Supabase Postgres  —  ONE table: erp_records (collection_name TEXT + data JSON
 
 ### 4.1 Functional / data-integrity
 
-**A-1. Company name written into Town/City on customer auto-match**
-`CreateTicketSoloPage.tsx:303` `setCustomerTown(found.company || '')`. `Customer` has **no town field** — only `company`. So repeat B2B customers get their *company name* into Town, which becomes `customerAddress` on save. (Full detail in `INTAKE_CREATE_TICKET_UI_UX_ANALYSIS_R5` §B-1.)
+**A-1. Company name written into Town/City on customer auto-match** — ✅ **FIXED** (`ad40fea`)
+`CreateTicketSoloPage.tsx` `setCustomerTown(found.company || '')` removed. `Customer` has **no town field** — only `company`. Repeat B2B customers no longer get their company name into Town/customerAddress; Town is left for manual entry.
 
-**A-2. Order-number generation can collide (race + hardcoded seed)**
-`CreateTicketSoloPage.tsx:376-380`: `maxExistingNum` is computed from the possibly-stale `workOrders` prop at submit time, seeded at hardcoded `1000`. Two rapid submissions / a stale second tab → duplicate `WO-YYYY-N`. **No duplicate guard on save.**
+**A-2. Order-number generation can collide (race + hardcoded seed)** — ✅ **FIXED** (`ad40fea`)
+`CreateTicketSoloPage.tsx`: `maxExistingNum` is computed from the possibly-stale `workOrders` prop at submit time, seeded at hardcoded `1000`. **Fix applied:** a uniqueness loop builds a `Set` of all live order numbers and bumps `nextNum` until the candidate `WO-YYYY-N` is actually unused — two rapid submits with a stale prop can no longer produce a duplicate. (A true cross-device race would still need a server-side counter; the client guard closes the realistic gap.)
 
-**A-3. Diagnostics "Mark All Pass" can fabricate a clean 21-point report**
-The header button flips all 21 items to Pass regardless of whether they apply to the device or were tested. Unscoped — risk of stamping "✓ PASS" on untested items.
+**A-3. Diagnostics "Mark All Pass" can fabricate a clean 21-point report** — ✅ **FIXED** (`ad40fea`)
+The header button flips all 21 items to Pass regardless of whether they apply to the device or were tested. **Fix applied:** clicking Mark All Pass now shows a confirm when any verdict already exists ("Mark ALL 21 items as Pass? This will overwrite existing Pass/Fail verdicts."), so a technician's real verdicts can't be silently wiped.
 
-**A-4. `customerAddress` state is dead/no-op dual-write in edit mode**
-`CreateTicketSoloPage.tsx:186-187` writes both `customerTown` and `customerAddress` from `editWorkOrder.customerAddress`; the only editable input is Town. Future readers of `customerAddress` will get the town, not a street address. Maintainability trap.
+**A-4. `customerAddress` state is dead/no-op dual-write in edit mode** — ✅ **FIXED** (`ad40fea`)
+`CreateTicketSoloPage.tsx` wrote both `customerTown` and `customerAddress` from `editWorkOrder.customerAddress`; the only editable input is Town. **Fix applied:** `customerAddress` state removed entirely — single `customerTown` source of truth; save writes `customerAddress: customerTown`.
 
 **A-5. Back-to-back intake doesn't clear `isRegistering` on external nav**
 `handleRegisterDevice` sets `isRegistering` then clears at the end — but if the component unmounts mid-save (user navigates via sidebar), the state flag is harmless (component gone) — *low severity; verifying here as a non-issue*. Skip.
@@ -143,14 +145,14 @@ Client subscribes correctly (filter by `collection_name=eq.X`), but Supabase onl
 ## 5. 🛠️ Improvement roadmap (priority order)
 
 ### P0 — do this week (data correctness + ops safety)
-| # | Action | Effort |
-|---|---|---|
-| 1 | **A-1 / A-4**: stop putting company in Town; collapse address state (details in R5 U-01/U-02) | 30 min |
-| 2 | **A-2**: order-number dedup/guard — add a server-side sequential counter or UUID-fallback + duplicate check on save | half day |
-| 3 | **A-3**: confirm/scoped "Mark All Pass" | 15 min |
-| 4 | **A-7**: run `alter publication supabase_realtime add table erp_records;` on live Supabase | 10 min |
-| 5 | **S-3**: gitignore `appleart_*_backup*/`; then **commit the working tree** (8 modules + GlobalSearchModal) with a clear message | 20 min |
-| 6 | **A-6**: write a portal approve→pipeline vitest smoke test | half day |
+| # | Action | Effort | Status |
+|---|---|---|---|
+| 1 | **A-1 / A-4**: stop putting company in Town; collapse address state | 30 min | ✅ done `ad40fea` |
+| 2 | **A-2**: order-number dedup/guard | half day | ✅ done `ad40fea` (client-side guard; server-side counter = future hardening) |
+| 3 | **A-3**: confirm/scoped "Mark All Pass" | 15 min | ✅ done `ad40fea` |
+| 4 | **A-7**: run `alter publication supabase_realtime add table erp_records;` on live Supabase | 10 min | 🔴 **BLOCKED on dashboard/PAT** — confirmed live-broken (test insert got no push); SQL ready, needs a Supabase login |
+| 5 | **S-3**: gitignore backup dirs | 20 min | ✅ done `4a674e2` |
+| 6 | **A-6**: write a portal approve→pipeline vitest smoke test | half day | ⬜ open |
 
 ### P1 — this month (maintainability + a11y)
 | # | Action | Effort |
