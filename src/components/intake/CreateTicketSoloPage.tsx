@@ -1264,7 +1264,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         <div className="h-20 shrink-0" aria-hidden="true" />
 
         {/* Sticky Action Bar — live ticket summary + register, always reachable on desktop */}
-        <div className="sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] lg:bottom-0 z-20 -mx-4 -mb-4 mt-1 rounded-b-xl bg-white/95 backdrop-blur border-t border-[#E5E5EA] px-4 py-3 shadow-[0_-6px_16px_rgba(0,0,0,0.06)]">
+        <div className="sticky bottom-0 z-20 -mx-4 -mb-4 mt-1 rounded-b-xl bg-white/95 backdrop-blur border-t border-[#E5E5EA] px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-6px_16px_rgba(0,0,0,0.06)]">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             {repairCount === 0 ? (
               <div className="flex-1 flex items-center gap-2 text-xs min-w-0" role="status">

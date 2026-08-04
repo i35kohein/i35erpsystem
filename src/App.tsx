@@ -337,9 +337,13 @@ export default function App() {
       }
     };
     const id = window.setInterval(refresh, 45_000);
+    // Manual refresh from the topbar database icon (OfflineSyncStatusBadge).
+    const handleRefreshRequest = () => refresh();
+    window.addEventListener('erp-refresh-request', handleRefreshRequest);
     return () => {
       cancelled = true;
       window.clearInterval(id);
+      window.removeEventListener('erp-refresh-request', handleRefreshRequest);
     };
   }, []);
 
@@ -1580,7 +1584,7 @@ export default function App() {
           </div>
         </header>
 
-        <main className="min-h-0 flex-1 w-full max-w-full px-3 sm:px-4 lg:px-5 pt-3 pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-5 flex flex-col">
+        <main className="min-h-0 flex-1 w-full max-w-full px-3 sm:px-4 lg:px-5 pt-3 pb-6 lg:pb-5 flex flex-col">
           <Suspense fallback={<div className="flex-1 flex items-center justify-center text-xs text-[#86868B]">Loading…</div>}>
           <div key={activeTab} className="app-module-content flex-1 w-full min-w-0 flex flex-col">
               {activeTab === 'dashboard' && (

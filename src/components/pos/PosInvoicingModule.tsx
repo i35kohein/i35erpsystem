@@ -1158,7 +1158,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
           scrolling past the device list (md:hidden so desktop keeps the
           in-flow action row). */}
       {selectedWo && (
-        <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-40 border-t border-[#E5E5EA] bg-white/95 backdrop-blur-sm px-4 py-2.5 md:hidden shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#E5E5EA] bg-white/95 backdrop-blur-sm px-4 pt-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] md:hidden shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 shrink-0">
               <p className="text-[10px] font-bold text-[#86868B] uppercase tracking-wide">Amount Due</p>
