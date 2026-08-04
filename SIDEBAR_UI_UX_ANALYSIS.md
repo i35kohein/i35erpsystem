@@ -54,11 +54,12 @@
 ---
 
 ## Recommended Fixes (applied this session)
-1. **Inventory badge → real** — compute low-stock from `parts` (at/below reorder level) or accept `lowStockCount` prop; remove the `2 // sample trigger` constant. *(done)*
-2. **POS badge → only true payable-ready** — drop the declined-diagnostic inflation. *(done)*
-3. **Delete the dead search/AI/archived props + unused imports** (Search, Sparkles, ExternalLink, Trash2, LanguageSwitcher import inside Navigation). *(done — props removed from component + App.tsx call)*
+1. **Inventory badge → real** — computed in App from `parts` (qty <= reorderPoint); removed the `2 // sample trigger` constant. Live: **457** low-stock parts, matches the Inventory module metric exactly (460 total, 337 at qty 0). *(done, commit 3dedb9b)*
+2. **POS badge → only true payable-ready** — dropped the declined-diagnostic inflation; now counts only tickets with `postRepairChecklist`. *(done, 3dedb9b)*
+3. **Delete the dead search/AI/archived props + unused imports** (Search, Sparkles, ExternalLink, Trash2, LanguageSwitcher; props `searchQuery`, `setSearchQuery`, `archivedCount`, `onOpenAiAssistant` removed from Navigation + App call). *(done, 3dedb9b)*
 4. **Unify mobile nav** to a single source of truth or slim it (only Intake/Pipeline/POS/Menu). *(recommended next)*
-5. **Hook the "System online" pill** to a real health check (or drop it).
+5. **Hook the "System online" pill** to a real health check (or drop it). *(recommended next)*
+6. **Deploy note:** `git add -A` swept in pre-existing uncommitted work; server.ts had unescaped Burmese quotes in the Telegram prompt → broke esbuild. Fixed + re-deployed (8bf5c24). Lesson: check `git status` before committing.
 
 ---
-**Status:** Items 1–3 (P0/P1/P2 dead-code) fixed + deployed. Items 4–5 queued as optional polish.
+**Status:** Items 1–3 (P0/P1/P2 dead-code) fixed + deployed (3dedb9b, 8bf5c24). Items 4–5 queued as optional polish.
