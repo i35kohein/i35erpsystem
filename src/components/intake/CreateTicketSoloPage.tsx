@@ -750,31 +750,37 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
 
         {/* STEP 3 & STEP 4: Color (REAL DEVICE COLOR BIG CIRCLE WITH SHADOW) & Warranty */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* STEP 3: Real Official Color Selection */}
-          <button
-            type="button"
-            onClick={() => setIsColorModalOpen(true)}
-            className="w-full text-left p-3 bg-[#F8F9FA] rounded-xl border border-[#E5E5EA] space-y-2.5 cursor-pointer hover:border-[#0071E3]/50 transition-all group"
-          >
-            <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-2.5">
-              <h3 className="text-xs font-extrabold text-[#1D1D1F] flex items-center space-x-2">
-                <span className="w-6 h-6 rounded-full bg-[#0071E3] text-white flex items-center justify-center text-[11px] font-black group-hover:scale-105 transition-transform">3</span>
-                <span className="text-xs">Realistic Color ({availableRealColors.length} Palette)</span>
-              </h3>
-              <span className="text-xs font-bold text-[#0071E3] group-hover:underline">Change</span>
-            </div>
-
-            <div className="bg-white p-3.5 rounded-xl border border-[#E5E5EA] text-xs font-bold text-[#1D1D1F] flex items-center justify-between">
-              <div className="space-y-0.5">
-                <span className="block text-[10px] text-[#86868B]">Selected Color:</span>
-                <span className="text-sm font-extrabold text-[#1D1D1F]">{deviceColor}</span>
+          {/* STEP 3: Real Official Color Selection — only after a model is chosen */}
+          {deviceModel ? (
+            <button
+              type="button"
+              onClick={() => setIsColorModalOpen(true)}
+              className="w-full text-left p-3 bg-[#F8F9FA] rounded-xl border border-[#E5E5EA] space-y-2.5 cursor-pointer hover:border-[#0071E3]/50 transition-all group"
+            >
+              <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-2.5">
+                <h3 className="text-xs font-extrabold text-[#1D1D1F] flex items-center space-x-2">
+                  <span className="w-6 h-6 rounded-full bg-[#0071E3] text-white flex items-center justify-center text-[11px] font-black group-hover:scale-105 transition-transform">3</span>
+                  <span className="text-xs">Realistic Color ({availableRealColors.length} Palette)</span>
+                </h3>
+                <span className="text-xs font-bold text-[#0071E3] group-hover:underline">Change</span>
               </div>
-              <div 
-                className={`w-11 h-11 rounded-full border-2 border-white shadow-xs ${activeColorStyle.border}`}
-                style={{ background: activeColorStyle.gradient }}
-              />
+
+              <div className="bg-white p-3.5 rounded-xl border border-[#E5E5EA] text-xs font-bold text-[#1D1D1F] flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <span className="block text-[10px] text-[#86868B]">Selected Color:</span>
+                  <span className="text-sm font-extrabold text-[#1D1D1F]">{deviceColor}</span>
+                </div>
+                <div 
+                  className={`w-11 h-11 rounded-full border-2 border-white shadow-xs ${activeColorStyle.border}`}
+                  style={{ background: activeColorStyle.gradient }}
+                />
+              </div>
+            </button>
+          ) : (
+            <div className="p-3 bg-[#F5F5F7]/60 rounded-xl border border-dashed border-[#D2D2D7] flex items-center justify-center text-[11px] text-[#86868B] font-semibold min-h-[92px]">
+              Select a device model first to see real color options
             </div>
-          </button>
+          )}
 
           {/* STEP 4: Warranty Selection */}
           <button
