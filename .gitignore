@@ -6,3 +6,7 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Local backups — never commit these
+appleart_*_backup*/
+backups/
