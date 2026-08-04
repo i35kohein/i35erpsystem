@@ -595,7 +595,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           <span>Enter customer details, choose the device, add repairs, then complete the intake check.</span>
         </div>
 
-        {/* Stepper Progress — 4 phases, completes as fields are filled */}
+        {/* Stepper Progress — 4 phases on ONE line, completes as fields are filled */}
         {(() => {
           const steps = [
             { label: 'Customer', done: Boolean(customerName.trim() && customerPhone.trim()) },
@@ -609,8 +609,8 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             <div className="px-1 pt-1" role="group" aria-label="Intake progress">
               <div className="flex items-center gap-2">
                 {steps.map((s, i) => (
-                  <div key={s.label} className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
+                  <React.Fragment key={s.label}>
+                    <div className="flex items-center gap-1.5 shrink-0">
                       <span
                         className={`w-5 h-5 shrink-0 rounded-full flex items-center justify-center text-[10px] font-black transition-colors ${
                           s.done ? 'bg-[#34C759] text-white' : 'bg-[#E5E5EA] text-[#86868B]'
@@ -618,10 +618,14 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                       >
                         {s.done ? <Check className="w-3 h-3" /> : i + 1}
                       </span>
-                      <span className={`text-[11px] font-bold truncate ${s.done ? 'text-[#1D1D1F]' : 'text-[#86868B]'}`}>{s.label}</span>
+                      <span className={`text-[11px] font-bold whitespace-nowrap ${s.done ? 'text-[#1D1D1F]' : 'text-[#86868B]'}`}>{s.label}</span>
                     </div>
-                    {i < steps.length - 1 && <div className="h-0.5 mt-2 -ml-1 mr-1 rounded-full bg-[#E5E5EA]"><div className="h-full rounded-full bg-[#34C759] transition-all" style={{ width: s.done ? '100%' : '0%' }} /></div>}
-                  </div>
+                    {i < steps.length - 1 && (
+                      <div className="flex-1 h-0.5 rounded-full bg-[#E5E5EA] min-w-2">
+                        <div className="h-full rounded-full bg-[#34C759] transition-all" style={{ width: s.done ? '100%' : '0%' }} />
+                      </div>
+                    )}
+                  </React.Fragment>
                 ))}
               </div>
               <div className="mt-2 h-1 rounded-full bg-[#E5E5EA] overflow-hidden">
