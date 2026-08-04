@@ -7,7 +7,7 @@
 
 > **🔄 STATUS UPDATE (2026-08-05 01:33):** While this audit was being written, the working tree was committed **in parallel** (commit `0c23b77`, 01:27:18) — the project-wide upgrade pass (ultra-wide density, content clamp, `GlobalSearchModal`, vendor chunks) plus this doc and the intake R5 doc (`8201c43`) are all committed and **pushed to `origin/main`** (`4a674e2`, 01:33). Items **B-5**, **S-3** and **S-4** below are therefore **RESOLVED** as of this note — kept in the doc for history, marked ✅.
 
-> **🔄 STATUS UPDATE 3 (2026-08-05 01:42):** **A-7 FIXED & VERIFIED LIVE** — Ko Hein ran `alter publication supabase_realtime add table erp_records;` in the Supabase SQL Editor; re-test confirmed the INSERT push arrives instantly (test row `__rttest2__` received, cleaned up). All P0 items are now **closed except A-6** (portal smoke test).
+> **🔄 STATUS UPDATE 4 (2026-08-05 01:45, commits `c6e367c` + `4a05962`):** **A-6 DONE** — portal estimate approve/reject logic extracted to pure `src/utils/portalWorkflow.ts`, the component now delegates to it, and 6 vitest tests cover the approve→pipeline handoff (Receive→In Progress, approval stamp, log append, reject→Pending, reject reason, no-regression). Full suite: **18/18 pass, tsc 0 errors**. All P0/P1 items from §4 are now **CLOSED**. Deployed to production 01:43 + 01:46.
 
 ---
 
@@ -152,7 +152,7 @@ Client subscribes correctly (filter by `collection_name=eq.X`), but Supabase onl
 | 3 | **A-3**: confirm/scoped "Mark All Pass" | 15 min | ✅ done `ad40fea` |
 | 4 | **A-7**: run `alter publication supabase_realtime add table erp_records;` on live Supabase | 10 min | ✅ **DONE & VERIFIED** (01:42) — INSERT push confirmed live |
 | 5 | **S-3**: gitignore backup dirs | 20 min | ✅ done `4a674e2` |
-| 6 | **A-6**: write a portal approve→pipeline vitest smoke test | half day | ⬜ open |
+| 6 | **A-6**: write a portal approve→pipeline vitest smoke test | half day | ✅ done `c6e367c` — 6 tests, 18/18 suite pass |
 
 ### P1 — this month (maintainability + a11y)
 | # | Action | Effort |
