@@ -34,13 +34,6 @@ export const translations: TranslationDictionary = {
   navPortal: { en: 'Customer Public Portal', mm: 'ဝယ်ယူသူ အများပြည်သူ ပေါ်တယ်' },
 
   // Statuses
-  statusReceive: { en: 'Received', mm: 'လက်ခံရရှိ' },
-  statusInProgress: { en: 'In Progress', mm: 'လုပ်ဆောင်နေဆဲ' },
-  statusPending: { en: 'Pending', mm: 'စောင့်ဆိုင်းဆဲ' },
-  statusFinished: { en: 'Finished', mm: 'ပြီးစီး' },
-  statusTakenOut: { en: 'Taken Out', mm: 'ထုတ်ယူပြီး' },
-  statusCantRepair: { en: "Can't Repair", mm: 'ပြင်ဆင်၍မရပါ' },
-  statusCustomerNotRepair: { en: 'Customer Cancelled', mm: 'ဝယ်ယူသူပယ်ဖျက်' },
 
   // Common Buttons & Actions
   newTicket: { en: 'New Ticket', mm: 'လက်မှတ်အသစ်' },
@@ -126,8 +119,6 @@ export const translations: TranslationDictionary = {
   posTotal: { en: 'Total Amount', mm: 'စုစုပေါင်း ပမာဏ' },
   posPay: { en: 'Process Payment', mm: 'ငွေပေးချေမှု ပြုလုပ်မည်' },
   posInvoiceNumber: { en: 'Invoice #', mm: 'ဘေလ်အမှတ် #' },
-  unpaidReady: { en: 'Unpaid / Ready', mm: 'မပေးချေရသေး / အသင့်ဖြစ်' },
-  paid: { en: 'Paid', mm: 'ပေးချေပြီး' },
 
   // Inventory & Stock
   partName: { en: 'Part Name', mm: 'အပိုပစ္စည်း အမည်' },
