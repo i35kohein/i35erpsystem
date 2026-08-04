@@ -562,6 +562,43 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           <span>Enter customer details, choose the device, add repairs, then complete the intake check.</span>
         </div>
 
+        {/* Stepper Progress — 4 phases, completes as fields are filled */}
+        {(() => {
+          const steps = [
+            { label: 'Customer', done: Boolean(customerName.trim() && customerPhone.trim()) },
+            { label: 'Device', done: Boolean(deviceModel) },
+            { label: 'Repairs', done: selectedRepairs.length > 0 },
+            { label: 'Diagnostics', done: beforeDiagnostics.some((d) => d.status === 'Pass' || d.status === 'Fail') },
+          ];
+          const doneCount = steps.filter((s) => s.done).length;
+          const pct = Math.round((doneCount / steps.length) * 100);
+          return (
+            <div className="px-1 pt-1" role="group" aria-label="Intake progress">
+              <div className="flex items-center gap-2">
+                {steps.map((s, i) => (
+                  <div key={s.label} className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className={`w-5 h-5 shrink-0 rounded-full flex items-center justify-center text-[10px] font-black transition-colors ${
+                          s.done ? 'bg-[#34C759] text-white' : 'bg-[#E5E5EA] text-[#86868B]'
+                        }`}
+                      >
+                        {s.done ? <Check className="w-3 h-3" /> : i + 1}
+                      </span>
+                      <span className={`text-[11px] font-bold truncate ${s.done ? 'text-[#1D1D1F]' : 'text-[#86868B]'}`}>{s.label}</span>
+                    </div>
+                    {i < steps.length - 1 && <div className="h-0.5 mt-2 -ml-1 mr-1 rounded-full bg-[#E5E5EA]"><div className="h-full rounded-full bg-[#34C759] transition-all" style={{ width: s.done ? '100%' : '0%' }} /></div>}
+                  </div>
+                ))}
+              </div>
+              <div className="mt-2 h-1 rounded-full bg-[#E5E5EA] overflow-hidden">
+                <div className="h-full bg-[#0071E3] rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
+              </div>
+              <p className="mt-1 text-[10px] text-[#86868B] font-medium">{doneCount}/4 complete — {pct}%</p>
+            </div>
+          );
+        })()}
+
         {/* STEP 1: Customer Information */}
         <div className="p-3 bg-[#F8F9FA] rounded-xl border border-[#E5E5EA] space-y-2.5">
           <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-2.5">
