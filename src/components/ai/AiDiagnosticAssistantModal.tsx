@@ -30,6 +30,7 @@ const QUICK_PROMPTS = [
   { label: 'Repair ကြန့်ကြားမှုများ', prompt: 'What are the current repair bottlenecks and what should the team do next?', icon: AlertTriangle },
   { label: 'Follow-up များ', prompt: 'Which customers and devices need follow-up first?', icon: PhoneCall },
   { label: 'ပစ္စည်း & stock', prompt: 'Which parts are top used and which stock needs attention?', icon: PackageSearch },
+  { label: 'ဒီလ စာရင်း', prompt: 'How many repairs were completed this month, per technician?', icon: Database },
 ];
 
 const WELCOME_MESSAGE: ChatMessage = {
@@ -246,8 +247,8 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
       normalized.includes('completed') || normalized.includes('finished') || normalized.includes('repaired') || normalized.includes('repair')
       || question.includes('ပြင်ပြီး') || question.includes('ပြင်') || question.includes('ပြီးလဲ') || question.includes('ပြီး');
 
-    // Technician-specific: "<name> ဒီလ ဘယ်နှစ်စောင် ပြီးလဲ" — the bot's data only
-    // has today's completed tickets; monthly figures live in the ERP monthly report.
+    // Technician-specific: "<name> ဒီလ ဘယ်နှစ်လုံး ပြင်ပြီးလဲ" — answer from the ERP
+    // monthly report (technicianPayouts), the authoritative source.
     const askedTech = technicians.find((t) => question.toLowerCase().includes((t.name || '').toLowerCase()));
     if (askedTech) {
       const techOrders = workOrders.filter((o) => o.assignedTechId === askedTech.id || o.assignedTechName === askedTech.name);
@@ -256,14 +257,26 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
       const todayLine = todayDone.length
         ? `ဒီနေ့ ပြီးစီး: ${todayDone.length} စောင် (${todayDone.map((o) => o.orderNumber).join(', ')})`
         : 'ဒီနေ့ ပြီးစီးတဲ့ ticket မရှိသေးပါ။';
-      const monthlyNote = asksThisMonth
-        ? '\n\nဒီလ (monthly) စာရင်းကို ကျွန်တော့် data ထဲမှာ မပါပါဘူး — ဆိုင်ရဲ့ ERP စနစ်ထဲက monthly report (Finance → Commissions) မှာ ကြည့်ပေးပါ။'
-        : '';
-      return `${askedTech.name} ရဲ့ စာရင်း:\n• ${todayLine}\n• လက်ရှိ active: ${activeNow.length} စောင်${monthlyNote}`;
+      // Monthly answer comes from the ERP monthly report record, never computed.
+      const monthlyRecord = context.monthlyReport.find((m) => m.technicianId === askedTech.id || m.technicianName === askedTech.name);
+      const monthlyLine = monthlyRecord
+        ? `\n\nဒီလ (${monthlyRecord.period}) ပြီးစီး: ${monthlyRecord.totalTicketsClosed} စောင် (ERP monthly report — labor ${monthlyRecord.totalLaborRevenue.toLocaleString()} MMK, commission ${monthlyRecord.commissionAmount.toLocaleString()} MMK, payout ${monthlyRecord.netPayout.toLocaleString()} MMK, ${monthlyRecord.status})`
+        : asksThisMonth
+          ? `\n\nဒီလ (${context.currentPeriod}) စာရင်းက ကျွန်တော့် monthly report ထဲမှာ ${askedTech.name} အတွက် မရှိသေးပါ — Finance → Commissions မှာ ကြည့်ပေးပါ။`
+          : '';
+      return `${askedTech.name} ရဲ့ စာရင်း:\n• ${todayLine}\n• လက်ရှိ active: ${activeNow.length} စောင်${monthlyLine}`;
     }
 
     if (asksThisMonth && asksCompletedRepair) {
-      return `ဒီလ (monthly) ပြီးစီးစာရင်းကို ကျွန်တော့် data ထဲမှာ မပါပါဘူး — ကျွန်တော့်မှာ ဒီနေ့ ပြီးစီးတဲ့ ticket တွေရဲ့ စာရင်းပဲ ရှိပါတယ်။\n\nဒီလ စာရင်းကို သိချင်ရင် ဆိုင်ရဲ့ ERP စနစ်ထဲက monthly report (Finance → Commissions tab) ကို ကြည့်ပေးပါ။`;
+      const monthRecords = context.monthlyReport.filter((m) => m.period === context.currentPeriod);
+      if (monthRecords.length) {
+        const perTech = monthRecords
+          .map((m) => `• ${m.technicianName}: ${m.totalTicketsClosed} စောင် (payout ${m.netPayout.toLocaleString()} MMK, ${m.status})`)
+          .join('\n');
+        const total = monthRecords.reduce((s, m) => s + m.totalTicketsClosed, 0);
+        return `ဒီလ (${context.currentPeriod}) ပြီးစီးစာရင်း (ERP monthly report):\nစုစုပေါင်း ${total} စောင်\n${perTech}\n\nအသေးစိတ်ကို Finance → Commissions tab မှာ ကြည့်ပါ။`;
+      }
+      return `ဒီလ (${context.currentPeriod}) စာရင်းက ကျွန်တော့် monthly report ထဲမှာ မရှိသေးပါ — Finance → Commissions tab မှာ ကြည့်ပေးပါ။`;
     }
     if (asksToday && asksCompletedRepair) {
       const completedList = context.completedToday.length

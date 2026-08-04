@@ -1894,6 +1894,7 @@ export default function App() {
         customers={rosterCustomers}
         technicians={technicians}
         suppliers={suppliers}
+        technicianPayouts={technicianPayouts}
         priceCatalog={priceCatalog.catalog}
         systemSettings={systemSettings}
         currentUserId={currentUser?.id}
