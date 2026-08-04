@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Language, translations } from '../data/translations';
 import { scopedSettingsKey, ACCOUNT_CHANGED_EVENT } from '../utils/accountSettings';
+import { startDomTranslation, stopDomTranslation } from '../lib/domTranslate';
 
 interface LanguageContextType {
   language: Language;
@@ -34,8 +35,11 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     document.documentElement.setAttribute('data-lang', language);
     if (language === 'mm') {
       document.body.classList.add('lang-mm');
+      // Full-UI auto-translation for hardcoded English strings (tech terms stay EN).
+      startDomTranslation();
     } else {
       document.body.classList.remove('lang-mm');
+      stopDomTranslation();
     }
   }, [language]);
 
