@@ -72,7 +72,9 @@ describe('portal estimate approval → pipeline handoff (A-6)', () => {
       NOW
     );
     const lastLog = result.repairLogs![result.repairLogs!.length - 1];
-    expect(lastLog.author).toContain('Daw Hla');
+    // author = stored customer name; signee = the name typed in the portal
+    expect(lastLog.author).toContain('Mg Mg');
+    expect(lastLog.note).toContain('Signee: Daw Hla');
     expect(lastLog.statusChange).toBe('In Progress');
     expect(lastLog.note).toContain('APPROVED');
   });
