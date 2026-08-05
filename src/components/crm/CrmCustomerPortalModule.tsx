@@ -207,22 +207,22 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
 
   return (
     <div className="space-y-3 text-xs">
-      {/* Header */}
-      <div className="module-toolbar flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white p-2 rounded-xl border border-[#E5E5EA] shadow-xs">
+      {/* Header — compact on mobile: subtitle hidden, tabs slimmer */}
+      <div className="module-toolbar flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 bg-white p-1.5 sm:p-2 rounded-xl border border-[#E5E5EA] shadow-xs">
         <div className="module-subheader">
-          <h1 className="text-lg font-bold text-[#1D1D1F] flex items-center space-x-2">
-            <Users className="w-5 h-5 text-[#0071E3]" />
+          <h1 className="text-base sm:text-lg font-bold text-[#1D1D1F] flex items-center space-x-2">
+            <Users className="w-4 h-4 sm:w-5 sm:h-5 text-[#0071E3]" />
             <span className="hidden sm:inline">Customer Relationship Management & Self-Service Portal</span>
-            <span className="sm:hidden">Customer & Staff Portal</span>
+            <span className="sm:hidden truncate">Customer & Staff Portal</span>
           </h1>
-          <p className="text-xs text-[#86868B]">Classify accounts (Retail, B2B, Wholesale) and simulate customer tracking portal</p>
+          <p className="hidden sm:block text-xs text-[#86868B]">Classify accounts (Retail, B2B, Wholesale) and simulate customer tracking portal</p>
         </div>
 
         <div className="flex items-center gap-1 overflow-x-auto rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] p-1 text-xs no-scrollbar">
           <button
             type="button"
             onClick={() => setActiveTab('CRM')}
-            className={`px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
+            className={`px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs font-extrabold rounded-xl transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
               activeTab === 'CRM'
                 ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-xs'
                 : 'bg-white hover:bg-slate-100 text-[#6E6E73] hover:text-[#1D1D1F] border-[#E5E5EA]'
@@ -233,7 +233,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
           <button
             type="button"
             onClick={() => setActiveTab('PORTAL_SIMULATOR')}
-            className={`px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
+            className={`px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs font-extrabold rounded-xl transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
               activeTab === 'PORTAL_SIMULATOR'
                 ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-xs'
                 : 'bg-white hover:bg-slate-100 text-[#6E6E73] hover:text-[#1D1D1F] border-[#E5E5EA]'
@@ -248,8 +248,8 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
         <div className="workspace-grid grid grid-cols-1 gap-3 overflow-hidden md:grid-cols-12">
           {/* Customer Directory List */}
           <div className="flex min-h-0 h-full flex-col md:col-span-6 xl:col-span-5 bg-white border border-[#E5E5EA] rounded-2xl p-4 shadow-xs">
-            <div className="flex justify-between items-center border-b border-[#E5E5EA] pb-2 gap-2">
-              <h2 className="font-bold text-[#1D1D1F] text-xs shrink-0">Customer Account Roster</h2>
+            <div className="flex flex-wrap justify-between items-center border-b border-[#E5E5EA] pb-2 gap-x-2 gap-y-1">
+              <h2 className="font-bold text-[#1D1D1F] text-xs">Customer Account Roster</h2>
               <div className="flex items-center gap-2 min-w-0">
                 <span className="text-[10px] font-semibold text-[#86868B] shrink-0">{filteredCustomers.length} accounts</span>
                 <Button
@@ -281,7 +281,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                   <div
                     key={cust.id}
                     onClick={() => setSelectedCustomer(cust)}
-                    className={`p-3 rounded-xl border transition-all cursor-pointer ${
+                    className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
                       isSelected
                         ? 'bg-[#F0F6FF] border-[#0071E3] shadow-xs'
                         : 'bg-[#F5F5F7] border-[#E5E5EA] hover:bg-slate-100'
@@ -311,13 +311,13 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
 
                     {cust.company && <p className="text-[11px] text-[#86868B]">{cust.company}</p>}
 
-                    <div className="flex justify-between items-center text-[11px] text-[#86868B] mt-2">
+                    <div className="flex justify-between items-center text-[11px] text-[#86868B] mt-1.5">
                       <span>{cust.phone}</span>
                       <span className="font-bold text-[#28A745]">{cust.totalSpent.toLocaleString()} {systemSettings.currencySymbol} Spent</span>
                     </div>
 
                     {/* Expandable Row Toggle Bar */}
-                    <div className="flex justify-between items-center mt-2.5 pt-2 border-t border-[#E5E5EA]/70">
+                    <div className="flex justify-between items-center mt-1.5 pt-1.5 border-t border-[#E5E5EA]/70">
                       <button
                         type="button"
                         onClick={(e) => toggleExpandCustomer(cust.id, e)}
@@ -447,7 +447,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
           </div>
 
           {/* Customer Details & History */}
-          <div className="flex min-h-0 h-full flex-col md:col-span-6 xl:col-span-7 bg-white border border-[#E5E5EA] rounded-2xl p-5 shadow-xs">
+          <div className="flex min-h-0 h-full flex-col md:col-span-6 xl:col-span-7 bg-white border border-[#E5E5EA] rounded-2xl p-4 shadow-xs">
             {selectedCustomer ? (
               <div className="flex min-h-0 flex-1 flex-col gap-5">
                 <div className="border-b border-[#E5E5EA] pb-3">
@@ -472,12 +472,13 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                       className="bg-[#0071E3]/10 hover:bg-[#0071E3] text-[#0071E3] hover:text-white border border-[#0071E3]/30"
                     >
                       <FileText className="w-3.5 h-3.5" />
-                      <span>Full Repair History Modal</span>
+                      <span className="hidden sm:inline">Full History</span>
+                      <span className="sm:hidden">History</span>
                     </Button>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 bg-[#F5F5F7] p-3 rounded-xl border border-[#E5E5EA] text-[#1D1D1F]">
+                <div className="grid grid-cols-2 gap-2 bg-[#F5F5F7] p-2.5 rounded-xl border border-[#E5E5EA] text-[#1D1D1F]">
                   <div>
                     <span className="text-[#86868B]">Email:</span>
                     <p className="font-semibold text-[#1D1D1F] truncate">{selectedCustomer.email}</p>
