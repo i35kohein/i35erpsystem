@@ -51,7 +51,7 @@ export const OfflineSyncStatusBadge: React.FC = () => {
   };
 
   return (
-    <div className="relative shrink-0" ref={rootRef}>
+    <div className="relative hidden lg:block shrink-0" ref={rootRef}>
       <button
         type="button"
         onClick={() => setOpen(!open)}

@@ -1881,7 +1881,7 @@ export default function App() {
             {(activeTab === 'intake' || activeTab === 'pipeline') && (
               <button
                 onClick={() => setIsRecycleBinOpen(true)}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all active:scale-95 cursor-pointer shrink-0 ${
+                className={`hidden lg:flex items-center space-x-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all active:scale-95 cursor-pointer shrink-0 ${
                   archivedWorkOrders.length > 0
                     ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200 shadow-2xs'
                     : 'bg-surface hover:bg-line text-ink border-line'
