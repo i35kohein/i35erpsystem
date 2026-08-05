@@ -1730,7 +1730,7 @@ export default function App() {
             {/* Dynamic Filters depending on Active Tab */}
             {activeTab === 'intake' && (
               <>
-                <div className="hidden lg:flex items-center gap-1.5">
+                <div className="hidden lg:flex items-center gap-2">
                 {/* Status Dropdown */}
                 <CustomDropdownMenu
                   value={statusFilter}
@@ -1774,7 +1774,7 @@ export default function App() {
 
             {activeTab === 'pipeline' && (
               <>
-                <div className="hidden lg:flex items-center gap-1.5">
+                <div className="hidden lg:flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setShowBottlenecksOnly(!showBottlenecksOnly)}
@@ -1839,7 +1839,7 @@ export default function App() {
 
             {activeTab === 'dashboard' && (
               <>
-                <div className="hidden lg:flex items-center gap-1.5">
+                <div className="hidden lg:flex items-center gap-2">
                 <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
                 <button
                   type="button"
@@ -1856,7 +1856,7 @@ export default function App() {
 
             {activeTab === 'inventory' && (
               <>
-                <div className="hidden lg:flex items-center gap-1.5">
+                <div className="hidden lg:flex items-center gap-2">
                 <CustomDropdownMenu
                   value={categoryFilter}
                   onChange={(val) => setCategoryFilter(val)}
@@ -1890,7 +1890,7 @@ export default function App() {
 
             {activeTab === 'pos' && (
               <>
-                <div className="hidden lg:flex items-center gap-1.5">
+                <div className="hidden lg:flex items-center gap-2">
                 <CustomDropdownMenu
                   value={statusFilter}
                   onChange={(val) => setStatusFilter(val)}
@@ -1909,7 +1909,7 @@ export default function App() {
 
             {activeTab === 'crm' && (
               <>
-                <div className="hidden lg:flex items-center gap-1.5">
+                <div className="hidden lg:flex items-center gap-2">
                 <CustomDropdownMenu
                   value={customerTypeFilter}
                   onChange={(val) => setCustomerTypeFilter(val)}
@@ -1929,7 +1929,7 @@ export default function App() {
 
             {activeTab === 'suppliers' && (
               <>
-                <div className="hidden lg:flex items-center gap-1.5">
+                <div className="hidden lg:flex items-center gap-2">
                 <CustomDropdownMenu
                   value={statusFilter}
                   onChange={(val) => setStatusFilter(val)}
@@ -1950,7 +1950,7 @@ export default function App() {
 
             {activeTab === 'qa' && (
               <>
-                <div className="hidden lg:flex items-center gap-1.5">
+                <div className="hidden lg:flex items-center gap-2">
                 <CustomDropdownMenu
                   value={statusFilter}
                   onChange={(val) => setStatusFilter(val)}
@@ -1967,7 +1967,7 @@ export default function App() {
             )}
 
             {activeTab === 'finance' && (
-              <div className="hidden lg:flex items-center gap-1.5">
+              <div className="hidden lg:flex items-center gap-2">
                 <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
               </div>
             )}

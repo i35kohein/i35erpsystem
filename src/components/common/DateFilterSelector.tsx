@@ -150,7 +150,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
     <div ref={popoverRef} className={`relative flex items-center ${className}`}>
       {compact ? (
         /* Compact Dropdown Menu Modal */
-        <div className="relative flex items-center space-x-1">
+        <div className="relative flex items-center space-x-1.5">
           <CustomDropdownMenu
             value={currentFilter.preset}
             onChange={(val) => handlePresetChange(val as DatePreset)}

@@ -1096,3 +1096,10 @@ html[data-theme] :is(
 .app-topbar-actions > * > * {
   flex-shrink: 0;
 }
+
+/* Prevent layout shift when the filter drawer locks body scroll — keep the
+   scrollbar gutter reserved so content doesn't jump when overflow toggles. */
+#main-content-scroll,
+body {
+  scrollbar-gutter: stable;
+}
