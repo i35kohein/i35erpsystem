@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Truck, 
   RotateCcw, 
@@ -14,7 +14,9 @@ import {
   Trash2,
   X,
   Phone,
-  Mail
+  Mail,
+  Grid,
+  List
 } from 'lucide-react';
 import { Supplier, RmaItem, PurchaseOrder, PartItem, RmaStatus } from '../../types';
 
@@ -52,6 +54,8 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
   setShowNewRmaModal: propSetShowNewRmaModal,
 }) => {
   const [activeSubTab, setActiveSubTab] = useState<'RMA' | 'PO' | 'SUPPLIERS'>('RMA');
+  // Phones default to the RMA card grid — the table is unusable below md.
+  const [rmaView, setRmaView] = useState<'table' | 'cards'>('table');
   const [localShowNewRmaModal, setLocalShowNewRmaModal] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [showAddSupplierModal, setShowAddSupplierModal] = useState(false);
@@ -130,8 +134,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
   });
 
   const handleCreateRma = () => {
-    const part = parts.find((p) => p.id === newRmaData.partId) || parts[0];
-    const supplier = suppliers.find((s) => s.id === newRmaData.supplierId) || suppliers[0];
+    const part = parts.find((p) => p.id === newRmaData.partId) || parts[0];    const supplier = suppliers.find((s) => s.id === newRmaData.supplierId) || suppliers[0];
 
     const rma: RmaItem = {
       id: `rma-${Date.now()}`,
@@ -152,6 +155,16 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
     onAddRma(rma);
     setShowNewRmaModal(false);
   };
+
+  // Force the RMA card grid below md (phones); user toggle wins on desktop.
+  useEffect(() => {
+    const apply = () => {
+      if (window.innerWidth < 768) setRmaView('cards');
+    };
+    apply();
+    window.addEventListener('resize', apply);
+    return () => window.removeEventListener('resize', apply);
+  }, []);
 
   return (
     <div className="space-y-3">
@@ -228,15 +241,90 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
               <p className="text-xs text-[#86868B]">Flag bad screens/batteries directly and monitor vendor credit refunds</p>
             </div>
 
-            <button
-              onClick={() => setShowNewRmaModal(true)}
-              className="px-3.5 py-1.5 bg-[#AF52DE] hover:bg-purple-600 text-white font-bold text-xs rounded-xl flex items-center space-x-1.5 shadow-xs transition-all active:scale-95"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Flag Defective RMA</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <div className="flex shrink-0 items-center rounded-lg border border-[#E5E5EA] bg-white p-0.5 shadow-2xs">
+                <button
+                  type="button"
+                  onClick={() => setRmaView('table')}
+                  title="Table view"
+                  aria-label="RMA table view"
+                  className={`inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors ${rmaView === 'table' ? 'bg-[#0071E3] text-white' : 'text-[#6E6E73] hover:bg-slate-100'}`}
+                >
+                  <List className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRmaView('cards')}
+                  title="Card view"
+                  aria-label="RMA card view"
+                  className={`inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors ${rmaView === 'cards' ? 'bg-[#0071E3] text-white' : 'text-[#6E6E73] hover:bg-slate-100'}`}
+                >
+                  <Grid className="h-3.5 w-3.5" />
+                </button>
+              </div>
+              <button
+                onClick={() => setShowNewRmaModal(true)}
+                className="px-3.5 py-1.5 bg-[#AF52DE] hover:bg-purple-600 text-white font-bold text-xs rounded-xl flex items-center space-x-1.5 shadow-xs transition-all active:scale-95"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Flag Defective RMA</span>
+              </button>
+            </div>
           </div>
 
+          {filteredRmas.length === 0 ? (
+            <div className="flex min-h-[200px] flex-col items-center justify-center p-12 text-center space-y-3 bg-white border border-[#E5E5EA] rounded-2xl">
+              <RotateCcw className="w-8 h-8 text-[#86868B] mx-auto" />
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-[#1D1D1F]">No RMAs match your search or status filter</p>
+                <p className="text-xs text-[#86868B]">Flag a defective part to start tracking vendor credit.</p>
+              </div>
+            </div>
+          ) : rmaView === 'cards' ? (
+            /* PHONE CARD GRID */
+            <div className="grid grid-cols-1 gap-3">
+              {filteredRmas.map((rma) => (
+                <div key={rma.id} className="space-y-3 bg-white border border-[#E5E5EA] rounded-2xl p-4 text-xs shadow-xs">
+                  <div className="flex items-start justify-between gap-2 border-b border-[#E5E5EA] pb-2">
+                    <div>
+                      <p className="font-mono font-bold text-[#0071E3]">{rma.rmaNumber}</p>
+                      <p className="text-[10px] text-[#86868B]">{new Date(rma.createdAt).toLocaleDateString()}</p>
+                    </div>
+                    <span className={`inline-flex items-center gap-1.5 text-[10px] font-extrabold px-2.5 py-1 rounded-lg border shadow-2xs ${rma.status === 'Credit Approved' ? 'bg-[#EAF8ED] text-[#28A745] border-[#34C759]/30' : rma.status === 'Shipped to Vendor' ? 'bg-[#F0F6FF] text-[#0071E3] border-[#0071E3]/25' : 'bg-slate-100 text-slate-700 border-slate-200'}`}>
+                      <span>{rma.status}</span>
+                    </span>
+                  </div>
+
+                  <div>
+                    <p className="font-bold text-[#1D1D1F]">{rma.partName}</p>
+                    <div className="mt-1 flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#1D1D1F] border border-[#E5E5EA]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#0071E3]" />
+                        <span>Tier: {rma.partQuality}</span>
+                      </span>
+                      <span className="font-bold text-[#AF52DE]">{rma.supplierName}</span>
+                    </div>
+                  </div>
+
+                  {rma.reason && <p className="line-clamp-2 text-[#1D1D1F]">{rma.reason}</p>}
+
+                  <div className="flex items-center justify-between gap-2 border-t border-[#E5E5EA] pt-2">
+                    <span className="font-mono text-[10px] text-[#86868B]">{rma.trackingNumber || 'No tracking yet'}</span>
+                    {rma.vendorCreditAmount ? (
+                      <span className="text-[10px] text-[#28A745] font-extrabold">+{rma.vendorCreditAmount.toLocaleString()} MMK Credit</span>
+                    ) : rma.status === 'Shipped to Vendor' ? (
+                      <button
+                        onClick={() => onUpdateRmaStatus(rma.id, 'Credit Approved', rma.unitCost * rma.quantity)}
+                        className="px-2.5 py-1.5 bg-[#EAF8ED] hover:bg-emerald-100 text-[#28A745] border border-[#34C759]/20 text-[10px] font-bold rounded-lg cursor-pointer"
+                      >
+                        Approve Credit
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
           <div className="bg-white border border-[#E5E5EA] rounded-2xl overflow-hidden text-xs shadow-xs">
             <table className="w-full text-left">
               <thead className="bg-[#F5F5F7] text-[#86868B] text-[10px] uppercase font-mono border-b border-[#E5E5EA]">
@@ -302,6 +390,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
               </tbody>
             </table>
           </div>
+          )}
         </div>
       )}
 

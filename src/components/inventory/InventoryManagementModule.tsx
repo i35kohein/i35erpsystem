@@ -158,6 +158,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const [isTagsPrintOpen, setIsTagsPrintOpen] = useState(false);
   const [selectedTagIds, setSelectedTagIds] = useState<Set<string>>(new Set());
   const [inlineEditMode, setInlineEditMode] = useState(false);
+  // Phones default to the card grid — the stock table is unusable below md.
+  const [stockView, setStockView] = useState<'table' | 'cards'>('table');
   const [inlineDrafts, setInlineDrafts] = useState<Record<string, InlineDraft>>({});
   const [showInlineSaveConfirm, setShowInlineSaveConfirm] = useState(false);
   const [isInlineSaving, setIsInlineSaving] = useState(false);
@@ -620,6 +622,16 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       ro.disconnect();
     };
   }, [viewMode]);
+
+  // Force the stock card grid below md (phones); user toggle wins on desktop.
+  useEffect(() => {
+    const apply = () => {
+      if (window.innerWidth < 768) setStockView('cards');
+    };
+    apply();
+    window.addEventListener('resize', apply);
+    return () => window.removeEventListener('resize', apply);
+  }, []);
 
   // Analytics Metrics
   const metrics = useMemo(() => {
@@ -1126,7 +1138,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       {viewMode === 'stock' && (
         <>
         {/* Barcode scan bar — keyboard-wedge scanners type the SKU + Enter here */}
-        <div className="flex items-center gap-2 rounded-xl border border-[#0071E3]/25 bg-blue-50/50 px-3 py-2">
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-[#0071E3]/25 bg-blue-50/50 px-3 py-2">
           <ScanLine className="h-4 w-4 shrink-0 text-[#0071E3]" />
           <input
             ref={scanInputRef}
@@ -1138,7 +1150,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             placeholder="Scan barcode — or type SKU then press Enter"
             autoComplete="off"
             autoFocus
-            className="min-w-0 flex-1 rounded-lg border border-[#D2D2D7] bg-white px-3 py-1.5 font-mono text-xs font-semibold text-[#1D1D1F] outline-none transition focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
+            className="min-w-0 flex-1 basis-[160px] rounded-lg border border-[#D2D2D7] bg-white px-3 py-1.5 font-mono text-xs font-semibold text-[#1D1D1F] outline-none transition focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
           />
           <button
             type="button"
@@ -1147,44 +1159,162 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           >
             Lookup
           </button>
+          {!inlineEditMode && (
+            <div className="ml-auto flex shrink-0 items-center rounded-lg border border-[#D2D2D7] bg-white p-0.5 shadow-2xs">
+              <button
+                type="button"
+                onClick={() => setStockView('table')}
+                title="Table view"
+                aria-label="Stock table view"
+                className={`inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors ${stockView === 'table' ? 'bg-[#0071E3] text-white' : 'text-[#6E6E73] hover:bg-slate-100'}`}
+              >
+                <List className="h-3.5 w-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setStockView('cards')}
+                title="Card view"
+                aria-label="Stock card view"
+                className={`inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors ${stockView === 'cards' ? 'bg-[#0071E3] text-white' : 'text-[#6E6E73] hover:bg-slate-100'}`}
+              >
+                <Grid className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
         </div>
         <div className="workspace-panel workspace-panel--standard rounded-2xl border border-[#E5E5EA] bg-white text-xs shadow-xs">
-          <div className="workspace-panel__scroll rounded-xl">
-            <table className="w-full text-left border-collapse">
-              <thead className="sticky top-0 z-20 bg-[#F5F5F7] text-[#86868B] text-[10px] uppercase font-mono border-b border-[#E5E5EA] shadow-2xs">
-                <tr>
-                  <th className="w-[34%] px-2 py-2 bg-[#F5F5F7]">Part Name & SKU</th>
-                  <th className="w-[108px] px-2 py-2 bg-[#F5F5F7] hidden md:table-cell">Quality</th>
-                  <th className="w-[96px] px-1.5 py-2 bg-[#F5F5F7]">Stock</th>
-                  <th className="w-[104px] px-1.5 py-2 bg-[#F5F5F7]">Selling Price</th>
-                  {inlineEditMode && <th className="w-[150px] px-1.5 py-2 bg-[#F5F5F7]">Supplier</th>}
-                  <th className="px-2 py-2 bg-[#F5F5F7] hidden md:table-cell">Bin</th>
-                  {!inlineEditMode && <th className="px-2 py-2 text-right bg-[#F5F5F7]">Detail</th>}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#E5E5EA]">
-                {filteredParts.length === 0 ? (
-                  <tr>
-                    <td colSpan={inlineEditMode ? 7 : 6} className="p-12 text-center space-y-2">
-                      <PackageX className="w-8 h-8 text-[#86868B] mx-auto" />
-                      <p className="text-sm font-bold text-[#1D1D1F]">No inventory components found matching your filter</p>
-                      <p className="text-xs text-[#86868B]">Try resetting the search query or quality tier selection.</p>
+          {filteredParts.length === 0 ? (
+            <div className="flex min-h-[280px] flex-col items-center justify-center p-12 text-center space-y-4">
+              <PackageX className="w-8 h-8 text-[#86868B] mx-auto" />
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-[#1D1D1F]">No inventory components found matching your filter</p>
+                <p className="text-xs text-[#86868B]">Try resetting the search query or quality tier selection.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedQuality('ALL');
+                  setSelectedCategory('ALL');
+                  setShowLowStockOnly(false);
+                  setSearchQuery('');
+                }}
+                className="mt-2 px-3 py-1.5 bg-[#0071E3] text-white font-bold rounded-xl text-xs"
+              >
+                Reset All Filters
+              </button>
+            </div>
+          ) : stockView === 'cards' && !inlineEditMode ? (
+            /* PHONE CARD GRID — read-only; price/stock editing stays in the desktop table */
+            <div className="grid grid-cols-1 gap-3 p-3 content-start">
+              {paginatedParts.map((part) => {
+                const isLow = part.quantityInStock <= part.reorderPoint;
+                const isOut = part.quantityInStock === 0;
+                const qualityBadge =
+                  part.qualityTier === 'Original' || part.qualityTier.includes('Original') ? (
+                    <span className="inline-flex max-w-[130px] items-center gap-1 truncate rounded-md border border-blue-200 bg-blue-50 px-1.5 py-0.5 text-[10px] font-extrabold text-blue-800">
+                      <ShieldCheck className="h-3 w-3 shrink-0 text-blue-600" />
+                      <span>{part.qualityTier}</span>
+                    </span>
+                  ) : part.qualityTier === 'OEM' ? (
+                    <span className="inline-flex max-w-[130px] items-center gap-1 truncate rounded-md border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-extrabold text-emerald-800">
+                      <Sparkles className="h-3 w-3 shrink-0 text-emerald-600" />
+                      <span>{part.qualityTier}</span>
+                    </span>
+                  ) : part.qualityTier === 'Genuine' ? (
+                    <span className="inline-flex max-w-[130px] items-center gap-1 truncate rounded-md border border-purple-200 bg-purple-50 px-1.5 py-0.5 text-[10px] font-extrabold text-purple-800">
+                      <Cpu className="h-3 w-3 shrink-0 text-purple-600" />
+                      <span>{part.qualityTier}</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex max-w-[130px] items-center gap-1 truncate rounded-md border border-slate-300 bg-slate-100 px-1.5 py-0.5 text-[10px] font-extrabold text-slate-800">
+                      <Tag className="h-3 w-3 shrink-0 text-slate-600" />
+                      <span>{part.qualityTier}</span>
+                    </span>
+                  );
+
+                return (
+                  <div key={part.id} className="space-y-3 rounded-2xl border border-[#E5E5EA] bg-white p-4 text-xs shadow-xs">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex min-w-0 items-start space-x-2">
+                        <div className="mt-0.5 shrink-0 rounded-md bg-[#0071E3]/10 p-1.5 text-[#0071E3]">
+                          <Cpu className="h-3.5 w-3.5" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-[13px] font-extrabold leading-snug text-[#1D1D1F]">{part.name}</p>
+                          <p className="mt-0.5 font-mono text-[10px] font-medium text-[#86868B]">SKU {part.sku}</p>
+                        </div>
+                      </div>
                       <button
                         type="button"
-                        onClick={() => {
-                          setSelectedQuality('ALL');
-                          setSelectedCategory('ALL');
-                          setShowLowStockOnly(false);
-                          setSearchQuery('');
-                        }}
-                        className="mt-2 px-3 py-1.5 bg-[#0071E3] text-white font-bold rounded-xl text-xs"
+                        onClick={() => setSelectedPartForDetails(part)}
+                        aria-label={`View ${part.name} details`}
+                        title="View part details"
+                        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] text-[#1D1D1F] transition-colors hover:border-[#0071E3] hover:bg-blue-50 hover:text-[#0071E3]"
                       >
-                        Reset All Filters
+                        <FileText className="h-3.5 w-3.5" />
                       </button>
-                    </td>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {qualityBadge}
+                      {part.locationBin && (
+                        <span className="inline-flex items-center gap-1 rounded-md border border-[#E5E5EA] bg-[#F5F5F7] px-1.5 py-0.5 text-[10px] font-extrabold text-[#0071E3]">
+                          <MapPin className="h-2.5 w-2.5 shrink-0" />
+                          {part.locationBin}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="space-y-1.5 rounded-xl border border-[#D8E5ED] bg-[#F8FBFD] p-2.5">
+                      <div className="flex items-center justify-between">
+                        <span className={`font-mono text-[15px] font-black tracking-wide ${isOut ? 'text-red-600' : isLow ? 'text-amber-600' : 'text-[#1D1D1F]'}`}>
+                          {part.quantityInStock} <span className="text-[10px] font-normal text-[#86868B]">units</span>
+                        </span>
+                        {isOut ? (
+                          <span className="animate-pulse rounded bg-red-600 px-1.5 py-0.5 text-[8px] font-black uppercase leading-none tracking-[0.1em] text-white">OUT OF STOCK</span>
+                        ) : isLow ? (
+                          <span className="rounded bg-amber-500 px-1.5 py-0.5 text-[8px] font-black uppercase leading-none tracking-[0.1em] text-white">REORDER</span>
+                        ) : (
+                          <span className="text-[10px] font-bold text-[#86868B]">Min: {part.reorderPoint}</span>
+                        )}
+                      </div>
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#E5E5EA]">
+                        <div
+                          className={`h-full transition-all duration-300 ${isOut ? 'w-0 bg-red-600' : isLow ? 'bg-amber-500' : 'bg-[#34C759]'}`}
+                          style={isOut ? undefined : { width: `${Math.min(100, Math.max(8, (part.quantityInStock / (part.reorderPoint * 3)) * 100))}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex items-end justify-between gap-2 border-t border-[#E5E5EA] pt-1">
+                      <div>
+                        <span className="block text-[10px] font-bold uppercase text-[#7F7F7F]">Selling Price</span>
+                        <span className="font-mono text-sm font-black text-[#16A34A]">{part.sellingPrice.toLocaleString()} MMK</span>
+                      </div>
+                      {part.supplierName && (
+                        <span className="max-w-[45%] truncate text-[10px] font-semibold text-[#86868B]">{part.supplierName}</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="workspace-panel__scroll rounded-xl">
+              <table className="w-full text-left border-collapse">
+                <thead className="sticky top-0 z-20 bg-[#F5F5F7] text-[#86868B] text-[10px] uppercase font-mono border-b border-[#E5E5EA] shadow-2xs">
+                  <tr>
+                    <th className="w-[34%] px-2 py-2 bg-[#F5F5F7]">Part Name & SKU</th>
+                    <th className="w-[108px] px-2 py-2 bg-[#F5F5F7] hidden md:table-cell">Quality</th>
+                    <th className="w-[96px] px-1.5 py-2 bg-[#F5F5F7]">Stock</th>
+                    <th className="w-[104px] px-1.5 py-2 bg-[#F5F5F7]">Selling Price</th>
+                    {inlineEditMode && <th className="w-[150px] px-1.5 py-2 bg-[#F5F5F7]">Supplier</th>}
+                    <th className="px-2 py-2 bg-[#F5F5F7] hidden md:table-cell">Bin</th>
+                    {!inlineEditMode && <th className="px-2 py-2 text-right bg-[#F5F5F7]">Detail</th>}
                   </tr>
-                ) : (
-                  paginatedParts.map((part) => {
+                </thead>
+                <tbody className="divide-y divide-[#E5E5EA]">
+                  {paginatedParts.map((part) => {
                     const isLow = part.quantityInStock <= part.reorderPoint;
                     const isOut = part.quantityInStock === 0;
                     const draft = inlineDrafts[part.id] || {};
@@ -1365,11 +1495,11 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         </td>}
                       </tr>
                     );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
 
           {/* Full list footer */}
           {filteredParts.length > 0 && (
