@@ -114,7 +114,7 @@ Pervasive `text-xs` (12px) / 14px editable inputs (POS qty, Inventory inline-edi
 
 **Round 1 (P0s, ~half a day):** pipeline mobile Show-All toggle → photo delete touch badge → CRM sheet z-index. All three are <20-line changes.
 
-**Round 2 (high-leverage P1s):** global `text-[16px]` editable-input rule in index.css (one line kills iOS zoom) → mobile card fallbacks for Profit view + Devices table + POS line-items scroll → matrix cell tap-detail → QA/CreateTicket segmented buttons `min-h-10` → portal the dropdown menu + gate HoverTooltip to fine pointers.
+**Round 2 (high-leverage P1s):** ✅ **done 2026-08-06** (commit `c81f893`, deployed): 16px input zoom rule (`@media (pointer: coarse)`) · mobile card fallback for Profit view + hidden cols for Devices + POS line-items scroll · matrix cell touch fallback line · QA/CreateTicket segmented `min-h-10` · dropdown menu portaled (viewport-aware, backdrop, auto-flip) · HoverTooltip gated to fine pointers.
 
 **Round 3 (P1 layout):** customer portal header wrap, finance stat grid, POS tiles grid, QuickCalc sticky total, topbar overflow menu.
 
