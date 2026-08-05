@@ -34,6 +34,13 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
 }) => {
   const [paperSize, setPaperSize] = useState<'3x2_tag' | 'a4_voucher'>('a4_voucher');
 
+  // ESC closes the print modal
+  React.useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [onClose]);
+
   // Print layout is centrally managed in System Management → POS & Receipt Layout.
   // The voucher only reads those saved defaults to keep every print consistent.
   const a4ColorMode = systemSettings?.a4PrintColorMode ?? 'monochrome';

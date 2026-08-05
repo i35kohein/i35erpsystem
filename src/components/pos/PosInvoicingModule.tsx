@@ -1103,6 +1103,26 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       inputMode="numeric"
                       className="w-full bg-white border border-[#E5E5EA] rounded-lg p-2 text-[#1D1D1F] font-mono focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
                     />
+                    {/* On-screen numpad — cashier speed on phones */}
+                    <div className="grid grid-cols-3 gap-1.5 md:hidden pt-0.5">
+                      {['1', '2', '3', '4', '5', '6', '7', '8', '9', '00', '0', '⌫'].map((key) => (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => {
+                            if (key === '⌫') {
+                              setCashTendered(Math.floor(cashTendered / 10));
+                            } else {
+                              setCashTendered(Number(String(cashTendered || '') + key) || 0);
+                            }
+                          }}
+                          className="h-11 rounded-xl border border-[#E5E5EA] bg-white font-mono text-sm font-black text-[#1D1D1F] hover:bg-[#F0F6FF] hover:border-[#0071E3] transition-colors active:scale-95 cursor-pointer"
+                          aria-label={`Numpad ${key}`}
+                        >
+                          {key}
+                        </button>
+                      ))}
+                    </div>
                     {cashTendered > 0 && cashTendered < selectedWo.totalAmount && (
                       <p className="flex items-center gap-1.5 text-rose-700 font-extrabold text-xs bg-rose-50 border border-rose-200 rounded-xl px-3 py-2">
                         <AlertTriangle className="w-3.5 h-3.5 shrink-0" />

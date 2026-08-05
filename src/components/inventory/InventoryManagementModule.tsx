@@ -1156,7 +1156,20 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           </div>
 
           {viewMode === 'stock' && (
-            <div className={`grid items-center gap-1 w-full md:flex md:w-auto md:ml-auto md:shrink-0 md:pl-1 ${inlineEditMode ? 'grid-cols-3' : 'grid-cols-4'}`}>
+            <div className={`grid items-center gap-1 w-full md:flex md:w-auto md:ml-auto md:shrink-0 md:pl-1 ${inlineEditMode ? 'grid-cols-3' : 'grid-cols-5'}`}>
+              {/* Quick Add Part — opens the add-part modal directly */}
+              {!inlineEditMode && (
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(true)}
+                  className="toolbar-compact-btn flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#0071E3] px-2.5 py-1.5 text-[11px] font-bold text-white shadow-xs transition-colors hover:bg-[#0051B3] active:scale-95 cursor-pointer"
+                  title="Add a new part"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Add Part</span>
+                </button>
+              )}
+
               {/* Table view — left, joined pair with Card */}
               {!inlineEditMode && (
                 <button
@@ -1527,7 +1540,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         <div className="flex items-center gap-1.5">
                           <button
                             type="button"
-                            onClick={() => onUpdatePartStock(part.id, Math.max(0, part.quantityInStock - 1))}
+                            onClick={() => { onUpdatePartStock(part.id, Math.max(0, part.quantityInStock - 1)); toast.info(`${part.name}: ${Math.max(0, part.quantityInStock - 1)} units`, 'Stock −1'); }}
                             aria-label={`Decrease stock for ${part.name}`}
                             title="Decrease stock"
                             className="flex h-10 w-10 lg:h-8 lg:w-8 items-center justify-center rounded-lg border border-amber-300 bg-white font-black text-rose-600 active:scale-95"
@@ -1535,7 +1548,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                           <span className="min-w-10 text-center font-mono text-base font-black text-[#1D1D1F]">{part.quantityInStock}</span>
                           <button
                             type="button"
-                            onClick={() => onUpdatePartStock(part.id, part.quantityInStock + 1)}
+                            onClick={() => { onUpdatePartStock(part.id, part.quantityInStock + 1); toast.success(`${part.name}: ${part.quantityInStock + 1} units`, 'Stock +1'); }}
                             aria-label={`Increase stock for ${part.name}`}
                             title="Increase stock"
                             className="flex h-10 w-10 lg:h-8 lg:w-8 items-center justify-center rounded-lg border border-amber-300 bg-white font-black text-[#0071E3] active:scale-95"
@@ -1958,6 +1971,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         );
                         const quantity = matchingParts.reduce((total, part) => total + part.quantityInStock, 0);
                         const reorderPoint = matchingParts.reduce((total, part) => total + part.reorderPoint, 0);
+                        const costValue = matchingParts.reduce((total, part) => total + (part.costPrice || 0) * part.quantityInStock, 0);
+                        const retailValue = matchingParts.reduce((total, part) => total + (part.sellingPrice || 0) * part.quantityInStock, 0);
                         const isLow = matchingParts.length > 0 && quantity <= reorderPoint;
                         const sharedLabel = merge && merge.models.length > 1 ? ` · Shared: ${merge.models.join(' + ')}` : '';
                         return (
@@ -1973,7 +1988,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                                 className={`min-w-14 min-h-9 md:min-h-8 rounded-lg border px-2 py-1 font-mono text-xs font-black ${
                                   quantity === 0 ? 'border-rose-200 bg-rose-50 text-rose-600' : isLow ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'
                                 }`}
-                                title={`${matchingParts.length} SKU${matchingParts.length === 1 ? '' : 's'} · ${quantity} units${sharedLabel}`}
+                                title={`${matchingParts.length} SKU${matchingParts.length === 1 ? '' : 's'} · ${quantity} units · Cost ${costValue.toLocaleString()} MMK · Retail ${retailValue.toLocaleString()} MMK${sharedLabel}`}
                               >
                                 {quantity}
                               </button>

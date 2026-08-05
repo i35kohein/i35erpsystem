@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { AlertTriangle, Trash2, X } from 'lucide-react';
 
 interface ConfirmDeleteModalProps {
@@ -22,12 +22,24 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
   onConfirm,
   onClose,
 }) => {
+  // ESC closes the modal; focus moves into the dialog on open (basic focus trap)
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handler);
+    const panel = document.getElementById('confirm-delete-panel');
+    panel?.focus();
+    return () => window.removeEventListener('keydown', handler);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
-      <div 
-        className="bg-white border border-slate-200 rounded-3xl shadow-2xl max-w-md w-full p-6 space-y-5 animate-in zoom-in-95 duration-150"
+      <div
+        id="confirm-delete-panel"
+        tabIndex={-1}
+        className="bg-white border border-slate-200 rounded-3xl shadow-2xl max-w-md w-full p-6 space-y-5 animate-in zoom-in-95 duration-150 outline-none"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between border-b border-slate-100 pb-4">

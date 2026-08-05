@@ -77,6 +77,10 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
   useEffect(() => {
     if (!isOpen) return;
 
+    // ESC closes the scanner modal
+    const escHandler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', escHandler);
+
     Html5Qrcode.getCameras()
       .then((deviceList) => {
         if (deviceList && deviceList.length > 0) {
@@ -96,6 +100,7 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
       });
 
     return () => {
+      window.removeEventListener('keydown', escHandler);
       stopScanner();
     };
   }, [isOpen]);
