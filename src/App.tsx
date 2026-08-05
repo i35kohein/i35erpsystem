@@ -561,6 +561,7 @@ export default function App() {
   const [printableTagWo, setPrintableTagWo] = useState<WorkOrder | null>(null);
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+  const filtersTriggerRef = useRef<HTMLButtonElement | null>(null);
   // Sidebar defaults to collapsed on desktop (Ko Hein 2026-08-05) so the
   // content area keeps usable width; user can still expand it manually.
   const [isCollapsed, setIsCollapsed] = useState(
@@ -618,11 +619,15 @@ export default function App() {
     const rowCls = "flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-xs font-extrabold transition-colors cursor-pointer";
     return (
       <div className="space-y-3">
-        {drawerChips.length > 0 && (
+        {drawerChips.length > 0 ? (
           <div className="rounded-xl border border-line bg-surface p-2.5">
             <p className="mb-1.5 text-[9px] font-extrabold uppercase tracking-wider text-muted">Active ({drawerChips.length})</p>
             <ActiveFilterChips chips={drawerChips} />
           </div>
+        ) : (
+          <p className="rounded-xl border border-dashed border-line bg-surface px-3 py-2 text-center text-[10px] font-bold text-muted">
+            No active filters — pick options below to filter the list
+          </p>
         )}
         {tab === 'pipeline' && (
           <>
@@ -803,22 +808,6 @@ export default function App() {
           </button>
         )}
 
-        {getActiveFilterCount(tab) > 0 && (
-          <button
-            type="button"
-            onClick={() => {
-              handleResetAllFilters();
-              setShowBottlenecksOnly(false);
-              setShowAllStages(false);
-              setShowBeforeNeedsDiagOnly(false);
-              setShowNeedsDiagOnly(false);
-            }}
-            className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2.5 text-xs font-extrabold text-rose-700 hover:bg-rose-100 transition-colors cursor-pointer"
-          >
-            <X className="w-4 h-4" />
-            Reset All Filters
-          </button>
-        )}
       </div>
     );
   };
@@ -1749,6 +1738,7 @@ export default function App() {
 
             {FILTER_TABS.includes(activeTab) && (
               <button
+                ref={filtersTriggerRef}
                 type="button"
                 onClick={() => setIsFilterDrawerOpen(true)}
                 className="lg:hidden inline-flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand transition-all cursor-pointer relative shrink-0"
@@ -2383,6 +2373,15 @@ export default function App() {
       <RightFilterDrawer
         open={isFilterDrawerOpen}
         onClose={() => setIsFilterDrawerOpen(false)}
+        triggerRef={filtersTriggerRef}
+        onReset={() => {
+          handleResetAllFilters();
+          setShowBottlenecksOnly(false);
+          setShowAllStages(false);
+          setShowBeforeNeedsDiagOnly(false);
+          setShowNeedsDiagOnly(false);
+        }}
+        resetDisabled={getActiveFilterCount(activeTab) === 0}
         title={`${activeTab === 'pipeline' ? 'Pipeline' : activeTab === 'pos' ? 'POS' : activeTab === 'crm' ? 'CRM' : activeTab === 'inventory' ? 'Inventory' : activeTab === 'suppliers' ? 'Suppliers' : activeTab === 'qa' ? 'QA' : activeTab === 'finance' ? 'Finance' : activeTab === 'dashboard' ? 'Dashboard' : 'Intake'} Filters`}
       >
         {renderMobileFilters(activeTab)}
