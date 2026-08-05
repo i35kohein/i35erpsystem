@@ -28,11 +28,13 @@ The gap is not layout — it's **desktop-behavior leakage**: hover-only interact
 
 ## P0 — Broken core flows on mobile (fix first)
 
+> ✅ **All 3 fixed 2026-08-06** (commit `00d940e`, deployed to VPS; tsc + build + browser-verified at 390px & 1440px).
+
 | # | Where | Problem | Fix |
 |---|-------|---------|-----|
-| P0-1 | Pipeline `StatusPipelineView.tsx:466/555/1193` | "Show All / exception stages" controls are `hidden lg:grid` → `showAllStages` can never be enabled on a phone → **Cant Repair / Customer Not Repair columns never render on mobile**, while the scroll hint promises "Scroll for Cant Repair / Customer Not Repair" (dead affordance). Two workflow stages unreachable = data silently hidden. | Mobile "Show All" toggle (chips row <lg), or auto-show exception columns when tickets exist there; make the hint track `showAllStages`. |
-| P0-2 | Create Ticket `CreateTicketSoloPage.tsx:1269` | Photo delete button is `opacity-0 group-hover:opacity-100` → **touch users can never delete an intake photo**; wrong photos become permanent ticket data. | Always-visible delete badge on touch (`sm:opacity-0 sm:group-hover:opacity-100`) or an edit-photos mode. |
-| P0-3 | CRM `CrmCustomerPortalModule.tsx:483` | Mobile bottom sheet is `z-[60]` while every modal (Full History `z-50`, Invoice, Add Customer) is `z-50` → opening History/Invoice from inside the open sheet renders the modal **underneath the sheet**. | Raise modals to `z-[70]+` (or lower the sheet), or close the sheet before opening modals. Audit all `z-[60]` sheets app-wide. |
+| P0-1 | Pipeline `StatusPipelineView.tsx:466/555/1193` | ~~"Show All / exception stages" controls are `hidden lg:grid` → `showAllStages` can never be enabled on a phone → **Cant Repair / Customer Not Repair columns never render on mobile**, while the scroll hint promises "Scroll for Cant Repair / Customer Not Repair" (dead affordance). Two workflow stages unreachable = data silently hidden.~~ **FIXED:** mobile `Show Exception Stages` chip (controls bar) + the misleading hint is now a one-tap Show All CTA with live counts; scroll hint only renders when the columns actually exist. | Mobile "Show All" toggle (chips row <lg), or auto-show exception columns when tickets exist there; make the hint track `showAllStages`. — done |
+| P0-2 | Create Ticket `CreateTicketSoloPage.tsx:1269` | ~~Photo delete button is `opacity-0 group-hover:opacity-100` → **touch users can never delete an intake photo**; wrong photos become permanent ticket data.~~ **FIXED:** badge is `opacity-100` on touch, hover-only from `sm:` up; 40px target via CSS touch floor; helper text updated. | Always-visible delete badge on touch (`sm:opacity-0 sm:group-hover:opacity-100`) or an edit-photos mode. — done |
+| P0-3 | CRM `CrmCustomerPortalModule.tsx:483` | ~~Mobile bottom sheet is `z-[60]` while every modal (Full History `z-50`, Invoice, Add Customer) is `z-50` → opening History/Invoice from inside the open sheet renders the modal **underneath the sheet**.~~ **FIXED:** Add/Edit Customer, Repair History Dossier & Printable Invoice raised to `z-[70]` (only `z-[60]` sheet in the app; no other conflicts found). | Raise modals to `z-[70]+` (or lower the sheet), or close the sheet before opening modals. Audit all `z-[60]` sheets app-wide. — done |
 
 ---
 
