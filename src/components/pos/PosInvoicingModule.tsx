@@ -532,9 +532,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
         <div className="md:col-span-7 bg-white border border-[#E5E5EA] rounded-2xl p-5 space-y-5 shadow-xs">
           {selectedWo ? (
             <div className="space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E5E5EA] pb-3">
-                <div>
-                  <div className="flex items-center space-x-2">
+              <div className="border-b border-[#E5E5EA] pb-3 space-y-2">
+                {/* Line 1: WO number + status + Notify */}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center space-x-2 min-w-0">
                     <span className="font-mono font-bold text-[#0071E3] text-sm">{selectedWo.orderNumber}</span>
                     <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md border ${
                       selectedWo.status === 'Finished' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
@@ -544,24 +545,25 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       {selectedWo.status}
                     </span>
                   </div>
-                  <h2 className="text-base font-bold text-[#1D1D1F]">{selectedWo.deviceModel}</h2>
-                </div>
-                
-                <div className="flex items-center space-x-2">
+
                   <button
                     type="button"
                     onClick={() => {
                       setNotifWo(selectedWo);
                       setIsNotifModalOpen(true);
                     }}
-                    className="px-3 py-1.5 bg-[#7360F2]/10 hover:bg-[#7360F2]/20 text-[#7360F2] font-extrabold text-xs rounded-xl border border-[#7360F2]/30 transition-all flex items-center space-x-1.5 cursor-pointer"
+                    className="px-3 py-1.5 bg-[#7360F2]/10 hover:bg-[#7360F2]/20 text-[#7360F2] font-extrabold text-xs rounded-xl border border-[#7360F2]/30 transition-all flex items-center space-x-1.5 cursor-pointer shrink-0"
                     title="Send SMS / Viber / Telegram Notification"
                   >
                     <BellRing className="w-3.5 h-3.5 text-[#7360F2]" />
                     <span>Notify Customer</span>
                   </button>
+                </div>
 
-                  <div className="text-right border-l border-[#E5E5EA] pl-3">
+                {/* Line 2: device + customer */}
+                <div className="flex items-end justify-between gap-3">
+                  <h2 className="text-base font-bold text-[#1D1D1F] truncate">{selectedWo.deviceModel}</h2>
+                  <div className="text-right shrink-0">
                     <span className="text-[#86868B] text-[10px]">Customer:</span>
                     <p className="font-bold text-[#1D1D1F] text-xs">{selectedWo.customerName}</p>
                   </div>
@@ -818,7 +820,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     <p>Enable one in Settings → Payment Methods to accept payment.</p>
                   </div>
                 ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 3xl:grid-cols-6 4xl:grid-cols-8 gap-2">
+                <div className="flex flex-wrap gap-2">
                   {activePaymentMethods.map((m) => {
                     const isSelected = paymentMethod === m.name;
                     const meta = getPaymentMeta(m.name);
@@ -828,7 +830,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         key={m.id}
                         type="button"
                         onClick={() => setPaymentMethod(m.name)}
-                        className={`min-h-[56px] p-2.5 rounded-xl border text-left font-bold text-xs transition-all cursor-pointer flex items-center space-x-2.5 ${
+                        className={`flex-1 min-w-[150px]! md:min-w-[165px]! min-h-[56px] p-2.5 rounded-xl border text-left font-bold text-xs transition-all cursor-pointer flex items-center space-x-2.5 ${
                           isSelected
                             ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-2xs'
                             : 'bg-white text-[#1D1D1F] border-[#E5E5EA] hover:bg-[#F5F5F7]'
@@ -837,9 +839,9 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#F5F5F7]">
                           <Icon className="w-4 h-4" style={{ color: isSelected ? '#FFFFFF' : meta.color }} />
                         </span>
-                        <div className="truncate min-w-0 flex-1">
-                          <div className="truncate font-extrabold">{m.name}</div>
-                          <div className={`text-[10px] font-normal truncate ${isSelected ? 'text-blue-100' : 'text-[#86868B]'}`}>
+                        <div className="min-w-0 flex-1">
+                          <div className={`leading-tight font-extrabold ${isSelected ? 'text-blue-100' : 'text-[#1D1D1F]'}`}>{m.name}</div>
+                          <div className={`text-[10px] font-normal leading-tight ${isSelected ? 'text-blue-100' : 'text-[#86868B]'}`}>
                             {m.category}
                           </div>
                         </div>
@@ -860,7 +862,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         ]);
                       }
                     }}
-                    className={`min-h-[56px] p-2.5 rounded-xl border text-left font-bold text-xs transition-all cursor-pointer flex items-center space-x-2.5 ${
+                    className={`flex-1 min-w-[150px]! md:min-w-[165px]! min-h-[56px] p-2.5 rounded-xl border text-left font-bold text-xs transition-all cursor-pointer flex items-center space-x-2.5 ${
                       paymentMethod === 'Split Payment'
                         ? 'bg-[#7360F2] text-white border-[#7360F2] shadow-2xs'
                         : 'bg-white text-[#1D1D1F] border-[#E5E5EA] hover:bg-[#F5F5F7]'
@@ -869,9 +871,9 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#F5F5F7]">
                       <Split className="w-4 h-4" style={{ color: paymentMethod === 'Split Payment' ? '#FFFFFF' : '#7360F2' }} />
                     </span>
-                    <div className="truncate min-w-0 flex-1">
-                      <div className="truncate font-extrabold">Split Payment</div>
-                      <div className={`text-[10px] font-normal truncate ${paymentMethod === 'Split Payment' ? 'text-purple-100' : 'text-[#86868B]'}`}>
+                    <div className="min-w-0 flex-1">
+                      <div className={`leading-tight font-extrabold ${paymentMethod === 'Split Payment' ? 'text-purple-100' : 'text-[#1D1D1F]'}`}>Split Payment</div>
+                      <div className={`text-[10px] font-normal leading-tight ${paymentMethod === 'Split Payment' ? 'text-purple-100' : 'text-[#86868B]'}`}>
                         Multi-Method
                       </div>
                     </div>
@@ -1102,12 +1104,14 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       className="w-full bg-white border border-[#E5E5EA] rounded-lg p-2 text-[#1D1D1F] font-mono focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
                     />
                     {cashTendered > 0 && cashTendered < selectedWo.totalAmount && (
-                      <p className="text-rose-600 font-bold text-xs">
+                      <p className="flex items-center gap-1.5 text-rose-700 font-extrabold text-xs bg-rose-50 border border-rose-200 rounded-xl px-3 py-2">
+                        <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
                         Short: {(selectedWo.totalAmount - cashTendered).toLocaleString()} MMK
                       </p>
                     )}
                     {cashTendered >= selectedWo.totalAmount && (
-                      <p className="text-[#28A745] font-bold text-xs">
+                      <p className="flex items-center gap-1.5 text-[#1A7F37] font-extrabold text-sm bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
+                        <CheckCircle2 className="w-4 h-4 shrink-0 text-[#28A745]" />
                         Change Due: {(cashTendered - selectedWo.totalAmount).toLocaleString()} MMK
                       </p>
                     )}
