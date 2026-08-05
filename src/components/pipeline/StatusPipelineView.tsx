@@ -49,6 +49,7 @@ import {
   AppUser
 } from '../../types';
 import { Button } from '../ui';
+import { ActiveFilterChips } from '../common/ActiveFilterChips';
 import { 
   get21Diagnostics, 
   get21AfterDiagnostics, 
@@ -428,6 +429,18 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
     count: filteredWorkOrders.filter((w) => w.status === id).length,
   }));
 
+  // Active-filter summary chips (desktop) — one-tap clear per filter
+  const activeFilterChips = [
+    statusFilter !== 'ALL' ? { key: 'stage', label: `Stage: ${statusFilter}`, onClear: () => setStatusFilter('ALL') } : null,
+    techFilter !== 'ALL' ? { key: 'tech', label: `Tech: ${techFilter === 'unassigned' ? 'Unassigned' : techFilter}`, onClear: () => setTechFilter('ALL') } : null,
+    dateFilter.preset !== 'all' ? { key: 'date', label: 'Date', onClear: () => setDateFilter({ preset: 'all' }) } : null,
+    searchQuery ? { key: 'q', label: `"${searchQuery}"`, onClear: () => setSearchQuery('') } : null,
+    showBottlenecksOnly ? { key: 'btl', label: '>48h', onClear: () => setShowBottlenecksOnly(false) } : null,
+    showAllStages ? { key: 'all', label: 'Show All', onClear: () => setShowAllStages(false) } : null,
+    showBeforeNeedsDiagOnly ? { key: 'bdiag', label: 'Before Diag', onClear: () => setShowBeforeNeedsDiagOnly(false) } : null,
+    showNeedsDiagOnly ? { key: 'ndiag', label: 'Needs Diag', onClear: () => setShowNeedsDiagOnly(false) } : null,
+  ].filter(Boolean) as Array<{ key: string; label: string; onClear: () => void }>;
+
   return (
     <div className="space-y-3">
       {/* Top Controls Bar (Kanban Pipeline Specific Actions) */}
@@ -524,6 +537,11 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
           )}
 
         </div>
+      </div>
+
+      {/* Active filter summary chips (desktop) */}
+      <div className="hidden lg:block">
+        <ActiveFilterChips chips={activeFilterChips} />
       </div>
 
       {/* Horizontal Scrollable 6 Kanban Columns */}

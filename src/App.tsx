@@ -69,6 +69,8 @@ import {
 } from './types';
 import { DateFilterSelector, DateFilterState } from './components/common/DateFilterSelector';
 import { RightFilterDrawer } from './components/common/RightFilterDrawer';
+import { ActiveFilterChips } from './components/common/ActiveFilterChips';
+import { checkIsBeforeDiagnosticNeeded, checkIsAfterDiagnosticNeeded } from './utils/diagnosticUtils';
 import { checkIsDiagnosticCompleted, checkIsBeforeDiagnosticCompleted, checkIsAfterDiagnosticCompleted } from './utils/diagnosticUtils';
 import { CustomDropdownMenu } from './components/common/CustomDropdownMenu';
 import { UserRoleSwitcher } from './components/common/UserRoleSwitcher';
@@ -591,11 +593,37 @@ export default function App() {
   };
 
   const renderMobileFilters = (tab: string) => {
+    const pipelineDiagCounts = tab === 'pipeline'
+      ? {
+          before: workOrders.filter((wo) => checkIsBeforeDiagnosticNeeded(wo)).length,
+          after: workOrders.filter((wo) => checkIsAfterDiagnosticNeeded(wo)).length,
+          cant: workOrders.filter((wo) => wo.status === 'Cant Repair').length,
+          not: workOrders.filter((wo) => wo.status === 'Customer Not Repair').length,
+        }
+      : { before: 0, after: 0, cant: 0, not: 0 };
+    const drawerChips = tab === 'pipeline'
+      ? ([
+          statusFilter !== 'ALL' ? { key: 'stage', label: `Stage: ${statusFilter}`, onClear: () => setStatusFilter('ALL') } : null,
+          techFilter !== 'ALL' ? { key: 'tech', label: `Tech: ${techFilter === 'unassigned' ? 'Unassigned' : techFilter}`, onClear: () => setTechFilter('ALL') } : null,
+          dateFilter.preset !== 'all' ? { key: 'date', label: 'Date', onClear: () => setDateFilter({ preset: 'all' }) } : null,
+          searchQuery ? { key: 'q', label: `"${searchQuery}"`, onClear: () => setSearchQuery('') } : null,
+          showBottlenecksOnly ? { key: 'btl', label: '>48h', onClear: () => setShowBottlenecksOnly(false) } : null,
+          showAllStages ? { key: 'all', label: 'Show All', onClear: () => setShowAllStages(false) } : null,
+          showBeforeNeedsDiagOnly ? { key: 'bdiag', label: 'Before Diag', onClear: () => setShowBeforeNeedsDiagOnly(false) } : null,
+          showNeedsDiagOnly ? { key: 'ndiag', label: 'Needs Diag', onClear: () => setShowNeedsDiagOnly(false) } : null,
+        ].filter(Boolean) as Array<{ key: string; label: string; onClear: () => void }>)
+      : [];
     const selectCls = "w-full rounded-xl border border-line bg-white px-3 py-2.5 text-xs font-extrabold text-ink focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none";
     const labelCls = "mb-1 block text-[10px] font-extrabold uppercase tracking-wider text-muted";
     const rowCls = "flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-xs font-extrabold transition-colors cursor-pointer";
     return (
       <div className="space-y-3">
+        {drawerChips.length > 0 && (
+          <div className="rounded-xl border border-line bg-surface p-2.5">
+            <p className="mb-1.5 text-[9px] font-extrabold uppercase tracking-wider text-muted">Active ({drawerChips.length})</p>
+            <ActiveFilterChips chips={drawerChips} />
+          </div>
+        )}
         {tab === 'pipeline' && (
           <>
           <button
@@ -618,6 +646,11 @@ export default function App() {
             <span className="flex items-center gap-2">
               <Eye className={`w-4 h-4 ${showAllStages ? 'text-white' : 'text-brand'}`} />
               Show All Stages
+              {pipelineDiagCounts.cant + pipelineDiagCounts.not > 0 && (
+                <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-black ${showAllStages ? 'bg-white/20' : 'bg-ink/10 text-ink'}`}>
+                  {pipelineDiagCounts.cant + pipelineDiagCounts.not}
+                </span>
+              )}
             </span>
             <span className={`text-[10px] ${showAllStages ? 'text-white/80' : 'text-muted'}`}>{showAllStages ? 'On' : 'Off'}</span>
           </button>
@@ -630,6 +663,11 @@ export default function App() {
             <span className="flex items-center gap-2">
               <Stethoscope className={`w-4 h-4 ${showBeforeNeedsDiagOnly ? 'text-white' : 'text-blue-600'}`} />
               Before Diag Pending
+              {pipelineDiagCounts.before > 0 && (
+                <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-black ${showBeforeNeedsDiagOnly ? 'bg-white/20' : 'bg-blue-100 text-blue-700'}`}>
+                  {pipelineDiagCounts.before}
+                </span>
+              )}
             </span>
             <span className={`text-[10px] ${showBeforeNeedsDiagOnly ? 'text-white/80' : 'text-muted'}`}>{showBeforeNeedsDiagOnly ? 'On' : 'Off'}</span>
           </button>
@@ -642,6 +680,11 @@ export default function App() {
             <span className="flex items-center gap-2">
               <ShieldCheck className={`w-4 h-4 ${showNeedsDiagOnly ? 'text-white' : 'text-purple-600'}`} />
               Finished Needs Diag
+              {pipelineDiagCounts.after > 0 && (
+                <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-black ${showNeedsDiagOnly ? 'bg-white/20' : 'bg-purple-100 text-purple-700'}`}>
+                  {pipelineDiagCounts.after}
+                </span>
+              )}
             </span>
             <span className={`text-[10px] ${showNeedsDiagOnly ? 'text-white/80' : 'text-muted'}`}>{showNeedsDiagOnly ? 'On' : 'Off'}</span>
           </button>
