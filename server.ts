@@ -661,8 +661,57 @@ ${JSON.stringify(context)}`;
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
+
+    // Static serving with Brotli precompressed variants + long-term caching.
+    // Files in /assets/ have content hashes => safe to cache forever (immutable).
+    // index.html / sw.js are revalidated so updates propagate.
+    const MIME: Record<string, string> = {
+      ".js": "text/javascript; charset=utf-8",
+      ".css": "text/css; charset=utf-8",
+      ".html": "text/html; charset=utf-8",
+      ".json": "application/json; charset=utf-8",
+      ".svg": "image/svg+xml",
+      ".webmanifest": "application/manifest+json",
+      ".map": "application/json; charset=utf-8",
+      ".txt": "text/plain; charset=utf-8",
+    };
+    const COMPRESSIBLE = new Set(Object.keys(MIME));
+
+    app.use((req, res, next) => {
+      if (req.method !== "GET" && req.method !== "HEAD") return next();
+      const urlPath = decodeURIComponent((req.path || "/").split("?")[0]);
+      if (urlPath.includes("..")) return next();
+      const relPath = urlPath === "/" ? "index.html" : urlPath.replace(/^\//, "");
+      const filePath = path.join(distPath, relPath);
+      if (!filePath.startsWith(distPath)) return next();
+
+      const isAsset = urlPath.startsWith("/assets/");
+      if (isAsset) {
+        res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      } else if (urlPath === "/sw.js") {
+        res.setHeader("Cache-Control", "no-cache");
+      } else if (urlPath === "/" || urlPath === "/index.html") {
+        res.setHeader("Cache-Control", "no-cache");
+      }
+
+      const ext = path.extname(filePath).toLowerCase();
+      const acceptsBr = (req.headers["accept-encoding"] || "").includes("br");
+      const brPath = filePath + ".br";
+      if (acceptsBr && COMPRESSIBLE.has(ext) && fs.existsSync(brPath)) {
+        res.setHeader("Content-Encoding", "br");
+        res.setHeader("Vary", "Accept-Encoding");
+        return res.sendFile(brPath, {
+          headers: { "Content-Type": MIME[ext] },
+        });
+      }
+      if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+        return res.sendFile(filePath);
+      }
+      next();
+    });
+
     app.get("*", (_req, res) => {
+      res.setHeader("Cache-Control", "no-cache");
       res.sendFile(path.join(distPath, "index.html"));
     });
   }

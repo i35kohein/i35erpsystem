@@ -19,6 +19,9 @@ echo "==> [1/4] Building production bundle..."
 cd "$(dirname "$0")"
 npm run build
 
+echo "==> [1b/4] Precompressing assets (Brotli)..."
+node scripts/precompress.mjs
+
 echo "==> [2/4] Uploading to VPS ($HOST:$REMOTE_DIR)..."
 # NOTE: `dist` without trailing slash => lands in $REMOTE_DIR/dist (server expects that layout)
 rsync -az --delete -e "ssh -i $KEY" dist package.json package-lock.json "$HOST:$REMOTE_DIR/"
