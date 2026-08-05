@@ -1,0 +1,371 @@
+import React from 'react';
+import type { SystemSettings } from '../../../types';
+import { Building2, CheckCircle2, Globe, Hash, Image as ImageIcon, Mail, Phone, Plus, Save, Store, Trash2, Upload } from 'lucide-react';
+import { Button } from '../../ui';
+
+interface ShopTabProps {
+  formData: SystemSettings;
+  setFormData: React.Dispatch<React.SetStateAction<SystemSettings>>;
+  handleSaveSettings: () => void;
+}
+
+const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSettings }) => {
+  return (
+
+        <div className="space-y-6">
+          {/* Shop Branding & Logo Card */}
+          <div className="bg-white p-6 rounded-2xl border border-[#E5E5EA] shadow-xs space-y-6">
+            <div>
+              <h3 className="text-base font-extrabold text-[#2C3E50] flex items-center space-x-2">
+                <Store className="w-5 h-5 text-[#0071E3]" />
+                <span>Shop Identity & Logo Settings</span>
+              </h3>
+              <p className="text-xs text-[#7F7F7F] mt-1">
+                Customize your store name and upload a shop logo. Saved details apply globally across the sidebar navigation, header, vouchers, invoices, and POS receipts.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+              {/* Logo Upload & Preview Box (4 cols) */}
+              <div className="md:col-span-4 bg-[#F8FBFD] p-5 rounded-2xl border border-[#D8E5ED] space-y-4 text-center">
+                <label className="block text-xs font-bold text-[#2C3E50]">Shop Logo Preview</label>
+                
+                <div className="flex flex-col items-center justify-center space-y-3">
+                  <div className="w-24 h-24 rounded-2xl bg-white border-2 border-dashed border-[#0071E3]/40 p-2 flex items-center justify-center shadow-xs relative group overflow-hidden">
+                    {formData.shopLogoUrl ? (
+                      <img
+                        src={formData.shopLogoUrl}
+                        alt="Shop Logo Preview"
+                        className="w-full h-full object-contain rounded-xl"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center text-[#86868B] space-y-1">
+                        <ImageIcon className="w-8 h-8 text-[#0071E3]/60" />
+                        <span className="text-[10px] font-bold">No Logo Set</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {formData.shopLogoUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, shopLogoUrl: '' })}
+                      className="text-[11px] font-bold text-red-500 hover:text-red-700 flex items-center space-x-1 cursor-pointer"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      <span>Remove Logo</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Upload File Input */}
+                <div className="space-y-2">
+                  <label className="w-full py-2.5 px-3 bg-[#0071E3] hover:bg-[#0051B3] text-white font-bold text-xs rounded-xl transition-all shadow-2xs flex items-center justify-center space-x-2 cursor-pointer">
+                    <Upload className="w-4 h-4" />
+                    <span>Upload Logo Image</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setFormData({ ...formData, shopLogoUrl: reader.result as string });
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                  </label>
+                  <p className="text-[10px] text-[#86868B]">PNG, JPG, SVG or WEBP up to 2MB</p>
+                </div>
+              </div>
+
+              {/* Logo URL & Shop Name Inputs (8 cols) */}
+              <div className="md:col-span-8 space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-[#2C3E50] mb-1.5">
+                    Shop Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.shopName || ''}
+                    onChange={(e) => setFormData({ ...formData, shopName: e.target.value })}
+                    placeholder="e.g. AppleRepair Pro Lab"
+                    className="w-full p-2.5 bg-white border border-[#E5E5EA] rounded-xl text-xs font-bold text-[#1D1D1F] focus:outline-none focus:border-[#0071E3]"
+                  />
+                  <p className="text-[10px] text-[#86868B] mt-1">
+                    Appears in top sidebar brand header, repair tickets, and customer documents.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-[#2C3E50] mb-1.5">
+                    Shop Logo Image URL (Alternative to File Upload)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.shopLogoUrl || ''}
+                    onChange={(e) => setFormData({ ...formData, shopLogoUrl: e.target.value })}
+                    placeholder="https://example.com/logo.png or data:image/png..."
+                    className="w-full p-2.5 bg-white border border-[#E5E5EA] rounded-xl text-xs text-[#1D1D1F] focus:outline-none focus:border-[#0071E3]"
+                  />
+                </div>
+
+                {/* Quick Preset Logos */}
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-bold text-[#526375]">
+                    Quick Preset Icons / Badges:
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ 
+                        ...formData, 
+                        shopLogoUrl: 'https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=120&auto=format&fit=crop&q=80' 
+                      })}
+                      className="px-2.5 py-1 bg-[#F5F5F7] hover:bg-[#E5E5EA] border border-[#D2D2D7] rounded-lg text-[11px] font-bold text-[#1D1D1F] transition-all flex items-center space-x-1.5 cursor-pointer"
+                    >
+                      <span> Apple Metallic Badge</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ 
+                        ...formData, 
+                        shopLogoUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=120&auto=format&fit=crop&q=80' 
+                      })}
+                      className="px-2.5 py-1 bg-[#F5F5F7] hover:bg-[#E5E5EA] border border-[#D2D2D7] rounded-lg text-[11px] font-bold text-[#1D1D1F] transition-all flex items-center space-x-1.5 cursor-pointer"
+                    >
+                      <span>⚡ Tech Circuit Chip</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ 
+                        ...formData, 
+                        shopLogoUrl: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=120&auto=format&fit=crop&q=80' 
+                      })}
+                      className="px-2.5 py-1 bg-[#F5F5F7] hover:bg-[#E5E5EA] border border-[#D2D2D7] rounded-lg text-[11px] font-bold text-[#1D1D1F] transition-all flex items-center space-x-1.5 cursor-pointer"
+                    >
+                      <span>🛡️ Cyber Lab Shield</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Shop Contact & Store Location Card */}
+          <div className="bg-white p-6 rounded-2xl border border-[#E5E5EA] shadow-xs space-y-4">
+            <div>
+              <h3 className="text-base font-extrabold text-[#2C3E50] flex items-center space-x-2">
+                <Building2 className="w-5 h-5 text-[#0071E3]" />
+                <span>Store Contact & Location Information</span>
+              </h3>
+              <p className="text-xs text-[#7F7F7F] mt-1">
+                Store details displayed on customer receipts, thermal vouchers, SMS notifications, and official invoices.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Multiple Store Phone Numbers Section */}
+              <div className="sm:col-span-2 lg:col-span-3 space-y-2.5 bg-[#F8F9FA] p-4 rounded-xl border border-[#E5E5EA]">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-extrabold text-[#1D1D1F] flex items-center space-x-1.5">
+                    <Phone className="w-3.5 h-3.5 text-[#34C759]" />
+                    <span>Store Contact Phone Lines (Multiple Numbers Supported)</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const currentPhones = formData.shopPhones && formData.shopPhones.length > 0 
+                        ? [...formData.shopPhones] 
+                        : [formData.shopPhone || ''];
+                      const updated = [...currentPhones, ''];
+                      setFormData({
+                        ...formData,
+                        shopPhones: updated,
+                        shopPhone: updated[0] || '',
+                      });
+                    }}
+                    className="px-2.5 py-1 bg-[#0071E3] hover:bg-[#0051B3] text-white font-extrabold text-[11px] rounded-lg transition-all flex items-center space-x-1 cursor-pointer shrink-0"
+                  >
+                    <Plus className="w-3 h-3" />
+                    <span>Add Contact Phone Number</span>
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  {((formData.shopPhones && formData.shopPhones.length > 0) 
+                    ? formData.shopPhones 
+                    : [formData.shopPhone || '']
+                  ).map((phoneNum, idx) => (
+                    <div key={idx} className="flex items-center space-x-2">
+                      <span className="text-[10px] font-extrabold font-mono text-[#86868B] w-20 shrink-0">
+                        {idx === 0 ? 'Primary Line:' : `Line #${idx + 1}:`}
+                      </span>
+                      <input
+                        type="text"
+                        value={phoneNum}
+                        onChange={(e) => {
+                          const currentPhones = formData.shopPhones && formData.shopPhones.length > 0 
+                            ? [...formData.shopPhones] 
+                            : [formData.shopPhone || ''];
+                          currentPhones[idx] = e.target.value;
+                          setFormData({
+                            ...formData,
+                            shopPhones: currentPhones,
+                            shopPhone: currentPhones[0] || '',
+                          });
+                        }}
+                        placeholder={idx === 0 ? "+95 9 790 000 000 (Primary Customer Service)" : "+95 9 440 000 000 (Hotline / Viber / WhatsApp)"}
+                        className="flex-1 p-2.5 bg-white border border-[#E5E5EA] rounded-xl text-xs font-bold text-[#1D1D1F] focus:outline-none focus:border-[#0071E3]"
+                      />
+                      {((formData.shopPhones?.length || 1) > 1) && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const currentPhones = formData.shopPhones && formData.shopPhones.length > 0 
+                              ? [...formData.shopPhones] 
+                              : [formData.shopPhone || ''];
+                            currentPhones.splice(idx, 1);
+                            setFormData({
+                              ...formData,
+                              shopPhones: currentPhones,
+                              shopPhone: currentPhones[0] || '',
+                            });
+                          }}
+                          className="p-2 text-[#86868B] hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all cursor-pointer"
+                          title="Remove Phone Line"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[10px] text-[#86868B]">
+                  Primary phone is used as main contact line. Additional lines appear on job vouchers, sticker tags, receipts, and invoices.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#2C3E50] mb-1 flex items-center space-x-1">
+                  <Mail className="w-3.5 h-3.5 text-[#0071E3]" />
+                  <span>Shop Support Email Address</span>
+                </label>
+                <input
+                  type="email"
+                  value={formData.shopEmail || ''}
+                  onChange={(e) => setFormData({ ...formData, shopEmail: e.target.value })}
+                  placeholder="support@applerepairpro.com"
+                  className="w-full p-2.5 bg-white border border-[#E5E5EA] rounded-xl text-xs text-[#1D1D1F] focus:outline-none focus:border-[#0071E3]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#2C3E50] mb-1 flex items-center space-x-1">
+                  <Globe className="w-3.5 h-3.5 text-[#0071E3]" />
+                  <span>Shop Official Website URL</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.shopWebsite || ''}
+                  onChange={(e) => setFormData({ ...formData, shopWebsite: e.target.value })}
+                  placeholder="www.applerepairpro.com"
+                  className="w-full p-2.5 bg-white border border-[#E5E5EA] rounded-xl text-xs text-[#1D1D1F] focus:outline-none focus:border-[#0071E3]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#2C3E50] mb-1 flex items-center space-x-1">
+                  <Hash className="w-3.5 h-3.5 text-[#0071E3]" />
+                  <span>Tax ID / Business Reg No</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.taxId || ''}
+                  onChange={(e) => setFormData({ ...formData, taxId: e.target.value })}
+                  placeholder="MMK-TAX-90210"
+                  className="w-full p-2.5 bg-white border border-[#E5E5EA] rounded-xl text-xs text-[#1D1D1F] focus:outline-none focus:border-[#0071E3]"
+                />
+              </div>
+
+              <div className="sm:col-span-2 lg:col-span-3">
+                <label className="block text-xs font-bold text-[#2C3E50] mb-1 flex items-center space-x-1">
+                  <Building2 className="w-3.5 h-3.5 text-[#0071E3]" />
+                  <span>Store Physical Address</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.shopAddress || ''}
+                  onChange={(e) => setFormData({ ...formData, shopAddress: e.target.value })}
+                  placeholder="No. 123 Sule Pagoda Road, Downtown Tech Plaza, Yangon"
+                  className="w-full p-2.5 bg-white border border-[#E5E5EA] rounded-xl text-xs text-[#1D1D1F] focus:outline-none focus:border-[#0071E3]"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-[#2C3E50] mb-1">
+                Shop Business Info & Operating Hours / Disclaimer Note
+              </label>
+              <textarea
+                rows={3}
+                value={formData.shopInfo || ''}
+                onChange={(e) => setFormData({ ...formData, shopInfo: e.target.value })}
+                placeholder="Authorized Apple Hardware Repair Center. Open Mon-Sat 9:00 AM - 6:30 PM."
+                className="w-full p-2.5 bg-white border border-[#E5E5EA] rounded-xl text-xs text-[#1D1D1F] focus:outline-none focus:border-[#0071E3]"
+              />
+            </div>
+          </div>
+
+          {/* Live ERP Preview Banner */}
+          <div className="bg-[#F8FBFD] p-5 rounded-2xl border border-[#D8E5ED] space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-black uppercase text-[#0071E3] tracking-widest flex items-center space-x-1.5">
+                <CheckCircle2 className="w-4 h-4 text-[#34C759]" />
+                <span>Live Navigation & Header Preview</span>
+              </span>
+              <span className="text-[10px] font-bold text-[#86868B]">Synced with active settings</span>
+            </div>
+
+            <div className="p-4 bg-white rounded-xl border border-[#E5E5EA] flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                {formData.shopLogoUrl ? (
+                  <img
+                    src={formData.shopLogoUrl}
+                    alt="Logo"
+                    className="w-9 h-9 rounded-xl object-contain bg-white border border-[#E5E5EA] p-0.5 shrink-0"
+                  />
+                ) : (
+                  <div className="w-9 h-9 rounded-xl bg-[#0071E3] flex items-center justify-center text-white shrink-0 font-bold text-sm">
+                    
+                  </div>
+                )}
+                <div>
+                  <h4 className="font-extrabold text-sm text-[#1D1D1F]">
+                    {formData.shopName || 'AppleRepair Pro'}
+                  </h4>
+                  <p className="text-[10px] text-[#86868B] font-medium">
+                    {formData.shopPhone} • {formData.shopAddress}
+                  </p>
+                </div>
+              </div>
+
+              <Button
+                type="button"
+                onClick={handleSaveSettings}
+                className="bg-[#0071E3] hover:bg-[#0051B3] text-white flex items-center space-x-1.5"
+              >
+                <Save className="w-4 h-4" />
+                <span>Save Shop Settings</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+  );
+};
+
+export default ShopTab;
