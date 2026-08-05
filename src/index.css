@@ -1,4 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
+
+/* Official app fonts (2026-08-06): IBM Plex Sans for UI text, IBM Plex Mono for numbers/codes */
+@theme {
+  --font-sans: 'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', 'SF Mono', monospace;
+}
+
+body {
+  font-family: 'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif;
+}
+[class*="font-mono"] {
+  font-family: 'IBM Plex Mono', 'SF Mono', monospace;
+}
 
 /* Ultra-wide breakpoints (beyond Tailwind's 2xl=1536):
    3xl = 1920px, 4xl = 2560px — used for extra grid density on big monitors. */
