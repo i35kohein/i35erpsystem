@@ -9,15 +9,15 @@ interface DrawerSelectProps {
 }
 
 /**
- * Branded inline dropdown for the filter drawer — the option list expands
- * INSIDE the drawer (no native picker, no clipping, no escaping the panel).
+ * Branded inline dropdown for the filter drawer. The option list renders as an
+ * OVERLAY (absolute) so opening it never pushes content below — no layout shift.
  */
 export const DrawerSelect: React.FC<DrawerSelectProps> = ({ label, value, onChange, options }) => {
   const [open, setOpen] = useState(false);
   const selected = options.find((o) => o.value === value);
 
   return (
-    <div>
+    <div className="relative">
       <label className="mb-1 block text-[10px] font-extrabold uppercase tracking-wider text-muted">{label}</label>
       <button
         type="button"
@@ -28,8 +28,9 @@ export const DrawerSelect: React.FC<DrawerSelectProps> = ({ label, value, onChan
         <span className="truncate">{selected ? selected.label : 'Select…'}</span>
         <ChevronDown className={`h-4 w-4 shrink-0 text-muted transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
+      {/* Overlay list — does not affect flow, so no layout shift when opened */}
       {open && (
-        <div className="mt-1.5 max-h-56 overflow-y-auto rounded-xl border border-line bg-white p-1 shadow-lg animate-fade-in">
+        <div className="absolute left-0 right-0 top-full z-20 mt-1.5 max-h-56 overflow-y-auto rounded-xl border border-line bg-white p-1 shadow-xl animate-fade-in">
           {options.map((opt) => (
             <button
               key={opt.value}
