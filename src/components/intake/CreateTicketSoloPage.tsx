@@ -959,7 +959,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               <button
                 type="button"
                 onClick={() => setIsModelModalOpen(true)}
-                className="px-5 py-2.5 bg-[#0071E3] hover:bg-[#0071E3]/90 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center space-x-2 cursor-pointer active:scale-98"
+                className="px-5 py-2.5 bg-[#0071E3] hover:bg-[#0071E3]/90 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center space-x-2 cursor-pointer active:scale-95"
               >
                 <Smartphone className="w-4 h-4" />
                 <span>Choose Device Model</span>
@@ -1323,7 +1323,8 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               ) : (
                 <>
                   <CheckCircle2 className="w-5 h-5" />
-                  <span>{isEditMode ? 'Save Ticket Changes' : 'Register Device & Generate Voucher'}</span>
+                  <span className="hidden sm:inline">{isEditMode ? 'Save Ticket Changes' : 'Register Device & Generate Voucher'}</span>
+                  <span className="sm:hidden">{isEditMode ? 'Save Changes' : 'Register Device'}</span>
                 </>
               )}
             </button>

@@ -1171,7 +1171,8 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               className="flex-1 max-w-[220px] py-3 rounded-xl bg-[#34C759] hover:bg-[#30B753] text-white font-extrabold text-xs shadow-xs transition-all flex items-center justify-center space-x-1.5 cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#34C759]/40 focus-visible:ring-offset-2"
             >
               <CreditCard className="w-4 h-4 shrink-0" />
-              <span className="truncate">Pay & Print Receipt</span>
+              <span className="truncate hidden sm:inline">Pay & Print Receipt</span>
+              <span className="sm:hidden">Pay</span>
             </button>
           </div>
         </div>

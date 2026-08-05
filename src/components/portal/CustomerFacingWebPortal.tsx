@@ -807,16 +807,18 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-[#E5E5EA]">
                 <button
                   onClick={() => setRejectionModalOpen(true)}
-                  className="w-full sm:w-auto px-5 py-3 bg-white border border-[#E5E5EA] text-[#FF3B30] hover:bg-[#FF3B30]/10 font-extrabold rounded-xl transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF3B30]/40 focus-visible:ring-offset-2"
+                  className="w-full sm:w-auto px-5 py-3 bg-white border border-[#E5E5EA] text-[#FF3B30] hover:bg-[#FF3B30]/10 font-extrabold rounded-xl transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF3B30]/40 focus-visible:ring-offset-2"
                 >
-                  Decline / Request Callback
+                  <span className="hidden sm:inline">Decline / Request Callback</span>
+                  <span className="sm:hidden">Decline</span>
                 </button>
                 <button
                   onClick={() => setApprovalModalOpen(true)}
                   className="w-full sm:w-auto px-6 py-3 bg-[#34C759] hover:bg-[#30B753] text-white font-extrabold rounded-xl shadow-xs transition-all active:scale-95 flex items-center justify-center space-x-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#34C759]/40 focus-visible:ring-offset-2"
                 >
                   <ThumbsUp className="w-4 h-4 shrink-0" />
-                  <span className="truncate">Approve Estimate & Authorize Repair</span>
+                  <span className="truncate hidden sm:inline">Approve Estimate & Authorize Repair</span>
+                  <span className="sm:hidden">Approve Estimate</span>
                 </button>
               </div>
             ) : (

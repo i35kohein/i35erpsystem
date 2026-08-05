@@ -838,7 +838,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                 type="button"
                 onClick={handleCreateWorkOrderFromCart}
                 disabled={cart.size === 0}
-                className="w-full py-2.5 bg-[#0071E3] hover:bg-[#0071E3]/90 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl transition-all shadow-2xs flex items-center justify-center space-x-2 cursor-pointer disabled:cursor-not-allowed active:scale-98"
+                className="w-full py-2.5 bg-[#0071E3] hover:bg-[#0071E3]/90 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl transition-all shadow-2xs flex items-center justify-center space-x-2 cursor-pointer disabled:cursor-not-allowed active:scale-95"
               >
                 <FileText className="w-4 h-4" />
                 <span>Create Intake Ticket</span>
