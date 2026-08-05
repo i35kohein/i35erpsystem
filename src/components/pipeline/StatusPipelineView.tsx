@@ -88,6 +88,12 @@ interface StatusPipelineViewProps {
   setDateFilter?: (d: DateFilterState) => void;
   showBottlenecksOnly?: boolean;
   setShowBottlenecksOnly?: (b: boolean) => void;
+  showAllStages?: boolean;
+  setShowAllStages?: (v: boolean) => void;
+  showBeforeNeedsDiagOnly?: boolean;
+  setShowBeforeNeedsDiagOnly?: (v: boolean) => void;
+  showNeedsDiagOnly?: boolean;
+  setShowNeedsDiagOnly?: (v: boolean) => void;
   onSelectPrintTag?: (wo: WorkOrder) => void;
   onOpenNewWorkOrder?: (prefill?: any) => void;
 }
@@ -121,6 +127,12 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
   setDateFilter: propSetDateFilter,
   showBottlenecksOnly: propShowBottlenecksOnly,
   setShowBottlenecksOnly: propSetShowBottlenecksOnly,
+  showAllStages: propShowAllStages,
+  setShowAllStages: propSetShowAllStages,
+  showBeforeNeedsDiagOnly: propShowBeforeNeedsDiagOnly,
+  setShowBeforeNeedsDiagOnly: propSetShowBeforeNeedsDiagOnly,
+  showNeedsDiagOnly: propShowNeedsDiagOnly,
+  setShowNeedsDiagOnly: propSetShowNeedsDiagOnly,
   onSelectPrintTag,
   onOpenNewWorkOrder,
 }) => {
@@ -133,9 +145,11 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
   // Mobile kanban horizontal-scroll affordance (Cant Repair / Customer Not Repair live at the far right)
   const [kanbanAtEnd, setKanbanAtEnd] = useState(false);
   // Hide the exception columns (Cant Repair / Customer Not Repair) by default — Show All reveals them
-  const [showAllStages, setShowAllStages] = useState(false);
   const [localDateFilter, setLocalDateFilter] = useState<DateFilterState>({ preset: 'all' });
   const [localShowBottlenecksOnly, setLocalShowBottlenecksOnly] = useState<boolean>(false);
+  const [localShowAllStages, setLocalShowAllStages] = useState(false);
+  const [localShowBeforeNeedsDiagOnly, setLocalShowBeforeNeedsDiagOnly] = useState(false);
+  const [localShowNeedsDiagOnly, setLocalShowNeedsDiagOnly] = useState(false);
 
   const searchQuery = propSearchQuery !== undefined ? propSearchQuery : localSearchQuery;
   const setSearchQuery = propSetSearchQuery || setLocalSearchQuery;
@@ -152,6 +166,13 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
   const showBottlenecksOnly = propShowBottlenecksOnly !== undefined ? propShowBottlenecksOnly : localShowBottlenecksOnly;
   const setShowBottlenecksOnly = propSetShowBottlenecksOnly || setLocalShowBottlenecksOnly;
 
+  const showAllStages = propShowAllStages !== undefined ? propShowAllStages : localShowAllStages;
+  const setShowAllStages = propSetShowAllStages || setLocalShowAllStages;
+  const showBeforeNeedsDiagOnly = propShowBeforeNeedsDiagOnly !== undefined ? propShowBeforeNeedsDiagOnly : localShowBeforeNeedsDiagOnly;
+  const setShowBeforeNeedsDiagOnly = propSetShowBeforeNeedsDiagOnly || setLocalShowBeforeNeedsDiagOnly;
+  const showNeedsDiagOnly = propShowNeedsDiagOnly !== undefined ? propShowNeedsDiagOnly : localShowNeedsDiagOnly;
+  const setShowNeedsDiagOnly = propSetShowNeedsDiagOnly || setLocalShowNeedsDiagOnly;
+
   // Modals
   const [detailModalWo, setDetailModalWo] = useState<WorkOrder | null>(null);
   const [addLogModalWo, setAddLogModalWo] = useState<WorkOrder | null>(null);
@@ -163,8 +184,6 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
 
   // Manual Repair Log Form State
   const [logText, setLogText] = useState('');
-  const [showNeedsDiagOnly, setShowNeedsDiagOnly] = useState(false);
-  const [showBeforeNeedsDiagOnly, setShowBeforeNeedsDiagOnly] = useState(false);
 
   // Checkout Payment Form State
   const [paidAmountInput, setPaidAmountInput] = useState('');
@@ -431,7 +450,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap sm:items-center sm:justify-end">
+        <div className="hidden lg:grid lg:grid-cols-2 xl:flex xl:flex-wrap xl:items-center xl:justify-end gap-1.5">
           <button
             type="button"
             onClick={() => setShowAllStages((v) => !v)}

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo, lazy, Suspense } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Sparkles, Plus, CircleDot, Search, Filter, Calculator, Folder, Settings, Download, Database, ExternalLink, ClipboardList, Kanban, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, ChevronDown, PhoneCall, Truck, Boxes, CreditCard, Users, DollarSign, LayoutDashboard, Timer, MoreHorizontal, SlidersHorizontal } from 'lucide-react';
+import { Sparkles, Plus, CircleDot, Search, Filter, Calculator, Folder, Settings, Download, Database, ExternalLink, ClipboardList, Kanban, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, ChevronDown, PhoneCall, Truck, Boxes, CreditCard, Users, DollarSign, LayoutDashboard, Timer, MoreHorizontal, SlidersHorizontal, Eye, Stethoscope } from 'lucide-react';
 import { subscribeToCollection, fetchCloudCollection, saveDocument, saveBatchDocuments, deleteDocument, clearCollection } from './lib/supabase';
 import { setActiveUserId, notifyAccountChanged } from './utils/accountSettings';
 
@@ -123,6 +123,9 @@ export default function App() {
   const [customerTypeFilter, setCustomerTypeFilter] = useState<string>('ALL');
   const [dateFilter, setDateFilter] = useState<DateFilterState>({ preset: 'all' });
   const [showBottlenecksOnly, setShowBottlenecksOnly] = useState<boolean>(false);
+  const [showAllStages, setShowAllStages] = useState(false);
+  const [showBeforeNeedsDiagOnly, setShowBeforeNeedsDiagOnly] = useState(false);
+  const [showNeedsDiagOnly, setShowNeedsDiagOnly] = useState(false);
 
   // Modal triggers from top bar
   const [inventoryAddModalOpen, setInventoryAddModalOpen] = useState(false);
@@ -569,7 +572,7 @@ export default function App() {
     const d = dateFilter.preset !== 'all' ? 1 : 0;
     switch (tab) {
       case 'pipeline':
-        return (statusFilter !== 'ALL' ? 1 : 0) + (techFilter !== 'ALL' ? 1 : 0) + (showBottlenecksOnly ? 1 : 0) + d;
+        return (statusFilter !== 'ALL' ? 1 : 0) + (techFilter !== 'ALL' ? 1 : 0) + (showBottlenecksOnly ? 1 : 0) + (showAllStages ? 1 : 0) + (showBeforeNeedsDiagOnly ? 1 : 0) + (showNeedsDiagOnly ? 1 : 0) + d;
       case 'intake':
       case 'pos':
       case 'suppliers':
@@ -594,6 +597,7 @@ export default function App() {
     return (
       <div className="space-y-3">
         {tab === 'pipeline' && (
+          <>
           <button
             type="button"
             onClick={() => setShowBottlenecksOnly(!showBottlenecksOnly)}
@@ -605,6 +609,43 @@ export default function App() {
             </span>
             <span className={`text-[10px] ${showBottlenecksOnly ? 'text-white/80' : 'text-muted'}`}>{showBottlenecksOnly ? 'On' : 'Off'}</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => setShowAllStages(!showAllStages)}
+            className={`${rowCls} ${showAllStages ? 'bg-ink text-white border-ink shadow-2xs' : 'bg-white text-ink border-line hover:bg-slate-100'}`}
+          >
+            <span className="flex items-center gap-2">
+              <Eye className={`w-4 h-4 ${showAllStages ? 'text-white' : 'text-brand'}`} />
+              Show All Stages
+            </span>
+            <span className={`text-[10px] ${showAllStages ? 'text-white/80' : 'text-muted'}`}>{showAllStages ? 'On' : 'Off'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => { setShowBeforeNeedsDiagOnly(!showBeforeNeedsDiagOnly); setShowNeedsDiagOnly(false); }}
+            className={`${rowCls} ${showBeforeNeedsDiagOnly ? 'bg-blue-600 text-white border-blue-700 shadow-2xs' : 'bg-white text-ink border-line hover:bg-slate-100'}`}
+          >
+            <span className="flex items-center gap-2">
+              <Stethoscope className={`w-4 h-4 ${showBeforeNeedsDiagOnly ? 'text-white' : 'text-blue-600'}`} />
+              Before Diag Pending
+            </span>
+            <span className={`text-[10px] ${showBeforeNeedsDiagOnly ? 'text-white/80' : 'text-muted'}`}>{showBeforeNeedsDiagOnly ? 'On' : 'Off'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => { setShowNeedsDiagOnly(!showNeedsDiagOnly); setShowBeforeNeedsDiagOnly(false); }}
+            className={`${rowCls} ${showNeedsDiagOnly ? 'bg-purple-600 text-white border-purple-700 shadow-2xs' : 'bg-white text-ink border-line hover:bg-slate-100'}`}
+          >
+            <span className="flex items-center gap-2">
+              <ShieldCheck className={`w-4 h-4 ${showNeedsDiagOnly ? 'text-white' : 'text-purple-600'}`} />
+              Finished Needs Diag
+            </span>
+            <span className={`text-[10px] ${showNeedsDiagOnly ? 'text-white/80' : 'text-muted'}`}>{showNeedsDiagOnly ? 'On' : 'Off'}</span>
+          </button>
+          </>
         )}
 
         {(tab === 'intake' || tab === 'pipeline' || tab === 'pos' || tab === 'suppliers' || tab === 'qa') && (
@@ -725,6 +766,9 @@ export default function App() {
             onClick={() => {
               handleResetAllFilters();
               setShowBottlenecksOnly(false);
+              setShowAllStages(false);
+              setShowBeforeNeedsDiagOnly(false);
+              setShowNeedsDiagOnly(false);
             }}
             className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2.5 text-xs font-extrabold text-rose-700 hover:bg-rose-100 transition-colors cursor-pointer"
           >
