@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import {
-  ChevronsRight, 
+  ChevronsRight,
+  Eye,
+  EyeOff, 
   ChevronRight, 
   ChevronLeft, 
   MessageSquare, 
@@ -25,10 +27,9 @@ import {
   Layers,
   Phone,
   ClipboardCheck,
-  Stethoscope,
   Trash2,
   BellRing,
-  Eye,
+  Stethoscope,
   Key,
   Lock,
   Barcode,
@@ -131,6 +132,8 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
   const [localTechFilter, setLocalTechFilter] = useState<string>('ALL');
   // Mobile kanban horizontal-scroll affordance (Cant Repair / Customer Not Repair live at the far right)
   const [kanbanAtEnd, setKanbanAtEnd] = useState(false);
+  // Hide the exception columns (Cant Repair / Customer Not Repair) by default — Show All reveals them
+  const [showAllStages, setShowAllStages] = useState(false);
   const [localDateFilter, setLocalDateFilter] = useState<DateFilterState>({ preset: 'all' });
   const [localShowBottlenecksOnly, setLocalShowBottlenecksOnly] = useState<boolean>(false);
 
@@ -400,6 +403,12 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
     return matchesSearch && matchesStatus && matchesTech && matchesBottleneck && matchesDate && matchesNeedsDiag;
   });
 
+  // Exception-column counts for the Show All toggle (Cant Repair / Customer Not Repair)
+  const hiddenStageCounts = (['Cant Repair', 'Customer Not Repair'] as const).map((id) => ({
+    id,
+    count: filteredWorkOrders.filter((w) => w.status === id).length,
+  }));
+
   return (
     <div className="space-y-3">
       {/* Top Controls Bar (Kanban Pipeline Specific Actions) */}
@@ -423,6 +432,23 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
         </div>
 
         <div className="flex flex-wrap items-center justify-end gap-1.5">
+          <button
+            type="button"
+            onClick={() => setShowAllStages((v) => !v)}
+            className={`inline-flex h-7 items-center gap-1 rounded-md border px-2 text-[10px] font-bold transition-colors cursor-pointer ${
+              showAllStages
+                ? 'bg-ink text-white border-ink shadow-2xs'
+                : 'bg-white text-ink border-line hover:bg-slate-100'
+            }`}
+            title={showAllStages ? 'Hide the exception columns again' : 'Show Cant Repair and Customer Not Repair columns'}
+          >
+            {showAllStages ? (
+              <><EyeOff className="w-3 h-3 shrink-0" /><span>Hide Exceptions</span></>
+            ) : (
+              <><Eye className="w-3 h-3 shrink-0" /><span>Show All{hiddenStageCounts.some((h) => h.count > 0) ? ` (${hiddenStageCounts.filter((h) => h.count > 0).map((h) => `${h.id.split(' ')[0]}:${h.count}`).join(' ')})` : ''}</span></>
+            )}
+          </button>
+
           <button
             type="button"
             onClick={() => {
@@ -489,7 +515,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
           setKanbanAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 12);
         }}
       >
-        {KANBAN_STAGES.filter((stage) => statusFilter === 'ALL' || stage.id === statusFilter).map((stage) => {
+        {KANBAN_STAGES.filter((stage) => (showAllStages || (stage.id !== 'Cant Repair' && stage.id !== 'Customer Not Repair')) && (statusFilter === 'ALL' || stage.id === statusFilter)).map((stage) => {
           const stageOrders = filteredWorkOrders.filter((w) => w.status === stage.id);
           const stageStagnantOrders = stageOrders.filter((w) => getIsStagnant(w));
 
