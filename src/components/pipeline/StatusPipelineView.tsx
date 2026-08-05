@@ -431,11 +431,11 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
           )}
         </div>
 
-        <div className="flex flex-wrap items-center justify-end gap-1.5">
+        <div className="grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap sm:items-center sm:justify-end">
           <button
             type="button"
             onClick={() => setShowAllStages((v) => !v)}
-            className={`inline-flex h-7 items-center gap-1 rounded-md border px-2 text-[10px] font-bold transition-colors cursor-pointer ${
+            className={`inline-flex w-full sm:w-auto h-8 sm:h-7 items-center justify-center gap-1 rounded-md border px-2 text-[10px] font-bold transition-colors cursor-pointer ${
               showAllStages
                 ? 'bg-ink text-white border-ink shadow-2xs'
                 : 'bg-white text-ink border-line hover:bg-slate-100'
@@ -455,7 +455,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
               setShowBeforeNeedsDiagOnly(!showBeforeNeedsDiagOnly);
               setShowNeedsDiagOnly(false);
             }}
-                className={`inline-flex h-7 items-center gap-1 rounded-md border px-2 text-[10px] font-bold transition-colors cursor-pointer ${
+                className={`inline-flex w-full sm:w-auto h-8 sm:h-7 items-center justify-center gap-1 rounded-md border px-2 text-[10px] font-bold transition-colors cursor-pointer ${
                   showBeforeNeedsDiagOnly
                     ? 'bg-blue-600 text-white border-blue-700 shadow-2xs'
                     : 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100'
@@ -471,7 +471,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
               setShowNeedsDiagOnly(!showNeedsDiagOnly);
               setShowBeforeNeedsDiagOnly(false);
             }}
-              className={`inline-flex h-7 items-center gap-1 rounded-md border px-2 text-[10px] font-bold transition-colors cursor-pointer ${
+              className={`inline-flex w-full sm:w-auto h-8 sm:h-7 items-center justify-center gap-1 rounded-md border px-2 text-[10px] font-bold transition-colors cursor-pointer ${
                 showNeedsDiagOnly
                   ? 'bg-purple-600 text-white border-purple-700 shadow-2xs'
                   : 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100'
