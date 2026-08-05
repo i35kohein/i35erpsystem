@@ -564,6 +564,178 @@ export default function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Quick Filter Helper States & Resetter
+  const FILTER_TABS = ['intake', 'pipeline', 'inventory', 'pos', 'crm', 'suppliers', 'qa', 'finance', 'dashboard'];
+  const getActiveFilterCount = (tab: string): number => {
+    const d = dateFilter.preset !== 'all' ? 1 : 0;
+    switch (tab) {
+      case 'pipeline':
+        return (statusFilter !== 'ALL' ? 1 : 0) + (techFilter !== 'ALL' ? 1 : 0) + (showBottlenecksOnly ? 1 : 0) + d;
+      case 'intake':
+      case 'pos':
+      case 'suppliers':
+      case 'qa':
+        return (statusFilter !== 'ALL' ? 1 : 0) + d;
+      case 'inventory':
+        return (categoryFilter !== 'ALL' ? 1 : 0) + (stockFilter !== 'ALL' ? 1 : 0) + d;
+      case 'crm':
+        return (customerTypeFilter !== 'ALL' ? 1 : 0) + d;
+      case 'finance':
+      case 'dashboard':
+        return d;
+      default:
+        return 0;
+    }
+  };
+
+  const renderMobileFilters = (tab: string) => {
+    const selectCls = "w-full rounded-xl border border-line bg-white px-3 py-2.5 text-xs font-extrabold text-ink focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none";
+    const labelCls = "mb-1 block text-[10px] font-extrabold uppercase tracking-wider text-muted";
+    const rowCls = "flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-xs font-extrabold transition-colors cursor-pointer";
+    return (
+      <div className="space-y-3">
+        {tab === 'pipeline' && (
+          <button
+            type="button"
+            onClick={() => setShowBottlenecksOnly(!showBottlenecksOnly)}
+            className={`${rowCls} ${showBottlenecksOnly ? 'bg-red-500 text-white border-red-600 shadow-2xs' : 'bg-white text-ink border-line hover:bg-slate-100'}`}
+          >
+            <span className="flex items-center gap-2">
+              <Timer className={`w-4 h-4 ${showBottlenecksOnly ? 'text-white' : 'text-red-600'}`} />
+              Bottlenecks (&gt;48h)
+            </span>
+            <span className={`text-[10px] ${showBottlenecksOnly ? 'text-white/80' : 'text-muted'}`}>{showBottlenecksOnly ? 'On' : 'Off'}</span>
+          </button>
+        )}
+
+        {(tab === 'intake' || tab === 'pipeline' || tab === 'pos' || tab === 'suppliers' || tab === 'qa') && (
+          <div>
+            <label className={labelCls}>
+              {tab === 'pos' ? 'Checkout Status' : tab === 'suppliers' ? 'RMA Status' : tab === 'qa' ? 'QA Status' : 'Status'}
+            </label>
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as any)} className={selectCls}>
+              {tab === 'pos' ? (
+                <>
+                  <option value="ALL">All Checkout Status</option>
+                  <option value="Pending Payment">Unpaid / Ready</option>
+                  <option value="Paid">Paid</option>
+                </>
+              ) : tab === 'suppliers' ? (
+                <>
+                  <option value="ALL">All RMA Statuses</option>
+                  <option value="Draft">Draft</option>
+                  <option value="Shipped to Vendor">Shipped to Vendor</option>
+                  <option value="Replaced / Refunded">Replaced / Refunded</option>
+                  <option value="Closed">Closed</option>
+                </>
+              ) : tab === 'qa' ? (
+                <>
+                  <option value="ALL">All QA Statuses</option>
+                  <option value="Pending QA">Pending QA</option>
+                </>
+              ) : (
+                <>
+                  <option value="ALL">{tab === 'pipeline' ? 'All Stages' : 'All Statuses'}</option>
+                  <option value="Receive">Receive</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Finished">Finished</option>
+                  <option value="Taken Out">Taken Out</option>
+                  <option value="Cant Repair">Cant Repair</option>
+                  <option value="Customer Not Repair">Customer Not Repair</option>
+                </>
+              )}
+            </select>
+          </div>
+        )}
+
+        {tab === 'pipeline' && (
+          <div>
+            <label className={labelCls}>Technician</label>
+            <select value={techFilter} onChange={(e) => setTechFilter(e.target.value as any)} className={selectCls}>
+              <option value="ALL">All Techs</option>
+              <option value="unassigned">Unassigned</option>
+              {technicians.map((t) => (
+                <option key={t.id} value={t.id}>{t.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {tab === 'inventory' && (
+          <>
+            <div>
+              <label className={labelCls}>Category</label>
+              <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value as any)} className={selectCls}>
+                <option value="ALL">All Categories</option>
+                {inventoryCategoryOptions.map((category) => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className={labelCls}>Quality Tier</label>
+              <select value={stockFilter} onChange={(e) => setStockFilter(e.target.value as any)} className={selectCls}>
+                <option value="ALL">All Tiers</option>
+                {inventoryQualityOptions.map((tier) => (
+                  <option key={tier} value={tier}>{tier}</option>
+                ))}
+              </select>
+            </div>
+          </>
+        )}
+
+        {tab === 'crm' && (
+          <div>
+            <label className={labelCls}>Account Type</label>
+            <select value={customerTypeFilter} onChange={(e) => setCustomerTypeFilter(e.target.value as any)} className={selectCls}>
+              <option value="ALL">All Account Types</option>
+              <option value="Retail">Retail</option>
+              <option value="B2B Corporate">B2B Corporate</option>
+              <option value="Wholesale Mail-In">Wholesale</option>
+            </select>
+          </div>
+        )}
+
+        {(tab === 'intake' || tab === 'pipeline' || tab === 'inventory' || tab === 'pos' || tab === 'crm' || tab === 'suppliers' || tab === 'qa' || tab === 'finance' || tab === 'dashboard') && (
+          <div>
+            <label className={labelCls}>Date</label>
+            <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
+          </div>
+        )}
+
+        {(tab === 'intake' || tab === 'pipeline') && (
+          <button
+            type="button"
+            onClick={() => { setIsRecycleBinOpen(true); setIsFilterDrawerOpen(false); }}
+            className={`${rowCls} bg-white text-ink border-line hover:bg-slate-100`}
+          >
+            <span className="flex items-center gap-2">
+              <Trash2 className={`w-4 h-4 ${archivedWorkOrders.length > 0 ? 'text-rose-600' : 'text-muted'}`} />
+              Recycle Bin
+            </span>
+            {archivedWorkOrders.length > 0 && (
+              <span className="rounded-full bg-rose-600 px-2 py-0.5 text-[10px] font-black text-white">{archivedWorkOrders.length}</span>
+            )}
+          </button>
+        )}
+
+        {getActiveFilterCount(tab) > 0 && (
+          <button
+            type="button"
+            onClick={() => {
+              handleResetAllFilters();
+              setShowBottlenecksOnly(false);
+            }}
+            className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2.5 text-xs font-extrabold text-rose-700 hover:bg-rose-100 transition-colors cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+            Reset All Filters
+          </button>
+        )}
+      </div>
+    );
+  };
+
   const activePipelineFilterCount =
     (showBottlenecksOnly ? 1 : 0) +
     (statusFilter !== 'ALL' ? 1 : 0) +
@@ -1464,6 +1636,7 @@ export default function App() {
             {/* Dynamic Filters depending on Active Tab */}
             {activeTab === 'intake' && (
               <>
+                <div className="hidden lg:flex items-center gap-1.5">
                 {/* Status Dropdown */}
                 <CustomDropdownMenu
                   value={statusFilter}
@@ -1483,26 +1656,29 @@ export default function App() {
 
                 {/* Date Filter Dropdown */}
                 <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
-              </>
+
+                </div>              </>
+            )}
+
+            {FILTER_TABS.includes(activeTab) && (
+              <button
+                type="button"
+                onClick={() => setIsFilterDrawerOpen(true)}
+                className="lg:hidden inline-flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand transition-all cursor-pointer relative shrink-0"
+                title="Open filters"
+                aria-label="Open filters"
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+                {getActiveFilterCount(activeTab) > 0 && (
+                  <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[9px] font-black text-white">
+                    {getActiveFilterCount(activeTab)}
+                  </span>
+                )}
+              </button>
             )}
 
             {activeTab === 'pipeline' && (
               <>
-                <button
-                  type="button"
-                  onClick={() => setIsFilterDrawerOpen(true)}
-                  className="lg:hidden inline-flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand transition-all cursor-pointer relative shrink-0"
-                  title="Open pipeline filters"
-                  aria-label="Open pipeline filters"
-                >
-                  <SlidersHorizontal className="h-4 w-4" />
-                  {activePipelineFilterCount > 0 && (
-                    <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[9px] font-black text-white">
-                      {activePipelineFilterCount}
-                    </span>
-                  )}
-                </button>
-
                 <div className="hidden lg:flex items-center gap-1.5">
                 <button
                   type="button"
@@ -1568,6 +1744,7 @@ export default function App() {
 
             {activeTab === 'dashboard' && (
               <>
+                <div className="hidden lg:flex items-center gap-1.5">
                 <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
                 <button
                   type="button"
@@ -1578,11 +1755,13 @@ export default function App() {
                   <Sparkles className="w-3.5 h-3.5 text-purple-600" />
                   <span className="hidden sm:inline">AI Assistant</span>
                 </button>
+                </div>
               </>
             )}
 
             {activeTab === 'inventory' && (
               <>
+                <div className="hidden lg:flex items-center gap-1.5">
                 <CustomDropdownMenu
                   value={categoryFilter}
                   onChange={(val) => setCategoryFilter(val)}
@@ -1610,11 +1789,13 @@ export default function App() {
                 />
 
                 <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact iconOnly />
-              </>
+
+                </div>              </>
             )}
 
             {activeTab === 'pos' && (
               <>
+                <div className="hidden lg:flex items-center gap-1.5">
                 <CustomDropdownMenu
                   value={statusFilter}
                   onChange={(val) => setStatusFilter(val)}
@@ -1627,11 +1808,13 @@ export default function App() {
                 />
 
                 <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
-              </>
+
+                </div>              </>
             )}
 
             {activeTab === 'crm' && (
               <>
+                <div className="hidden lg:flex items-center gap-1.5">
                 <CustomDropdownMenu
                   value={customerTypeFilter}
                   onChange={(val) => setCustomerTypeFilter(val)}
@@ -1645,11 +1828,13 @@ export default function App() {
                 />
 
                 <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
-              </>
+
+                </div>              </>
             )}
 
             {activeTab === 'suppliers' && (
               <>
+                <div className="hidden lg:flex items-center gap-1.5">
                 <CustomDropdownMenu
                   value={statusFilter}
                   onChange={(val) => setStatusFilter(val)}
@@ -1664,11 +1849,13 @@ export default function App() {
                 />
 
                 <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
-              </>
+
+                </div>              </>
             )}
 
             {activeTab === 'qa' && (
               <>
+                <div className="hidden lg:flex items-center gap-1.5">
                 <CustomDropdownMenu
                   value={statusFilter}
                   onChange={(val) => setStatusFilter(val)}
@@ -1680,11 +1867,14 @@ export default function App() {
                 />
 
                 <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
-              </>
+
+                </div>              </>
             )}
 
             {activeTab === 'finance' && (
-              <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
+              <div className="hidden lg:flex items-center gap-1.5">
+                <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
+              </div>
             )}
 
             {/* Quick Access Recycle Bin Button (Only shown in Work Intake & Status Pipeline) */}
@@ -2102,88 +2292,13 @@ export default function App() {
       />
 
       {/* Mobile pipeline filter drawer — all navbar filters in one right panel */}
-      <RightFilterDrawer open={isFilterDrawerOpen} onClose={() => setIsFilterDrawerOpen(false)} title="Pipeline Filters">
-        <div className="space-y-3">
-          <button
-            type="button"
-            onClick={() => setShowBottlenecksOnly(!showBottlenecksOnly)}
-            className={`flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-xs font-extrabold transition-colors cursor-pointer ${
-              showBottlenecksOnly
-                ? 'bg-red-500 text-white border-red-600 shadow-2xs'
-                : 'bg-white text-ink border-line hover:bg-slate-100'
-            }`}
-          >
-            <span className="flex items-center gap-2">
-              <Timer className={`w-4 h-4 ${showBottlenecksOnly ? 'text-white' : 'text-red-600'}`} />
-              Bottlenecks (&gt;48h)
-            </span>
-            <span className={`text-[10px] ${showBottlenecksOnly ? 'text-white/80' : 'text-muted'}`}>{showBottlenecksOnly ? 'On' : 'Off'}</span>
-          </button>
-
-          <div>
-            <label className="mb-1 block text-[10px] font-extrabold uppercase tracking-wider text-muted">Stage</label>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
-              className="w-full rounded-xl border border-line bg-white px-3 py-2.5 text-xs font-extrabold text-ink focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none"
-            >
-              <option value="ALL">All Stages</option>
-              <option value="Receive">Receive</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Pending">Pending</option>
-              <option value="Finished">Finished</option>
-              <option value="Taken Out">Taken Out</option>
-              <option value="Cant Repair">Cant Repair</option>
-              <option value="Customer Not Repair">Customer Not Repair</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="mb-1 block text-[10px] font-extrabold uppercase tracking-wider text-muted">Technician</label>
-            <select
-              value={techFilter}
-              onChange={(e) => setTechFilter(e.target.value as any)}
-              className="w-full rounded-xl border border-line bg-white px-3 py-2.5 text-xs font-extrabold text-ink focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none"
-            >
-              <option value="ALL">All Techs</option>
-              <option value="unassigned">Unassigned</option>
-              {technicians.map((t) => (
-                <option key={t.id} value={t.id}>{t.name}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="mb-1 block text-[10px] font-extrabold uppercase tracking-wider text-muted">Date</label>
-            <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
-          </div>
-
-          <button
-            type="button"
-            onClick={() => { setIsRecycleBinOpen(true); setIsFilterDrawerOpen(false); }}
-            className="flex w-full items-center gap-2 rounded-xl border border-line bg-white px-3 py-2.5 text-xs font-extrabold text-ink hover:bg-slate-100 transition-colors cursor-pointer"
-          >
-            <Trash2 className={`w-4 h-4 ${archivedWorkOrders.length > 0 ? 'text-rose-600' : 'text-muted'}`} />
-            Recycle Bin
-            {archivedWorkOrders.length > 0 && (
-              <span className="ml-auto rounded-full bg-rose-600 px-2 py-0.5 text-[10px] font-black text-white">{archivedWorkOrders.length}</span>
-            )}
-          </button>
-
-          {(activePipelineFilterCount > 0 || searchQuery) && (
-            <button
-              type="button"
-              onClick={() => {
-                handleResetAllFilters();
-                setShowBottlenecksOnly(false);
-              }}
-              className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2.5 text-xs font-extrabold text-rose-700 hover:bg-rose-100 transition-colors cursor-pointer"
-            >
-              <X className="w-4 h-4" />
-              Reset All Filters
-            </button>
-          )}
-        </div>
+            {/* Mobile filter drawer — per-tab filters in one right panel (dropdowns live here on mobile) */}
+      <RightFilterDrawer
+        open={isFilterDrawerOpen}
+        onClose={() => setIsFilterDrawerOpen(false)}
+        title={`${activeTab === 'pipeline' ? 'Pipeline' : activeTab === 'pos' ? 'POS' : activeTab === 'crm' ? 'CRM' : activeTab === 'inventory' ? 'Inventory' : activeTab === 'suppliers' ? 'Suppliers' : activeTab === 'qa' ? 'QA' : activeTab === 'finance' ? 'Finance' : activeTab === 'dashboard' ? 'Dashboard' : 'Intake'} Filters`}
+      >
+        {renderMobileFilters(activeTab)}
       </RightFilterDrawer>
 
       <HoverTooltip />
