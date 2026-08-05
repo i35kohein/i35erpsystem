@@ -1459,7 +1459,7 @@ export default function App() {
           </div>
 
           {/* Dynamic Header Actions & Quick Filters per Tab */}
-          <div className="app-topbar-actions flex min-w-0 items-center flex-nowrap justify-end gap-1.5 sm:gap-2 text-xs py-1 shrink-0 relative z-30 overflow-x-auto no-scrollbar max-w-full">
+          <div className="app-topbar-actions flex min-w-0 items-center flex-nowrap justify-end gap-1.5 sm:gap-2 text-xs py-1 shrink-0 relative z-30 overflow-x-auto no-scrollbar max-w-full lg:overflow-visible">
             {/* Global Search (Cmd/Ctrl+K) */}
             <button
               type="button"
