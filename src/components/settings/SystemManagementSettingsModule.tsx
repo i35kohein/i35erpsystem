@@ -52,10 +52,14 @@ import {
   Sparkles,
   RefreshCw,
   Truck,
-  ChevronDown
+  ChevronDown,
+  ChevronRight,
+  Search,
+  ArrowLeft
 } from 'lucide-react';
 import { Technician, SystemSettings, TechnicianLevel, PaymentMethodConfig, WorkOrder, NotificationTemplate, AppUser, UserRole, UserPermissions, PartItem, PartQualityTier, Supplier } from '../../types';
 import { DEFAULT_PAYMENT_METHODS, getActivePaymentMethods, DEFAULT_NOTIFICATION_TEMPLATES } from '../../data/seedData';
+import { Button } from '../ui';
 import { useTheme, THEME_PRESETS, ThemeMode } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { LanguageSwitcher } from '../common/LanguageSwitcher';
@@ -175,12 +179,23 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   const { theme, setTheme, geometry, setGeometry } = useTheme();
   const { t, language, setLanguage } = useLanguage();
   const [activeSubTab, setActiveSubTab] = useState<'shop' | 'theme' | 'users' | 'technicians' | 'intake' | 'pricing' | 'payment' | 'inventory' | 'pos' | 'notifications' | 'qa' | 'recycle' | 'ai'>(initialSubTab || 'users');
+  // Two-level navigation: launcher menu → drilled-in tab view (Back returns).
+  // App only sets initialSubTab='ai' when jumping from the dashboard AI shortcut — drill in then.
+  const [settingsDrilledIn, setSettingsDrilledIn] = useState(initialSubTab === 'ai');
   const [inventoryDataTab, setInventoryDataTab] = useState<'categories' | 'suppliers' | 'tiers' | 'bins' | 'rules'>('categories');
 
   
   // Local settings draft state
   const [formData, setFormData] = useState<SystemSettings>(settings);
   const [isSavedBanner, setIsSavedBanner] = useState(false);
+  // Settings tab navigation: search + dirty tracking
+  const [settingsTabQuery, setSettingsTabQuery] = useState('');
+  const isDirty = JSON.stringify(formData) !== JSON.stringify(settings);
+  // Collapsible long sections (mobile-friendly) — keyed by section id, default open
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
+  const toggleSection = (key: string) =>
+    setCollapsedSections((prev) => ({ ...prev, [key]: !prev[key] }));
+  const isSectionOpen = (key: string) => !collapsedSections[key];
   const [isDeviceTagPrinterOpen, setIsDeviceTagPrinterOpen] = useState(false);
   const [categoryDraft, setCategoryDraft] = useState('');
   const [editingCategoryKey, setEditingCategoryKey] = useState<string | null>(null);
@@ -840,7 +855,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 pb-20 lg:pb-0">
       {/* Save Toast Notification */}
       {isSavedBanner && (
         <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-bold flex items-center justify-between animate-fade-in">
@@ -851,51 +866,139 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
         </div>
       )}
 
-      {/* Navigation Sub-Tabs - Grid Display showing ALL available menus */}
-      <div className="bg-[#F5F5F7] p-2 rounded-2xl border border-[#E5E5EA] grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-2 w-full text-xs shadow-2xs">
-        {[
-          { id: 'users', label: 'User Roles & Permissions', icon: UserPlus, badge: users.length },
-          { id: 'shop', label: 'Shop Settings & Logo', icon: Store },
-          { id: 'theme', label: 'Theme & Color Palette', icon: Palette },
-          { id: 'technicians', label: 'Technicians & Staff', icon: Users, badge: technicians.length },
-          { id: 'intake', label: 'Work Orders & Intake', icon: FileText },
-          { id: 'pricing', label: 'Pricing & Currency', icon: DollarSign },
-          { id: 'payment', label: 'Payment Methods & MM QR', icon: CreditCard },
-          { id: 'inventory', label: 'Inventory Data & Quality', icon: Boxes, badge: inventoryCategories.length },
-          { id: 'pos', label: 'POS & Receipt Layout', icon: Printer },
-          { id: 'notifications', label: 'SMS & Telegram Alerts', icon: BellRing },
-          { id: 'ai', label: 'AI Assistant & API', icon: Sparkles },
-          { id: 'qa', label: 'QA & Diagnostic Rules', icon: ShieldCheck },
-          { id: 'recycle', label: 'Recycle Bin & Trash', icon: Trash2, badge: archivedCount },
-        ].map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeSubTab === tab.id;
-          return (
+      {/* Navigation Sub-Tabs — launcher menu (hidden once drilled into a tab) */}
+      {!settingsDrilledIn && (
+      <div className="bg-[#F5F5F7] p-2.5 rounded-2xl border border-[#E5E5EA] space-y-2.5 shadow-2xs">
+        {/* Settings search filter */}
+        <div className="relative">
+          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#86868B]" />
+          <input
+            type="text"
+            value={settingsTabQuery}
+            onChange={(e) => setSettingsTabQuery(e.target.value)}
+            placeholder="Search settings…"
+            className="w-full bg-white border border-[#E5E5EA] text-xs text-[#1D1D1F] placeholder-[#86868B] pl-8 pr-7 py-2 rounded-xl focus:outline-none focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20 transition-all"
+          />
+          {settingsTabQuery && (
             <button
-              key={tab.id}
               type="button"
-              onClick={() => setActiveSubTab(tab.id as any)}
-              className={`px-3 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center justify-start space-x-2 cursor-pointer border select-none active:scale-95 w-full ${
-                isActive
-                  ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-xs'
-                  : 'bg-white hover:bg-slate-100 text-[#6E6E73] hover:text-[#1D1D1F] border-[#E5E5EA]'
-              }`}
+              onClick={() => setSettingsTabQuery('')}
+              aria-label="Clear settings search"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center text-[#86868B] hover:text-[#1D1D1F] rounded-full hover:bg-[#F5F5F7] transition-colors cursor-pointer"
             >
-              <Icon className="w-4 h-4 shrink-0" />
-              <span className="truncate">{tab.label}</span>
-              {tab.badge !== undefined && (
-                <span
-                  className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold ml-auto shrink-0 ${
-                    isActive ? 'bg-white/20 text-white' : 'bg-[#E5E5EA] text-[#1D1D1F]'
-                  }`}
-                >
-                  {tab.badge}
-                </span>
-              )}
+              <X className="w-3.5 h-3.5" />
             </button>
-          );
-        })}
+          )}
+        </div>
+
+        {(() => {
+          const tabDefs = [
+            { id: 'users', label: 'User Roles & Permissions', icon: UserPlus, badge: users.length },
+            { id: 'shop', label: 'Shop Settings & Logo', icon: Store },
+            { id: 'theme', label: 'Theme & Color Palette', icon: Palette },
+            { id: 'technicians', label: 'Technicians & Staff', icon: Users, badge: technicians.length },
+            { id: 'intake', label: 'Work Orders & Intake', icon: FileText },
+            { id: 'pricing', label: 'Pricing & Currency', icon: DollarSign },
+            { id: 'payment', label: 'Payment Methods & MM QR', icon: CreditCard },
+            { id: 'inventory', label: 'Inventory Data & Quality', icon: Boxes, badge: inventoryCategories.length },
+            { id: 'pos', label: 'POS & Receipt Layout', icon: Printer },
+            { id: 'notifications', label: 'SMS & Telegram Alerts', icon: BellRing },
+            { id: 'ai', label: 'AI Assistant & API', icon: Sparkles },
+            { id: 'qa', label: 'QA & Diagnostic Rules', icon: ShieldCheck },
+            { id: 'recycle', label: 'Recycle Bin & Trash', icon: Trash2, badge: archivedCount },
+          ];
+          const defById = new Map(tabDefs.map((t) => [t.id, t]));
+          const groups = [
+            { label: 'Business', ids: ['shop', 'pricing', 'payment', 'pos'] },
+            { label: 'Staff', ids: ['users', 'technicians'] },
+            { label: 'Operations', ids: ['intake', 'qa', 'inventory', 'notifications'] },
+            { label: 'System', ids: ['theme', 'ai', 'recycle'] },
+          ];
+          const q = settingsTabQuery.trim().toLowerCase();
+          let visibleCount = 0;
+          const rendered = groups.map((group) => {
+            const tabs = group.ids.map((id) => defById.get(id)!).filter((t) => !q || t.label.toLowerCase().includes(q));
+            if (tabs.length === 0) return null;
+            visibleCount += tabs.length;
+            return (
+              <div key={group.label}>
+                <p className="px-1 pb-1 text-[9px] font-extrabold uppercase tracking-wider text-[#86868B]">
+                  {group.label}
+                </p>
+                <div className="flex flex-col gap-1 md:grid md:grid-cols-3 xl:grid-cols-6 md:gap-1.5">
+                  {tabs.map((tab) => {
+                    const Icon = tab.icon;
+                    const isActive = activeSubTab === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => {
+                          if (isDirty && tab.id !== activeSubTab) {
+                            if (!window.confirm('You have unsaved changes. Discard them and switch tab?')) return;
+                          }
+                          setActiveSubTab(tab.id as any);
+                          setSettingsDrilledIn(true);
+                        }}
+                        title={tab.label}
+                        className={`relative flex items-center justify-start gap-2 px-3 py-2.5 w-full md:space-x-2 md:py-2 text-[11px] md:text-xs font-extrabold rounded-xl transition-all cursor-pointer border select-none active:scale-95 shrink-0 ${
+                          isActive
+                            ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-xs'
+                            : 'bg-white hover:bg-slate-100 text-[#6E6E73] hover:text-[#1D1D1F] border-[#E5E5EA]'
+                        }`}
+                      >
+                        <Icon className="w-5 h-5 md:w-4 md:h-4 shrink-0" />
+                        <span className="truncate leading-tight">{tab.label}</span>
+                        {isDirty && isActive && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0 absolute top-1 right-1 md:static" title="Unsaved changes" />
+                        )}
+                        {tab.badge !== undefined && (
+                          <span
+                            className={`absolute top-0.5 right-0.5 px-1 rounded-full text-[7px] font-mono font-bold leading-[11px] md:static md:px-1.5 md:py-0.2 md:text-[10px] md:ml-auto ${
+                              isActive ? 'bg-white/20 text-white' : 'bg-[#E5E5EA] text-[#1D1D1F]'
+                            }`}
+                          >
+                            {tab.badge}
+                          </span>
+                        )}
+                        <ChevronRight className="w-4 h-4 ml-auto shrink-0 text-[#C7C7CC] md:hidden" />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          });
+          if (q && visibleCount === 0) {
+            return <p className="text-center text-xs font-bold text-[#86868B] py-3">No settings match “{settingsTabQuery}”</p>;
+          }
+          return rendered;
+        })()}
       </div>
+      )}
+
+      {/* Drilled-in tab view — one tab at a time with a Back bar */}
+      {settingsDrilledIn && (
+        <>
+        {/* Back navigation bar */}
+        <div className="flex items-center justify-between gap-3 bg-white p-2.5 rounded-2xl border border-[#E5E5EA] shadow-2xs">
+          <Button
+            type="button"
+            onClick={() => setSettingsDrilledIn(false)}
+            variant="outline"
+            size="sm"
+            className="flex items-center space-x-1.5"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Back to Settings Menu</span>
+          </Button>
+          {isDirty && (
+            <span className="flex items-center gap-1.5 text-[10px] font-extrabold text-amber-600">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              Unsaved changes
+            </span>
+          )}
+        </div>
 
       {/* Tab: AI Assistant Provider */}
       {activeSubTab === 'ai' && (
@@ -1020,15 +1123,15 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                   Finished tickets are auto-classified as Spareparts Change or Hardware Repair. Re-scan applies AI to every finished ticket without a verdict (including previously failed ones).
                 </p>
               </div>
-              <button
+              <Button
                 type="button"
                 onClick={handleAiRescan}
                 disabled={aiRescanning || !onAiRescanTickets}
-                className="px-4 py-2 bg-[#0071E3] hover:bg-[#0051B3] disabled:opacity-50 text-white font-bold text-xs rounded-xl flex items-center justify-center space-x-1.5 transition-all shadow-2xs cursor-pointer shrink-0"
+                className="bg-[#0071E3] hover:bg-[#0051B3] disabled:opacity-50 text-white shrink-0"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${aiRescanning ? 'animate-spin' : ''}`} />
                 <span>{aiRescanning ? 'Classifying…' : 'Re-scan Finished Tickets with AI'}</span>
-              </button>
+              </Button>
             </div>
             {aiRescanResult && (
               <p className="text-[11px] font-bold text-[#0071E3] bg-white/80 border border-[#0071E3]/20 rounded-lg px-3 py-2">
@@ -1068,14 +1171,14 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                 </p>
               </div>
 
-              <button
+              <Button
                 type="button"
                 onClick={handleOpenAddUser}
-                className="px-4 py-2 bg-[#0071E3] hover:bg-[#0051B3] text-white font-extrabold text-xs rounded-xl shadow-2xs transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 active:scale-95"
+                className="bg-[#0071E3] hover:bg-[#0051B3] text-white shrink-0 flex items-center space-x-1.5"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add New User Account</span>
-              </button>
+              </Button>
             </div>
 
             {/* Role Rules Banner */}
@@ -1568,14 +1671,14 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                 </div>
               </div>
 
-              <button
+              <Button
                 type="button"
                 onClick={handleSaveSettings}
-                className="px-4 py-2 bg-[#0071E3] hover:bg-[#0051B3] text-white font-extrabold text-xs rounded-xl transition-all shadow-2xs flex items-center space-x-1.5 cursor-pointer active:scale-95"
+                className="bg-[#0071E3] hover:bg-[#0051B3] text-white flex items-center space-x-1.5"
               >
                 <Save className="w-4 h-4" />
                 <span>Save Shop Settings</span>
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -1850,14 +1953,14 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               </div>
 
               <div className="flex items-center space-x-2">
-                <button
+                <Button
                   type="button"
                   onClick={handleOpenAddTech}
-                  className="px-3.5 py-2 bg-[#0071E3] hover:bg-[#0051B3] text-white font-extrabold text-xs rounded-xl transition-all shadow-2xs flex items-center space-x-1.5 cursor-pointer shrink-0 active:scale-95"
+                  className="bg-[#0071E3] hover:bg-[#0051B3] text-white shrink-0 flex items-center space-x-1.5"
                 >
                   <UserPlus className="w-3.5 h-3.5" />
                   <span>Add New Technician</span>
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -1874,14 +1977,15 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                   </p>
                 </div>
                 <div className="flex items-center justify-center space-x-3 pt-2">
-                  <button
+                  <Button
                     type="button"
                     onClick={handleOpenAddTech}
-                    className="px-4 py-2 bg-white text-[#1D1D1F] border border-[#D2D2D7] font-extrabold text-xs rounded-xl hover:bg-[#F5F5F7] transition-all flex items-center space-x-1.5 cursor-pointer active:scale-95"
+                    variant="outline"
+                    className="text-[#1D1D1F] border-[#D2D2D7] hover:bg-[#F5F5F7] flex items-center space-x-1.5"
                   >
                     <UserPlus className="w-3.5 h-3.5 text-[#0071E3]" />
                     <span>Add Technician</span>
-                  </button>
+                  </Button>
                 </div>
               </div>
             ) : (
@@ -2134,13 +2238,13 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                 <p className="text-[11px] text-[#86868B]">Enable or disable Cash, KBZ Pay, UAB Pay, AYA Pay, MMQR, CB Bank, Yoma Bank, Wave Money, etc.</p>
               </div>
             </div>
-            <button
+            <Button
               type="button"
               onClick={() => setActiveSubTab('payment')}
-              className="px-3.5 py-2 bg-[#0071E3] hover:bg-[#0051B3] text-white font-bold text-xs rounded-xl transition-all cursor-pointer shadow-2xs"
+              className="bg-[#0071E3] hover:bg-[#0051B3] text-white"
             >
               Configure Payment Gateways →
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -2655,8 +2759,22 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             </button>
           </div>
 
-          {/* Formats, Branding & Text Fields */}
-          <div className="space-y-6">
+          {/* Formats, Branding & Text Fields — collapsible (mobile-friendly) */}
+          <div className="bg-white rounded-2xl border border-[#D2D2D7] shadow-2xs overflow-hidden">
+            <button
+              type="button"
+              onClick={() => toggleSection('pos-formats')}
+              className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-[#F8F9FA] hover:bg-[#F0F1F4] transition-colors cursor-pointer"
+              aria-expanded={isSectionOpen('pos-formats')}
+            >
+              <span className="text-xs font-extrabold text-[#1D1D1F] flex items-center space-x-2">
+                <Printer className="w-4 h-4 text-[#0071E3]" />
+                <span>Formats, Branding & Text Fields</span>
+              </span>
+              <ChevronDown className={`w-4 h-4 text-[#86868B] transition-transform ${isSectionOpen('pos-formats') ? '' : 'rotate-180'}`} />
+            </button>
+            {isSectionOpen('pos-formats') && (
+            <div className="space-y-6 p-4">
             {/* Connected Store Branding Status Card — sourced only from Shop Settings. */}
             <div className="bg-white p-4 rounded-2xl border border-[#D2D2D7] shadow-2xs flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-start space-x-3.5">
@@ -2903,6 +3021,8 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               </div>
             </div>
           </div>
+            )}
+          </div>
 
           {/* Dedicated A4 Print Voucher & Job Sheet Defaults Block */}
           <div className="bg-white p-5 rounded-2xl border border-[#D2D2D7] shadow-2xs space-y-5">
@@ -3126,8 +3246,22 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             </div>
           </div>
 
-          {/* Templates Cards List */}
-          <div className="space-y-4">
+          {/* Templates Cards List — collapsible (mobile-friendly) */}
+          <div className="bg-white rounded-2xl border border-[#D2D2D7] shadow-2xs overflow-hidden">
+            <button
+              type="button"
+              onClick={() => toggleSection('notif-templates')}
+              className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-[#F8F9FA] hover:bg-[#F0F1F4] transition-colors cursor-pointer"
+              aria-expanded={isSectionOpen('notif-templates')}
+            >
+              <span className="text-xs font-extrabold text-[#1D1D1F] flex items-center space-x-2">
+                <BellRing className="w-4 h-4 text-[#0071E3]" />
+                <span>Configured Message Templates ({currentNotificationTemplates.length})</span>
+              </span>
+              <ChevronDown className={`w-4 h-4 text-[#86868B] transition-transform ${isSectionOpen('notif-templates') ? '' : 'rotate-180'}`} />
+            </button>
+            {isSectionOpen('notif-templates') && (
+            <div className="space-y-4 p-4">
             <div className="flex items-center justify-between">
               <h4 className="text-xs font-extrabold text-[#86868B] uppercase tracking-wider">
                 Configured Message Templates ({currentNotificationTemplates.length})
@@ -3249,6 +3383,8 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                 );
               })}
             </div>
+            </div>
+            )}
           </div>
         </div>
       )}
@@ -3868,6 +4004,8 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
           </div>
         </div>
       )}
+        </>
+      )}
 
       {/* Interactive Device Intake Print Voucher & Tag Printer Modal */}
       {isDeviceTagPrinterOpen && (
@@ -3876,6 +4014,31 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
           systemSettings={formData}
           onClose={() => setIsDeviceTagPrinterOpen(false)}
         />
+      )}
+
+      {/* Sticky mobile save bar — appears only when the settings draft is dirty */}
+      {isDirty && (
+        <div className="lg:hidden fixed inset-x-0 bottom-0 z-40 border-t border-[#E5E5EA] bg-white/95 backdrop-blur-sm px-4 pt-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              onClick={() => setFormData(settings)}
+              variant="outline"
+              className="flex-1"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              Reset
+            </Button>
+            <Button
+              type="button"
+              onClick={() => handleSaveSettings()}
+              className="flex-1 bg-[#0071E3] hover:bg-[#0051B3] text-white"
+            >
+              <Save className="w-3.5 h-3.5" />
+              Save Changes
+            </Button>
+          </div>
+        </div>
       )}
     </div>
   );
