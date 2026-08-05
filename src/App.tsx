@@ -805,8 +805,25 @@ export default function App() {
 
         {(tab === 'intake' || tab === 'pipeline' || tab === 'inventory' || tab === 'pos' || tab === 'crm' || tab === 'suppliers' || tab === 'qa' || tab === 'finance' || tab === 'dashboard') && (
           <div>
-            <label className={labelCls}>Date</label>
-            <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
+            <DrawerSelect
+              label="Date"
+              value={dateFilter.preset === 'custom' ? 'custom' : dateFilter.preset}
+              onChange={(v) => setDateFilter(v === 'all' ? { preset: 'all' } : { preset: v as DateFilterState['preset'] })}
+              options={[
+                { value: 'all', label: 'All Dates' },
+                { value: 'today', label: 'Today' },
+                { value: '7days', label: 'Last 7 Days' },
+                { value: '30days', label: 'Last 30 Days' },
+                { value: '60days', label: 'Last 60 Days' },
+                {
+                  value: 'custom',
+                  label:
+                    dateFilter.preset === 'custom' && dateFilter.startDate
+                      ? `${dateFilter.startDate} → ${dateFilter.endDate || ''} (custom)`
+                      : 'Custom Range…',
+                },
+              ]}
+            />
           </div>
         )}
 
