@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo, lazy, Suspense } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Sparkles, Plus, CircleDot, Search, Filter, Calculator, Folder, Settings, Download, Database, ExternalLink, ClipboardList, Kanban, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, ChevronDown, PhoneCall, Truck, Boxes, CreditCard, Users, DollarSign, LayoutDashboard, Timer, MoreHorizontal } from 'lucide-react';
+import { Sparkles, Plus, CircleDot, Search, Filter, Calculator, Folder, Settings, Download, Database, ExternalLink, ClipboardList, Kanban, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, ChevronDown, PhoneCall, Truck, Boxes, CreditCard, Users, DollarSign, LayoutDashboard, Timer, MoreHorizontal, SlidersHorizontal } from 'lucide-react';
 import { subscribeToCollection, fetchCloudCollection, saveDocument, saveBatchDocuments, deleteDocument, clearCollection } from './lib/supabase';
 import { setActiveUserId, notifyAccountChanged } from './utils/accountSettings';
 
@@ -68,6 +68,7 @@ import {
   UserRole
 } from './types';
 import { DateFilterSelector, DateFilterState } from './components/common/DateFilterSelector';
+import { RightFilterDrawer } from './components/common/RightFilterDrawer';
 import { checkIsDiagnosticCompleted, checkIsBeforeDiagnosticCompleted, checkIsAfterDiagnosticCompleted } from './utils/diagnosticUtils';
 import { CustomDropdownMenu } from './components/common/CustomDropdownMenu';
 import { UserRoleSwitcher } from './components/common/UserRoleSwitcher';
@@ -554,6 +555,7 @@ export default function App() {
   const [settingsInitialSubTab, setSettingsInitialSubTab] = useState<'users' | 'ai'>('users');
   const [printableTagWo, setPrintableTagWo] = useState<WorkOrder | null>(null);
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   // Sidebar defaults to collapsed on desktop (Ko Hein 2026-08-05) so the
   // content area keeps usable width; user can still expand it manually.
   const [isCollapsed, setIsCollapsed] = useState(
@@ -562,6 +564,12 @@ export default function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Quick Filter Helper States & Resetter
+  const activePipelineFilterCount =
+    (showBottlenecksOnly ? 1 : 0) +
+    (statusFilter !== 'ALL' ? 1 : 0) +
+    (techFilter !== 'ALL' ? 1 : 0) +
+    (dateFilter.preset !== 'all' ? 1 : 0);
+
   const hasActiveFilters =
     searchQuery !== '' ||
     statusFilter !== 'ALL' ||
@@ -1482,6 +1490,22 @@ export default function App() {
               <>
                 <button
                   type="button"
+                  onClick={() => setIsFilterDrawerOpen(true)}
+                  className="lg:hidden inline-flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand transition-all cursor-pointer relative shrink-0"
+                  title="Open pipeline filters"
+                  aria-label="Open pipeline filters"
+                >
+                  <SlidersHorizontal className="h-4 w-4" />
+                  {activePipelineFilterCount > 0 && (
+                    <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[9px] font-black text-white">
+                      {activePipelineFilterCount}
+                    </span>
+                  )}
+                </button>
+
+                <div className="hidden lg:flex items-center gap-1.5">
+                <button
+                  type="button"
                   onClick={() => setShowBottlenecksOnly(!showBottlenecksOnly)}
                   className={`py-1.5 px-3 rounded-xl border text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 ${
                     showBottlenecksOnly
@@ -1538,6 +1562,7 @@ export default function App() {
                 />
 
                 <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
+                </div>
               </>
             )}
 
@@ -2075,6 +2100,91 @@ export default function App() {
         onRestoreAll={handleRestoreAllWorkOrders}
         onEmptyRecycleBin={handleEmptyRecycleBin}
       />
+
+      {/* Mobile pipeline filter drawer — all navbar filters in one right panel */}
+      <RightFilterDrawer open={isFilterDrawerOpen} onClose={() => setIsFilterDrawerOpen(false)} title="Pipeline Filters">
+        <div className="space-y-3">
+          <button
+            type="button"
+            onClick={() => setShowBottlenecksOnly(!showBottlenecksOnly)}
+            className={`flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-xs font-extrabold transition-colors cursor-pointer ${
+              showBottlenecksOnly
+                ? 'bg-red-500 text-white border-red-600 shadow-2xs'
+                : 'bg-white text-ink border-line hover:bg-slate-100'
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <Timer className={`w-4 h-4 ${showBottlenecksOnly ? 'text-white' : 'text-red-600'}`} />
+              Bottlenecks (&gt;48h)
+            </span>
+            <span className={`text-[10px] ${showBottlenecksOnly ? 'text-white/80' : 'text-muted'}`}>{showBottlenecksOnly ? 'On' : 'Off'}</span>
+          </button>
+
+          <div>
+            <label className="mb-1 block text-[10px] font-extrabold uppercase tracking-wider text-muted">Stage</label>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as any)}
+              className="w-full rounded-xl border border-line bg-white px-3 py-2.5 text-xs font-extrabold text-ink focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none"
+            >
+              <option value="ALL">All Stages</option>
+              <option value="Receive">Receive</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Pending">Pending</option>
+              <option value="Finished">Finished</option>
+              <option value="Taken Out">Taken Out</option>
+              <option value="Cant Repair">Cant Repair</option>
+              <option value="Customer Not Repair">Customer Not Repair</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-[10px] font-extrabold uppercase tracking-wider text-muted">Technician</label>
+            <select
+              value={techFilter}
+              onChange={(e) => setTechFilter(e.target.value as any)}
+              className="w-full rounded-xl border border-line bg-white px-3 py-2.5 text-xs font-extrabold text-ink focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none"
+            >
+              <option value="ALL">All Techs</option>
+              <option value="unassigned">Unassigned</option>
+              {technicians.map((t) => (
+                <option key={t.id} value={t.id}>{t.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-[10px] font-extrabold uppercase tracking-wider text-muted">Date</label>
+            <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
+          </div>
+
+          <button
+            type="button"
+            onClick={() => { setIsRecycleBinOpen(true); setIsFilterDrawerOpen(false); }}
+            className="flex w-full items-center gap-2 rounded-xl border border-line bg-white px-3 py-2.5 text-xs font-extrabold text-ink hover:bg-slate-100 transition-colors cursor-pointer"
+          >
+            <Trash2 className={`w-4 h-4 ${archivedWorkOrders.length > 0 ? 'text-rose-600' : 'text-muted'}`} />
+            Recycle Bin
+            {archivedWorkOrders.length > 0 && (
+              <span className="ml-auto rounded-full bg-rose-600 px-2 py-0.5 text-[10px] font-black text-white">{archivedWorkOrders.length}</span>
+            )}
+          </button>
+
+          {(activePipelineFilterCount > 0 || searchQuery) && (
+            <button
+              type="button"
+              onClick={() => {
+                handleResetAllFilters();
+                setShowBottlenecksOnly(false);
+              }}
+              className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2.5 text-xs font-extrabold text-rose-700 hover:bg-rose-100 transition-colors cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+              Reset All Filters
+            </button>
+          )}
+        </div>
+      </RightFilterDrawer>
 
       <HoverTooltip />
 
