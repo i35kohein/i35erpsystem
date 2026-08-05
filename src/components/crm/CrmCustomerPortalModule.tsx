@@ -21,9 +21,11 @@ import {
   Printer,
   Trash2,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Edit2
 } from 'lucide-react';
 import { Customer, CustomerType, WorkOrder, SystemSettings } from '../../types';
+import { Button } from '../ui';
 import { CustomerFacingWebPortal } from '../portal/CustomerFacingWebPortal';
 import { PrintableInvoiceModal } from '../common/PrintableInvoiceModal';
 import { CustomerRepairHistoryModal } from './CustomerRepairHistoryModal';
@@ -34,6 +36,7 @@ interface CrmCustomerPortalModuleProps {
   customers: Customer[];
   workOrders: WorkOrder[];
   onAddCustomer: (cust: Customer) => void;
+  onUpdateCustomer?: (cust: Customer) => void;
   onDeleteCustomer?: (customerId: string) => void;
   /** Ids of standalone Supabase customer accounts. Roster rows NOT in this set are
    * derived from tickets — they have no account record to delete. */
@@ -71,6 +74,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
   customers,
   workOrders,
   onAddCustomer,
+  onUpdateCustomer,
   onDeleteCustomer,
   cloudCustomerIds,
   systemSettings = DEFAULT_SYSTEM_SETTINGS,
@@ -80,6 +84,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
 }) => {
   const [activeTab, setActiveTab] = useState<'CRM' | 'PORTAL_SIMULATOR'>('CRM');
   const [isAddCustomerModalOpen, setIsAddCustomerModalOpen] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [newCustomerForm, setNewCustomerForm] = useState({
     name: '',
     phone: '',
@@ -127,24 +132,58 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
     });
   }, [customers]);
 
+  const openAddCustomerModal = () => {
+    setEditingCustomer(null);
+    setNewCustomerForm({ name: '', phone: '', email: '', company: '', type: 'Retail', discountPercentage: 0, notes: '' });
+    setIsAddCustomerModalOpen(true);
+  };
+
+  const openEditCustomerModal = (cust: Customer) => {
+    setEditingCustomer(cust);
+    setNewCustomerForm({
+      name: cust.name,
+      phone: cust.phone,
+      email: cust.email || '',
+      company: cust.company || '',
+      type: cust.type,
+      discountPercentage: cust.discountPercentage || 0,
+      notes: cust.notes || '',
+    });
+    setIsAddCustomerModalOpen(true);
+  };
+
   const handleCreateCustomerSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCustomerForm.name.trim() || !newCustomerForm.phone.trim()) return;
-    const cust: Customer = {
-      id: `cust-${Date.now()}`,
-      name: newCustomerForm.name.trim(),
-      phone: newCustomerForm.phone.trim(),
-      email: newCustomerForm.email.trim(),
-      company: newCustomerForm.company.trim() || undefined,
-      type: newCustomerForm.type,
-      discountPercentage: Number(newCustomerForm.discountPercentage) || 0,
-      totalOrdersCount: 0,
-      totalSpent: 0,
-      notes: newCustomerForm.notes.trim() || undefined,
-      createdAt: new Date().toISOString(),
-    };
-    onAddCustomer(cust);
+    if (editingCustomer) {
+      onUpdateCustomer?.({
+        ...editingCustomer,
+        name: newCustomerForm.name.trim(),
+        phone: newCustomerForm.phone.trim(),
+        email: newCustomerForm.email.trim(),
+        company: newCustomerForm.company.trim() || undefined,
+        type: newCustomerForm.type,
+        discountPercentage: Number(newCustomerForm.discountPercentage) || 0,
+        notes: newCustomerForm.notes.trim() || undefined,
+      });
+    } else {
+      const cust: Customer = {
+        id: `cust-${Date.now()}`,
+        name: newCustomerForm.name.trim(),
+        phone: newCustomerForm.phone.trim(),
+        email: newCustomerForm.email.trim(),
+        company: newCustomerForm.company.trim() || undefined,
+        type: newCustomerForm.type,
+        discountPercentage: Number(newCustomerForm.discountPercentage) || 0,
+        totalOrdersCount: 0,
+        totalSpent: 0,
+        notes: newCustomerForm.notes.trim() || undefined,
+        createdAt: new Date().toISOString(),
+      };
+      onAddCustomer(cust);
+    }
     setNewCustomerForm({ name: '', phone: '', email: '', company: '', type: 'Retail', discountPercentage: 0, notes: '' });
+    setEditingCustomer(null);
     setIsAddCustomerModalOpen(false);
   };
 
@@ -213,14 +252,15 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
               <h2 className="font-bold text-[#1D1D1F] text-xs shrink-0">Customer Account Roster</h2>
               <div className="flex items-center gap-2 min-w-0">
                 <span className="text-[10px] font-semibold text-[#86868B] shrink-0">{filteredCustomers.length} accounts</span>
-                <button
+                <Button
                   type="button"
                   onClick={() => setIsAddCustomerModalOpen(true)}
-                  className="px-2.5 py-1.5 bg-[#0071E3] hover:bg-[#0071E3]/90 text-white font-extrabold text-[10px] rounded-lg transition-all flex items-center space-x-1 cursor-pointer active:scale-95 shrink-0"
+                  size="sm"
+                  className="bg-[#0071E3] hover:bg-[#0071E3]/90 text-white shrink-0 flex items-center space-x-1 rounded-lg"
                 >
                   <Plus className="w-3 h-3" />
                   <span>Add Customer</span>
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -303,6 +343,19 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                           <span>Full History</span>
                         </button>
 
+                        {(cloudCustomerIds?.has(cust.id) ?? true) && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openEditCustomerModal(cust);
+                            }}
+                            className="p-1 bg-blue-50 text-[#0071E3] hover:bg-blue-100 font-bold text-[10px] rounded-md transition-colors cursor-pointer"
+                            title="Edit Customer Account"
+                          >
+                            <Edit2 className="w-3 h-3" />
+                          </button>
+                        )}
                         {(cloudCustomerIds?.has(cust.id) ?? true) ? (
                         <button
                           type="button"
@@ -412,14 +465,15 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                       {selectedCustomer.company && <p className="text-[#86868B] text-xs font-medium">{selectedCustomer.company}</p>}
                     </div>
 
-                    <button
+                    <Button
                       type="button"
                       onClick={() => handleOpenHistoryModal(selectedCustomer)}
-                      className="px-3 py-1 bg-[#0071E3]/10 hover:bg-[#0071E3] text-[#0071E3] hover:text-white border border-[#0071E3]/30 font-bold text-xs rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer shadow-2xs"
+                      size="sm"
+                      className="bg-[#0071E3]/10 hover:bg-[#0071E3] text-[#0071E3] hover:text-white border border-[#0071E3]/30"
                     >
                       <FileText className="w-3.5 h-3.5" />
                       <span>Full Repair History Modal</span>
-                    </button>
+                    </Button>
                   </div>
                 </div>
 
@@ -496,7 +550,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
             <div className="flex justify-between items-center border-b border-[#E5E5EA] pb-2">
               <h4 className="font-extrabold text-[#1D1D1F] text-sm flex items-center space-x-1.5">
                 <Users className="w-4 h-4 text-[#0071E3]" />
-                <span>Register New Customer Account</span>
+                <span>{editingCustomer ? 'Edit Customer Account' : 'Register New Customer Account'}</span>
               </h4>
               <button
                 type="button"
@@ -595,20 +649,20 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
             </div>
 
             <div className="flex justify-end space-x-2 pt-2 border-t border-[#E5E5EA]">
-              <button
+              <Button
                 type="button"
                 onClick={() => setIsAddCustomerModalOpen(false)}
-                className="px-3 py-2 bg-white border border-[#E5E5EA] text-[#1D1D1F] font-bold rounded-xl cursor-pointer"
+                variant="outline"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
-                className="px-4 py-2 bg-[#0071E3] hover:bg-[#0051B3] text-white font-extrabold rounded-xl shadow-xs cursor-pointer flex items-center space-x-1.5 active:scale-95"
+                className="bg-[#0071E3] hover:bg-[#0051B3] text-white flex items-center space-x-1.5"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>Save Customer</span>
-              </button>
+                <span>{editingCustomer ? 'Save Changes' : 'Save Customer'}</span>
+              </Button>
             </div>
           </form>
         </div>

@@ -71,6 +71,7 @@ import { DateFilterSelector, DateFilterState } from './components/common/DateFil
 import { checkIsDiagnosticCompleted, checkIsBeforeDiagnosticCompleted, checkIsAfterDiagnosticCompleted } from './utils/diagnosticUtils';
 import { CustomDropdownMenu } from './components/common/CustomDropdownMenu';
 import { UserRoleSwitcher } from './components/common/UserRoleSwitcher';
+import { ModuleLoadingSkeleton } from './components/common/ModuleLoadingSkeleton';
 import { useLanguage } from './context/LanguageContext';
 import { Navigation } from './components/Navigation';
 // Heavy modules are code-split (React.lazy) so the initial bundle stays lean.
@@ -1049,6 +1050,11 @@ export default function App() {
     saveDocument('customers', cust).catch(reportSaveError);
   };
 
+  const handleUpdateCustomer = (updated: Customer) => {
+    setCustomers((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
+    saveDocument('customers', updated).catch(reportSaveError);
+  };
+
   const handleDeleteCustomer = (customerId: string) => {
     if (currentUser.role !== 'Admin') {
       addToast('🔒 Access Denied: Only Admin accounts can delete customer records.', 'error', 'Permission Required');
@@ -1702,7 +1708,7 @@ export default function App() {
         </header>
 
         <main className="min-h-0 flex-1 w-full max-w-[3840px] mx-auto px-3 sm:px-4 lg:px-5 pt-3 pb-6 lg:pb-5 flex flex-col">
-          <Suspense fallback={<div className="flex-1 flex items-center justify-center text-xs text-[#86868B]">Loading…</div>}>
+          <Suspense fallback={<ModuleLoadingSkeleton />}>
           <div key={activeTab} className="app-module-content flex-1 w-full min-w-0 flex flex-col">
               {activeTab === 'dashboard' && (
                 <DashboardOverview
@@ -1937,6 +1943,7 @@ export default function App() {
                   cloudCustomerIds={new Set(customers.map((c) => c.id))}
                   workOrders={activeWorkOrders}
                   onAddCustomer={handleAddCustomer}
+                  onUpdateCustomer={handleUpdateCustomer}
                   onDeleteCustomer={handleDeleteCustomer}
                   systemSettings={systemSettings}
                   onSaveWorkOrder={handleSaveWorkOrder}
