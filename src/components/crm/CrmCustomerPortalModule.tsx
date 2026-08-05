@@ -123,6 +123,20 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
 
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(filteredCustomers[0] || customers[0] || null);
 
+  // Mobile master-detail: detail column becomes a bottom sheet; auto-open when the
+  // user taps a different customer on phones (skips the initial auto-selection).
+  const [isMobileDetailOpen, setIsMobileDetailOpen] = useState(false);
+  const isFirstRenderRef = React.useRef(true);
+  useEffect(() => {
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false;
+      return;
+    }
+    if (selectedCustomer && window.matchMedia('(max-width: 767px)').matches) {
+      setIsMobileDetailOpen(true);
+    }
+  }, [selectedCustomer]);
+
   // Keep detail panel stable when customers are added, removed, or filtered.
   // A deleted customer must not remain in the detail panel.
   useEffect(() => {
@@ -446,8 +460,23 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
             </div>
           </div>
 
-          {/* Customer Details & History */}
-          <div className="flex min-h-0 h-full flex-col md:col-span-6 xl:col-span-7 bg-white border border-[#E5E5EA] rounded-2xl p-4 shadow-xs">
+          {/* Customer Details & History — bottom sheet on mobile (fixed), in-flow panel on md+ */}
+          <div className={`fixed inset-x-0 bottom-0 z-[60] max-h-[85vh] overflow-y-auto rounded-t-3xl bg-white border-t border-[#E5E5EA] shadow-[0_-8px_30px_rgba(0,0,0,0.12)] transition-transform duration-300 flex min-h-0 flex-col p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] md:static md:inset-auto md:z-auto md:max-h-none md:overflow-visible md:rounded-none md:border md:border-[#E5E5EA] md:shadow-xs md:transition-none md:translate-y-0 md:col-span-6 xl:col-span-7 ${isMobileDetailOpen ? 'translate-y-0' : 'translate-y-full'}`}>
+            {/* Mobile sheet handle + close (md:hidden) */}
+            <div className="flex items-center justify-between pb-2 md:hidden">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="h-1 w-8 shrink-0 rounded-full bg-[#D2D2D7]" />
+                <p className="truncate text-xs font-extrabold text-[#1D1D1F]">{selectedCustomer?.name || 'Customer Details'}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsMobileDetailOpen(false)}
+                aria-label="Close customer details"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[#86868B] hover:bg-[#F5F5F7] hover:text-[#1D1D1F] transition-colors cursor-pointer"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
             {selectedCustomer ? (
               <div className="flex min-h-0 flex-1 flex-col gap-5">
                 <div className="border-b border-[#E5E5EA] pb-3">

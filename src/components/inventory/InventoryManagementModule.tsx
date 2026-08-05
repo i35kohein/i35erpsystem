@@ -56,6 +56,21 @@ import JsBarcode from 'jsbarcode';
 const isSameDeviceModel = (left: string, right: string) =>
   left.trim().toLocaleLowerCase() === right.trim().toLocaleLowerCase();
 
+// Small sort-direction indicator for sortable table headers
+const SortArrow: React.FC<{ dir: 'asc' | 'desc' }> = ({ dir }) => (
+  <svg
+    className={`w-3 h-3 shrink-0 ${dir === 'asc' ? 'text-[#0071E3]' : 'text-[#0071E3] rotate-180'}`}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M6 9l6-6 6 6" />
+  </svg>
+);
+
 const DEFAULT_QUALITY_TIERS = [
   'Original',
   'OEM',
@@ -328,6 +343,74 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const [selectedPartForDetails, setSelectedPartForDetails] = useState<PartItem | null>(null);
   const [scanQuery, setScanQuery] = useState('');
   const scanInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Column sorting (stock table)
+  const [sortKey, setSortKey] = useState<'name' | 'stock' | 'price' | null>(null);
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const toggleSort = (key: 'name' | 'stock' | 'price') => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  };
+
+  // Bulk selection (stock table)
+  const [selectedPartIds, setSelectedPartIds] = useState<Set<string>>(new Set());
+  const selectedParts = parts.filter((p) => selectedPartIds.has(p.id));
+  const togglePartSelection = (id: string) => {
+    setSelectedPartIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+  const toggleSelectAllVisible = () => {
+    const visibleIds = paginatedParts.map((p) => p.id);
+    const allSelected = visibleIds.every((id) => selectedPartIds.has(id));
+    setSelectedPartIds((prev) => {
+      const next = new Set(prev);
+      visibleIds.forEach((id) => (allSelected ? next.delete(id) : next.add(id)));
+      return next;
+    });
+  };
+  const clearSelection = () => setSelectedPartIds(new Set());
+  const exportSelectedCsv = () => {
+    const rows = [
+      ['Part Name', 'SKU', 'Category', 'Quality', 'Stock', 'Reorder Point', 'Cost (MMK)', 'Selling (MMK)', 'Bin'],
+      ...selectedParts.map((p) => [
+        p.name, p.sku || '', p.category || '', p.qualityTier || '',
+        String(p.quantityInStock), String(p.reorderPoint || 0),
+        String(p.costPrice || 0), String(p.sellingPrice || 0), p.locationBin || '',
+      ]),
+    ];
+    const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `inventory-selection-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`${selectedParts.length} part(s) exported`, 'CSV Exported');
+  };
+  const bulkSetReorder = () => {
+    const input = window.prompt(`Set reorder point for ${selectedParts.length} selected part(s) to:`);
+    const value = Number(input);
+    if (input === null || Number.isNaN(value) || value < 0) return;
+    selectedParts.forEach((p) => {
+      onUpdatePart?.({ ...p, reorderPoint: value });
+    });
+    toast.success(`Reorder point set to ${value} for ${selectedParts.length} part(s)`, 'Bulk Update');
+    clearSelection();
+  };
+  const bulkDelete = () => {
+    if (!window.confirm(`Delete ${selectedParts.length} selected part(s)? This cannot be undone.`)) return;
+    selectedParts.forEach((p) => onDeletePart?.(p.id));
+    toast.success(`${selectedParts.length} part(s) deleted`, 'Bulk Delete');
+    clearSelection();
+  };
 
   // Barcode scanner = keyboard wedge: types SKU then Enter. Look up exact SKU
   // (case-insensitive) and open the part detail modal; beep/flash on miss.
@@ -744,7 +827,19 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
       return matchesQuality && matchesCategory && matchesModel && matchesLowStock && matchesSearch;
     }).sort((a, b) => {
-      // Group by device model (newest iPhone first), then category, then name.
+      if (sortKey === 'stock') {
+        const diff = a.quantityInStock - b.quantityInStock;
+        return sortDir === 'asc' ? diff : -diff;
+      }
+      if (sortKey === 'price') {
+        const diff = a.sellingPrice - b.sellingPrice;
+        return sortDir === 'asc' ? diff : -diff;
+      }
+      if (sortKey === 'name') {
+        const byName = (a.name || '').localeCompare(b.name || '', undefined, { numeric: true, sensitivity: 'base' });
+        return sortDir === 'asc' ? byName : -byName;
+      }
+      // Default: group by device model (newest iPhone first), then category, then name.
       const modelOf = (p: PartItem) => (p.deviceCompatibility && p.deviceCompatibility[0]) || '';
       const byModel = compareModelsNewestFirst(modelOf(a), modelOf(b));
       if (byModel !== 0) return byModel;
@@ -752,7 +847,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       if (byCategory !== 0) return byCategory;
       return (a.name || '').localeCompare(b.name || '', undefined, { numeric: true, sensitivity: 'base' });
     });
-  }, [parts, selectedQuality, selectedCategory, selectedModelFilter, showLowStockOnly, activeSearchQuery]);
+  }, [parts, selectedQuality, selectedCategory, selectedModelFilter, showLowStockOnly, activeSearchQuery, sortKey, sortDir]);
 
   const totalPages = 1;
   const safeCurrentPage = 1;
@@ -1277,6 +1372,47 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           </button>
         </div>
 
+        {/* Bulk actions bar — appears when parts are selected (stock table only) */}
+        {selectedPartIds.size > 0 && !inlineEditMode && (
+          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-[#0071E3]/30 bg-[#F0F6FF] px-3 py-2">
+            <span className="text-xs font-extrabold text-[#0071E3]">{selectedPartIds.size} selected</span>
+            <div className="ml-auto flex flex-wrap items-center gap-1.5">
+              <button
+                type="button"
+                onClick={exportSelectedCsv}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[#0071E3] bg-white px-2.5 py-1.5 text-[11px] font-bold text-[#0071E3] hover:bg-[#0071E3] hover:text-white transition-colors cursor-pointer"
+              >
+                <FileText className="w-3.5 h-3.5" />
+                Export CSV
+              </button>
+              <button
+                type="button"
+                onClick={bulkSetReorder}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[#E5E5EA] bg-white px-2.5 py-1.5 text-[11px] font-bold text-[#1D1D1F] hover:border-[#0071E3] hover:text-[#0071E3] transition-colors cursor-pointer"
+              >
+                <AlertTriangle className="w-3.5 h-3.5" />
+                Set Reorder Point
+              </button>
+              <button
+                type="button"
+                onClick={bulkDelete}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-[11px] font-bold text-rose-600 hover:bg-rose-100 transition-colors cursor-pointer"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Delete
+              </button>
+              <button
+                type="button"
+                onClick={clearSelection}
+                className="inline-flex items-center rounded-lg px-2 py-1.5 text-[11px] font-bold text-[#86868B] hover:text-[#1D1D1F] transition-colors cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+                Clear
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Low-stock quick audit banner — visible in Stock view too (not just Profit) */}
         {metrics.lowStockCount > 0 && (
           <button
@@ -1429,6 +1565,30 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     </div>
                     )}
 
+                    {/* Selling price edit — mobile card edit mode (step 1,000 MMK, instant save) */}
+                    {inlineEditMode && (
+                      <div className="flex items-center justify-between gap-2 rounded-xl border border-emerald-200 bg-emerald-50/60 p-2.5">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wide text-emerald-700">Selling Price</span>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => onUpdatePart?.({ ...part, sellingPrice: Math.max(0, part.sellingPrice - 1000) })}
+                            aria-label={`Decrease price for ${part.name}`}
+                            title="Decrease price by 1,000 MMK"
+                            className="flex h-10 w-10 lg:h-8 lg:w-8 items-center justify-center rounded-lg border border-emerald-300 bg-white font-black text-rose-600 active:scale-95"
+                          >−</button>
+                          <span className="min-w-[70px] text-center font-mono text-sm font-black text-[#1D1D1F]">{part.sellingPrice.toLocaleString()}</span>
+                          <button
+                            type="button"
+                            onClick={() => onUpdatePart?.({ ...part, sellingPrice: part.sellingPrice + 1000 })}
+                            aria-label={`Increase price for ${part.name}`}
+                            title="Increase price by 1,000 MMK"
+                            className="flex h-10 w-10 lg:h-8 lg:w-8 items-center justify-center rounded-lg border border-emerald-300 bg-white font-black text-[#0071E3] active:scale-95"
+                          >+</button>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="flex items-end justify-between gap-2 border-t border-[#E5E5EA] pt-1">
                       <div>
                         <span className="block text-[10px] font-bold uppercase text-[#7F7F7F]">Selling Price</span>
@@ -1448,10 +1608,36 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <table className="w-full text-left border-collapse">
                 <thead className="sticky top-0 z-20 bg-[#F5F5F7] text-[#86868B] text-[10px] uppercase font-mono border-b border-[#E5E5EA] shadow-2xs">
                   <tr>
-                    <th className="w-[34%] px-2 py-2 bg-[#F5F5F7]">Part Name & SKU</th>
+                    {!inlineEditMode && (
+                      <th className="w-[40px] px-2 py-2 bg-[#F5F5F7]">
+                        <input
+                          type="checkbox"
+                          checked={paginatedParts.length > 0 && paginatedParts.every((p) => selectedPartIds.has(p.id))}
+                          onChange={toggleSelectAllVisible}
+                          aria-label="Select all visible parts"
+                          className="accent-[#0071E3] w-3.5 h-3.5 cursor-pointer"
+                        />
+                      </th>
+                    )}
+                    <th className="w-[34%] px-2 py-2 bg-[#F5F5F7]">
+                      <button type="button" onClick={() => toggleSort('name')} className="inline-flex items-center gap-1 hover:text-[#0071E3] transition-colors cursor-pointer uppercase font-mono text-[10px]" title="Sort by part name">
+                        Part Name & SKU
+                        {sortKey === 'name' && <SortArrow dir={sortDir} />}
+                      </button>
+                    </th>
                     <th className="w-[108px] px-2 py-2 bg-[#F5F5F7] hidden md:table-cell">Quality</th>
-                    <th className="w-[96px] px-1.5 py-2 bg-[#F5F5F7]">Stock</th>
-                    <th className="w-[104px] px-1.5 py-2 bg-[#F5F5F7]">Selling Price</th>
+                    <th className="w-[96px] px-1.5 py-2 bg-[#F5F5F7]">
+                      <button type="button" onClick={() => toggleSort('stock')} className="inline-flex items-center gap-1 hover:text-[#0071E3] transition-colors cursor-pointer uppercase font-mono text-[10px]" title="Sort by stock quantity">
+                        Stock
+                        {sortKey === 'stock' && <SortArrow dir={sortDir} />}
+                      </button>
+                    </th>
+                    <th className="w-[104px] px-1.5 py-2 bg-[#F5F5F7]">
+                      <button type="button" onClick={() => toggleSort('price')} className="inline-flex items-center gap-1 hover:text-[#0071E3] transition-colors cursor-pointer uppercase font-mono text-[10px]" title="Sort by selling price">
+                        Selling Price
+                        {sortKey === 'price' && <SortArrow dir={sortDir} />}
+                      </button>
+                    </th>
                     {inlineEditMode && <th className="w-[150px] px-1.5 py-2 bg-[#F5F5F7]">Supplier</th>}
                     <th className="px-2 py-2 bg-[#F5F5F7] hidden md:table-cell">Bin</th>
                     {!inlineEditMode && <th className="px-2 py-2 text-right bg-[#F5F5F7]">Detail</th>}
@@ -1465,7 +1651,19 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     const editValue = (key: keyof PartItem, fallback: string | number) => draft[key] ?? fallback;
 
                     return (
-                      <tr key={part.id} className="hover:bg-slate-50/80 transition-colors">
+                      <tr key={part.id} className={`transition-colors ${selectedPartIds.has(part.id) ? 'bg-[#F0F6FF]' : 'hover:bg-slate-50/80'}`}>
+                        {/* Selection checkbox */}
+                        {!inlineEditMode && (
+                          <td className="px-2 py-2">
+                            <input
+                              type="checkbox"
+                              checked={selectedPartIds.has(part.id)}
+                              onChange={() => togglePartSelection(part.id)}
+                              aria-label={`Select ${part.name}`}
+                              className="accent-[#0071E3] w-3.5 h-3.5 cursor-pointer"
+                            />
+                          </td>
+                        )}
                         {/* Part Name & SKU */}
                         <td className="px-2 py-2 space-y-1">
                           <div className="flex items-start space-x-2">
@@ -1687,13 +1885,19 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 {paginatedParts.map((part) => {
                   const profit = part.sellingPrice - part.costPrice;
                   const margin = part.sellingPrice ? Math.round((profit / part.sellingPrice) * 100) : 0;
+                  // Margin heat map: >=40% green, 20-39% lime/emerald, 0-19% amber, negative red
+                  const heat =
+                    margin >= 40 ? 'bg-emerald-100 text-emerald-800' :
+                    margin >= 20 ? 'bg-lime-100 text-lime-800' :
+                    margin >= 0 ? 'bg-amber-100 text-amber-800' :
+                    'bg-rose-100 text-rose-700';
                   return (
                     <tr key={part.id} className="hover:bg-slate-50/80">
                       <td className="p-2.5"><p className="max-w-[260px] truncate font-bold text-[#1D1D1F]">{part.name}</p><p className="mt-0.5 font-mono text-[10px] text-[#86868B]">{part.sku}</p></td>
                       <td className="p-2.5 font-mono text-[#6E6E73] whitespace-nowrap hidden md:table-cell">{part.costPrice.toLocaleString()} MMK</td>
                       <td className="p-2.5 font-mono font-bold text-[#16A34A] whitespace-nowrap">{part.sellingPrice.toLocaleString()} MMK</td>
-                      <td className={`p-2.5 font-mono font-black whitespace-nowrap ${profit >= 0 ? 'text-[#0071E3]' : 'text-rose-600'}`}>{profit >= 0 ? '+' : ''}{profit.toLocaleString()} MMK<span className={`mt-0.5 block w-max rounded-md px-1.5 py-0.5 font-mono text-[9px] font-black sm:hidden ${margin >= 0 ? 'bg-blue-50 text-[#0071E3]' : 'bg-rose-50 text-rose-600'}`}>{margin}%</span></td>
-                      <td className="p-2.5 hidden sm:table-cell"><span className={`rounded-md px-1.5 py-0.5 font-mono text-[10px] font-black ${margin >= 0 ? 'bg-blue-50 text-[#0071E3]' : 'bg-rose-50 text-rose-600'}`}>{margin}%</span></td>
+                      <td className={`p-2.5 font-mono font-black whitespace-nowrap ${profit >= 0 ? 'text-[#0071E3]' : 'text-rose-600'}`}>{profit >= 0 ? '+' : ''}{profit.toLocaleString()} MMK<span className={`mt-0.5 block w-max rounded-md px-1.5 py-0.5 font-mono text-[9px] font-black sm:hidden ${heat}`}>{margin}%</span></td>
+                      <td className="p-2.5 hidden sm:table-cell"><span className={`rounded-md px-1.5 py-0.5 font-mono text-[10px] font-black ${heat}`} title={margin >= 40 ? 'High margin' : margin >= 20 ? 'Good margin' : margin >= 0 ? 'Low margin' : 'Loss'}>{margin}%</span></td>
                       <td className="p-2.5 text-right"><button type="button" aria-label={`View ${part.name} details`} title="View part details" onClick={() => setSelectedPartForDetails(part)} className="inline-flex h-10 w-10 lg:h-7 lg:w-7 items-center justify-center rounded-lg border border-[#E5E5EA] bg-white text-[#1D1D1F] hover:border-[#0071E3] hover:text-[#0071E3]"><Eye className="h-3 w-3" /></button></td>
                     </tr>
                   );

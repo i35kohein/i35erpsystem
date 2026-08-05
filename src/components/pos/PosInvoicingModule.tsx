@@ -525,6 +525,11 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 );
               })
             )}
+            {filteredWorkOrders.length > 0 && (
+              <p className="text-center text-[10px] font-mono font-bold text-[#C7C7CC] pt-2 pb-1 tracking-widest select-none">
+                — End of queue —
+              </p>
+            )}
           </div>
         </div>
 
@@ -631,11 +636,6 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           <td className="p-2.5 text-[#1D1D1F]">
                             <div className="space-y-1">
                               <div className="font-medium">{li.description}</div>
-                              {hasDiscount && (
-                                <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[9px] font-bold text-amber-700">
-                                  Discount {quote.discountPercent}% off
-                                </span>
-                              )}
                               {li.partId && !li.isLabor && (
                                 <span className="inline-flex items-center rounded-full border border-[#D6E7FF] bg-[#F0F6FF] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-[#0071E3]">
                                   Inventory Part
@@ -1119,6 +1119,35 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 )}
               </div>
 
+              {/* Receipt preview — what Pay & Print will produce */}
+              <div className="rounded-xl border border-[#E5E5EA] bg-[#FBFBFD]">
+                <div className="flex items-center justify-between px-3 pt-2.5 pb-1.5">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wide text-[#86868B]">Receipt Preview</span>
+                  <FileText className="w-3.5 h-3.5 text-[#C7C7CC]" />
+                </div>
+                <div className="mx-3 mb-3 rounded-lg border border-dashed border-[#D2D2D7] bg-white px-3 py-2.5 font-mono text-[9px] leading-relaxed text-[#1D1D1F]">
+                  <div className="text-center font-black uppercase tracking-widest text-[10px]">i35 Apple Service</div>
+                  <div className="text-center text-[#86868B]">No 1031, Pyi Htaung Su Main Rd, North Dagon</div>
+                  <div className="my-1.5 border-t border-dashed border-[#D2D2D7]" />
+                  <div className="flex justify-between"><span className="text-[#86868B]">Invoice</span><span className="font-bold">{selectedWo.orderNumber}</span></div>
+                  <div className="flex justify-between"><span className="text-[#86868B]">Device</span><span className="max-w-[55%] truncate font-bold">{selectedWo.deviceModel}</span></div>
+                  <div className="my-1.5 border-t border-dashed border-[#D2D2D7]" />
+                  {(selectedWo.lineItems || []).slice(0, 3).map((li) => (
+                    <div key={li.id} className="flex justify-between gap-2">
+                      <span className="truncate">{li.description}</span>
+                      <span className="shrink-0">{(Number(li.unitPrice || 0) * (li.quantity || 1)).toLocaleString()}</span>
+                    </div>
+                  ))}
+                  {(selectedWo.lineItems || []).length > 3 && (
+                    <div className="text-[#86868B]">… +{(selectedWo.lineItems || []).length - 3} more</div>
+                  )}
+                  <div className="my-1.5 border-t border-dashed border-[#D2D2D7]" />
+                  <div className="flex justify-between"><span className="text-[#86868B]">Discount</span><span>-{(selectedWo.discountAmount || 0).toLocaleString()}</span></div>
+                  <div className="flex justify-between font-black text-[11px]"><span>TOTAL</span><span>{selectedWo.totalAmount.toLocaleString()} MMK</span></div>
+                  <div className="text-center text-[#86868B] mt-1">Thank you for your business!</div>
+                </div>
+              </div>
+
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
                 <Button
@@ -1181,6 +1210,11 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
             <div className="min-w-0 shrink-0">
               <p className="text-[10px] font-bold text-[#86868B] uppercase tracking-wide">Amount Due</p>
               <p className="font-mono font-black text-[#0071E3] text-base leading-tight">{selectedWo.totalAmount.toLocaleString()} MMK</p>
+              {paymentMethod === 'Cash' && cashTendered >= selectedWo.totalAmount && (
+                <p className="text-[10px] font-extrabold text-[#28A745] leading-tight">
+                  Change: {(cashTendered - selectedWo.totalAmount).toLocaleString()} MMK
+                </p>
+              )}
             </div>
             <button
               type="button"
