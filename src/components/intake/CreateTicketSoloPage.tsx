@@ -1266,7 +1266,9 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 <img src={photo} alt="Intake" className="w-full h-full object-cover" />
                 <button
                   onClick={() => setIntakePhotos(prev => prev.filter((_, i) => i !== idx))}
-                  className="absolute top-1 right-1 bg-black/70 text-white p-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  aria-label={`Remove photo ${idx + 1}`}
+                  title="Remove photo"
+                  className="absolute top-1 right-1 bg-black/70 text-white p-0.5 rounded-full opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity active:scale-90"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -1307,7 +1309,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               <span>Take / Add Photo</span>
             </button>
           </div>
-          <p className="text-[10px] text-muted font-medium">Up to 4MB per photo · hover a thumbnail to delete · on mobile the camera opens directly.</p>
+          <p className="text-[10px] text-muted font-medium">Up to 4MB per photo · tap the × badge on a thumbnail to delete · on mobile the camera opens directly.</p>
         </div>
 
         {/* Spacer so the sticky bar never covers the content above it at full scroll */}

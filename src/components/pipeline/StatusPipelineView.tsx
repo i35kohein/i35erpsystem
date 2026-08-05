@@ -539,6 +539,33 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
         </div>
       </div>
 
+      {/* Mobile stage toggles (lg:hidden) — Show All lives in the drawer too, but the
+          exception columns are the workflow's far-right stages, so a one-tap inline
+          toggle keeps them reachable without hunting the filter drawer. */}
+      <div className="lg:hidden flex items-center gap-1.5 overflow-x-auto no-scrollbar -mx-0.5 px-0.5">
+        <button
+          type="button"
+          onClick={() => setShowAllStages((v) => !v)}
+          className={`inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-xl border px-3 text-[11px] font-bold transition-colors cursor-pointer active:scale-95 ${
+            showAllStages
+              ? 'bg-ink text-white border-ink shadow-2xs'
+              : 'bg-white text-ink border-line-strong hover:bg-slate-100'
+          }`}
+          aria-pressed={showAllStages}
+        >
+          {showAllStages ? <EyeOff className="w-3.5 h-3.5 shrink-0" /> : <Eye className="w-3.5 h-3.5 shrink-0 text-brand" />}
+          <span>{showAllStages ? 'Hide Exception Stages' : 'Show Exception Stages'}</span>
+          {hiddenStageCounts.some((h) => h.count > 0) && (
+            <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-black ${showAllStages ? 'bg-white/20 text-white' : 'bg-rose-100 text-rose-700'}`}>
+              {hiddenStageCounts.filter((h) => h.count > 0).reduce((acc, h) => acc + h.count, 0)}
+            </span>
+          )}
+        </button>
+        {!showAllStages && (
+          <p className="shrink-0 text-[10px] font-medium text-muted">Cant Repair · Customer Not Repair</p>
+        )}
+      </div>
+
       {/* Active filter summary chips (desktop) */}
       <div className="hidden lg:block">
         <ActiveFilterChips chips={activeFilterChips} />
@@ -1189,14 +1216,30 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
         </div>
       )}
 
-      {/* Mobile scroll hint — shows until the far-right columns are reached */}
-      {!kanbanAtEnd && (
+      {/* Mobile scroll hint — honest about what is actually rendered. When the exception
+          stages are hidden the pill becomes a one-tap Show All action (previously it
+          promised columns that could never render). When they're shown, it's a scroll
+          cue until the far-right columns are reached. */}
+      {!showAllStages ? (
+        <div className="md:hidden">
+          <button
+            type="button"
+            onClick={() => setShowAllStages(true)}
+            className="flex w-full items-center justify-center gap-1.5 rounded-full border border-dashed border-rose-300 bg-rose-50 px-3 py-2.5 text-[11px] font-extrabold text-rose-700 transition-colors cursor-pointer active:scale-[0.99]"
+          >
+            <Eye className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+            <span>
+              Show Cant Repair{hiddenStageCounts[0].count > 0 ? ` (${hiddenStageCounts[0].count})` : ''} & Customer Not Repair{hiddenStageCounts[1].count > 0 ? ` (${hiddenStageCounts[1].count})` : ''}
+            </span>
+          </button>
+        </div>
+      ) : !kanbanAtEnd ? (
         <div className="flex items-center justify-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5 text-[10px] font-extrabold text-muted md:hidden animate-fade-in">
           <ChevronsRight className="w-3.5 h-3.5 text-brand" />
           <span>Scroll for Cant Repair / Customer Not Repair</span>
           <ChevronsRight className="w-3.5 h-3.5 text-brand" />
         </div>
-      )}
+      ) : null}
 
       {/* MODAL 4: Checkout Payment */}
       {checkoutModalWo && (
