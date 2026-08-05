@@ -68,19 +68,24 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
   const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'ESTIMATE' | 'DIAGNOSTICS' | 'MESSAGES'>('OVERVIEW');
 
   // Find matching work orders based on phone, email, order number, serial number, or IMEI
+  // Phone matching is strict: the query digits must EQUAL the ticket digits or be the
+  // trailing 6+ digits of it. Raw substring matching was leaking tickets (typing "0"
+  // logged into the first ticket whose phone contained a 0).
+  const cleanQueryDigits = (authenticatedCustomerPhoneOrEmail || '').toLowerCase().replace(/[^0-9]/g, '');
+  const phoneMatch = (wo: WorkOrder) => {
+    const digits = (wo.customerPhone || '').replace(/[^0-9]/g, '');
+    if (!digits || cleanQueryDigits.length < 6) return false;
+    return digits === cleanQueryDigits || digits.endsWith(cleanQueryDigits);
+  };
   const matchingWorkOrders = workOrders.filter((wo) => {
     if (!authenticatedCustomerPhoneOrEmail) return false;
     const target = authenticatedCustomerPhoneOrEmail.toLowerCase().trim();
-    
-    // Clean phone numbers for comparison (remove spaces, parens, hyphens)
-    const cleanTarget = target.replace(/[^0-[#0-9a-z]/gi, '');
-    const cleanPhone = wo.customerPhone?.replace(/[^0-9]/g, '');
 
     return (
-      wo.orderNumber.toLowerCase().includes(target) ||
-      (wo.customerPhone && wo.customerPhone.toLowerCase().includes(target)) ||
-      (cleanPhone && cleanPhone.length > 3 && cleanTarget.includes(cleanPhone)) ||
-      (wo.customerEmail && wo.customerEmail.toLowerCase().includes(target)) ||
+      wo.orderNumber.toLowerCase() === target ||
+      wo.orderNumber.toLowerCase().replace(/[^0-9a-z]/g, '') === target.replace(/[^0-9a-z]/g, '') ||
+      phoneMatch(wo) ||
+      (wo.customerEmail && wo.customerEmail.toLowerCase() === target) ||
       (wo.serialNumber && wo.serialNumber.toLowerCase() === target) ||
       (wo.imei && wo.imei.toLowerCase() === target)
     );
@@ -99,16 +104,22 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
       return;
     }
 
-    const cleanQuery = query.toLowerCase().replace(/[^0-[#0-9a-z]/gi, '');
+    const cleanQuery = query.toLowerCase().replace(/[^0-9a-z]/gi, '');
+    const cleanQueryDigits = cleanQuery.replace(/[^0-9]/g, '');
 
-    // Check if any work order matches
+    const phoneMatch = (wo: WorkOrder) => {
+      const digits = (wo.customerPhone || '').replace(/[^0-9]/g, '');
+      if (!digits || cleanQueryDigits.length < 6) return false;
+      return digits === cleanQueryDigits || digits.endsWith(cleanQueryDigits);
+    };
+
+    // Check if any work order matches (strict: exact order#/email/serial/IMEI, or
+    // phone digits equal / trailing-6+ digits — never a raw substring).
     const found = workOrders.filter((wo) => {
-      const cleanPhone = wo.customerPhone?.replace(/[^0-9]/g, '');
       return (
         wo.orderNumber.toLowerCase() === query.toLowerCase() ||
         wo.orderNumber.toLowerCase().replace(/[^0-9a-z]/g, '') === cleanQuery ||
-        (wo.customerPhone && wo.customerPhone.toLowerCase().includes(query.toLowerCase())) ||
-        (cleanPhone && cleanPhone.length >= 4 && cleanQuery.includes(cleanPhone)) ||
+        phoneMatch(wo) ||
         (wo.customerEmail && wo.customerEmail.toLowerCase().trim() === query.toLowerCase().trim()) ||
         (wo.serialNumber && wo.serialNumber.toLowerCase() === query.toLowerCase()) ||
         (wo.imei && wo.imei.toLowerCase() === query.toLowerCase())
@@ -805,13 +816,15 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             {/* Approval Controls */}
             {currentWorkOrder.estimateStatus !== 'Approved' ? (
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-[#E5E5EA]">
-                <button
-                  onClick={() => setRejectionModalOpen(true)}
-                  className="w-full sm:w-auto px-5 py-3 bg-white border border-[#E5E5EA] text-[#FF3B30] hover:bg-[#FF3B30]/10 font-extrabold rounded-xl transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF3B30]/40 focus-visible:ring-offset-2"
-                >
-                  <span className="hidden sm:inline">Decline / Request Callback</span>
-                  <span className="sm:hidden">Decline</span>
-                </button>
+                {(currentWorkOrder.status === 'Receive' || currentWorkOrder.status === 'Pending') && (
+                  <button
+                    onClick={() => setRejectionModalOpen(true)}
+                    className="w-full sm:w-auto px-5 py-3 bg-white border border-[#E5E5EA] text-[#FF3B30] hover:bg-[#FF3B30]/10 font-extrabold rounded-xl transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF3B30]/40 focus-visible:ring-offset-2"
+                  >
+                    <span className="hidden sm:inline">Decline / Request Callback</span>
+                    <span className="sm:hidden">Decline</span>
+                  </button>
+                )}
                 <button
                   onClick={() => setApprovalModalOpen(true)}
                   className="w-full sm:w-auto px-6 py-3 bg-[#34C759] hover:bg-[#30B753] text-white font-extrabold rounded-xl shadow-xs transition-all active:scale-95 flex items-center justify-center space-x-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#34C759]/40 focus-visible:ring-offset-2"

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo, lazy, Suspense } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Sparkles, Plus, CircleDot, Search, Filter, Calculator, Folder, Settings, Download, Database, ExternalLink, ClipboardList, Kanban, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, ChevronDown, PhoneCall, Truck, Boxes, CreditCard, Users, DollarSign, LayoutDashboard, Timer } from 'lucide-react';
+import { Sparkles, Plus, CircleDot, Search, Filter, Calculator, Folder, Settings, Download, Database, ExternalLink, ClipboardList, Kanban, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, ChevronDown, PhoneCall, Truck, Boxes, CreditCard, Users, DollarSign, LayoutDashboard, Timer, MoreHorizontal } from 'lucide-react';
 import { subscribeToCollection, fetchCloudCollection, saveDocument, saveBatchDocuments, deleteDocument, clearCollection } from './lib/supabase';
 import { setActiveUserId, notifyAccountChanged } from './utils/accountSettings';
 
@@ -130,6 +130,7 @@ export default function App() {
   const [priceCatalogQuickCalcOpen, setPriceCatalogQuickCalcOpen] = useState(false);
   const [priceCatalogDeviceModalOpen, setPriceCatalogDeviceModalOpen] = useState(false);
   const [priceCatalogSettingsModalOpen, setPriceCatalogSettingsModalOpen] = useState(false);
+  const [priceCatalogMenuOpen, setPriceCatalogMenuOpen] = useState(false);
   const priceCatalogExportRef = useRef<(() => void) | null>(null);
   
   // Settings top navigation controls state
@@ -1053,6 +1054,12 @@ export default function App() {
       addToast('🔒 Access Denied: Only Admin accounts can delete customer records.', 'error', 'Permission Required');
       return;
     }
+    // Ticket-derived customers have no standalone account — deleting their tickets
+    // is the only real removal; don't fire a bogus Supabase delete or a success toast.
+    if (!customers.some((c) => c.id === customerId)) {
+      addToast('This customer has no standalone account — it is derived from repair tickets. Archive/delete the tickets instead.', 'info', 'Nothing to Delete');
+      return;
+    }
     const cust = customers.find((c) => c.id === customerId);
     setCustomers((prev) => prev.filter((c) => c.id !== customerId));
     deleteDocument('customers', customerId).catch(reportSaveError);
@@ -1273,7 +1280,7 @@ export default function App() {
             {/* Price Catalog Header Controls */}
             {activeTab === 'price-catalog' ? (
               <>
-                <div className="relative w-32 sm:w-36 md:w-44 lg:w-52 shrink-0">
+                <div className="relative hidden lg:block w-52 shrink-0">
                   <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#86868B]" />
                   <input
                     type="text"
@@ -1292,43 +1299,115 @@ export default function App() {
                   )}
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => setPriceCatalogQuickCalcOpen(true)}
-                  className="px-2.5 sm:px-3 py-1.5 bg-[#34C759] hover:bg-[#34C759]/90 text-white font-extrabold text-xs rounded-xl transition-all flex items-center space-x-1 sm:space-x-1.5 shadow-2xs cursor-pointer shrink-0 active:scale-95"
-                >
-                  <Calculator className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Calc</span>
-                </button>
+                {/* Desktop: all four actions inline (lg+) */}
+                <div className="hidden lg:flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setPriceCatalogQuickCalcOpen(true)}
+                    className="px-2.5 sm:px-3 py-1.5 bg-[#34C759] hover:bg-[#34C759]/90 text-white font-extrabold text-xs rounded-xl transition-all flex items-center space-x-1 sm:space-x-1.5 shadow-2xs cursor-pointer shrink-0 active:scale-95"
+                  >
+                    <Calculator className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Calc</span>
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={() => setPriceCatalogDeviceModalOpen(true)}
-                  className="px-2.5 sm:px-3 py-1.5 bg-[#0071E3] hover:bg-[#0071E3]/90 text-white font-extrabold text-xs rounded-xl transition-all flex items-center space-x-1 sm:space-x-1.5 shadow-2xs cursor-pointer shrink-0 active:scale-95"
-                >
-                  <Folder className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Model</span>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => setPriceCatalogDeviceModalOpen(true)}
+                    className="px-2.5 sm:px-3 py-1.5 bg-[#0071E3] hover:bg-[#0071E3]/90 text-white font-extrabold text-xs rounded-xl transition-all flex items-center space-x-1 sm:space-x-1.5 shadow-2xs cursor-pointer shrink-0 active:scale-95"
+                  >
+                    <Folder className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Model</span>
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={() => setPriceCatalogSettingsModalOpen(true)}
-                  className="px-2.5 sm:px-3 py-1.5 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] font-bold text-xs rounded-xl border border-[#E5E5EA] transition-all cursor-pointer shrink-0 shadow-2xs flex items-center space-x-1.5"
-                  title="Folder & Catalog Settings"
-                >
-                  <Settings className="w-3.5 h-3.5 text-[#0071E3]" />
-                  <span className="hidden md:inline">Settings</span>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => setPriceCatalogSettingsModalOpen(true)}
+                    className="px-2.5 sm:px-3 py-1.5 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] font-bold text-xs rounded-xl border border-[#E5E5EA] transition-all cursor-pointer shrink-0 shadow-2xs flex items-center space-x-1.5"
+                    title="Folder & Catalog Settings"
+                  >
+                    <Settings className="w-3.5 h-3.5 text-[#0071E3]" />
+                    <span className="hidden md:inline">Settings</span>
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={() => priceCatalogExportRef.current?.()}
-                  className="px-2.5 sm:px-3 py-1.5 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] font-bold text-xs rounded-xl border border-[#E5E5EA] transition-all cursor-pointer shrink-0 shadow-2xs flex items-center space-x-1.5"
-                  title="Export Catalog to CSV"
-                >
-                  <Download className="w-3.5 h-3.5 text-[#34C759]" />
-                  <span className="hidden md:inline">Export</span>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => priceCatalogExportRef.current?.()}
+                    className="px-2.5 sm:px-3 py-1.5 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] font-bold text-xs rounded-xl border border-[#E5E5EA] transition-all cursor-pointer shrink-0 shadow-2xs flex items-center space-x-1.5"
+                    title="Export Catalog to CSV"
+                  >
+                    <Download className="w-3.5 h-3.5 text-[#34C759]" />
+                    <span className="hidden md:inline">Export</span>
+                  </button>
+                </div>
+
+                {/* Mobile: all four actions behind a ⋯ overflow menu (lg:hidden) */}
+                <div className="relative lg:hidden shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setPriceCatalogMenuOpen(!priceCatalogMenuOpen)}
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#F5F5F7] hover:bg-[#E5E5EA] border border-[#E5E5EA] text-[#1D1D1F] transition-all cursor-pointer active:scale-95"
+                    aria-label="More catalog actions"
+                    title="More actions"
+                  >
+                    <MoreHorizontal className="w-5 h-5" />
+                  </button>
+
+                  {priceCatalogMenuOpen && (
+                    <>
+                      <div
+                        className="fixed inset-0 z-40"
+                        onClick={() => setPriceCatalogMenuOpen(false)}
+                        aria-hidden="true"
+                      />
+                      <div className="absolute right-0 top-full mt-1.5 z-50 w-48 rounded-xl border border-[#E5E5EA] bg-white p-1.5 shadow-xl">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPriceCatalogQuickCalcOpen(true);
+                            setPriceCatalogMenuOpen(false);
+                          }}
+                          className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg hover:bg-[#F5F5F7] transition-colors cursor-pointer text-left"
+                        >
+                          <Calculator className="w-4 h-4 text-[#34C759] shrink-0" />
+                          Quick Price Calculator
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPriceCatalogDeviceModalOpen(true);
+                            setPriceCatalogMenuOpen(false);
+                          }}
+                          className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg hover:bg-[#F5F5F7] transition-colors cursor-pointer text-left"
+                        >
+                          <Folder className="w-4 h-4 text-[#0071E3] shrink-0" />
+                          Switch Model
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPriceCatalogSettingsModalOpen(true);
+                            setPriceCatalogMenuOpen(false);
+                          }}
+                          className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg hover:bg-[#F5F5F7] transition-colors cursor-pointer text-left"
+                        >
+                          <Settings className="w-4 h-4 text-[#0071E3] shrink-0" />
+                          Catalog Settings
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            priceCatalogExportRef.current?.();
+                            setPriceCatalogMenuOpen(false);
+                          }}
+                          className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg hover:bg-[#F5F5F7] transition-colors cursor-pointer text-left"
+                        >
+                          <Download className="w-4 h-4 text-[#34C759] shrink-0" />
+                          Export to CSV
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
               </>
             ) : ['intake', 'pipeline', 'pos', 'inventory', 'crm', 'suppliers', 'qa'].includes(activeTab) ? (
               /* Contextual Search Input */
@@ -1855,6 +1934,7 @@ export default function App() {
               {activeTab === 'crm' && (
                 <CrmCustomerPortalModule
                   customers={rosterCustomers}
+                  cloudCustomerIds={new Set(customers.map((c) => c.id))}
                   workOrders={activeWorkOrders}
                   onAddCustomer={handleAddCustomer}
                   onDeleteCustomer={handleDeleteCustomer}

@@ -35,6 +35,9 @@ interface CrmCustomerPortalModuleProps {
   workOrders: WorkOrder[];
   onAddCustomer: (cust: Customer) => void;
   onDeleteCustomer?: (customerId: string) => void;
+  /** Ids of standalone Supabase customer accounts. Roster rows NOT in this set are
+   * derived from tickets — they have no account record to delete. */
+  cloudCustomerIds?: Set<string>;
   systemSettings?: SystemSettings;
   onSaveWorkOrder?: (wo: WorkOrder) => void;
   searchQuery?: string;
@@ -69,6 +72,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
   workOrders,
   onAddCustomer,
   onDeleteCustomer,
+  cloudCustomerIds,
   systemSettings = DEFAULT_SYSTEM_SETTINGS,
   onSaveWorkOrder = () => {},
   searchQuery = '',
@@ -240,7 +244,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                       >
                         {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                         <span>
-                          {custOrders.length} Repair{custOrders.length === 1 ? '' : 's'} {isExpanded ? 'History' : 'History'}
+                          {custOrders.length} Repair{custOrders.length === 1 ? '' : 's'}
                         </span>
                       </button>
 
@@ -258,6 +262,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                           <span>Full History</span>
                         </button>
 
+                        {(cloudCustomerIds?.has(cust.id) ?? true) ? (
                         <button
                           type="button"
                           onClick={(e) => {
@@ -271,6 +276,14 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                         >
                           <Trash2 className="w-3 h-3" />
                         </button>
+                      ) : (
+                        <span
+                          className="px-1.5 py-0.5 text-[9px] font-bold text-[#86868B] bg-white border border-[#E5E5EA] rounded-md"
+                          title="Ticket-derived customer — no standalone account to delete"
+                        >
+                          Derived
+                        </span>
+                      )}
                       </div>
                     </div>
 
