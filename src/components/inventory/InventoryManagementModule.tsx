@@ -853,6 +853,16 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const safeCurrentPage = 1;
   const paginatedParts = filteredParts;
 
+  // Table pagination (stock table only — cards/profit/matrix stay full list)
+  const TABLE_PAGE_SIZE = 50;
+  const [tablePage, setTablePage] = useState(1);
+  useEffect(() => {
+    setTablePage(1); // reset to first page whenever the filtered/sorted list changes
+  }, [filteredParts, sortKey, sortDir]);
+  const tableTotalPages = Math.max(1, Math.ceil(paginatedParts.length / TABLE_PAGE_SIZE));
+  const tablePageSafe = Math.min(tablePage, tableTotalPages);
+  const tablePageParts = paginatedParts.slice((tablePageSafe - 1) * TABLE_PAGE_SIZE, tablePageSafe * TABLE_PAGE_SIZE);
+
   const handleSaveNewPart = () => {
     if (!newPartData.name || !newPartData.sku || !newPartData.category || !newPartData.qualityTier || !newPartData.supplierId || !newPartData.deviceCompatibility?.[0] || (isBackGlassCategory && !newPartData.backGlassColor)) {
       toast.error('Choose a device model, category, quality tier, and supplier. Back Glass parts also need a color. Then enter the part name and SKU.', 'Incomplete Part Details');
@@ -1657,7 +1667,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#E5E5EA]">
-                  {paginatedParts.map((part) => {
+                  {tablePageParts.map((part) => {
                     const isLow = part.quantityInStock <= part.reorderPoint;
                     const isOut = part.quantityInStock === 0;
                     const draft = inlineDrafts[part.id] || {};
@@ -1853,6 +1863,34 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   })}
                 </tbody>
               </table>
+              {/* Table pagination controls */}
+              {tableTotalPages > 1 && (
+                <div className="sticky bottom-0 flex items-center justify-between gap-2 border-t border-[#E5E5EA] bg-white px-3 py-2">
+                  <span className="text-[10px] font-mono font-bold text-[#86868B]">
+                    {paginatedParts.length} parts · Page {tablePageSafe}/{tableTotalPages}
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setTablePage((p) => Math.max(1, p - 1))}
+                      disabled={tablePageSafe <= 1}
+                      className="flex h-8 items-center gap-1 rounded-lg border border-[#E5E5EA] bg-white px-2.5 text-[11px] font-bold text-[#1D1D1F] hover:border-[#0071E3] hover:text-[#0071E3] disabled:opacity-40 disabled:hover:border-[#E5E5EA] disabled:hover:text-[#1D1D1F] transition-colors cursor-pointer"
+                    >
+                      <ChevronLeft className="w-3.5 h-3.5" />
+                      Prev
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTablePage((p) => Math.min(tableTotalPages, p + 1))}
+                      disabled={tablePageSafe >= tableTotalPages}
+                      className="flex h-8 items-center gap-1 rounded-lg border border-[#E5E5EA] bg-white px-2.5 text-[11px] font-bold text-[#1D1D1F] hover:border-[#0071E3] hover:text-[#0071E3] disabled:opacity-40 disabled:hover:border-[#E5E5EA] disabled:hover:text-[#1D1D1F] transition-colors cursor-pointer"
+                    >
+                      Next
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

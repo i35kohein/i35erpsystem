@@ -137,6 +137,25 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
     }
   }, [selectedCustomer]);
 
+  // Keyboard shortcuts: [ / ] cycle through customers (desktop convenience)
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null;
+      const tag = el?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el?.isContentEditable) return;
+      if (e.key !== '[' && e.key !== ']') return;
+      if (!filteredCustomers.length) return;
+      e.preventDefault();
+      const idx = selectedCustomer ? filteredCustomers.findIndex((c) => c.id === selectedCustomer.id) : -1;
+      const next = e.key === ']'
+        ? filteredCustomers[(idx + 1) % filteredCustomers.length]
+        : filteredCustomers[(idx - 1 + filteredCustomers.length) % filteredCustomers.length];
+      setSelectedCustomer(next);
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [filteredCustomers, selectedCustomer]);
+
   // Keep detail panel stable when customers are added, removed, or filtered.
   // A deleted customer must not remain in the detail panel.
   useEffect(() => {
