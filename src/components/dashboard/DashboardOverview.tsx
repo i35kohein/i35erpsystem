@@ -1072,11 +1072,12 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <div className="space-y-0.5">
                 <div className="flex items-center space-x-2">
                   <ListFilter className="w-4 h-4 text-[#0071E3]" />
-                  <h3 className="text-sm font-extrabold text-[#1D1D1F]">
-                    Status Queue & Stage Distribution
+                  <h3 className="text-sm font-extrabold text-[#1D1D1F] truncate">
+                    <span className="hidden sm:inline">Status Queue & Stage Distribution</span>
+                    <span className="sm:hidden">Stage Distribution</span>
                   </h3>
-                  <span className="px-2.5 py-0.5 bg-[#0071E3]/10 text-[#0071E3] rounded-full text-[11px] font-mono font-bold">
-                    {filteredWorkOrders.length} Total Work Orders
+                  <span className="px-2.5 py-0.5 bg-[#0071E3]/10 text-[#0071E3] rounded-full text-[11px] font-mono font-bold whitespace-nowrap">
+                    {filteredWorkOrders.length} <span className="hidden md:inline">Total Work Orders</span><span className="md:hidden">Orders</span>
                   </span>
                 </div>
                 <p className="text-xs text-[#86868B]">High-level stage tracking, bottlenecks, and active repair distribution</p>
@@ -1088,7 +1089,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   className="px-4 py-2 bg-[#0071E3] hover:bg-[#0071E3]/90 text-white font-extrabold text-xs rounded-xl shadow-2xs flex items-center space-x-2 transition-all cursor-pointer active:scale-95"
                 >
                   <Kanban className="w-4 h-4" />
-                  <span>Open Interactive Pipeline</span>
+                  <span className="hidden sm:inline">Open Interactive Pipeline</span>
+                  <span className="sm:hidden">Open Pipeline</span>
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
@@ -1108,7 +1110,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   <div key={item.stage} className={`p-4 rounded-xl border border-slate-200/80 ${item.bg} space-y-2`}>
                     <div className="flex items-center justify-between">
                       <span className={`text-xs font-bold ${item.text}`}>{item.title}</span>
-                      <span className="font-mono text-xs font-black text-slate-800">{item.count} tickets</span>
+                      <span className="font-mono text-xs font-black text-slate-800">{item.count} <span className="hidden xl:inline">tickets</span></span>
                     </div>
                     <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
                       <div className={`h-full ${item.color} rounded-full transition-all duration-500`} style={{ width: `${pct}%` }} />
@@ -1135,11 +1137,12 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <div className="space-y-0.5">
                 <div className="flex items-center space-x-2">
                   <ClipboardList className="w-4 h-4 text-[#0071E3]" />
-                  <h3 className="text-sm font-extrabold text-[#1D1D1F]">
-                    Live Work Order Status Analytics Queue Roster
+                  <h3 className="text-sm font-extrabold text-[#1D1D1F] truncate">
+                    <span className="hidden md:inline">Live Work Order Status Analytics Queue Roster</span>
+                    <span className="md:hidden">Queue Roster</span>
                   </h3>
-                  <span className="px-2.5 py-0.5 bg-[#0071E3]/10 text-[#0071E3] rounded-full text-[11px] font-mono font-bold">
-                    {statusQueueWorkOrders.length} {statusQueueWorkOrders.length === 1 ? 'Ticket' : 'Tickets'}
+                  <span className="px-2.5 py-0.5 bg-[#0071E3]/10 text-[#0071E3] rounded-full text-[11px] font-mono font-bold whitespace-nowrap">
+                    {statusQueueWorkOrders.length} <span className="hidden md:inline">{statusQueueWorkOrders.length === 1 ? 'Ticket' : 'Tickets'}</span>
                   </span>
                   {statusQueueFilter !== 'ALL' && (
                     <span className="px-2.5 py-0.5 bg-indigo-100 text-indigo-800 rounded-full text-[11px] font-mono font-bold">
@@ -1147,7 +1150,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-[#86868B]">Read-only analytic ticket roster filtered by repair stage, technician, and priority</p>
+                <p className="hidden sm:block text-xs text-[#86868B]">Read-only analytic ticket roster filtered by repair stage, technician, and priority</p>
               </div>
             </div>
 
@@ -1427,7 +1430,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   <div className="p-2 bg-[#0071E3]/10 text-[#0071E3] rounded-xl border border-[#0071E3]/20">
                     <BarChart3 className="w-5 h-5" />
                   </div>
-                  <h3 className="text-base font-extrabold text-[#1D1D1F]">Top Repair Categories with Income</h3>
+                  <h3 className="text-base font-extrabold text-[#1D1D1F] truncate">
+                    <span className="hidden sm:inline">Top Repair Categories with Income</span>
+                    <span className="sm:hidden">Top Categories (Income)</span>
+                  </h3>
                 </div>
                 <p className="text-xs text-[#86868B]">Repair category breakdown by tickets and revenue</p>
               </div>
@@ -1531,9 +1537,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           <div className="bg-white border border-[#E5E5EA] rounded-2xl p-5 shadow-xs space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#E5E5EA]">
               <div>
-                <h3 className="text-sm font-bold text-[#1D1D1F] flex items-center space-x-2">
-                  <AlertTriangle className="w-4 h-4 text-[#FF9500]" />
-                  <span>Low Stock Repair Component Auto Triggers</span>
+                <h3 className="text-sm font-bold text-[#1D1D1F] flex items-center space-x-2 truncate">
+                  <AlertTriangle className="w-4 h-4 text-[#FF9500] shrink-0" />
+                  <span className="hidden sm:inline">Low Stock Repair Component Auto Triggers</span>
+                  <span className="sm:hidden">Low Stock Alerts</span>
                 </h3>
                 <p className="text-xs text-[#86868B]">Replacement screens, batteries, and logic board ICs needing reorder</p>
               </div>
@@ -1665,9 +1672,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           <div className="bg-white border border-[#E5E5EA] rounded-2xl p-5 shadow-xs space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#E5E5EA]">
               <div>
-                <h3 className="text-sm font-extrabold text-[#1D1D1F] flex items-center space-x-2">
-                  <Coins className="w-4 h-4 text-[#34C759]" />
-                  <span>Financial Revenue Intelligence</span>
+                <h3 className="text-sm font-extrabold text-[#1D1D1F] flex items-center space-x-2 truncate">
+                  <Coins className="w-4 h-4 text-[#34C759] shrink-0" />
+                  <span className="hidden sm:inline">Financial Revenue Intelligence</span>
+                  <span className="sm:hidden">Financial Insights</span>
                 </h3>
                 <p className="text-xs text-[#86868B]">Average ticket value and margin metrics</p>
               </div>

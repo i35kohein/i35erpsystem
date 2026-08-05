@@ -1112,17 +1112,17 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       setIsInvoiceModalOpen(true);
                     }
                   }}
-                  className="w-full sm:w-1/2 py-3 bg-[#F5F5F7] hover:bg-[#E5E5EA] border border-[#D2D2D7] text-[#1D1D1F] font-bold text-xs rounded-xl transition-all flex items-center justify-center space-x-1.5 cursor-pointer active:scale-95"
+                  className="w-full sm:w-1/2 py-3 bg-[#F5F5F7] hover:bg-[#E5E5EA] border border-[#D2D2D7] text-[#1D1D1F] font-bold text-xs rounded-xl transition-all flex items-center justify-center space-x-1.5 cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071E3]/40 focus-visible:ring-offset-2"
                 >
-                  <FileText className="w-4 h-4 text-[#0071E3]" />
-                  <span>Print Itemized Invoice</span>
+                  <FileText className="w-4 h-4 text-[#0071E3] shrink-0" />
+                  <span className="truncate">Print Itemized Invoice</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setIsConfirmOpen(true)}
                   disabled={isProcessingPayment}
-                  className={`w-full sm:w-1/2 py-3 font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center space-x-1.5 ${
+                  className={`w-full sm:w-1/2 py-3 font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center space-x-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#34C759]/40 focus-visible:ring-offset-2 ${
                     isProcessingPayment
                       ? 'bg-[#86868B] text-white cursor-not-allowed opacity-80'
                       : 'bg-[#34C759] hover:bg-[#30B753] text-white cursor-pointer active:scale-95'
@@ -1168,10 +1168,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               type="button"
               onClick={() => setIsConfirmOpen(true)}
               disabled={isProcessingPayment}
-              className="flex-1 max-w-[220px] py-3 rounded-xl bg-[#34C759] hover:bg-[#30B753] text-white font-extrabold text-xs shadow-xs transition-all flex items-center justify-center space-x-1.5 cursor-pointer active:scale-95"
+              className="flex-1 max-w-[220px] py-3 rounded-xl bg-[#34C759] hover:bg-[#30B753] text-white font-extrabold text-xs shadow-xs transition-all flex items-center justify-center space-x-1.5 cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#34C759]/40 focus-visible:ring-offset-2"
             >
-              <CreditCard className="w-4 h-4" />
-              <span>Pay & Print Receipt</span>
+              <CreditCard className="w-4 h-4 shrink-0" />
+              <span className="truncate">Pay & Print Receipt</span>
             </button>
           </div>
         </div>
@@ -1242,7 +1242,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               <button
                 type="button"
                 onClick={() => setIsConfirmOpen(false)}
-                className="flex-1 py-2.5 bg-[#F5F5F7] hover:bg-[#E5E5EA] border border-[#D2D2D7] text-[#1D1D1F] font-bold text-xs rounded-xl transition-all cursor-pointer"
+                className="flex-1 py-2.5 bg-[#F5F5F7] hover:bg-[#E5E5EA] border border-[#D2D2D7] text-[#1D1D1F] font-bold text-xs rounded-xl transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/30 focus-visible:ring-offset-2"
               >
                 Cancel
               </button>
@@ -1253,9 +1253,9 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   handleProcessPayment();
                 }}
                 disabled={isProcessingPayment}
-                className="flex-1 py-2.5 bg-[#34C759] hover:bg-[#30B753] text-white font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
+                className="flex-1 py-2.5 bg-[#34C759] hover:bg-[#30B753] text-white font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center space-x-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#34C759]/40 focus-visible:ring-offset-2"
               >
-                <ShieldCheck className="w-4 h-4" />
+                <ShieldCheck className="w-4 h-4 shrink-0" />
                 <span>Confirm & Print</span>
               </button>
             </div>

@@ -253,7 +253,8 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
               </span>
               <div>
                 <h2 className="text-base font-extrabold text-[#1D1D1F] tracking-tight">
-                  Completed Repairs & Post-Delivery Customer Follow-Ups
+                  <span className="hidden sm:inline">Completed Repairs & Post-Delivery Customer Follow-Ups</span>
+                  <span className="sm:hidden">Completed Repairs & Follow-Ups</span>
                 </h2>
                 <p className="text-xs text-[#86868B]">
                   Conduct post-service quality calls for repaired & delivered devices to ensure satisfaction and manage warranty queries.

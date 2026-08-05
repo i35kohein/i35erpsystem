@@ -284,10 +284,10 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
 
               <button
                 type="submit"
-                className="w-full py-3 bg-[#0071E3] hover:bg-[#0077ED] text-white font-bold rounded-xl text-sm shadow-xs transition-all active:scale-98 flex items-center justify-center space-x-2 cursor-pointer"
+                className="w-full max-w-md mx-auto py-3 bg-[#0071E3] hover:bg-[#0077ED] text-white font-bold rounded-xl text-sm shadow-xs transition-all active:scale-95 flex items-center justify-center space-x-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071E3]/40 focus-visible:ring-offset-2"
               >
-                <span>Track Repair Voucher</span>
-                <ChevronRight className="w-4 h-4" />
+                <span className="truncate">Track Repair Voucher</span>
+                <ChevronRight className="w-4 h-4 shrink-0" />
               </button>
             </form>
 
@@ -804,19 +804,19 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
 
             {/* Approval Controls */}
             {currentWorkOrder.estimateStatus !== 'Approved' ? (
-              <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-[#E5E5EA]">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-[#E5E5EA]">
                 <button
                   onClick={() => setRejectionModalOpen(true)}
-                  className="w-full sm:w-auto px-5 py-3 bg-white border border-[#E5E5EA] text-[#FF3B30] hover:bg-[#FF3B30]/10 font-extrabold rounded-xl transition-all cursor-pointer"
+                  className="w-full sm:w-auto px-5 py-3 bg-white border border-[#E5E5EA] text-[#FF3B30] hover:bg-[#FF3B30]/10 font-extrabold rounded-xl transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF3B30]/40 focus-visible:ring-offset-2"
                 >
                   Decline / Request Callback
                 </button>
                 <button
                   onClick={() => setApprovalModalOpen(true)}
-                  className="w-full sm:w-auto px-6 py-3 bg-[#34C759] hover:bg-[#30B753] text-white font-extrabold rounded-xl shadow-xs transition-all active:scale-95 flex items-center justify-center space-x-2 cursor-pointer"
+                  className="w-full sm:w-auto px-6 py-3 bg-[#34C759] hover:bg-[#30B753] text-white font-extrabold rounded-xl shadow-xs transition-all active:scale-95 flex items-center justify-center space-x-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#34C759]/40 focus-visible:ring-offset-2"
                 >
-                  <ThumbsUp className="w-4 h-4" />
-                  <span>Approve Estimate & Authorize Repair</span>
+                  <ThumbsUp className="w-4 h-4 shrink-0" />
+                  <span className="truncate">Approve Estimate & Authorize Repair</span>
                 </button>
               </div>
             ) : (

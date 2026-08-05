@@ -319,7 +319,8 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
           </div>
           <div>
             <h1 className="text-lg font-black text-[#1D1D1F] tracking-tight">
-              Shop Finance, Profit & Loss (P&L) Engine
+              <span className="hidden sm:inline">Shop Finance, Profit & Loss (P&L) Engine</span>
+              <span className="sm:hidden">Finance & P&L Engine</span>
             </h1>
             <p className="text-xs text-[#86868B] font-medium">
               Labor & parts income, COGS margins, OpEx overhead, inventory asset valuation & supplier debts

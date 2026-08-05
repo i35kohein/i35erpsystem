@@ -570,24 +570,24 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             {!isEditMode && (
               <button
                 onClick={() => onSelectPrintTag(createdTicket)}
-                className="w-full sm:w-auto px-5 py-3 bg-white border border-[#D2D2D7] hover:bg-slate-50 text-[#1D1D1F] font-bold text-xs rounded-xl flex items-center justify-center space-x-2"
+                className="w-full sm:w-auto px-5 py-3 bg-white border border-[#D2D2D7] hover:bg-slate-50 text-[#1D1D1F] font-bold text-xs rounded-xl flex items-center justify-center space-x-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071E3]/40 focus-visible:ring-offset-2"
               >
-                <Printer className="w-4 h-4 text-[#0071E3]" />
-                <span>Print Sticker Tag Voucher</span>
+                <Printer className="w-4 h-4 text-[#0071E3] shrink-0" />
+                <span className="truncate">Print Sticker Tag Voucher</span>
               </button>
             )}
 
             <button
               onClick={onViewRepairTickets}
-              className="w-full sm:w-auto px-5 py-3 bg-[#0071E3] hover:bg-[#0077ED] text-white font-extrabold text-xs rounded-xl shadow-sm flex items-center justify-center space-x-2"
+              className="w-full sm:w-auto px-5 py-3 bg-[#0071E3] hover:bg-[#0077ED] text-white font-extrabold text-xs rounded-xl shadow-sm flex items-center justify-center space-x-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071E3]/40 focus-visible:ring-offset-2"
             >
-              <List className="w-4 h-4" />
-              <span>{isEditMode ? 'Back to Ticket List' : 'View in Work Orders List'}</span>
+              <List className="w-4 h-4 shrink-0" />
+              <span className="truncate">{isEditMode ? 'Back to Ticket List' : 'View in Work Orders List'}</span>
             </button>
 
             <button
               onClick={isEditMode && onCancelEdit ? onCancelEdit : handleResetForm}
-              className="w-full sm:w-auto px-4 py-3 bg-[#F8F9FA] hover:bg-slate-200 text-[#1D1D1F] font-semibold text-xs rounded-xl border border-[#D2D2D7]"
+              className="w-full sm:w-auto px-4 py-3 bg-[#F8F9FA] hover:bg-slate-200 text-[#1D1D1F] font-semibold text-xs rounded-xl border border-[#D2D2D7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/30 focus-visible:ring-offset-2"
             >
               {isEditMode ? 'Discard Changes' : '+ Create Another Ticket'}
             </button>

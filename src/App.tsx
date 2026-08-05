@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo, lazy, Suspense } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Sparkles, Plus, CircleDot, Search, Filter, Calculator, Folder, Settings, Download, Database, ExternalLink, ClipboardList, Kanban, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, Menu, ChevronDown, PhoneCall, Truck, Boxes, CreditCard, Users, DollarSign, LayoutDashboard, Timer } from 'lucide-react';
+import { Sparkles, Plus, CircleDot, Search, Filter, Calculator, Folder, Settings, Download, Database, ExternalLink, ClipboardList, Kanban, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, ChevronDown, PhoneCall, Truck, Boxes, CreditCard, Users, DollarSign, LayoutDashboard, Timer } from 'lucide-react';
 import { subscribeToCollection, fetchCloudCollection, saveDocument, saveBatchDocuments, deleteDocument, clearCollection } from './lib/supabase';
 import { setActiveUserId, notifyAccountChanged } from './utils/accountSettings';
 
@@ -1200,7 +1200,21 @@ export default function App() {
               aria-label="Toggle Navigation Menu"
               title="Toggle Navigation Menu"
             >
-              <Menu className="w-5 h-5" />
+              {/* 3-line hamburger — clean, bold, evenly spaced for mobile */}
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.75"
+                strokeLinecap="round"
+                aria-hidden="true"
+              >
+                <path d="M3.5 6.5h17" />
+                <path d="M3.5 12h17" />
+                <path d="M3.5 17.5h17" />
+              </svg>
             </button>
             <h1 className="font-extrabold text-[#1D1D1F] tracking-tight text-sm sm:text-base truncate">
               {currentTab.title}
@@ -1213,7 +1227,7 @@ export default function App() {
             <button
               type="button"
               onClick={() => setIsGlobalSearchOpen(true)}
-              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#E5E5EA] bg-white text-[#1D1D1F] hover:border-[#0071E3] hover:text-[#0071E3] transition-all cursor-pointer active:scale-95"
+              className="inline-flex h-11 w-11 lg:h-8 lg:w-8 shrink-0 items-center justify-center rounded-lg border border-[#E5E5EA] bg-white text-[#1D1D1F] hover:border-[#0071E3] hover:text-[#0071E3] transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071E3]/40 focus-visible:ring-offset-2"
               title="Global search (⌘K)"
               aria-label="Global search (⌘K)"
             >

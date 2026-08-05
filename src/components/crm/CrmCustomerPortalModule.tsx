@@ -138,7 +138,8 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
         <div className="module-subheader">
           <h1 className="text-lg font-bold text-[#1D1D1F] flex items-center space-x-2">
             <Users className="w-5 h-5 text-[#0071E3]" />
-            <span>Customer Relationship Management & Self-Service Portal</span>
+            <span className="hidden sm:inline">Customer Relationship Management & Self-Service Portal</span>
+            <span className="sm:hidden">Customer & Staff Portal</span>
           </h1>
           <p className="text-xs text-[#86868B]">Classify accounts (Retail, B2B, Wholesale) and simulate customer tracking portal</p>
         </div>

@@ -215,6 +215,9 @@ export const Navigation: React.FC<NavigationProps> = ({
 
 
 
+  // Mobile drawer should always render in expanded (not mini-collapsed) mode.
+  const effectiveCollapsed = isCollapsed && !isMobileMenuOpen;
+
   const handleTabSelect = (tabId: string) => {
     if (tabId === 'recycle-bin') {
       onOpenRecycleBin?.();
@@ -241,13 +244,13 @@ export const Navigation: React.FC<NavigationProps> = ({
         bg-white border-r border-[#E5E5EA]
         flex flex-col justify-between
         transition-all duration-300 ease-in-out select-none
-        ${isMobileMenuOpen ? 'translate-x-0 w-64' : '-translate-x-full lg:translate-x-0'}
-        ${isCollapsed ? 'lg:w-14' : 'lg:w-64'}
-        ${!isCollapsed ? 'lg:shadow-xl lg:shadow-[#1D1D1F]/10' : ''}
+        ${isMobileMenuOpen ? 'translate-x-0 w-[280px] max-w-[85vw]' : '-translate-x-full lg:translate-x-0'}
+        ${effectiveCollapsed ? 'lg:w-14' : 'lg:w-64'}
+        ${!effectiveCollapsed ? 'lg:shadow-xl lg:shadow-[#1D1D1F]/10' : ''}
       `}>
         {/* Sidebar Header & Toggle */}
         <div className="p-2.5 border-b border-[#E5E5EA] flex flex-col gap-2">
-          {isCollapsed ? (
+          {effectiveCollapsed ? (
             /* Collapsed Header: Centered Logo + Expand Toggle Stacked */
             <div className="flex flex-col items-center justify-center space-y-2 py-1">
               <button
@@ -318,10 +321,10 @@ export const Navigation: React.FC<NavigationProps> = ({
                   onClick={() => setIsMobileMenuOpen(false)}
                   variant="ghost"
                   size="icon"
-                  className="lg:hidden p-1.5 text-[#86868B] hover:text-[#1D1D1F] rounded-lg"
+                  className="lg:hidden p-2 text-[#86868B] hover:text-[#1D1D1F] rounded-xl"
                   aria-label="Close menu"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-6 h-6" />
                 </Button>
               </div>
             </div>
@@ -347,12 +350,12 @@ export const Navigation: React.FC<NavigationProps> = ({
               size="sm"
               title="New Intake Ticket"
               className={`w-full mt-1.5 ${
-                isCollapsed ? 'w-10 h-10 mx-auto justify-center p-0' : 'justify-center px-3.5 py-2.5'
+                effectiveCollapsed ? 'w-10 h-10 mx-auto justify-center p-0' : 'justify-center px-3.5 py-2.5 min-h-10 lg:min-h-0'
               } font-bold ${activeTab === 'create-ticket' ? 'bg-[#0051B3]' : 'hover:bg-[#0051B3]'}`}
             >
               <div className="flex items-center justify-center min-w-0">
-                <Plus className={`w-4 h-4 shrink-0 ${isCollapsed ? '' : 'mr-2'}`} />
-                {!isCollapsed && <span className="truncate text-xs">+ Intake Ticket</span>}
+                <Plus className={`w-4 h-4 shrink-0 ${effectiveCollapsed ? '' : 'mr-2'}`} />
+                {!effectiveCollapsed && <span className="truncate text-xs">+ Intake Ticket</span>}
               </div>
             </Button>
 
@@ -365,7 +368,7 @@ export const Navigation: React.FC<NavigationProps> = ({
               size="sm"
               title="Dashboard"
               className={`w-full mt-1.5 ${
-                isCollapsed ? 'w-10 h-10 mx-auto justify-center p-0 relative' : 'justify-between px-3.5 py-2.5'
+                effectiveCollapsed ? 'w-10 h-10 mx-auto justify-center p-0 relative' : 'justify-between px-3.5 py-2.5 min-h-10 lg:min-h-0'
               } ${
                 activeTab === 'dashboard'
                   ? 'bg-[#EAF2FF] text-[#1559A6] font-bold border-[#B8D3F4]'
@@ -374,7 +377,7 @@ export const Navigation: React.FC<NavigationProps> = ({
             >
               <div className="flex items-center justify-center min-w-0">
                 <LayoutDashboard className={`w-4 h-4 shrink-0 ${activeTab === 'dashboard' ? 'text-[#0071E3]' : 'text-[#86868B]'}`} />
-                {!isCollapsed && <span className="truncate text-xs ml-2.5">Dashboard</span>}
+                {!effectiveCollapsed && <span className="truncate text-xs ml-2.5">Dashboard</span>}
               </div>
             </Button>
           </div>
@@ -382,10 +385,10 @@ export const Navigation: React.FC<NavigationProps> = ({
           {/* Grouped Sub-Menus with detail lines */}
           {navGroups.map((group) => (
             <div key={group.title} className="space-y-1 pb-2 border-b border-[#E5E5EA]/60 last:border-b-0">
-              {!isCollapsed && (
+              {!effectiveCollapsed && (
                 <div className="px-3 py-1 text-[9px] font-extrabold text-[#86868B] tracking-wider uppercase flex items-center justify-between">
                   <span>{group.title}</span>
-                  <span className="w-8 h-[1px] bg-[#E5E5EA]" />
+                  <span className="hidden sm:block w-8 h-[1px] bg-[#E5E5EA]" />
                 </div>
               )}
               <div className="space-y-1">
@@ -402,7 +405,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                       variant="outline"
                       size="sm"
                       className={`w-full ${
-                        isCollapsed ? 'w-10 h-10 mx-auto justify-center p-0 relative' : 'justify-between px-3.5 py-2.5'
+                        effectiveCollapsed ? 'w-10 h-10 mx-auto justify-center p-0 relative' : 'justify-between px-3.5 py-2.5 min-h-10 lg:min-h-0'
                       } ${
                         isActive
                           ? 'bg-[#EAF2FF] text-[#1559A6] font-bold border-[#B8D3F4]'
@@ -411,14 +414,14 @@ export const Navigation: React.FC<NavigationProps> = ({
                       title={item.badge !== undefined && (typeof item.badge === 'string' || item.badge > 0) ? `${item.label} (${item.badge})` : item.label}
                       aria-label={item.badge !== undefined && (typeof item.badge === 'string' || item.badge > 0) ? `${item.label} (${item.badge} pending)` : item.label}
                     >
-                      <div className={`flex items-center min-w-0 ${isCollapsed ? 'justify-center' : 'flex-1'}`}>
+                      <div className={`flex items-center min-w-0 ${effectiveCollapsed ? 'justify-center' : 'flex-1'}`}>
                         <ItemIcon className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#0071E3]' : 'text-[#86868B]'}`} />
-                        {!isCollapsed && <span className="truncate text-xs ml-2.5">{item.label}</span>}
+                        {!effectiveCollapsed && <span className="truncate text-xs ml-2.5">{item.label}</span>}
                       </div>
 
                       {item.badge !== undefined && (typeof item.badge === 'string' || item.badge > 0) && (
-                        <Badge className={`text-[9px] py-0.2 px-1.5 text-white shrink-0 ${item.badgeColor || 'bg-[#0071E3]'} ${isCollapsed ? 'absolute -top-1.5 -right-1.5 px-[5px] py-[2px] text-[length:8px] leading-none min-w-[16px] text-center border border-white shadow-2xs' : ''}`}>
-                          {isCollapsed && typeof item.badge === 'number' && item.badge > 99 ? '99+' : item.badge}
+                        <Badge className={`text-[9px] py-0.2 px-1.5 text-white shrink-0 ${item.badgeColor || 'bg-[#0071E3]'} ${effectiveCollapsed ? 'absolute -top-1.5 -right-1.5 px-[5px] py-[2px] text-[length:8px] leading-none min-w-[16px] text-center border border-white shadow-2xs' : ''}`}>
+                          {effectiveCollapsed && typeof item.badge === 'number' && item.badge > 99 ? '99+' : item.badge}
                         </Badge>
                       )}
                     </Button>
@@ -430,7 +433,7 @@ export const Navigation: React.FC<NavigationProps> = ({
         </nav>
 
         {/* Sidebar Footer Quick Action Utilities */}
-        <div className="p-2.5 border-t border-[#E5E5EA] bg-[#F9F9FB] space-y-2">
+        <div className="p-2.5 border-t border-[#E5E5EA] bg-[#F9F9FB] space-y-2 pb-[calc(0.625rem+env(safe-area-inset-bottom))]">
           {/* Active User Role Switcher */}
           {currentUser && onSwitchUser && (
             <div className="w-full flex justify-center">
@@ -439,7 +442,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                 users={users}
                 onSwitchUser={onSwitchUser}
                 onOpenUserManagement={onOpenUserManagement}
-                compact={isCollapsed}
+                compact={effectiveCollapsed}
               />
             </div>
           )}
@@ -456,12 +459,12 @@ export const Navigation: React.FC<NavigationProps> = ({
               className="w-full justify-center gap-2 py-2 text-[11px] hover:bg-[#FF3B30]/5 hover:text-[#FF3B30]"
             >
               <LogOut className="h-3.5 w-3.5" />
-              {!isCollapsed && <span>Logout</span>}
+              {!effectiveCollapsed && <span>Logout</span>}
             </Button>
           )}
 
           {/* System Online Status Pill */}
-          {!isCollapsed && (
+          {!effectiveCollapsed && (
             <div className="pt-1 px-1 flex items-center justify-between text-[10px] text-[#86868B]">
               <span className="flex items-center space-x-1.5">
                 <span className="w-2 h-2 rounded-full bg-[#2E7D32]" />

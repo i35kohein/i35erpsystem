@@ -1161,9 +1161,9 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
 
             <button
               onClick={handleConfirmCheckout}
-              className="w-full py-3 bg-[#34C759] hover:bg-[#34C759]/90 text-white font-extrabold text-xs rounded-xl shadow-md"
+              className="w-full max-w-md mx-auto py-3 bg-[#34C759] hover:bg-[#34C759]/90 text-white font-extrabold text-xs rounded-xl shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#34C759]/40 focus-visible:ring-offset-2"
             >
-              Confirm Checkout & Move to Taken Out
+              <span className="truncate">Confirm Checkout & Move to Taken Out</span>
             </button>
           </div>
         </div>
@@ -1295,9 +1295,9 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
             <button
               type="button"
               onClick={handleSaveAfterDiagnostic}
-              className="w-full py-3 bg-[#0071E3] hover:bg-[#0077ED] text-white font-extrabold rounded-xl text-xs shadow-md transition-all"
+              className="w-full max-w-md mx-auto py-3 bg-[#0071E3] hover:bg-[#0077ED] text-white font-extrabold rounded-xl text-xs shadow-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071E3]/40 focus-visible:ring-offset-2"
             >
-              Save After-Repair Diagnostic & Update Ticket
+              <span className="truncate">Save After-Repair Diagnostic & Update Ticket</span>
             </button>
           </div>
         </div>

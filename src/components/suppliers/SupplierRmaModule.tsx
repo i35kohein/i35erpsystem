@@ -173,7 +173,8 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
         <div className="module-subheader">
           <h1 className="text-lg font-bold text-[#1D1D1F] flex items-center space-x-2">
             <Truck className="w-5 h-5 text-[#0071E3]" />
-            <span>Supplier Purchase Orders & Defective RMA Returns</span>
+            <span className="hidden sm:inline">Supplier Purchase Orders & Defective RMA Returns</span>
+            <span className="sm:hidden">Purchase Orders & RMA Returns</span>
           </h1>
           <p className="text-xs text-[#86868B]">Track vendor shipments, defective part returns, and vendor credit authorizations</p>
         </div>
@@ -236,7 +237,8 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
             <div>
               <h2 className="text-sm font-bold text-[#1D1D1F] flex items-center space-x-2">
                 <RotateCcw className="w-4 h-4 text-[#AF52DE]" />
-                <span>Defective Return Merchandise Authorizations (RMA)</span>
+                <span className="hidden sm:inline">Defective Return Merchandise Authorizations (RMA)</span>
+                <span className="sm:hidden">Defective RMA Returns</span>
               </h2>
               <p className="text-xs text-[#86868B]">Flag bad screens/batteries directly and monitor vendor credit refunds</p>
             </div>

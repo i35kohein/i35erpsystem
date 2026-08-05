@@ -293,10 +293,10 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
             <button
               type="button"
               onClick={() => setIsCameraScannerOpen(true)}
-              className="px-3.5 py-2.5 bg-[#1D1D1F] hover:bg-black text-white font-extrabold text-xs rounded-xl shadow-2xs transition-all flex items-center space-x-2 cursor-pointer active:scale-95"
+              className="px-3.5 py-2.5 min-h-11 lg:min-h-0 bg-[#1D1D1F] hover:bg-black text-white font-extrabold text-xs rounded-xl shadow-2xs transition-all flex items-center space-x-2 cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/40 focus-visible:ring-offset-2"
               title="Scan Device Barcode or QR Code"
             >
-              <Camera className="w-4 h-4 text-[#0071E3]" />
+              <Camera className="w-4 h-4 text-[#0071E3] shrink-0" />
               <span>Scan Barcode / QR</span>
             </button>
           </div>

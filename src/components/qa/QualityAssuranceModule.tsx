@@ -211,7 +211,8 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
         <div>
           <h1 className="text-lg font-bold text-[#1D1D1F] flex items-center space-x-2">
             <ShieldCheck className="w-5 h-5 text-[#34C759]" />
-            <span>Quality Assurance (QA) & Warranty 21-Point Inspection</span>
+            <span className="hidden sm:inline">Quality Assurance (QA) & Warranty 21-Point Inspection</span>
+            <span className="sm:hidden">QA & Warranty Inspection</span>
           </h1>
           <p className="text-xs text-[#86868B]">Mandatory post-repair 21-hardware test re-inspection for finished devices in QA control before customer pickup</p>
         </div>
