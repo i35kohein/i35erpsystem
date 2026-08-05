@@ -914,18 +914,26 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             { label: 'Operations', ids: ['intake', 'qa', 'inventory', 'notifications'] },
             { label: 'System', ids: ['theme', 'ai', 'recycle'] },
           ];
+          // Work-desk accent tints per group (icon tile backgrounds)
+          const accentByGroup: Record<string, string> = {
+            Business: 'bg-[#EAF4FF] text-[#0071E3]',
+            Staff: 'bg-[#E8F7EF] text-[#16A34A]',
+            Operations: 'bg-[#F3EFFF] text-[#7C3AED]',
+            System: 'bg-[#FFF4E5] text-[#F59E0B]',
+          };
           const q = settingsTabQuery.trim().toLowerCase();
           let visibleCount = 0;
           const rendered = groups.map((group) => {
             const tabs = group.ids.map((id) => defById.get(id)!).filter((t) => !q || t.label.toLowerCase().includes(q));
             if (tabs.length === 0) return null;
             visibleCount += tabs.length;
+            const accent = accentByGroup[group.label] || 'bg-[#F0F6FF] text-[#0071E3]';
             return (
               <div key={group.label}>
-                <p className="px-1 pb-1 text-[9px] font-extrabold uppercase tracking-wider text-[#86868B]">
+                <p className="px-1 pb-1.5 text-[9px] font-extrabold uppercase tracking-wider text-[#86868B]">
                   {group.label}
                 </p>
-                <div className="flex flex-col gap-1 md:grid md:grid-cols-3 xl:grid-cols-6 md:gap-1.5">
+                <div className="flex flex-col gap-1 md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 md:gap-2">
                   {tabs.map((tab) => {
                     const Icon = tab.icon;
                     const isActive = activeSubTab === tab.id;
@@ -941,27 +949,34 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                           setSettingsDrilledIn(true);
                         }}
                         title={tab.label}
-                        className={`relative flex items-center justify-start gap-2 px-3 py-2.5 w-full md:space-x-2 md:py-2 text-[11px] md:text-xs font-extrabold rounded-xl transition-all cursor-pointer border select-none active:scale-95 shrink-0 ${
+                        className={`relative flex flex-row md:flex-col items-center justify-start md:justify-center gap-2.5 md:gap-2 px-3 py-2.5 md:px-2 md:py-4 w-full text-left md:text-center text-[11px] md:text-[11px] font-extrabold rounded-xl md:rounded-2xl transition-all cursor-pointer border select-none active:scale-95 shrink-0 ${
                           isActive
                             ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-xs'
                             : 'bg-white hover:bg-slate-100 text-[#6E6E73] hover:text-[#1D1D1F] border-[#E5E5EA]'
                         }`}
                       >
-                        <Icon className="w-5 h-5 md:w-4 md:h-4 shrink-0" />
-                        <span className="truncate leading-tight">{tab.label}</span>
+                        {/* Work-desk app-icon tile */}
+                        <span
+                          className={`flex items-center justify-center w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl shrink-0 transition-colors ${
+                            isActive ? 'bg-white/20' : accent
+                          }`}
+                        >
+                          <Icon className="w-5 h-5 md:w-6 md:h-6" />
+                        </span>
+                        <span className="truncate leading-tight md:leading-snug">{tab.label}</span>
                         {isDirty && isActive && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0 absolute top-1 right-1 md:static" title="Unsaved changes" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0 absolute top-1.5 right-1.5" title="Unsaved changes" />
                         )}
                         {tab.badge !== undefined && (
                           <span
-                            className={`absolute top-0.5 right-0.5 px-1 rounded-full text-[7px] font-mono font-bold leading-[11px] md:static md:px-1.5 md:py-0.2 md:text-[10px] md:ml-auto ${
+                            className={`absolute top-1.5 right-1.5 px-1.5 rounded-full text-[8px] font-mono font-bold leading-[13px] ${
                               isActive ? 'bg-white/20 text-white' : 'bg-[#E5E5EA] text-[#1D1D1F]'
                             }`}
                           >
                             {tab.badge}
                           </span>
                         )}
-                        <ChevronRight className="w-4 h-4 ml-auto shrink-0 text-[#C7C7CC] md:hidden" />
+                        <ChevronRight className="w-4 h-4 ml-auto md:hidden shrink-0 text-[#C7C7CC]" />
                       </button>
                     );
                   })}

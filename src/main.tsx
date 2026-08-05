@@ -7,11 +7,15 @@ import { LanguageProvider } from './context/LanguageContext.tsx';
 
 // ERP is deliberately online-only. Remove the legacy offline worker and its
 // cache once so previous browser data cannot be shown or uploaded later.
+// NOTE: use window.caches (not bare `caches`) — CacheStorage only exists in
+// secure contexts (HTTPS/localhost), and a bare identifier throws ReferenceError
+// on plain HTTP origins like the VPS IP.
 if (typeof window !== 'undefined') {
   void navigator.serviceWorker?.getRegistrations?.().then((registrations) =>
     Promise.all(registrations.map((registration) => registration.unregister())),
   );
-  void caches?.keys?.().then((keys) => Promise.all(keys.map((key) => caches.delete(key))));
+  const cachesApi = window.caches;
+  void cachesApi?.keys?.().then((keys) => Promise.all(keys.map((key) => cachesApi.delete(key))));
   try {
     indexedDB.deleteDatabase('AppleRepairERP_DB');
   } catch {
