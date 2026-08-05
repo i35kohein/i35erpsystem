@@ -70,6 +70,7 @@ import {
 import { DateFilterSelector, DateFilterState } from './components/common/DateFilterSelector';
 import { RightFilterDrawer } from './components/common/RightFilterDrawer';
 import { ActiveFilterChips } from './components/common/ActiveFilterChips';
+import { DrawerSelect } from './components/common/DrawerSelect';
 import { checkIsBeforeDiagnosticNeeded, checkIsAfterDiagnosticNeeded } from './utils/diagnosticUtils';
 import { checkIsDiagnosticCompleted, checkIsBeforeDiagnosticCompleted, checkIsAfterDiagnosticCompleted } from './utils/diagnosticUtils';
 import { CustomDropdownMenu } from './components/common/CustomDropdownMenu';
@@ -701,52 +702,58 @@ export default function App() {
             <label className={labelCls}>
               {tab === 'pos' ? 'Checkout Status' : tab === 'suppliers' ? 'RMA Status' : tab === 'qa' ? 'QA Status' : 'Status'}
             </label>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as any)} className={selectCls}>
-              {tab === 'pos' ? (
-                <>
-                  <option value="ALL">All Checkout Status</option>
-                  <option value="Pending Payment">Unpaid / Ready</option>
-                  <option value="Paid">Paid</option>
-                </>
-              ) : tab === 'suppliers' ? (
-                <>
-                  <option value="ALL">All RMA Statuses</option>
-                  <option value="Draft">Draft</option>
-                  <option value="Shipped to Vendor">Shipped to Vendor</option>
-                  <option value="Replaced / Refunded">Replaced / Refunded</option>
-                  <option value="Closed">Closed</option>
-                </>
-              ) : tab === 'qa' ? (
-                <>
-                  <option value="ALL">All QA Statuses</option>
-                  <option value="Pending QA">Pending QA</option>
-                </>
-              ) : (
-                <>
-                  <option value="ALL">{tab === 'pipeline' ? 'All Stages' : 'All Statuses'}</option>
-                  <option value="Receive">Receive</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Finished">Finished</option>
-                  <option value="Taken Out">Taken Out</option>
-                  <option value="Cant Repair">Cant Repair</option>
-                  <option value="Customer Not Repair">Customer Not Repair</option>
-                </>
-              )}
-            </select>
+            <DrawerSelect
+              label={tab === 'pos' ? 'Checkout Status' : tab === 'suppliers' ? 'RMA Status' : tab === 'qa' ? 'QA Status' : 'Status'}
+              value={statusFilter}
+              onChange={(v) => setStatusFilter(v as any)}
+              options={
+                tab === 'pos'
+                  ? [
+                      { value: 'ALL', label: 'All Checkout Status' },
+                      { value: 'Pending Payment', label: 'Unpaid / Ready' },
+                      { value: 'Paid', label: 'Paid' },
+                    ]
+                  : tab === 'suppliers'
+                    ? [
+                        { value: 'ALL', label: 'All RMA Statuses' },
+                        { value: 'Draft', label: 'Draft' },
+                        { value: 'Shipped to Vendor', label: 'Shipped to Vendor' },
+                        { value: 'Replaced / Refunded', label: 'Replaced / Refunded' },
+                        { value: 'Closed', label: 'Closed' },
+                      ]
+                    : tab === 'qa'
+                      ? [
+                          { value: 'ALL', label: 'All QA Statuses' },
+                          { value: 'Pending QA', label: 'Pending QA' },
+                        ]
+                      : [
+                          { value: 'ALL', label: tab === 'pipeline' ? 'All Stages' : 'All Statuses' },
+                          { value: 'Receive', label: 'Receive' },
+                          { value: 'In Progress', label: 'In Progress' },
+                          { value: 'Pending', label: 'Pending' },
+                          { value: 'Finished', label: 'Finished' },
+                          { value: 'Taken Out', label: 'Taken Out' },
+                          { value: 'Cant Repair', label: 'Cant Repair' },
+                          { value: 'Customer Not Repair', label: 'Customer Not Repair' },
+                        ]
+              }
+            />
           </div>
         )}
 
         {tab === 'pipeline' && (
           <div>
             <label className={labelCls}>Technician</label>
-            <select value={techFilter} onChange={(e) => setTechFilter(e.target.value as any)} className={selectCls}>
-              <option value="ALL">All Techs</option>
-              <option value="unassigned">Unassigned</option>
-              {technicians.map((t) => (
-                <option key={t.id} value={t.id}>{t.name}</option>
-              ))}
-            </select>
+            <DrawerSelect
+              label="Technician"
+              value={techFilter}
+              onChange={(v) => setTechFilter(v as any)}
+              options={[
+                { value: 'ALL', label: 'All Techs' },
+                { value: 'unassigned', label: 'Unassigned' },
+                ...technicians.map((t) => ({ value: t.id, label: t.name })),
+              ]}
+            />
           </div>
         )}
 
@@ -754,21 +761,27 @@ export default function App() {
           <>
             <div>
               <label className={labelCls}>Category</label>
-              <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value as any)} className={selectCls}>
-                <option value="ALL">All Categories</option>
-                {inventoryCategoryOptions.map((category) => (
-                  <option key={category} value={category}>{category}</option>
-                ))}
-              </select>
+              <DrawerSelect
+                label="Category"
+                value={categoryFilter}
+                onChange={(v) => setCategoryFilter(v as any)}
+                options={[
+                  { value: 'ALL', label: 'All Categories' },
+                  ...inventoryCategoryOptions.map((category) => ({ value: category, label: category })),
+                ]}
+              />
             </div>
             <div>
               <label className={labelCls}>Quality Tier</label>
-              <select value={stockFilter} onChange={(e) => setStockFilter(e.target.value as any)} className={selectCls}>
-                <option value="ALL">All Tiers</option>
-                {inventoryQualityOptions.map((tier) => (
-                  <option key={tier} value={tier}>{tier}</option>
-                ))}
-              </select>
+              <DrawerSelect
+                label="Quality Tier"
+                value={stockFilter}
+                onChange={(v) => setStockFilter(v as any)}
+                options={[
+                  { value: 'ALL', label: 'All Tiers' },
+                  ...inventoryQualityOptions.map((tier) => ({ value: tier, label: tier })),
+                ]}
+              />
             </div>
           </>
         )}
@@ -776,12 +789,17 @@ export default function App() {
         {tab === 'crm' && (
           <div>
             <label className={labelCls}>Account Type</label>
-            <select value={customerTypeFilter} onChange={(e) => setCustomerTypeFilter(e.target.value as any)} className={selectCls}>
-              <option value="ALL">All Account Types</option>
-              <option value="Retail">Retail</option>
-              <option value="B2B Corporate">B2B Corporate</option>
-              <option value="Wholesale Mail-In">Wholesale</option>
-            </select>
+            <DrawerSelect
+              label="Account Type"
+              value={customerTypeFilter}
+              onChange={(v) => setCustomerTypeFilter(v as any)}
+              options={[
+                { value: 'ALL', label: 'All Account Types' },
+                { value: 'Retail', label: 'Retail' },
+                { value: 'B2B Corporate', label: 'B2B Corporate' },
+                { value: 'Wholesale Mail-In', label: 'Wholesale' },
+              ]}
+            />
           </div>
         )}
 
