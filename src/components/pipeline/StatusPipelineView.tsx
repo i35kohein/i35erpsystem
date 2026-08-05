@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { 
+import {
+  ChevronsRight, 
   ChevronRight, 
   ChevronLeft, 
   MessageSquare, 
@@ -128,6 +129,8 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
   const [localSearchQuery, setLocalSearchQuery] = useState('');
   const [localStatusFilter, setLocalStatusFilter] = useState<string>('ALL');
   const [localTechFilter, setLocalTechFilter] = useState<string>('ALL');
+  // Mobile kanban horizontal-scroll affordance (Cant Repair / Customer Not Repair live at the far right)
+  const [kanbanAtEnd, setKanbanAtEnd] = useState(false);
   const [localDateFilter, setLocalDateFilter] = useState<DateFilterState>({ preset: 'all' });
   const [localShowBottlenecksOnly, setLocalShowBottlenecksOnly] = useState<boolean>(false);
 
@@ -479,7 +482,13 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
       </div>
 
       {/* Horizontal Scrollable 6 Kanban Columns */}
-      <div className="flex min-h-[calc(100dvh-14rem)] space-x-3 overflow-x-auto pb-4 pt-1 snap-x touch-pan-x no-scrollbar md:grid md:grid-cols-3 md:gap-3 md:space-x-0 md:overflow-visible md:snap-none lg:flex lg:space-x-3 lg:overflow-x-auto lg:snap-x lg:grid-cols-none">
+      <div
+        className="kanban-scroll flex min-h-[calc(100dvh-14rem)] space-x-3 overflow-x-auto pb-4 pt-1 snap-x touch-pan-x no-scrollbar md:grid md:grid-cols-3 md:gap-3 md:space-x-0 md:overflow-visible md:snap-none lg:flex lg:space-x-3 lg:overflow-x-auto lg:snap-x lg:grid-cols-none"
+        onScroll={(e) => {
+          const el = e.currentTarget;
+          setKanbanAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 12);
+        }}
+      >
         {KANBAN_STAGES.filter((stage) => statusFilter === 'ALL' || stage.id === statusFilter).map((stage) => {
           const stageOrders = filteredWorkOrders.filter((w) => w.status === stage.id);
           const stageStagnantOrders = stageOrders.filter((w) => getIsStagnant(w));
@@ -1114,6 +1123,15 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
               ))}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Mobile scroll hint — shows until the far-right columns are reached */}
+      {!kanbanAtEnd && (
+        <div className="flex items-center justify-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5 text-[10px] font-extrabold text-muted md:hidden animate-fade-in">
+          <ChevronsRight className="w-3.5 h-3.5 text-brand" />
+          <span>Scroll for Cant Repair / Customer Not Repair</span>
+          <ChevronsRight className="w-3.5 h-3.5 text-brand" />
         </div>
       )}
 

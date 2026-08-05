@@ -1069,3 +1069,22 @@ html[data-theme] :is(
 .animate-fadeIn {
   animation: i35-fade-in 0.18s ease-out both;
 }
+
+/* Kanban pipeline horizontal scroll — thin visible scrollbar on phones so the
+   far-right columns (Cant Repair / Customer Not Repair) are obviously reachable. */
+@media (max-width: 767px) {
+  .kanban-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #D2D2D7 transparent;
+  }
+  .kanban-scroll::-webkit-scrollbar {
+    height: 6px;
+  }
+  .kanban-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .kanban-scroll::-webkit-scrollbar-thumb {
+    background: #D2D2D7;
+    border-radius: 999px;
+  }
+}
