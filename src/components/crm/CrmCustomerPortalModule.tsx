@@ -23,7 +23,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import { Customer, WorkOrder, SystemSettings } from '../../types';
+import { Customer, CustomerType, WorkOrder, SystemSettings } from '../../types';
 import { CustomerFacingWebPortal } from '../portal/CustomerFacingWebPortal';
 import { PrintableInvoiceModal } from '../common/PrintableInvoiceModal';
 import { CustomerRepairHistoryModal } from './CustomerRepairHistoryModal';
@@ -79,6 +79,16 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
   customerTypeFilter = 'ALL',
 }) => {
   const [activeTab, setActiveTab] = useState<'CRM' | 'PORTAL_SIMULATOR'>('CRM');
+  const [isAddCustomerModalOpen, setIsAddCustomerModalOpen] = useState(false);
+  const [newCustomerForm, setNewCustomerForm] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    company: '',
+    type: 'Retail' as CustomerType,
+    discountPercentage: 0,
+    notes: '',
+  });
   const [expandedCustomerIds, setExpandedCustomerIds] = useState<string[]>([]);
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
   const [selectedInvoiceWo, setSelectedInvoiceWo] = useState<WorkOrder | null>(null);
@@ -116,6 +126,27 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
       return customers[0] || null;
     });
   }, [customers]);
+
+  const handleCreateCustomerSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCustomerForm.name.trim() || !newCustomerForm.phone.trim()) return;
+    const cust: Customer = {
+      id: `cust-${Date.now()}`,
+      name: newCustomerForm.name.trim(),
+      phone: newCustomerForm.phone.trim(),
+      email: newCustomerForm.email.trim(),
+      company: newCustomerForm.company.trim() || undefined,
+      type: newCustomerForm.type,
+      discountPercentage: Number(newCustomerForm.discountPercentage) || 0,
+      totalOrdersCount: 0,
+      totalSpent: 0,
+      notes: newCustomerForm.notes.trim() || undefined,
+      createdAt: new Date().toISOString(),
+    };
+    onAddCustomer(cust);
+    setNewCustomerForm({ name: '', phone: '', email: '', company: '', type: 'Retail', discountPercentage: 0, notes: '' });
+    setIsAddCustomerModalOpen(false);
+  };
 
   const toggleExpandCustomer = (custId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -178,9 +209,19 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
         <div className="workspace-grid grid grid-cols-1 gap-3 overflow-hidden md:grid-cols-12">
           {/* Customer Directory List */}
           <div className="flex min-h-0 h-full flex-col md:col-span-6 xl:col-span-5 bg-white border border-[#E5E5EA] rounded-2xl p-4 shadow-xs">
-            <div className="flex justify-between items-center border-b border-[#E5E5EA] pb-2">
-              <h2 className="font-bold text-[#1D1D1F] text-xs">Customer Account Roster</h2>
-              <span className="text-[10px] font-semibold text-[#86868B]">{filteredCustomers.length} accounts</span>
+            <div className="flex justify-between items-center border-b border-[#E5E5EA] pb-2 gap-2">
+              <h2 className="font-bold text-[#1D1D1F] text-xs shrink-0">Customer Account Roster</h2>
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-[10px] font-semibold text-[#86868B] shrink-0">{filteredCustomers.length} accounts</span>
+                <button
+                  type="button"
+                  onClick={() => setIsAddCustomerModalOpen(true)}
+                  className="px-2.5 py-1.5 bg-[#0071E3] hover:bg-[#0071E3]/90 text-white font-extrabold text-[10px] rounded-lg transition-all flex items-center space-x-1 cursor-pointer active:scale-95 shrink-0"
+                >
+                  <Plus className="w-3 h-3" />
+                  <span>Add Customer</span>
+                </button>
+              </div>
             </div>
 
             <div className="min-h-0 flex-1 space-y-2 overflow-y-auto py-3 pr-1">
@@ -445,6 +486,131 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
             systemSettings={systemSettings}
             onUpdateWorkOrder={onSaveWorkOrder}
           />
+        </div>
+      )}
+
+      {/* Add Customer Modal */}
+      {isAddCustomerModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <form onSubmit={handleCreateCustomerSubmit} className="bg-white border border-[#E5E5EA] rounded-2xl max-w-md w-full p-5 space-y-4 text-xs shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center border-b border-[#E5E5EA] pb-2">
+              <h4 className="font-extrabold text-[#1D1D1F] text-sm flex items-center space-x-1.5">
+                <Users className="w-4 h-4 text-[#0071E3]" />
+                <span>Register New Customer Account</span>
+              </h4>
+              <button
+                type="button"
+                onClick={() => setIsAddCustomerModalOpen(false)}
+                aria-label="Close add customer"
+                className="text-[#86868B] hover:text-[#1D1D1F] cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block font-bold text-[#1D1D1F] mb-1">Customer Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={newCustomerForm.name}
+                  onChange={(e) => setNewCustomerForm({ ...newCustomerForm, name: e.target.value })}
+                  placeholder="e.g. U Kyaw Zin"
+                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2 text-xs font-bold text-[#1D1D1F] outline-none focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block font-bold text-[#1D1D1F] mb-1">Phone Number *</label>
+                  <input
+                    type="tel"
+                    required
+                    value={newCustomerForm.phone}
+                    onChange={(e) => setNewCustomerForm({ ...newCustomerForm, phone: e.target.value })}
+                    placeholder="09 123 456 789"
+                    className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2 text-xs font-mono font-bold text-[#1D1D1F] outline-none focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-[#1D1D1F] mb-1">Account Type</label>
+                  <select
+                    value={newCustomerForm.type}
+                    onChange={(e) => setNewCustomerForm({ ...newCustomerForm, type: e.target.value as CustomerType })}
+                    className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2 text-xs font-bold text-[#1D1D1F] outline-none cursor-pointer focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
+                  >
+                    <option value="Retail">Retail</option>
+                    <option value="B2B Corporate">B2B Corporate</option>
+                    <option value="Wholesale Mail-In">Wholesale Mail-In</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-[#1D1D1F] mb-1">Email Address</label>
+                <input
+                  type="email"
+                  value={newCustomerForm.email}
+                  onChange={(e) => setNewCustomerForm({ ...newCustomerForm, email: e.target.value })}
+                  placeholder="customer@example.com"
+                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2 text-xs text-[#1D1D1F] outline-none focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block font-bold text-[#1D1D1F] mb-1">Company (B2B)</label>
+                  <input
+                    type="text"
+                    value={newCustomerForm.company}
+                    onChange={(e) => setNewCustomerForm({ ...newCustomerForm, company: e.target.value })}
+                    placeholder="e.g. i35 Apple Service"
+                    className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2 text-xs text-[#1D1D1F] outline-none focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-[#1D1D1F] mb-1">Discount %</label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={newCustomerForm.discountPercentage}
+                    onChange={(e) => setNewCustomerForm({ ...newCustomerForm, discountPercentage: Number(e.target.value) })}
+                    className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2 text-xs font-mono font-bold text-[#1D1D1F] outline-none focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-[#1D1D1F] mb-1">Notes</label>
+                <textarea
+                  rows={2}
+                  value={newCustomerForm.notes}
+                  onChange={(e) => setNewCustomerForm({ ...newCustomerForm, notes: e.target.value })}
+                  placeholder="VIP customer, credit terms, preferred tech…"
+                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2 text-xs text-[#1D1D1F] outline-none resize-none focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-2 pt-2 border-t border-[#E5E5EA]">
+              <button
+                type="button"
+                onClick={() => setIsAddCustomerModalOpen(false)}
+                className="px-3 py-2 bg-white border border-[#E5E5EA] text-[#1D1D1F] font-bold rounded-xl cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-[#0071E3] hover:bg-[#0051B3] text-white font-extrabold rounded-xl shadow-xs cursor-pointer flex items-center space-x-1.5 active:scale-95"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Save Customer</span>
+              </button>
+            </div>
+          </form>
         </div>
       )}
 
