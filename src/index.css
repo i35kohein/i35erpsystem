@@ -438,10 +438,6 @@ button {
     flex: 0 0 auto;
     overflow: visible;
   }
-
-  .basic-ui header > div:last-child > *:not(:first-child) {
-    display: none !important;
-  }
 }
 
 /* iPad/tablet topbar: keep every action reachable without horizontal overflow. */
@@ -1087,4 +1083,16 @@ html[data-theme] :is(
     background: #D2D2D7;
     border-radius: 999px;
   }
+}
+
+/* Topbar action buttons must never collapse on narrow screens — the title
+   truncates instead, and the action row scrolls horizontally when needed. */
+.app-topbar-actions {
+  flex-shrink: 0;
+}
+.app-topbar-actions > * {
+  flex-shrink: 0;
+}
+.app-topbar-actions > * > * {
+  flex-shrink: 0;
 }

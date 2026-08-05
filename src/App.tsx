@@ -1203,9 +1203,9 @@ export default function App() {
       {/* Main Right Content Column */}
       <div id="main-content-scroll" className="relative flex h-full h-dvh min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-gutter:stable] lg:pl-14">
         {/* Top Navigation Bar Header */}
-        <header className="app-topbar flex flex-row items-center justify-between px-3 sm:px-5 h-[52px] min-h-[52px] bg-white border-b border-line sticky top-0 z-40 gap-2 shrink-0">
+        <header className="app-topbar flex flex-col sm:flex-row items-stretch sm:items-center justify-between px-3 sm:px-5 min-h-[52px] bg-white border-b border-line sticky top-0 z-40 gap-1.5 sm:gap-2 py-1.5 sm:py-0 shrink-0">
           {/* Active Tab Title & Mobile Toggle */}
-          <div className="flex items-center space-x-2 sm:space-x-3 shrink-0 min-w-0">
+          <div className="flex items-center space-x-2 sm:space-x-3 shrink-0 min-w-0 w-full sm:w-auto">
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -1235,7 +1235,7 @@ export default function App() {
           </div>
 
           {/* Dynamic Header Actions & Quick Filters per Tab */}
-          <div className="app-topbar-actions flex min-w-0 items-center flex-nowrap justify-end gap-1.5 sm:gap-2 text-xs py-1 shrink-0 relative z-30 overflow-x-auto no-scrollbar max-w-full">
+          <div className="app-topbar-actions flex w-full sm:w-auto min-w-0 items-center flex-nowrap justify-start sm:justify-end gap-1.5 sm:gap-2 text-xs py-0.5 sm:py-1 shrink-0 relative z-30 overflow-x-auto no-scrollbar max-w-full">
             {/* Global Search (Cmd/Ctrl+K) */}
             <button
               type="button"
