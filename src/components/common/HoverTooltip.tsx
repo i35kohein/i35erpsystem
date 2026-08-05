@@ -16,6 +16,14 @@ export const HoverTooltip: React.FC = () => {
   const showTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
+    // Tooltips are a hover/fine-pointer affordance only. On touch, tapping an
+    // icon button focuses it (esp. Android Chrome) which previously popped a
+    // tooltip at the tap point and covered the control; and hover never fires
+    // anyway. Gate the whole system off for coarse pointers. (Audit S2.)
+    if (typeof window !== 'undefined' && !window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      return;
+    }
+
     const clearTimer = () => {
       if (showTimerRef.current !== null) {
         window.clearTimeout(showTimerRef.current);

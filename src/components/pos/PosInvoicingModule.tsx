@@ -601,8 +601,13 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               {/* Itemized Line Items Breakdown */}
               <div className="space-y-2">
                 <h3 className="font-bold text-brand text-xs">Itemized Labor & Parts</h3>
-                <div className="border border-line rounded-xl overflow-hidden bg-surface/80">
-                  <table className="w-full text-left">
+                {/* overflow-x-auto instead of overflow-hidden: the Amount cell
+                    (strike-through + discounted price + remove button) and long
+                    part names used to get clipped with no way to reach them on
+                    ≤390px phones (audit P1-B). min-w lets it scroll on mobile
+                    instead of crushing; desktop is wide enough to fit. */}
+                <div className="border border-line rounded-xl overflow-x-auto bg-surface/80">
+                  <table className="w-full text-left min-w-[520px]">
                     <thead className="bg-surface text-muted text-[10px] uppercase font-mono border-b border-line">
                       <tr>
                         <th className="p-2.5">Item</th>
@@ -657,7 +662,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                 <button
                                   type="button"
                                   onClick={() => handleRemoveInventoryPartFromWorkOrder(li.id)}
-                                  className="inline-flex h-6 w-6 items-center justify-center rounded-full text-rose-500 transition-colors hover:bg-rose-50 hover:text-rose-600"
+                                  className="inline-flex h-9 w-9 items-center justify-center rounded-full text-rose-500 transition-colors hover:bg-rose-50 hover:text-rose-600 active:scale-90"
                                   title="Remove inventory part"
                                   aria-label={`Remove ${li.description}`}
                                 >

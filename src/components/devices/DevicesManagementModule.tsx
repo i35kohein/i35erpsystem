@@ -407,9 +407,9 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
               <tr className="bg-[#F9F9FB] border-b border-line text-[10px] font-extrabold text-muted uppercase">
                 <th className="p-3.5">Device & Model</th>
                 <th className="p-3.5">Serial / IMEI</th>
-                <th className="p-3.5">Color & Lock</th>
+                <th className="p-3.5 hidden md:table-cell">Color & Lock</th>
                 <th className="p-3.5">Owner / Customer</th>
-                <th className="p-3.5 text-center">Service History</th>
+                <th className="p-3.5 text-center hidden lg:table-cell">Service History</th>
                 <th className="p-3.5 text-right">Actions</th>
               </tr>
             </thead>
@@ -455,7 +455,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
                       </td>
 
                       {/* Color & Lock Status */}
-                      <td className="p-3.5">
+                      <td className="p-3.5 hidden md:table-cell">
                         <div className="space-y-1">
                           <p className="font-semibold text-ink">{device.deviceColor}</p>
                           <div className="flex items-center space-x-1">
@@ -483,7 +483,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
                       </td>
 
                       {/* Service History Stats */}
-                      <td className="p-3.5 text-center">
+                      <td className="p-3.5 text-center hidden lg:table-cell">
                         <div className="inline-flex flex-col items-center">
                           <span className="px-2 py-0.5 bg-blue-50 text-brand font-extrabold rounded-full border border-blue-200 text-[10px]">
                             {device.workOrders.length} Repair Ticket{device.workOrders.length > 1 ? 's' : ''}
@@ -510,7 +510,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
                           {latestWo && (
                             <button
                               onClick={() => onPrintTag(latestWo)}
-                              className="p-1.5 text-muted hover:text-ink hover:bg-surface rounded-lg transition-colors cursor-pointer"
+                              className="p-2.5 text-muted hover:text-ink hover:bg-surface rounded-lg transition-colors cursor-pointer active:scale-90"
                               title="Print Device Tag"
                             >
                               <Printer className="w-4 h-4" />

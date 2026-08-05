@@ -1921,7 +1921,58 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             <span className="font-mono text-[11px] font-black text-brand">+{metrics.totalPotentialProfit.toLocaleString()} MMK</span>
           </div>
           <div className="workspace-panel__scroll">
-            <table className="w-full text-left">
+            {/* PHONE CARD GRID (<sm) — profit view had no card fallback, so the
+                nowrap MMK prices crushed part names on phones (audit P1-B). */}
+            <div className="grid grid-cols-1 gap-3 p-3 content-start sm:hidden">
+              {paginatedParts.map((part) => {
+                const profit = part.sellingPrice - part.costPrice;
+                const margin = part.sellingPrice ? Math.round((profit / part.sellingPrice) * 100) : 0;
+                const heat =
+                  margin >= 40 ? 'bg-emerald-100 text-emerald-800' :
+                  margin >= 20 ? 'bg-lime-100 text-lime-800' :
+                  margin >= 0 ? 'bg-amber-100 text-amber-800' :
+                  'bg-rose-100 text-rose-700';
+                return (
+                  <div key={part.id} className="space-y-2.5 rounded-2xl border border-line bg-white p-4 text-xs shadow-xs">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-[13px] font-extrabold leading-snug text-ink break-words">{part.name}</p>
+                        <p className="mt-0.5 font-mono text-[10px] font-medium text-muted">SKU {part.sku}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedPartForDetails(part)}
+                        aria-label={`View ${part.name} details`}
+                        title="View part details"
+                        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors hover:border-brand hover:bg-blue-50 hover:text-brand"
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 rounded-xl border border-[#D8E5ED] bg-[#F8FBFD] p-3">
+                      <div>
+                        <p className="text-[9px] font-extrabold uppercase tracking-wider text-muted">Cost</p>
+                        <p className="mt-0.5 font-mono text-[12px] font-bold text-faint break-words">{part.costPrice.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] font-extrabold uppercase tracking-wider text-muted">Selling</p>
+                        <p className="mt-0.5 font-mono text-[12px] font-bold text-[#16A34A] break-words">{part.sellingPrice.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] font-extrabold uppercase tracking-wider text-muted">Profit</p>
+                        <p className={`mt-0.5 font-mono text-[12px] font-black break-words ${profit >= 0 ? 'text-brand' : 'text-rose-600'}`}>{profit >= 0 ? '+' : ''}{profit.toLocaleString()}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-muted">Margin / unit</span>
+                      <span className={`rounded-md px-2 py-1 font-mono text-[11px] font-black ${heat}`}>{margin}%</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {/* TABLE (sm+) */}
+            <table className="w-full text-left hidden sm:table">
               <thead className="sticky top-0 z-20 border-b border-line bg-surface font-mono text-[10px] uppercase text-muted">
                 <tr>
                   <th className="p-2.5">Part</th>
@@ -2029,6 +2080,11 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                                 title={`${matchingParts.length} SKU${matchingParts.length === 1 ? '' : 's'} · ${quantity} units · Cost ${costValue.toLocaleString()} MMK · Retail ${retailValue.toLocaleString()} MMK${sharedLabel}`}
                               >
                                 {quantity}
+                                {/* Touch fallback for the title= tooltip (invisible on
+                                    phones): SKU count + stock value under the number. */}
+                                <span className="block text-[8px] font-bold leading-none opacity-80 mt-0.5 sm:hidden">
+                                  {matchingParts.length} SKU · {costValue.toLocaleString()}
+                                </span>
                               </button>
                             ) : <span className="text-[#C7C7CC]">—</span>}
                           </td>

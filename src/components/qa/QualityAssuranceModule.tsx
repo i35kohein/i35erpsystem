@@ -380,14 +380,14 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     <button
                       type="button"
                       onClick={handleMarkAllPass}
-                      className="rounded-full bg-success px-3 py-1 text-[10px] font-bold text-white shadow-xs transition-colors hover:bg-[#28A745]"
+                      className="rounded-full bg-success px-3 py-2 min-h-10 text-[11px] font-bold text-white shadow-xs transition-colors hover:bg-[#28A745]"
                     >
                       Mark All Pass
                     </button>
                     <button
                       type="button"
                       onClick={() => setQaDiagnostics((prev) => prev.map((diagnostic) => ({ ...diagnostic, status: 'N/A' })))}
-                      className="rounded-full border border-line-strong bg-surface px-3 py-1 text-[10px] font-bold text-ink shadow-xs transition-colors hover:bg-line"
+                      className="rounded-full border border-line-strong bg-surface px-3 py-2 min-h-10 text-[11px] font-bold text-ink shadow-xs transition-colors hover:bg-line"
                     >
                       Mark All N/A
                     </button>
@@ -416,12 +416,13 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           </span>
                         </div>
 
-                        {/* Status Toggle Buttons */}
-                        <div className="flex space-x-1 text-[10px]">
+                        {/* Status Toggle Buttons — min-h-10 so the highest-frequency
+                            tap action in QA clears the 40px touch floor (audit 3.1) */}
+                        <div className="flex space-x-1 text-[11px]">
                           <button
                             type="button"
                             onClick={() => handleDiagnosticStatusChange(item.id, 'Pass')}
-                            className={`flex-1 py-1 rounded-lg font-black transition-all ${
+                            className={`flex-1 min-h-10 py-2 rounded-lg font-black transition-all ${
                               item.status === 'Pass' ? 'bg-[#16A34A] text-white shadow-xs' : 'bg-surface text-ink hover:bg-slate-200'
                             }`}
                           >
@@ -430,7 +431,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           <button
                             type="button"
                             onClick={() => handleDiagnosticStatusChange(item.id, 'Fail')}
-                            className={`flex-1 py-1 rounded-lg font-black transition-all ${
+                            className={`flex-1 min-h-10 py-2 rounded-lg font-black transition-all ${
                               item.status === 'Fail' ? 'bg-[#DC2626] text-white shadow-xs' : 'bg-surface text-ink hover:bg-slate-200'
                             }`}
                           >
@@ -439,7 +440,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           <button
                             type="button"
                             onClick={() => handleDiagnosticStatusChange(item.id, 'N/A')}
-                            className={`flex-1 py-1 rounded-lg font-black transition-all ${
+                            className={`flex-1 min-h-10 py-2 rounded-lg font-black transition-all ${
                               item.status === 'N/A' ? 'bg-[#475569] text-white shadow-xs' : 'bg-surface text-ink hover:bg-slate-200'
                             }`}
                           >

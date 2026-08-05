@@ -1137,20 +1137,20 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                   }
                   setBeforeDiagnostics(prev => prev.map(d => ({ ...d, status: 'Pass' })));
                 }}
-                className="text-[10px] text-white font-bold bg-success hover:bg-[#28A745] px-3 py-1 rounded-full shadow-xs transition-colors"
+                className="text-[11px] text-white font-bold bg-success hover:bg-[#28A745] px-3 py-2 min-h-10 rounded-full shadow-xs transition-colors"
               >
                 Mark All Pass
               </button>
               <button 
                 onClick={() => setBeforeDiagnostics(prev => prev.map(d => ({ ...d, status: 'N/A' })))}
-                className="text-[10px] text-ink font-bold bg-surface hover:bg-line px-3 py-1 rounded-full shadow-xs transition-colors border border-line-strong"
+                className="text-[11px] text-ink font-bold bg-surface hover:bg-line px-3 py-2 min-h-10 rounded-full shadow-xs transition-colors border border-line-strong"
               >
                 Mark All N/A
               </button>
               <button 
                 onClick={() => setBeforeDiagnostics(prev => prev.map(d => ({ ...d, status: 'N/A' as const, note: '' })))}
                 title="Reset all statuses and comments"
-                className="text-[10px] text-muted font-bold bg-white hover:bg-line px-3 py-1 rounded-full transition-colors border border-line-strong"
+                className="text-[11px] text-muted font-bold bg-white hover:bg-line px-3 py-2 min-h-10 rounded-full transition-colors border border-line-strong"
               >
                 Reset
               </button>
@@ -1180,14 +1180,14 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
 
                   </div>
 
-                  <div className="flex space-x-1 text-[10px]">
+                  <div className="flex space-x-1 text-[11px]">
                     <button
                       onClick={() => {
                         const updated = [...beforeDiagnostics];
                         updated[idx].status = 'Pass';
                         setBeforeDiagnostics(updated);
                       }}
-                        className={`flex-1 py-1 rounded-lg font-black transition-all ${
+                        className={`flex-1 min-h-10 py-2 rounded-lg font-black transition-all ${
                         item.status === 'Pass' ? 'bg-[#16A34A] text-white shadow-xs' : 'bg-surface text-ink hover:bg-slate-200'
                       }`}
                     >
@@ -1199,7 +1199,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                         updated[idx].status = 'Fail';
                         setBeforeDiagnostics(updated);
                       }}
-                        className={`flex-1 py-1 rounded-lg font-black transition-all ${
+                        className={`flex-1 min-h-10 py-2 rounded-lg font-black transition-all ${
                         item.status === 'Fail' ? 'bg-[#DC2626] text-white shadow-xs' : 'bg-surface text-ink hover:bg-slate-200'
                       }`}
                     >
@@ -1211,7 +1211,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                         updated[idx].status = 'N/A';
                         setBeforeDiagnostics(updated);
                       }}
-                        className={`flex-1 py-1 rounded-lg font-black transition-all ${
+                        className={`flex-1 min-h-10 py-2 rounded-lg font-black transition-all ${
                         item.status === 'N/A' ? 'bg-[#475569] text-white shadow-xs' : 'bg-surface text-ink hover:bg-slate-200'
                       }`}
                     >

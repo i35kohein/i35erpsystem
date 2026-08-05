@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronDown, Check } from 'lucide-react';
 
 export interface DropdownOption {
@@ -24,6 +25,18 @@ interface CustomDropdownMenuProps {
   ariaLabel?: string;
 }
 
+const MENU_WIDTH = 224; // w-56
+const MENU_MIN_HEIGHT = 232; // ~9 options before the internal list scrolls (max-h-64)
+const VIEWPORT_MARGIN = 8;
+
+/**
+ * Custom dropdown. The menu is portal-rendered and positioned with `fixed`
+ * coordinates computed from the trigger's bounding rect, so it can never be
+ * clipped by an `overflow:hidden` ancestor (workspace panels, cards) and can
+ * never escape the viewport edge on phones. A transparent backdrop captures
+ * outside taps; the menu closes on scroll/resize so stale coordinates can't
+ * linger. (Audit S1: in-place absolute menus clipped & overflowed on mobile.)
+ */
 export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
   options,
   value,
@@ -41,32 +54,126 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [menuPos, setMenuPos] = useState<{ top: number; left: number; placeTop: boolean } | null>(null);
 
-  // An empty value is intentionally unselected. Do not silently show the first option.
   const selectedOption = options.find((o) => o.value === value);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setIsOpen(false);
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleEscape);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEscape);
-    };
+  const close = useCallback(() => {
+    setIsOpen(false);
+    setMenuPos(null);
   }, []);
+
+  const open = useCallback(() => {
+    const rect = buttonRef.current?.getBoundingClientRect();
+    if (!rect) {
+      setIsOpen(true);
+      return;
+    }
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    // Respect an explicit `top` placement, but auto-flip when the preferred
+    // side has no room (portaled menus can't rely on CSS flipping).
+    const preferTop = menuPlacement === 'top';
+    const placeTop = preferTop
+      ? spaceAbove > MENU_MIN_HEIGHT || spaceAbove >= spaceBelow
+      : spaceBelow < MENU_MIN_HEIGHT && spaceAbove > spaceBelow;
+
+    // Horizontal anchor mirrors the old left/right/group-left alignment.
+    let left =
+      menuAlign === 'left' ? rect.left
+      : menuAlign === 'group-left' ? rect.left - 32
+      : rect.right - MENU_WIDTH; // right (default)
+    // Clamp inside the viewport so phones never get an off-screen menu.
+    left = Math.max(VIEWPORT_MARGIN, Math.min(left, window.innerWidth - MENU_WIDTH - VIEWPORT_MARGIN));
+
+    setMenuPos({ top: placeTop ? rect.top - 8 : rect.bottom + 8, left, placeTop });
+    setIsOpen(true);
+  }, [menuPlacement, menuAlign]);
+
+  // Close on scroll/resize while open so fixed coordinates never go stale.
+  useEffect(() => {
+    if (!isOpen) return;
+    const onViewportChange = () => close();
+    window.addEventListener('scroll', onViewportChange, true);
+    window.addEventListener('resize', onViewportChange);
+    window.addEventListener('orientationchange', onViewportChange);
+    return () => {
+      window.removeEventListener('scroll', onViewportChange, true);
+      window.removeEventListener('resize', onViewportChange);
+      window.removeEventListener('orientationchange', onViewportChange);
+    };
+  }, [isOpen, close]);
+
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') close();
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [close]);
+
+  const menu = menuPos && (
+    <>
+      {/* Transparent backdrop — captures outside taps/mouse-downs; higher than
+          the menu itself is NOT needed, it sits below the menu (z order by
+          DOM order within the same stacking context). */}
+      <div
+        className="fixed inset-0 z-[95]"
+        onMouseDown={close}
+        onTouchStart={close}
+        aria-hidden="true"
+      />
+      <div
+        role="listbox"
+        className={`fixed z-[96] w-56 max-w-[calc(100vw-1rem)] rounded-xl border border-[var(--border)] bg-[var(--card-bg)] p-1.5 shadow-lg ${menuPos.placeTop ? '-translate-y-full' : ''} ${menuClassName}`}
+        style={{ top: menuPos.top, left: menuPos.left }}
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        <div className="max-h-64 overflow-y-auto space-y-0.5 custom-scrollbar">
+          {options.map((option) => {
+            const isSelected = option.value === value;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                role="option"
+                aria-selected={isSelected}
+                onClick={() => {
+                  onChange(option.value);
+                  close();
+                }}
+                className={`min-h-9 w-full flex items-center justify-between gap-3 px-3 py-2 text-xs rounded-lg transition-colors cursor-pointer text-left ${
+                  isSelected
+                    ? 'bg-[var(--primary)] text-white font-extrabold'
+                    : 'text-[var(--text-main)] hover:bg-[var(--blue-tint)] font-semibold'
+                }`}
+              >
+                <span className="truncate">{option.label}</span>
+                <div className="flex items-center space-x-1.5">
+                  {option.badge !== undefined && (
+                    <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                      isSelected ? 'bg-white/20 text-white' : 'bg-[var(--border-subtle)] text-[var(--text-secondary)]'
+                    }`}>
+                      {option.badge}
+                    </span>
+                  )}
+                  {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </>
+  );
 
   return (
     <div ref={containerRef} className={`relative inline-block text-left ${className}`}>
       <button
+        ref={buttonRef}
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => (isOpen ? close() : open())}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-label={ariaLabel || selectedOption?.label || placeholder}
@@ -91,53 +198,8 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
         </span>
       </button>
 
-      {/* Floating Menu Modal / Popover */}
-      {isOpen && (
-        <div
-          className={`absolute z-50 w-56 max-w-[calc(100vw-2rem)] rounded-xl border border-[var(--border)] bg-[var(--card-bg)] p-1.5 shadow-lg ${
-            menuAlign === 'group-left'
-              ? '-left-8 origin-top-left'
-              : menuAlign === 'left'
-                ? 'left-0 origin-top-left'
-                : 'right-0 origin-top-right'
-          } ${menuPlacement === 'top' ? 'bottom-full mb-1.5' : 'mt-1.5'} ${menuClassName}`}
-        >
-          <div role="listbox" className="max-h-64 overflow-y-auto space-y-0.5 custom-scrollbar">
-            {options.map((option) => {
-              const isSelected = option.value === value;
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  role="option"
-                  aria-selected={isSelected}
-                  onClick={() => {
-                    onChange(option.value);
-                    setIsOpen(false);
-                  }}
-                  className={`min-h-9 w-full flex items-center justify-between gap-3 px-3 py-2 text-xs rounded-lg transition-colors cursor-pointer text-left ${
-                    isSelected
-                      ? 'bg-[var(--primary)] text-white font-extrabold'
-                      : 'text-[var(--text-main)] hover:bg-[var(--blue-tint)] font-semibold'
-                  }`}
-                >
-                  <span className="truncate">{option.label}</span>
-                  <div className="flex items-center space-x-1.5">
-                    {option.badge !== undefined && (
-                      <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
-                        isSelected ? 'bg-white/20 text-white' : 'bg-[var(--border-subtle)] text-[var(--text-secondary)]'
-                      }`}>
-                        {option.badge}
-                      </span>
-                    )}
-                    {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      {/* Portal to body: immune to ancestor clipping/overflow and viewport escape */}
+      {isOpen && menu && createPortal(menu, document.body)}
     </div>
   );
 };
