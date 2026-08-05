@@ -1,0 +1,44 @@
+Translation dictionary build report
+=====================================
+
+Dictionary entries: 470 total
+  - domTranslate pairs: 401
+  - i18n keys: 118
+  - conflicts (same EN, different MM): 20
+  - entries not found in src/ (possible stale): 0
+
+
+Component scan: 82 files
+  - unique UI string candidates: 1848
+  - fully covered: 349
+  - PARTIAL (mixed EN+MM, review): 760
+  - UNCOVERED (missing from dict): 739
+
+Missing t('...') keys (render raw key in UI): 0
+
+Conflicts (same English, different Myanmar):
+  - "Save"  ->  သိမ်းမည် ⚠CONFLICT(သိမ်းဆည်းမည်)
+  - "Edit"  ->  ပြင်မည် ⚠CONFLICT(ပြင်ဆင်မည်)
+  - "Filter"  ->  စစ်ထုတ်မည် ⚠CONFLICT(စစ်ထုတ်ရန်)
+  - "Reset"  ->  ပြန်သတ်မှတ်မည် ⚠CONFLICT(မူလအတိုင်းပြန်ထားမည်)
+  - "Add"  ->  ထည့်မည် ⚠CONFLICT(အသစ်ထည့်မည်)
+  - "Copy"  ->  မိတ္တူကူးမည် ⚠CONFLICT(ကူးယူမည်)
+  - "Change"  ->  ပြောင်းမည် ⚠CONFLICT(ငွေပြန်)
+  - "Refresh"  ->  ပြန်လည်ရယူမည် ⚠CONFLICT(ပြန်လည်စတင်ရန်)
+  - "Warranty Watch Clear"  ->  အာမခံ စောင့်ကြည့်မှု ရှင်းလင်း ⚠CONFLICT(အာမခံ စောင့်ကြည့်မှု)
+  - "Assigned Tech"  ->  တာဝန်ပေးထားသည့် နည်းပညာရှင် ⚠CONFLICT(တာဝန်ယူထားသော နည်းပညာရှင်)
+  - "Calc"  ->  တွက်မည် ⚠CONFLICT(တွက်ချက်ရန်)
+  - "Unit Price"  ->  တစ်ခုဈေး ⚠CONFLICT(တစ်ခုချင်း ဈေးနှုန်း)
+  - "Parts Inventory & Stock Matrix"  ->  အပိုပစ္စည်းနှင့် စတော့ Matrix ⚠CONFLICT(အပိုပစ္စည်းနှင့် စတော့စာရင်း Matrix)
+  - "Add Part"  ->  အပိုပစ္စည်း ထည့်မည် ⚠CONFLICT(အပိုပစ္စည်းထည့်မည်)
+  - "In Stock"  ->  လက်ကျန် ⚠CONFLICT(စတော့ ရှိပမာဏ)
+  - "Reorder Point"  ->  ပြန်မှာရန် သတ်မှတ်ချက် ⚠CONFLICT(ပြန်လည်မှာယူမည့် ပမာဏ)
+  - "Suppliers & Vendor RMAs"  ->  ပစ္စည်းပေးသွင်းသူနှင့် RMA များ ⚠CONFLICT(ပစ္စည်းပေးသွင်းသူနှင့် အာမခံ ပြန်အပ်လွှဲ)
+  - "Total Spent"  ->  သုံးစွဲမှု စုစုပေါင်း ⚠CONFLICT(စုစုပေါင်း သုံးစွဲမှု)
+  - "All Account Types"  ->  အကောင့် အမျိုးအစား အားလုံး ⚠CONFLICT(အကောင့်အမျိုးအစားအားလုံး)
+  - "AI Assistant"  ->  AI အကူ ⚠CONFLICT(AI ကူညီမည့်သူ)
+
+Outputs:
+  - translations/translation-dictionary.csv
+  - translations/translation-dictionary.json
+  - translations/manual-translation-worklist.csv

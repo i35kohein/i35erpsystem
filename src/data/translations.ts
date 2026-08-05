@@ -34,6 +34,13 @@ export const translations: TranslationDictionary = {
   navPortal: { en: 'Customer Public Portal', mm: 'ဝယ်ယူသူ အများပြည်သူ ပေါ်တယ်' },
 
   // Statuses
+  statusReceive: { en: 'Receive', mm: 'လက်ခံရရှိ' },
+  statusInProgress: { en: 'In Progress', mm: 'လုပ်ဆောင်ဆဲ' },
+  statusPending: { en: 'Pending', mm: 'စောင့်ဆိုင်း' },
+  statusFinished: { en: 'Finished', mm: 'ပြီးစီး' },
+  statusTakenOut: { en: 'Taken Out', mm: 'ထုတ်ယူသွား' },
+  statusCantRepair: { en: "Can't Repair", mm: 'ပြုပြင်၍မရ' },
+  statusCustomerNotRepair: { en: 'Customer Not Repair', mm: 'ဝယ်ယူသူ မပြုပြင်' },
 
   // Common Buttons & Actions
   newTicket: { en: 'New Ticket', mm: 'လက်မှတ်အသစ်' },
