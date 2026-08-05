@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { WorkOrder, Customer, SystemSettings, PartItem, WorkOrderLineItem } from '../../types';
 import { Button } from '../ui';
+import { StatusChip } from '../common/StatusChip';
 import { getActivePaymentMethods } from '../../data/seedData';
 import { PrintableInvoiceModal } from '../common/PrintableInvoiceModal';
 import { CustomerNotificationModal } from '../common/CustomerNotificationModal';
@@ -462,11 +463,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         {wo.orderNumber}
                       </span>
                       <div className="flex items-center space-x-1">
-                        <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-md border uppercase ${
-                          wo.status === 'Taken Out' ? 'bg-slate-100 text-slate-600 border-slate-300' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                        }`}>
-                          {wo.status}
-                        </span>
+                        <StatusChip status={wo.status} />
                         <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md border ${
                           wo.isPaid ? 'bg-[#EAF8ED] text-[#28A745] border-[#34C759]/20' : 'bg-[#FFF4E5] text-[#D97706] border-[#FF9F0A]/20'
                         }`}>
@@ -542,13 +539,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center space-x-2 min-w-0">
                     <span className="font-mono font-bold text-[#0071E3] text-sm">{selectedWo.orderNumber}</span>
-                    <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md border ${
-                      selectedWo.status === 'Finished' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                      selectedWo.status === 'Taken Out' ? 'bg-slate-100 text-slate-700 border-slate-300' :
-                      'bg-rose-50 text-rose-700 border-rose-200'
-                    }`}>
-                      {selectedWo.status}
-                    </span>
+                    <StatusChip status={selectedWo.status} />
                   </div>
 
                   <button

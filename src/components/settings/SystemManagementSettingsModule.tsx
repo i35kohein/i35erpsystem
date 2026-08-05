@@ -1231,16 +1231,17 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               </div>
 
               <div className="flex items-center justify-end space-x-2 pt-4 border-t border-[#E5E5EA]">
-                <button
+                <Button
                   type="button"
                   onClick={() => setTechModalOpen(false)}
-                  className="px-4 py-2 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] font-bold rounded-xl cursor-pointer"
+                  variant="outline"
+                  className="font-bold"
                 >
                   Cancel
-                </button>
+                </Button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#0071E3] hover:bg-[#0051B3] text-white font-extrabold rounded-xl shadow-2xs cursor-pointer active:scale-95"
+                  className="font-extrabold"
                 >
                   {editingTech ? 'Update Record' : 'Save Technician'}
                 </button>
@@ -1272,7 +1273,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               <button
                 type="button"
                 onClick={() => handleConfirmDeleteTech(deleteConfirmId)}
-                className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-2xs cursor-pointer"
+                className="text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white"
               >
                 Confirm Delete
               </button>
@@ -1586,13 +1587,14 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             </div>
 
             <div className="flex items-center justify-end space-x-2 border-t border-[#E5E5EA] pt-3">
-              <button
+              <Button
                 type="button"
                 onClick={() => setUserModalOpen(false)}
-                className="px-4 py-2 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] font-bold text-xs rounded-xl cursor-pointer"
+                variant="outline"
+                className="text-xs font-bold"
               >
                 Cancel
-              </button>
+              </Button>
               <button
                 type="button"
                 onClick={handleSaveUser}
