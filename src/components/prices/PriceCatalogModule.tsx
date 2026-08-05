@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import { 
   Search, 
@@ -166,7 +166,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
   const [deviceSearchQuery, setDeviceSearchQuery] = useState('');
   const [activeFamilyTab, setActiveFamilyTab] = useState<'All' | 'iPhone' | 'iPad' | 'Apple Watch' | 'Mac' | 'Other'>('All');
   const [quoteCopied, setQuoteCopied] = useState(false);
-  const [isMobileCartOpen, setIsMobileCartOpen] = useState(false);
+  const cartPanelRef = useRef<HTMLDivElement>(null);
 
   // Cart State: Map of categoryKey -> CartItem
   const [cart, setCart] = useState<Map<string, CartItem>>(() => new Map<string, CartItem>());
@@ -484,9 +484,13 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
       </div>
 
       {/* POS Catalog & Cart Main Layout */}
-      <div className="grid min-h-0 flex-1 grid-cols-1 items-stretch gap-5 overflow-y-auto lg:grid-cols-12 lg:overflow-hidden [scrollbar-gutter:stable]">
+      {/* Mobile: plain flex column so each child keeps its natural height and the
+          container scrolls (CSS-grid auto rows + stretch were collapsing the catalog
+          section to ~289px so cards overlapped the cart panel). Desktop (lg): grid
+          8/4 split with internal scrolling, unchanged. */}
+      <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto pb-16 md:pb-0 lg:grid lg:grid-cols-12 lg:overflow-hidden [scrollbar-gutter:stable]">
         {/* Main POS Catalog & Grid Section (8 Cols on Desktop) - Dedicated Scroll Container */}
-        <div className="min-h-0 space-y-4 overflow-visible p-2 sm:p-2.5 lg:col-span-8 lg:overflow-y-auto scrollbar-thin [scrollbar-gutter:stable]">
+        <div className="shrink-0 space-y-4 overflow-visible p-2 sm:p-2.5 lg:min-h-0 lg:col-span-8 lg:overflow-y-auto scrollbar-thin [scrollbar-gutter:stable]">
 
           {/* Service Grid - Fixed Height Non-shifting Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-3.5 pb-8 pt-0.5 px-0.5">
@@ -589,7 +593,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
         </div>
 
         {/* Right Side Cart & Invoice Summary Panel (4 Cols Desktop) */}
-        <div className="flex flex-col overflow-hidden rounded-2xl border border-[#E5E5EA] bg-white shadow-2xs lg:col-span-4 lg:h-full lg:min-h-0 lg:overflow-y-auto">
+        <div ref={cartPanelRef} className="shrink-0 flex flex-col overflow-hidden rounded-2xl border border-[#E5E5EA] bg-white shadow-2xs lg:col-span-4 lg:h-full lg:min-h-0 lg:overflow-y-auto">
           {/* Cart Header */}
           <div className="p-3.5 sm:p-4 border-b border-[#E5E5EA] flex items-center justify-between bg-[#F5F5F7]/80 h-[56px] shrink-0">
             <div className="flex items-center space-x-2.5 min-w-0">
@@ -856,6 +860,28 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Mobile floating cart bar — always reachable while adding services (md:hidden) */}
+      {cart.size > 0 && (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#E5E5EA] bg-white/95 backdrop-blur-sm px-4 pt-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] shadow-[0_-4px_12px_rgba(0,0,0,0.06)] md:hidden">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0 shrink-0">
+              <p className="text-[10px] font-bold text-[#86868B] uppercase tracking-wide">Selected Services</p>
+              <p className="font-mono font-black text-[#0071E3] text-base leading-tight">
+                {cartSummary.count} <span className="text-[10px] font-normal text-[#86868B]">items · {cartSummary.totalDue.toLocaleString()} MMK</span>
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => cartPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              className="flex-1 max-w-[180px] py-3 rounded-xl bg-[#0071E3] hover:bg-[#0071E3]/90 text-white font-extrabold text-xs shadow-xs transition-all flex items-center justify-center space-x-1.5 cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071E3]/40 focus-visible:ring-offset-2"
+            >
+              <Receipt className="w-4 h-4 shrink-0" />
+              <span className="truncate">View Cart</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Device Picker Modal */}
       <DeviceModelChooserModal
