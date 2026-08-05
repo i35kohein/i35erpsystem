@@ -292,23 +292,23 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
   return (
     <>
       <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-5 animate-fadeIn">
-        <div className="bg-white border border-[#E5E5EA] rounded-3xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+        <div className="bg-white border border-line rounded-3xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
           {/* Modal Top Header */}
-          <div className="px-5 py-4 border-b border-[#E5E5EA] bg-white flex items-center justify-between">
+          <div className="px-5 py-4 border-b border-line bg-white flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#0071E3] text-white flex items-center justify-center font-black shrink-0">
+              <div className="w-10 h-10 rounded-2xl bg-brand text-white flex items-center justify-center font-black shrink-0">
                 <Calculator className="w-5 h-5" />
               </div>
               <div>
                 <div className="flex items-center space-x-2">
-                  <h2 className="font-extrabold text-base sm:text-lg text-[#1D1D1F]">
+                  <h2 className="font-extrabold text-base sm:text-lg text-ink">
                     Quick Price Calculator & Estimate Generator
                   </h2>
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">
                     On-the-Spot Customer Quote
                   </span>
                 </div>
-                <p className="text-xs text-[#86868B]">
+                <p className="text-xs text-muted">
                   Instantly toggle repair services, apply bundle discounts, and calculate customer total estimate
                 </p>
               </div>
@@ -316,26 +316,26 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
 
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-[#E5E5EA] hover:bg-[#D1D1D6] text-[#1D1D1F] transition-all cursor-pointer flex items-center justify-center shrink-0"
+              className="w-8 h-8 rounded-full bg-line hover:bg-[#D1D1D6] text-ink transition-all cursor-pointer flex items-center justify-center shrink-0"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Model Ribbon & Category Tabs */}
-          <div className="p-4 border-b border-[#E5E5EA] bg-[#F5F5F7]/80 space-y-3">
+          <div className="p-4 border-b border-line bg-surface/80 space-y-3">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
               {/* Selected Device Badge & Model Switcher */}
-              <div className="flex items-center space-x-2 bg-white px-3.5 py-2 rounded-2xl border border-[#E5E5EA] shadow-2xs min-w-0">
-                <Smartphone className="w-4 h-4 text-[#0071E3] shrink-0" />
-                <span className="text-xs font-bold text-[#86868B] shrink-0">Model:</span>
-                <span className="text-xs sm:text-sm font-black text-[#1D1D1F] truncate min-w-0" title={selectedDevice}>
+              <div className="flex items-center space-x-2 bg-white px-3.5 py-2 rounded-2xl border border-line shadow-2xs min-w-0">
+                <Smartphone className="w-4 h-4 text-brand shrink-0" />
+                <span className="text-xs font-bold text-muted shrink-0">Model:</span>
+                <span className="text-xs sm:text-sm font-black text-ink truncate min-w-0" title={selectedDevice}>
                   {selectedDevice}
                 </span>
                 <button
                   type="button"
                   onClick={() => setIsDeviceChooserOpen(true)}
-                  className="p-1.5 rounded-xl bg-[#0071E3]/10 hover:bg-[#0071E3]/20 text-[#0071E3] transition-all cursor-pointer shrink-0 ml-1.5"
+                  className="p-1.5 rounded-xl bg-brand/10 hover:bg-brand/20 text-brand transition-all cursor-pointer shrink-0 ml-1.5"
                   title="Change device model"
                 >
                   <Folder className="w-4 h-4" />
@@ -344,18 +344,18 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
 
               {/* Quick Search */}
               <div className="relative flex-1 max-w-md">
-                <Search className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#86868B]" />
+                <Search className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
                 <input
                   type="text"
                   placeholder="Quick filter service name..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-1.5 bg-white border border-[#E5E5EA] rounded-xl text-xs font-bold text-[#1D1D1F] focus:outline-none focus:ring-2 focus:ring-[#0071E3]"
+                  className="w-full pl-9 pr-3 py-1.5 bg-white border border-line rounded-xl text-xs font-bold text-ink focus:outline-none focus:ring-2 focus:ring-brand"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#86868B]"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted"
                   >
                     Clear
                   </button>
@@ -374,8 +374,8 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                     onClick={() => setCategoryFilter(grp)}
                     className={`px-3 py-1 rounded-xl font-bold transition-all shrink-0 cursor-pointer ${
                       isActive
-                        ? 'bg-[#0071E3] text-white shadow-2xs'
-                        : 'bg-white text-[#86868B] border border-[#E5E5EA] hover:text-[#1D1D1F]'
+                        ? 'bg-brand text-white shadow-2xs'
+                        : 'bg-white text-muted border border-line hover:text-ink'
                     }`}
                   >
                     {grp}
@@ -390,20 +390,20 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
             {/* Services Toggle Grid (8 Cols) */}
             <div className="lg:col-span-7 space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-extrabold uppercase tracking-wider text-[#86868B] flex items-center space-x-1.5">
-                  <ListChecks className="w-3.5 h-3.5 text-[#0071E3]" />
+                <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted flex items-center space-x-1.5">
+                  <ListChecks className="w-3.5 h-3.5 text-brand" />
                   <span>Available Repair Services for {selectedDevice}</span>
                 </h3>
-                <span className="text-[11px] font-bold text-[#86868B]">
+                <span className="text-[11px] font-bold text-muted">
                   {filteredServices.length} priced services
                 </span>
               </div>
 
               {filteredServices.length === 0 ? (
-                <div className="py-12 text-center bg-[#F5F5F7] rounded-2xl border border-[#E5E5EA] space-y-2">
-                  <ListChecks className="w-8 h-8 text-[#86868B] mx-auto opacity-40" />
-                  <p className="text-xs font-bold text-[#1D1D1F]">No priced services match filter</p>
-                  <p className="text-[11px] text-[#86868B]">
+                <div className="py-12 text-center bg-surface rounded-2xl border border-line space-y-2">
+                  <ListChecks className="w-8 h-8 text-muted mx-auto opacity-40" />
+                  <p className="text-xs font-bold text-ink">No priced services match filter</p>
+                  <p className="text-[11px] text-muted">
                     Try clearing search or picking another device model.
                   </p>
                 </div>
@@ -421,8 +421,8 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                         }
                         className={`p-3.5 rounded-2xl border transition-all text-left flex flex-col justify-between cursor-pointer min-h-[96px] select-none ${
                           isSelected
-                            ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-md ring-2 ring-[#0071E3]/20'
-                            : 'bg-white text-[#1D1D1F] border-[#E5E5EA] hover:border-[#0071E3] hover:shadow-2xs'
+                            ? 'bg-brand text-white border-brand shadow-md ring-2 ring-brand/20'
+                            : 'bg-white text-ink border-line hover:border-brand hover:shadow-2xs'
                         }`}
                       >
                         <div className="flex items-start justify-between gap-2">
@@ -430,7 +430,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                             <div className="flex items-center space-x-1.5 mb-1 flex-wrap gap-y-1">
                               <span
                                 className={`text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full inline-block ${
-                                  isSelected ? 'bg-white/20 text-white' : 'bg-[#F5F5F7] text-[#86868B]'
+                                  isSelected ? 'bg-white/20 text-white' : 'bg-surface text-muted'
                                 }`}
                               >
                                 {service.group}
@@ -442,7 +442,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                           </div>
                           <div
                             className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
-                              isSelected ? 'bg-white text-[#0071E3]' : 'border-2 border-[#E5E5EA] bg-white'
+                              isSelected ? 'bg-white text-brand' : 'border-2 border-line bg-white'
                             }`}
                           >
                             {isSelected && <Check className="w-4 h-4 stroke-[3]" />}
@@ -454,14 +454,14 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                             <ShieldCheck className={`w-3 h-3 ${isSelected ? 'text-white' : 'text-emerald-600'}`} />
                             <span
                               className={`text-[9px] font-semibold ${
-                                isSelected ? 'text-white/90' : 'text-[#86868B]'
+                                isSelected ? 'text-white/90' : 'text-muted'
                               }`}
                             >
                               {service.warranty}
                             </span>
                           </div>
 
-                          <span className={`font-black font-mono text-sm sm:text-base ${isSelected ? 'text-white' : 'text-[#0071E3]'}`}>
+                          <span className={`font-black font-mono text-sm sm:text-base ${isSelected ? 'text-white' : 'text-brand'}`}>
                             {formatPrice(service.price)}
                           </span>
                         </div>
@@ -473,15 +473,15 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
             </div>
 
             {/* Live Calculation Sidebar (5 Cols) */}
-            <div className="lg:col-span-5 bg-[#F5F5F7] p-4 sm:p-5 rounded-2xl border border-[#E5E5EA] space-y-4 flex flex-col justify-between">
+            <div className="lg:col-span-5 bg-surface p-4 sm:p-5 rounded-2xl border border-line space-y-4 flex flex-col justify-between">
               <div className="space-y-4">
                 {/* Live Estimate Header */}
-                <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-3">
+                <div className="flex items-center justify-between border-b border-line pb-3">
                   <div className="flex items-center space-x-2">
                     <Sparkles className="w-4 h-4 text-emerald-600" />
-                    <h3 className="font-extrabold text-sm text-[#1D1D1F]">Live Total Estimate</h3>
+                    <h3 className="font-extrabold text-sm text-ink">Live Total Estimate</h3>
                   </div>
-                  <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-[#0071E3] text-white">
+                  <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-brand text-white">
                     {selectedList.length} Services Selected
                   </span>
                 </div>
@@ -489,8 +489,8 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                 {/* Selected Services Breakdown */}
                 <div className="space-y-1.5 max-h-[170px] overflow-y-auto pr-1">
                   {selectedList.length === 0 ? (
-                    <div className="py-6 text-center text-[#86868B] space-y-1">
-                      <Calculator className="w-7 h-7 mx-auto opacity-30 text-[#0071E3]" />
+                    <div className="py-6 text-center text-muted space-y-1">
+                      <Calculator className="w-7 h-7 mx-auto opacity-30 text-brand" />
                       <p className="text-xs font-bold">No services selected yet</p>
                       <p className="text-[11px]">Click service cards on the left to add to estimate</p>
                     </div>
@@ -498,10 +498,10 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                     selectedList.map((item) => (
                       <div
                         key={item.key}
-                        className="bg-white px-2.5 py-1.5 rounded-xl border border-[#E5E5EA] flex items-center justify-between text-xs shadow-2xs group hover:border-[#0071E3]/40 transition-all"
+                        className="bg-white px-2.5 py-1.5 rounded-xl border border-line flex items-center justify-between text-xs shadow-2xs group hover:border-brand/40 transition-all"
                       >
                         <div className="min-w-0 pr-2 flex items-center space-x-1.5">
-                          <span className="font-extrabold text-[11px] text-[#1D1D1F] truncate leading-tight min-w-0">
+                          <span className="font-extrabold text-[11px] text-ink truncate leading-tight min-w-0">
                             {item.label}
                           </span>
                           <span className="text-[9px] font-extrabold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-200 flex items-center space-x-0.5 shrink-0">
@@ -510,7 +510,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                           </span>
                         </div>
                         <div className="flex items-center space-x-2 shrink-0">
-                          <span className="font-black font-mono text-[11px] text-[#0071E3]">
+                          <span className="font-black font-mono text-[11px] text-brand">
                             {formatPrice(item.price)}
                           </span>
                           <button
@@ -518,7 +518,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                             onClick={() =>
                               handleToggleService(item.key, item.label, item.price, item.warranty)
                             }
-                            className="text-[#86868B] hover:text-[#FF3B30] hover:bg-rose-50 p-0.5 rounded-md transition-all cursor-pointer"
+                            className="text-muted hover:text-danger hover:bg-rose-50 p-0.5 rounded-md transition-all cursor-pointer"
                             title="Remove service"
                           >
                             <X className="w-3.5 h-3.5" />
@@ -530,8 +530,8 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                 </div>
 
                 {/* Quick Bundle Discount Buttons */}
-                <div className="space-y-1.5 pt-2 border-t border-[#E5E5EA]">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#86868B] block">
+                <div className="space-y-1.5 pt-2 border-t border-line">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted block">
                     Quick Bundle Discounts
                   </span>
                   <div className="grid grid-cols-3 gap-1.5 text-xs">
@@ -560,8 +560,8 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                           }}
                           className={`py-1.5 px-2 rounded-xl font-bold text-[11px] transition-all cursor-pointer border ${
                             isSelected
-                              ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-2xs'
-                              : 'bg-white text-[#1D1D1F] border-[#E5E5EA] hover:border-[#0071E3]'
+                              ? 'bg-brand text-white border-brand shadow-2xs'
+                              : 'bg-white text-ink border-line hover:border-brand'
                           }`}
                         >
                           {disc.label}
@@ -572,58 +572,58 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                 </div>
 
                 {/* Tax & Deposit Toggles */}
-                <div className="flex items-center justify-between pt-2 border-t border-[#E5E5EA] text-xs">
+                <div className="flex items-center justify-between pt-2 border-t border-line text-xs">
                   <label className="flex items-center space-x-2 cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={enableSalesTax}
                       onChange={(e) => setEnableSalesTax(e.target.checked)}
-                      className="rounded border-[#E5E5EA] text-[#0071E3] focus:ring-[#0071E3]"
+                      className="rounded border-line text-brand focus:ring-brand"
                     />
-                    <span className="font-bold text-[#1D1D1F]">Include Sales Tax ({salesTaxRate}%)</span>
+                    <span className="font-bold text-ink">Include Sales Tax ({salesTaxRate}%)</span>
                   </label>
 
-                  <div className="flex items-center space-x-1 text-[#86868B]">
-                    <Clock className="w-3.5 h-3.5 text-[#0071E3]" />
+                  <div className="flex items-center space-x-1 text-muted">
+                    <Clock className="w-3.5 h-3.5 text-brand" />
                     <span className="font-extrabold text-[11px]">Est. ~{estimatedTime}</span>
                   </div>
                 </div>
 
                 {/* Final Price Box */}
-                <div className="bg-white p-4 rounded-2xl border-2 border-[#0071E3] space-y-2 shadow-xs">
-                  <div className="flex justify-between text-xs text-[#86868B]">
+                <div className="bg-white p-4 rounded-2xl border-2 border-brand space-y-2 shadow-xs">
+                  <div className="flex justify-between text-xs text-muted">
                     <span>Subtotal:</span>
-                    <span className="font-mono font-bold text-[#1D1D1F]">{formatPrice(rawSubtotal)}</span>
+                    <span className="font-mono font-bold text-ink">{formatPrice(rawSubtotal)}</span>
                   </div>
 
-                  <div className="flex justify-between text-xs text-[#86868B] items-center min-h-[22px]">
+                  <div className="flex justify-between text-xs text-muted items-center min-h-[22px]">
                     <span>Bundle Discount:</span>
                     {totalDiscount > 0 ? (
-                      <span className="font-mono font-bold text-[#34C759] bg-[#34C759]/10 px-2 py-0.5 rounded-md border border-[#34C759]/20">
+                      <span className="font-mono font-bold text-success bg-success/10 px-2 py-0.5 rounded-md border border-success/20">
                         -{formatPrice(totalDiscount)}
                       </span>
                     ) : (
-                      <span className="font-mono text-[#86868B] text-[11px]">0 MMK</span>
+                      <span className="font-mono text-muted text-[11px]">0 MMK</span>
                     )}
                   </div>
 
                   {enableSalesTax && (
-                    <div className="flex justify-between text-xs text-[#86868B]">
+                    <div className="flex justify-between text-xs text-muted">
                       <span>Sales Tax ({salesTaxRate}%):</span>
                       <span className="font-mono">{formatPrice(taxAmount)}</span>
                     </div>
                   )}
 
-                  <div className="pt-2 border-t border-[#E5E5EA] flex items-baseline justify-between">
+                  <div className="pt-2 border-t border-line flex items-baseline justify-between">
                     <div>
-                      <span className="text-xs font-black uppercase tracking-wider text-[#1D1D1F] block">
+                      <span className="text-xs font-black uppercase tracking-wider text-ink block">
                         Grand Total
                       </span>
-                      <span className="text-[10px] text-[#86868B] block">
+                      <span className="text-[10px] text-muted block">
                         Required 50% Deposit: {formatPrice(requiredDeposit)}
                       </span>
                     </div>
-                    <span className="text-2xl font-black font-mono text-[#0071E3]">
+                    <span className="text-2xl font-black font-mono text-brand">
                       {formatPrice(grandTotal)}
                     </span>
                   </div>
@@ -631,12 +631,12 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
               </div>
 
               {/* Action Buttons */}
-              <div className="space-y-2 pt-3 border-t border-[#E5E5EA]">
+              <div className="space-y-2 pt-3 border-t border-line">
                 <Button
                   type="button"
                   onClick={handleCopyQuote}
                   disabled={selectedList.length === 0}
-                  className="w-full bg-[#0071E3] hover:bg-[#0071E3]/90 disabled:opacity-50 text-white"
+                  className="w-full bg-brand hover:bg-brand/90 disabled:opacity-50 text-white"
                 >
                   {copiedQuote ? (
                     <>
@@ -676,9 +676,9 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                     disabled={selectedList.length === 0}
                     className={`${
                       onCreateTicketWithQuote ? 'col-span-1' : 'col-span-2'
-                    } py-2 bg-white hover:bg-[#E5E5EA] disabled:opacity-50 text-[#1D1D1F] border border-[#E5E5EA] font-extrabold rounded-xl text-xs transition-all flex items-center justify-center space-x-1.5 cursor-pointer shadow-2xs`}
+                    } py-2 bg-white hover:bg-line disabled:opacity-50 text-ink border border-line font-extrabold rounded-xl text-xs transition-all flex items-center justify-center space-x-1.5 cursor-pointer shadow-2xs`}
                   >
-                    <Printer className="w-3.5 h-3.5 text-[#0071E3]" />
+                    <Printer className="w-3.5 h-3.5 text-brand" />
                     <span>Print Slip</span>
                   </button>
 
@@ -699,14 +699,14 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
           </div>
 
           {/* Footer Bar */}
-          <div className="px-5 py-3 bg-[#F5F5F7] border-t border-[#E5E5EA] flex items-center justify-between text-xs">
-            <span className="font-semibold text-[#86868B]">
-              Calculated for <strong className="text-[#1D1D1F]">{selectedDevice}</strong>
+          <div className="px-5 py-3 bg-surface border-t border-line flex items-center justify-between text-xs">
+            <span className="font-semibold text-muted">
+              Calculated for <strong className="text-ink">{selectedDevice}</strong>
             </span>
             <button
               type="button"
               onClick={handleReset}
-              className="text-[#FF3B30] font-extrabold hover:underline flex items-center space-x-1 cursor-pointer"
+              className="text-danger font-extrabold hover:underline flex items-center space-x-1 cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Reset Calculator</span>

@@ -11,7 +11,7 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
   const { language, setLanguage } = useLanguage();
   return (
         <div className="space-y-6">
-          <div className="bg-white p-6 rounded-2xl border border-[#E5E5EA] shadow-xs space-y-4">
+          <div className="bg-white p-6 rounded-2xl border border-line shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-base font-extrabold text-[#2C3E50] flex items-center space-x-2">
@@ -34,7 +34,7 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
                     className={`p-5 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-4 ${
                       isSelected
                         ? 'border-[#27B1AE] bg-[#F8FBFD] shadow-md ring-2 ring-[#27B1AE]/20'
-                        : 'border-[#E5E5EA] bg-white hover:border-[#136F9A]/40 shadow-xs'
+                        : 'border-line bg-white hover:border-[#136F9A]/40 shadow-xs'
                     }`}
                   >
                     <div className="space-y-3">
@@ -113,10 +113,10 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
           </div>
 
           {/* Component Geometry & Design System Architecture Card */}
-          <div className="bg-white p-6 rounded-2xl border border-[#E5E5EA] shadow-xs space-y-4">
+          <div className="bg-white p-6 rounded-2xl border border-line shadow-xs space-y-4">
             <div>
               <h3 className="text-base font-extrabold text-[#2C3E50] flex items-center space-x-2">
-                <Square className="w-5 h-5 text-[#0071E3]" />
+                <Square className="w-5 h-5 text-brand" />
                 <span>Component Geometry & Design System Architecture</span>
               </h3>
               <p className="text-xs text-[#7F7F7F] mt-1">
@@ -129,17 +129,17 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
                 onClick={() => setGeometry('square')}
                 className={`p-5 rounded-none border-2 transition-all cursor-pointer flex flex-col justify-between space-y-3 ${
                   geometry === 'square'
-                    ? 'border-[#0071E3] bg-[#F0F6FF] ring-2 ring-[#0071E3]/20 shadow-xs'
-                    : 'border-[#E5E5EA] bg-white hover:border-slate-300'
+                    ? 'border-brand bg-brand-soft ring-2 ring-brand/20 shadow-xs'
+                    : 'border-line bg-white hover:border-slate-300'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <Square className="w-5 h-5 text-[#0071E3]" />
+                    <Square className="w-5 h-5 text-brand" />
                     <span className="font-extrabold text-sm text-[#2C3E50]">Square / Rectangular Design System</span>
                   </div>
                   {geometry === 'square' && (
-                    <span className="text-xs font-black px-2.5 py-0.5 bg-[#0071E3] text-white rounded-none">Active</span>
+                    <span className="text-xs font-black px-2.5 py-0.5 bg-brand text-white rounded-none">Active</span>
                   )}
                 </div>
                 <p className="text-xs text-[#526375] leading-relaxed">
@@ -151,17 +151,17 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
                 onClick={() => setGeometry('curved')}
                 className={`p-5 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-3 ${
                   geometry === 'curved'
-                    ? 'border-[#0071E3] bg-[#F0F6FF] ring-2 ring-[#0071E3]/20 shadow-xs'
-                    : 'border-[#E5E5EA] bg-white hover:border-slate-300'
+                    ? 'border-brand bg-brand-soft ring-2 ring-brand/20 shadow-xs'
+                    : 'border-line bg-white hover:border-slate-300'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <Circle className="w-5 h-5 text-[#34C759]" />
+                    <Circle className="w-5 h-5 text-success" />
                     <span className="font-extrabold text-sm text-[#2C3E50]">Curved Soft Geometry</span>
                   </div>
                   {geometry === 'curved' && (
-                    <span className="text-xs font-black px-2.5 py-0.5 bg-[#34C759] text-white rounded-full">Active</span>
+                    <span className="text-xs font-black px-2.5 py-0.5 bg-success text-white rounded-full">Active</span>
                   )}
                 </div>
                 <p className="text-xs text-[#526375] leading-relaxed">
@@ -172,7 +172,7 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
           </div>
 
           {/* Language Selection Card */}
-          <div className="bg-white p-6 rounded-2xl border border-[#E5E5EA] shadow-xs space-y-4">
+          <div className="bg-white p-6 rounded-2xl border border-line shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-base font-extrabold text-[#2C3E50] flex items-center space-x-2">
@@ -191,36 +191,36 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
                 onClick={() => setLanguage('en')}
                 className={`p-4 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-between ${
                   language === 'en'
-                    ? 'border-[#0071E3] bg-[#F0F6FF] ring-2 ring-[#0071E3]/20'
-                    : 'border-[#E5E5EA] bg-white hover:border-slate-300'
+                    ? 'border-brand bg-brand-soft ring-2 ring-brand/20'
+                    : 'border-line bg-white hover:border-slate-300'
                 }`}
               >
                 <div className="flex items-center space-x-3">
                   <span className="text-2xl">🇺🇸</span>
                   <div>
-                    <h4 className="text-sm font-extrabold text-[#1D1D1F]">English (US)</h4>
-                    <p className="text-xs text-[#86868B]">Standard English interface for ERP & Work Orders</p>
+                    <h4 className="text-sm font-extrabold text-ink">English (US)</h4>
+                    <p className="text-xs text-muted">Standard English interface for ERP & Work Orders</p>
                   </div>
                 </div>
-                {language === 'en' && <Check className="w-5 h-5 text-[#0071E3]" />}
+                {language === 'en' && <Check className="w-5 h-5 text-brand" />}
               </div>
 
               <div
                 onClick={() => setLanguage('mm')}
                 className={`p-4 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-between ${
                   language === 'mm'
-                    ? 'border-[#0071E3] bg-[#F0F6FF] ring-2 ring-[#0071E3]/20'
-                    : 'border-[#E5E5EA] bg-white hover:border-slate-300'
+                    ? 'border-brand bg-brand-soft ring-2 ring-brand/20'
+                    : 'border-line bg-white hover:border-slate-300'
                 }`}
               >
                 <div className="flex items-center space-x-3">
                   <span className="text-2xl">🇲🇲</span>
                   <div>
-                    <h4 className="text-sm font-extrabold text-[#1D1D1F]">မြန်မာစာ (Myanmar / Burmese)</h4>
-                    <p className="text-xs text-[#86868B]">ပြုပြင်ရေး ERP စနစ်တစ်ခုလုံး မြန်မာဘာသာဖြင့် သုံးစွဲရန်</p>
+                    <h4 className="text-sm font-extrabold text-ink">မြန်မာစာ (Myanmar / Burmese)</h4>
+                    <p className="text-xs text-muted">ပြုပြင်ရေး ERP စနစ်တစ်ခုလုံး မြန်မာဘာသာဖြင့် သုံးစွဲရန်</p>
                   </div>
                 </div>
-                {language === 'mm' && <Check className="w-5 h-5 text-[#0071E3]" />}
+                {language === 'mm' && <Check className="w-5 h-5 text-brand" />}
               </div>
             </div>
           </div>

@@ -181,10 +181,10 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
                 onChange({ ...currentFilter, preset: 'custom' });
               }
             }}
-            className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#E5E5EA] cursor-pointer transition-all ${
+            className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-line cursor-pointer transition-all ${
               currentFilter.preset === 'custom'
-                ? 'bg-[#0071E3] text-white font-bold'
-                : 'bg-[#F5F5F7] hover:bg-white text-[#424245]'
+                ? 'bg-brand text-white font-bold'
+                : 'bg-surface hover:bg-white text-[#424245]'
             }`}
             title="Calendar Picker"
           >
@@ -193,14 +193,14 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
         </div>
       ) : (
         /* Minimalistic Segmented Control */
-        <div className="flex items-center bg-[#F5F5F7] p-1 rounded-xl border border-[#E5E5EA] shadow-2xs space-x-1">
+        <div className="flex items-center bg-surface p-1 rounded-xl border border-line shadow-2xs space-x-1">
           <button
             type="button"
             onClick={() => handlePresetChange('all')}
             className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
               currentFilter.preset === 'all'
-                ? 'bg-[#0071E3] text-white shadow-2xs font-bold'
-                : 'text-[#424245] hover:text-[#1D1D1F] hover:bg-white/60'
+                ? 'bg-brand text-white shadow-2xs font-bold'
+                : 'text-[#424245] hover:text-ink hover:bg-white/60'
             }`}
           >
             All
@@ -211,8 +211,8 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
             onClick={() => handlePresetChange('today')}
             className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
               currentFilter.preset === 'today'
-                ? 'bg-[#0071E3] text-white shadow-2xs font-bold'
-                : 'text-[#424245] hover:text-[#1D1D1F] hover:bg-white/60'
+                ? 'bg-brand text-white shadow-2xs font-bold'
+                : 'text-[#424245] hover:text-ink hover:bg-white/60'
             }`}
           >
             Today
@@ -223,8 +223,8 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
             onClick={() => handlePresetChange('7days')}
             className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
               currentFilter.preset === '7days'
-                ? 'bg-[#0071E3] text-white shadow-2xs font-bold'
-                : 'text-[#424245] hover:text-[#1D1D1F] hover:bg-white/60'
+                ? 'bg-brand text-white shadow-2xs font-bold'
+                : 'text-[#424245] hover:text-ink hover:bg-white/60'
             }`}
           >
             7 Days
@@ -235,8 +235,8 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
             onClick={() => handlePresetChange('30days')}
             className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
               currentFilter.preset === '30days'
-                ? 'bg-[#0071E3] text-white shadow-2xs font-bold'
-                : 'text-[#424245] hover:text-[#1D1D1F] hover:bg-white/60'
+                ? 'bg-brand text-white shadow-2xs font-bold'
+                : 'text-[#424245] hover:text-ink hover:bg-white/60'
             }`}
           >
             30 Days
@@ -253,8 +253,8 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
             }}
             className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center space-x-1.5 ${
               currentFilter.preset === 'custom'
-                ? 'bg-[#0071E3] text-white shadow-2xs font-bold'
-                : 'text-[#424245] hover:text-[#1D1D1F] hover:bg-white/60'
+                ? 'bg-brand text-white shadow-2xs font-bold'
+                : 'text-[#424245] hover:text-ink hover:bg-white/60'
             }`}
           >
             <Calendar className="w-3.5 h-3.5" />
@@ -272,17 +272,17 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
       {/* Beautiful Popover Calendar Modal */}
       {showCalendarModal && (
         <div
-          className="absolute right-0 top-11 z-50 w-80 bg-white rounded-2xl border border-[#D2D2D7] shadow-2xl p-4 text-[#1D1D1F] animate-in fade-in zoom-in-95 duration-150"
+          className="absolute right-0 top-11 z-50 w-80 bg-white rounded-2xl border border-line-strong shadow-2xl p-4 text-ink animate-in fade-in zoom-in-95 duration-150"
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-3 mb-3">
+          <div className="flex items-center justify-between border-b border-line pb-3 mb-3">
             <div className="flex items-center space-x-2">
-              <Calendar className="w-4 h-4 text-[#0071E3]" />
-              <span className="font-extrabold text-xs text-[#1D1D1F]">Select Custom Date Range</span>
+              <Calendar className="w-4 h-4 text-brand" />
+              <span className="font-extrabold text-xs text-ink">Select Custom Date Range</span>
             </div>
             <button
               onClick={() => setShowCalendarModal(false)}
-              className="p-1 rounded-full text-[#86868B] hover:text-[#1D1D1F] hover:bg-[#F5F5F7] transition-all cursor-pointer"
+              className="p-1 rounded-full text-muted hover:text-ink hover:bg-surface transition-all cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -293,24 +293,24 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
             <button
               type="button"
               onClick={handlePrevMonth}
-              className="p-1.5 rounded-lg border border-[#E5E5EA] hover:bg-[#F5F5F7] text-[#1D1D1F] transition-all cursor-pointer"
+              className="p-1.5 rounded-lg border border-line hover:bg-surface text-ink transition-all cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="font-bold text-xs text-[#1D1D1F]">
+            <span className="font-bold text-xs text-ink">
               {monthNames[currentMonth]} {currentYear}
             </span>
             <button
               type="button"
               onClick={handleNextMonth}
-              className="p-1.5 rounded-lg border border-[#E5E5EA] hover:bg-[#F5F5F7] text-[#1D1D1F] transition-all cursor-pointer"
+              className="p-1.5 rounded-lg border border-line hover:bg-surface text-ink transition-all cursor-pointer"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
 
           {/* Days of Week */}
-          <div className="grid grid-cols-7 text-center text-[10px] font-bold text-[#86868B] mb-2 uppercase">
+          <div className="grid grid-cols-7 text-center text-[10px] font-bold text-muted mb-2 uppercase">
             <span>Su</span>
             <span>Mo</span>
             <span>Tu</span>
@@ -338,10 +338,10 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
                   onClick={() => handleDateClick(day)}
                   className={`h-8 w-8 mx-auto rounded-lg font-semibold flex items-center justify-center transition-all cursor-pointer text-xs ${
                     selected
-                      ? 'bg-[#0071E3] text-white font-bold shadow-xs'
+                      ? 'bg-brand text-white font-bold shadow-xs'
                       : inRange
-                      ? 'bg-[#F0F6FF] text-[#0071E3] font-bold'
-                      : 'hover:bg-[#F5F5F7] text-[#1D1D1F]'
+                      ? 'bg-brand-soft text-brand font-bold'
+                      : 'hover:bg-surface text-ink'
                   }`}
                 >
                   {day}
@@ -351,15 +351,15 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
           </div>
 
           {/* Range Selection Status */}
-          <div className="bg-[#F5F5F7] p-2.5 rounded-xl border border-[#E5E5EA] text-xs mb-3 flex items-center justify-between">
-            <div className="text-[11px] text-[#6E6E73]">
+          <div className="bg-surface p-2.5 rounded-xl border border-line text-xs mb-3 flex items-center justify-between">
+            <div className="text-[11px] text-faint">
               {tempStartDate ? (
                 <span>
-                  <strong className="text-[#1D1D1F]">{tempStartDate}</strong>
+                  <strong className="text-ink">{tempStartDate}</strong>
                   {tempEndDate ? (
-                    <> to <strong className="text-[#1D1D1F]">{tempEndDate}</strong></>
+                    <> to <strong className="text-ink">{tempEndDate}</strong></>
                   ) : (
-                    <span className="text-[#86868B]"> (select end date)</span>
+                    <span className="text-muted"> (select end date)</span>
                   )}
                 </span>
               ) : (
@@ -373,7 +373,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
                   setTempStartDate(undefined);
                   setTempEndDate(undefined);
                 }}
-                className="text-[10px] text-[#0071E3] font-bold hover:underline cursor-pointer ml-2"
+                className="text-[10px] text-brand font-bold hover:underline cursor-pointer ml-2"
               >
                 Clear
               </button>
@@ -384,30 +384,30 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
           <div className="space-y-2">
             <div className="grid grid-cols-2 gap-2 text-[11px]">
               <div>
-                <label className="block text-[#86868B] font-semibold mb-0.5">Start Date</label>
+                <label className="block text-muted font-semibold mb-0.5">Start Date</label>
                 <input
                   type="date"
                   value={tempStartDate || ''}
                   onChange={(e) => setTempStartDate(e.target.value)}
-                  className="w-full px-2 py-1 bg-[#F5F5F7] border border-[#E5E5EA] rounded-lg text-[#1D1D1F] focus:outline-none focus:border-[#0071E3]"
+                  className="w-full px-2 py-1 bg-surface border border-line rounded-lg text-ink focus:outline-none focus:border-brand"
                 />
               </div>
               <div>
-                <label className="block text-[#86868B] font-semibold mb-0.5">End Date</label>
+                <label className="block text-muted font-semibold mb-0.5">End Date</label>
                 <input
                   type="date"
                   value={tempEndDate || ''}
                   onChange={(e) => setTempEndDate(e.target.value)}
-                  className="w-full px-2 py-1 bg-[#F5F5F7] border border-[#E5E5EA] rounded-lg text-[#1D1D1F] focus:outline-none focus:border-[#0071E3]"
+                  className="w-full px-2 py-1 bg-surface border border-line rounded-lg text-ink focus:outline-none focus:border-brand"
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-end space-x-2 pt-2 border-t border-[#E5E5EA]">
+            <div className="flex items-center justify-end space-x-2 pt-2 border-t border-line">
               <button
                 type="button"
                 onClick={() => setShowCalendarModal(false)}
-                className="px-3 py-1.5 text-xs text-[#6E6E73] font-semibold hover:bg-[#F5F5F7] rounded-lg transition-all cursor-pointer"
+                className="px-3 py-1.5 text-xs text-faint font-semibold hover:bg-surface rounded-lg transition-all cursor-pointer"
               >
                 Cancel
               </button>
@@ -415,7 +415,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
                 type="button"
                 onClick={handleApplyCustomRange}
                 disabled={!tempStartDate}
-                className="px-4 py-1.5 bg-[#0071E3] hover:bg-[#0077ED] disabled:opacity-50 text-white font-bold text-xs rounded-lg shadow-xs transition-all cursor-pointer flex items-center space-x-1"
+                className="px-4 py-1.5 bg-brand hover:bg-[#0077ED] disabled:opacity-50 text-white font-bold text-xs rounded-lg shadow-xs transition-all cursor-pointer flex items-center space-x-1"
               >
                 <Check className="w-3.5 h-3.5" />
                 <span>Apply Range</span>

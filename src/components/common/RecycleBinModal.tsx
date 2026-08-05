@@ -46,22 +46,22 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl border border-[#E5E5EA] shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden text-[#1D1D1F]">
+      <div className="bg-white rounded-2xl border border-line shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden text-ink">
         
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-[#E5E5EA] flex items-center justify-between bg-[#F9F9FB]">
+        <div className="p-4 sm:p-5 border-b border-line flex items-center justify-between bg-[#F9F9FB]">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600">
               <Trash2 className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h2 className="font-extrabold text-base sm:text-lg text-[#1D1D1F]">Recycle Bin & Archive</h2>
+                <h2 className="font-extrabold text-base sm:text-lg text-ink">Recycle Bin & Archive</h2>
                 <span className="px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700 text-xs font-bold">
                   {archivedWorkOrders.length} {archivedWorkOrders.length === 1 ? 'ticket' : 'tickets'}
                 </span>
               </div>
-              <p className="text-xs text-[#86868B] mt-0.5">
+              <p className="text-xs text-muted mt-0.5">
                 Deleted repair tickets are safely stored here. You can restore them anytime or permanently delete them.
               </p>
             </div>
@@ -97,7 +97,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="p-2 rounded-xl text-[#86868B] hover:text-[#1D1D1F] hover:bg-[#E5E5EA]/50 transition-colors cursor-pointer"
+              className="p-2 rounded-xl text-muted hover:text-ink hover:bg-line/50 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -106,15 +106,15 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
 
         {/* Filter Bar */}
         {archivedWorkOrders.length > 0 && (
-          <div className="p-3 sm:p-4 border-b border-[#E5E5EA] bg-white flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="p-3 sm:p-4 border-b border-line bg-white flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="relative w-full sm:w-72">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#86868B]" />
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search archived tickets by WO#, name, model..."
-                className="w-full bg-[#F5F5F7] text-xs text-[#1D1D1F] placeholder-[#86868B] pl-9 pr-4 py-2 rounded-xl border border-[#E5E5EA] focus:bg-white focus:outline-none focus:border-[#0071E3] transition-all"
+                className="w-full bg-surface text-xs text-ink placeholder-muted pl-9 pr-4 py-2 rounded-xl border border-line focus:bg-white focus:outline-none focus:border-brand transition-all"
               />
             </div>
 
@@ -141,43 +141,43 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
         )}
 
         {/* List Content */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 bg-[#F5F5F7]">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 bg-surface">
           {archivedWorkOrders.length === 0 ? (
-            <div className="py-16 text-center space-y-3 bg-white rounded-2xl border border-[#E5E5EA] p-8 shadow-2xs">
+            <div className="py-16 text-center space-y-3 bg-white rounded-2xl border border-line p-8 shadow-2xs">
               <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
                 <Trash2 className="w-8 h-8" />
               </div>
-              <h3 className="font-bold text-base text-[#1D1D1F]">Recycle Bin is Empty</h3>
-              <p className="text-xs text-[#86868B] max-w-md mx-auto leading-relaxed">
+              <h3 className="font-bold text-base text-ink">Recycle Bin is Empty</h3>
+              <p className="text-xs text-muted max-w-md mx-auto leading-relaxed">
                 When repair tickets are deleted from the pipeline or intake portal, they will be archived here. You can safely restore them anytime with all diagnostics and logs intact.
               </p>
             </div>
           ) : filteredWorkOrders.length === 0 ? (
-            <div className="py-12 text-center space-y-2 bg-white rounded-2xl border border-[#E5E5EA] p-6">
-              <Search className="w-8 h-8 text-[#86868B] mx-auto" />
-              <p className="font-bold text-sm text-[#1D1D1F]">No matching archived tickets found</p>
-              <p className="text-xs text-[#86868B]">Try searching with a different keyword or ticket number.</p>
+            <div className="py-12 text-center space-y-2 bg-white rounded-2xl border border-line p-6">
+              <Search className="w-8 h-8 text-muted mx-auto" />
+              <p className="font-bold text-sm text-ink">No matching archived tickets found</p>
+              <p className="text-xs text-muted">Try searching with a different keyword or ticket number.</p>
             </div>
           ) : (
             filteredWorkOrders.map((wo) => (
               <div
                 key={wo.id}
-                className="bg-white rounded-2xl border border-[#E5E5EA] p-4 shadow-2xs hover:border-[#0071E3]/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                className="bg-white rounded-2xl border border-line p-4 shadow-2xs hover:border-brand/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
               >
                 <div className="space-y-1.5 flex-1 min-w-0">
                   <div className="flex items-center space-x-1.5 flex-wrap gap-y-1">
-                    <span className="font-mono font-bold text-[#0071E3] text-sm">{wo.orderNumber || wo.id}</span>
+                    <span className="font-mono font-bold text-brand text-sm">{wo.orderNumber || wo.id}</span>
                     <StatusBadge status={wo.status} size="sm" />
                     <PriorityBadge priority={wo.priority} size="sm" showNormal={true} />
                   </div>
 
-                  <div className="flex items-center space-x-3 text-xs text-[#1D1D1F]">
+                  <div className="flex items-center space-x-3 text-xs text-ink">
                     <span className="font-semibold truncate">{wo.customerName}</span>
-                    <span className="text-[#86868B]">({wo.customerPhone})</span>
+                    <span className="text-muted">({wo.customerPhone})</span>
                   </div>
 
-                  <div className="flex items-center space-x-2 text-xs text-[#86868B]">
-                    <span className="font-medium text-[#1D1D1F]">{wo.deviceCategory} {wo.deviceModel}</span>
+                  <div className="flex items-center space-x-2 text-xs text-muted">
+                    <span className="font-medium text-ink">{wo.deviceCategory} {wo.deviceModel}</span>
                     {wo.serialNumber && <span>• S/N: {wo.serialNumber}</span>}
                   </div>
 
@@ -189,7 +189,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center space-x-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-[#E5E5EA]">
+                <div className="flex items-center space-x-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-line">
                   <Button
                     type="button"
                     onClick={() => onRestoreWorkOrder(wo.id)}
@@ -216,10 +216,10 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="p-4 border-t border-[#E5E5EA] bg-white flex items-center justify-between text-xs text-[#86868B]">
+        <div className="p-4 border-t border-line bg-white flex items-center justify-between text-xs text-muted">
           <div>
-            Showing <span className="font-bold text-[#1D1D1F]">{filteredWorkOrders.length}</span> of{' '}
-            <span className="font-bold text-[#1D1D1F]">{archivedWorkOrders.length}</span> archived repair tickets
+            Showing <span className="font-bold text-ink">{filteredWorkOrders.length}</span> of{' '}
+            <span className="font-bold text-ink">{archivedWorkOrders.length}</span> archived repair tickets
           </div>
           <Button
             type="button"
@@ -233,12 +233,12 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
         {/* Confirm Empty Recycle Bin Modal Popup */}
         {confirmEmptyOpen && (
           <div className="fixed inset-0 bg-slate-900/60 z-60 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl border border-[#E5E5EA] shadow-2xl p-6 max-w-md w-full space-y-4">
+            <div className="bg-white rounded-2xl border border-line shadow-2xl p-6 max-w-md w-full space-y-4">
               <div className="flex items-center space-x-3 text-rose-600">
                 <ShieldAlert className="w-7 h-7" />
-                <h3 className="font-extrabold text-base text-[#1D1D1F]">Empty Recycle Bin?</h3>
+                <h3 className="font-extrabold text-base text-ink">Empty Recycle Bin?</h3>
               </div>
-              <p className="text-xs text-[#86868B] leading-relaxed">
+              <p className="text-xs text-muted leading-relaxed">
                 This will permanently remove all <span className="font-bold text-rose-600">{archivedWorkOrders.length}</span> archived repair tickets from the database. This action cannot be undone.
               </p>
               <div className="flex items-center justify-end space-x-2 pt-2">

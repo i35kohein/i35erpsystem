@@ -1154,13 +1154,13 @@ export default function App() {
 
   if (!isOnline) {
     return (
-      <main className="flex min-h-dvh w-full items-center justify-center bg-[#F5F5F7] p-5 text-[#1D1D1F]">
-        <section className="w-full max-w-sm rounded-2xl border border-[#E5E5EA] bg-white p-6 text-center shadow-sm">
+      <main className="flex min-h-dvh w-full items-center justify-center bg-surface p-5 text-ink">
+        <section className="w-full max-w-sm rounded-2xl border border-line bg-white p-6 text-center shadow-sm">
           <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
             <AlertTriangle className="h-5 w-5" />
           </div>
           <h1 className="text-base font-bold">Internet connection required</h1>
-          <p className="mt-1 text-xs leading-5 text-[#6E6E73]">This ERP uses live Supabase data only. Reconnect to open the system.</p>
+          <p className="mt-1 text-xs leading-5 text-faint">This ERP uses live Supabase data only. Reconnect to open the system.</p>
         </section>
       </main>
     );
@@ -1168,8 +1168,8 @@ export default function App() {
 
   if (authChecking) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F5F5F7]">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#E5E5EA] border-t-[#0071E3]" />
+      <div className="flex min-h-screen items-center justify-center bg-surface">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-line border-t-brand" />
       </div>
     );
   }
@@ -1179,7 +1179,7 @@ export default function App() {
   }
 
   return (
-    <div className="basic-ui h-screen h-dvh w-full bg-[#F5F5F7] text-[#1D1D1F] font-sans antialiased flex flex-col lg:flex-row overflow-hidden selection:bg-[#0071E3] selection:text-white">
+    <div className="basic-ui h-screen h-dvh w-full bg-surface text-ink font-sans antialiased flex flex-col lg:flex-row overflow-hidden selection:bg-brand selection:text-white">
       {/* Persistent Left Sidebar Navigation */}
       <Navigation
         activeTab={activeTab}
@@ -1203,13 +1203,13 @@ export default function App() {
       {/* Main Right Content Column */}
       <div id="main-content-scroll" className="relative flex h-full h-dvh min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-gutter:stable] lg:pl-14">
         {/* Top Navigation Bar Header */}
-        <header className="app-topbar flex flex-row items-center justify-between px-3 sm:px-5 h-[52px] min-h-[52px] bg-white border-b border-[#E5E5EA] sticky top-0 z-40 gap-2 shrink-0">
+        <header className="app-topbar flex flex-row items-center justify-between px-3 sm:px-5 h-[52px] min-h-[52px] bg-white border-b border-line sticky top-0 z-40 gap-2 shrink-0">
           {/* Active Tab Title & Mobile Toggle */}
           <div className="flex items-center space-x-2 sm:space-x-3 shrink-0 min-w-0">
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden min-h-11 min-w-11 flex items-center justify-center bg-[#F5F5F7] hover:bg-[#E5E5EA] border border-[#E5E5EA] text-[#1D1D1F] rounded-xl active:scale-95 transition-all shrink-0 cursor-pointer"
+              className="lg:hidden min-h-11 min-w-11 flex items-center justify-center bg-surface hover:bg-line border border-line text-ink rounded-xl active:scale-95 transition-all shrink-0 cursor-pointer"
               aria-label="Toggle Navigation Menu"
               title="Toggle Navigation Menu"
             >
@@ -1229,7 +1229,7 @@ export default function App() {
                 <path d="M3.5 17.5h17" />
               </svg>
             </button>
-            <h1 className="font-extrabold text-[#1D1D1F] tracking-tight text-sm sm:text-base truncate">
+            <h1 className="font-extrabold text-ink tracking-tight text-sm sm:text-base truncate">
               {currentTab.title}
             </h1>
           </div>
@@ -1240,7 +1240,7 @@ export default function App() {
             <button
               type="button"
               onClick={() => setIsGlobalSearchOpen(true)}
-              className="inline-flex h-11 w-11 lg:h-8 lg:w-8 shrink-0 items-center justify-center rounded-lg border border-[#E5E5EA] bg-white text-[#1D1D1F] hover:border-[#0071E3] hover:text-[#0071E3] transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071E3]/40 focus-visible:ring-offset-2"
+              className="inline-flex h-11 w-11 lg:h-8 lg:w-8 shrink-0 items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2"
               title="Global search (⌘K)"
               aria-label="Global search (⌘K)"
             >
@@ -1265,16 +1265,16 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => settingsResetRef.current?.()}
-                  className="px-2.5 sm:px-3 py-1.5 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] font-bold text-xs rounded-xl border border-[#D2D2D7] transition-all flex items-center space-x-1 sm:space-x-1.5 cursor-pointer shadow-2xs active:scale-95"
+                  className="px-2.5 sm:px-3 py-1.5 bg-surface hover:bg-line text-ink font-bold text-xs rounded-xl border border-line-strong transition-all flex items-center space-x-1 sm:space-x-1.5 cursor-pointer shadow-2xs active:scale-95"
                   title="Reset settings draft"
                 >
-                  <RotateCcw className="w-3.5 h-3.5 text-[#86868B]" />
+                  <RotateCcw className="w-3.5 h-3.5 text-muted" />
                   <span className="hidden sm:inline">Reset Draft</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => settingsSaveRef.current?.()}
-                  className="px-3 sm:px-3.5 py-1.5 bg-[#0071E3] hover:bg-[#0051B3] text-white font-extrabold text-xs rounded-xl transition-all shadow-2xs flex items-center space-x-1 sm:space-x-1.5 cursor-pointer active:scale-95"
+                  className="px-3 sm:px-3.5 py-1.5 bg-brand hover:bg-brand-deep text-white font-extrabold text-xs rounded-xl transition-all shadow-2xs flex items-center space-x-1 sm:space-x-1.5 cursor-pointer active:scale-95"
                   title="Save all settings"
                 >
                   <Save className="w-3.5 h-3.5" />
@@ -1287,18 +1287,18 @@ export default function App() {
             {activeTab === 'price-catalog' ? (
               <>
                 <div className="relative hidden lg:block w-52 shrink-0">
-                  <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#86868B]" />
+                  <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Filter services..."
-                    className="w-full bg-[#F5F5F7] text-xs text-[#1D1D1F] placeholder-[#86868B] pl-7 pr-5 py-1.5 rounded-xl border border-[#E5E5EA] focus:bg-white focus:outline-none focus:border-[#0071E3] transition-all shadow-2xs"
+                    className="w-full bg-surface text-xs text-ink placeholder-muted pl-7 pr-5 py-1.5 rounded-xl border border-line focus:bg-white focus:outline-none focus:border-brand transition-all shadow-2xs"
                   />
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-[#86868B] hover:text-[#1D1D1F]"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted hover:text-ink"
                     >
                       ×
                     </button>
@@ -1310,7 +1310,7 @@ export default function App() {
                   <button
                     type="button"
                     onClick={() => setPriceCatalogQuickCalcOpen(true)}
-                    className="px-2.5 sm:px-3 py-1.5 bg-[#34C759] hover:bg-[#34C759]/90 text-white font-extrabold text-xs rounded-xl transition-all flex items-center space-x-1 sm:space-x-1.5 shadow-2xs cursor-pointer shrink-0 active:scale-95"
+                    className="px-2.5 sm:px-3 py-1.5 bg-success hover:bg-success/90 text-white font-extrabold text-xs rounded-xl transition-all flex items-center space-x-1 sm:space-x-1.5 shadow-2xs cursor-pointer shrink-0 active:scale-95"
                   >
                     <Calculator className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">Calc</span>
@@ -1319,7 +1319,7 @@ export default function App() {
                   <button
                     type="button"
                     onClick={() => setPriceCatalogDeviceModalOpen(true)}
-                    className="px-2.5 sm:px-3 py-1.5 bg-[#0071E3] hover:bg-[#0071E3]/90 text-white font-extrabold text-xs rounded-xl transition-all flex items-center space-x-1 sm:space-x-1.5 shadow-2xs cursor-pointer shrink-0 active:scale-95"
+                    className="px-2.5 sm:px-3 py-1.5 bg-brand hover:bg-brand/90 text-white font-extrabold text-xs rounded-xl transition-all flex items-center space-x-1 sm:space-x-1.5 shadow-2xs cursor-pointer shrink-0 active:scale-95"
                   >
                     <Folder className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">Model</span>
@@ -1328,20 +1328,20 @@ export default function App() {
                   <button
                     type="button"
                     onClick={() => setPriceCatalogSettingsModalOpen(true)}
-                    className="px-2.5 sm:px-3 py-1.5 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] font-bold text-xs rounded-xl border border-[#E5E5EA] transition-all cursor-pointer shrink-0 shadow-2xs flex items-center space-x-1.5"
+                    className="px-2.5 sm:px-3 py-1.5 bg-surface hover:bg-line text-ink font-bold text-xs rounded-xl border border-line transition-all cursor-pointer shrink-0 shadow-2xs flex items-center space-x-1.5"
                     title="Folder & Catalog Settings"
                   >
-                    <Settings className="w-3.5 h-3.5 text-[#0071E3]" />
+                    <Settings className="w-3.5 h-3.5 text-brand" />
                     <span className="hidden md:inline">Settings</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => priceCatalogExportRef.current?.()}
-                    className="px-2.5 sm:px-3 py-1.5 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] font-bold text-xs rounded-xl border border-[#E5E5EA] transition-all cursor-pointer shrink-0 shadow-2xs flex items-center space-x-1.5"
+                    className="px-2.5 sm:px-3 py-1.5 bg-surface hover:bg-line text-ink font-bold text-xs rounded-xl border border-line transition-all cursor-pointer shrink-0 shadow-2xs flex items-center space-x-1.5"
                     title="Export Catalog to CSV"
                   >
-                    <Download className="w-3.5 h-3.5 text-[#34C759]" />
+                    <Download className="w-3.5 h-3.5 text-success" />
                     <span className="hidden md:inline">Export</span>
                   </button>
                 </div>
@@ -1351,7 +1351,7 @@ export default function App() {
                   <button
                     type="button"
                     onClick={() => setPriceCatalogMenuOpen(!priceCatalogMenuOpen)}
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#F5F5F7] hover:bg-[#E5E5EA] border border-[#E5E5EA] text-[#1D1D1F] transition-all cursor-pointer active:scale-95"
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-surface hover:bg-line border border-line text-ink transition-all cursor-pointer active:scale-95"
                     aria-label="More catalog actions"
                     title="More actions"
                   >
@@ -1365,16 +1365,16 @@ export default function App() {
                         onClick={() => setPriceCatalogMenuOpen(false)}
                         aria-hidden="true"
                       />
-                      <div className="absolute right-0 top-full mt-1.5 z-50 w-48 rounded-xl border border-[#E5E5EA] bg-white p-1.5 shadow-xl">
+                      <div className="absolute right-0 top-full mt-1.5 z-50 w-48 rounded-xl border border-line bg-white p-1.5 shadow-xl">
                         <button
                           type="button"
                           onClick={() => {
                             setPriceCatalogQuickCalcOpen(true);
                             setPriceCatalogMenuOpen(false);
                           }}
-                          className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg hover:bg-[#F5F5F7] transition-colors cursor-pointer text-left"
+                          className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg hover:bg-surface transition-colors cursor-pointer text-left"
                         >
-                          <Calculator className="w-4 h-4 text-[#34C759] shrink-0" />
+                          <Calculator className="w-4 h-4 text-success shrink-0" />
                           Quick Price Calculator
                         </button>
                         <button
@@ -1383,9 +1383,9 @@ export default function App() {
                             setPriceCatalogDeviceModalOpen(true);
                             setPriceCatalogMenuOpen(false);
                           }}
-                          className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg hover:bg-[#F5F5F7] transition-colors cursor-pointer text-left"
+                          className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg hover:bg-surface transition-colors cursor-pointer text-left"
                         >
-                          <Folder className="w-4 h-4 text-[#0071E3] shrink-0" />
+                          <Folder className="w-4 h-4 text-brand shrink-0" />
                           Switch Model
                         </button>
                         <button
@@ -1394,9 +1394,9 @@ export default function App() {
                             setPriceCatalogSettingsModalOpen(true);
                             setPriceCatalogMenuOpen(false);
                           }}
-                          className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg hover:bg-[#F5F5F7] transition-colors cursor-pointer text-left"
+                          className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg hover:bg-surface transition-colors cursor-pointer text-left"
                         >
-                          <Settings className="w-4 h-4 text-[#0071E3] shrink-0" />
+                          <Settings className="w-4 h-4 text-brand shrink-0" />
                           Catalog Settings
                         </button>
                         <button
@@ -1405,9 +1405,9 @@ export default function App() {
                             priceCatalogExportRef.current?.();
                             setPriceCatalogMenuOpen(false);
                           }}
-                          className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg hover:bg-[#F5F5F7] transition-colors cursor-pointer text-left"
+                          className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg hover:bg-surface transition-colors cursor-pointer text-left"
                         >
-                          <Download className="w-4 h-4 text-[#34C759] shrink-0" />
+                          <Download className="w-4 h-4 text-success shrink-0" />
                           Export to CSV
                         </button>
                       </div>
@@ -1418,7 +1418,7 @@ export default function App() {
             ) : ['intake', 'pipeline', 'pos', 'inventory', 'crm', 'suppliers', 'qa'].includes(activeTab) ? (
               /* Contextual Search Input — desktop only (modules have their own mobile search) */
               <div className="relative hidden lg:block w-52 shrink-0">
-                <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#86868B]" />
+                <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted" />
                 <input
                   type="text"
                   value={searchQuery}
@@ -1440,12 +1440,12 @@ export default function App() {
                       ? "Search Ticket #, Customer, Model, IMEI..."
                       : `Search ${currentTab.title}...`
                   }
-                  className="w-full bg-[#F5F5F7] text-xs text-[#1D1D1F] placeholder-[#86868B] pl-7 pr-5 py-1.5 rounded-xl border border-[#E5E5EA] focus:bg-white focus:outline-none focus:border-[#0071E3] transition-all shadow-2xs"
+                  className="w-full bg-surface text-xs text-ink placeholder-muted pl-7 pr-5 py-1.5 rounded-xl border border-line focus:bg-white focus:outline-none focus:border-brand transition-all shadow-2xs"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-[#86868B] hover:text-[#1D1D1F]"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted hover:text-ink"
                   >
                     ×
                   </button>
@@ -1669,11 +1669,11 @@ export default function App() {
                 className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all active:scale-95 cursor-pointer shrink-0 ${
                   archivedWorkOrders.length > 0
                     ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200 shadow-2xs'
-                    : 'bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] border-[#E5E5EA]'
+                    : 'bg-surface hover:bg-line text-ink border-line'
                 }`}
                 title="Recycle Bin & Archived Tickets"
               >
-                <Trash2 className={`w-3.5 h-3.5 ${archivedWorkOrders.length > 0 ? 'text-rose-600' : 'text-[#86868B]'}`} />
+                <Trash2 className={`w-3.5 h-3.5 ${archivedWorkOrders.length > 0 ? 'text-rose-600' : 'text-muted'}`} />
                 <span className="hidden sm:inline">{t('recycleBin')}</span>
                 {archivedWorkOrders.length > 0 && (
                   <span className="px-1.5 py-0.2 rounded-full bg-rose-600 text-white text-[10px] font-bold">
@@ -1687,7 +1687,7 @@ export default function App() {
             {activeTab === 'inventory' ? (
               <button
                 onClick={() => setInventoryAddModalOpen(true)}
-                className="flex items-center space-x-1.5 px-3.5 py-1.5 bg-[#0071E3] hover:bg-[#0051B3] text-white text-xs font-bold rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+                className="flex items-center space-x-1.5 px-3.5 py-1.5 bg-brand hover:bg-brand-deep text-white text-xs font-bold rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>{t('addPart')}</span>

@@ -5,6 +5,19 @@
 @theme {
   --breakpoint-3xl: 120rem;
   --breakpoint-4xl: 160rem;
+
+  /* Design tokens — canonical i35 palette (replaces raw hex in utilities) */
+  --color-brand: #0071E3;        /* primary action blue */
+  --color-brand-deep: #0051B3;   /* hover/pressed blue */
+  --color-brand-soft: #F0F6FF;   /* tinted blue background */
+  --color-ink: #1D1D1F;          /* primary text */
+  --color-muted: #86868B;        /* secondary text */
+  --color-faint: #6E6E73;        /* tertiary text */
+  --color-line: #E5E5EA;         /* hairline border */
+  --color-line-strong: #D2D2D7;  /* stronger border */
+  --color-surface: #F5F5F7;      /* subtle panel bg */
+  --color-success: #34C759;      /* positive/green */
+  --color-danger: #FF3B30;       /* destructive/red */
 }
 
 /* Global focus ring — consistent visible keyboard focus across the app. */

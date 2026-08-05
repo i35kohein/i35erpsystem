@@ -96,15 +96,15 @@ export const UserRoleSwitcher: React.FC<UserRoleSwitcherProps> = ({
             className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
           />
-          <div className={`absolute z-50 w-56 max-w-[calc(100vw-1rem)] rounded-2xl bg-white border border-[#D2D2D7] shadow-2xl p-2 space-y-1.5 animate-in fade-in zoom-in-95 duration-150 ${
+          <div className={`absolute z-50 w-56 max-w-[calc(100vw-1rem)] rounded-2xl bg-white border border-line-strong shadow-2xl p-2 space-y-1.5 animate-in fade-in zoom-in-95 duration-150 ${
             compact ? 'left-full bottom-0 ml-2' : 'left-0 bottom-full mb-2'
           }`}>
-            <div className="px-3 py-2 border-b border-[#E5E5EA]">
-              <span className="text-[10px] font-extrabold text-[#86868B] uppercase tracking-wider block">
+            <div className="px-3 py-2 border-b border-line">
+              <span className="text-[10px] font-extrabold text-muted uppercase tracking-wider block">
                 Switch User / Operating Role
               </span>
-              <p className="text-[11px] text-[#1D1D1F] font-medium mt-0.5">
-                Current: <strong className="text-[#0071E3]">{currentUser.name}</strong> ({currentUser.role})
+              <p className="text-[11px] text-ink font-medium mt-0.5">
+                Current: <strong className="text-brand">{currentUser.name}</strong> ({currentUser.role})
               </p>
             </div>
 
@@ -124,8 +124,8 @@ export const UserRoleSwitcher: React.FC<UserRoleSwitcherProps> = ({
                     }}
                     className={`w-full flex items-center justify-between p-2.5 rounded-xl border text-xs transition-all cursor-pointer text-left ${
                       isSelected
-                        ? 'bg-[#F0F6FF] border-[#0071E3] text-[#0071E3] font-bold shadow-2xs'
-                        : 'bg-white border-transparent hover:bg-[#F5F5F7] text-[#1D1D1F]'
+                        ? 'bg-brand-soft border-brand text-brand font-bold shadow-2xs'
+                        : 'bg-white border-transparent hover:bg-surface text-ink'
                     }`}
                   >
                     <div className="flex items-center space-x-2.5 min-w-0">
@@ -133,13 +133,13 @@ export const UserRoleSwitcher: React.FC<UserRoleSwitcherProps> = ({
                         <Icon className="w-4 h-4" />
                       </div>
                       <div className="min-w-0">
-                        <span className="font-extrabold block truncate text-[#1D1D1F]">{usr.name}</span>
+                        <span className="font-extrabold block truncate text-ink">{usr.name}</span>
                         <div className="flex items-center space-x-1.5">
                           <span className={`px-1.5 py-0.2 rounded-md text-[9px] font-bold border ${badge.bgColor}`}>
                             {usr.role}
                           </span>
                           {usr.role === 'Technician' && usr.technicianName && (
-                            <span className="text-[10px] text-[#86868B] truncate">
+                            <span className="text-[10px] text-muted truncate">
                               • {usr.technicianName}
                             </span>
                           )}
@@ -147,7 +147,7 @@ export const UserRoleSwitcher: React.FC<UserRoleSwitcherProps> = ({
                       </div>
                     </div>
 
-                    {isSelected && <Check className="w-4 h-4 text-[#0071E3] shrink-0" />}
+                    {isSelected && <Check className="w-4 h-4 text-brand shrink-0" />}
                   </button>
                 );
               })}
@@ -155,14 +155,14 @@ export const UserRoleSwitcher: React.FC<UserRoleSwitcherProps> = ({
 
             {/* Admin User Management Button */}
             {currentUser.role === 'Admin' && onOpenUserManagement && (
-              <div className="pt-1 border-t border-[#E5E5EA]">
+              <div className="pt-1 border-t border-line">
                 <button
                   type="button"
                   onClick={() => {
                     onOpenUserManagement();
                     setIsOpen(false);
                   }}
-                  className="w-full py-2 px-3 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#0071E3] font-extrabold text-xs rounded-xl transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
+                  className="w-full py-2 px-3 bg-surface hover:bg-line text-brand font-extrabold text-xs rounded-xl transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
                 >
                   <UserPlus className="w-3.5 h-3.5" />
                   <span>Manage Users & Permissions</span>

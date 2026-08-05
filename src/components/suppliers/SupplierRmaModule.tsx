@@ -170,31 +170,31 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
   return (
     <div className="space-y-3">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-[#E5E5EA] shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-line shadow-xs">
         <div className="module-subheader">
-          <h1 className="text-lg font-bold text-[#1D1D1F] flex items-center space-x-2">
-            <Truck className="w-5 h-5 text-[#0071E3]" />
+          <h1 className="text-lg font-bold text-ink flex items-center space-x-2">
+            <Truck className="w-5 h-5 text-brand" />
             <span className="hidden sm:inline">Supplier Purchase Orders & Defective RMA Returns</span>
             <span className="sm:hidden">Purchase Orders & RMA Returns</span>
           </h1>
-          <p className="text-xs text-[#86868B]">Track vendor shipments, defective part returns, and vendor credit authorizations</p>
+          <p className="text-xs text-muted">Track vendor shipments, defective part returns, and vendor credit authorizations</p>
         </div>
 
         {/* Subtab Toggle — full-width equal 3-column segmented on mobile */}
-        <div className="bg-[#F5F5F7] p-1.5 rounded-2xl border border-[#E5E5EA] grid grid-cols-3 gap-1.5 overflow-x-auto no-scrollbar text-xs shadow-2xs w-full md:flex md:items-center md:w-auto md:overflow-visible">
+        <div className="bg-surface p-1.5 rounded-2xl border border-line grid grid-cols-3 gap-1.5 overflow-x-auto no-scrollbar text-xs shadow-2xs w-full md:flex md:items-center md:w-auto md:overflow-visible">
           <button
             type="button"
             onClick={() => setActiveSubTab('RMA')}
             className={`w-full md:w-auto px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center justify-center md:justify-start space-x-2 cursor-pointer border select-none active:scale-95 ${
               activeSubTab === 'RMA'
-                ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-xs'
-                : 'bg-white hover:bg-slate-100 text-[#6E6E73] hover:text-[#1D1D1F] border-[#E5E5EA]'
+                ? 'bg-brand text-white border-brand shadow-xs'
+                : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
             }`}
           >
             <span>RMA Defective Returns</span>
             <span
               className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
-                activeSubTab === 'RMA' ? 'bg-white/20 text-white' : 'bg-[#E5E5EA] text-[#1D1D1F]'
+                activeSubTab === 'RMA' ? 'bg-white/20 text-white' : 'bg-line text-ink'
               }`}
             >
               {rmas.length}
@@ -205,14 +205,14 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
             onClick={() => setActiveSubTab('PO')}
             className={`w-full md:w-auto px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center justify-center md:justify-start space-x-2 cursor-pointer border select-none active:scale-95 ${
               activeSubTab === 'PO'
-                ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-xs'
-                : 'bg-white hover:bg-slate-100 text-[#6E6E73] hover:text-[#1D1D1F] border-[#E5E5EA]'
+                ? 'bg-brand text-white border-brand shadow-xs'
+                : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
             }`}
           >
             <span>Purchase Orders</span>
             <span
               className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
-                activeSubTab === 'PO' ? 'bg-white/20 text-white' : 'bg-[#E5E5EA] text-[#1D1D1F]'
+                activeSubTab === 'PO' ? 'bg-white/20 text-white' : 'bg-line text-ink'
               }`}
             >
               {purchaseOrders.length}
@@ -223,8 +223,8 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
             onClick={() => setActiveSubTab('SUPPLIERS')}
             className={`w-full md:w-auto px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center justify-center md:justify-start space-x-2 cursor-pointer border select-none active:scale-95 ${
               activeSubTab === 'SUPPLIERS'
-                ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-xs'
-                : 'bg-white hover:bg-slate-100 text-[#6E6E73] hover:text-[#1D1D1F] border-[#E5E5EA]'
+                ? 'bg-brand text-white border-brand shadow-xs'
+                : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
             }`}
           >
             <span>Vendor Catalog</span>
@@ -236,22 +236,22 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-bold text-[#1D1D1F] flex items-center space-x-2">
+              <h2 className="text-sm font-bold text-ink flex items-center space-x-2">
                 <RotateCcw className="w-4 h-4 text-[#AF52DE]" />
                 <span className="hidden sm:inline">Defective Return Merchandise Authorizations (RMA)</span>
                 <span className="sm:hidden">Defective RMA Returns</span>
               </h2>
-              <p className="text-xs text-[#86868B]">Flag bad screens/batteries directly and monitor vendor credit refunds</p>
+              <p className="text-xs text-muted">Flag bad screens/batteries directly and monitor vendor credit refunds</p>
             </div>
 
             <div className="flex items-center gap-2">
-              <div className="flex shrink-0 items-center rounded-lg border border-[#E5E5EA] bg-white p-0.5 shadow-2xs">
+              <div className="flex shrink-0 items-center rounded-lg border border-line bg-white p-0.5 shadow-2xs">
                 <button
                   type="button"
                   onClick={() => setRmaView('table')}
                   title="Table view"
                   aria-label="RMA table view"
-                  className={`inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors ${rmaView === 'table' ? 'bg-[#0071E3] text-white' : 'text-[#6E6E73] hover:bg-slate-100'}`}
+                  className={`inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors ${rmaView === 'table' ? 'bg-brand text-white' : 'text-faint hover:bg-slate-100'}`}
                 >
                   <List className="h-3.5 w-3.5" />
                 </button>
@@ -260,7 +260,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                   onClick={() => setRmaView('cards')}
                   title="Card view"
                   aria-label="RMA card view"
-                  className={`inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors ${rmaView === 'cards' ? 'bg-[#0071E3] text-white' : 'text-[#6E6E73] hover:bg-slate-100'}`}
+                  className={`inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors ${rmaView === 'cards' ? 'bg-brand text-white' : 'text-faint hover:bg-slate-100'}`}
                 >
                   <Grid className="h-3.5 w-3.5" />
                 </button>
@@ -277,49 +277,49 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
           </div>
 
           {filteredRmas.length === 0 ? (
-            <div className="flex min-h-[200px] flex-col items-center justify-center p-12 text-center space-y-3 bg-white border border-[#E5E5EA] rounded-2xl">
-              <RotateCcw className="w-8 h-8 text-[#86868B] mx-auto" />
+            <div className="flex min-h-[200px] flex-col items-center justify-center p-12 text-center space-y-3 bg-white border border-line rounded-2xl">
+              <RotateCcw className="w-8 h-8 text-muted mx-auto" />
               <div className="space-y-1">
-                <p className="text-sm font-bold text-[#1D1D1F]">No RMAs match your search or status filter</p>
-                <p className="text-xs text-[#86868B]">Flag a defective part to start tracking vendor credit.</p>
+                <p className="text-sm font-bold text-ink">No RMAs match your search or status filter</p>
+                <p className="text-xs text-muted">Flag a defective part to start tracking vendor credit.</p>
               </div>
             </div>
           ) : rmaView === 'cards' ? (
             /* PHONE CARD GRID */
             <div className="grid grid-cols-1 gap-3">
               {filteredRmas.map((rma) => (
-                <div key={rma.id} className="space-y-3 bg-white border border-[#E5E5EA] rounded-2xl p-4 text-xs shadow-xs">
-                  <div className="flex items-start justify-between gap-2 border-b border-[#E5E5EA] pb-2">
+                <div key={rma.id} className="space-y-3 bg-white border border-line rounded-2xl p-4 text-xs shadow-xs">
+                  <div className="flex items-start justify-between gap-2 border-b border-line pb-2">
                     <div>
-                      <p className="font-mono font-bold text-[#0071E3]">{rma.rmaNumber}</p>
-                      <p className="text-[10px] text-[#86868B]">{new Date(rma.createdAt).toLocaleDateString()}</p>
+                      <p className="font-mono font-bold text-brand">{rma.rmaNumber}</p>
+                      <p className="text-[10px] text-muted">{new Date(rma.createdAt).toLocaleDateString()}</p>
                     </div>
-                    <span className={`inline-flex items-center gap-1.5 text-[10px] font-extrabold px-2.5 py-1 rounded-lg border shadow-2xs ${rma.status === 'Credit Approved' ? 'bg-[#EAF8ED] text-[#28A745] border-[#34C759]/30' : rma.status === 'Shipped to Vendor' ? 'bg-[#F0F6FF] text-[#0071E3] border-[#0071E3]/25' : 'bg-slate-100 text-slate-700 border-slate-200'}`}>
+                    <span className={`inline-flex items-center gap-1.5 text-[10px] font-extrabold px-2.5 py-1 rounded-lg border shadow-2xs ${rma.status === 'Credit Approved' ? 'bg-[#EAF8ED] text-[#28A745] border-success/30' : rma.status === 'Shipped to Vendor' ? 'bg-brand-soft text-brand border-brand/25' : 'bg-slate-100 text-slate-700 border-slate-200'}`}>
                       <span>{rma.status}</span>
                     </span>
                   </div>
 
                   <div>
-                    <p className="font-bold text-[#1D1D1F]">{rma.partName}</p>
+                    <p className="font-bold text-ink">{rma.partName}</p>
                     <div className="mt-1 flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#1D1D1F] border border-[#E5E5EA]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#0071E3]" />
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-surface text-ink border border-line">
+                        <span className="w-1.5 h-1.5 rounded-full bg-brand" />
                         <span>Tier: {rma.partQuality}</span>
                       </span>
                       <span className="font-bold text-[#AF52DE]">{rma.supplierName}</span>
                     </div>
                   </div>
 
-                  {rma.reason && <p className="line-clamp-2 text-[#1D1D1F]">{rma.reason}</p>}
+                  {rma.reason && <p className="line-clamp-2 text-ink">{rma.reason}</p>}
 
-                  <div className="flex items-center justify-between gap-2 border-t border-[#E5E5EA] pt-2">
-                    <span className="font-mono text-[10px] text-[#86868B]">{rma.trackingNumber || 'No tracking yet'}</span>
+                  <div className="flex items-center justify-between gap-2 border-t border-line pt-2">
+                    <span className="font-mono text-[10px] text-muted">{rma.trackingNumber || 'No tracking yet'}</span>
                     {rma.vendorCreditAmount ? (
                       <span className="text-[10px] text-[#28A745] font-extrabold">+{rma.vendorCreditAmount.toLocaleString()} MMK Credit</span>
                     ) : rma.status === 'Shipped to Vendor' ? (
                       <button
                         onClick={() => onUpdateRmaStatus(rma.id, 'Credit Approved', rma.unitCost * rma.quantity)}
-                        className="px-2.5 py-1.5 bg-[#EAF8ED] hover:bg-emerald-100 text-[#28A745] border border-[#34C759]/20 text-[10px] font-bold rounded-lg cursor-pointer"
+                        className="px-2.5 py-1.5 bg-[#EAF8ED] hover:bg-emerald-100 text-[#28A745] border border-success/20 text-[10px] font-bold rounded-lg cursor-pointer"
                       >
                         Approve Credit
                       </button>
@@ -329,9 +329,9 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
               ))}
             </div>
           ) : (
-          <div className="bg-white border border-[#E5E5EA] rounded-2xl overflow-hidden text-xs shadow-xs">
+          <div className="bg-white border border-line rounded-2xl overflow-hidden text-xs shadow-xs">
             <table className="w-full text-left">
-              <thead className="bg-[#F5F5F7] text-[#86868B] text-[10px] uppercase font-mono border-b border-[#E5E5EA]">
+              <thead className="bg-surface text-muted text-[10px] uppercase font-mono border-b border-line">
                 <tr>
                   <th className="p-3">RMA # & Date</th>
                   <th className="p-3">Defective Part & Tier</th>
@@ -342,34 +342,34 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                   <th className="p-3 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E5E5EA]">
+              <tbody className="divide-y divide-line">
                 {filteredRmas.map((rma) => (
                   <tr key={rma.id} className="hover:bg-slate-50 transition-colors">
                     <td className="p-3 font-mono">
-                      <p className="font-bold text-[#0071E3]">{rma.rmaNumber}</p>
-                      <p className="text-[10px] text-[#86868B]">{new Date(rma.createdAt).toLocaleDateString()}</p>
+                      <p className="font-bold text-brand">{rma.rmaNumber}</p>
+                      <p className="text-[10px] text-muted">{new Date(rma.createdAt).toLocaleDateString()}</p>
                     </td>
 
                     <td className="p-3.5">
-                      <p className="font-bold text-[#1D1D1F]">{rma.partName}</p>
-                      <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#1D1D1F] border border-[#E5E5EA]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#0071E3]" />
+                      <p className="font-bold text-ink">{rma.partName}</p>
+                      <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-surface text-ink border border-line">
+                        <span className="w-1.5 h-1.5 rounded-full bg-brand" />
                         <span>Tier: {rma.partQuality}</span>
                       </span>
                     </td>
 
                     <td className="p-3.5 font-bold text-[#AF52DE]">{rma.supplierName}</td>
 
-                    <td className="p-3.5 text-[#1D1D1F] max-w-xs text-xs hidden lg:table-cell">{rma.reason}</td>
+                    <td className="p-3.5 text-ink max-w-xs text-xs hidden lg:table-cell">{rma.reason}</td>
 
-                    <td className="p-3.5 font-mono text-[10px] text-[#86868B] hidden xl:table-cell">
+                    <td className="p-3.5 font-mono text-[10px] text-muted hidden xl:table-cell">
                       {rma.trackingNumber || 'No tracking yet'}
                     </td>
 
                     <td className="p-3.5">
                       <span className={`inline-flex items-center gap-1.5 text-[10px] font-extrabold px-2.5 py-1 rounded-lg border shadow-2xs ${
-                        rma.status === 'Credit Approved' ? 'bg-[#EAF8ED] text-[#28A745] border-[#34C759]/30' :
-                        rma.status === 'Shipped to Vendor' ? 'bg-[#F0F6FF] text-[#0071E3] border-[#0071E3]/25' :
+                        rma.status === 'Credit Approved' ? 'bg-[#EAF8ED] text-[#28A745] border-success/30' :
+                        rma.status === 'Shipped to Vendor' ? 'bg-brand-soft text-brand border-brand/25' :
                         'bg-slate-100 text-slate-700 border-slate-200'
                       }`}>
                         <span>{rma.status}</span>
@@ -383,7 +383,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                       {rma.status === 'Shipped to Vendor' && (
                         <button
                           onClick={() => onUpdateRmaStatus(rma.id, 'Credit Approved', rma.unitCost * rma.quantity)}
-                          className="px-2 py-1 bg-[#EAF8ED] hover:bg-emerald-100 text-[#28A745] border border-[#34C759]/20 text-[10px] font-bold rounded"
+                          className="px-2 py-1 bg-[#EAF8ED] hover:bg-emerald-100 text-[#28A745] border border-success/20 text-[10px] font-bold rounded"
                         >
                           Approve Credit
                         </button>
@@ -401,34 +401,34 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
       {activeSubTab === 'PO' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-[#1D1D1F] flex items-center space-x-2">
-              <FileText className="w-4 h-4 text-[#0071E3]" />
+            <h2 className="text-sm font-bold text-ink flex items-center space-x-2">
+              <FileText className="w-4 h-4 text-brand" />
               <span>Purchase Orders (POs)</span>
             </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {purchaseOrders.map((po) => (
-              <div key={po.id} className="p-4 bg-white border border-[#E5E5EA] rounded-2xl space-y-3 text-xs shadow-xs">
-                <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-2">
+              <div key={po.id} className="p-4 bg-white border border-line rounded-2xl space-y-3 text-xs shadow-xs">
+                <div className="flex items-center justify-between border-b border-line pb-2">
                   <div>
-                    <span className="font-mono font-bold text-[#0071E3]">{po.poNumber}</span>
-                    <p className="text-[#1D1D1F] font-semibold">{po.supplierName}</p>
+                    <span className="font-mono font-bold text-brand">{po.poNumber}</span>
+                    <p className="text-ink font-semibold">{po.supplierName}</p>
                   </div>
-                  <span className="bg-[#F0F6FF] text-[#0071E3] border border-[#0071E3]/20 px-2 py-0.5 rounded font-bold">{po.status}</span>
+                  <span className="bg-brand-soft text-brand border border-brand/20 px-2 py-0.5 rounded font-bold">{po.status}</span>
                 </div>
 
                 <div className="space-y-1">
                   {po.items.map((it, idx) => (
-                    <div key={idx} className="flex justify-between text-[#1D1D1F]">
+                    <div key={idx} className="flex justify-between text-ink">
                       <span>{it.quantity}x {it.partName}</span>
                       <span className="font-mono">{(it.unitCost * it.quantity).toLocaleString()} MMK</span>
                     </div>
                   ))}
                 </div>
 
-                <div className="flex justify-between items-center pt-2 border-t border-[#E5E5EA] font-bold">
-                  <span className="text-[#86868B]">Total PO Value:</span>
+                <div className="flex justify-between items-center pt-2 border-t border-line font-bold">
+                  <span className="text-muted">Total PO Value:</span>
                   <span className="text-[#28A745] font-mono text-sm">{po.totalCost.toLocaleString()} MMK</span>
                 </div>
               </div>
@@ -441,16 +441,16 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-bold text-[#1D1D1F] flex items-center space-x-2">
-                <Truck className="w-4 h-4 text-[#0071E3]" />
+              <h2 className="text-sm font-bold text-ink flex items-center space-x-2">
+                <Truck className="w-4 h-4 text-brand" />
                 <span>Vendor Supplier Catalog ({suppliers.length})</span>
               </h2>
-              <p className="text-xs text-[#86868B]">Manage part supplier profiles, codes, contact info, and RMA lead times</p>
+              <p className="text-xs text-muted">Manage part supplier profiles, codes, contact info, and RMA lead times</p>
             </div>
             <Button
               type="button"
               onClick={() => setShowAddSupplierModal(true)}
-              className="bg-[#0071E3] hover:bg-[#0051B3] text-white flex items-center space-x-1.5"
+              className="bg-brand hover:bg-brand-deep text-white flex items-center space-x-1.5"
             >
               <Plus className="w-4 h-4" />
               <span>Register Supplier</span>
@@ -461,17 +461,17 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
             {suppliers.map((sup) => {
               const countParts = parts.filter((p) => p.supplierId === sup.id || p.supplierName === sup.name).length;
               return (
-                <div key={sup.id} className="p-4 bg-white border border-[#E5E5EA] rounded-2xl space-y-2.5 shadow-xs relative">
+                <div key={sup.id} className="p-4 bg-white border border-line rounded-2xl space-y-2.5 shadow-xs relative">
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="font-extrabold text-[#1D1D1F] text-sm">{sup.name}</h3>
-                      <span className="bg-[#F5F5F7] text-[#1D1D1F] border border-[#E5E5EA] px-2 py-0.5 rounded font-mono text-[10px] inline-block mt-0.5">{sup.code}</span>
+                      <h3 className="font-extrabold text-ink text-sm">{sup.name}</h3>
+                      <span className="bg-surface text-ink border border-line px-2 py-0.5 rounded font-mono text-[10px] inline-block mt-0.5">{sup.code}</span>
                     </div>
                     <div className="flex items-center space-x-1">
                       <button
                         onClick={() => setEditingSupplier(sup)}
                         title="Edit Supplier"
-                        className="p-1.5 text-slate-500 hover:text-[#0071E3] hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                        className="p-1.5 text-slate-500 hover:text-brand hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
                       >
                         <Edit2 className="w-3.5 h-3.5" />
                       </button>
@@ -485,7 +485,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                     </div>
                   </div>
 
-                  <div className="space-y-1 text-[#86868B]">
+                  <div className="space-y-1 text-muted">
                     <p className="flex items-center space-x-1.5">
                       <Mail className="w-3 h-3 text-slate-400 shrink-0" />
                       <span className="truncate">{sup.contactEmail}</span>
@@ -496,9 +496,9 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                     </p>
                   </div>
 
-                  <div className="flex justify-between items-center pt-2 border-t border-[#E5E5EA] text-[11px]">
-                    <span className="text-[#86868B]">RMA Lead Time:</span>
-                    <span className="text-[#0071E3] font-bold">{sup.avgRmaTurnaroundDays} Days</span>
+                  <div className="flex justify-between items-center pt-2 border-t border-line text-[11px]">
+                    <span className="text-muted">RMA Lead Time:</span>
+                    <span className="text-brand font-bold">{sup.avgRmaTurnaroundDays} Days</span>
                   </div>
                 </div>
               );
@@ -510,18 +510,18 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
       {/* New RMA Modal */}
       {showNewRmaModal && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-[#E5E5EA] rounded-2xl max-w-lg w-full p-6 space-y-4 text-xs shadow-xl">
-            <h3 className="text-sm font-bold text-[#1D1D1F] border-b border-[#E5E5EA] pb-2">
+          <div className="bg-white border border-line rounded-2xl max-w-lg w-full p-6 space-y-4 text-xs shadow-xl">
+            <h3 className="text-sm font-bold text-ink border-b border-line pb-2">
               Flag Defective Component for Vendor RMA
             </h3>
 
             <div className="space-y-3">
               <div>
-                <label className="block text-[#86868B] mb-1">Select Component from Inventory</label>
+                <label className="block text-muted mb-1">Select Component from Inventory</label>
                 <select
                   value={newRmaData.partId}
                   onChange={(e) => setNewRmaData({ ...newRmaData, partId: e.target.value })}
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-lg p-2 text-[#1D1D1F] focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
+                  className="w-full bg-surface border border-line rounded-lg p-2 text-ink focus:border-brand focus:ring-2 focus:ring-brand/20"
                 >
                   {parts.map((p) => (
                     <option key={p.id} value={p.id}>{p.name} ({p.qualityTier}) - {p.costPrice.toLocaleString()} MMK</option>
@@ -530,11 +530,11 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
               </div>
 
               <div>
-                <label className="block text-[#86868B] mb-1">Vendor / Supplier</label>
+                <label className="block text-muted mb-1">Vendor / Supplier</label>
                 <select
                   value={newRmaData.supplierId}
                   onChange={(e) => setNewRmaData({ ...newRmaData, supplierId: e.target.value })}
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-lg p-2 text-[#1D1D1F] focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
+                  className="w-full bg-surface border border-line rounded-lg p-2 text-ink focus:border-brand focus:ring-2 focus:ring-brand/20"
                 >
                   {suppliers.map((s) => (
                     <option key={s.id} value={s.id}>{s.name}</option>
@@ -543,24 +543,24 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
               </div>
 
               <div>
-                <label className="block text-[#86868B] mb-1">Defect Description / Testing Notes</label>
+                <label className="block text-muted mb-1">Defect Description / Testing Notes</label>
                 <textarea
                   rows={3}
                   value={newRmaData.reason || ''}
                   onChange={(e) => setNewRmaData({ ...newRmaData, reason: e.target.value })}
                   placeholder="e.g. Screen lines, battery non-genuine warning loop..."
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-lg p-2 text-[#1D1D1F] focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
+                  className="w-full bg-surface border border-line rounded-lg p-2 text-ink focus:border-brand focus:ring-2 focus:ring-brand/20"
                 />
               </div>
 
               <div>
-                <label className="block text-[#86868B] mb-1">Return Shipment Tracking #</label>
+                <label className="block text-muted mb-1">Return Shipment Tracking #</label>
                 <input
                   type="text"
                   value={newRmaData.trackingNumber || ''}
                   onChange={(e) => setNewRmaData({ ...newRmaData, trackingNumber: e.target.value })}
                   placeholder="e.g. 1Z9999990199887766"
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-lg p-2 text-[#1D1D1F] font-mono focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
+                  className="w-full bg-surface border border-line rounded-lg p-2 text-ink font-mono focus:border-brand focus:ring-2 focus:ring-brand/20"
                 />
               </div>
             </div>
@@ -588,16 +588,16 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
       {/* Register Supplier Modal */}
       {showAddSupplierModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <form onSubmit={handleCreateSupplierSubmit} className="bg-white border border-[#E5E5EA] rounded-2xl max-w-md w-full p-5 space-y-4 text-xs shadow-2xl">
-            <div className="flex justify-between items-center border-b border-[#E5E5EA] pb-2">
-              <h4 className="font-extrabold text-[#1D1D1F] text-sm flex items-center space-x-1.5">
-                <Truck className="w-4 h-4 text-[#0071E3]" />
+          <form onSubmit={handleCreateSupplierSubmit} className="bg-white border border-line rounded-2xl max-w-md w-full p-5 space-y-4 text-xs shadow-2xl">
+            <div className="flex justify-between items-center border-b border-line pb-2">
+              <h4 className="font-extrabold text-ink text-sm flex items-center space-x-1.5">
+                <Truck className="w-4 h-4 text-brand" />
                 <span>Register New Supplier Vendor</span>
               </h4>
               <button
                 type="button"
                 onClick={() => setShowAddSupplierModal(false)}
-                className="text-[#86868B] hover:text-[#1D1D1F] cursor-pointer"
+                className="text-muted hover:text-ink cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -605,64 +605,64 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
 
             <div className="space-y-3">
               <div>
-                <label className="block font-bold text-[#1D1D1F] mb-1">Supplier Vendor Name *</label>
+                <label className="block font-bold text-ink mb-1">Supplier Vendor Name *</label>
                 <input
                   type="text"
                   required
                   value={newSupplierForm.name}
                   onChange={(e) => setNewSupplierForm({ ...newSupplierForm, name: e.target.value })}
                   placeholder="e.g. MobileSentrix USA"
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2 text-xs font-bold text-[#1D1D1F]"
+                  className="w-full bg-surface border border-line rounded-xl p-2 text-xs font-bold text-ink"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block font-bold text-[#1D1D1F] mb-1">Short Code *</label>
+                  <label className="block font-bold text-ink mb-1">Short Code *</label>
                   <input
                     type="text"
                     required
                     value={newSupplierForm.code}
                     onChange={(e) => setNewSupplierForm({ ...newSupplierForm, code: e.target.value })}
                     placeholder="e.g. MS-US"
-                    className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2 text-xs font-mono font-bold text-[#1D1D1F]"
+                    className="w-full bg-surface border border-line rounded-xl p-2 text-xs font-mono font-bold text-ink"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-[#1D1D1F] mb-1">Phone Number</label>
+                  <label className="block font-bold text-ink mb-1">Phone Number</label>
                   <input
                     type="text"
                     value={newSupplierForm.phone}
                     onChange={(e) => setNewSupplierForm({ ...newSupplierForm, phone: e.target.value })}
                     placeholder="+1 (800) 555-0199"
-                    className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2 text-xs text-[#1D1D1F]"
+                    className="w-full bg-surface border border-line rounded-xl p-2 text-xs text-ink"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-bold text-[#1D1D1F] mb-1">Contact Email</label>
+                <label className="block font-bold text-ink mb-1">Contact Email</label>
                 <input
                   type="email"
                   value={newSupplierForm.contactEmail}
                   onChange={(e) => setNewSupplierForm({ ...newSupplierForm, contactEmail: e.target.value })}
                   placeholder="rma@mobilesentrix.com"
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2 text-xs text-[#1D1D1F]"
+                  className="w-full bg-surface border border-line rounded-xl p-2 text-xs text-ink"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-[#1D1D1F] mb-1">Avg RMA Lead Time (Days)</label>
+                <label className="block font-bold text-ink mb-1">Avg RMA Lead Time (Days)</label>
                 <input
                   type="number"
                   value={newSupplierForm.avgRmaTurnaroundDays}
                   onChange={(e) => setNewSupplierForm({ ...newSupplierForm, avgRmaTurnaroundDays: Number(e.target.value) })}
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2 text-xs text-[#1D1D1F]"
+                  className="w-full bg-surface border border-line rounded-xl p-2 text-xs text-ink"
                 />
               </div>
             </div>
 
-            <div className="flex justify-end space-x-2 pt-2 border-t border-[#E5E5EA]">
+            <div className="flex justify-end space-x-2 pt-2 border-t border-line">
               <Button
                 type="button"
                 onClick={() => setShowAddSupplierModal(false)}
@@ -672,7 +672,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
               </Button>
               <Button
                 type="submit"
-                className="bg-[#0071E3] hover:bg-[#0051B3] text-white"
+                className="bg-brand hover:bg-brand-deep text-white"
               >
                 Save Supplier
               </Button>
@@ -684,16 +684,16 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
       {/* Edit Supplier Modal */}
       {editingSupplier && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <form onSubmit={handleSaveEditSupplierSubmit} className="bg-white border border-[#E5E5EA] rounded-2xl max-w-md w-full p-5 space-y-4 text-xs shadow-2xl">
-            <div className="flex justify-between items-center border-b border-[#E5E5EA] pb-2">
-              <h4 className="font-extrabold text-[#1D1D1F] text-sm flex items-center space-x-1.5">
-                <Truck className="w-4 h-4 text-[#0071E3]" />
+          <form onSubmit={handleSaveEditSupplierSubmit} className="bg-white border border-line rounded-2xl max-w-md w-full p-5 space-y-4 text-xs shadow-2xl">
+            <div className="flex justify-between items-center border-b border-line pb-2">
+              <h4 className="font-extrabold text-ink text-sm flex items-center space-x-1.5">
+                <Truck className="w-4 h-4 text-brand" />
                 <span>Edit Supplier Vendor Profile</span>
               </h4>
               <button
                 type="button"
                 onClick={() => setEditingSupplier(null)}
-                className="text-[#86868B] hover:text-[#1D1D1F] cursor-pointer"
+                className="text-muted hover:text-ink cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -701,60 +701,60 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
 
             <div className="space-y-3">
               <div>
-                <label className="block font-bold text-[#1D1D1F] mb-1">Supplier Name *</label>
+                <label className="block font-bold text-ink mb-1">Supplier Name *</label>
                 <input
                   type="text"
                   required
                   value={editingSupplier.name}
                   onChange={(e) => setEditingSupplier({ ...editingSupplier, name: e.target.value })}
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2 text-xs font-bold text-[#1D1D1F]"
+                  className="w-full bg-surface border border-line rounded-xl p-2 text-xs font-bold text-ink"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block font-bold text-[#1D1D1F] mb-1">Short Code *</label>
+                  <label className="block font-bold text-ink mb-1">Short Code *</label>
                   <input
                     type="text"
                     required
                     value={editingSupplier.code}
                     onChange={(e) => setEditingSupplier({ ...editingSupplier, code: e.target.value })}
-                    className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2 text-xs font-mono font-bold text-[#1D1D1F]"
+                    className="w-full bg-surface border border-line rounded-xl p-2 text-xs font-mono font-bold text-ink"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-[#1D1D1F] mb-1">Phone Number</label>
+                  <label className="block font-bold text-ink mb-1">Phone Number</label>
                   <input
                     type="text"
                     value={editingSupplier.phone}
                     onChange={(e) => setEditingSupplier({ ...editingSupplier, phone: e.target.value })}
-                    className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2 text-xs text-[#1D1D1F]"
+                    className="w-full bg-surface border border-line rounded-xl p-2 text-xs text-ink"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-bold text-[#1D1D1F] mb-1">Contact Email</label>
+                <label className="block font-bold text-ink mb-1">Contact Email</label>
                 <input
                   type="email"
                   value={editingSupplier.contactEmail}
                   onChange={(e) => setEditingSupplier({ ...editingSupplier, contactEmail: e.target.value })}
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2 text-xs text-[#1D1D1F]"
+                  className="w-full bg-surface border border-line rounded-xl p-2 text-xs text-ink"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-[#1D1D1F] mb-1">Avg RMA Lead Time (Days)</label>
+                <label className="block font-bold text-ink mb-1">Avg RMA Lead Time (Days)</label>
                 <input
                   type="number"
                   value={editingSupplier.avgRmaTurnaroundDays}
                   onChange={(e) => setEditingSupplier({ ...editingSupplier, avgRmaTurnaroundDays: Number(e.target.value) })}
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2 text-xs text-[#1D1D1F]"
+                  className="w-full bg-surface border border-line rounded-xl p-2 text-xs text-ink"
                 />
               </div>
             </div>
 
-            <div className="flex justify-end space-x-2 pt-2 border-t border-[#E5E5EA]">
+            <div className="flex justify-end space-x-2 pt-2 border-t border-line">
               <Button
                 type="button"
                 onClick={() => setEditingSupplier(null)}
@@ -764,7 +764,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
               </Button>
               <Button
                 type="submit"
-                className="bg-[#0071E3] hover:bg-[#0051B3] text-white"
+                className="bg-brand hover:bg-brand-deep text-white"
               >
                 Save Changes
               </Button>

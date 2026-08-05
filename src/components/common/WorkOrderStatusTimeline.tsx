@@ -39,7 +39,7 @@ interface WorkOrderStatusTimelineProps {
 
 export const MAIN_STATUS_PIPELINE: { status: WorkOrderStatus; label: string; desc: string; icon: any; color: string; badge: string; bg: string }[] = [
   { status: 'Receive', label: 'Received', desc: 'Ticket Intake & Inspection', icon: PackageCheck, color: 'text-purple-600 border-purple-500 bg-purple-500', badge: 'bg-purple-100 text-purple-800 border-purple-200', bg: 'bg-purple-50' },
-  { status: 'In Progress', label: 'In Progress', desc: 'Active Hardware Repair', icon: Cog, color: 'text-[#0071E3] border-[#0071E3] bg-[#0071E3]', badge: 'bg-blue-100 text-blue-800 border-blue-200', bg: 'bg-blue-50' },
+  { status: 'In Progress', label: 'In Progress', desc: 'Active Hardware Repair', icon: Cog, color: 'text-brand border-brand bg-brand', badge: 'bg-blue-100 text-blue-800 border-blue-200', bg: 'bg-blue-50' },
   { status: 'Pending', label: 'Pending', desc: 'Awaiting Parts or Client Approval', icon: Clock, color: 'text-amber-600 border-amber-500 bg-amber-500', badge: 'bg-amber-100 text-amber-800 border-amber-200', bg: 'bg-amber-50' },
   { status: 'Finished', label: 'Finished', desc: 'QA Passed & Ready for Pickup', icon: CheckCircle2, color: 'text-emerald-600 border-emerald-500 bg-emerald-500', badge: 'bg-emerald-100 text-emerald-800 border-emerald-200', bg: 'bg-emerald-50' },
   { status: 'Taken Out', label: 'Taken Out', desc: 'Paid & Returned to Customer', icon: ShieldCheck, color: 'text-slate-700 border-slate-700 bg-slate-700', badge: 'bg-slate-200 text-slate-800 border-slate-300', bg: 'bg-slate-100' },
@@ -292,7 +292,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="space-y-0.5">
             <div className="flex items-center space-x-2">
-              <span className="font-mono font-bold text-xs bg-[#0071E3] text-white px-2.5 py-0.5 rounded-lg">
+              <span className="font-mono font-bold text-xs bg-brand text-white px-2.5 py-0.5 rounded-lg">
                 {workOrder.orderNumber || workOrder.id}
               </span>
               <h3 className="font-extrabold text-sm sm:text-base text-white tracking-tight">
@@ -319,7 +319,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
             <button
               type="button"
               onClick={() => setIsAddingLog(!isAddingLog)}
-              className="px-3 py-1.5 bg-[#0071E3] hover:bg-[#0077ED] text-white font-bold text-xs rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer shadow-md active:scale-95"
+              className="px-3 py-1.5 bg-brand hover:bg-[#0077ED] text-white font-bold text-xs rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer shadow-md active:scale-95"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>{t('logStatus')}</span>
@@ -397,16 +397,16 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
 
       {/* SECTION 2: Add New Transition / Log Panel (Drawer Modal) */}
       {isAddingLog && (
-        <div className="p-4 bg-[#F5F5F7] border border-[#0071E3]/30 rounded-2xl shadow-xs space-y-3 animate-fadeIn">
-          <div className="flex justify-between items-center pb-2 border-b border-[#E5E5EA]">
-            <span className="font-black text-xs text-[#1D1D1F] flex items-center space-x-1.5">
-              <Activity className="w-4 h-4 text-[#0071E3]" />
+        <div className="p-4 bg-surface border border-brand/30 rounded-2xl shadow-xs space-y-3 animate-fadeIn">
+          <div className="flex justify-between items-center pb-2 border-b border-line">
+            <span className="font-black text-xs text-ink flex items-center space-x-1.5">
+              <Activity className="w-4 h-4 text-brand" />
               <span>Record Status Transition or Technical Audit Entry</span>
             </span>
             <button
               type="button"
               onClick={() => setIsAddingLog(false)}
-              className="text-xs text-[#86868B] hover:text-[#1D1D1F] font-bold"
+              className="text-xs text-muted hover:text-ink font-bold"
             >
               Cancel ✕
             </button>
@@ -414,11 +414,11 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div>
-              <label className="block font-bold text-[#1D1D1F] mb-1">Target Status Transition</label>
+              <label className="block font-bold text-ink mb-1">Target Status Transition</label>
               <select
                 value={targetStatus}
                 onChange={(e) => setTargetStatus(e.target.value as WorkOrderStatus)}
-                className="w-full bg-white border border-[#E5E5EA] rounded-xl px-3 py-1.5 text-xs font-bold text-[#1D1D1F] focus:border-[#0071E3] focus:outline-none"
+                className="w-full bg-white border border-line rounded-xl px-3 py-1.5 text-xs font-bold text-ink focus:border-brand focus:outline-none"
               >
                 <option value="Receive">Receive (Intake & Inspection)</option>
                 <option value="In Progress">In Progress (Active Repair)</option>
@@ -429,7 +429,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
                 <option value="Customer Not Repair">Customer Not Repair (Declined)</option>
               </select>
               {targetStatus !== workOrder.status && (
-                <p className="text-[10px] text-[#0071E3] font-bold mt-1">
+                <p className="text-[10px] text-brand font-bold mt-1">
                   ⚡ Status will update from <span className="underline">{workOrder.status}</span> ➔ <span className="underline">{targetStatus}</span>
                 </p>
               )}
@@ -469,25 +469,25 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
             </div>
 
             <div>
-              <label className="block font-bold text-[#1D1D1F] mb-1">Technician / Author Name</label>
+              <label className="block font-bold text-ink mb-1">Technician / Author Name</label>
               <input
                 type="text"
                 value={newLogAuthor}
                 onChange={(e) => setNewLogAuthor(e.target.value)}
                 placeholder="e.g. Elena Rostova"
-                className="w-full bg-white border border-[#E5E5EA] rounded-xl px-3 py-1.5 text-xs text-[#1D1D1F] focus:border-[#0071E3] focus:outline-none font-semibold"
+                className="w-full bg-white border border-line rounded-xl px-3 py-1.5 text-xs text-ink focus:border-brand focus:outline-none font-semibold"
               />
             </div>
           </div>
 
           <div>
-            <label className="block font-bold text-[#1D1D1F] mb-1">Audit Log Note & Repair Evidence *</label>
+            <label className="block font-bold text-ink mb-1">Audit Log Note & Repair Evidence *</label>
             <textarea
               rows={3}
               value={newLogNote}
               onChange={(e) => setNewLogNote(e.target.value)}
               placeholder="e.g. Replaced display panel and completed 21-point touch & TrueTone calibration. Moving to QA testing."
-              className="w-full bg-white border border-[#E5E5EA] rounded-xl p-3 text-xs text-[#1D1D1F] focus:border-[#0071E3] focus:outline-none"
+              className="w-full bg-white border border-line rounded-xl p-3 text-xs text-ink focus:border-brand focus:outline-none"
             />
           </div>
 
@@ -495,14 +495,14 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
             <button
               type="button"
               onClick={() => setIsAddingLog(false)}
-              className="px-3.5 py-1.5 bg-white border border-[#E5E5EA] hover:bg-slate-100 text-[#1D1D1F] font-bold text-xs rounded-xl transition-all cursor-pointer"
+              className="px-3.5 py-1.5 bg-white border border-line hover:bg-slate-100 text-ink font-bold text-xs rounded-xl transition-all cursor-pointer"
             >
               Discard
             </button>
             <button
               type="button"
               onClick={handleAddNewTransitionLog}
-              className="px-4 py-1.5 bg-[#0071E3] hover:bg-[#0077ED] text-white font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center space-x-1 cursor-pointer"
+              className="px-4 py-1.5 bg-brand hover:bg-[#0077ED] text-white font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center space-x-1 cursor-pointer"
             >
               <Send className="w-3.5 h-3.5" />
               <span>Save & Publish Transition Log</span>
@@ -513,27 +513,27 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
 
       {/* SECTION 3: Timeline Search & Filter Toolbar */}
       {!compact && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 bg-[#F5F5F7] p-2.5 rounded-2xl border border-[#E5E5EA]">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 bg-surface p-2.5 rounded-2xl border border-line">
           {/* Search Bar */}
           <div className="relative w-full sm:w-72">
-            <Search className="w-3.5 h-3.5 text-[#86868B] absolute left-3 top-2.5" />
+            <Search className="w-3.5 h-3.5 text-muted absolute left-3 top-2.5" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search transitions, notes, tech..."
-              className="w-full bg-white border border-[#E5E5EA] rounded-xl pl-8 pr-3 py-1.5 text-xs text-[#1D1D1F] focus:border-[#0071E3] focus:outline-none font-medium"
+              className="w-full bg-white border border-line rounded-xl pl-8 pr-3 py-1.5 text-xs text-ink focus:border-brand focus:outline-none font-medium"
             />
           </div>
 
           {/* Filter Pills */}
           <div className="flex items-center space-x-1 overflow-x-auto no-scrollbar w-full sm:w-auto">
-            <span className="text-[10px] font-bold text-[#86868B] uppercase tracking-wider pr-1">Filter:</span>
+            <span className="text-[10px] font-bold text-muted uppercase tracking-wider pr-1">Filter:</span>
             <button
               type="button"
               onClick={() => setFilterType('ALL')}
               className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
-                filterType === 'ALL' ? 'bg-[#0071E3] text-white' : 'bg-white text-[#1D1D1F] hover:bg-slate-200'
+                filterType === 'ALL' ? 'bg-brand text-white' : 'bg-white text-ink hover:bg-slate-200'
               }`}
             >
               All Events ({auditItems.length})
@@ -542,7 +542,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
               type="button"
               onClick={() => setFilterType('TRANSITION')}
               className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
-                filterType === 'TRANSITION' ? 'bg-[#0071E3] text-white' : 'bg-white text-[#1D1D1F] hover:bg-slate-200'
+                filterType === 'TRANSITION' ? 'bg-brand text-white' : 'bg-white text-ink hover:bg-slate-200'
               }`}
             >
               Transitions Only
@@ -551,7 +551,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
               type="button"
               onClick={() => setFilterType('NOTES')}
               className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
-                filterType === 'NOTES' ? 'bg-[#0071E3] text-white' : 'bg-white text-[#1D1D1F] hover:bg-slate-200'
+                filterType === 'NOTES' ? 'bg-brand text-white' : 'bg-white text-ink hover:bg-slate-200'
               }`}
             >
               Tech Notes
@@ -560,7 +560,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
               type="button"
               onClick={() => setFilterType('QA')}
               className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
-                filterType === 'QA' ? 'bg-[#0071E3] text-white' : 'bg-white text-[#1D1D1F] hover:bg-slate-200'
+                filterType === 'QA' ? 'bg-brand text-white' : 'bg-white text-ink hover:bg-slate-200'
               }`}
             >
               QA & Diagnostics
@@ -571,7 +571,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
 
       {/* SECTION 4: Interactive Chronological Audit Timeline */}
       {filteredAuditItems.length > 0 ? (
-        <div className="relative pl-6 sm:pl-8 space-y-5 before:absolute before:left-3 sm:before:left-4 before:top-3 before:bottom-3 before:w-0.5 before:bg-gradient-to-b before:from-[#0071E3] before:via-[#AF52DE] before:to-emerald-500">
+        <div className="relative pl-6 sm:pl-8 space-y-5 before:absolute before:left-3 sm:before:left-4 before:top-3 before:bottom-3 before:w-0.5 before:bg-gradient-to-b before:from-brand before:via-[#AF52DE] before:to-emerald-500">
           {filteredAuditItems.map((item, index) => {
             const isExpanded = expandedLogIds.includes(item.id);
 
@@ -587,10 +587,10 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
               categoryLabel = 'Work Order Created & Intaken';
               categoryBadge = 'bg-purple-50 text-purple-800 border-purple-200';
             } else if (item.type === 'STATUS_TRANSITION') {
-              iconBg = 'bg-[#0071E3] text-white ring-4 ring-blue-100';
+              iconBg = 'bg-brand text-white ring-4 ring-blue-100';
               IconComponent = ArrowRight;
               categoryLabel = 'Status Transition Mapped';
-              categoryBadge = 'bg-blue-50 text-[#0071E3] border-blue-200';
+              categoryBadge = 'bg-blue-50 text-brand border-blue-200';
             } else if (item.type === 'QA_CHECK') {
               iconBg = 'bg-purple-600 text-white ring-4 ring-purple-100';
               IconComponent = ShieldCheck;
@@ -616,9 +616,9 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
                 </div>
 
                 {/* Timeline Card */}
-                <div className="bg-white border border-[#E5E5EA] hover:border-[#0071E3]/60 rounded-2xl p-3.5 sm:p-4 space-y-2.5 shadow-2xs transition-all">
+                <div className="bg-white border border-line hover:border-brand/60 rounded-2xl p-3.5 sm:p-4 space-y-2.5 shadow-2xs transition-all">
                   {/* Card Header */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 border-b border-[#E5E5EA] pb-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 border-b border-line pb-2">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className={`px-2 py-0.5 text-[10px] font-extrabold rounded-full border ${categoryBadge}`}>
                         {categoryLabel}
@@ -626,35 +626,35 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
 
                       {/* Display Status Transition Pair if present */}
                       {item.fromStatus && item.toStatus && (
-                        <div className="flex items-center space-x-1.5 font-mono text-[11px] font-extrabold bg-[#F5F5F7] px-2.5 py-0.5 rounded-lg border border-[#E5E5EA]">
-                          <span className="text-[#86868B]">{item.fromStatus}</span>
-                          <ArrowRight className="w-3 h-3 text-[#0071E3]" />
-                          <span className="text-[#0071E3] underline">{item.toStatus}</span>
+                        <div className="flex items-center space-x-1.5 font-mono text-[11px] font-extrabold bg-surface px-2.5 py-0.5 rounded-lg border border-line">
+                          <span className="text-muted">{item.fromStatus}</span>
+                          <ArrowRight className="w-3 h-3 text-brand" />
+                          <span className="text-brand underline">{item.toStatus}</span>
                         </div>
                       )}
                     </div>
 
-                    <div className="flex items-center space-x-2 text-[10px] text-[#86868B]">
+                    <div className="flex items-center space-x-2 text-[10px] text-muted">
                       {item.timeDelta && (
                         <span className="bg-slate-100 text-slate-700 font-mono font-bold px-1.5 py-0.5 rounded inline-flex items-center">
                           <Clock className="w-3 h-3 text-slate-500 shrink-0 mr-1" />
                           <span>{item.timeDelta}</span>
                         </span>
                       )}
-                      <span className="font-semibold text-[#1D1D1F]">{item.formattedDate}</span>
+                      <span className="font-semibold text-ink">{item.formattedDate}</span>
                       <span>at {item.formattedTime}</span>
                     </div>
                   </div>
 
                   {/* Body Content */}
                   <div className="space-y-1">
-                    <p className="text-xs text-[#1D1D1F] font-semibold leading-relaxed">
+                    <p className="text-xs text-ink font-semibold leading-relaxed">
                       {item.note}
                     </p>
 
-                    <div className="flex items-center justify-between pt-1 text-[10px] text-[#86868B]">
+                    <div className="flex items-center justify-between pt-1 text-[10px] text-muted">
                       <span>
-                        Logged by: <strong className="text-[#1D1D1F] font-bold">{item.author}</strong>
+                        Logged by: <strong className="text-ink font-bold">{item.author}</strong>
                       </span>
 
                       {item.isInitialIntake && (
@@ -670,10 +670,10 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
           })}
         </div>
       ) : (
-        <div className="p-8 text-center text-[#86868B] bg-[#F8F9FA] rounded-2xl border border-dashed border-[#E5E5EA]">
-          <Search className="w-8 h-8 text-[#86868B]/40 mx-auto mb-2" />
-          <p className="font-extrabold text-xs text-[#1D1D1F]">No Status Transition Events Found</p>
-          <p className="text-[11px] text-[#86868B] mt-0.5">
+        <div className="p-8 text-center text-muted bg-[#F8F9FA] rounded-2xl border border-dashed border-line">
+          <Search className="w-8 h-8 text-muted/40 mx-auto mb-2" />
+          <p className="font-extrabold text-xs text-ink">No Status Transition Events Found</p>
+          <p className="text-[11px] text-muted mt-0.5">
             Try adjusting search keywords or selecting a different filter option above.
           </p>
         </div>

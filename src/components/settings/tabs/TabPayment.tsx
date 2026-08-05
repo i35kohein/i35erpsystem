@@ -16,14 +16,14 @@ interface PaymentTabProps {
 
 const PaymentTab: React.FC<PaymentTabProps> = ({ formData, setFormData, currentPaymentMethods, handleTogglePaymentMethod, handleUpdatePaymentMethodField, handleAddCustomPaymentMethod, handleResetPaymentMethods, handleSetAllPaymentMethodsState }) => {
   return (
-        <div className="bg-white p-6 rounded-2xl border border-[#D2D2D7] shadow-2xs space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E5E5EA] pb-4">
+        <div className="bg-white p-6 rounded-2xl border border-line-strong shadow-2xs space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line pb-4">
             <div>
-              <h3 className="text-base font-extrabold text-[#1D1D1F] flex items-center space-x-2">
-                <CreditCard className="w-5 h-5 text-[#0071E3]" />
+              <h3 className="text-base font-extrabold text-ink flex items-center space-x-2">
+                <CreditCard className="w-5 h-5 text-brand" />
                 <span>Global Payment Gateways & Myanmar Banking Settings</span>
               </h3>
-              <p className="text-xs text-[#86868B] mt-1">
+              <p className="text-xs text-muted mt-1">
                 Configure enabled payment methods across your store (Cash, KBZ Pay, UAB Pay, AYA Pay, MMQR, CB Bank, Yoma Bank, Wave Money, etc.). Disabled payment options will be hidden automatically during POS checkout, Work Order intake, and invoicing.
               </p>
             </div>
@@ -40,7 +40,7 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ formData, setFormData, currentP
               <button
                 type="button"
                 onClick={handleAddCustomPaymentMethod}
-                className="px-3 py-1.5 bg-[#0071E3] hover:bg-[#0051B3] text-white font-bold text-xs rounded-xl shadow-2xs transition-all flex items-center space-x-1 cursor-pointer"
+                className="px-3 py-1.5 bg-brand hover:bg-brand-deep text-white font-bold text-xs rounded-xl shadow-2xs transition-all flex items-center space-x-1 cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Custom Gateway</span>
@@ -48,9 +48,9 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ formData, setFormData, currentP
               <button
                 type="button"
                 onClick={handleResetPaymentMethods}
-                className="px-3 py-1.5 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] font-bold text-xs rounded-xl border border-[#D2D2D7] transition-all flex items-center space-x-1 cursor-pointer"
+                className="px-3 py-1.5 bg-surface hover:bg-line text-ink font-bold text-xs rounded-xl border border-line-strong transition-all flex items-center space-x-1 cursor-pointer"
               >
-                <RotateCcw className="w-3.5 h-3.5 text-[#86868B]" />
+                <RotateCcw className="w-3.5 h-3.5 text-muted" />
                 <span>Reset Defaults</span>
               </button>
             </div>
@@ -62,7 +62,7 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ formData, setFormData, currentP
               {
                 title: 'Total Configured',
                 count: currentPaymentMethods.length,
-                color: 'bg-blue-50 text-[#0071E3] border-blue-200',
+                color: 'bg-blue-50 text-brand border-blue-200',
               },
               {
                 title: 'Active Gateways',
@@ -104,15 +104,15 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ formData, setFormData, currentP
 
               return (
                 <div key={cat} className="space-y-3">
-                  <div className="flex items-center space-x-2 border-b border-[#E5E5EA] pb-2">
-                    <span className="p-1.5 bg-[#F5F5F7] rounded-lg text-[#0071E3]">
+                  <div className="flex items-center space-x-2 border-b border-line pb-2">
+                    <span className="p-1.5 bg-surface rounded-lg text-brand">
                       <CatIcon className="w-4 h-4" />
                     </span>
                     <div>
-                      <h4 className="text-xs font-extrabold text-[#1D1D1F] uppercase tracking-wider">
+                      <h4 className="text-xs font-extrabold text-ink uppercase tracking-wider">
                         {categoryTitles[cat]?.title || cat}
                       </h4>
-                      <p className="text-[11px] text-[#86868B]">
+                      <p className="text-[11px] text-muted">
                         {categoryTitles[cat]?.desc}
                       </p>
                     </div>
@@ -124,14 +124,14 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ formData, setFormData, currentP
                         key={method.id}
                         className={`p-4 rounded-2xl border transition-all ${
                           method.enabled
-                            ? 'bg-white border-[#E5E5EA] shadow-2xs hover:border-[#0071E3]'
-                            : 'bg-[#F8F9FA] border-[#E5E5EA] opacity-60'
+                            ? 'bg-white border-line shadow-2xs hover:border-brand'
+                            : 'bg-[#F8F9FA] border-line opacity-60'
                         }`}
                       >
-                        <div className="flex items-center justify-between pb-3 border-b border-[#F5F5F7]">
+                        <div className="flex items-center justify-between pb-3 border-b border-surface">
                           <div>
                             <div className="flex items-center space-x-1.5">
-                              <span className="font-extrabold text-xs text-[#1D1D1F] block">{method.name}</span>
+                              <span className="font-extrabold text-xs text-ink block">{method.name}</span>
                             </div>
                             <span className={`text-[10px] font-extrabold uppercase px-1.5 py-0.2 rounded-md ${
                               method.enabled ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500'
@@ -177,22 +177,22 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ formData, setFormData, currentP
                         <div className="mt-3 space-y-2 text-xs">
                           <div className="grid grid-cols-2 gap-2">
                             <div>
-                              <label className="text-[10px] font-bold text-[#86868B] block mb-0.5">Gateway / Bank Name</label>
+                              <label className="text-[10px] font-bold text-muted block mb-0.5">Gateway / Bank Name</label>
                               <input
                                 type="text"
                                 value={method.name}
                                 onChange={(e) => handleUpdatePaymentMethodField(method.id, 'name', e.target.value)}
-                                className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-lg px-2 py-1 text-xs font-bold text-[#1D1D1F]"
+                                className="w-full bg-surface border border-line rounded-lg px-2 py-1 text-xs font-bold text-ink"
                               />
                             </div>
                             <div>
-                              <label className="text-[10px] font-bold text-[#86868B] block mb-0.5">Account / Phone No.</label>
+                              <label className="text-[10px] font-bold text-muted block mb-0.5">Account / Phone No.</label>
                               <input
                                 type="text"
                                 value={method.accountNumber || ''}
                                 onChange={(e) => handleUpdatePaymentMethodField(method.id, 'accountNumber', e.target.value)}
                                 placeholder="e.g. 09790000000 or Account #"
-                                className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-lg px-2 py-1 text-xs font-mono font-bold text-[#0071E3]"
+                                className="w-full bg-surface border border-line rounded-lg px-2 py-1 text-xs font-mono font-bold text-brand"
                               />
                             </div>
                           </div>
@@ -200,23 +200,23 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ formData, setFormData, currentP
                           {method.category !== 'Cash' && method.category !== 'Card & Digital' && (
                             <div className="grid grid-cols-2 gap-2">
                               <div>
-                                <label className="text-[10px] font-bold text-[#86868B] block mb-0.5">Account Beneficiary Name</label>
+                                <label className="text-[10px] font-bold text-muted block mb-0.5">Account Beneficiary Name</label>
                                 <input
                                   type="text"
                                   value={method.accountName || ''}
                                   onChange={(e) => handleUpdatePaymentMethodField(method.id, 'accountName', e.target.value)}
                                   placeholder="e.g. AppleRepair Pro Ltd"
-                                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-lg px-2 py-1 text-xs font-bold text-[#1D1D1F]"
+                                  className="w-full bg-surface border border-line rounded-lg px-2 py-1 text-xs font-bold text-ink"
                                 />
                               </div>
                               <div>
-                                <label className="text-[10px] font-bold text-[#86868B] block mb-0.5">Receipt / Note Reference</label>
+                                <label className="text-[10px] font-bold text-muted block mb-0.5">Receipt / Note Reference</label>
                                 <input
                                   type="text"
                                   value={method.notes || ''}
                                   onChange={(e) => handleUpdatePaymentMethodField(method.id, 'notes', e.target.value)}
                                   placeholder="e.g. Scan QR at counter"
-                                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-lg px-2 py-1 text-xs text-[#86868B]"
+                                  className="w-full bg-surface border border-line rounded-lg px-2 py-1 text-xs text-muted"
                                 />
                               </div>
                             </div>

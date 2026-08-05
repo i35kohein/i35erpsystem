@@ -173,7 +173,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
             <div className={`-rotate-[24deg] select-none border-4 px-10 py-3 font-black uppercase tracking-[0.35em] ${
               isMono
                 ? 'border-black/20 text-black/25'
-                : 'border-[#34C759]/20 text-[#34C759]/25'
+                : 'border-success/20 text-success/25'
             }`}
               style={{ fontSize: '64px', lineHeight: 1 }}
             >
@@ -198,7 +198,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                 />
               ) : (
                 <div className={`w-8 min-h-[32px] self-stretch rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
-                  isMono ? 'bg-black text-white' : 'bg-[#0071E3] text-white'
+                  isMono ? 'bg-black text-white' : 'bg-brand text-white'
                 }`}>
                   <CircleDot className="w-5 h-5" />
                 </div>
@@ -245,7 +245,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
 
           <div className="flex items-center space-x-3">
             <div className="text-left sm:text-right font-mono space-y-0.5">
-              <p className={`text-xs font-black ${isMono ? 'text-black' : 'text-[#0071E3]'}`}>
+              <p className={`text-xs font-black ${isMono ? 'text-black' : 'text-brand'}`}>
                 Voucher #: {workOrder.orderNumber}
               </p>
               <p className="text-[11px] text-slate-700">Date: {new Date(workOrder.createdAt).toLocaleDateString()}</p>
@@ -279,7 +279,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
             <h3 className={`font-extrabold text-xs flex items-center space-x-1.5 border-b pb-1 ${
               isMono ? 'border-slate-300 text-black' : 'border-slate-200 text-slate-800'
             }`}>
-              <User className={`w-3.5 h-3.5 ${isMono ? 'text-black' : 'text-[#0071E3]'}`} />
+              <User className={`w-3.5 h-3.5 ${isMono ? 'text-black' : 'text-brand'}`} />
               <span>Customer Account Details</span>
             </h3>
             <div className="space-y-0.5 text-[11px]">
@@ -297,7 +297,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
             <h3 className={`font-extrabold text-xs flex items-center space-x-1.5 border-b pb-1 ${
               isMono ? 'border-slate-300 text-black' : 'border-slate-200 text-slate-800'
             }`}>
-              <Smartphone className={`w-3.5 h-3.5 ${isMono ? 'text-black' : 'text-[#0071E3]'}`} />
+              <Smartphone className={`w-3.5 h-3.5 ${isMono ? 'text-black' : 'text-brand'}`} />
               <span>Hardware Specifications</span>
             </h3>
             <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[11px]">
@@ -345,7 +345,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                 <tfoot>
                   <tr className={`border-t font-bold ${isMono ? 'border-black' : 'border-slate-800'}`}>
                     <td colSpan={4} className="p-1.5 text-right font-sans text-xs">Estimated Total Charge:</td>
-                    <td className={`p-1.5 text-right text-sm font-mono ${isMono ? 'text-black font-extrabold' : 'text-[#0071E3]'}`}>
+                    <td className={`p-1.5 text-right text-sm font-mono ${isMono ? 'text-black font-extrabold' : 'text-brand'}`}>
                       {workOrder.subtotal.toLocaleString()} MMK
                     </td>
                   </tr>
@@ -362,7 +362,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
               isMono ? 'border-slate-400' : 'border-slate-200'
             }`}>
               <h3 className="font-extrabold text-xs text-black flex items-center space-x-1.5">
-                <ShieldCheck className={`w-4 h-4 ${isMono ? 'text-black' : 'text-[#34C759]'}`} />
+                <ShieldCheck className={`w-4 h-4 ${isMono ? 'text-black' : 'text-success'}`} />
                 <span>{hasAfterQa ? '21-Point Hardware Diagnostic Checklist — Before Intake vs After QA Pass' : '21-Point Hardware Diagnostic Checklist — Before Intake'}</span>
               </h3>
               <div className="flex items-center space-x-2 text-[10px] font-bold font-mono">
@@ -837,26 +837,26 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
         }
       `}</style>
 
-      <div className="printable-modal-wrapper bg-white border border-[#E5E5EA] rounded-2xl w-full max-w-4xl h-[90vh] max-h-[850px] p-4 sm:p-5 space-y-3 text-xs shadow-2xl relative my-auto flex flex-col">
+      <div className="printable-modal-wrapper bg-white border border-line rounded-2xl w-full max-w-4xl h-[90vh] max-h-[850px] p-4 sm:p-5 space-y-3 text-xs shadow-2xl relative my-auto flex flex-col">
         {/* Header Controls Bar (no-print) */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E5E5EA] pb-3 shrink-0 no-print">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3 shrink-0 no-print">
           <div className="flex items-center space-x-2">
-            <Printer className="w-5 h-5 text-[#0071E3]" />
+            <Printer className="w-5 h-5 text-brand" />
             <div>
-              <h2 className="text-sm font-extrabold text-[#1D1D1F]">Device Intake Print Voucher</h2>
-              <p className="text-[11px] text-[#86868B]">A4 Job Sheet & 3"x2" Sticker Tag · Layout set in System Management</p>
+              <h2 className="text-sm font-extrabold text-ink">Device Intake Print Voucher</h2>
+              <p className="text-[11px] text-muted">A4 Job Sheet & 3"x2" Sticker Tag · Layout set in System Management</p>
             </div>
           </div>
 
           {/* Header Action Buttons (Aligned to same height and size) */}
           <div className="flex flex-wrap items-center gap-2">
             {/* Paper Format Segment */}
-            <div className="flex items-center bg-[#F5F5F7] p-1 rounded-xl border border-[#E5E5EA] h-9">
+            <div className="flex items-center bg-surface p-1 rounded-xl border border-line h-9">
               <button
                 type="button"
                 onClick={() => setPaperSize('a4_voucher')}
                 className={`h-7 flex items-center space-x-1.5 px-3 rounded-lg font-bold text-xs transition-all ${
-                  paperSize === 'a4_voucher' ? 'bg-[#0071E3] text-white shadow-xs' : 'text-[#86868B] hover:text-[#1D1D1F]'
+                  paperSize === 'a4_voucher' ? 'bg-brand text-white shadow-xs' : 'text-muted hover:text-ink'
                 }`}
               >
                 <FileText className="w-3.5 h-3.5 shrink-0" />
@@ -867,7 +867,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                 type="button"
                 onClick={() => setPaperSize('3x2_tag')}
                 className={`h-7 flex items-center space-x-1.5 px-3 rounded-lg font-bold text-xs transition-all ${
-                  paperSize === '3x2_tag' ? 'bg-[#0071E3] text-white shadow-xs' : 'text-[#86868B] hover:text-[#1D1D1F]'
+                  paperSize === '3x2_tag' ? 'bg-brand text-white shadow-xs' : 'text-muted hover:text-ink'
                 }`}
               >
                 <QrCode className="w-3.5 h-3.5 shrink-0" />
@@ -878,7 +878,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="h-9 w-9 flex items-center justify-center text-[#86868B] hover:text-[#1D1D1F] rounded-xl hover:bg-[#F5F5F7] transition-colors border border-transparent hover:border-[#E5E5EA]"
+              className="h-9 w-9 flex items-center justify-center text-muted hover:text-ink rounded-xl hover:bg-surface transition-colors border border-transparent hover:border-line"
             >
               <X className="w-5 h-5" />
             </button>
@@ -891,7 +891,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
             /* ---------------- 3x2 MONOCHROME STICKER TAG PREVIEW (CENTERED STAGE) ---------------- */
             <div className="printable-preview-stage flex flex-col items-center justify-center p-6 bg-slate-100/70 border border-dashed border-slate-300 rounded-2xl min-h-[380px]">
               <div className="mb-3 flex items-center space-x-2 text-[11px] font-bold text-slate-600 bg-white px-3 py-1 rounded-full border border-slate-200 shadow-2xs">
-                <QrCode className="w-3.5 h-3.5 text-[#0071E3]" />
+                <QrCode className="w-3.5 h-3.5 text-brand" />
                 <span>3" × 2" Device Sticker Tag Preview</span>
               </div>
               <div className="printable-area tag-printable-area bg-white text-black p-4 rounded-xl border-2 border-black font-sans space-y-2 select-none max-w-sm w-full shadow-md">
@@ -943,7 +943,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
           ) : (
             /* ---------------- A4 JOB SHEET PREVIEW (STANDARD / COMPACT / DUAL) ---------------- */
             <div className={`printable-area a4-voucher-print ${a4LayoutDensity === 'compact' ? 'a4-print-compact' : ''} bg-white text-black p-5 sm:p-6 rounded-2xl border font-sans space-y-5 shadow-xs transition-all ${
-              a4ColorMode === 'monochrome' ? 'border-black grayscale contrast-105' : 'border-[#E5E5EA]'
+              a4ColorMode === 'monochrome' ? 'border-black grayscale contrast-105' : 'border-line'
             }`}>
               {a4LayoutDensity === 'dual_voucher' ? (
                 /* DUAL SPLIT VOUCHER: TOP CUSTOMER COPY + BOTTOM SHOP COPY */
@@ -972,9 +972,9 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
         </div>
 
         {/* Modal Footer Controls (no-print) */}
-        <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-[#E5E5EA] no-print text-xs">
-          <div className="flex items-center space-x-2 font-mono text-[#86868B] text-[11px]">
-            <span className="font-bold text-[#1D1D1F]">
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-line no-print text-xs">
+          <div className="flex items-center space-x-2 font-mono text-muted text-[11px]">
+            <span className="font-bold text-ink">
               Mode: {a4ColorMode === 'monochrome' ? 'Black & White Grayscale' : 'Standard Color'}
             </span>
             <span>•</span>
@@ -987,7 +987,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-white border border-[#E5E5EA] text-[#1D1D1F] font-semibold rounded-xl hover:bg-slate-50 transition-colors"
+              className="px-4 py-2 bg-white border border-line text-ink font-semibold rounded-xl hover:bg-slate-50 transition-colors"
             >
               Close
             </button>
@@ -995,7 +995,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
               type="button"
               onClick={handlePrint}
               className={`px-5 py-2 font-bold text-white rounded-xl flex items-center space-x-1.5 shadow-xs transition-all active:scale-95 cursor-pointer ${
-                a4ColorMode === 'monochrome' ? 'bg-black hover:bg-slate-800' : 'bg-[#0071E3] hover:bg-[#0077ED]'
+                a4ColorMode === 'monochrome' ? 'bg-black hover:bg-slate-800' : 'bg-brand hover:bg-[#0077ED]'
               }`}
             >
               <Printer className="w-4 h-4" />

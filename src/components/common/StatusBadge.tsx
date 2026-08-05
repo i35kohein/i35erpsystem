@@ -60,8 +60,8 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'Receive':
     case 'Intake':
     case 'New Intake':
-      badgeStyle = 'bg-blue-50 text-[#0071E3] border border-blue-200';
-      dotColor = 'bg-[#0071E3]';
+      badgeStyle = 'bg-blue-50 text-brand border border-blue-200';
+      dotColor = 'bg-brand';
       pingColor = 'bg-blue-400';
       isPulsing = false;
       break;

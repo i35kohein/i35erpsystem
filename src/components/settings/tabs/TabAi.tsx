@@ -31,19 +31,19 @@ const AI_MODEL_PRESETS: Record<string, { id: string; label: string }[]> = {
 
 const AiTab: React.FC<AiTabProps> = ({ formData, setFormData, aiRescanning, aiRescanResult, onAiRescanTickets, handleAiRescan }) => {
   return (
-        <div className="bg-white p-6 rounded-2xl border border-[#D2D2D7] shadow-2xs space-y-5">
-          <div className="pb-4 border-b border-[#E5E5EA]">
-            <h3 className="text-base font-extrabold text-[#1D1D1F] flex items-center space-x-2">
-              <Sparkles className="w-5 h-5 text-[#0071E3]" />
+        <div className="bg-white p-6 rounded-2xl border border-line-strong shadow-2xs space-y-5">
+          <div className="pb-4 border-b border-line">
+            <h3 className="text-base font-extrabold text-ink flex items-center space-x-2">
+              <Sparkles className="w-5 h-5 text-brand" />
               <span>ERP AI Assistant & API Provider</span>
             </h3>
-            <p className="text-xs text-[#86868B] mt-1">
+            <p className="text-xs text-muted mt-1">
               Connect a mainstream model or any OpenAI-compatible endpoint. Local Analysis works without an API key.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <label className="space-y-1.5 text-xs font-bold text-[#1D1D1F]">
+            <label className="space-y-1.5 text-xs font-bold text-ink">
               <span>Provider</span>
               <select
                 value={formData.aiProvider || 'local'}
@@ -51,7 +51,7 @@ const AiTab: React.FC<AiTabProps> = ({ formData, setFormData, aiRescanning, aiRe
                   const aiProvider = event.target.value as SystemSettings['aiProvider'];
                   setFormData({ ...formData, aiProvider, aiApiKey: aiProvider === 'deepseek' ? '' : formData.aiApiKey });
                 }}
-                className="w-full p-2.5 border border-[#E5E5EA] rounded-xl bg-white"
+                className="w-full p-2.5 border border-line rounded-xl bg-white"
               >
                 <option value="local">Local Analysis (No API)</option>
                 <option value="openai">OpenAI</option>
@@ -64,7 +64,7 @@ const AiTab: React.FC<AiTabProps> = ({ formData, setFormData, aiRescanning, aiRe
               </select>
             </label>
 
-            <label className="space-y-1.5 text-xs font-bold text-[#1D1D1F]">
+            <label className="space-y-1.5 text-xs font-bold text-ink">
               <span>Model</span>
               <input
                 list="ai-model-presets"
@@ -77,7 +77,7 @@ const AiTab: React.FC<AiTabProps> = ({ formData, setFormData, aiRescanning, aiRe
                       ? 'e.g. anthropic/claude-opus-5'
                       : 'Leave blank for provider default'
                 }
-                className="w-full p-2.5 border border-[#E5E5EA] rounded-xl bg-white"
+                className="w-full p-2.5 border border-line rounded-xl bg-white"
               />
               <datalist id="ai-model-presets">
                 {(AI_MODEL_PRESETS[formData.aiProvider] || []).map((m) => (
@@ -96,8 +96,8 @@ const AiTab: React.FC<AiTabProps> = ({ formData, setFormData, aiRescanning, aiRe
                       title={m.id}
                       className={`px-2.5 py-1 rounded-full text-[10px] font-bold border transition-all cursor-pointer ${
                         formData.aiModel === m.id
-                          ? 'bg-[#0071E3] text-white border-[#0071E3]'
-                          : 'bg-[#F5F5F7] text-[#51525C] border-[#E5E5EA] hover:border-[#0071E3] hover:text-[#0071E3]'
+                          ? 'bg-brand text-white border-brand'
+                          : 'bg-surface text-[#51525C] border-line hover:border-brand hover:text-brand'
                       }`}
                     >
                       {m.label}
@@ -108,14 +108,14 @@ const AiTab: React.FC<AiTabProps> = ({ formData, setFormData, aiRescanning, aiRe
             </label>
 
             {formData.aiProvider === 'deepseek' ? (
-              <div className="space-y-1.5 text-xs font-bold text-[#1D1D1F]">
+              <div className="space-y-1.5 text-xs font-bold text-ink">
                 <span>DeepSeek API Key</span>
                 <div className="min-h-[42px] px-3 py-2.5 border border-emerald-200 bg-emerald-50 text-emerald-800 rounded-xl flex items-center">
                   Server environment key in use — no browser key required.
                 </div>
               </div>
             ) : (
-              <label className="space-y-1.5 text-xs font-bold text-[#1D1D1F]">
+              <label className="space-y-1.5 text-xs font-bold text-ink">
                 <span>API Key</span>
                 <input
                   type="password"
@@ -124,31 +124,31 @@ const AiTab: React.FC<AiTabProps> = ({ formData, setFormData, aiRescanning, aiRe
                   placeholder={formData.aiProvider === 'local' ? 'Not required for Local Analysis' : 'Provider API key'}
                   disabled={formData.aiProvider === 'local'}
                   autoComplete="off"
-                  className="w-full p-2.5 border border-[#E5E5EA] rounded-xl bg-white disabled:opacity-50"
+                  className="w-full p-2.5 border border-line rounded-xl bg-white disabled:opacity-50"
                 />
               </label>
             )}
 
-            <label className="space-y-1.5 text-xs font-bold text-[#1D1D1F]">
+            <label className="space-y-1.5 text-xs font-bold text-ink">
               <span>Custom Base URL</span>
               <input
                 value={formData.aiBaseUrl || ''}
                 onChange={(event) => setFormData({ ...formData, aiBaseUrl: event.target.value })}
                 placeholder="https://your-api.example.com/v1"
-                className="w-full p-2.5 border border-[#E5E5EA] rounded-xl bg-white"
+                className="w-full p-2.5 border border-line rounded-xl bg-white"
               />
             </label>
           </div>
 
           {/* AI Repair-Type Classification — re-scan finished tickets */}
-          <div className="p-4 rounded-xl border border-[#0071E3]/20 bg-gradient-to-br from-[#F0F6FF]/50 to-[#F0F6FF]/20 space-y-3">
+          <div className="p-4 rounded-xl border border-brand/20 bg-gradient-to-br from-brand-soft/50 to-brand-soft/20 space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="space-y-0.5">
-                <p className="text-xs font-extrabold text-[#1D1D1F] flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-[#0071E3]" />
+                <p className="text-xs font-extrabold text-ink flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-brand" />
                   AI Repair-Type Classification
                 </p>
-                <p className="text-[11px] text-[#86868B]">
+                <p className="text-[11px] text-muted">
                   Finished tickets are auto-classified as Spareparts Change or Hardware Repair. Re-scan applies AI to every finished ticket without a verdict (including previously failed ones).
                 </p>
               </div>
@@ -156,30 +156,30 @@ const AiTab: React.FC<AiTabProps> = ({ formData, setFormData, aiRescanning, aiRe
                 type="button"
                 onClick={handleAiRescan}
                 disabled={aiRescanning || !onAiRescanTickets}
-                className="bg-[#0071E3] hover:bg-[#0051B3] disabled:opacity-50 text-white shrink-0"
+                className="bg-brand hover:bg-brand-deep disabled:opacity-50 text-white shrink-0"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${aiRescanning ? 'animate-spin' : ''}`} />
                 <span>{aiRescanning ? 'Classifying…' : 'Re-scan Finished Tickets with AI'}</span>
               </Button>
             </div>
             {aiRescanResult && (
-              <p className="text-[11px] font-bold text-[#0071E3] bg-white/80 border border-[#0071E3]/20 rounded-lg px-3 py-2">
+              <p className="text-[11px] font-bold text-brand bg-white/80 border border-brand/20 rounded-lg px-3 py-2">
                 {aiRescanResult}
               </p>
             )}
           </div>
 
-          <label className="block space-y-1.5 text-xs font-bold text-[#1D1D1F]">
+          <label className="block space-y-1.5 text-xs font-bold text-ink">
             <span>Assistant Instructions</span>
             <textarea
               rows={3}
               value={formData.aiSystemPrompt || ''}
               onChange={(event) => setFormData({ ...formData, aiSystemPrompt: event.target.value })}
-              className="w-full p-2.5 border border-[#E5E5EA] rounded-xl bg-white resize-y"
+              className="w-full p-2.5 border border-line rounded-xl bg-white resize-y"
             />
           </label>
 
-          <div className="p-3 bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl text-[11px] text-[#86868B]">
+          <div className="p-3 bg-surface border border-line rounded-xl text-[11px] text-muted">
             The assistant sends a compact live operational summary to the selected provider. API credentials are used only for requests initiated from this ERP assistant. For shared production use, keep keys in server-side secrets instead of browser-synced settings.
           </div>
         </div>

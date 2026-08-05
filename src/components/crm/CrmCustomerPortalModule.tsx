@@ -241,24 +241,24 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
   return (
     <div className="space-y-3 text-xs">
       {/* Header — compact on mobile: subtitle hidden, tabs slimmer */}
-      <div className="module-toolbar flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 bg-white p-1.5 sm:p-2 rounded-xl border border-[#E5E5EA] shadow-xs">
+      <div className="module-toolbar flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 bg-white p-1.5 sm:p-2 rounded-xl border border-line shadow-xs">
         <div className="module-subheader">
-          <h1 className="text-base sm:text-lg font-bold text-[#1D1D1F] flex items-center space-x-2">
-            <Users className="w-4 h-4 sm:w-5 sm:h-5 text-[#0071E3]" />
+          <h1 className="text-base sm:text-lg font-bold text-ink flex items-center space-x-2">
+            <Users className="w-4 h-4 sm:w-5 sm:h-5 text-brand" />
             <span className="hidden sm:inline">Customer Relationship Management & Self-Service Portal</span>
             <span className="sm:hidden truncate">Customer & Staff Portal</span>
           </h1>
-          <p className="hidden sm:block text-xs text-[#86868B]">Classify accounts (Retail, B2B, Wholesale) and simulate customer tracking portal</p>
+          <p className="hidden sm:block text-xs text-muted">Classify accounts (Retail, B2B, Wholesale) and simulate customer tracking portal</p>
         </div>
 
-        <div className="flex items-center gap-1 overflow-x-auto rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] p-1 text-xs no-scrollbar">
+        <div className="flex items-center gap-1 overflow-x-auto rounded-lg border border-line bg-surface p-1 text-xs no-scrollbar">
           <button
             type="button"
             onClick={() => setActiveTab('CRM')}
             className={`px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs font-extrabold rounded-xl transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
               activeTab === 'CRM'
-                ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-xs'
-                : 'bg-white hover:bg-slate-100 text-[#6E6E73] hover:text-[#1D1D1F] border-[#E5E5EA]'
+                ? 'bg-brand text-white border-brand shadow-xs'
+                : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
             }`}
           >
             <span>Customer Database</span>
@@ -268,8 +268,8 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
             onClick={() => setActiveTab('PORTAL_SIMULATOR')}
             className={`px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs font-extrabold rounded-xl transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
               activeTab === 'PORTAL_SIMULATOR'
-                ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-xs'
-                : 'bg-white hover:bg-slate-100 text-[#6E6E73] hover:text-[#1D1D1F] border-[#E5E5EA]'
+                ? 'bg-brand text-white border-brand shadow-xs'
+                : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
             }`}
           >
             <span>Portal Simulator</span>
@@ -280,16 +280,16 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
       {activeTab === 'CRM' ? (
         <div className="workspace-grid grid grid-cols-1 gap-3 overflow-hidden md:grid-cols-12">
           {/* Customer Directory List */}
-          <div className="flex min-h-0 h-full flex-col md:col-span-6 xl:col-span-5 bg-white border border-[#E5E5EA] rounded-2xl p-4 shadow-xs">
-            <div className="flex flex-wrap justify-between items-center border-b border-[#E5E5EA] pb-2 gap-x-2 gap-y-1">
-              <h2 className="font-bold text-[#1D1D1F] text-xs">Customer Account Roster</h2>
+          <div className="flex min-h-0 h-full flex-col md:col-span-6 xl:col-span-5 bg-white border border-line rounded-2xl p-4 shadow-xs">
+            <div className="flex flex-wrap justify-between items-center border-b border-line pb-2 gap-x-2 gap-y-1">
+              <h2 className="font-bold text-ink text-xs">Customer Account Roster</h2>
               <div className="flex items-center gap-2 min-w-0">
-                <span className="text-[10px] font-semibold text-[#86868B] shrink-0">{filteredCustomers.length} accounts</span>
+                <span className="text-[10px] font-semibold text-muted shrink-0">{filteredCustomers.length} accounts</span>
                 <Button
                   type="button"
                   onClick={() => setIsAddCustomerModalOpen(true)}
                   size="sm"
-                  className="bg-[#0071E3] hover:bg-[#0071E3]/90 text-white shrink-0 flex items-center space-x-1 rounded-lg"
+                  className="bg-brand hover:bg-brand/90 text-white shrink-0 flex items-center space-x-1 rounded-lg"
                 >
                   <Plus className="w-3 h-3" />
                   <span>Add Customer</span>
@@ -299,8 +299,8 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
 
             <div className="min-h-0 flex-1 space-y-2 overflow-y-auto py-3 pr-1">
               {filteredCustomers.length === 0 && (
-                <div className="flex h-full min-h-[260px] flex-col items-center justify-center rounded-xl border border-dashed border-[#E5E5EA] bg-[#F8F9FA] px-5 text-center text-[#86868B]">
-                  <Users className="mb-2 h-7 w-7 text-[#86868B]/50" />
+                <div className="flex h-full min-h-[260px] flex-col items-center justify-center rounded-xl border border-dashed border-line bg-[#F8F9FA] px-5 text-center text-muted">
+                  <Users className="mb-2 h-7 w-7 text-muted/50" />
                   <p className="font-semibold">No customer accounts found</p>
                   <p className="mt-1 text-[11px]">Customers from new intake tickets will appear here.</p>
                 </div>
@@ -316,8 +316,8 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                     onClick={() => setSelectedCustomer(cust)}
                     className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
                       isSelected
-                        ? 'bg-[#F0F6FF] border-[#0071E3] shadow-xs'
-                        : 'bg-[#F5F5F7] border-[#E5E5EA] hover:bg-slate-100'
+                        ? 'bg-brand-soft border-brand shadow-xs'
+                        : 'bg-surface border-line hover:bg-slate-100'
                     }`}
                   >
                     <div className="flex justify-between items-center">
@@ -327,34 +327,34 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                           e.stopPropagation();
                           handleOpenHistoryModal(cust);
                         }}
-                        className="font-bold text-[#1D1D1F] hover:text-[#0071E3] hover:underline cursor-pointer text-left flex items-center space-x-1 group"
+                        className="font-bold text-ink hover:text-brand hover:underline cursor-pointer text-left flex items-center space-x-1 group"
                         title="Click to view full repair history modal"
                       >
                         <span>{cust.name}</span>
-                        <ExternalLink className="w-3 h-3 text-[#0071E3] opacity-70 group-hover:opacity-100 transition-opacity" />
+                        <ExternalLink className="w-3 h-3 text-brand opacity-70 group-hover:opacity-100 transition-opacity" />
                       </button>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
                         cust.type === 'B2B Corporate' ? 'bg-purple-50 text-purple-700 border-purple-200' :
-                        cust.type === 'Wholesale Mail-In' ? 'bg-[#F0F6FF] text-[#0071E3] border-[#0071E3]/20' :
-                        'bg-white text-[#1D1D1F] border-[#E5E5EA]'
+                        cust.type === 'Wholesale Mail-In' ? 'bg-brand-soft text-brand border-brand/20' :
+                        'bg-white text-ink border-line'
                       }`}>
                         {cust.type}
                       </span>
                     </div>
 
-                    {cust.company && <p className="text-[11px] text-[#86868B]">{cust.company}</p>}
+                    {cust.company && <p className="text-[11px] text-muted">{cust.company}</p>}
 
-                    <div className="flex justify-between items-center text-[11px] text-[#86868B] mt-1.5">
+                    <div className="flex justify-between items-center text-[11px] text-muted mt-1.5">
                       <span>{cust.phone}</span>
                       <span className="font-bold text-[#28A745]">{cust.totalSpent.toLocaleString()} {systemSettings.currencySymbol} Spent</span>
                     </div>
 
                     {/* Expandable Row Toggle Bar */}
-                    <div className="flex justify-between items-center mt-1.5 pt-1.5 border-t border-[#E5E5EA]/70">
+                    <div className="flex justify-between items-center mt-1.5 pt-1.5 border-t border-line/70">
                       <button
                         type="button"
                         onClick={(e) => toggleExpandCustomer(cust.id, e)}
-                        className="flex items-center space-x-1 text-[11px] font-bold text-[#0071E3] hover:text-[#0051B3] transition-colors py-0.5 px-1.5 rounded-md hover:bg-blue-100/50 cursor-pointer"
+                        className="flex items-center space-x-1 text-[11px] font-bold text-brand hover:text-brand-deep transition-colors py-0.5 px-1.5 rounded-md hover:bg-blue-100/50 cursor-pointer"
                       >
                         {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                         <span>
@@ -369,7 +369,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                             e.stopPropagation();
                             handleOpenHistoryModal(cust);
                           }}
-                          className="px-2 py-0.5 bg-blue-50 text-[#0071E3] hover:bg-blue-100 font-bold text-[10px] rounded-md transition-colors flex items-center space-x-1 cursor-pointer"
+                          className="px-2 py-0.5 bg-blue-50 text-brand hover:bg-blue-100 font-bold text-[10px] rounded-md transition-colors flex items-center space-x-1 cursor-pointer"
                           title="Open Full Repair History Modal"
                         >
                           <FileText className="w-2.5 h-2.5" />
@@ -383,7 +383,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                               e.stopPropagation();
                               openEditCustomerModal(cust);
                             }}
-                            className="p-1 bg-blue-50 text-[#0071E3] hover:bg-blue-100 font-bold text-[10px] rounded-md transition-colors cursor-pointer"
+                            className="p-1 bg-blue-50 text-brand hover:bg-blue-100 font-bold text-[10px] rounded-md transition-colors cursor-pointer"
                             title="Edit Customer Account"
                           >
                             <Edit2 className="w-3 h-3" />
@@ -405,7 +405,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                         </button>
                       ) : (
                         <span
-                          className="px-1.5 py-0.5 text-[9px] font-bold text-[#86868B] bg-white border border-[#E5E5EA] rounded-md"
+                          className="px-1.5 py-0.5 text-[9px] font-bold text-muted bg-white border border-line rounded-md"
                           title="Ticket-derived customer — no standalone account to delete"
                         >
                           Derived
@@ -417,9 +417,9 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                     {/* Expandable Inline Repair History */}
                     {isExpanded && (
                       <div className="mt-2.5 pt-2 border-t border-blue-100 bg-white p-2.5 rounded-xl border space-y-2 shadow-2xs">
-                        <div className="flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wider text-[#1D1D1F]">
+                        <div className="flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wider text-ink">
                           <span className="flex items-center space-x-1">
-                            <History className="w-3 h-3 text-[#0071E3]" />
+                            <History className="w-3 h-3 text-brand" />
                             <span>Repair History ({custOrders.length})</span>
                           </span>
                         </div>
@@ -429,10 +429,10 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                             {custOrders.map((wo) => (
                               <div
                                 key={wo.id}
-                                className="p-2 rounded-lg bg-[#F8F9FA] border border-[#E5E5EA] hover:border-[#0071E3] transition-all text-[11px] space-y-1"
+                                className="p-2 rounded-lg bg-[#F8F9FA] border border-line hover:border-brand transition-all text-[11px] space-y-1"
                               >
                                 <div className="flex items-center justify-between">
-                                  <span className="font-mono font-bold text-[#1D1D1F]">{wo.orderNumber || wo.id}</span>
+                                  <span className="font-mono font-bold text-ink">{wo.orderNumber || wo.id}</span>
                                   <div className="flex items-center space-x-1.5">
                                     <span className={`px-1.5 py-0.5 text-[9px] font-bold rounded-full border ${getStatusBadgeStyle(wo.status)}`}>
                                       {wo.status}
@@ -444,7 +444,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                                         setSelectedInvoiceWo(wo);
                                         setIsInvoiceModalOpen(true);
                                       }}
-                                      className="px-1.5 py-0.5 bg-white hover:bg-blue-50 border border-[#D2D2D7] hover:border-[#0071E3] text-[#0071E3] font-bold text-[9px] rounded flex items-center space-x-1 cursor-pointer transition-colors"
+                                      className="px-1.5 py-0.5 bg-white hover:bg-blue-50 border border-line-strong hover:border-brand text-brand font-bold text-[9px] rounded flex items-center space-x-1 cursor-pointer transition-colors"
                                       title="Print Invoice"
                                     >
                                       <Printer className="w-2.5 h-2.5" />
@@ -453,15 +453,15 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                                   </div>
                                 </div>
                                 <div className="flex items-center justify-between">
-                                  <span className="font-semibold text-[#1D1D1F] truncate max-w-[160px]">{wo.deviceModel}</span>
+                                  <span className="font-semibold text-ink truncate max-w-[160px]">{wo.deviceModel}</span>
                                   <span className="font-bold text-[#28A745]">{wo.totalAmount?.toLocaleString() || 0} {systemSettings.currencySymbol}</span>
                                 </div>
                                 {wo.symptomsReported && (
-                                  <p className="text-[10px] text-[#86868B] line-clamp-1 italic">
+                                  <p className="text-[10px] text-muted line-clamp-1 italic">
                                     "{wo.symptomsReported}"
                                   </p>
                                 )}
-                                <div className="flex justify-between items-center text-[9px] text-[#86868B] pt-0.5 border-t border-[#E5E5EA]/50">
+                                <div className="flex justify-between items-center text-[9px] text-muted pt-0.5 border-t border-line/50">
                                   <span>{new Date(wo.createdAt).toLocaleDateString()}</span>
                                   {wo.serialNumber && <span>SN: {wo.serialNumber}</span>}
                                 </div>
@@ -469,7 +469,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                             ))}
                           </div>
                         ) : (
-                          <p className="text-[11px] text-[#86868B] italic py-1 text-center">No repair history recorded for this customer.</p>
+                          <p className="text-[11px] text-muted italic py-1 text-center">No repair history recorded for this customer.</p>
                         )}
                       </div>
                     )}
@@ -480,44 +480,44 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
           </div>
 
           {/* Customer Details & History — bottom sheet on mobile (fixed), in-flow panel on md+ */}
-          <div className={`fixed inset-x-0 bottom-0 z-[60] max-h-[85vh] overflow-y-auto rounded-t-3xl bg-white border-t border-[#E5E5EA] shadow-[0_-8px_30px_rgba(0,0,0,0.12)] transition-transform duration-300 flex min-h-0 flex-col p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] md:static md:inset-auto md:z-auto md:max-h-none md:overflow-visible md:rounded-none md:border md:border-[#E5E5EA] md:shadow-xs md:transition-none md:translate-y-0 md:col-span-6 xl:col-span-7 ${isMobileDetailOpen ? 'translate-y-0' : 'translate-y-full'}`}>
+          <div className={`fixed inset-x-0 bottom-0 z-[60] max-h-[85vh] overflow-y-auto rounded-t-3xl bg-white border-t border-line shadow-[0_-8px_30px_rgba(0,0,0,0.12)] transition-transform duration-300 flex min-h-0 flex-col p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] md:static md:inset-auto md:z-auto md:max-h-none md:overflow-visible md:rounded-none md:border md:border-line md:shadow-xs md:transition-none md:translate-y-0 md:col-span-6 xl:col-span-7 ${isMobileDetailOpen ? 'translate-y-0' : 'translate-y-full'}`}>
             {/* Mobile sheet handle + close (md:hidden) */}
             <div className="flex items-center justify-between pb-2 md:hidden">
               <div className="flex items-center gap-2 min-w-0">
-                <span className="h-1 w-8 shrink-0 rounded-full bg-[#D2D2D7]" />
-                <p className="truncate text-xs font-extrabold text-[#1D1D1F]">{selectedCustomer?.name || 'Customer Details'}</p>
+                <span className="h-1 w-8 shrink-0 rounded-full bg-line-strong" />
+                <p className="truncate text-xs font-extrabold text-ink">{selectedCustomer?.name || 'Customer Details'}</p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsMobileDetailOpen(false)}
                 aria-label="Close customer details"
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[#86868B] hover:bg-[#F5F5F7] hover:text-[#1D1D1F] transition-colors cursor-pointer"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted hover:bg-surface hover:text-ink transition-colors cursor-pointer"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
             {selectedCustomer ? (
               <div className="flex min-h-0 flex-1 flex-col gap-5">
-                <div className="border-b border-[#E5E5EA] pb-3">
+                <div className="border-b border-line pb-3">
                   <div className="flex justify-between items-start">
                     <div>
                       <button
                         type="button"
                         onClick={() => handleOpenHistoryModal(selectedCustomer)}
-                        className="text-base font-black text-[#1D1D1F] hover:text-[#0071E3] hover:underline flex items-center space-x-2 cursor-pointer text-left group"
+                        className="text-base font-black text-ink hover:text-brand hover:underline flex items-center space-x-2 cursor-pointer text-left group"
                         title="Click to view full repair history modal"
                       >
                         <span>{selectedCustomer.name}</span>
-                        <ExternalLink className="w-4 h-4 text-[#0071E3] opacity-80 group-hover:opacity-100 transition-opacity" />
+                        <ExternalLink className="w-4 h-4 text-brand opacity-80 group-hover:opacity-100 transition-opacity" />
                       </button>
-                      {selectedCustomer.company && <p className="text-[#86868B] text-xs font-medium">{selectedCustomer.company}</p>}
+                      {selectedCustomer.company && <p className="text-muted text-xs font-medium">{selectedCustomer.company}</p>}
                     </div>
 
                     <Button
                       type="button"
                       onClick={() => handleOpenHistoryModal(selectedCustomer)}
                       size="sm"
-                      className="bg-[#0071E3]/10 hover:bg-[#0071E3] text-[#0071E3] hover:text-white border border-[#0071E3]/30"
+                      className="bg-brand/10 hover:bg-brand text-brand hover:text-white border border-brand/30"
                     >
                       <FileText className="w-3.5 h-3.5" />
                       <span className="hidden sm:inline">Full History</span>
@@ -526,21 +526,21 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 bg-[#F5F5F7] p-2.5 rounded-xl border border-[#E5E5EA] text-[#1D1D1F]">
+                <div className="grid grid-cols-2 gap-2 bg-surface p-2.5 rounded-xl border border-line text-ink">
                   <div>
-                    <span className="text-[#86868B]">Email:</span>
-                    <p className="font-semibold text-[#1D1D1F] truncate">{selectedCustomer.email}</p>
+                    <span className="text-muted">Email:</span>
+                    <p className="font-semibold text-ink truncate">{selectedCustomer.email}</p>
                   </div>
                   <div>
-                    <span className="text-[#86868B]">Phone:</span>
-                    <p className="font-mono text-[#1D1D1F]">{selectedCustomer.phone}</p>
+                    <span className="text-muted">Phone:</span>
+                    <p className="font-mono text-ink">{selectedCustomer.phone}</p>
                   </div>
                   <div>
-                    <span className="text-[#86868B]">Total Orders:</span>
-                    <p className="font-bold text-[#0071E3]">{selectedCustomerOrders.length} Repairs</p>
+                    <span className="text-muted">Total Orders:</span>
+                    <p className="font-bold text-brand">{selectedCustomerOrders.length} Repairs</p>
                   </div>
                   <div>
-                    <span className="text-[#86868B]">Total Spent:</span>
+                    <span className="text-muted">Total Spent:</span>
                     <p className="font-bold text-[#28A745]">{selectedCustomer.totalSpent.toLocaleString()} {systemSettings.currencySymbol}</p>
                   </div>
                 </div>
@@ -552,10 +552,10 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                 )}
 
                 {/* Selected Customer Detailed Repair History Timeline */}
-                <div className="flex min-h-0 flex-1 flex-col space-y-3 pt-2 border-t border-[#E5E5EA]">
+                <div className="flex min-h-0 flex-1 flex-col space-y-3 pt-2 border-t border-line">
                   <div className="flex items-center justify-between pb-1">
-                    <h3 className="font-black text-[#1D1D1F] text-xs flex items-center space-x-1.5">
-                      <History className="w-4 h-4 text-[#0071E3]" />
+                    <h3 className="font-black text-ink text-xs flex items-center space-x-1.5">
+                      <History className="w-4 h-4 text-brand" />
                       <span>Chronological Repair History & Outcomes ({selectedCustomerOrders.length})</span>
                     </h3>
                   </div>
@@ -573,8 +573,8 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                 </div>
               </div>
             ) : (
-              <div className="flex min-h-[360px] flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-[#E5E5EA] bg-[#F8F9FA] p-8 text-center text-[#86868B]">
-                <Users className="mb-2 h-8 w-8 text-[#86868B]/50" />
+              <div className="flex min-h-[360px] flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-line bg-[#F8F9FA] p-8 text-center text-muted">
+                <Users className="mb-2 h-8 w-8 text-muted/50" />
                 <p className="font-semibold">Select a customer to view details.</p>
               </div>
             )}
@@ -582,7 +582,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
         </div>
       ) : (
         /* PORTAL VIEW SIMULATOR */
-        <div className="rounded-3xl overflow-hidden border border-[#E5E5EA] shadow-xs">
+        <div className="rounded-3xl overflow-hidden border border-line shadow-xs">
           <CustomerFacingWebPortal
             workOrders={workOrders}
             customers={customers}
@@ -595,17 +595,17 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
       {/* Add Customer Modal */}
       {isAddCustomerModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <form onSubmit={handleCreateCustomerSubmit} className="bg-white border border-[#E5E5EA] rounded-2xl max-w-md w-full p-5 space-y-4 text-xs shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center border-b border-[#E5E5EA] pb-2">
-              <h4 className="font-extrabold text-[#1D1D1F] text-sm flex items-center space-x-1.5">
-                <Users className="w-4 h-4 text-[#0071E3]" />
+          <form onSubmit={handleCreateCustomerSubmit} className="bg-white border border-line rounded-2xl max-w-md w-full p-5 space-y-4 text-xs shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center border-b border-line pb-2">
+              <h4 className="font-extrabold text-ink text-sm flex items-center space-x-1.5">
+                <Users className="w-4 h-4 text-brand" />
                 <span>{editingCustomer ? 'Edit Customer Account' : 'Register New Customer Account'}</span>
               </h4>
               <button
                 type="button"
                 onClick={() => setIsAddCustomerModalOpen(false)}
                 aria-label="Close add customer"
-                className="text-[#86868B] hover:text-[#1D1D1F] cursor-pointer"
+                className="text-muted hover:text-ink cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -613,35 +613,35 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
 
             <div className="space-y-3">
               <div>
-                <label className="block font-bold text-[#1D1D1F] mb-1">Customer Name *</label>
+                <label className="block font-bold text-ink mb-1">Customer Name *</label>
                 <input
                   type="text"
                   required
                   value={newCustomerForm.name}
                   onChange={(e) => setNewCustomerForm({ ...newCustomerForm, name: e.target.value })}
                   placeholder="e.g. U Kyaw Zin"
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2 text-xs font-bold text-[#1D1D1F] outline-none focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
+                  className="w-full bg-surface border border-line rounded-xl p-2 text-xs font-bold text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block font-bold text-[#1D1D1F] mb-1">Phone Number *</label>
+                  <label className="block font-bold text-ink mb-1">Phone Number *</label>
                   <input
                     type="tel"
                     required
                     value={newCustomerForm.phone}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, phone: e.target.value })}
                     placeholder="09 123 456 789"
-                    className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2 text-xs font-mono font-bold text-[#1D1D1F] outline-none focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
+                    className="w-full bg-surface border border-line rounded-xl p-2 text-xs font-mono font-bold text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-[#1D1D1F] mb-1">Account Type</label>
+                  <label className="block font-bold text-ink mb-1">Account Type</label>
                   <select
                     value={newCustomerForm.type}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, type: e.target.value as CustomerType })}
-                    className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2 text-xs font-bold text-[#1D1D1F] outline-none cursor-pointer focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
+                    className="w-full bg-surface border border-line rounded-xl p-2 text-xs font-bold text-ink outline-none cursor-pointer focus:border-brand focus:ring-2 focus:ring-brand/20"
                   >
                     <option value="Retail">Retail</option>
                     <option value="B2B Corporate">B2B Corporate</option>
@@ -651,53 +651,53 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
               </div>
 
               <div>
-                <label className="block font-bold text-[#1D1D1F] mb-1">Email Address</label>
+                <label className="block font-bold text-ink mb-1">Email Address</label>
                 <input
                   type="email"
                   value={newCustomerForm.email}
                   onChange={(e) => setNewCustomerForm({ ...newCustomerForm, email: e.target.value })}
                   placeholder="customer@example.com"
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2 text-xs text-[#1D1D1F] outline-none focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
+                  className="w-full bg-surface border border-line rounded-xl p-2 text-xs text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block font-bold text-[#1D1D1F] mb-1">Company (B2B)</label>
+                  <label className="block font-bold text-ink mb-1">Company (B2B)</label>
                   <input
                     type="text"
                     value={newCustomerForm.company}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, company: e.target.value })}
                     placeholder="e.g. i35 Apple Service"
-                    className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2 text-xs text-[#1D1D1F] outline-none focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
+                    className="w-full bg-surface border border-line rounded-xl p-2 text-xs text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-[#1D1D1F] mb-1">Discount %</label>
+                  <label className="block font-bold text-ink mb-1">Discount %</label>
                   <input
                     type="number"
                     min={0}
                     max={100}
                     value={newCustomerForm.discountPercentage}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, discountPercentage: Number(e.target.value) })}
-                    className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2 text-xs font-mono font-bold text-[#1D1D1F] outline-none focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
+                    className="w-full bg-surface border border-line rounded-xl p-2 text-xs font-mono font-bold text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-bold text-[#1D1D1F] mb-1">Notes</label>
+                <label className="block font-bold text-ink mb-1">Notes</label>
                 <textarea
                   rows={2}
                   value={newCustomerForm.notes}
                   onChange={(e) => setNewCustomerForm({ ...newCustomerForm, notes: e.target.value })}
                   placeholder="VIP customer, credit terms, preferred tech…"
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2 text-xs text-[#1D1D1F] outline-none resize-none focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
+                  className="w-full bg-surface border border-line rounded-xl p-2 text-xs text-ink outline-none resize-none focus:border-brand focus:ring-2 focus:ring-brand/20"
                 />
               </div>
             </div>
 
-            <div className="flex justify-end space-x-2 pt-2 border-t border-[#E5E5EA]">
+            <div className="flex justify-end space-x-2 pt-2 border-t border-line">
               <Button
                 type="button"
                 onClick={() => setIsAddCustomerModalOpen(false)}
@@ -707,7 +707,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
               </Button>
               <Button
                 type="submit"
-                className="bg-[#0071E3] hover:bg-[#0051B3] text-white flex items-center space-x-1.5"
+                className="bg-brand hover:bg-brand-deep text-white flex items-center space-x-1.5"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>{editingCustomer ? 'Save Changes' : 'Save Customer'}</span>

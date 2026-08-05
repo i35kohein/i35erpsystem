@@ -81,13 +81,13 @@ export const MicroSolderingModule: React.FC<MicroSolderingModuleProps> = ({
   return (
     <div className="space-y-6 text-xs">
       {/* Header */}
-      <div className="module-subheader flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-[#E5E5EA] shadow-xs">
+      <div className="module-subheader flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-line shadow-xs">
         <div>
-          <h1 className="text-lg font-bold text-[#1D1D1F] flex items-center space-x-2">
+          <h1 className="text-lg font-bold text-ink flex items-center space-x-2">
             <Cpu className="w-5 h-5 text-[#AF52DE]" />
             <span>Micro-Soldering & Logic Board Diagnostic Module</span>
           </h1>
-          <p className="text-xs text-[#86868B]">Record multimeter diode mode measurements, thermal camera hotspots, IC reballing logs, and ZXW schematic tags</p>
+          <p className="text-xs text-muted">Record multimeter diode mode measurements, thermal camera hotspots, IC reballing logs, and ZXW schematic tags</p>
         </div>
 
         <div className="bg-purple-50 text-purple-700 font-mono font-bold px-3 py-1 rounded-full border border-purple-200/80">
@@ -97,8 +97,8 @@ export const MicroSolderingModule: React.FC<MicroSolderingModuleProps> = ({
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
         {/* Left Column: Board Repair Work Orders (5 cols) */}
-        <div className="md:col-span-5 bg-white border border-[#E5E5EA] rounded-2xl p-4 space-y-3 shadow-xs">
-          <h2 className="font-bold text-[#1D1D1F] text-xs border-b border-[#E5E5EA] pb-2">Level 3 Board Repair Queue</h2>
+        <div className="md:col-span-5 bg-white border border-line rounded-2xl p-4 space-y-3 shadow-xs">
+          <h2 className="font-bold text-ink text-xs border-b border-line pb-2">Level 3 Board Repair Queue</h2>
 
           <div className="space-y-2">
             {workOrders.map((wo) => {
@@ -118,22 +118,22 @@ export const MicroSolderingModule: React.FC<MicroSolderingModuleProps> = ({
                   }}
                   className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-[#F0F6FF] border-[#0071E3] shadow-xs'
-                      : 'bg-[#F5F5F7] border-[#E5E5EA] hover:bg-slate-100'
+                      ? 'bg-brand-soft border-brand shadow-xs'
+                      : 'bg-surface border-line hover:bg-slate-100'
                   }`}
                 >
                   <div className="flex justify-between items-center">
                     <span className="font-mono font-bold text-[#AF52DE]">{wo.orderNumber}</span>
-                    <span className="bg-white text-[#1D1D1F] text-[10px] px-2 py-0.5 rounded-md border border-[#E5E5EA] font-semibold">
+                    <span className="bg-white text-ink text-[10px] px-2 py-0.5 rounded-md border border-line font-semibold">
                       {wo.serviceType}
                     </span>
                   </div>
 
-                  <p className="font-bold text-[#1D1D1F] mt-1">{wo.deviceModel}</p>
-                  <p className="text-[11px] text-[#86868B]">Cust: {wo.customerName}</p>
+                  <p className="font-bold text-ink mt-1">{wo.deviceModel}</p>
+                  <p className="text-[11px] text-muted">Cust: {wo.customerName}</p>
 
                   {wo.microSolderingLog?.multimeterDiodeShortFound && (
-                    <span className="inline-block mt-2 text-[10px] bg-[#FF3B30]/10 text-[#FF3B30] font-bold px-2 py-0.5 rounded border border-[#FF3B30]/20">
+                    <span className="inline-block mt-2 text-[10px] bg-danger/10 text-danger font-bold px-2 py-0.5 rounded border border-danger/20">
                       ⚠ Board Short Circuit Logged
                     </span>
                   )}
@@ -144,13 +144,13 @@ export const MicroSolderingModule: React.FC<MicroSolderingModuleProps> = ({
         </div>
 
         {/* Right Column: Board Diagnostic Worksheet (7 cols) */}
-        <div className="md:col-span-7 bg-white border border-[#E5E5EA] rounded-2xl p-5 space-y-5 shadow-xs">
+        <div className="md:col-span-7 bg-white border border-line rounded-2xl p-5 space-y-5 shadow-xs">
           {selectedWo ? (
             <div className="space-y-5">
-              <div className="border-b border-[#E5E5EA] pb-3 flex justify-between items-center">
+              <div className="border-b border-line pb-3 flex justify-between items-center">
                 <div>
                   <span className="font-mono text-[#AF52DE] font-bold">{selectedWo.orderNumber}</span>
-                  <h2 className="text-base font-bold text-[#1D1D1F]">{selectedWo.deviceModel} Diagnostic Worksheet</h2>
+                  <h2 className="text-base font-bold text-ink">{selectedWo.deviceModel} Diagnostic Worksheet</h2>
                 </div>
 
                 <button
@@ -162,19 +162,19 @@ export const MicroSolderingModule: React.FC<MicroSolderingModuleProps> = ({
               </div>
 
               {/* Board Identification */}
-              <div className="bg-[#F5F5F7]/80 p-3 rounded-xl border border-[#E5E5EA] space-y-2">
-                <label className="block text-[#86868B] font-bold">Logic Board Model / Number:</label>
+              <div className="bg-surface/80 p-3 rounded-xl border border-line space-y-2">
+                <label className="block text-muted font-bold">Logic Board Model / Number:</label>
                 <input
                   type="text"
                   value={boardModel}
                   onChange={(e) => setBoardModel(e.target.value)}
                   placeholder="e.g. 820-02020 or iPhone 13 Pro Logic Board"
-                  className="w-full bg-white border border-[#E5E5EA] rounded-lg p-2 text-[#1D1D1F] font-mono focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
+                  className="w-full bg-white border border-line rounded-lg p-2 text-ink font-mono focus:border-brand focus:ring-2 focus:ring-brand/20"
                 />
               </div>
 
               {/* Multimeter Diode Mode Readings Table */}
-              <div className="bg-[#F5F5F7]/80 p-4 rounded-xl border border-[#E5E5EA] space-y-3">
+              <div className="bg-surface/80 p-4 rounded-xl border border-line space-y-3">
                 <div className="flex justify-between items-center">
                   <h3 className="font-bold text-[#AF52DE] flex items-center space-x-1.5">
                     <Activity className="w-4 h-4 text-[#AF52DE]" />
@@ -188,14 +188,14 @@ export const MicroSolderingModule: React.FC<MicroSolderingModuleProps> = ({
                     value={lineName}
                     onChange={(e) => setLineName(e.target.value)}
                     placeholder="Power Line (e.g. PP_VCC_MAIN)"
-                    className="bg-white border border-[#E5E5EA] rounded p-1.5 text-[#1D1D1F] font-mono focus:border-[#0071E3]"
+                    className="bg-white border border-line rounded p-1.5 text-ink font-mono focus:border-brand"
                   />
                   <input
                     type="text"
                     value={expectedVal}
                     onChange={(e) => setExpectedVal(e.target.value)}
                     placeholder="Expected (e.g. 0.380V)"
-                    className="bg-white border border-[#E5E5EA] rounded p-1.5 text-[#1D1D1F] font-mono focus:border-[#0071E3]"
+                    className="bg-white border border-line rounded p-1.5 text-ink font-mono focus:border-brand"
                   />
                   <div className="flex space-x-1">
                     <input
@@ -203,7 +203,7 @@ export const MicroSolderingModule: React.FC<MicroSolderingModuleProps> = ({
                       value={actualVal}
                       onChange={(e) => setActualVal(e.target.value)}
                       placeholder="Actual (e.g. 0.002V)"
-                      className="bg-white border border-[#E5E5EA] rounded p-1.5 text-[#1D1D1F] font-mono flex-1 focus:border-[#0071E3]"
+                      className="bg-white border border-line rounded p-1.5 text-ink font-mono flex-1 focus:border-brand"
                     />
                     <button
                       onClick={handleAddDiodeReading}
@@ -214,9 +214,9 @@ export const MicroSolderingModule: React.FC<MicroSolderingModuleProps> = ({
                   </div>
                 </div>
 
-                <div className="border border-[#E5E5EA] rounded-lg overflow-hidden bg-white">
+                <div className="border border-line rounded-lg overflow-hidden bg-white">
                   <table className="w-full text-left">
-                    <thead className="bg-[#F5F5F7] text-[#86868B] text-[10px] uppercase font-mono border-b border-[#E5E5EA]">
+                    <thead className="bg-surface text-muted text-[10px] uppercase font-mono border-b border-line">
                       <tr>
                         <th className="p-2">Power Line</th>
                         <th className="p-2">Expected Diode</th>
@@ -224,15 +224,15 @@ export const MicroSolderingModule: React.FC<MicroSolderingModuleProps> = ({
                         <th className="p-2">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#E5E5EA] font-mono">
+                    <tbody className="divide-y divide-line font-mono">
                       {diodeReadings.map((r, idx) => (
                         <tr key={idx}>
-                          <td className="p-2 text-[#1D1D1F]">{r.lineName}</td>
-                          <td className="p-2 text-[#86868B]">{r.expectedValue}</td>
-                          <td className="p-2 text-[#1D1D1F]">{r.actualValue}</td>
+                          <td className="p-2 text-ink">{r.lineName}</td>
+                          <td className="p-2 text-muted">{r.expectedValue}</td>
+                          <td className="p-2 text-ink">{r.actualValue}</td>
                           <td className="p-2">
                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
-                              r.status === 'PASS' ? 'bg-[#EAF8ED] text-[#28A745] border-[#34C759]/20' : 'bg-[#FFF0F0] text-[#FF3B30] border-[#FF3B30]/30 animate-pulse'
+                              r.status === 'PASS' ? 'bg-[#EAF8ED] text-[#28A745] border-success/20' : 'bg-[#FFF0F0] text-danger border-danger/30 animate-pulse'
                             }`}>
                               {r.status}
                             </span>
@@ -245,9 +245,9 @@ export const MicroSolderingModule: React.FC<MicroSolderingModuleProps> = ({
               </div>
 
               {/* Thermal Camera & IC Replacement Log */}
-              <div className="bg-[#F5F5F7]/80 p-4 rounded-xl border border-[#E5E5EA] space-y-3">
+              <div className="bg-surface/80 p-4 rounded-xl border border-line space-y-3">
                 <div>
-                  <label className="block text-[#86868B] font-bold mb-1 flex items-center space-x-1.5">
+                  <label className="block text-muted font-bold mb-1 flex items-center space-x-1.5">
                     <Flame className="w-4 h-4 text-[#FF9F0A]" />
                     <span>Thermal Camera Hotspot Finding Notes</span>
                   </label>
@@ -255,12 +255,12 @@ export const MicroSolderingModule: React.FC<MicroSolderingModuleProps> = ({
                     rows={2}
                     value={thermalNotes}
                     onChange={(e) => setThermalNotes(e.target.value)}
-                    className="w-full bg-white border border-[#E5E5EA] rounded-lg p-2 text-[#1D1D1F] focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
+                    className="w-full bg-white border border-line rounded-lg p-2 text-ink focus:border-brand focus:ring-2 focus:ring-brand/20"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[#86868B] font-bold mb-1">
+                  <label className="block text-muted font-bold mb-1">
                     Chips / Micro-Components Replaced (Comma-separated)
                   </label>
                   <input
@@ -268,13 +268,13 @@ export const MicroSolderingModule: React.FC<MicroSolderingModuleProps> = ({
                     value={icReplaced}
                     onChange={(e) => setIcReplaced(e.target.value)}
                     placeholder="e.g. Audio IC U3101, Decoupling Cap C3010, Hydra U2"
-                    className="w-full bg-white border border-[#E5E5EA] rounded-lg p-2 text-[#1D1D1F] font-mono focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
+                    className="w-full bg-white border border-line rounded-lg p-2 text-ink font-mono focus:border-brand focus:ring-2 focus:ring-brand/20"
                   />
                 </div>
               </div>
             </div>
           ) : (
-            <div className="p-12 text-center text-[#86868B]">
+            <div className="p-12 text-center text-muted">
               Select a work order to log micro-soldering diagnostics.
             </div>
           )}

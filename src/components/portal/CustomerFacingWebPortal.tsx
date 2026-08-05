@@ -232,23 +232,23 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
   // Render Login View if not authenticated
   if (!authenticatedCustomerPhoneOrEmail || !currentWorkOrder) {
     return (
-      <div className="min-h-screen bg-[#F5F5F7] flex flex-col justify-between p-4 sm:p-6 text-xs antialiased">
+      <div className="min-h-screen bg-surface flex flex-col justify-between p-4 sm:p-6 text-xs antialiased">
         {/* Top Header */}
-        <header className="max-w-4xl mx-auto w-full flex items-center justify-between py-3 px-4 bg-white/80 backdrop-blur-md rounded-2xl border border-[#E5E5EA] shadow-2xs">
+        <header className="max-w-4xl mx-auto w-full flex items-center justify-between py-3 px-4 bg-white/80 backdrop-blur-md rounded-2xl border border-line shadow-2xs">
           <div className="flex items-center space-x-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#0071E3] flex items-center justify-center text-white shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-brand flex items-center justify-center text-white shrink-0">
               <CircleDot className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="font-extrabold text-sm text-[#1D1D1F] tracking-tight">{systemSettings.shopName}</h1>
-              <p className="text-[10px] text-[#86868B] font-medium">Customer Repair Status Portal</p>
+              <h1 className="font-extrabold text-sm text-ink tracking-tight">{systemSettings.shopName}</h1>
+              <p className="text-[10px] text-muted font-medium">Customer Repair Status Portal</p>
             </div>
           </div>
 
           {onExitPortalMode && (
             <button
               onClick={onExitPortalMode}
-              className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] font-bold text-xs rounded-xl border border-[#E5E5EA] transition-all cursor-pointer"
+              className="flex items-center space-x-1.5 px-3 py-1.5 bg-surface hover:bg-line text-ink font-bold text-xs rounded-xl border border-line transition-all cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Return to Staff ERP</span>
@@ -258,19 +258,19 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
 
         {/* Main Login Box */}
         <main className="max-w-md mx-auto w-full my-auto py-8">
-          <div className="bg-white rounded-3xl border border-[#E5E5EA] p-6 sm:p-8 shadow-md space-y-6">
+          <div className="bg-white rounded-3xl border border-line p-6 sm:p-8 shadow-md space-y-6">
             <div className="text-center space-y-2">
-              <div className="w-12 h-12 rounded-2xl bg-[#F0F6FF] text-[#0071E3] border border-[#0071E3]/20 flex items-center justify-center mx-auto">
+              <div className="w-12 h-12 rounded-2xl bg-brand-soft text-brand border border-brand/20 flex items-center justify-center mx-auto">
                 <Smartphone className="w-6 h-6" />
               </div>
-              <h2 className="text-lg font-extrabold text-[#1D1D1F]">Check Your Repair Status</h2>
-              <p className="text-xs text-[#86868B]">
+              <h2 className="text-lg font-extrabold text-ink">Check Your Repair Status</h2>
+              <p className="text-xs text-muted">
                 Enter your phone number, email, or Work Order # (e.g. WO-2026-1001) to view real-time repair progress, inspect diagnostic logs, and approve estimates.
               </p>
             </div>
 
             {loginError && (
-              <div className="p-3 bg-[#FF3B30]/10 border border-[#FF3B30]/30 rounded-xl text-[#FF3B30] text-xs font-medium flex items-start space-x-2">
+              <div className="p-3 bg-danger/10 border border-danger/30 rounded-xl text-danger text-xs font-medium flex items-start space-x-2">
                 <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{loginError}</span>
               </div>
@@ -278,9 +278,9 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
 
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="block text-[#1D1D1F] font-bold mb-1">Unique Identifier</label>
+                <label className="block text-ink font-bold mb-1">Unique Identifier</label>
                 <div className="relative">
-                  <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#86868B]" />
+                  <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
                   <input
                     type="text"
                     value={identifierInput}
@@ -289,14 +289,14 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                       setLoginError(null);
                     }}
                     placeholder="e.g. (555) 234-5678 or WO-2026-1001"
-                    className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl pl-10 pr-4 py-3 text-sm font-medium text-[#1D1D1F] focus:outline-none focus:border-[#0071E3] focus:bg-white transition-all placeholder-[#86868B]"
+                    className="w-full bg-surface border border-line rounded-xl pl-10 pr-4 py-3 text-sm font-medium text-ink focus:outline-none focus:border-brand focus:bg-white transition-all placeholder-muted"
                   />
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full max-w-md mx-auto py-3 bg-[#0071E3] hover:bg-[#0077ED] text-white font-bold rounded-xl text-sm shadow-xs transition-all active:scale-95 flex items-center justify-center space-x-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071E3]/40 focus-visible:ring-offset-2"
+                className="w-full max-w-md mx-auto py-3 bg-brand hover:bg-[#0077ED] text-white font-bold rounded-xl text-sm shadow-xs transition-all active:scale-95 flex items-center justify-center space-x-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2"
               >
                 <span className="truncate">Track Repair Voucher</span>
                 <ChevronRight className="w-4 h-4 shrink-0" />
@@ -307,9 +307,9 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
         </main>
 
         {/* Footer */}
-        <footer className="text-center py-4 text-[#86868B] text-[11px] space-y-1">
+        <footer className="text-center py-4 text-muted text-[11px] space-y-1">
           <p>© {new Date().getFullYear()} {systemSettings.shopName}. All rights reserved.</p>
-          <p>Need support? Call <a href={`tel:${systemSettings.shopPhone}`} className="text-[#0071E3] underline">{systemSettings.shopPhone}</a> or visit {systemSettings.shopAddress}</p>
+          <p>Need support? Call <a href={`tel:${systemSettings.shopPhone}`} className="text-brand underline">{systemSettings.shopPhone}</a> or visit {systemSettings.shopAddress}</p>
         </footer>
       </div>
     );
@@ -318,34 +318,34 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
   const currentStage = getProgressStage(currentWorkOrder.status);
 
   return (
-    <div className="min-h-screen bg-[#F5F5F7] flex flex-col text-xs antialiased pb-12">
+    <div className="min-h-screen bg-surface flex flex-col text-xs antialiased pb-12">
       {/* Top Header Navigation */}
-      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-[#E5E5EA] px-4 py-3 shadow-2xs">
+      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-line px-4 py-3 shadow-2xs">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 rounded-xl bg-[#0071E3] text-white flex items-center justify-center font-extrabold shadow-2xs">
+            <div className="w-9 h-9 rounded-xl bg-brand text-white flex items-center justify-center font-extrabold shadow-2xs">
               <CircleDot className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h1 className="font-extrabold text-sm text-[#1D1D1F]">{systemSettings.shopName}</h1>
-                <span className="bg-[#34C759]/15 text-[#34C759] text-[9px] font-extrabold px-2 py-0.5 rounded-full border border-[#34C759]/30">
+                <h1 className="font-extrabold text-sm text-ink">{systemSettings.shopName}</h1>
+                <span className="bg-success/15 text-success text-[9px] font-extrabold px-2 py-0.5 rounded-full border border-success/30">
                   LIVE PORTAL
                 </span>
               </div>
-              <p className="text-[10px] text-[#86868B]">Logged in: <strong className="text-[#1D1D1F]">{currentWorkOrder.customerName}</strong> ({currentWorkOrder.customerPhone || currentWorkOrder.customerEmail})</p>
+              <p className="text-[10px] text-muted">Logged in: <strong className="text-ink">{currentWorkOrder.customerName}</strong> ({currentWorkOrder.customerPhone || currentWorkOrder.customerEmail})</p>
             </div>
           </div>
 
           <div className="flex items-center space-x-2">
             {/* Ticket Selector Dropdown if customer has multiple tickets */}
             {matchingWorkOrders.length > 1 && (
-              <div className="flex items-center space-x-1.5 bg-[#F5F5F7] px-2.5 py-1.5 rounded-xl border border-[#E5E5EA]">
-                <label className="text-[10px] text-[#86868B] font-bold">Select Device:</label>
+              <div className="flex items-center space-x-1.5 bg-surface px-2.5 py-1.5 rounded-xl border border-line">
+                <label className="text-[10px] text-muted font-bold">Select Device:</label>
                 <select
                   value={currentWorkOrder.id}
                   onChange={(e) => setSelectedWorkOrderId(e.target.value)}
-                  className="bg-transparent text-[#0071E3] font-bold text-xs focus:outline-none"
+                  className="bg-transparent text-brand font-bold text-xs focus:outline-none"
                 >
                   {matchingWorkOrders.map((wo) => (
                     <option key={wo.id} value={wo.id}>
@@ -359,7 +359,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             {onExitPortalMode && (
               <button
                 onClick={onExitPortalMode}
-                className="hidden sm:flex items-center space-x-1 px-3 py-1.5 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] font-bold rounded-xl border border-[#E5E5EA] transition-all cursor-pointer"
+                className="hidden sm:flex items-center space-x-1 px-3 py-1.5 bg-surface hover:bg-line text-ink font-bold rounded-xl border border-line transition-all cursor-pointer"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>ERP Mode</span>
@@ -374,7 +374,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
               }}
               variant="ghost"
               size="sm"
-              className="bg-[#FF3B30]/10 hover:bg-[#FF3B30]/20 text-[#FF3B30] border border-[#FF3B30]/20"
+              className="bg-danger/10 hover:bg-danger/20 text-danger border border-danger/20"
             >
               Log Out
             </Button>
@@ -394,13 +394,13 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
               </div>
               <div className="space-y-0.5">
                 <div className="flex items-center space-x-2">
-                  <h3 className="font-extrabold text-sm text-[#1D1D1F]">Action Required: Review Repair Quote Estimate</h3>
+                  <h3 className="font-extrabold text-sm text-ink">Action Required: Review Repair Quote Estimate</h3>
                   <span className="bg-[#FF9500] text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase">
                     Awaiting Approval
                   </span>
                 </div>
-                <p className="text-xs text-[#6E6E73]">
-                  Our technicians have completed the initial diagnostic inspection for your <strong>{currentWorkOrder.deviceModel}</strong>. Total estimated cost: <strong className="text-[#1D1D1F] font-mono text-sm">{currentWorkOrder.totalAmount.toLocaleString()} {systemSettings.currencySymbol}</strong>.
+                <p className="text-xs text-faint">
+                  Our technicians have completed the initial diagnostic inspection for your <strong>{currentWorkOrder.deviceModel}</strong>. Total estimated cost: <strong className="text-ink font-mono text-sm">{currentWorkOrder.totalAmount.toLocaleString()} {systemSettings.currencySymbol}</strong>.
                 </p>
               </div>
             </div>
@@ -409,7 +409,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
               <Button
                 type="button"
                 onClick={() => setApprovalModalOpen(true)}
-                className="bg-[#34C759] hover:bg-[#30B753] text-white flex items-center space-x-1.5"
+                className="bg-success hover:bg-[#30B753] text-white flex items-center space-x-1.5"
               >
                 <ThumbsUp className="w-4 h-4" />
                 <span>Approve Estimate</span>
@@ -418,7 +418,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 type="button"
                 onClick={() => setRejectionModalOpen(true)}
                 variant="outline"
-                className="text-[#FF3B30] hover:bg-[#FF3B30]/10 hover:text-[#FF3B30] border-[#E5E5EA]"
+                className="text-danger hover:bg-danger/10 hover:text-danger border-line"
               >
                 Decline / Request Call
               </Button>
@@ -427,39 +427,39 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
         )}
 
         {/* Work Order Header Summary Banner */}
-        <div className="bg-white rounded-3xl border border-[#E5E5EA] p-5 sm:p-6 shadow-2xs space-y-5">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E5E5EA] pb-5">
+        <div className="bg-white rounded-3xl border border-line p-5 sm:p-6 shadow-2xs space-y-5">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-line pb-5">
             <div>
               <div className="flex items-center space-x-2">
-                <span className="text-xs font-extrabold font-mono text-[#0071E3] bg-[#F0F6FF] px-2.5 py-1 rounded-lg border border-[#0071E3]/20">
+                <span className="text-xs font-extrabold font-mono text-brand bg-brand-soft px-2.5 py-1 rounded-lg border border-brand/20">
                   {currentWorkOrder.orderNumber}
                 </span>
                 <span className={`text-xs font-bold px-2.5 py-1 rounded-lg border ${
-                  currentWorkOrder.status === 'Finished' ? 'bg-[#34C759]/10 text-[#34C759] border-[#34C759]/30' :
-                  currentWorkOrder.status === 'In Progress' ? 'bg-[#0071E3]/10 text-[#0071E3] border-[#0071E3]/30' :
+                  currentWorkOrder.status === 'Finished' ? 'bg-success/10 text-success border-success/30' :
+                  currentWorkOrder.status === 'In Progress' ? 'bg-brand/10 text-brand border-brand/30' :
                   'bg-[#FF9500]/10 text-[#FF9500] border-[#FF9500]/30'
                 }`}>
                   Status: {currentWorkOrder.status}
                 </span>
                 {currentWorkOrder.priority === 'Rush' && (
-                  <span className="bg-[#FF3B30]/10 text-[#FF3B30] text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-[#FF3B30]/30">
+                  <span className="bg-danger/10 text-danger text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-danger/30">
                     RUSH SERVICE
                   </span>
                 )}
               </div>
 
-              <h2 className="text-lg sm:text-xl font-extrabold text-[#1D1D1F] mt-2">
+              <h2 className="text-lg sm:text-xl font-extrabold text-ink mt-2">
                 {currentWorkOrder.deviceModel} ({currentWorkOrder.deviceColor})
               </h2>
-              <p className="text-xs text-[#86868B] mt-0.5">
-                Serial / IMEI: <span className="font-mono text-[#1D1D1F] font-semibold">{currentWorkOrder.serialNumber || currentWorkOrder.imei || 'N/A'}</span>
+              <p className="text-xs text-muted mt-0.5">
+                Serial / IMEI: <span className="font-mono text-ink font-semibold">{currentWorkOrder.serialNumber || currentWorkOrder.imei || 'N/A'}</span>
               </p>
             </div>
 
-            <div className="flex items-center gap-3 bg-[#F5F5F7] p-3 rounded-2xl border border-[#E5E5EA]">
+            <div className="flex items-center gap-3 bg-surface p-3 rounded-2xl border border-line">
               <div className="text-right">
-                <p className="text-[10px] text-[#86868B] font-bold uppercase tracking-wider">Estimated Completion</p>
-                <p className="text-sm font-extrabold text-[#0071E3] font-mono">
+                <p className="text-[10px] text-muted font-bold uppercase tracking-wider">Estimated Completion</p>
+                <p className="text-sm font-extrabold text-brand font-mono">
                   {currentWorkOrder.estimatedCompletion ? new Date(currentWorkOrder.estimatedCompletion).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Pending Bench Test'}
                 </p>
               </div>
@@ -470,99 +470,99 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 size="icon"
                 title="Print Digital Voucher Receipt"
               >
-                <Printer className="w-4 h-4 text-[#0071E3]" />
+                <Printer className="w-4 h-4 text-brand" />
               </Button>
             </div>
           </div>
 
           {/* 5-Stage Visual Progress Bar */}
           <div className="space-y-3 pt-2">
-            <p className="text-[11px] font-bold text-[#86868B] uppercase tracking-wider">Live Repair Progress Timeline</p>
+            <p className="text-[11px] font-bold text-muted uppercase tracking-wider">Live Repair Progress Timeline</p>
 
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 relative">
               {/* Stage 1: Intake Received */}
               <div className={`p-3 rounded-2xl border transition-all ${
                 currentStage >= 1
-                  ? 'bg-[#F0F6FF] border-[#0071E3]/40 text-[#0071E3]'
-                  : 'bg-[#F5F5F7] border-[#E5E5EA] text-[#86868B]'
+                  ? 'bg-brand-soft border-brand/40 text-brand'
+                  : 'bg-surface border-line text-muted'
               }`}>
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-[10px] font-extrabold uppercase">1. Received</span>
-                  {currentStage >= 1 && <CheckCircle2 className="w-4 h-4 text-[#0071E3]" />}
+                  {currentStage >= 1 && <CheckCircle2 className="w-4 h-4 text-brand" />}
                 </div>
-                <p className="font-bold text-xs text-[#1D1D1F]">Ticket Intake</p>
-                <p className="text-[10px] text-[#86868B]">Checked in at shop</p>
+                <p className="font-bold text-xs text-ink">Ticket Intake</p>
+                <p className="text-[10px] text-muted">Checked in at shop</p>
               </div>
 
               {/* Stage 2: Diagnostics */}
               <div className={`p-3 rounded-2xl border transition-all ${
                 currentStage >= 2
-                  ? 'bg-[#F0F6FF] border-[#0071E3]/40 text-[#0071E3]'
+                  ? 'bg-brand-soft border-brand/40 text-brand'
                   : currentStage === 1
                   ? 'bg-amber-50 border-amber-300 text-amber-700'
-                  : 'bg-[#F5F5F7] border-[#E5E5EA] text-[#86868B]'
+                  : 'bg-surface border-line text-muted'
               }`}>
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-[10px] font-extrabold uppercase">2. Diagnostics</span>
-                  {currentStage >= 2 ? <CheckCircle2 className="w-4 h-4 text-[#0071E3]" /> : currentStage === 1 ? <Clock className="w-4 h-4 animate-spin text-amber-600" /> : null}
+                  {currentStage >= 2 ? <CheckCircle2 className="w-4 h-4 text-brand" /> : currentStage === 1 ? <Clock className="w-4 h-4 animate-spin text-amber-600" /> : null}
                 </div>
-                <p className="font-bold text-xs text-[#1D1D1F]">Testing & Quote</p>
-                <p className="text-[10px] text-[#86868B]">Inspection complete</p>
+                <p className="font-bold text-xs text-ink">Testing & Quote</p>
+                <p className="text-[10px] text-muted">Inspection complete</p>
               </div>
 
               {/* Stage 3: In Repair */}
               <div className={`p-3 rounded-2xl border transition-all ${
                 currentStage >= 3
-                  ? 'bg-[#F0F6FF] border-[#0071E3]/40 text-[#0071E3]'
-                  : 'bg-[#F5F5F7] border-[#E5E5EA] text-[#86868B]'
+                  ? 'bg-brand-soft border-brand/40 text-brand'
+                  : 'bg-surface border-line text-muted'
               }`}>
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-[10px] font-extrabold uppercase">3. In Repair</span>
-                  {currentStage >= 3 && <CheckCircle2 className="w-4 h-4 text-[#0071E3]" />}
+                  {currentStage >= 3 && <CheckCircle2 className="w-4 h-4 text-brand" />}
                 </div>
-                <p className="font-bold text-xs text-[#1D1D1F]">Bench Service</p>
-                <p className="text-[10px] text-[#86868B]">Parts & Assembly</p>
+                <p className="font-bold text-xs text-ink">Bench Service</p>
+                <p className="text-[10px] text-muted">Parts & Assembly</p>
               </div>
 
               {/* Stage 4: QA Verified */}
               <div className={`p-3 rounded-2xl border transition-all ${
                 currentStage >= 4
-                  ? 'bg-[#34C759]/10 border-[#34C759]/40 text-[#34C759]'
-                  : 'bg-[#F5F5F7] border-[#E5E5EA] text-[#86868B]'
+                  ? 'bg-success/10 border-success/40 text-success'
+                  : 'bg-surface border-line text-muted'
               }`}>
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-[10px] font-extrabold uppercase">4. QA Passed</span>
-                  {currentStage >= 4 && <CheckCircle2 className="w-4 h-4 text-[#34C759]" />}
+                  {currentStage >= 4 && <CheckCircle2 className="w-4 h-4 text-success" />}
                 </div>
-                <p className="font-bold text-xs text-[#1D1D1F]">Quality Check</p>
-                <p className="text-[10px] text-[#86868B]">21-Point Verified</p>
+                <p className="font-bold text-xs text-ink">Quality Check</p>
+                <p className="text-[10px] text-muted">21-Point Verified</p>
               </div>
 
               {/* Stage 5: Ready for Collection */}
               <div className={`p-3 rounded-2xl border transition-all ${
                 currentStage >= 5
-                  ? 'bg-[#34C759]/20 border-[#34C759]/60 text-[#34C759]'
-                  : 'bg-[#F5F5F7] border-[#E5E5EA] text-[#86868B]'
+                  ? 'bg-success/20 border-success/60 text-success'
+                  : 'bg-surface border-line text-muted'
               }`}>
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-[10px] font-extrabold uppercase">5. Complete</span>
-                  {currentStage >= 5 && <CheckCircle2 className="w-4 h-4 text-[#34C759]" />}
+                  {currentStage >= 5 && <CheckCircle2 className="w-4 h-4 text-success" />}
                 </div>
-                <p className="font-bold text-xs text-[#1D1D1F]">Ready Pickup</p>
-                <p className="text-[10px] text-[#86868B]">Completed</p>
+                <p className="font-bold text-xs text-ink">Ready Pickup</p>
+                <p className="text-[10px] text-muted">Completed</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Portal Navigation Tabs */}
-        <div className="flex border-b border-[#E5E5EA] space-x-2 bg-white px-4 pt-2 rounded-2xl border shadow-2xs overflow-x-auto no-scrollbar">
+        <div className="flex border-b border-line space-x-2 bg-white px-4 pt-2 rounded-2xl border shadow-2xs overflow-x-auto no-scrollbar">
           <button
             onClick={() => setActiveTab('OVERVIEW')}
             className={`pb-3 px-3 font-extrabold text-xs transition-all border-b-2 flex items-center space-x-1.5 cursor-pointer whitespace-nowrap ${
               activeTab === 'OVERVIEW'
-                ? 'border-[#0071E3] text-[#0071E3]'
-                : 'border-transparent text-[#86868B] hover:text-[#1D1D1F]'
+                ? 'border-brand text-brand'
+                : 'border-transparent text-muted hover:text-ink'
             }`}
           >
             <Info className="w-4 h-4" />
@@ -573,8 +573,8 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             onClick={() => setActiveTab('ESTIMATE')}
             className={`pb-3 px-3 font-extrabold text-xs transition-all border-b-2 flex items-center space-x-1.5 cursor-pointer whitespace-nowrap relative ${
               activeTab === 'ESTIMATE'
-                ? 'border-[#0071E3] text-[#0071E3]'
-                : 'border-transparent text-[#86868B] hover:text-[#1D1D1F]'
+                ? 'border-brand text-brand'
+                : 'border-transparent text-muted hover:text-ink'
             }`}
           >
             <FileText className="w-4 h-4" />
@@ -588,8 +588,8 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             onClick={() => setActiveTab('DIAGNOSTICS')}
             className={`pb-3 px-3 font-extrabold text-xs transition-all border-b-2 flex items-center space-x-1.5 cursor-pointer whitespace-nowrap ${
               activeTab === 'DIAGNOSTICS'
-                ? 'border-[#0071E3] text-[#0071E3]'
-                : 'border-transparent text-[#86868B] hover:text-[#1D1D1F]'
+                ? 'border-brand text-brand'
+                : 'border-transparent text-muted hover:text-ink'
             }`}
           >
             <ShieldCheck className="w-4 h-4" />
@@ -600,14 +600,14 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             onClick={() => setActiveTab('MESSAGES')}
             className={`pb-3 px-3 font-extrabold text-xs transition-all border-b-2 flex items-center space-x-1.5 cursor-pointer whitespace-nowrap relative ${
               activeTab === 'MESSAGES'
-                ? 'border-[#0071E3] text-[#0071E3]'
-                : 'border-transparent text-[#86868B] hover:text-[#1D1D1F]'
+                ? 'border-brand text-brand'
+                : 'border-transparent text-muted hover:text-ink'
             }`}
           >
             <MessageSquare className="w-4 h-4" />
             <span>Message Shop & Technician</span>
             {currentWorkOrder.customerInquiries && currentWorkOrder.customerInquiries.length > 0 && (
-              <span className="bg-[#0071E3] text-white text-[9px] font-bold px-1.5 py-0.2 rounded-full">
+              <span className="bg-brand text-white text-[9px] font-bold px-1.5 py-0.2 rounded-full">
                 {currentWorkOrder.customerInquiries.length}
               </span>
             )}
@@ -620,57 +620,57 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             {/* Left Column: Device & Tech Details */}
             <div className="md:col-span-7 space-y-6">
               {/* Reported Issues & Technical Findings */}
-              <div className="bg-white rounded-3xl border border-[#E5E5EA] p-5 shadow-2xs space-y-4">
-                <h3 className="font-extrabold text-sm text-[#1D1D1F] flex items-center space-x-2">
-                  <ClipboardCheck className="w-4 h-4 text-[#0071E3]" />
+              <div className="bg-white rounded-3xl border border-line p-5 shadow-2xs space-y-4">
+                <h3 className="font-extrabold text-sm text-ink flex items-center space-x-2">
+                  <ClipboardCheck className="w-4 h-4 text-brand" />
                   <span>Reported Symptoms & Diagnostic Findings</span>
                 </h3>
 
-                <div className="p-3.5 bg-[#F5F5F7] rounded-2xl border border-[#E5E5EA] space-y-1">
-                  <span className="text-[10px] font-bold text-[#86868B] uppercase">Symptoms Reported at Intake</span>
-                  <p className="text-xs text-[#1D1D1F] font-medium">{currentWorkOrder.symptomsReported || 'None specified at check-in'}</p>
+                <div className="p-3.5 bg-surface rounded-2xl border border-line space-y-1">
+                  <span className="text-[10px] font-bold text-muted uppercase">Symptoms Reported at Intake</span>
+                  <p className="text-xs text-ink font-medium">{currentWorkOrder.symptomsReported || 'None specified at check-in'}</p>
                 </div>
 
                 {currentWorkOrder.diagnosticResult && (
-                  <div className="p-3.5 bg-[#F0F6FF] rounded-2xl border border-[#0071E3]/20 space-y-1">
-                    <span className="text-[10px] font-bold text-[#0071E3] uppercase">Technician Diagnostic Findings</span>
-                    <p className="text-xs text-[#1D1D1F] font-medium">{currentWorkOrder.diagnosticResult}</p>
+                  <div className="p-3.5 bg-brand-soft rounded-2xl border border-brand/20 space-y-1">
+                    <span className="text-[10px] font-bold text-brand uppercase">Technician Diagnostic Findings</span>
+                    <p className="text-xs text-ink font-medium">{currentWorkOrder.diagnosticResult}</p>
                   </div>
                 )}
 
                 {currentWorkOrder.assignedTechName && (
-                  <div className="flex items-center space-x-3 pt-2 border-t border-[#E5E5EA]">
-                    <div className="w-9 h-9 rounded-full bg-[#0071E3] text-white flex items-center justify-center font-bold">
+                  <div className="flex items-center space-x-3 pt-2 border-t border-line">
+                    <div className="w-9 h-9 rounded-full bg-brand text-white flex items-center justify-center font-bold">
                       {currentWorkOrder.assignedTechName.charAt(0)}
                     </div>
                     <div>
-                      <p className="font-bold text-[#1D1D1F] text-xs">Assigned Technician: {currentWorkOrder.assignedTechName}</p>
-                      <p className="text-[10px] text-[#86868B]">Specialized Apple Master Technician</p>
+                      <p className="font-bold text-ink text-xs">Assigned Technician: {currentWorkOrder.assignedTechName}</p>
+                      <p className="text-[10px] text-muted">Specialized Apple Master Technician</p>
                     </div>
                   </div>
                 )}
               </div>
 
               {/* Live Activity & Status Log */}
-              <div className="bg-white rounded-3xl border border-[#E5E5EA] p-5 shadow-2xs space-y-4">
-                <h3 className="font-extrabold text-sm text-[#1D1D1F] flex items-center space-x-2">
-                  <Clock className="w-4 h-4 text-[#0071E3]" />
+              <div className="bg-white rounded-3xl border border-line p-5 shadow-2xs space-y-4">
+                <h3 className="font-extrabold text-sm text-ink flex items-center space-x-2">
+                  <Clock className="w-4 h-4 text-brand" />
                   <span>Real-Time Repair History & Logs</span>
                 </h3>
 
                 <div className="space-y-3">
                   {currentWorkOrder.repairLogs && currentWorkOrder.repairLogs.length > 0 ? (
                     currentWorkOrder.repairLogs.map((log) => (
-                      <div key={log.id} className="p-3 bg-[#F5F5F7] rounded-xl border border-[#E5E5EA] space-y-1">
-                        <div className="flex justify-between items-center text-[10px] text-[#86868B]">
-                          <span className="font-bold text-[#1D1D1F]">{log.author || 'Shop Tech'}</span>
+                      <div key={log.id} className="p-3 bg-surface rounded-xl border border-line space-y-1">
+                        <div className="flex justify-between items-center text-[10px] text-muted">
+                          <span className="font-bold text-ink">{log.author || 'Shop Tech'}</span>
                           <span>{log.timestamp}</span>
                         </div>
-                        <p className="text-xs text-[#1D1D1F]">{log.note}</p>
+                        <p className="text-xs text-ink">{log.note}</p>
                       </div>
                     ))
                   ) : (
-                    <p className="text-xs text-[#86868B] italic">No public log updates recorded yet.</p>
+                    <p className="text-xs text-muted italic">No public log updates recorded yet.</p>
                   )}
                 </div>
               </div>
@@ -679,42 +679,42 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             {/* Right Column: Warranty & Financial Overview */}
             <div className="md:col-span-5 space-y-6">
               {/* Financial Quick Card */}
-              <div className="bg-white rounded-3xl border border-[#E5E5EA] p-5 shadow-2xs space-y-4">
-                <h3 className="font-extrabold text-sm text-[#1D1D1F] flex items-center space-x-2">
-                  <CreditCard className="w-4 h-4 text-[#0071E3]" />
+              <div className="bg-white rounded-3xl border border-line p-5 shadow-2xs space-y-4">
+                <h3 className="font-extrabold text-sm text-ink flex items-center space-x-2">
+                  <CreditCard className="w-4 h-4 text-brand" />
                   <span>Payment & Financial Summary</span>
                 </h3>
 
-                <div className="space-y-2 bg-[#F5F5F7] p-4 rounded-2xl border border-[#E5E5EA] text-xs">
+                <div className="space-y-2 bg-surface p-4 rounded-2xl border border-line text-xs">
                   <div className="flex justify-between">
-                    <span className="text-[#86868B]">Subtotal:</span>
-                    <span className="font-mono text-[#1D1D1F]">{currentWorkOrder.subtotal.toLocaleString()} {systemSettings.currencySymbol}</span>
+                    <span className="text-muted">Subtotal:</span>
+                    <span className="font-mono text-ink">{currentWorkOrder.subtotal.toLocaleString()} {systemSettings.currencySymbol}</span>
                   </div>
                   {currentWorkOrder.discountAmount > 0 && (
-                    <div className="flex justify-between text-[#34C759]">
+                    <div className="flex justify-between text-success">
                       <span>Discount Applied:</span>
                       <span className="font-mono">-{currentWorkOrder.discountAmount.toLocaleString()} {systemSettings.currencySymbol}</span>
                     </div>
                   )}
                   {currentWorkOrder.depositAmount > 0 && (
-                    <div className="flex justify-between text-[#0071E3]">
+                    <div className="flex justify-between text-brand">
                       <span>Deposit Paid:</span>
                       <span className="font-mono">-{currentWorkOrder.depositAmount.toLocaleString()} {systemSettings.currencySymbol}</span>
                     </div>
                   )}
-                  <div className="pt-2 border-t border-[#E5E5EA] flex justify-between font-extrabold text-sm">
-                    <span className="text-[#1D1D1F]">Total Amount:</span>
-                    <span className="font-mono text-[#0071E3]">
+                  <div className="pt-2 border-t border-line flex justify-between font-extrabold text-sm">
+                    <span className="text-ink">Total Amount:</span>
+                    <span className="font-mono text-brand">
                       {currentWorkOrder.totalAmount.toLocaleString()} {systemSettings.currencySymbol}
                     </span>
                   </div>
                 </div>
 
-                <div className="p-3 bg-[#F0F6FF] rounded-xl border border-[#0071E3]/20 flex items-center justify-between">
-                  <span className="font-bold text-xs text-[#1D1D1F]">Payment Status:</span>
+                <div className="p-3 bg-brand-soft rounded-xl border border-brand/20 flex items-center justify-between">
+                  <span className="font-bold text-xs text-ink">Payment Status:</span>
                   <span className={`font-extrabold text-xs px-2.5 py-0.5 rounded-full border ${
                     currentWorkOrder.isPaid
-                      ? 'bg-[#34C759]/15 text-[#34C759] border-[#34C759]/30'
+                      ? 'bg-success/15 text-success border-success/30'
                       : 'bg-[#FF9500]/15 text-[#FF9500] border-[#FF9500]/30'
                   }`}>
                     {currentWorkOrder.isPaid ? 'PAID IN FULL' : 'PAYMENT DUE AT PICKUP'}
@@ -723,18 +723,18 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
               </div>
 
               {/* Warranty Coverage Card */}
-              <div className="bg-white rounded-3xl border border-[#E5E5EA] p-5 shadow-2xs space-y-3">
-                <div className="flex items-center space-x-2 text-[#34C759]">
+              <div className="bg-white rounded-3xl border border-line p-5 shadow-2xs space-y-3">
+                <div className="flex items-center space-x-2 text-success">
                   <Award className="w-5 h-5" />
-                  <h3 className="font-extrabold text-sm text-[#1D1D1F]">Warranty Coverage Guarantee</h3>
+                  <h3 className="font-extrabold text-sm text-ink">Warranty Coverage Guarantee</h3>
                 </div>
-                <p className="text-xs text-[#6E6E73]">
+                <p className="text-xs text-faint">
                   All modular repairs and replacement parts installed by {systemSettings.shopName} include full warranty protection.
                 </p>
 
-                <div className="p-3 bg-[#34C759]/10 border border-[#34C759]/30 rounded-xl flex items-center justify-between">
-                  <span className="font-bold text-xs text-[#1D1D1F]">Covered Period:</span>
-                  <span className="font-extrabold text-xs text-[#34C759] font-mono">
+                <div className="p-3 bg-success/10 border border-success/30 rounded-xl flex items-center justify-between">
+                  <span className="font-bold text-xs text-ink">Covered Period:</span>
+                  <span className="font-extrabold text-xs text-success font-mono">
                     {currentWorkOrder.warrantyDays || 90} Days Guarantee
                   </span>
                 </div>
@@ -745,20 +745,20 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
 
         {/* Tab 2: ESTIMATE */}
         {activeTab === 'ESTIMATE' && (
-          <div className="bg-white rounded-3xl border border-[#E5E5EA] p-6 shadow-2xs space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E5E5EA] pb-4">
+          <div className="bg-white rounded-3xl border border-line p-6 shadow-2xs space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line pb-4">
               <div>
-                <h3 className="text-base font-extrabold text-[#1D1D1F]">Itemized Repair Quote Estimate</h3>
-                <p className="text-xs text-[#86868B]">Official breakdown of required replacement components and repair labor</p>
+                <h3 className="text-base font-extrabold text-ink">Itemized Repair Quote Estimate</h3>
+                <p className="text-xs text-muted">Official breakdown of required replacement components and repair labor</p>
               </div>
 
               <div className="flex items-center space-x-2">
-                <span className="text-xs text-[#86868B]">Estimate Status:</span>
+                <span className="text-xs text-muted">Estimate Status:</span>
                 <span className={`px-3 py-1 rounded-full font-extrabold text-xs border ${
                   currentWorkOrder.estimateStatus === 'Approved'
-                    ? 'bg-[#34C759]/15 text-[#34C759] border-[#34C759]/30'
+                    ? 'bg-success/15 text-success border-success/30'
                     : currentWorkOrder.estimateStatus === 'Rejected'
-                    ? 'bg-[#FF3B30]/15 text-[#FF3B30] border-[#FF3B30]/30'
+                    ? 'bg-danger/15 text-danger border-danger/30'
                     : 'bg-[#FF9500]/15 text-[#FF9500] border-[#FF9500]/30 animate-pulse'
                 }`}>
                   {currentWorkOrder.estimateStatus || 'Awaiting Approval'}
@@ -767,8 +767,8 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             </div>
 
             {/* Line Items Table */}
-            <div className="border border-[#E5E5EA] rounded-2xl overflow-hidden divide-y divide-[#E5E5EA]">
-              <div className="bg-[#F5F5F7] px-4 py-2.5 grid grid-cols-12 font-bold text-[#86868B] text-[10px] uppercase tracking-wider">
+            <div className="border border-line rounded-2xl overflow-hidden divide-y divide-line">
+              <div className="bg-surface px-4 py-2.5 grid grid-cols-12 font-bold text-muted text-[10px] uppercase tracking-wider">
                 <div className="col-span-6">Description / Component</div>
                 <div className="col-span-2 text-center">Type</div>
                 <div className="col-span-2 text-center">Qty</div>
@@ -777,21 +777,21 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
 
               {currentWorkOrder.lineItems.map((li) => (
                 <div key={li.id} className="px-4 py-3 grid grid-cols-12 items-center text-xs">
-                  <div className="col-span-6 font-semibold text-[#1D1D1F]">
+                  <div className="col-span-6 font-semibold text-ink">
                     {li.description}
                     {li.partQuality && (
-                      <span className="block text-[10px] text-[#0071E3] font-normal">{li.partQuality}</span>
+                      <span className="block text-[10px] text-brand font-normal">{li.partQuality}</span>
                     )}
                   </div>
                   <div className="col-span-2 text-center">
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                      li.isLabor ? 'bg-purple-50 text-purple-700' : 'bg-[#F0F6FF] text-[#0071E3]'
+                      li.isLabor ? 'bg-purple-50 text-purple-700' : 'bg-brand-soft text-brand'
                     }`}>
                       {li.isLabor ? 'Labor' : 'Part'}
                     </span>
                   </div>
                   <div className="col-span-2 text-center font-mono font-medium">{li.quantity}</div>
-                  <div className="col-span-2 text-right font-mono font-bold text-[#1D1D1F]">
+                  <div className="col-span-2 text-right font-mono font-bold text-ink">
                     {(li.unitPrice * li.quantity).toLocaleString()} {systemSettings.currencySymbol}
                   </div>
                 </div>
@@ -799,36 +799,36 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             </div>
 
             {/* Totals Box */}
-            <div className="max-w-xs ml-auto space-y-2 bg-[#F5F5F7] p-4 rounded-2xl border border-[#E5E5EA]">
-              <div className="flex justify-between text-xs text-[#86868B]">
+            <div className="max-w-xs ml-auto space-y-2 bg-surface p-4 rounded-2xl border border-line">
+              <div className="flex justify-between text-xs text-muted">
                 <span>Subtotal:</span>
-                <span className="font-mono text-[#1D1D1F]">{currentWorkOrder.subtotal.toLocaleString()} {systemSettings.currencySymbol}</span>
+                <span className="font-mono text-ink">{currentWorkOrder.subtotal.toLocaleString()} {systemSettings.currencySymbol}</span>
               </div>
               {currentWorkOrder.taxAmount > 0 && (
-                <div className="flex justify-between text-xs text-[#86868B]">
+                <div className="flex justify-between text-xs text-muted">
                   <span>Tax:</span>
-                  <span className="font-mono text-[#1D1D1F]">{currentWorkOrder.taxAmount.toLocaleString()} {systemSettings.currencySymbol}</span>
+                  <span className="font-mono text-ink">{currentWorkOrder.taxAmount.toLocaleString()} {systemSettings.currencySymbol}</span>
                 </div>
               )}
               {currentWorkOrder.depositAmount > 0 && (
-                <div className="flex justify-between text-xs text-[#0071E3]">
+                <div className="flex justify-between text-xs text-brand">
                   <span>Deposit Paid:</span>
                   <span className="font-mono">-{currentWorkOrder.depositAmount.toLocaleString()} {systemSettings.currencySymbol}</span>
                 </div>
               )}
-              <div className="pt-2 border-t border-[#E5E5EA] flex justify-between font-extrabold text-sm text-[#1D1D1F]">
+              <div className="pt-2 border-t border-line flex justify-between font-extrabold text-sm text-ink">
                 <span>Total Authorized Estimate:</span>
-                <span className="font-mono text-[#0071E3]">{currentWorkOrder.totalAmount.toLocaleString()} {systemSettings.currencySymbol}</span>
+                <span className="font-mono text-brand">{currentWorkOrder.totalAmount.toLocaleString()} {systemSettings.currencySymbol}</span>
               </div>
             </div>
 
             {/* Approval Controls */}
             {currentWorkOrder.estimateStatus !== 'Approved' ? (
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-[#E5E5EA]">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-line">
                 {(currentWorkOrder.status === 'Receive' || currentWorkOrder.status === 'Pending') && (
                   <button
                     onClick={() => setRejectionModalOpen(true)}
-                    className="w-full sm:w-auto px-5 py-3 bg-white border border-[#E5E5EA] text-[#FF3B30] hover:bg-[#FF3B30]/10 font-extrabold rounded-xl transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF3B30]/40 focus-visible:ring-offset-2"
+                    className="w-full sm:w-auto px-5 py-3 bg-white border border-line text-danger hover:bg-danger/10 font-extrabold rounded-xl transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger/40 focus-visible:ring-offset-2"
                   >
                     <span className="hidden sm:inline">Decline / Request Callback</span>
                     <span className="sm:hidden">Decline</span>
@@ -836,7 +836,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 )}
                 <button
                   onClick={() => setApprovalModalOpen(true)}
-                  className="w-full sm:w-auto px-6 py-3 bg-[#34C759] hover:bg-[#30B753] text-white font-extrabold rounded-xl shadow-xs transition-all active:scale-95 flex items-center justify-center space-x-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#34C759]/40 focus-visible:ring-offset-2"
+                  className="w-full sm:w-auto px-6 py-3 bg-success hover:bg-[#30B753] text-white font-extrabold rounded-xl shadow-xs transition-all active:scale-95 flex items-center justify-center space-x-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success/40 focus-visible:ring-offset-2"
                 >
                   <ThumbsUp className="w-4 h-4 shrink-0" />
                   <span className="truncate hidden sm:inline">Approve Estimate & Authorize Repair</span>
@@ -844,7 +844,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 </button>
               </div>
             ) : (
-              <div className="p-4 bg-[#34C759]/10 border border-[#34C759]/30 rounded-2xl flex items-center justify-between text-[#34C759]">
+              <div className="p-4 bg-success/10 border border-success/30 rounded-2xl flex items-center justify-between text-success">
                 <div className="flex items-center space-x-2">
                   <CheckCircle2 className="w-5 h-5" />
                   <div>
@@ -860,10 +860,10 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
 
         {/* Tab 3: DIAGNOSTICS */}
         {activeTab === 'DIAGNOSTICS' && (
-          <div className="bg-white rounded-3xl border border-[#E5E5EA] p-6 shadow-2xs space-y-6">
+          <div className="bg-white rounded-3xl border border-line p-6 shadow-2xs space-y-6">
             <div>
-              <h3 className="text-base font-extrabold text-[#1D1D1F]">21-Point Hardware Diagnostic Checklist</h3>
-              <p className="text-xs text-[#86868B]">Full transparency report recorded during initial device intake inspection</p>
+              <h3 className="text-base font-extrabold text-ink">21-Point Hardware Diagnostic Checklist</h3>
+              <p className="text-xs text-muted">Full transparency report recorded during initial device intake inspection</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -872,23 +872,23 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   <div
                     key={item.id}
                     className={`p-3 rounded-2xl border flex items-center justify-between ${
-                      item.status === 'Pass' ? 'bg-[#34C759]/10 border-[#34C759]/30 text-[#1D1D1F]' :
-                      item.status === 'Fail' ? 'bg-[#FF3B30]/10 border-[#FF3B30]/30 text-[#1D1D1F]' :
-                      'bg-[#F5F5F7] border-[#E5E5EA] text-[#86868B]'
+                      item.status === 'Pass' ? 'bg-success/10 border-success/30 text-ink' :
+                      item.status === 'Fail' ? 'bg-danger/10 border-danger/30 text-ink' :
+                      'bg-surface border-line text-muted'
                     }`}
                   >
                     <span className="font-bold text-xs">{item.name}</span>
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                      item.status === 'Pass' ? 'bg-[#34C759] text-white' :
-                      item.status === 'Fail' ? 'bg-[#FF3B30] text-white' :
-                      'bg-[#86868B] text-white'
+                      item.status === 'Pass' ? 'bg-success text-white' :
+                      item.status === 'Fail' ? 'bg-danger text-white' :
+                      'bg-muted text-white'
                     }`}>
                       {item.status}
                     </span>
                   </div>
                 ))
               ) : (
-                <div className="col-span-full p-6 text-center text-[#86868B] italic">
+                <div className="col-span-full p-6 text-center text-muted italic">
                   Standard intake inspection recorded. All primary core sensors tested.
                 </div>
               )}
@@ -898,14 +898,14 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
 
         {/* Tab 4: MESSAGES */}
         {activeTab === 'MESSAGES' && (
-          <div className="bg-white rounded-3xl border border-[#E5E5EA] p-6 shadow-2xs space-y-6">
+          <div className="bg-white rounded-3xl border border-line p-6 shadow-2xs space-y-6">
             <div>
-              <h3 className="text-base font-extrabold text-[#1D1D1F]">Direct Shop Communication Channel</h3>
-              <p className="text-xs text-[#86868B]">Send a direct message to our technical team regarding work order {currentWorkOrder.orderNumber}</p>
+              <h3 className="text-base font-extrabold text-ink">Direct Shop Communication Channel</h3>
+              <p className="text-xs text-muted">Send a direct message to our technical team regarding work order {currentWorkOrder.orderNumber}</p>
             </div>
 
             {/* Message Thread */}
-            <div className="space-y-3 max-h-80 overflow-y-auto p-4 bg-[#F5F5F7] rounded-2xl border border-[#E5E5EA]">
+            <div className="space-y-3 max-h-80 overflow-y-auto p-4 bg-surface rounded-2xl border border-line">
               {currentWorkOrder.customerInquiries && currentWorkOrder.customerInquiries.length > 0 ? (
                 currentWorkOrder.customerInquiries.map((msg) => (
                   <div
@@ -916,16 +916,16 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   >
                     <div className={`p-3 rounded-2xl text-xs ${
                       msg.sender === 'Customer'
-                        ? 'bg-[#0071E3] text-white rounded-br-none'
-                        : 'bg-white border border-[#E5E5EA] text-[#1D1D1F] rounded-bl-none shadow-2xs'
+                        ? 'bg-brand text-white rounded-br-none'
+                        : 'bg-white border border-line text-ink rounded-bl-none shadow-2xs'
                     }`}>
                       <p className="font-medium">{msg.text}</p>
                     </div>
-                    <span className="text-[9px] text-[#86868B] mt-1 font-mono">{msg.timestamp}</span>
+                    <span className="text-[9px] text-muted mt-1 font-mono">{msg.timestamp}</span>
                   </div>
                 ))
               ) : (
-                <div className="text-center py-8 text-[#86868B] text-xs">
+                <div className="text-center py-8 text-muted text-xs">
                   No messages sent yet. Use the box below to ask any question or leave instructions for the repair team.
                 </div>
               )}
@@ -938,12 +938,12 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 value={messageInput}
                 onChange={(e) => setMessageInput(e.target.value)}
                 placeholder="Type your message or question here..."
-                className="flex-1 bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl px-4 py-2.5 text-xs text-[#1D1D1F] focus:outline-none focus:bg-white focus:border-[#0071E3] transition-all"
+                className="flex-1 bg-surface border border-line rounded-xl px-4 py-2.5 text-xs text-ink focus:outline-none focus:bg-white focus:border-brand transition-all"
               />
               <Button
                 type="submit"
                 disabled={!messageInput.trim()}
-                className="bg-[#0071E3] hover:bg-[#0077ED] disabled:opacity-50 text-white flex items-center space-x-1"
+                className="bg-brand hover:bg-[#0077ED] disabled:opacity-50 text-white flex items-center space-x-1"
               >
                 <span>Send</span>
                 <Send className="w-3.5 h-3.5" />
@@ -956,36 +956,36 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
       {/* APPROVAL CONFIRMATION MODAL */}
       {approvalModalOpen && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-5 shadow-2xl border border-[#E5E5EA] animate-in fade-in zoom-in duration-150">
-            <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-3">
-              <div className="flex items-center space-x-2 text-[#34C759]">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-5 shadow-2xl border border-line animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center justify-between border-b border-line pb-3">
+              <div className="flex items-center space-x-2 text-success">
                 <CheckCircle2 className="w-5 h-5" />
-                <h3 className="font-extrabold text-base text-[#1D1D1F]">Authorize Repair Estimate</h3>
+                <h3 className="font-extrabold text-base text-ink">Authorize Repair Estimate</h3>
               </div>
               <button
                 onClick={() => setApprovalModalOpen(false)}
-                className="p-1 text-[#86868B] hover:text-[#1D1D1F] rounded-lg"
+                className="p-1 text-muted hover:text-ink rounded-lg"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-3 text-xs text-[#1D1D1F]">
+            <div className="space-y-3 text-xs text-ink">
               <p>
                 You are authorizing <strong>{systemSettings.shopName}</strong> to proceed with the repair for <strong>{currentWorkOrder.deviceModel}</strong> (WO #{currentWorkOrder.orderNumber}).
               </p>
 
-              <div className="bg-[#F5F5F7] p-3.5 rounded-2xl border border-[#E5E5EA] space-y-1.5 font-mono">
+              <div className="bg-surface p-3.5 rounded-2xl border border-line space-y-1.5 font-mono">
                 <div className="flex justify-between">
-                  <span className="text-[#86868B]">Device:</span>
+                  <span className="text-muted">Device:</span>
                   <span className="font-bold">{currentWorkOrder.deviceModel}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#86868B]">Authorized Total:</span>
-                  <span className="font-extrabold text-[#34C759]">{currentWorkOrder.totalAmount.toLocaleString()} {systemSettings.currencySymbol}</span>
+                  <span className="text-muted">Authorized Total:</span>
+                  <span className="font-extrabold text-success">{currentWorkOrder.totalAmount.toLocaleString()} {systemSettings.currencySymbol}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#86868B]">Warranty Coverage:</span>
+                  <span className="text-muted">Warranty Coverage:</span>
                   <span className="font-bold">{currentWorkOrder.warrantyDays || 90} Days Guarantee</span>
                 </div>
               </div>
@@ -997,7 +997,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   value={customerNameSig}
                   onChange={(e) => setCustomerNameSig(e.target.value)}
                   placeholder="Type your full name as signature"
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl px-3 py-2 text-xs font-bold focus:bg-white focus:border-[#0071E3] focus:outline-none"
+                  className="w-full bg-surface border border-line rounded-xl px-3 py-2 text-xs font-bold focus:bg-white focus:border-brand focus:outline-none"
                 />
               </div>
 
@@ -1006,15 +1006,15 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   type="checkbox"
                   checked={agreedToTerms}
                   onChange={(e) => setAgreedToTerms(e.target.checked)}
-                  className="mt-0.5 rounded text-[#0071E3]"
+                  className="mt-0.5 rounded text-brand"
                 />
-                <span className="text-[11px] text-[#86868B]">
+                <span className="text-[11px] text-muted">
                   I authorize the shop to install required components and confirm that all estimates are understood and agreed upon.
                 </span>
               </label>
             </div>
 
-            <div className="flex space-x-2 pt-2 border-t border-[#E5E5EA]">
+            <div className="flex space-x-2 pt-2 border-t border-line">
               <Button
                 type="button"
                 onClick={() => setApprovalModalOpen(false)}
@@ -1027,7 +1027,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 type="button"
                 onClick={handleApproveEstimate}
                 disabled={!agreedToTerms || !customerNameSig.trim()}
-                className="flex-1 bg-[#34C759] hover:bg-[#30B753] disabled:opacity-50 text-white"
+                className="flex-1 bg-success hover:bg-[#30B753] disabled:opacity-50 text-white"
               >
                 Confirm & Authorize
               </Button>
@@ -1039,27 +1039,27 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
       {/* REJECTION / CALL REQUEST MODAL */}
       {rejectionModalOpen && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-5 shadow-2xl border border-[#E5E5EA] animate-in fade-in zoom-in duration-150">
-            <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-3">
-              <div className="flex items-center space-x-2 text-[#FF3B30]">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-5 shadow-2xl border border-line animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center justify-between border-b border-line pb-3">
+              <div className="flex items-center space-x-2 text-danger">
                 <ThumbsDown className="w-5 h-5" />
-                <h3 className="font-extrabold text-base text-[#1D1D1F]">Decline Estimate / Request Callback</h3>
+                <h3 className="font-extrabold text-base text-ink">Decline Estimate / Request Callback</h3>
               </div>
               <button
                 onClick={() => setRejectionModalOpen(false)}
-                className="p-1 text-[#86868B] hover:text-[#1D1D1F] rounded-lg"
+                className="p-1 text-muted hover:text-ink rounded-lg"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-4 text-xs text-[#1D1D1F]">
+            <div className="space-y-4 text-xs text-ink">
               <div>
                 <label className="block font-bold mb-1">Reason for Requesting Modification</label>
                 <select
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl px-3 py-2 text-xs font-semibold focus:bg-white focus:border-[#0071E3]"
+                  className="w-full bg-surface border border-line rounded-xl px-3 py-2 text-xs font-semibold focus:bg-white focus:border-brand"
                 >
                   <option value="Request Phone Call from Technician">Request Phone Call from Technician</option>
                   <option value="Price exceeds budget / Cancel repair">Price exceeds budget / Cancel repair</option>
@@ -1075,12 +1075,12 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   onChange={(e) => setRejectionNotes(e.target.value)}
                   placeholder="Tell us what you need or when you'd like us to call you back..."
                   rows={3}
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-3 text-xs focus:bg-white focus:border-[#0071E3] focus:outline-none"
+                  className="w-full bg-surface border border-line rounded-xl p-3 text-xs focus:bg-white focus:border-brand focus:outline-none"
                 />
               </div>
             </div>
 
-            <div className="flex space-x-2 pt-2 border-t border-[#E5E5EA]">
+            <div className="flex space-x-2 pt-2 border-t border-line">
               <Button
                 type="button"
                 onClick={() => setRejectionModalOpen(false)}
@@ -1092,7 +1092,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
               <Button
                 type="button"
                 onClick={handleRejectEstimate}
-                className="flex-1 bg-[#FF3B30] hover:bg-red-600 text-white"
+                className="flex-1 bg-danger hover:bg-red-600 text-white"
               >
                 Submit Request
               </Button>
@@ -1144,9 +1144,9 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
               }
             }
           `}</style>
-          <div className="printable-portal-voucher bg-white rounded-3xl max-w-xl w-full p-6 space-y-6 shadow-2xl border border-[#E5E5EA] my-auto">
-            <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-3 print:hidden">
-              <h3 className="font-extrabold text-sm text-[#1D1D1F]">Digital Service Voucher & Estimate Receipt</h3>
+          <div className="printable-portal-voucher bg-white rounded-3xl max-w-xl w-full p-6 space-y-6 shadow-2xl border border-line my-auto">
+            <div className="flex items-center justify-between border-b border-line pb-3 print:hidden">
+              <h3 className="font-extrabold text-sm text-ink">Digital Service Voucher & Estimate Receipt</h3>
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => {
@@ -1156,14 +1156,14 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                       console.warn('Print failed:', e);
                     }
                   }}
-                  className="px-3 py-1.5 bg-[#0071E3] text-white font-bold rounded-xl text-xs flex items-center space-x-1 cursor-pointer"
+                  className="px-3 py-1.5 bg-brand text-white font-bold rounded-xl text-xs flex items-center space-x-1 cursor-pointer"
                 >
                   <Printer className="w-3.5 h-3.5" />
                   <span>Print</span>
                 </button>
                 <button
                   onClick={() => setPrintModalOpen(false)}
-                  className="p-1 text-[#86868B] hover:text-[#1D1D1F]"
+                  className="p-1 text-muted hover:text-ink"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -1171,39 +1171,39 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             </div>
 
             {/* Printable Content */}
-            <div className="space-y-4 text-xs font-sans text-[#1D1D1F]">
-              <div className="text-center border-b border-[#E5E5EA] pb-3 space-y-1">
+            <div className="space-y-4 text-xs font-sans text-ink">
+              <div className="text-center border-b border-line pb-3 space-y-1">
                 {systemSettings.shopLogoUrl && (
                   <div className="flex justify-center mb-1">
                     <img src={systemSettings.shopLogoUrl} alt="Logo" className="h-10 max-w-[140px] object-contain" />
                   </div>
                 )}
                 <h2 className="font-black text-base uppercase tracking-tight">{systemSettings.shopName}</h2>
-                <p className="text-[10px] text-[#86868B]">{systemSettings.shopAddress} • Tel: {systemSettings.shopPhone}</p>
-                <p className="text-[10px] text-[#86868B]">Tax ID: {systemSettings.taxId}</p>
+                <p className="text-[10px] text-muted">{systemSettings.shopAddress} • Tel: {systemSettings.shopPhone}</p>
+                <p className="text-[10px] text-muted">Tax ID: {systemSettings.taxId}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 bg-[#F5F5F7] p-3.5 rounded-2xl border border-[#E5E5EA]">
+              <div className="grid grid-cols-2 gap-3 bg-surface p-3.5 rounded-2xl border border-line">
                 <div>
-                  <span className="text-[10px] font-bold text-[#86868B] uppercase">Voucher Number</span>
-                  <p className="font-mono font-bold text-[#0071E3] text-sm">{currentWorkOrder.orderNumber}</p>
+                  <span className="text-[10px] font-bold text-muted uppercase">Voucher Number</span>
+                  <p className="font-mono font-bold text-brand text-sm">{currentWorkOrder.orderNumber}</p>
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold text-[#86868B] uppercase">Customer Name</span>
-                  <p className="font-bold text-[#1D1D1F]">{currentWorkOrder.customerName}</p>
+                  <span className="text-[10px] font-bold text-muted uppercase">Customer Name</span>
+                  <p className="font-bold text-ink">{currentWorkOrder.customerName}</p>
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold text-[#86868B] uppercase">Device Model</span>
-                  <p className="font-bold text-[#1D1D1F]">{currentWorkOrder.deviceModel}</p>
+                  <span className="text-[10px] font-bold text-muted uppercase">Device Model</span>
+                  <p className="font-bold text-ink">{currentWorkOrder.deviceModel}</p>
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold text-[#86868B] uppercase">Serial / IMEI</span>
-                  <p className="font-mono font-bold text-[#1D1D1F]">{currentWorkOrder.serialNumber || currentWorkOrder.imei || 'N/A'}</p>
+                  <span className="text-[10px] font-bold text-muted uppercase">Serial / IMEI</span>
+                  <p className="font-mono font-bold text-ink">{currentWorkOrder.serialNumber || currentWorkOrder.imei || 'N/A'}</p>
                 </div>
               </div>
 
-              <div className="border border-[#E5E5EA] rounded-xl overflow-hidden divide-y divide-[#E5E5EA]">
-                <div className="bg-[#F5F5F7] px-3 py-1.5 font-bold text-[#86868B] text-[10px] flex justify-between uppercase">
+              <div className="border border-line rounded-xl overflow-hidden divide-y divide-line">
+                <div className="bg-surface px-3 py-1.5 font-bold text-muted text-[10px] flex justify-between uppercase">
                   <span>Item Description</span>
                   <span>Amount</span>
                 </div>
@@ -1215,12 +1215,12 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 ))}
               </div>
 
-              <div className="text-right space-y-1 font-mono pt-2 border-t border-[#E5E5EA]">
-                <p className="text-xs text-[#86868B]">Subtotal: {currentWorkOrder.subtotal.toLocaleString()} {systemSettings.currencySymbol}</p>
-                <p className="text-sm font-black text-[#0071E3]">Total: {currentWorkOrder.totalAmount.toLocaleString()} {systemSettings.currencySymbol}</p>
+              <div className="text-right space-y-1 font-mono pt-2 border-t border-line">
+                <p className="text-xs text-muted">Subtotal: {currentWorkOrder.subtotal.toLocaleString()} {systemSettings.currencySymbol}</p>
+                <p className="text-sm font-black text-brand">Total: {currentWorkOrder.totalAmount.toLocaleString()} {systemSettings.currencySymbol}</p>
               </div>
 
-              <p className="text-[10px] text-center text-[#86868B] pt-3 border-t border-[#E5E5EA]">
+              <p className="text-[10px] text-center text-muted pt-3 border-t border-line">
                 {systemSettings.receiptFooterNote}
               </p>
             </div>

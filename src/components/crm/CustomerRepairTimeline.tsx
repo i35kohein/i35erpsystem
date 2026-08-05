@@ -51,10 +51,10 @@ const getOutcomeMeta = (status: string) => {
       return {
         label: 'Under Active Repair',
         badgeClass: 'bg-blue-50 text-blue-700 border-blue-200',
-        nodeBg: 'bg-[#0071E3] text-white ring-4 ring-blue-100',
+        nodeBg: 'bg-brand text-white ring-4 ring-blue-100',
         icon: Cog,
         bgGradient: 'from-blue-50/50 to-transparent',
-        borderLeft: 'border-l-4 border-l-[#0071E3]',
+        borderLeft: 'border-l-4 border-l-brand',
       };
     case 'Pending':
       return {
@@ -166,10 +166,10 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
 
   if (workOrders.length === 0) {
     return (
-      <div className={`flex min-h-[260px] flex-col items-center justify-center rounded-2xl border border-dashed border-[#E5E5EA] bg-[#F8F9FA] p-8 text-center text-[#86868B] ${emptyClassName}`}>
-        <Clock className="w-8 h-8 text-[#86868B]/50 mx-auto mb-2" />
+      <div className={`flex min-h-[260px] flex-col items-center justify-center rounded-2xl border border-dashed border-line bg-[#F8F9FA] p-8 text-center text-muted ${emptyClassName}`}>
+        <Clock className="w-8 h-8 text-muted/50 mx-auto mb-2" />
         <p className="font-semibold text-xs">No repair history recorded for this customer account.</p>
-        <p className="text-[11px] text-[#86868B] mt-0.5">When work orders are intaken, they will appear chronologically here.</p>
+        <p className="text-[11px] text-muted mt-0.5">When work orders are intaken, they will appear chronologically here.</p>
       </div>
     );
   }
@@ -178,28 +178,28 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
     <div className="space-y-4 text-xs">
       {/* Filtering & Sorting Controls Bar */}
       {showFilters && (
-        <div className="bg-[#F5F5F7] p-3 rounded-2xl border border-[#E5E5EA] space-y-2.5">
+        <div className="bg-surface p-3 rounded-2xl border border-line space-y-2.5">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5">
             {/* Search Input */}
             <div className="relative w-full sm:w-64">
-              <Search className="w-3.5 h-3.5 text-[#86868B] absolute left-3 top-2.5" />
+              <Search className="w-3.5 h-3.5 text-muted absolute left-3 top-2.5" />
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search ticket, model, serial, notes..."
-                className="w-full bg-white border border-[#E5E5EA] rounded-xl pl-8 pr-3 py-1.5 text-xs font-semibold text-[#1D1D1F] focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20 focus:outline-none"
+                className="w-full bg-white border border-line rounded-xl pl-8 pr-3 py-1.5 text-xs font-semibold text-ink focus:border-brand focus:ring-2 focus:ring-brand/20 focus:outline-none"
               />
             </div>
 
             {/* Filter Controls */}
             <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-              <div className="flex items-center space-x-1 bg-white px-2.5 py-1 rounded-xl border border-[#E5E5EA]">
-                <Filter className="w-3 h-3 text-[#86868B]" />
+              <div className="flex items-center space-x-1 bg-white px-2.5 py-1 rounded-xl border border-line">
+                <Filter className="w-3 h-3 text-muted" />
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="bg-transparent text-[11px] font-bold text-[#1D1D1F] focus:outline-none cursor-pointer"
+                  className="bg-transparent text-[11px] font-bold text-ink focus:outline-none cursor-pointer"
                 >
                   <option value="ALL">All Outcomes ({workOrders.length})</option>
                   <option value="Finished">Finished</option>
@@ -212,12 +212,12 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
               </div>
 
               {availableCategories.length > 1 && (
-                <div className="flex items-center space-x-1 bg-white px-2.5 py-1 rounded-xl border border-[#E5E5EA]">
-                  <Smartphone className="w-3 h-3 text-[#86868B]" />
+                <div className="flex items-center space-x-1 bg-white px-2.5 py-1 rounded-xl border border-line">
+                  <Smartphone className="w-3 h-3 text-muted" />
                   <select
                     value={deviceFilter}
                     onChange={(e) => setDeviceFilter(e.target.value)}
-                    className="bg-transparent text-[11px] font-bold text-[#1D1D1F] focus:outline-none cursor-pointer"
+                    className="bg-transparent text-[11px] font-bold text-ink focus:outline-none cursor-pointer"
                   >
                     <option value="ALL">All Devices</option>
                     {availableCategories.map((cat) => (
@@ -231,10 +231,10 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
               <button
                 type="button"
                 onClick={() => setSortOrder(prev => prev === 'NEWEST' ? 'OLDEST' : 'NEWEST')}
-                className="px-2.5 py-1 bg-white border border-[#E5E5EA] hover:border-[#0071E3] text-[#1D1D1F] font-bold text-[11px] rounded-xl flex items-center space-x-1 cursor-pointer transition-all shadow-2xs"
+                className="px-2.5 py-1 bg-white border border-line hover:border-brand text-ink font-bold text-[11px] rounded-xl flex items-center space-x-1 cursor-pointer transition-all shadow-2xs"
                 title="Toggle Chronological Order"
               >
-                <ArrowUpDown className="w-3 h-3 text-[#0071E3]" />
+                <ArrowUpDown className="w-3 h-3 text-brand" />
                 <span>{sortOrder === 'NEWEST' ? 'Newest First' : 'Oldest First'}</span>
               </button>
             </div>
@@ -244,7 +244,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
 
       {/* Chronological Timeline Container */}
       {sortedOrders.length > 0 ? (
-        <div className="relative pl-6 sm:pl-8 space-y-6 before:absolute before:left-3 sm:before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-gradient-to-b before:from-[#0071E3] before:via-[#E5E5EA] before:to-[#E5E5EA]">
+        <div className="relative pl-6 sm:pl-8 space-y-6 before:absolute before:left-3 sm:before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-gradient-to-b before:from-brand before:via-line before:to-line">
           {sortedOrders.map((wo, index) => {
             const outcomeMeta = getOutcomeMeta(wo.status);
             const NodeIcon = outcomeMeta.icon;
@@ -276,11 +276,11 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                 </div>
 
                 {/* Timeline Ticket Card */}
-                <div className={`bg-white border border-[#E5E5EA] hover:border-[#0071E3]/50 rounded-2xl p-4 space-y-3 shadow-xs transition-all ${outcomeMeta.borderLeft}`}>
+                <div className={`bg-white border border-line hover:border-brand/50 rounded-2xl p-4 space-y-3 shadow-xs transition-all ${outcomeMeta.borderLeft}`}>
                   {/* Top Header: Order #, Outcome Badge, Date */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#E5E5EA]/80 pb-2.5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-line/80 pb-2.5">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="px-2.5 py-1 bg-[#1D1D1F] text-white font-mono font-bold text-xs rounded-xl shadow-2xs">
+                      <span className="px-2.5 py-1 bg-ink text-white font-mono font-bold text-xs rounded-xl shadow-2xs">
                         {wo.orderNumber || wo.id}
                       </span>
 
@@ -289,7 +289,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                       </span>
 
                       {wo.serviceType && (
-                        <span className="px-2 py-0.5 text-[10px] font-bold bg-[#F5F5F7] text-[#1D1D1F] border border-[#E5E5EA] rounded-md">
+                        <span className="px-2 py-0.5 text-[10px] font-bold bg-surface text-ink border border-line rounded-md">
                           {wo.serviceType}
                         </span>
                       )}
@@ -301,33 +301,33 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                       )}
                     </div>
 
-                    <div className="flex items-center space-x-2 text-[11px] text-[#86868B]">
-                      <Calendar className="w-3.5 h-3.5 text-[#0071E3]" />
-                      <span className="font-semibold text-[#1D1D1F]">{formattedDate}</span>
-                      <span className="text-[#86868B]">at {formattedTime}</span>
+                    <div className="flex items-center space-x-2 text-[11px] text-muted">
+                      <Calendar className="w-3.5 h-3.5 text-brand" />
+                      <span className="font-semibold text-ink">{formattedDate}</span>
+                      <span className="text-muted">at {formattedTime}</span>
                     </div>
                   </div>
 
                   {/* Device Specification & Serial Section */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#F9F9FB] p-3 rounded-xl border border-[#E5E5EA]/80">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#F9F9FB] p-3 rounded-xl border border-line/80">
                     <div>
-                      <span className="text-[10px] font-bold text-[#86868B] uppercase tracking-wider block mb-0.5">
+                      <span className="text-[10px] font-bold text-muted uppercase tracking-wider block mb-0.5">
                         Device Specification
                       </span>
                       <div className="flex items-center space-x-1.5">
-                        <Smartphone className="w-4 h-4 text-[#0071E3]" />
-                        <span className="font-black text-[#1D1D1F] text-xs">
+                        <Smartphone className="w-4 h-4 text-brand" />
+                        <span className="font-black text-ink text-xs">
                           {wo.deviceCategory} {wo.deviceModel}
                         </span>
                       </div>
-                      <div className="flex flex-wrap items-center gap-2 text-[10px] text-[#86868B] mt-1">
+                      <div className="flex flex-wrap items-center gap-2 text-[10px] text-muted mt-1">
                         {wo.deviceColor && (
-                          <span className="px-1.5 py-0.5 bg-white rounded border border-[#E5E5EA] font-medium">
+                          <span className="px-1.5 py-0.5 bg-white rounded border border-line font-medium">
                             Color: {wo.deviceColor}
                           </span>
                         )}
                         {(wo.serialNumber || wo.imei) && (
-                          <span className="px-1.5 py-0.5 bg-white rounded border border-[#E5E5EA] font-mono font-bold text-[#1D1D1F]">
+                          <span className="px-1.5 py-0.5 bg-white rounded border border-line font-mono font-bold text-ink">
                             S/N: {wo.serialNumber || wo.imei}
                           </span>
                         )}
@@ -335,18 +335,18 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                     </div>
 
                     <div>
-                      <span className="text-[10px] font-bold text-[#86868B] uppercase tracking-wider block mb-0.5">
+                      <span className="text-[10px] font-bold text-muted uppercase tracking-wider block mb-0.5">
                         Security & Passcode Status
                       </span>
                       <div className="flex items-center space-x-3 text-[11px] pt-0.5">
                         <div>
-                          <span className="text-[#86868B]">Passcode: </span>
-                          <span className="font-mono font-bold text-[#1D1D1F]">
+                          <span className="text-muted">Passcode: </span>
+                          <span className="font-mono font-bold text-ink">
                             {wo.passcode ? '•••• Provided' : 'None / Pattern'}
                           </span>
                         </div>
                         <div>
-                          <span className="text-[#86868B]">Find My: </span>
+                          <span className="text-muted">Find My: </span>
                           <span className={`font-bold px-1.5 py-0.5 rounded text-[10px] ${
                             wo.findMyStatus === 'OFF' 
                               ? 'bg-emerald-100 text-emerald-800' 
@@ -363,10 +363,10 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
 
                   {/* Outcome & Repair Details Box */}
                   <div className="space-y-2">
-                    <div className="bg-[#F0F6FF] p-3 rounded-xl border border-[#0071E3]/20 space-y-1.5">
+                    <div className="bg-brand-soft p-3 rounded-xl border border-brand/20 space-y-1.5">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-black uppercase text-[#0071E3] tracking-wider flex items-center space-x-1">
-                          <Activity className="w-3 h-3 text-[#0071E3]" />
+                        <span className="text-[10px] font-black uppercase text-brand tracking-wider flex items-center space-x-1">
+                          <Activity className="w-3 h-3 text-brand" />
                           <span>Repair Outcome Summary & Diagnosis</span>
                         </span>
                         {wo.postRepairChecklist && (
@@ -377,16 +377,16 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                         )}
                       </div>
 
-                      <p className="text-xs text-[#1D1D1F] font-semibold leading-relaxed">
+                      <p className="text-xs text-ink font-semibold leading-relaxed">
                         {wo.afterRepairSummary || wo.diagnosticResult || wo.symptomsReported || 'Standard intake diagnostics completed.'}
                       </p>
 
                       {/* Line Items / Selected Repairs List */}
                       {wo.selectedRepairs && wo.selectedRepairs.length > 0 && (
-                        <div className="pt-1.5 border-t border-[#0071E3]/15 flex flex-wrap gap-1.5">
-                          <span className="text-[10px] font-bold text-[#86868B] py-0.5">Services:</span>
+                        <div className="pt-1.5 border-t border-brand/15 flex flex-wrap gap-1.5">
+                          <span className="text-[10px] font-bold text-muted py-0.5">Services:</span>
                           {wo.selectedRepairs.map((item, i) => (
-                            <span key={i} className="px-2 py-0.5 bg-white text-[#1D1D1F] border border-[#0071E3]/20 text-[10px] font-bold rounded-md">
+                            <span key={i} className="px-2 py-0.5 bg-white text-ink border border-brand/20 text-[10px] font-bold rounded-md">
                               {item.name} ({item.finalPrice?.toLocaleString()} {systemSettings.currencySymbol})
                             </span>
                           ))}
@@ -396,21 +396,21 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                   </div>
 
                   {/* Footer Stats: Tech, Financials, Warranty & Printable Invoice */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-[#E5E5EA] text-[11px]">
-                    <div className="flex flex-wrap items-center gap-3 text-[#86868B]">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-line text-[11px]">
+                    <div className="flex flex-wrap items-center gap-3 text-muted">
                       <span>
                         <strong>Assigned Tech:</strong>{' '}
-                        <span className="text-[#1D1D1F] font-semibold">{wo.assignedTechName || 'Unassigned'}</span>
+                        <span className="text-ink font-semibold">{wo.assignedTechName || 'Unassigned'}</span>
                       </span>
                       <span>
                         <strong>Warranty:</strong>{' '}
-                        <span className="text-[#0071E3] font-bold">{wo.warrantyDays || 90} Days Protection</span>
+                        <span className="text-brand font-bold">{wo.warrantyDays || 90} Days Protection</span>
                       </span>
                     </div>
 
                     <div className="flex items-center space-x-3">
                       <div className="text-right">
-                        <span className="text-[10px] text-[#86868B] uppercase font-bold block leading-none">Total Cost</span>
+                        <span className="text-[10px] text-muted uppercase font-bold block leading-none">Total Cost</span>
                         <span className="text-sm font-extrabold text-[#28A745]">
                           {wo.totalAmount?.toLocaleString() || 0} {systemSettings.currencySymbol}
                         </span>
@@ -421,7 +421,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                         <button
                           type="button"
                           onClick={() => onPrintInvoice(wo)}
-                          className="px-3 py-1.5 bg-white hover:bg-blue-50 border border-[#D8E5ED] hover:border-[#0071E3] text-[#0071E3] font-bold text-xs rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer shadow-2xs active:scale-95"
+                          className="px-3 py-1.5 bg-white hover:bg-blue-50 border border-[#D8E5ED] hover:border-brand text-brand font-bold text-xs rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer shadow-2xs active:scale-95"
                           title="Print Customer Invoice"
                         >
                           <Printer className="w-3.5 h-3.5" />
@@ -434,7 +434,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                         <button
                           type="button"
                           onClick={() => toggleExpandLogs(wo.id)}
-                          className="px-2.5 py-1.5 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] font-bold text-xs rounded-xl transition-all flex items-center space-x-1 cursor-pointer"
+                          className="px-2.5 py-1.5 bg-surface hover:bg-line text-ink font-bold text-xs rounded-xl transition-all flex items-center space-x-1 cursor-pointer"
                         >
                           {isLogsExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                           <span>Logs ({wo.repairLogs?.length})</span>
@@ -445,7 +445,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
 
                   {/* Expandable Status Transition & Audit Timeline Drawer */}
                   {isLogsExpanded && (
-                    <div className="mt-3 pt-3 border-t border-dashed border-[#E5E5EA]">
+                    <div className="mt-3 pt-3 border-t border-dashed border-line">
                       <WorkOrderStatusTimeline
                         workOrder={wo}
                       />
@@ -457,8 +457,8 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
           })}
         </div>
       ) : (
-        <div className="p-8 text-center text-[#86868B] bg-[#F8F9FA] rounded-2xl border border-dashed border-[#E5E5EA]">
-          <Search className="w-6 h-6 text-[#86868B]/50 mx-auto mb-2" />
+        <div className="p-8 text-center text-muted bg-[#F8F9FA] rounded-2xl border border-dashed border-line">
+          <Search className="w-6 h-6 text-muted/50 mx-auto mb-2" />
           <p className="font-semibold text-xs">No repair history matched your search filter.</p>
           <button
             type="button"
@@ -467,7 +467,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
               setStatusFilter('ALL');
               setDeviceFilter('ALL');
             }}
-            className="mt-2 text-xs text-[#0071E3] font-bold hover:underline cursor-pointer"
+            className="mt-2 text-xs text-brand font-bold hover:underline cursor-pointer"
           >
             Reset Filters
           </button>

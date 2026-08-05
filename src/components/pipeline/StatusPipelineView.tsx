@@ -91,7 +91,7 @@ interface StatusPipelineViewProps {
 }
 
 export const KANBAN_STAGES: { id: WorkOrderStatus; title: string; subtitle: string; color: string; badgeColor: string }[] = [
-  { id: 'Receive', title: 'Receive', subtitle: 'New Intake', color: 'border-blue-200 bg-blue-50/40', badgeColor: 'bg-[#0071E3] text-white font-extrabold tracking-wide' },
+  { id: 'Receive', title: 'Receive', subtitle: 'New Intake', color: 'border-blue-200 bg-blue-50/40', badgeColor: 'bg-brand text-white font-extrabold tracking-wide' },
   { id: 'In Progress', title: 'In Progress', subtitle: 'Repair Active', color: 'border-purple-200 bg-purple-50/40', badgeColor: 'bg-purple-700 text-white font-extrabold tracking-wide' },
   { id: 'Pending', title: 'Pending', subtitle: 'Waiting Parts/Client', color: 'border-amber-200 bg-amber-50/40', badgeColor: 'bg-amber-600 text-white font-extrabold' },
   { id: 'Finished', title: 'Finished', subtitle: 'QA Passed / Ready', color: 'border-emerald-200 bg-emerald-50/40', badgeColor: 'bg-emerald-600 text-white font-extrabold' },
@@ -207,19 +207,19 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
     }
     switch (status) {
       case 'Receive':
-        return 'bg-white border border-[#E5E5EA] shadow-2xs hover:border-[#0071E3] hover:ring-2 hover:ring-[#0071E3]/20 transition-all duration-200';
+        return 'bg-white border border-line shadow-2xs hover:border-brand hover:ring-2 hover:ring-brand/20 transition-all duration-200';
       case 'In Progress':
-        return 'bg-white border border-[#E5E5EA] shadow-2xs hover:border-[#AF52DE] hover:ring-2 hover:ring-[#AF52DE]/20 transition-all duration-200';
+        return 'bg-white border border-line shadow-2xs hover:border-[#AF52DE] hover:ring-2 hover:ring-[#AF52DE]/20 transition-all duration-200';
       case 'Pending':
-        return 'bg-white border border-[#E5E5EA] shadow-2xs hover:border-amber-500 hover:ring-2 hover:ring-amber-500/20 transition-all duration-200';
+        return 'bg-white border border-line shadow-2xs hover:border-amber-500 hover:ring-2 hover:ring-amber-500/20 transition-all duration-200';
       case 'Finished':
-        return 'bg-white border border-[#E5E5EA] shadow-2xs hover:border-[#34C759] hover:ring-2 hover:ring-[#34C759]/20 transition-all duration-200';
+        return 'bg-white border border-line shadow-2xs hover:border-success hover:ring-2 hover:ring-success/20 transition-all duration-200';
       case 'Cant Repair':
-        return 'bg-white border border-[#E5E5EA] shadow-2xs hover:border-rose-400 hover:ring-2 hover:ring-rose-400/20 transition-all duration-200';
+        return 'bg-white border border-line shadow-2xs hover:border-rose-400 hover:ring-2 hover:ring-rose-400/20 transition-all duration-200';
       case 'Customer Not Repair':
-        return 'bg-white border border-[#E5E5EA] shadow-2xs hover:border-orange-400 hover:ring-2 hover:ring-orange-400/20 transition-all duration-200';
+        return 'bg-white border border-line shadow-2xs hover:border-orange-400 hover:ring-2 hover:ring-orange-400/20 transition-all duration-200';
       default:
-        return 'bg-white border border-[#E5E5EA] shadow-2xs hover:border-slate-400 hover:ring-2 hover:ring-slate-400/20 transition-all duration-200';
+        return 'bg-white border border-line shadow-2xs hover:border-slate-400 hover:ring-2 hover:ring-slate-400/20 transition-all duration-200';
     }
   };
 
@@ -400,10 +400,10 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
   return (
     <div className="space-y-3">
       {/* Top Controls Bar (Kanban Pipeline Specific Actions) */}
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#D2D2D7] bg-white px-2.5 py-2 text-[11px] shadow-2xs">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line-strong bg-white px-2.5 py-2 text-[11px] shadow-2xs">
         <div className="flex min-w-0 items-center gap-1.5">
-          <span className="whitespace-nowrap font-extrabold text-[#1D1D1F]">Active Pipeline Overview</span>
-          <span className="truncate text-[10px] font-medium text-[#86868B]">({filteredWorkOrders.length} tickets matching filters)</span>
+          <span className="whitespace-nowrap font-extrabold text-ink">Active Pipeline Overview</span>
+          <span className="truncate text-[10px] font-medium text-muted">({filteredWorkOrders.length} tickets matching filters)</span>
           {hasActiveFilters && (
             <button
               type="button"
@@ -412,7 +412,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                 setShowNeedsDiagOnly(false);
                 setShowBeforeNeedsDiagOnly(false);
               }}
-              className="px-2 py-0.5 text-[10px] bg-slate-100 hover:bg-slate-200 text-[#0071E3] font-bold rounded-lg transition-all cursor-pointer border border-slate-200"
+              className="px-2 py-0.5 text-[10px] bg-slate-100 hover:bg-slate-200 text-brand font-bold rounded-lg transition-all cursor-pointer border border-slate-200"
             >
               Reset Filters ↺
             </button>
@@ -515,9 +515,9 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
               className={`rounded-2xl border ${stage.color} bg-white/50 backdrop-blur-xs p-3 flex flex-col min-w-[260px] md:min-w-0 flex-1 max-w-none shadow-2xs snap-start transition-all`}
             >
               {/* Column Header */}
-              <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-[#E5E5EA]">
+              <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-line">
                 <div>
-                  <h3 className="text-xs font-extrabold text-[#1D1D1F] tracking-tight">
+                  <h3 className="text-xs font-extrabold text-ink tracking-tight">
                     {stage.id === 'Receive' ? t('statusReceive') :
                      stage.id === 'In Progress' ? t('statusInProgress') :
                      stage.id === 'Pending' ? t('statusPending') :
@@ -526,7 +526,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                      stage.id === 'Cant Repair' ? t('statusCantRepair') :
                      stage.id === 'Customer Not Repair' ? t('statusCustomerNotRepair') : stage.title}
                   </h3>
-                  <p className="text-[10px] text-[#86868B] font-medium">{stage.subtitle}</p>
+                  <p className="text-[10px] text-muted font-medium">{stage.subtitle}</p>
                 </div>
                 <div className="flex items-center space-x-1">
                   {stageStagnantOrders.length > 0 && (
@@ -547,7 +547,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
               {/* Cards Container */}
               <div className="flex-1 space-y-3 overflow-y-auto pr-0.5 max-h-[680px]">
                 {stageOrders.length === 0 ? (
-                  <div className="text-[11px] text-[#86868B] font-medium text-center py-12 border-2 border-dashed border-[#E5E5EA] rounded-xl bg-white/40">
+                  <div className="text-[11px] text-muted font-medium text-center py-12 border-2 border-dashed border-line rounded-xl bg-white/40">
                     No tickets in {stage.title}
                   </div>
                 ) : (
@@ -582,7 +582,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         {/* Header: Order Number & Priority Badge */}
                         <div className="flex items-center justify-between gap-1.5">
                           <div className="flex items-center space-x-1.5 min-w-0">
-                            <span className="h-[20px] font-mono text-[9px] font-extrabold text-[#0071E3] bg-[#F0F6FF] px-2 rounded-md border border-[#0071E3]/20 inline-flex items-center justify-center shrink-0 leading-none">{wo.orderNumber}</span>
+                            <span className="h-[20px] font-mono text-[9px] font-extrabold text-brand bg-brand-soft px-2 rounded-md border border-brand/20 inline-flex items-center justify-center shrink-0 leading-none">{wo.orderNumber}</span>
                             <PriorityBadge priority={wo.priority} size="xs" />
                           </div>
                           <div className="flex items-center space-x-1 shrink-0">
@@ -615,20 +615,20 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                             <span className="font-mono bg-red-100 px-1.5 py-0.5 rounded text-red-800">{hoursInStatus}h</span>
                           </div>
                         ) : (
-                          <div className="flex items-center space-x-1 text-[10px] text-[#86868B]">
-                            <Clock className="w-3 h-3 text-[#0071E3] shrink-0" />
-                            <span>In stage: <strong className="text-[#1D1D1F]">{hoursInStatus < 1 ? '&lt; 1h' : `${hoursInStatus}h`}</strong></span>
+                          <div className="flex items-center space-x-1 text-[10px] text-muted">
+                            <Clock className="w-3 h-3 text-brand shrink-0" />
+                            <span>In stage: <strong className="text-ink">{hoursInStatus < 1 ? '&lt; 1h' : `${hoursInStatus}h`}</strong></span>
                           </div>
                         )}
 
                         {/* Model & Customer & Repair Issue */}
                         <div role="button" tabIndex={0} aria-label={`Open detail for ${wo.deviceModel || wo.orderNumber || wo.id}`} className="cursor-pointer space-y-1" onClick={() => setDetailModalWo(wo)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setDetailModalWo(wo); } }}>
-                          <p className="font-extrabold text-[#1D1D1F] text-xs line-clamp-1 hover:text-[#0071E3] transition-colors">{wo.deviceModel}</p>
-                          <p className="text-[10px] text-[#86868B] truncate">{wo.customerName} • {wo.customerPhone}</p>
+                          <p className="font-extrabold text-ink text-xs line-clamp-1 hover:text-brand transition-colors">{wo.deviceModel}</p>
+                          <p className="text-[10px] text-muted truncate">{wo.customerName} • {wo.customerPhone}</p>
                           
                           {/* What to repair under Customer info */}
-                          <div className="flex items-start space-x-1.5 pt-1 mt-1 border-t border-slate-100 text-[11px] text-[#1D1D1F]">
-                            <ClipboardCheck className="w-3.5 h-3.5 text-[#0071E3] shrink-0 mt-0.5" />
+                          <div className="flex items-start space-x-1.5 pt-1 mt-1 border-t border-slate-100 text-[11px] text-ink">
+                            <ClipboardCheck className="w-3.5 h-3.5 text-brand shrink-0 mt-0.5" />
                             <span className="font-semibold text-slate-700 line-clamp-2 leading-tight">
                               {getRepairSummary(wo)}
                             </span>
@@ -636,12 +636,12 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         </div>
 
                         {/* Tech Tag */}
-                        <div className="flex items-center justify-between text-[10px] pt-1 border-t border-slate-100 text-[#86868B]">
-                          <span>Tech: <strong className="text-[#1D1D1F]">{tech?.name?.split(' ')[0] || 'Unassigned'}</strong></span>
+                        <div className="flex items-center justify-between text-[10px] pt-1 border-t border-slate-100 text-muted">
+                          <span>Tech: <strong className="text-ink">{tech?.name?.split(' ')[0] || 'Unassigned'}</strong></span>
                           <button
                             type="button"
                             onClick={() => setAssignTechModalWo(wo)}
-                            className="text-[#0071E3] hover:underline flex items-center space-x-0.5 font-semibold"
+                            className="text-brand hover:underline flex items-center space-x-0.5 font-semibold"
                           >
                             <UserCheck className="w-3 h-3" />
                             <span>Assign</span>
@@ -653,16 +653,16 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                           <button
                             type="button"
                             onClick={() => setDetailModalWo(wo)}
-                            className="py-1 px-1 bg-[#F5F5F7] hover:bg-slate-100 text-[#1D1D1F] font-semibold rounded-lg border border-[#E5E5EA] text-center flex items-center justify-center space-x-0.5 truncate"
+                            className="py-1 px-1 bg-surface hover:bg-slate-100 text-ink font-semibold rounded-lg border border-line text-center flex items-center justify-center space-x-0.5 truncate"
                           >
-                            <Eye className="w-3 h-3 text-[#1D1D1F] shrink-0" />
+                            <Eye className="w-3 h-3 text-ink shrink-0" />
                             <span>Detail</span>
                           </button>
 
                           <button
                             type="button"
                             onClick={() => setAddLogModalWo(wo)}
-                            className="py-1 px-1 bg-[#F5F5F7] hover:bg-slate-100 text-[#0071E3] font-semibold rounded-lg border border-[#E5E5EA] text-center flex items-center justify-center space-x-0.5 truncate"
+                            className="py-1 px-1 bg-surface hover:bg-slate-100 text-brand font-semibold rounded-lg border border-line text-center flex items-center justify-center space-x-0.5 truncate"
                           >
                             <Plus className="w-3 h-3" />
                             <span>Log</span>
@@ -691,7 +691,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                                 setCheckoutModalWo(wo);
                                 setPaidAmountInput(wo.totalAmount.toString());
                               }}
-                              className="w-full py-1.5 bg-[#34C759] hover:bg-[#34C759]/90 text-white font-extrabold rounded-lg text-[10px] flex items-center justify-center space-x-1 shadow-xs"
+                              className="w-full py-1.5 bg-success hover:bg-success/90 text-white font-extrabold rounded-lg text-[10px] flex items-center justify-center space-x-1 shadow-xs"
                             >
                               <DollarSign className="w-3 h-3" />
                               <span>Checkout</span>
@@ -736,19 +736,19 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
       {/* MODAL 1: Full Ticket Detail View Modal */}
       {detailModalWo && (
         <div className="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 items-center justify-center p-3 sm:p-6">
-          <div className="bg-white border border-[#D2D2D7] rounded-2xl max-w-5xl w-full p-6 space-y-4 text-xs shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <button onClick={() => setDetailModalWo(null)} aria-label="Close ticket detail" className="absolute right-4 top-4 text-[#86868B] hover:text-[#1D1D1F] cursor-pointer">
+          <div className="bg-white border border-line-strong rounded-2xl max-w-5xl w-full p-6 space-y-4 text-xs shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onClick={() => setDetailModalWo(null)} aria-label="Close ticket detail" className="absolute right-4 top-4 text-muted hover:text-ink cursor-pointer">
               <X className="w-5 h-5" />
             </button>
 
             {/* Modal Header */}
-            <div className="border-b border-[#E5E5EA] pb-3 flex flex-wrap justify-between items-center gap-3 pr-8">
+            <div className="border-b border-line pb-3 flex flex-wrap justify-between items-center gap-3 pr-8">
               <div className="flex items-center space-x-3">
-                <span className="font-mono text-xs font-black text-[#0071E3] bg-[#0071E3]/10 px-2.5 py-1 rounded-lg border border-[#0071E3]/20">
+                <span className="font-mono text-xs font-black text-brand bg-brand/10 px-2.5 py-1 rounded-lg border border-brand/20">
                   {detailModalWo.orderNumber}
                 </span>
                 <div>
-                  <h2 className="text-lg font-black text-[#1D1D1F] tracking-tight">{detailModalWo.deviceModel}</h2>
+                  <h2 className="text-lg font-black text-ink tracking-tight">{detailModalWo.deviceModel}</h2>
                 </div>
               </div>
 
@@ -760,7 +760,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                       onSelectPrintTag(detailModalWo);
                       setDetailModalWo(null);
                     }}
-                    className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-[#0071E3] font-bold text-[11px] rounded-lg transition-colors flex items-center space-x-1 border border-slate-200 cursor-pointer"
+                    className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-brand font-bold text-[11px] rounded-lg transition-colors flex items-center space-x-1 border border-slate-200 cursor-pointer"
                   >
                     <Printer className="w-3.5 h-3.5" />
                     <span>Print Tag/Voucher</span>
@@ -793,58 +793,58 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
             </div>
 
             {/* Customer & Hardware Specifications Banner (Clean, Non-Redundant Layout) */}
-            <div className="bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-4 text-xs space-y-3">
+            <div className="bg-surface border border-line rounded-xl p-4 text-xs space-y-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                <div className="space-y-1 bg-white p-3 rounded-lg border border-[#E5E5EA]">
-                  <span className="text-[10px] font-extrabold text-[#86868B] uppercase tracking-wider flex items-center space-x-1">
-                    <User className="w-3 h-3 text-[#0071E3]" />
+                <div className="space-y-1 bg-white p-3 rounded-lg border border-line">
+                  <span className="text-[10px] font-extrabold text-muted uppercase tracking-wider flex items-center space-x-1">
+                    <User className="w-3 h-3 text-brand" />
                     <span>Customer Contact</span>
                   </span>
-                  <div className="font-extrabold text-[#1D1D1F] text-xs truncate">{detailModalWo.customerName}</div>
-                  <div className="text-[11px] text-[#0071E3] font-bold flex items-center space-x-1">
-                    <Phone className="w-3 h-3 text-[#0071E3]" />
+                  <div className="font-extrabold text-ink text-xs truncate">{detailModalWo.customerName}</div>
+                  <div className="text-[11px] text-brand font-bold flex items-center space-x-1">
+                    <Phone className="w-3 h-3 text-brand" />
                     <span>{detailModalWo.customerPhone}</span>
                   </div>
                 </div>
 
-                <div className="space-y-1 bg-white p-3 rounded-lg border border-[#E5E5EA]">
-                  <span className="text-[10px] font-extrabold text-[#86868B] uppercase tracking-wider flex items-center space-x-1">
-                    <MapPin className="w-3 h-3 text-[#0071E3]" />
+                <div className="space-y-1 bg-white p-3 rounded-lg border border-line">
+                  <span className="text-[10px] font-extrabold text-muted uppercase tracking-wider flex items-center space-x-1">
+                    <MapPin className="w-3 h-3 text-brand" />
                     <span>Town / City</span>
                   </span>
-                  <div className="font-bold text-[#1D1D1F] text-xs truncate">
+                  <div className="font-bold text-ink text-xs truncate">
                     {detailModalWo.customerAddress || '—'}
                   </div>
-                  <div className="text-[11px] text-[#86868B] font-medium">Account: {detailModalWo.customerType || 'Retail'}</div>
+                  <div className="text-[11px] text-muted font-medium">Account: {detailModalWo.customerType || 'Retail'}</div>
                 </div>
 
-                <div className="space-y-1 bg-white p-3 rounded-lg border border-[#E5E5EA]">
-                  <span className="text-[10px] font-extrabold text-[#86868B] uppercase tracking-wider flex items-center space-x-1">
-                    <Barcode className="w-3 h-3 text-[#0071E3]" />
+                <div className="space-y-1 bg-white p-3 rounded-lg border border-line">
+                  <span className="text-[10px] font-extrabold text-muted uppercase tracking-wider flex items-center space-x-1">
+                    <Barcode className="w-3 h-3 text-brand" />
                     <span>Hardware Info</span>
                   </span>
-                  <div className="font-mono font-bold text-[#1D1D1F] text-xs truncate">
+                  <div className="font-mono font-bold text-ink text-xs truncate">
                     IMEI: {detailModalWo.serialNumber || detailModalWo.imei || 'N/A'}
                   </div>
-                  <div className="text-[11px] text-[#1D1D1F] font-bold flex items-center space-x-1 truncate">
+                  <div className="text-[11px] text-ink font-bold flex items-center space-x-1 truncate">
                     <Key className="w-3 h-3 text-amber-600 shrink-0" />
                     <span>{detailModalWo.passcode || 'No Passcode'}</span>
-                    <span className="text-[#D2D2D7]">•</span>
+                    <span className="text-line-strong">•</span>
                     <Palette className="w-3 h-3 text-slate-500 shrink-0" />
                     <span>{detailModalWo.deviceColor || 'Standard'}</span>
                   </div>
                 </div>
 
-                <div className="space-y-1 bg-white p-3 rounded-lg border border-[#E5E5EA]">
-                  <span className="text-[10px] font-extrabold text-[#86868B] uppercase tracking-wider flex items-center space-x-1">
-                    <UserCheck className="w-3 h-3 text-[#0071E3]" />
+                <div className="space-y-1 bg-white p-3 rounded-lg border border-line">
+                  <span className="text-[10px] font-extrabold text-muted uppercase tracking-wider flex items-center space-x-1">
+                    <UserCheck className="w-3 h-3 text-brand" />
                     <span>Technician & Cost</span>
                   </span>
-                  <div className="font-bold text-[#1D1D1F] text-xs flex items-center space-x-1 truncate">
-                    <ClipboardCheck className="w-3 h-3 text-[#0071E3]" />
+                  <div className="font-bold text-ink text-xs flex items-center space-x-1 truncate">
+                    <ClipboardCheck className="w-3 h-3 text-brand" />
                     <span>Tech: {detailModalWo.assignedTechName || 'Unassigned'}</span>
                   </div>
-                  <div className="font-mono font-black text-[#0071E3] text-xs flex items-center space-x-1">
+                  <div className="font-mono font-black text-brand text-xs flex items-center space-x-1">
                     <Coins className="w-3.5 h-3.5 text-amber-500" />
                     <span>{(detailModalWo.totalAmount || 0).toLocaleString()} MMK</span>
                   </div>
@@ -885,24 +885,24 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
 
             {/* Selected Repairs */}
             {detailModalWo.selectedRepairs && detailModalWo.selectedRepairs.length > 0 && (
-              <div className="p-3.5 bg-[#E5F1FF]/50 border border-[#0071E3]/20 rounded-xl space-y-2">
-                <div className="flex justify-between items-center border-b border-[#0071E3]/10 pb-1.5">
-                  <span className="font-bold text-[#0071E3] flex items-center space-x-1.5 text-xs">
-                    <ClipboardCheck className="w-3.5 h-3.5 text-[#0071E3] shrink-0" />
+              <div className="p-3.5 bg-[#E5F1FF]/50 border border-brand/20 rounded-xl space-y-2">
+                <div className="flex justify-between items-center border-b border-brand/10 pb-1.5">
+                  <span className="font-bold text-brand flex items-center space-x-1.5 text-xs">
+                    <ClipboardCheck className="w-3.5 h-3.5 text-brand shrink-0" />
                     <span>Selected Services & Repairs:</span>
                   </span>
-                  <span className="font-mono font-extrabold text-[#0071E3] text-xs">
+                  <span className="font-mono font-extrabold text-brand text-xs">
                     Total: {(detailModalWo.totalAmount || 0).toLocaleString()} MMK
                   </span>
                 </div>
                 <div className="space-y-1">
                   {detailModalWo.selectedRepairs.map(r => (
                     <div key={r.id} className="flex justify-between items-center text-xs">
-                      <span className="flex items-center space-x-1.5 font-medium text-[#1D1D1F]">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#0071E3] shrink-0" />
+                      <span className="flex items-center space-x-1.5 font-medium text-ink">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-brand shrink-0" />
                         <span>{r.name} {r.discountPercent > 0 ? `(${r.discountPercent}% OFF)` : ''}</span>
                       </span>
-                      <span className="font-bold font-mono text-[#1D1D1F]">{r.finalPrice.toLocaleString()} MMK</span>
+                      <span className="font-bold font-mono text-ink">{r.finalPrice.toLocaleString()} MMK</span>
                     </div>
                   ))}
                 </div>
@@ -910,18 +910,18 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
             )}
 
             {/* Diagnostics Comparison Master Grid (All 21 Items Visible without Scrolling) */}
-            <div className="p-4 bg-slate-50/80 border border-[#D2D2D7] rounded-2xl space-y-3">
+            <div className="p-4 bg-slate-50/80 border border-line-strong rounded-2xl space-y-3">
               <div className="flex flex-wrap justify-between items-center pb-2 border-b border-slate-200 gap-2">
                 <div className="flex items-center space-x-2">
-                  <ShieldCheck className="w-5 h-5 text-[#0071E3]" />
-                  <span className="font-extrabold text-sm text-[#1D1D1F]">21-Point Hardware Diagnostic Comparison</span>
+                  <ShieldCheck className="w-5 h-5 text-brand" />
+                  <span className="font-extrabold text-sm text-ink">21-Point Hardware Diagnostic Comparison</span>
                 </div>
                 <div className="flex items-center space-x-3 text-[11px] font-bold">
-                  <span className="flex items-center space-x-1 text-[#1D1D1F]">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#0071E3] inline-block" />
+                  <span className="flex items-center space-x-1 text-ink">
+                    <span className="w-2.5 h-2.5 rounded-full bg-brand inline-block" />
                     <span>Left: Before Intake</span>
                   </span>
-                  <span className="flex items-center space-x-1 text-[#1D1D1F]">
+                  <span className="flex items-center space-x-1 text-ink">
                     <span className="w-2.5 h-2.5 rounded-full bg-[#AF52DE] inline-block" />
                     <span>Right: After QA</span>
                   </span>
@@ -968,12 +968,12 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         className={`p-2 rounded-xl border transition-all flex items-center justify-between text-xs shadow-2xs ${
                           beforeItem.status === 'Fail' || afterItem.status === 'Fail'
                             ? 'bg-red-50/60 border-red-200'
-                            : 'bg-white border-[#E5E5EA]'
+                            : 'bg-white border-line'
                         }`}
                       >
                         <div className="min-w-0 pr-1 space-y-0.5">
-                          <div className="font-extrabold text-[#1D1D1F] text-[11px] truncate flex items-center space-x-1">
-                            <span className="text-[#86868B] font-mono font-bold text-[10px] shrink-0">{idx + 1}.</span>
+                          <div className="font-extrabold text-ink text-[11px] truncate flex items-center space-x-1">
+                            <span className="text-muted font-mono font-bold text-[10px] shrink-0">{idx + 1}.</span>
                             <span className="truncate">{beforeItem.name}</span>
                           </div>
                           {(beforeItem.note || afterItem.note) && (
@@ -988,7 +988,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                           <div title="Before Repair Intake Status">
                             {renderBadge(beforeItem.status)}
                           </div>
-                          <span className="text-[#86868B] text-[10px] font-bold">→</span>
+                          <span className="text-muted text-[10px] font-bold">→</span>
                           {/* After Badge */}
                           <div title="After QA Final Status">
                             {renderBadge(afterItem.status)}
@@ -1002,7 +1002,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
             </div>
 
             {/* Interactive Work Order Status Transition & Audit Timeline */}
-            <div className="pt-2 border-t border-[#E5E5EA]">
+            <div className="pt-2 border-t border-line">
               <WorkOrderStatusTimeline
                 workOrder={detailModalWo}
                 onSaveWorkOrder={(updatedWo) => {
@@ -1047,31 +1047,31 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
       {/* MODAL 2: Add Manual Repair Log */}
       {addLogModalWo && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-[#D2D2D7] rounded-2xl max-w-md w-full p-6 space-y-4 text-xs shadow-2xl relative">
-            <button onClick={() => setAddLogModalWo(null)} aria-label="Close repair log" className="absolute right-4 top-4 text-[#86868B] hover:text-[#1D1D1F]">
+          <div className="bg-white border border-line-strong rounded-2xl max-w-md w-full p-6 space-y-4 text-xs shadow-2xl relative">
+            <button onClick={() => setAddLogModalWo(null)} aria-label="Close repair log" className="absolute right-4 top-4 text-muted hover:text-ink">
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-sm font-bold text-[#1D1D1F] border-b border-[#D2D2D7] pb-2 flex items-center space-x-2">
-              <Plus className="w-4 h-4 text-[#0071E3]" />
+            <h3 className="text-sm font-bold text-ink border-b border-line-strong pb-2 flex items-center space-x-2">
+              <Plus className="w-4 h-4 text-brand" />
               <span>Add Repair Log Entry ({addLogModalWo.orderNumber})</span>
             </h3>
 
             <div>
-              <label className="block text-[#86868B] mb-1 font-medium">Repair Update Note *</label>
+              <label className="block text-muted mb-1 font-medium">Repair Update Note *</label>
               <textarea
                 rows={4}
                 value={logText}
                 onChange={(e) => setLogText(e.target.value)}
                 placeholder="e.g. Jul 22, 2026 5:57 PM - No Power fixed. Speaker still not working."
-                className="w-full bg-[#F8F9FA] border border-[#D2D2D7] rounded-xl p-3 text-xs text-[#1D1D1F] focus:border-[#0071E3]"
+                className="w-full bg-[#F8F9FA] border border-line-strong rounded-xl p-3 text-xs text-ink focus:border-brand"
               />
             </div>
 
             <Button
               type="button"
               onClick={handleAddRepairLog}
-              className="w-full bg-[#0071E3] text-white hover:bg-[#0077ED]"
+              className="w-full bg-brand text-white hover:bg-[#0077ED]"
             >
               Save Repair Log
             </Button>
@@ -1082,13 +1082,13 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
       {/* MODAL 3: Assign Technician */}
       {assignTechModalWo && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-[#D2D2D7] rounded-2xl max-w-sm w-full p-6 space-y-4 text-xs shadow-2xl relative">
-            <button onClick={() => setAssignTechModalWo(null)} aria-label="Close technician assignment" className="absolute right-4 top-4 text-[#86868B] hover:text-[#1D1D1F]">
+          <div className="bg-white border border-line-strong rounded-2xl max-w-sm w-full p-6 space-y-4 text-xs shadow-2xl relative">
+            <button onClick={() => setAssignTechModalWo(null)} aria-label="Close technician assignment" className="absolute right-4 top-4 text-muted hover:text-ink">
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-sm font-bold text-[#1D1D1F] border-b border-[#D2D2D7] pb-2 flex items-center space-x-2">
-              <UserCheck className="w-4 h-4 text-[#0071E3]" />
+            <h3 className="text-sm font-bold text-ink border-b border-line-strong pb-2 flex items-center space-x-2">
+              <UserCheck className="w-4 h-4 text-brand" />
               <span>Assign Technician ({assignTechModalWo.orderNumber})</span>
             </h3>
 
@@ -1099,15 +1099,15 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   onClick={() => handleAssignTechnician(t.id)}
                   className={`w-full p-3 rounded-xl border text-left flex justify-between items-center transition-all ${
                     assignTechModalWo.assignedTechId === t.id
-                      ? 'border-[#0071E3] bg-[#E5F1FF] text-[#0071E3] font-bold'
-                      : 'border-[#D2D2D7] bg-white text-[#1D1D1F] hover:bg-slate-50'
+                      ? 'border-brand bg-[#E5F1FF] text-brand font-bold'
+                      : 'border-line-strong bg-white text-ink hover:bg-slate-50'
                   }`}
                 >
                   <div>
                     <p className="font-bold text-xs">{t.name}</p>
                     <p className="text-[10px] opacity-70">{t.level}</p>
                   </div>
-                  <span className="text-[10px] bg-slate-100 text-[#1D1D1F] px-2 py-0.5 rounded-full font-bold">
+                  <span className="text-[10px] bg-slate-100 text-ink px-2 py-0.5 rounded-full font-bold">
                     {t.activeJobsCount} Active Jobs
                   </span>
                 </button>
@@ -1120,34 +1120,34 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
       {/* MODAL 4: Checkout Payment */}
       {checkoutModalWo && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-[#D2D2D7] rounded-2xl max-w-md w-full p-6 space-y-4 text-xs shadow-2xl relative">
-            <button onClick={() => setCheckoutModalWo(null)} aria-label="Close checkout" className="absolute right-4 top-4 text-[#86868B] hover:text-[#1D1D1F]">
+          <div className="bg-white border border-line-strong rounded-2xl max-w-md w-full p-6 space-y-4 text-xs shadow-2xl relative">
+            <button onClick={() => setCheckoutModalWo(null)} aria-label="Close checkout" className="absolute right-4 top-4 text-muted hover:text-ink">
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-sm font-bold text-[#1D1D1F] border-b border-[#D2D2D7] pb-2 flex items-center space-x-2">
-              <Coins className="w-4 h-4 text-[#34C759]" />
+            <h3 className="text-sm font-bold text-ink border-b border-line-strong pb-2 flex items-center space-x-2">
+              <Coins className="w-4 h-4 text-success" />
               <span>Checkout Payment ({checkoutModalWo.orderNumber})</span>
             </h3>
 
-            <div className="bg-[#E8F8EE] p-3 rounded-xl border border-[#34C759]/30 text-xs text-[#1E7E34] font-bold flex justify-between">
+            <div className="bg-[#E8F8EE] p-3 rounded-xl border border-success/30 text-xs text-[#1E7E34] font-bold flex justify-between">
               <span>Total Invoice Due:</span>
               <span className="text-sm font-mono">{checkoutModalWo.totalAmount.toLocaleString()} MMK</span>
             </div>
 
             <div className="space-y-3">
               <div>
-                <label className="block text-[#86868B] mb-1 font-medium">Paid Amount (MMK) *</label>
+                <label className="block text-muted mb-1 font-medium">Paid Amount (MMK) *</label>
                 <input
                   type="number"
                   value={paidAmountInput}
                   onChange={(e) => setPaidAmountInput(e.target.value)}
-                  className="w-full bg-[#F8F9FA] border border-[#D2D2D7] rounded-xl px-3 py-2 text-sm font-mono font-bold text-[#1D1D1F]"
+                  className="w-full bg-[#F8F9FA] border border-line-strong rounded-xl px-3 py-2 text-sm font-mono font-bold text-ink"
                 />
               </div>
 
               <div>
-                <label className="block text-[#86868B] mb-1 font-medium">Payment Method *</label>
+                <label className="block text-muted mb-1 font-medium">Payment Method *</label>
                 <CustomDropdownMenu
                   value={paymentMethod}
                   onChange={(val) => setPaymentMethod(val as any)}
@@ -1164,7 +1164,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
             <Button
               type="button"
               onClick={handleConfirmCheckout}
-              className="w-full max-w-md mx-auto bg-[#34C759] hover:bg-[#34C759]/90 text-white"
+              className="w-full max-w-md mx-auto bg-success hover:bg-success/90 text-white"
             >
               <span className="truncate">Confirm Checkout & Move to Taken Out</span>
             </Button>
@@ -1175,26 +1175,26 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
       {/* MODAL 5: After-Repair Diagnostic */}
       {afterDiagModalWo && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-[#D2D2D7] rounded-2xl max-w-xl w-full p-6 space-y-4 text-xs shadow-2xl relative max-h-[88vh] overflow-y-auto">
-            <button onClick={() => setAfterDiagModalWo(null)} aria-label="Close post-diagnosis" className="absolute right-4 top-4 text-[#86868B] hover:text-[#1D1D1F]">
+          <div className="bg-white border border-line-strong rounded-2xl max-w-xl w-full p-6 space-y-4 text-xs shadow-2xl relative max-h-[88vh] overflow-y-auto">
+            <button onClick={() => setAfterDiagModalWo(null)} aria-label="Close post-diagnosis" className="absolute right-4 top-4 text-muted hover:text-ink">
               <X className="w-5 h-5" />
             </button>
 
-            <div className="border-b border-[#D2D2D7] pb-3 space-y-1">
+            <div className="border-b border-line-strong pb-3 space-y-1">
               <div className="flex items-center space-x-2">
                 <ShieldCheck className="w-5 h-5 text-[#AF52DE]" />
-                <h3 className="text-sm font-bold text-[#1D1D1F]">
+                <h3 className="text-sm font-bold text-ink">
                   After-Repair 21-Point QA Inspection
                 </h3>
               </div>
-              <p className="text-xs text-[#86868B]">
-                Ticket <strong className="text-[#0071E3] font-mono">{afterDiagModalWo.orderNumber}</strong> • {afterDiagModalWo.deviceModel}
+              <p className="text-xs text-muted">
+                Ticket <strong className="text-brand font-mono">{afterDiagModalWo.orderNumber}</strong> • {afterDiagModalWo.deviceModel}
               </p>
             </div>
 
             {/* Quick Actions & Pass/Fail Counts */}
             <div className="flex items-center justify-between p-2.5 bg-purple-50/60 rounded-xl border border-purple-200 text-xs">
-              <div className="flex items-center space-x-2 font-bold text-[#1D1D1F]">
+              <div className="flex items-center space-x-2 font-bold text-ink">
                 <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[11px]">
                   Pass: {afterDiagnostics.filter(d => d.status === 'Pass').length}
                 </span>
@@ -1212,7 +1212,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   onClick={() => {
                     setAfterDiagnostics(afterDiagnostics.map(d => ({ ...d, status: 'Pass', note: d.note || 'QA Passed' })));
                   }}
-                  className="px-2.5 py-1 bg-[#34C759] text-white font-extrabold rounded-lg text-[10px] hover:bg-[#34C759]/90 shadow-2xs"
+                  className="px-2.5 py-1 bg-success text-white font-extrabold rounded-lg text-[10px] hover:bg-success/90 shadow-2xs"
                 >
                   Mark All Pass
                 </button>
@@ -1222,8 +1222,8 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
             {/* 21-Point Diagnostic Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-72 overflow-y-auto pr-1">
               {afterDiagnostics.map((item, idx) => (
-                <div key={item.id || item.name} className="p-2 bg-[#F8F9FA] border border-[#E5E5EA] rounded-xl space-y-1.5">
-                  <div className="flex justify-between items-center text-[11px] font-bold text-[#1D1D1F]">
+                <div key={item.id || item.name} className="p-2 bg-[#F8F9FA] border border-line rounded-xl space-y-1.5">
+                  <div className="flex justify-between items-center text-[11px] font-bold text-ink">
                     <span className="truncate pr-1">{idx + 1}. {item.name}</span>
                     <span className={`text-[10px] font-extrabold px-1.5 py-0.2 rounded ${
                       item.status === 'Pass' ? 'bg-emerald-100 text-emerald-800' :
@@ -1241,7 +1241,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         copy[idx].status = 'Pass';
                         setAfterDiagnostics(copy);
                       }}
-                      className={`flex-1 py-1 rounded-md font-extrabold transition-all ${item.status === 'Pass' ? 'bg-[#34C759] text-white shadow-2xs' : 'bg-slate-200 text-[#1D1D1F] hover:bg-slate-300'}`}
+                      className={`flex-1 py-1 rounded-md font-extrabold transition-all ${item.status === 'Pass' ? 'bg-success text-white shadow-2xs' : 'bg-slate-200 text-ink hover:bg-slate-300'}`}
                     >
                       Pass
                     </button>
@@ -1252,7 +1252,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         copy[idx].status = 'Fail';
                         setAfterDiagnostics(copy);
                       }}
-                      className={`flex-1 py-1 rounded-md font-extrabold transition-all ${item.status === 'Fail' ? 'bg-rose-600 text-white shadow-2xs' : 'bg-slate-200 text-[#1D1D1F] hover:bg-slate-300'}`}
+                      className={`flex-1 py-1 rounded-md font-extrabold transition-all ${item.status === 'Fail' ? 'bg-rose-600 text-white shadow-2xs' : 'bg-slate-200 text-ink hover:bg-slate-300'}`}
                     >
                       Fail
                     </button>
@@ -1263,7 +1263,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         copy[idx].status = 'N/A';
                         setAfterDiagnostics(copy);
                       }}
-                      className={`flex-1 py-1 rounded-md font-extrabold transition-all ${item.status === 'N/A' ? 'bg-slate-600 text-white shadow-2xs' : 'bg-slate-200 text-[#1D1D1F] hover:bg-slate-300'}`}
+                      className={`flex-1 py-1 rounded-md font-extrabold transition-all ${item.status === 'N/A' ? 'bg-slate-600 text-white shadow-2xs' : 'bg-slate-200 text-ink hover:bg-slate-300'}`}
                     >
                       N/A
                     </button>
@@ -1278,27 +1278,27 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                       setAfterDiagnostics(copy);
                     }}
                     placeholder="Note e.g. TrueTone OK"
-                    className="w-full bg-white border border-[#E5E5EA] rounded-md px-2 py-0.5 text-[10px] text-[#1D1D1F]"
+                    className="w-full bg-white border border-line rounded-md px-2 py-0.5 text-[10px] text-ink"
                   />
                 </div>
               ))}
             </div>
 
             <div>
-              <label className="block text-[#86868B] mb-1 font-semibold">QA Inspection Summary Note</label>
+              <label className="block text-muted mb-1 font-semibold">QA Inspection Summary Note</label>
               <textarea
                 rows={2}
                 value={afterSummaryNote}
                 onChange={(e) => setAfterSummaryNote(e.target.value)}
                 placeholder="e.g. All functions tested pass. TrueTone transferred, battery charging test pass."
-                className="w-full bg-[#F8F9FA] border border-[#D2D2D7] rounded-xl p-2.5 text-xs text-[#1D1D1F]"
+                className="w-full bg-[#F8F9FA] border border-line-strong rounded-xl p-2.5 text-xs text-ink"
               />
             </div>
 
             <Button
               type="button"
               onClick={handleSaveAfterDiagnostic}
-              className="w-full max-w-md mx-auto bg-[#0071E3] hover:bg-[#0077ED] text-white"
+              className="w-full max-w-md mx-auto bg-brand hover:bg-[#0077ED] text-white"
             >
               <span className="truncate">Save After-Repair Diagnostic & Update Ticket</span>
             </Button>
@@ -1323,7 +1323,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
             <button 
               type="button" 
               onClick={() => setPendingBeforeDiagAlertWo(null)} 
-              className="absolute right-4 top-4 text-[#86868B] hover:text-[#1D1D1F] p-1 rounded-lg hover:bg-slate-100 transition-colors"
+              className="absolute right-4 top-4 text-muted hover:text-ink p-1 rounded-lg hover:bg-slate-100 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -1338,10 +1338,10 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
               </div>
             </div>
 
-            <div className="space-y-3 text-xs text-[#1D1D1F]">
+            <div className="space-y-3 text-xs text-ink">
               <p className="leading-relaxed">
                 You are attempting to move Ticket{' '}
-                <strong className="font-mono text-[#0071E3] font-black bg-[#F0F6FF] px-2 py-0.5 rounded border border-[#0071E3]/20">
+                <strong className="font-mono text-brand font-black bg-brand-soft px-2 py-0.5 rounded border border-brand/20">
                   {pendingBeforeDiagAlertWo.wo.orderNumber}
                 </strong>{' '}
                 ({pendingBeforeDiagAlertWo.wo.deviceModel}) to <strong className="text-amber-800 font-bold">"{pendingBeforeDiagAlertWo.newStatus}"</strong>.
@@ -1366,7 +1366,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   setPendingBeforeDiagAlertWo(null);
                   setDetailModalWo(woToInspect);
                 }}
-                className="w-full sm:w-auto flex-1 py-2.5 px-4 bg-[#0071E3] hover:bg-[#0077ED] text-white font-extrabold rounded-xl text-xs flex items-center justify-center space-x-2 transition-all shadow-md active:scale-95 cursor-pointer"
+                className="w-full sm:w-auto flex-1 py-2.5 px-4 bg-brand hover:bg-[#0077ED] text-white font-extrabold rounded-xl text-xs flex items-center justify-center space-x-2 transition-all shadow-md active:scale-95 cursor-pointer"
               >
                 <ShieldCheck className="w-4 h-4" />
                 <span>Complete Intake Diagnostic First</span>
@@ -1415,7 +1415,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
             <button 
               type="button" 
               onClick={() => setPendingDiagAlertWo(null)} 
-              className="absolute right-4 top-4 text-[#86868B] hover:text-[#1D1D1F] p-1 rounded-lg hover:bg-slate-100 transition-colors"
+              className="absolute right-4 top-4 text-muted hover:text-ink p-1 rounded-lg hover:bg-slate-100 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -1430,10 +1430,10 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
               </div>
             </div>
 
-            <div className="space-y-3 text-xs text-[#1D1D1F]">
+            <div className="space-y-3 text-xs text-ink">
               <p className="leading-relaxed">
                 You are attempting to move Ticket{' '}
-                <strong className="font-mono text-[#0071E3] font-black bg-[#F0F6FF] px-2 py-0.5 rounded border border-[#0071E3]/20">
+                <strong className="font-mono text-brand font-black bg-brand-soft px-2 py-0.5 rounded border border-brand/20">
                   {pendingDiagAlertWo.wo.orderNumber}
                 </strong>{' '}
                 ({pendingDiagAlertWo.wo.deviceModel}) to <strong className="text-emerald-700 font-bold">"Finished"</strong>.
@@ -1458,7 +1458,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   setPendingDiagAlertWo(null);
                   setDetailModalWo(woToInspect);
                 }}
-                className="w-full sm:w-auto flex-1 py-2.5 px-4 bg-[#0071E3] hover:bg-[#0077ED] text-white font-extrabold rounded-xl text-xs flex items-center justify-center space-x-2 transition-all shadow-md active:scale-95 cursor-pointer"
+                className="w-full sm:w-auto flex-1 py-2.5 px-4 bg-brand hover:bg-[#0077ED] text-white font-extrabold rounded-xl text-xs flex items-center justify-center space-x-2 transition-all shadow-md active:scale-95 cursor-pointer"
               >
                 <ShieldCheck className="w-4 h-4" />
                 <span>Complete Diagnostic First</span>

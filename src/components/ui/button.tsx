@@ -4,17 +4,17 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-xs font-bold ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071E3]/40 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-60 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer active:scale-95 transition-all",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-xs font-bold ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-60 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer active:scale-95 transition-all",
   {
     variants: {
       variant: {
-        default: "bg-[#0071E3] text-white hover:bg-[#0077ED] shadow-xs",
+        default: "bg-brand text-white hover:bg-[#0077ED] shadow-xs",
         destructive: "bg-rose-600 text-white hover:bg-rose-700 shadow-xs",
-        outline: "border border-[#E5E5EA] bg-white text-[#1D1D1F] hover:bg-slate-50 hover:text-slate-900",
-        secondary: "bg-[#F5F5F7] text-[#1D1D1F] hover:bg-slate-200",
-        ghost: "hover:bg-slate-100 text-[#1D1D1F]",
-        link: "text-[#0071E3] underline-offset-4 hover:underline",
-        success: "bg-[#34C759] text-white hover:bg-[#30B753] shadow-xs",
+        outline: "border border-line bg-white text-ink hover:bg-slate-50 hover:text-slate-900",
+        secondary: "bg-surface text-ink hover:bg-slate-200",
+        ghost: "hover:bg-slate-100 text-ink",
+        link: "text-brand underline-offset-4 hover:underline",
+        success: "bg-success text-white hover:bg-[#30B753] shadow-xs",
       },
       size: {
         default: "h-11 lg:h-9 px-4 py-2",

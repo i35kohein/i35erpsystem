@@ -68,14 +68,14 @@ export const OfflineSyncStatusBadge: React.FC = () => {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-9 z-[70] w-64 rounded-xl border border-[#E5E5EA] bg-white p-3 shadow-xl text-xs">
-          <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-2 mb-2">
-            <span className="font-extrabold text-[#1D1D1F]">Live Database Status</span>
+        <div className="absolute right-0 top-9 z-[70] w-64 rounded-xl border border-line bg-white p-3 shadow-xl text-xs">
+          <div className="flex items-center justify-between border-b border-line pb-2 mb-2">
+            <span className="font-extrabold text-ink">Live Database Status</span>
             <button
               type="button"
               onClick={() => setOpen(false)}
               aria-label="Close status panel"
-              className="text-[#86868B] hover:text-[#1D1D1F] transition-colors cursor-pointer"
+              className="text-muted hover:text-ink transition-colors cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -100,7 +100,7 @@ export const OfflineSyncStatusBadge: React.FC = () => {
             type="button"
             onClick={handleRefresh}
             disabled={refreshing}
-            className="mt-3 w-full flex items-center justify-center space-x-1.5 py-2 rounded-lg bg-[#0071E3] hover:bg-[#0051B3] text-white font-bold transition-all cursor-pointer disabled:opacity-60 disabled:cursor-wait"
+            className="mt-3 w-full flex items-center justify-center space-x-1.5 py-2 rounded-lg bg-brand hover:bg-brand-deep text-white font-bold transition-all cursor-pointer disabled:opacity-60 disabled:cursor-wait"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
             <span>{refreshing ? 'Refreshing…' : 'Refresh Data Now'}</span>
@@ -113,7 +113,7 @@ export const OfflineSyncStatusBadge: React.FC = () => {
 
 const StatusRow: React.FC<{ ok: boolean; label: string; value: string }> = ({ ok, label, value }) => (
   <div className="flex items-center justify-between">
-    <span className="text-[#86868B] font-medium">{label}</span>
+    <span className="text-muted font-medium">{label}</span>
     <span className={`flex items-center space-x-1 font-bold ${ok ? 'text-[#28A745]' : 'text-rose-600'}`}>
       {ok ? <CheckCircle2 className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
       <span>{value}</span>

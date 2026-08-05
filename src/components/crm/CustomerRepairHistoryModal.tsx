@@ -102,31 +102,31 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-6 animate-fadeIn">
-      <div className="bg-white border border-[#E5E5EA] rounded-3xl w-full max-w-5xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      <div className="bg-white border border-line rounded-3xl w-full max-w-5xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-[#E5E5EA] bg-[#F8FBFD] flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-line bg-[#F8FBFD] flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="p-3 bg-[#0071E3]/10 text-[#0071E3] rounded-2xl shadow-inner">
+            <div className="p-3 bg-brand/10 text-brand rounded-2xl shadow-inner">
               <User className="w-6 h-6" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h2 className="text-lg font-black text-[#1D1D1F]">{customer.name}</h2>
+                <h2 className="text-lg font-black text-ink">{customer.name}</h2>
                 <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
                   customer.type === 'B2B Corporate' ? 'bg-purple-50 text-purple-700 border-purple-200' :
-                  customer.type === 'Wholesale Mail-In' ? 'bg-[#F0F6FF] text-[#0071E3] border-[#0071E3]/20' :
-                  'bg-white text-[#1D1D1F] border-[#E5E5EA]'
+                  customer.type === 'Wholesale Mail-In' ? 'bg-brand-soft text-brand border-brand/20' :
+                  'bg-white text-ink border-line'
                 }`}>
                   {customer.type}
                 </span>
               </div>
-              <p className="text-xs text-[#86868B]">Complete Lifetime Repair Dossier & Service Records</p>
+              <p className="text-xs text-muted">Complete Lifetime Repair Dossier & Service Records</p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-2 text-[#86868B] hover:text-[#1D1D1F] hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
+            className="p-2 text-muted hover:text-ink hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -135,70 +135,70 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
         {/* Modal Content Body */}
         <div className="p-6 overflow-y-auto space-y-6 flex-1 text-xs">
           {/* Customer Metadata Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#F5F5F7] p-4 rounded-2xl border border-[#E5E5EA]">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-surface p-4 rounded-2xl border border-line">
             <div className="flex items-center space-x-2">
-              <Phone className="w-4 h-4 text-[#86868B]" />
+              <Phone className="w-4 h-4 text-muted" />
               <div>
-                <span className="block text-[10px] text-[#86868B] font-bold uppercase">Phone</span>
-                <span className="font-mono font-bold text-[#1D1D1F]">{customer.phone || 'N/A'}</span>
+                <span className="block text-[10px] text-muted font-bold uppercase">Phone</span>
+                <span className="font-mono font-bold text-ink">{customer.phone || 'N/A'}</span>
               </div>
             </div>
 
             <div className="flex items-center space-x-2">
-              <Mail className="w-4 h-4 text-[#86868B]" />
+              <Mail className="w-4 h-4 text-muted" />
               <div className="min-w-0">
-                <span className="block text-[10px] text-[#86868B] font-bold uppercase">Email</span>
-                <span className="font-semibold text-[#1D1D1F] truncate block">{customer.email || 'N/A'}</span>
+                <span className="block text-[10px] text-muted font-bold uppercase">Email</span>
+                <span className="font-semibold text-ink truncate block">{customer.email || 'N/A'}</span>
               </div>
             </div>
 
             {customer.company && (
               <div className="flex items-center space-x-2">
-                <Building className="w-4 h-4 text-[#86868B]" />
+                <Building className="w-4 h-4 text-muted" />
                 <div className="min-w-0">
-                  <span className="block text-[10px] text-[#86868B] font-bold uppercase">Company</span>
-                  <span className="font-semibold text-[#1D1D1F] truncate block">{customer.company}</span>
+                  <span className="block text-[10px] text-muted font-bold uppercase">Company</span>
+                  <span className="font-semibold text-ink truncate block">{customer.company}</span>
                 </div>
               </div>
             )}
 
             <div className="flex items-center space-x-2">
-              <Tag className="w-4 h-4 text-[#0071E3]" />
+              <Tag className="w-4 h-4 text-brand" />
               <div>
-                <span className="block text-[10px] text-[#86868B] font-bold uppercase">Account Tier</span>
-                <span className="font-bold text-[#0071E3]">{customer.discountPercentage}% Discount Tier</span>
+                <span className="block text-[10px] text-muted font-bold uppercase">Account Tier</span>
+                <span className="font-bold text-brand">{customer.discountPercentage}% Discount Tier</span>
               </div>
             </div>
           </div>
 
           {/* Quick Metrics Bar */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="bg-white p-3.5 rounded-2xl border border-[#E5E5EA] shadow-2xs">
-              <span className="text-[10px] font-bold text-[#86868B] uppercase">Total Repairs</span>
-              <div className="text-lg font-black text-[#1D1D1F] mt-0.5 flex items-center justify-between">
+            <div className="bg-white p-3.5 rounded-2xl border border-line shadow-2xs">
+              <span className="text-[10px] font-bold text-muted uppercase">Total Repairs</span>
+              <div className="text-lg font-black text-ink mt-0.5 flex items-center justify-between">
                 <span>{customerOrders.length}</span>
-                <History className="w-5 h-5 text-[#0071E3]" />
+                <History className="w-5 h-5 text-brand" />
               </div>
             </div>
 
-            <div className="bg-white p-3.5 rounded-2xl border border-[#E5E5EA] shadow-2xs">
-              <span className="text-[10px] font-bold text-[#86868B] uppercase">Completed</span>
+            <div className="bg-white p-3.5 rounded-2xl border border-line shadow-2xs">
+              <span className="text-[10px] font-bold text-muted uppercase">Completed</span>
               <div className="text-lg font-black text-emerald-600 mt-0.5 flex items-center justify-between">
                 <span>{completedCount}</span>
                 <CheckCircle2 className="w-5 h-5 text-emerald-500" />
               </div>
             </div>
 
-            <div className="bg-white p-3.5 rounded-2xl border border-[#E5E5EA] shadow-2xs">
-              <span className="text-[10px] font-bold text-[#86868B] uppercase">Active Repairs</span>
+            <div className="bg-white p-3.5 rounded-2xl border border-line shadow-2xs">
+              <span className="text-[10px] font-bold text-muted uppercase">Active Repairs</span>
               <div className="text-lg font-black text-amber-600 mt-0.5 flex items-center justify-between">
                 <span>{inProgressCount}</span>
                 <Clock className="w-5 h-5 text-amber-500" />
               </div>
             </div>
 
-            <div className="bg-white p-3.5 rounded-2xl border border-[#E5E5EA] shadow-2xs">
-              <span className="text-[10px] font-bold text-[#86868B] uppercase">Total Expenditure</span>
+            <div className="bg-white p-3.5 rounded-2xl border border-line shadow-2xs">
+              <span className="text-[10px] font-bold text-muted uppercase">Total Expenditure</span>
               <div className="text-lg font-black text-[#28A745] mt-0.5 flex items-center justify-between">
                 <span>{totalSpent.toLocaleString()} {systemSettings.currencySymbol}</span>
                 <TrendingUp className="w-5 h-5 text-[#28A745]" />
@@ -208,10 +208,10 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
 
           {/* Chronological Repair History Timeline */}
           <div className="space-y-3 pt-2">
-            <h3 className="font-extrabold text-[#1D1D1F] text-xs flex items-center justify-between">
+            <h3 className="font-extrabold text-ink text-xs flex items-center justify-between">
               <span>Chronological Repair History & Outcomes ({customerOrders.length})</span>
               {customerOrders.length > 0 && (
-                <span className="text-[#86868B] text-[11px] font-medium">Average Ticket Value: {avgCost.toLocaleString()} {systemSettings.currencySymbol}</span>
+                <span className="text-muted text-[11px] font-medium">Average Ticket Value: {avgCost.toLocaleString()} {systemSettings.currencySymbol}</span>
               )}
             </h3>
 
@@ -225,10 +225,10 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 border-t border-[#E5E5EA] bg-[#F8FBFD] flex justify-end">
+        <div className="px-6 py-3 border-t border-line bg-[#F8FBFD] flex justify-end">
           <button
             onClick={onClose}
-            className="px-5 py-2 bg-[#1D1D1F] hover:bg-black text-white font-bold text-xs rounded-xl shadow-2xs transition-all cursor-pointer"
+            className="px-5 py-2 bg-ink hover:bg-black text-white font-bold text-xs rounded-xl shadow-2xs transition-all cursor-pointer"
           >
             Close Dossier
           </button>

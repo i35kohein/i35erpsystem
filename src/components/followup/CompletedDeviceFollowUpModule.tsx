@@ -253,20 +253,20 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
   return (
     <div className="space-y-3 pb-4">
       {/* Top Banner / Dashboard Overview */}
-      <div className="bg-white border border-[#E5E5EA] rounded-2xl p-5 shadow-2xs space-y-4">
+      <div className="bg-white border border-line rounded-2xl p-5 shadow-2xs space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="module-subheader">
             <div className="flex items-center space-x-2">
-              <span className="p-2 bg-[#E5F1FF] text-[#0071E3] rounded-xl">
+              <span className="p-2 bg-[#E5F1FF] text-brand rounded-xl">
                 <UserCheck className="w-5 h-5" />
               </span>
               <div>
-                <h2 className="text-base font-extrabold text-[#1D1D1F] tracking-tight">
+                <h2 className="text-base font-extrabold text-ink tracking-tight">
                   <span className="hidden sm:inline">Completed Repairs & Post-Delivery Customer Follow-Ups</span>
                   <span className="sm:hidden">Completed Repairs & Follow-Ups</span>
                 </h2>
-                <p className="text-xs text-[#86868B]">
-                  Conduct post-service quality calls for repaired & delivered devices. Tickets appear here starting <strong className="text-[#0071E3]">7 days</strong> after delivery.
+                <p className="text-xs text-muted">
+                  Conduct post-service quality calls for repaired & delivered devices. Tickets appear here starting <strong className="text-brand">7 days</strong> after delivery.
                 </p>
               </div>
             </div>
@@ -274,13 +274,13 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
 
           <div className="flex items-center space-x-2 w-full md:w-auto md:shrink-0">
             <div className="relative w-full md:w-auto">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#86868B]" />
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search ticket, customer, device..."
-                className="pl-8 pr-3 py-1.5 bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl text-xs focus:outline-none focus:border-[#0071E3] focus:bg-white transition-all w-full md:w-64"
+                className="pl-8 pr-3 py-1.5 bg-surface border border-line rounded-xl text-xs focus:outline-none focus:border-brand focus:bg-white transition-all w-full md:w-64"
               />
             </div>
           </div>
@@ -288,10 +288,10 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
 
         {/* Analytics Key Cards */}
         <div className="grid grid-cols-2 md:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10 gap-2.5 pt-2">
-          <div className="bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-3 space-y-1">
-            <span className="text-[11px] font-semibold text-[#86868B]">Total Completed</span>
-            <div className="text-xl font-extrabold text-[#1D1D1F]">{totalCompleted}</div>
-            <p className="text-[10px] text-[#86868B]">Finished & Picked Up</p>
+          <div className="bg-surface border border-line rounded-xl p-3 space-y-1">
+            <span className="text-[11px] font-semibold text-muted">Total Completed</span>
+            <div className="text-xl font-extrabold text-ink">{totalCompleted}</div>
+            <p className="text-[10px] text-muted">Finished & Picked Up</p>
           </div>
 
           <div className="bg-indigo-50/70 border border-indigo-200 rounded-xl p-3 space-y-1">
@@ -332,7 +332,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
       </div>
 
       {/* Filter Tabs Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white border border-[#E5E5EA] p-3 rounded-2xl shadow-2xs">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white border border-line p-3 rounded-2xl shadow-2xs">
         <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
           {[
             { id: 'ALL', label: `All 7+ Day Due (${followUpEligible.length})` },
@@ -350,8 +350,8 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
               onClick={() => setStatusFilter(tab.id)}
               className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer shrink-0 ${
                 statusFilter === tab.id
-                  ? 'bg-[#0071E3] text-white shadow-2xs'
-                  : 'bg-[#F5F5F7] text-[#1D1D1F] hover:bg-[#E5E5EA]'
+                  ? 'bg-brand text-white shadow-2xs'
+                  : 'bg-surface text-ink hover:bg-line'
               }`}
             >
               {tab.label}
@@ -366,7 +366,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
               setStatusFilter('ALL');
               setSearchQuery('');
             }}
-            className="text-xs text-[#0071E3] font-bold hover:underline shrink-0 text-right sm:text-left"
+            className="text-xs text-brand font-bold hover:underline shrink-0 text-right sm:text-left"
           >
             Reset Filters
           </button>
@@ -374,24 +374,24 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
       </div>
 
       {/* Main Completed Tickets List */}
-      <div className="bg-white border border-[#E5E5EA] rounded-2xl shadow-2xs overflow-hidden">
-        <div className="px-5 py-3.5 border-b border-[#E5E5EA] flex items-center justify-between bg-[#FAFAFC]">
-          <h3 className="text-xs font-extrabold text-[#1D1D1F] uppercase tracking-wider">
+      <div className="bg-white border border-line rounded-2xl shadow-2xs overflow-hidden">
+        <div className="px-5 py-3.5 border-b border-line flex items-center justify-between bg-[#FAFAFC]">
+          <h3 className="text-xs font-extrabold text-ink uppercase tracking-wider">
             Devices Due for Follow-Up ({filteredWorkOrders.length})
           </h3>
-          <span className="text-[11px] text-[#86868B] font-semibold">
+          <span className="text-[11px] text-muted font-semibold">
             Click 'Log Follow-Up' to record customer status
           </span>
         </div>
 
         {filteredWorkOrders.length === 0 ? (
           <div className="p-12 text-center space-y-3">
-            <div className="w-12 h-12 rounded-full bg-[#F5F5F7] flex items-center justify-center mx-auto text-[#86868B]">
+            <div className="w-12 h-12 rounded-full bg-surface flex items-center justify-center mx-auto text-muted">
               <UserCheck className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-sm font-bold text-[#1D1D1F]">No completed tickets found</p>
-              <p className="text-xs text-[#86868B]">
+              <p className="text-sm font-bold text-ink">No completed tickets found</p>
+              <p className="text-xs text-muted">
                 {searchQuery || statusFilter !== 'ALL'
                   ? 'Try adjusting your search query or status filter.'
                   : 'No follow-ups due yet. Tickets appear here automatically once 7 days have passed since delivery.'}
@@ -399,7 +399,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
             </div>
           </div>
         ) : (
-          <div className="divide-y divide-[#E5E5EA]">
+          <div className="divide-y divide-line">
             {filteredWorkOrders.map((wo) => {
               const records = wo.followUpRecords || [];
               const lastRecord = records.length > 0 ? records[records.length - 1] : null;
@@ -413,13 +413,13 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                   {/* Customer & Ticket Info */}
                   <div className="space-y-1.5 flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono font-extrabold text-xs text-[#0071E3]">
+                      <span className="font-mono font-extrabold text-xs text-brand">
                         {wo.orderNumber}
                       </span>
-                      <span className="text-xs font-extrabold text-[#1D1D1F]">
+                      <span className="text-xs font-extrabold text-ink">
                         {wo.customerName}
                       </span>
-                      <span className="text-xs text-[#86868B]">
+                      <span className="text-xs text-muted">
                         ({wo.customerPhone})
                       </span>
                       <div className="flex items-center space-x-1 ml-auto md:ml-0 flex-wrap gap-1">
@@ -448,24 +448,24 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-[#86868B]">
-                      <span className="flex items-center space-x-1 font-semibold text-[#1D1D1F]">
-                        <Smartphone className="w-3.5 h-3.5 text-[#0071E3]" />
+                    <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-muted">
+                      <span className="flex items-center space-x-1 font-semibold text-ink">
+                        <Smartphone className="w-3.5 h-3.5 text-brand" />
                         <span>{wo.deviceModel}</span>
                       </span>
                       {wo.serialNumber && (
-                        <span>S/N: <span className="font-mono text-[#1D1D1F]">{wo.serialNumber}</span></span>
+                        <span>S/N: <span className="font-mono text-ink">{wo.serialNumber}</span></span>
                       )}
                       <span>
                         Completed:{' '}
-                        <span className="font-medium text-[#1D1D1F]">
+                        <span className="font-medium text-ink">
                           {new Date(wo.updatedAt || wo.createdAt).toLocaleDateString()}
                         </span>
                       </span>
                       {wo.assignedTechName && (
-                        <span>Tech: <span className="font-semibold text-[#1D1D1F]">{wo.assignedTechName}</span></span>
+                        <span>Tech: <span className="font-semibold text-ink">{wo.assignedTechName}</span></span>
                       )}
-                      <span>Warranty: <span className="font-semibold text-[#1D1D1F]">{wo.warrantyDays} Days</span></span>
+                      <span>Warranty: <span className="font-semibold text-ink">{wo.warrantyDays} Days</span></span>
                       <span>Total: <span className="font-extrabold text-emerald-600">{systemSettings.currencySymbol}{wo.totalAmount || 0}</span></span>
                     </div>
 
@@ -525,9 +525,9 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
 
                     {/* Last Log preview */}
                     {lastRecord && (
-                      <div className="bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-2.5 text-xs text-[#1D1D1F] space-y-1 mt-1">
-                        <div className="flex items-center justify-between text-[11px] text-[#86868B]">
-                          <span className="font-bold text-[#1D1D1F] flex items-center space-x-1">
+                      <div className="bg-surface border border-line rounded-xl p-2.5 text-xs text-ink space-y-1 mt-1">
+                        <div className="flex items-center justify-between text-[11px] text-muted">
+                          <span className="font-bold text-ink flex items-center space-x-1">
                             <span>Last Logged by {lastRecord.author}</span>
                             {lastRecord.satisfactionRating && (
                               <span className="flex items-center text-amber-500 font-bold ml-2">
@@ -537,20 +537,20 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                           </span>
                           <span>{new Date(lastRecord.timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
                         </div>
-                        <p className="text-xs text-[#1D1D1F]">{lastRecord.notes}</p>
+                        <p className="text-xs text-ink">{lastRecord.notes}</p>
                       </div>
                     )}
                   </div>
 
                   {/* Actions Bar */}
-                  <div className="flex items-center space-x-2 shrink-0 border-t md:border-t-0 pt-2 md:pt-0 border-[#E5E5EA]">
+                  <div className="flex items-center space-x-2 shrink-0 border-t md:border-t-0 pt-2 md:pt-0 border-line">
                     {/* Direct Contact Buttons */}
                     <a
                       href={`tel:${wo.customerPhone}`}
-                      className="p-2 rounded-xl bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] border border-[#E5E5EA] transition-colors cursor-pointer"
+                      className="p-2 rounded-xl bg-surface hover:bg-line text-ink border border-line transition-colors cursor-pointer"
                       title="Call Phone"
                     >
-                      <Phone className="w-3.5 h-3.5 text-[#0071E3]" />
+                      <Phone className="w-3.5 h-3.5 text-brand" />
                     </a>
 
                     {records.length > 0 && (
@@ -561,7 +561,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                         size="sm"
                         className="flex items-center space-x-1"
                       >
-                        <History className="w-3.5 h-3.5 text-[#86868B]" />
+                        <History className="w-3.5 h-3.5 text-muted" />
                         <span>Logs ({records.length})</span>
                       </Button>
                     )}
@@ -570,7 +570,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                       type="button"
                       onClick={() => handleOpenLogModal(wo)}
                       size="sm"
-                      className="bg-[#0071E3] hover:bg-[#0077ED] text-white flex items-center space-x-1.5"
+                      className="bg-brand hover:bg-[#0077ED] text-white flex items-center space-x-1.5"
                     >
                       <PhoneCall className="w-3.5 h-3.5" />
                       <span>Log Follow-Up</span>
@@ -586,24 +586,24 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
       {/* LOG FOLLOW-UP MODAL */}
       {isLogModalOpen && selectedWo && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-[#E5E5EA] rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-xl animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-3">
+          <div className="bg-white border border-line rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-xl animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-line pb-3">
               <div className="flex items-center space-x-2">
-                <div className="p-2 bg-[#E5F1FF] text-[#0071E3] rounded-xl">
+                <div className="p-2 bg-[#E5F1FF] text-brand rounded-xl">
                   <PhoneCall className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-sm text-[#1D1D1F]">
+                  <h3 className="font-extrabold text-sm text-ink">
                     Record Follow-Up Call
                   </h3>
-                  <p className="text-xs text-[#86868B]">
+                  <p className="text-xs text-muted">
                     {selectedWo.orderNumber} • {selectedWo.customerName} ({selectedWo.deviceModel})
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setIsLogModalOpen(false)}
-                className="p-1 rounded-lg text-[#86868B] hover:bg-[#F5F5F7] hover:text-[#1D1D1F] transition-colors"
+                className="p-1 rounded-lg text-muted hover:bg-surface hover:text-ink transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -668,7 +668,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
 
               {/* Outcome / Status Selector */}
               <div className="space-y-1.5">
-                <label className="font-bold text-[#1D1D1F]">Follow-Up Outcome Status</label>
+                <label className="font-bold text-ink">Follow-Up Outcome Status</label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {(
                     [
@@ -686,8 +686,8 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                       onClick={() => setFormStatus(s.id)}
                       className={`p-2 rounded-xl border font-bold text-center transition-all cursor-pointer ${
                         formStatus === s.id
-                          ? 'border-[#0071E3] bg-[#E5F1FF] text-[#0071E3]'
-                          : 'border-[#E5E5EA] bg-white text-[#1D1D1F] hover:bg-[#F5F5F7]'
+                          ? 'border-brand bg-[#E5F1FF] text-brand'
+                          : 'border-line bg-white text-ink hover:bg-surface'
                       }`}
                     >
                       {s.label}
@@ -722,21 +722,21 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
 
               {/* Staff Author */}
               <div className="space-y-1">
-                <label className="font-bold text-[#1D1D1F]">Logged By (Staff / Advisor Name)</label>
+                <label className="font-bold text-ink">Logged By (Staff / Advisor Name)</label>
                 <input
                   type="text"
                   value={formAuthor}
                   onChange={(e) => setFormAuthor(e.target.value)}
                   placeholder="e.g. Service Advisor Alex"
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#0071E3] focus:bg-white transition-all"
+                  className="w-full bg-surface border border-line rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand focus:bg-white transition-all"
                 />
               </div>
 
               {/* Notes & Quick Templates */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="font-bold text-[#1D1D1F]">Call Notes & Feedback Details</label>
-                  <span className="text-[10px] text-[#86868B]">Quick click templates below</span>
+                  <label className="font-bold text-ink">Call Notes & Feedback Details</label>
+                  <span className="text-[10px] text-muted">Quick click templates below</span>
                 </div>
 
                 <div className="flex flex-wrap gap-1.5 pb-1">
@@ -745,7 +745,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                       key={idx}
                       type="button"
                       onClick={() => setFormNotes(tmpl)}
-                      className="px-2 py-1 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] border border-[#E5E5EA] rounded-lg text-[10px] font-semibold transition-all text-left cursor-pointer"
+                      className="px-2 py-1 bg-surface hover:bg-line text-ink border border-line rounded-lg text-[10px] font-semibold transition-all text-left cursor-pointer"
                     >
                       + {tmpl.slice(0, 32)}...
                     </button>
@@ -757,24 +757,24 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                   value={formNotes}
                   onChange={(e) => setFormNotes(e.target.value)}
                   placeholder="Enter details from customer follow-up call..."
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl p-3 text-xs focus:outline-none focus:border-[#0071E3] focus:bg-white transition-all resize-none"
+                  className="w-full bg-surface border border-line rounded-xl p-3 text-xs focus:outline-none focus:border-brand focus:bg-white transition-all resize-none"
                 />
               </div>
 
               {/* Next Follow-up Date */}
               <div className="space-y-1">
-                <label className="font-bold text-[#1D1D1F]">Next Follow-Up Date (Optional)</label>
+                <label className="font-bold text-ink">Next Follow-Up Date (Optional)</label>
                 <input
                   type="date"
                   value={formNextDate}
                   onChange={(e) => setFormNextDate(e.target.value)}
-                  className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#0071E3] focus:bg-white transition-all"
+                  className="w-full bg-surface border border-line rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand focus:bg-white transition-all"
                 />
               </div>
             </div>
 
             {/* Modal Actions */}
-            <div className="flex items-center justify-end space-x-2 pt-3 border-t border-[#E5E5EA]">
+            <div className="flex items-center justify-end space-x-2 pt-3 border-t border-line">
               <Button
                 type="button"
                 onClick={() => setIsLogModalOpen(false)}
@@ -785,7 +785,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
               <Button
                 type="button"
                 onClick={handleSaveFollowUpLog}
-                className="bg-[#0071E3] hover:bg-[#0077ED] text-white flex items-center space-x-1.5"
+                className="bg-brand hover:bg-[#0077ED] text-white flex items-center space-x-1.5"
               >
                 <Check className="w-4 h-4" />
                 <span>Save Follow-Up Log</span>
@@ -798,22 +798,22 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
       {/* HISTORY LOGS MODAL */}
       {historyModalWo && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-[#E5E5EA] rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-3">
+          <div className="bg-white border border-line rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-line pb-3">
               <div className="flex items-center space-x-2">
-                <History className="w-5 h-5 text-[#0071E3]" />
+                <History className="w-5 h-5 text-brand" />
                 <div>
-                  <h3 className="font-extrabold text-sm text-[#1D1D1F]">
+                  <h3 className="font-extrabold text-sm text-ink">
                     Follow-Up History Log
                   </h3>
-                  <p className="text-xs text-[#86868B]">
+                  <p className="text-xs text-muted">
                     {historyModalWo.orderNumber} • {historyModalWo.customerName}
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setHistoryModalWo(null)}
-                className="p-1 rounded-lg text-[#86868B] hover:bg-[#F5F5F7] hover:text-[#1D1D1F] transition-colors"
+                className="p-1 rounded-lg text-muted hover:bg-surface hover:text-ink transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -853,11 +853,11 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
               {(historyModalWo.followUpRecords || []).map((rec) => (
                 <div
                   key={rec.id}
-                  className="p-3 bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl text-xs space-y-1.5"
+                  className="p-3 bg-surface border border-line rounded-xl text-xs space-y-1.5"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-[#1D1D1F]">{rec.author}</span>
-                    <span className="text-[10px] text-[#86868B]">
+                    <span className="font-bold text-ink">{rec.author}</span>
+                    <span className="text-[10px] text-muted">
                       {new Date(rec.timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
                     </span>
                   </div>
@@ -869,9 +869,9 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                       </span>
                     )}
                   </div>
-                  <p className="text-[#1D1D1F]">{rec.notes}</p>
+                  <p className="text-ink">{rec.notes}</p>
                   {rec.nextFollowUpDate && (
-                    <div className="text-[10px] text-[#0071E3] font-semibold">
+                    <div className="text-[10px] text-brand font-semibold">
                       Next Callback: {rec.nextFollowUpDate}
                     </div>
                   )}
@@ -883,7 +883,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
               <button
                 type="button"
                 onClick={() => setHistoryModalWo(null)}
-                className="px-4 py-2 bg-[#F5F5F7] border border-[#E5E5EA] text-[#1D1D1F] font-bold rounded-xl text-xs hover:bg-[#E5E5EA] transition-all cursor-pointer"
+                className="px-4 py-2 bg-surface border border-line text-ink font-bold rounded-xl text-xs hover:bg-line transition-all cursor-pointer"
               >
                 Close
               </button>

@@ -18,14 +18,14 @@ interface UsersTabProps {
 const UsersTab: React.FC<UsersTabProps> = ({ formData, setFormData, users, currentUser, handleOpenAddUser, handleOpenEditUser, onDeleteUser }) => {
   return (
         <div className="space-y-6">
-          <div className="bg-white p-6 rounded-2xl border border-[#D2D2D7] shadow-2xs space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E5E5EA]">
+          <div className="bg-white p-6 rounded-2xl border border-line-strong shadow-2xs space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-line">
               <div>
-                <h3 className="text-base font-extrabold text-[#1D1D1F] flex items-center space-x-2">
-                  <UserPlus className="w-5 h-5 text-[#0071E3]" />
+                <h3 className="text-base font-extrabold text-ink flex items-center space-x-2">
+                  <UserPlus className="w-5 h-5 text-brand" />
                   <span>System Users & Role Access Control</span>
                 </h3>
-                <p className="text-xs text-[#86868B] mt-1">
+                <p className="text-xs text-muted mt-1">
                   Manage accounts for Admin, Technicians, and Reception staff. Control granular deletion and access permissions.
                 </p>
               </div>
@@ -33,7 +33,7 @@ const UsersTab: React.FC<UsersTabProps> = ({ formData, setFormData, users, curre
               <Button
                 type="button"
                 onClick={handleOpenAddUser}
-                className="bg-[#0071E3] hover:bg-[#0051B3] text-white shrink-0 flex items-center space-x-1.5"
+                className="bg-brand hover:bg-brand-deep text-white shrink-0 flex items-center space-x-1.5"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add New User Account</span>
@@ -75,7 +75,7 @@ const UsersTab: React.FC<UsersTabProps> = ({ formData, setFormData, users, curre
 
             {/* Users Table / Card List */}
             <div className="space-y-3 pt-2">
-              <h4 className="text-xs font-extrabold text-[#1D1D1F] uppercase tracking-wider">
+              <h4 className="text-xs font-extrabold text-ink uppercase tracking-wider">
                 Active System Users ({users.length})
               </h4>
 
@@ -90,8 +90,8 @@ const UsersTab: React.FC<UsersTabProps> = ({ formData, setFormData, users, curre
                       key={usr.id}
                       className={`p-4 rounded-2xl border transition-all space-y-3 ${
                         usr.id === currentUser?.id
-                          ? 'bg-blue-50/40 border-[#0071E3] shadow-xs'
-                          : 'bg-white border-[#E5E5EA] hover:border-[#D2D2D7]'
+                          ? 'bg-blue-50/40 border-brand shadow-xs'
+                          : 'bg-white border-line hover:border-line-strong'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-2">
@@ -107,14 +107,14 @@ const UsersTab: React.FC<UsersTabProps> = ({ formData, setFormData, users, curre
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-center space-x-1.5">
-                              <h5 className="font-extrabold text-sm text-[#1D1D1F] truncate">{usr.name}</h5>
+                              <h5 className="font-extrabold text-sm text-ink truncate">{usr.name}</h5>
                               {usr.id === currentUser?.id && (
-                                <span className="px-1.5 py-0.2 bg-[#0071E3] text-white text-[9px] font-extrabold rounded-md">
+                                <span className="px-1.5 py-0.2 bg-brand text-white text-[9px] font-extrabold rounded-md">
                                   YOU
                                 </span>
                               )}
                             </div>
-                            <p className="text-xs text-[#86868B] truncate">{usr.email}</p>
+                            <p className="text-xs text-muted truncate">{usr.email}</p>
                           </div>
                         </div>
 
@@ -122,7 +122,7 @@ const UsersTab: React.FC<UsersTabProps> = ({ formData, setFormData, users, curre
                           <button
                             type="button"
                             onClick={() => handleOpenEditUser(usr)}
-                            className="p-1.5 text-[#0071E3] hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                            className="p-1.5 text-brand hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
                             title="Edit User & Permissions"
                           >
                             <Edit2 className="w-4 h-4" />
@@ -144,7 +144,7 @@ const UsersTab: React.FC<UsersTabProps> = ({ formData, setFormData, users, curre
                         </div>
                       </div>
 
-                      <div className="pt-2 border-t border-[#E5E5EA]/80 flex flex-wrap items-center justify-between text-xs gap-2">
+                      <div className="pt-2 border-t border-line/80 flex flex-wrap items-center justify-between text-xs gap-2">
                         <span className={`px-2 py-0.5 rounded-lg text-[10px] font-extrabold border ${
                           isAdmin
                             ? 'bg-purple-50 text-purple-700 border-purple-200'
@@ -156,15 +156,15 @@ const UsersTab: React.FC<UsersTabProps> = ({ formData, setFormData, users, curre
                         </span>
 
                         {usr.phone && (
-                          <span className="text-[11px] text-[#6E6E73] font-medium">
+                          <span className="text-[11px] text-faint font-medium">
                             📞 {usr.phone}
                           </span>
                         )}
                       </div>
 
                       {/* Permissions Tags */}
-                      <div className="bg-[#F5F5F7] p-2 rounded-xl text-[10px] text-[#6E6E73] space-y-1">
-                        <div className="font-extrabold text-[#1D1D1F] flex items-center justify-between">
+                      <div className="bg-surface p-2 rounded-xl text-[10px] text-faint space-y-1">
+                        <div className="font-extrabold text-ink flex items-center justify-between">
                           <span>Key Permissions:</span>
                           <span className={usr.permissions?.canDeleteWorkOrders ? 'text-emerald-600 font-bold' : 'text-slate-400'}>
                             {usr.permissions?.canDeleteWorkOrders ? 'Can Delete Items' : 'No Delete Access'}

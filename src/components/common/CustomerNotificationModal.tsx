@@ -109,11 +109,11 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
 
   return (
     <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-      <div className="bg-white rounded-3xl border border-[#E5E5EA] shadow-2xl max-w-lg w-full overflow-hidden">
+      <div className="bg-white rounded-3xl border border-line shadow-2xl max-w-lg w-full overflow-hidden">
         {/* Modal Header */}
-        <div className="bg-[#1D1D1F] text-white p-5 flex items-center justify-between">
+        <div className="bg-ink text-white p-5 flex items-center justify-between">
           <div className="flex items-center space-x-2.5">
-            <div className="p-2 bg-[#0071E3] rounded-2xl text-white">
+            <div className="p-2 bg-brand rounded-2xl text-white">
               <BellRing className="w-5 h-5 animate-pulse" />
             </div>
             <div>
@@ -135,7 +135,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
         <div className="p-6 space-y-5">
           {/* Channel Selector Buttons */}
           <div>
-            <label className="block text-[11px] font-extrabold text-[#86868B] uppercase tracking-wider mb-2">
+            <label className="block text-[11px] font-extrabold text-muted uppercase tracking-wider mb-2">
               Select Notification Channel
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -145,7 +145,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
                 className={`py-2.5 px-3 rounded-2xl border font-extrabold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer ${
                   channel === 'Viber'
                     ? 'bg-[#7360F2] text-white border-[#7360F2] shadow-sm'
-                    : 'bg-[#F5F5F7] text-[#1D1D1F] border-[#E5E5EA] hover:bg-slate-200'
+                    : 'bg-surface text-ink border-line hover:bg-slate-200'
                 }`}
               >
                 <MessageSquare className="w-4 h-4" />
@@ -157,8 +157,8 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
                 onClick={() => setChannel('SMS')}
                 className={`py-2.5 px-3 rounded-2xl border font-extrabold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer ${
                   channel === 'SMS'
-                    ? 'bg-[#34C759] text-white border-[#34C759] shadow-sm'
-                    : 'bg-[#F5F5F7] text-[#1D1D1F] border-[#E5E5EA] hover:bg-slate-200'
+                    ? 'bg-success text-white border-success shadow-sm'
+                    : 'bg-surface text-ink border-line hover:bg-slate-200'
                 }`}
               >
                 <Phone className="w-4 h-4" />
@@ -171,7 +171,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
                 className={`py-2.5 px-3 rounded-2xl border font-extrabold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer ${
                   channel === 'Telegram'
                     ? 'bg-[#229ED9] text-white border-[#229ED9] shadow-sm'
-                    : 'bg-[#F5F5F7] text-[#1D1D1F] border-[#E5E5EA] hover:bg-slate-200'
+                    : 'bg-surface text-ink border-line hover:bg-slate-200'
                 }`}
               >
                 <Send className="w-4 h-4" />
@@ -182,7 +182,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
 
           {/* Configured Notification Templates */}
           <div>
-            <label className="block text-[11px] font-extrabold text-[#86868B] uppercase tracking-wider mb-2">
+            <label className="block text-[11px] font-extrabold text-muted uppercase tracking-wider mb-2">
               Notification Message Templates (မြန်မာဘာသာ)
             </label>
             <div className="flex flex-wrap gap-1.5">
@@ -195,8 +195,8 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
                     onClick={() => handleSelectTemplate(tmpl)}
                     className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                       isSel
-                        ? 'bg-[#0071E3] text-white shadow-xs'
-                        : 'bg-slate-100 text-[#1D1D1F] hover:bg-slate-200 border border-slate-200'
+                        ? 'bg-brand text-white shadow-xs'
+                        : 'bg-slate-100 text-ink hover:bg-slate-200 border border-slate-200'
                     }`}
                   >
                     {tmpl.title}
@@ -209,35 +209,35 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
           {/* Message Text Area */}
           <div>
             <div className="flex justify-between items-center mb-1">
-              <span className="text-[11px] font-bold text-[#86868B]">Message Preview:</span>
-              <span className="text-[10px] text-[#0071E3] font-bold">{messageText.length} characters</span>
+              <span className="text-[11px] font-bold text-muted">Message Preview:</span>
+              <span className="text-[10px] text-brand font-bold">{messageText.length} characters</span>
             </div>
             <textarea
               rows={4}
               value={messageText}
               onChange={(e) => setMessageText(e.target.value)}
-              className="w-full bg-[#F5F5F7] border border-[#E5E5EA] rounded-2xl p-3.5 text-xs text-[#1D1D1F] font-sans leading-relaxed focus:bg-white focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20 resize-none"
+              className="w-full bg-surface border border-line rounded-2xl p-3.5 text-xs text-ink font-sans leading-relaxed focus:bg-white focus:border-brand focus:ring-2 focus:ring-brand/20 resize-none"
             />
           </div>
 
           {/* Recipient summary info badge */}
-          <div className="bg-blue-50 border border-blue-200 p-3 rounded-2xl flex items-center justify-between text-xs text-[#1D1D1F]">
+          <div className="bg-blue-50 border border-blue-200 p-3 rounded-2xl flex items-center justify-between text-xs text-ink">
             <div>
-              <span className="text-[10px] text-[#86868B] block">Recipient Phone:</span>
-              <span className="font-mono font-extrabold text-[#0071E3]">{workOrder.customerPhone || 'N/A'}</span>
+              <span className="text-[10px] text-muted block">Recipient Phone:</span>
+              <span className="font-mono font-extrabold text-brand">{workOrder.customerPhone || 'N/A'}</span>
             </div>
             <div className="text-right">
-              <span className="text-[10px] text-[#86868B] block">Device / Total:</span>
+              <span className="text-[10px] text-muted block">Device / Total:</span>
               <span className="font-bold">{workOrder.deviceModel} • {workOrder.totalAmount.toLocaleString()} MMK</span>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center space-x-2 pt-2 border-t border-[#E5E5EA]">
+          <div className="flex items-center space-x-2 pt-2 border-t border-line">
             <button
               type="button"
               onClick={handleCopy}
-              className="flex-1 py-3 bg-[#F5F5F7] hover:bg-slate-200 text-[#1D1D1F] font-extrabold text-xs rounded-2xl transition-all flex items-center justify-center space-x-1.5 cursor-pointer active:scale-95 border border-[#D2D2D7]"
+              className="flex-1 py-3 bg-surface hover:bg-slate-200 text-ink font-extrabold text-xs rounded-2xl transition-all flex items-center justify-center space-x-1.5 cursor-pointer active:scale-95 border border-line-strong"
             >
               {copied ? (
                 <>
@@ -246,7 +246,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
                 </>
               ) : (
                 <>
-                  <Copy className="w-4 h-4 text-[#0071E3]" />
+                  <Copy className="w-4 h-4 text-brand" />
                   <span>Copy Burmese Text</span>
                 </>
               )}
@@ -259,7 +259,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
                 channel === 'Viber'
                   ? 'bg-[#7360F2] hover:bg-[#614fe0]'
                   : channel === 'SMS'
-                  ? 'bg-[#34C759] hover:bg-[#2fb350]'
+                  ? 'bg-success hover:bg-[#2fb350]'
                   : 'bg-[#229ED9] hover:bg-[#1f8ec3]'
               }`}
             >

@@ -886,23 +886,23 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
 
       {/* Navigation Sub-Tabs — launcher menu (hidden once drilled into a tab) */}
       {!settingsDrilledIn && (
-      <div className="bg-[#F5F5F7] p-2.5 rounded-2xl border border-[#E5E5EA] space-y-2.5 shadow-2xs">
+      <div className="bg-surface p-2.5 rounded-2xl border border-line space-y-2.5 shadow-2xs">
         {/* Settings search filter */}
         <div className="relative">
-          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#86868B]" />
+          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
           <input
             type="text"
             value={settingsTabQuery}
             onChange={(e) => setSettingsTabQuery(e.target.value)}
             placeholder="Search settings…"
-            className="w-full bg-white border border-[#E5E5EA] text-xs text-[#1D1D1F] placeholder-[#86868B] pl-8 pr-7 py-2 rounded-xl focus:outline-none focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20 transition-all"
+            className="w-full bg-white border border-line text-xs text-ink placeholder-muted pl-8 pr-7 py-2 rounded-xl focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all"
           />
           {settingsTabQuery && (
             <button
               type="button"
               onClick={() => setSettingsTabQuery('')}
               aria-label="Clear settings search"
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center text-[#86868B] hover:text-[#1D1D1F] rounded-full hover:bg-[#F5F5F7] transition-colors cursor-pointer"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center text-muted hover:text-ink rounded-full hover:bg-surface transition-colors cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -934,7 +934,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
           ];
           // Work-desk accent tints per group (icon tile backgrounds)
           const accentByGroup: Record<string, string> = {
-            Business: 'bg-[#EAF4FF] text-[#0071E3]',
+            Business: 'bg-[#EAF4FF] text-brand',
             Staff: 'bg-[#E8F7EF] text-[#16A34A]',
             Operations: 'bg-[#F3EFFF] text-[#7C3AED]',
             System: 'bg-[#FFF4E5] text-[#F59E0B]',
@@ -945,10 +945,10 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             const tabs = group.ids.map((id) => defById.get(id)!).filter((t) => !q || t.label.toLowerCase().includes(q));
             if (tabs.length === 0) return null;
             visibleCount += tabs.length;
-            const accent = accentByGroup[group.label] || 'bg-[#F0F6FF] text-[#0071E3]';
+            const accent = accentByGroup[group.label] || 'bg-brand-soft text-brand';
             return (
               <div key={group.label}>
-                <p className="px-1 pb-1.5 text-[9px] font-extrabold uppercase tracking-wider text-[#86868B]">
+                <p className="px-1 pb-1.5 text-[9px] font-extrabold uppercase tracking-wider text-muted">
                   {group.label}
                 </p>
                 <div className="flex flex-col gap-1 md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 md:gap-2">
@@ -969,8 +969,8 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                         title={tab.label}
                         className={`relative flex flex-row md:flex-col items-center justify-start md:justify-center gap-2.5 md:gap-2 px-3 py-2.5 md:px-2 md:py-4 w-full text-left md:text-center text-[11px] md:text-[11px] font-extrabold rounded-xl md:rounded-2xl transition-all cursor-pointer border select-none active:scale-95 shrink-0 ${
                           isActive
-                            ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-xs'
-                            : 'bg-white hover:bg-slate-100 text-[#6E6E73] hover:text-[#1D1D1F] border-[#E5E5EA]'
+                            ? 'bg-brand text-white border-brand shadow-xs'
+                            : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
                         }`}
                       >
                         {/* Work-desk app-icon tile */}
@@ -988,7 +988,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                         {tab.badge !== undefined && (
                           <span
                             className={`absolute top-1.5 right-1.5 px-1.5 rounded-full text-[8px] font-mono font-bold leading-[13px] ${
-                              isActive ? 'bg-white/20 text-white' : 'bg-[#E5E5EA] text-[#1D1D1F]'
+                              isActive ? 'bg-white/20 text-white' : 'bg-line text-ink'
                             }`}
                           >
                             {tab.badge}
@@ -1003,7 +1003,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             );
           });
           if (q && visibleCount === 0) {
-            return <p className="text-center text-xs font-bold text-[#86868B] py-3">No settings match “{settingsTabQuery}”</p>;
+            return <p className="text-center text-xs font-bold text-muted py-3">No settings match “{settingsTabQuery}”</p>;
           }
           return rendered;
         })()}
@@ -1014,7 +1014,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
       {settingsDrilledIn && (
         <>
         {/* Back navigation bar */}
-        <div className="flex items-center justify-between gap-3 bg-white p-2.5 rounded-2xl border border-[#E5E5EA] shadow-2xs">
+        <div className="flex items-center justify-between gap-3 bg-white p-2.5 rounded-2xl border border-line shadow-2xs">
           <Button
             type="button"
             onClick={() => setSettingsDrilledIn(false)}
@@ -1089,17 +1089,17 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
       )}{/* Add / Edit Technician Modal */}
       {techModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-xl w-full p-6 space-y-5 border border-[#D2D2D7] shadow-2xl animate-scale-in my-8">
-            <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-3">
+          <div className="bg-white rounded-2xl max-w-xl w-full p-6 space-y-5 border border-line-strong shadow-2xl animate-scale-in my-8">
+            <div className="flex items-center justify-between border-b border-line pb-3">
               <div className="flex items-center space-x-2">
                 <span className="p-1.5 bg-purple-50 text-[#AF52DE] rounded-lg">
                   <Award className="w-5 h-5" />
                 </span>
                 <div>
-                  <h3 className="font-extrabold text-base text-[#1D1D1F]">
+                  <h3 className="font-extrabold text-base text-ink">
                     {editingTech ? 'Edit Technician Record' : 'Add New Technical Staff'}
                   </h3>
-                  <p className="text-[11px] text-[#86868B]">
+                  <p className="text-[11px] text-muted">
                     {editingTech ? 'Update staff details and commission rates' : 'Register a new technician on the roster'}
                   </p>
                 </div>
@@ -1107,7 +1107,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               <button
                 type="button"
                 onClick={() => setTechModalOpen(false)}
-                className="p-1.5 text-[#86868B] hover:text-[#1D1D1F] hover:bg-[#F5F5F7] rounded-lg cursor-pointer"
+                className="p-1.5 text-muted hover:text-ink hover:bg-surface rounded-lg cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1115,49 +1115,49 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
 
             <form onSubmit={handleTechSubmit} className="space-y-4 text-xs">
               <div>
-                <label className="font-bold text-[#1D1D1F] block mb-1.5">Technician Full Name *</label>
+                <label className="font-bold text-ink block mb-1.5">Technician Full Name *</label>
                 <input
                   type="text"
                   required
                   value={techFormData.name}
                   onChange={(e) => setTechFormData({ ...techFormData, name: e.target.value })}
                   placeholder="e.g. Alex Rivera"
-                  className="w-full h-10 bg-[#F5F5F7] text-[#1D1D1F] font-medium px-3 rounded-xl border border-[#D2D2D7] focus:bg-white focus:outline-none focus:border-[#0071E3]"
+                  className="w-full h-10 bg-surface text-ink font-medium px-3 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <p className="text-[10px] font-black text-[#86868B] uppercase tracking-wider">Contact Information</p>
+                <p className="text-[10px] font-black text-muted uppercase tracking-wider">Contact Information</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="font-bold text-[#1D1D1F] block mb-1.5">Email Address</label>
+                    <label className="font-bold text-ink block mb-1.5">Email Address</label>
                     <input
                       type="email"
                       value={techFormData.email}
                       onChange={(e) => setTechFormData({ ...techFormData, email: e.target.value })}
                       placeholder="alex@applerepairpro.com"
-                      className="w-full h-10 bg-[#F5F5F7] text-[#1D1D1F] font-medium px-3 rounded-xl border border-[#D2D2D7] focus:bg-white focus:outline-none focus:border-[#0071E3]"
+                      className="w-full h-10 bg-surface text-ink font-medium px-3 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand"
                     />
                   </div>
 
                   <div>
-                    <label className="font-bold text-[#1D1D1F] block mb-1.5">Phone Number</label>
+                    <label className="font-bold text-ink block mb-1.5">Phone Number</label>
                     <input
                       type="text"
                       value={techFormData.phone}
                       onChange={(e) => setTechFormData({ ...techFormData, phone: e.target.value })}
                       placeholder="+95 9 700 000 000"
-                      className="w-full h-10 bg-[#F5F5F7] text-[#1D1D1F] font-medium px-3 rounded-xl border border-[#D2D2D7] focus:bg-white focus:outline-none focus:border-[#0071E3]"
+                      className="w-full h-10 bg-surface text-ink font-medium px-3 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand"
                     />
                   </div>
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <p className="text-[10px] font-black text-[#86868B] uppercase tracking-wider">Role & Status</p>
+                <p className="text-[10px] font-black text-muted uppercase tracking-wider">Role & Status</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="font-bold text-[#1D1D1F] block mb-1.5">Skill Tier Level</label>
+                    <label className="font-bold text-ink block mb-1.5">Skill Tier Level</label>
                     <CustomDropdownMenu
                       value={techFormData.level}
                       onChange={(level) => setTechFormData({ ...techFormData, level: level as TechnicianLevel })}
@@ -1167,18 +1167,18 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                         { value: 'Level 3 Master', label: 'Level 3 Master' },
                       ]}
                       className="w-full"
-                      buttonClassName="!w-full !h-10 !rounded-xl !border-[#D2D2D7] !bg-[#F5F5F7] !px-3"
+                      buttonClassName="!w-full !h-10 !rounded-xl !border-line-strong !bg-surface !px-3"
                       menuAlign="left"
                       size="md"
                     />
                   </div>
 
                   <div>
-                    <label className="font-bold text-[#1D1D1F] block mb-1.5">Status</label>
+                    <label className="font-bold text-ink block mb-1.5">Status</label>
                     <select
                       value={techFormData.status}
                       onChange={(e) => setTechFormData({ ...techFormData, status: e.target.value as any })}
-                      className="w-full h-10 bg-[#F5F5F7] text-[#1D1D1F] font-bold px-3 rounded-xl border border-[#D2D2D7] focus:bg-white focus:outline-none focus:border-[#0071E3]"
+                      className="w-full h-10 bg-surface text-ink font-bold px-3 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand"
                     >
                       <option value="Active">Active</option>
                       <option value="On Leave">On Leave</option>
@@ -1189,48 +1189,48 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               </div>
 
               <div>
-                <label className="font-bold text-[#1D1D1F] block mb-1.5">Specialty / Hardware Focus</label>
+                <label className="font-bold text-ink block mb-1.5">Specialty / Hardware Focus</label>
                 <input
                   type="text"
                   value={techFormData.specialty}
                   onChange={(e) => setTechFormData({ ...techFormData, specialty: e.target.value })}
                   placeholder="e.g. MacBook Logic Boards, Display Repair"
-                  className="w-full h-10 bg-[#F5F5F7] text-[#1D1D1F] font-medium px-3 rounded-xl border border-[#D2D2D7] focus:bg-white focus:outline-none focus:border-[#0071E3]"
+                  className="w-full h-10 bg-surface text-ink font-medium px-3 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <p className="text-[10px] font-black text-[#86868B] uppercase tracking-wider">Commission Rates</p>
+                <p className="text-[10px] font-black text-muted uppercase tracking-wider">Commission Rates</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="bg-[#F8F9FA] border border-[#E5E5EA] rounded-xl p-3">
-                    <label className="font-bold text-[#1D1D1F] block mb-1.5">Spareparts Change (%)</label>
+                  <div className="bg-[#F8F9FA] border border-line rounded-xl p-3">
+                    <label className="font-bold text-ink block mb-1.5">Spareparts Change (%)</label>
                     <input
                       type="number"
                       value={techFormData.commissionRateParts}
                       onChange={(e) => setTechFormData({ ...techFormData, commissionRateParts: Number(e.target.value) })}
                       min="0"
                       max="50"
-                      className="w-full h-9 bg-white text-[#1D1D1F] font-bold px-3 rounded-lg border border-[#D2D2D7] focus:outline-none focus:border-[#0071E3]"
+                      className="w-full h-9 bg-white text-ink font-bold px-3 rounded-lg border border-line-strong focus:outline-none focus:border-brand"
                     />
-                    <p className="text-[10px] text-[#86868B] mt-1.5">Standard Modular (parts-swap) jobs</p>
+                    <p className="text-[10px] text-muted mt-1.5">Standard Modular (parts-swap) jobs</p>
                   </div>
 
-                  <div className="bg-[#F8F9FA] border border-[#E5E5EA] rounded-xl p-3">
-                    <label className="font-bold text-[#1D1D1F] block mb-1.5">Hardware Repair (%)</label>
+                  <div className="bg-[#F8F9FA] border border-line rounded-xl p-3">
+                    <label className="font-bold text-ink block mb-1.5">Hardware Repair (%)</label>
                     <input
                       type="number"
                       value={techFormData.commissionRateHardware}
                       onChange={(e) => setTechFormData({ ...techFormData, commissionRateHardware: Number(e.target.value) })}
                       min="0"
                       max="50"
-                      className="w-full h-9 bg-white text-[#1D1D1F] font-bold px-3 rounded-lg border border-[#D2D2D7] focus:outline-none focus:border-[#0071E3]"
+                      className="w-full h-9 bg-white text-ink font-bold px-3 rounded-lg border border-line-strong focus:outline-none focus:border-brand"
                     />
-                    <p className="text-[10px] text-[#86868B] mt-1.5">Micro-Soldering (board-level) jobs</p>
+                    <p className="text-[10px] text-muted mt-1.5">Micro-Soldering (board-level) jobs</p>
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center justify-end space-x-2 pt-4 border-t border-[#E5E5EA]">
+              <div className="flex items-center justify-end space-x-2 pt-4 border-t border-line">
                 <Button
                   type="button"
                   onClick={() => setTechModalOpen(false)}
@@ -1254,19 +1254,19 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
       {/* Delete Technician Confirmation Modal */}
       {deleteConfirmId && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-sm w-full p-5 space-y-4 border border-[#D2D2D7] shadow-xl animate-scale-in">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-5 space-y-4 border border-line-strong shadow-xl animate-scale-in">
             <div className="flex items-center space-x-3 text-rose-600">
               <AlertCircle className="w-6 h-6 shrink-0" />
-              <h3 className="font-extrabold text-sm text-[#1D1D1F]">Delete Technician?</h3>
+              <h3 className="font-extrabold text-sm text-ink">Delete Technician?</h3>
             </div>
-            <p className="text-xs text-[#86868B]">
+            <p className="text-xs text-muted">
               Are you sure you want to remove this technician from the system roster? Active tickets assigned to them will remain in the pipeline.
             </p>
             <div className="flex items-center justify-end space-x-2 pt-2">
               <button
                 type="button"
                 onClick={() => setDeleteConfirmId(null)}
-                className="px-3 py-1.5 bg-[#F5F5F7] text-[#1D1D1F] font-bold text-xs rounded-xl cursor-pointer"
+                className="px-3 py-1.5 bg-surface text-ink font-bold text-xs rounded-xl cursor-pointer"
               >
                 Cancel
               </button>
@@ -1285,20 +1285,20 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
       {/* Add / Edit User Modal */}
       {userModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-5 border border-[#D2D2D7] shadow-2xl animate-scale-in my-8">
-            <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-3">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-5 border border-line-strong shadow-2xl animate-scale-in my-8">
+            <div className="flex items-center justify-between border-b border-line pb-3">
               <div className="flex items-center space-x-2">
-                <span className="p-1.5 bg-blue-50 text-[#0071E3] rounded-lg">
+                <span className="p-1.5 bg-blue-50 text-brand rounded-lg">
                   <UserPlus className="w-5 h-5" />
                 </span>
-                <h3 className="font-extrabold text-base text-[#1D1D1F]">
+                <h3 className="font-extrabold text-base text-ink">
                   {editingUser ? 'Edit User Account & Permissions' : 'Add New System User'}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setUserModalOpen(false)}
-                className="p-1 text-[#86868B] hover:text-[#1D1D1F] rounded-lg cursor-pointer"
+                className="p-1 text-muted hover:text-ink rounded-lg cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1308,7 +1308,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               {/* User Name & Email */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="font-bold text-[#1D1D1F] block">
+                  <label className="font-bold text-ink block">
                     Full Name <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -1316,18 +1316,18 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                     value={userFormData.name}
                     onChange={(e) => setUserFormData({ ...userFormData, name: e.target.value })}
                     placeholder="e.g. Mg Mg or Daw Thin"
-                    className="w-full px-3 py-2 rounded-xl border border-[#D2D2D7] focus:outline-none focus:border-[#0071E3] font-medium"
+                    className="w-full px-3 py-2 rounded-xl border border-line-strong focus:outline-none focus:border-brand font-medium"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="font-bold text-[#1D1D1F] block">Email Address</label>
+                  <label className="font-bold text-ink block">Email Address</label>
                   <input
                     type="email"
                     value={userFormData.email}
                     onChange={(e) => setUserFormData({ ...userFormData, email: e.target.value })}
                     placeholder="user@applerepairpro.com"
-                    className="w-full px-3 py-2 rounded-xl border border-[#D2D2D7] focus:outline-none focus:border-[#0071E3] font-medium"
+                    className="w-full px-3 py-2 rounded-xl border border-line-strong focus:outline-none focus:border-brand font-medium"
                   />
                 </div>
               </div>
@@ -1335,22 +1335,22 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               {/* Phone & Status */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="font-bold text-[#1D1D1F] block">Phone Number</label>
+                  <label className="font-bold text-ink block">Phone Number</label>
                   <input
                     type="text"
                     value={userFormData.phone}
                     onChange={(e) => setUserFormData({ ...userFormData, phone: e.target.value })}
                     placeholder="+95 9 123 456 789"
-                    className="w-full px-3 py-2 rounded-xl border border-[#D2D2D7] focus:outline-none focus:border-[#0071E3] font-medium"
+                    className="w-full px-3 py-2 rounded-xl border border-line-strong focus:outline-none focus:border-brand font-medium"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="font-bold text-[#1D1D1F] block">Account Status</label>
+                  <label className="font-bold text-ink block">Account Status</label>
                   <select
                     value={userFormData.status}
                     onChange={(e) => setUserFormData({ ...userFormData, status: e.target.value as any })}
-                    className="w-full px-3 py-2 rounded-xl border border-[#D2D2D7] focus:outline-none focus:border-[#0071E3] font-bold bg-white"
+                    className="w-full px-3 py-2 rounded-xl border border-line-strong focus:outline-none focus:border-brand font-bold bg-white"
                   >
                     <option value="Active">Active User</option>
                     <option value="Inactive">Inactive / Suspended</option>
@@ -1359,8 +1359,8 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               </div>
 
               {/* Role Selector */}
-              <div className="space-y-2 pt-2 border-t border-[#E5E5EA]">
-                <label className="font-extrabold text-[#1D1D1F] block">
+              <div className="space-y-2 pt-2 border-t border-line">
+                <label className="font-extrabold text-ink block">
                   Select User Role <span className="text-rose-500">*</span>
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -1384,7 +1384,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                     className={`p-2.5 rounded-xl border text-center font-extrabold transition-all cursor-pointer ${
                       userFormData.role === 'Admin'
                         ? 'bg-purple-100 border-purple-600 text-purple-900 shadow-2xs'
-                        : 'bg-white border-[#D2D2D7] text-[#1D1D1F] hover:bg-purple-50/50'
+                        : 'bg-white border-line-strong text-ink hover:bg-purple-50/50'
                     }`}
                   >
                     <div className="text-base mb-0.5">👑</div>
@@ -1411,7 +1411,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                     className={`p-2.5 rounded-xl border text-center font-extrabold transition-all cursor-pointer ${
                       userFormData.role === 'Technician'
                         ? 'bg-blue-100 border-blue-600 text-blue-900 shadow-2xs'
-                        : 'bg-white border-[#D2D2D7] text-[#1D1D1F] hover:bg-blue-50/50'
+                        : 'bg-white border-line-strong text-ink hover:bg-blue-50/50'
                     }`}
                   >
                     <div className="text-base mb-0.5">🔧</div>
@@ -1438,7 +1438,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                     className={`p-2.5 rounded-xl border text-center font-extrabold transition-all cursor-pointer ${
                       userFormData.role === 'Reception'
                         ? 'bg-amber-100 border-amber-600 text-amber-900 shadow-2xs'
-                        : 'bg-white border-[#D2D2D7] text-[#1D1D1F] hover:bg-amber-50/50'
+                        : 'bg-white border-line-strong text-ink hover:bg-amber-50/50'
                     }`}
                   >
                     <div className="text-base mb-0.5">📋</div>
@@ -1456,7 +1456,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                   <select
                     value={userFormData.technicianId}
                     onChange={(e) => setUserFormData({ ...userFormData, technicianId: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-blue-300 focus:outline-none focus:border-[#0071E3] font-bold bg-white text-blue-950"
+                    className="w-full px-3 py-2 rounded-xl border border-blue-300 focus:outline-none focus:border-brand font-bold bg-white text-blue-950"
                   >
                     <option value="">-- Select Technician Staff Profile --</option>
                     {technicians.map((tech) => (
@@ -1469,13 +1469,13 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               )}
 
               {/* Granular Permission Toggles */}
-              <div className="space-y-2 pt-2 border-t border-[#E5E5EA]">
-                <label className="font-extrabold text-[#1D1D1F] block">
+              <div className="space-y-2 pt-2 border-t border-line">
+                <label className="font-extrabold text-ink block">
                   Permissions & Capabilities
                 </label>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-[#F5F5F7] p-3 rounded-xl border border-[#E5E5EA]">
-                  <label className="flex items-center space-x-2 cursor-pointer font-bold text-[#1D1D1F]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-surface p-3 rounded-xl border border-line">
+                  <label className="flex items-center space-x-2 cursor-pointer font-bold text-ink">
                     <input
                       type="checkbox"
                       checked={!!userFormData.permissions?.canDeleteWorkOrders}
@@ -1488,12 +1488,12 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                           },
                         })
                       }
-                      className="rounded text-[#0071E3] focus:ring-[#0071E3]"
+                      className="rounded text-brand focus:ring-brand"
                     />
                     <span>Delete Work Orders & Tasks</span>
                   </label>
 
-                  <label className="flex items-center space-x-2 cursor-pointer font-bold text-[#1D1D1F]">
+                  <label className="flex items-center space-x-2 cursor-pointer font-bold text-ink">
                     <input
                       type="checkbox"
                       checked={!!userFormData.permissions?.canDeleteInventory}
@@ -1506,12 +1506,12 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                           },
                         })
                       }
-                      className="rounded text-[#0071E3] focus:ring-[#0071E3]"
+                      className="rounded text-brand focus:ring-brand"
                     />
                     <span>Delete Parts & Stock</span>
                   </label>
 
-                  <label className="flex items-center space-x-2 cursor-pointer font-bold text-[#1D1D1F]">
+                  <label className="flex items-center space-x-2 cursor-pointer font-bold text-ink">
                     <input
                       type="checkbox"
                       checked={!!userFormData.permissions?.canDeleteCustomers}
@@ -1524,12 +1524,12 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                           },
                         })
                       }
-                      className="rounded text-[#0071E3] focus:ring-[#0071E3]"
+                      className="rounded text-brand focus:ring-brand"
                     />
                     <span>Delete Customer Records</span>
                   </label>
 
-                  <label className="flex items-center space-x-2 cursor-pointer font-bold text-[#1D1D1F]">
+                  <label className="flex items-center space-x-2 cursor-pointer font-bold text-ink">
                     <input
                       type="checkbox"
                       checked={!!userFormData.permissions?.canAccessSettings}
@@ -1542,12 +1542,12 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                           },
                         })
                       }
-                      className="rounded text-[#0071E3] focus:ring-[#0071E3]"
+                      className="rounded text-brand focus:ring-brand"
                     />
                     <span>Access System Settings</span>
                   </label>
 
-                  <label className="flex items-center space-x-2 cursor-pointer font-bold text-[#1D1D1F]">
+                  <label className="flex items-center space-x-2 cursor-pointer font-bold text-ink">
                     <input
                       type="checkbox"
                       checked={!!userFormData.permissions?.canAccessFinance}
@@ -1560,12 +1560,12 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                           },
                         })
                       }
-                      className="rounded text-[#0071E3] focus:ring-[#0071E3]"
+                      className="rounded text-brand focus:ring-brand"
                     />
                     <span>Access Finance & P&L</span>
                   </label>
 
-                  <label className="flex items-center space-x-2 cursor-pointer font-bold text-[#1D1D1F]">
+                  <label className="flex items-center space-x-2 cursor-pointer font-bold text-ink">
                     <input
                       type="checkbox"
                       checked={!!userFormData.permissions?.canEditPrices}
@@ -1578,7 +1578,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                           },
                         })
                       }
-                      className="rounded text-[#0071E3] focus:ring-[#0071E3]"
+                      className="rounded text-brand focus:ring-brand"
                     />
                     <span>Modify Price Catalog</span>
                   </label>
@@ -1586,7 +1586,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               </div>
             </div>
 
-            <div className="flex items-center justify-end space-x-2 border-t border-[#E5E5EA] pt-3">
+            <div className="flex items-center justify-end space-x-2 border-t border-line pt-3">
               <Button
                 type="button"
                 onClick={() => setUserModalOpen(false)}
@@ -1598,7 +1598,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               <button
                 type="button"
                 onClick={handleSaveUser}
-                className="px-4 py-2 bg-[#0071E3] hover:bg-[#0051B3] text-white font-extrabold text-xs rounded-xl shadow-2xs cursor-pointer active:scale-95"
+                className="px-4 py-2 bg-brand hover:bg-brand-deep text-white font-extrabold text-xs rounded-xl shadow-2xs cursor-pointer active:scale-95"
               >
                 {editingUser ? 'Save Changes' : 'Create User Account'}
               </button>
@@ -1620,7 +1620,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
 
       {/* Sticky mobile save bar — appears only when the settings draft is dirty */}
       {isDirty && (
-        <div className="lg:hidden fixed inset-x-0 bottom-0 z-40 border-t border-[#E5E5EA] bg-white/95 backdrop-blur-sm px-4 pt-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
+        <div className="lg:hidden fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/95 backdrop-blur-sm px-4 pt-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
           <div className="flex items-center gap-2">
             <Button
               type="button"
@@ -1634,7 +1634,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             <Button
               type="button"
               onClick={() => handleSaveSettings()}
-              className="flex-1 bg-[#0071E3] hover:bg-[#0051B3] text-white"
+              className="flex-1 bg-brand hover:bg-brand-deep text-white"
             >
               <Save className="w-3.5 h-3.5" />
               Save Changes

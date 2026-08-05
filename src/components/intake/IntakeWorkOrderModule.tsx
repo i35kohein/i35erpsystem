@@ -190,7 +190,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
       case 'Rush': return 'border-rose-300 bg-rose-50/40 hover:border-rose-400';
       case 'Warranty Redo': return 'border-purple-300 bg-purple-50/40 hover:border-purple-400';
       case 'B2B Priority': return 'border-amber-300 bg-amber-50/40 hover:border-amber-400';
-      default: return 'border-[#E5E5EA] bg-white hover:border-slate-300';
+      default: return 'border-line bg-white hover:border-slate-300';
     }
   };
 
@@ -242,8 +242,8 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   return (
     <div className="space-y-3">
       {/* Top Header Banner & Actions */}
-      <div className="bg-white border border-[#E5E5EA] rounded-2xl p-5 shadow-xs space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#E5E5EA]">
+      <div className="bg-white border border-line rounded-2xl p-5 shadow-xs space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-line">
           <div className="module-subheader space-y-1">
             <div className="flex items-center space-x-2.5">
               <span className="p-2.5 bg-[#136F9A]/10 text-[#136F9A] rounded-xl">
@@ -296,10 +296,10 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
             <Button
               type="button"
               onClick={() => setIsCameraScannerOpen(true)}
-              className="w-full md:w-auto bg-[#1D1D1F] hover:bg-black text-white flex items-center justify-center md:justify-start space-x-1.5"
+              className="w-full md:w-auto bg-ink hover:bg-black text-white flex items-center justify-center md:justify-start space-x-1.5"
               title="Scan Device Barcode or QR Code"
             >
-              <Camera className="w-3.5 h-3.5 text-[#0071E3] shrink-0" />
+              <Camera className="w-3.5 h-3.5 text-brand shrink-0" />
               <span className="hidden sm:inline">Scan Barcode / QR</span>
               <span className="sm:hidden">Scan</span>
             </Button>
@@ -347,9 +347,9 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
       </div>
 
       {/* Main Full-Width Section: Controls Bar & Ticket List */}
-      <div className="workspace-panel workspace-panel--with-toolbar bg-white border border-[#E5E5EA] rounded-2xl p-5 space-y-4 shadow-xs">
+      <div className="workspace-panel workspace-panel--with-toolbar bg-white border border-line rounded-2xl p-5 space-y-4 shadow-xs">
         {/* Controls Bar: Items Count, Filters, Clear All, Sort */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-[#E5E5EA]">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-line">
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2 font-extrabold text-[#2C3E50] text-sm">
               <Ticket className="w-4 h-4 text-[#136F9A]" />
@@ -426,20 +426,20 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           /* TABLE VIEW */
           <div className="workspace-panel__scroll rounded-xl">
             <table className="w-full text-left border-collapse">
-              <thead className="sticky top-0 z-20 border-b border-[#E5E5EA] bg-[#F5F5F7] font-mono text-[10px] uppercase text-[#86868B] shadow-2xs">
+              <thead className="sticky top-0 z-20 border-b border-line bg-surface font-mono text-[10px] uppercase text-muted shadow-2xs">
                 <tr>
-                  <th className="w-[132px] px-2 py-2 bg-[#F5F5F7]">Ticket # & Date</th>
-                  <th className="w-[148px] px-2 py-2 bg-[#F5F5F7]">Customer & Contact</th>
-                  <th className="w-[158px] px-2 py-2 bg-[#F5F5F7]">Device & Serial/IMEI</th>
-                  <th className="px-2 py-2 bg-[#F5F5F7] hidden lg:table-cell">Symptoms / Service</th>
-                  <th className="w-[112px] px-2 py-2 bg-[#F5F5F7] hidden lg:table-cell">Assigned Tech</th>
-                  <th className="w-[92px] px-2 py-2 bg-[#F5F5F7] hidden lg:table-cell">Priority</th>
-                  <th className="w-[114px] px-2 py-2 bg-[#F5F5F7]">Stage & Status</th>
-                  <th className="w-[112px] px-2 py-2 bg-[#F5F5F7]">Amount</th>
-                  <th className="w-[44px] px-2 py-2 text-right bg-[#F5F5F7]">Detail</th>
+                  <th className="w-[132px] px-2 py-2 bg-surface">Ticket # & Date</th>
+                  <th className="w-[148px] px-2 py-2 bg-surface">Customer & Contact</th>
+                  <th className="w-[158px] px-2 py-2 bg-surface">Device & Serial/IMEI</th>
+                  <th className="px-2 py-2 bg-surface hidden lg:table-cell">Symptoms / Service</th>
+                  <th className="w-[112px] px-2 py-2 bg-surface hidden lg:table-cell">Assigned Tech</th>
+                  <th className="w-[92px] px-2 py-2 bg-surface hidden lg:table-cell">Priority</th>
+                  <th className="w-[114px] px-2 py-2 bg-surface">Stage & Status</th>
+                  <th className="w-[112px] px-2 py-2 bg-surface">Amount</th>
+                  <th className="w-[44px] px-2 py-2 text-right bg-surface">Detail</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E5E5EA] text-xs">
+              <tbody className="divide-y divide-line text-xs">
                 {filteredOrders.map((wo) => {
                   const createdDate = timeAgoShort(wo.createdAt);
                   const createdDateFull = new Date(wo.createdAt || Date.now()).toLocaleDateString('en-US', {
@@ -457,43 +457,43 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                       {/* Ticket # & Date */}
                       <td className="px-2 py-2">
                         <div className="flex items-start space-x-2">
-                          <div className="mt-0.5 shrink-0 rounded-md bg-[#0071E3]/10 p-1 text-[#0071E3]">
+                          <div className="mt-0.5 shrink-0 rounded-md bg-brand/10 p-1 text-brand">
                             <Ticket className="h-3 w-3" />
                           </div>
                           <div className="min-w-0">
-                            <p className="font-mono text-[11px] font-extrabold leading-snug text-[#0071E3]">{wo.orderNumber || wo.id}</p>
-                            <p className="mt-0.5 text-[9px] font-medium text-[#86868B]" title={createdDateFull}>{createdDate}</p>
+                            <p className="font-mono text-[11px] font-extrabold leading-snug text-brand">{wo.orderNumber || wo.id}</p>
+                            <p className="mt-0.5 text-[9px] font-medium text-muted" title={createdDateFull}>{createdDate}</p>
                           </div>
                         </div>
                       </td>
 
                       {/* Customer & Contact */}
-                      <td className="px-2 py-2 text-[#1D1D1F]">
+                      <td className="px-2 py-2 text-ink">
                         <div className="space-y-0.5">
                           <span className="block max-w-[140px] truncate text-[11px] font-extrabold leading-snug">{wo.customerName}</span>
-                          <span className="block font-mono text-[9px] font-medium text-[#86868B]">{wo.customerPhone}</span>
+                          <span className="block font-mono text-[9px] font-medium text-muted">{wo.customerPhone}</span>
                         </div>
                       </td>
 
                       {/* Device & Serial */}
-                      <td className="px-2 py-2 text-[#1D1D1F]">
+                      <td className="px-2 py-2 text-ink">
                         <div className="space-y-0.5">
                           <span className="block max-w-[150px] truncate text-[11px] font-extrabold leading-snug">{wo.deviceModel}</span>
-                          <span className="block max-w-[150px] truncate font-mono text-[9px] font-medium text-[#86868B]">
+                          <span className="block max-w-[150px] truncate font-mono text-[9px] font-medium text-muted">
                             {wo.serialNumber || wo.imei ? `SN: ${wo.serialNumber || wo.imei}` : 'No Serial'}
                           </span>
                         </div>
                       </td>
 
                       {/* Symptoms / Service */}
-                      <td className="px-2 py-2 text-[#1D1D1F] hidden lg:table-cell">
+                      <td className="px-2 py-2 text-ink hidden lg:table-cell">
                         <p className="line-clamp-1 max-w-[180px] text-[11px] font-semibold" title={wo.symptomsReported || wo.serviceType}>
                           {wo.symptomsReported || wo.serviceType || 'General Repair'}
                         </p>
                       </td>
 
                       {/* Assigned Tech */}
-                      <td className="px-2 py-2 text-[#1D1D1F] hidden lg:table-cell">
+                      <td className="px-2 py-2 text-ink hidden lg:table-cell">
                         <div className="flex items-center space-x-1.5">
                           <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-200 text-[10px] font-bold text-slate-700">
                             {(wo.assignedTechName || 'U').charAt(0)}
@@ -526,7 +526,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                           <button
                             type="button"
                             onClick={() => handleOpenTicketDetail(wo)}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] text-[#1D1D1F] transition-colors hover:border-[#0071E3] hover:bg-blue-50 hover:text-[#0071E3]"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors hover:border-brand hover:bg-blue-50 hover:text-brand"
                             title="View Ticket Status"
                             aria-label={`View status for ${wo.orderNumber || wo.id}`}
                           >
@@ -555,7 +555,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                   onClick={() => handleOpenTicketDetail(wo)}
                   className={`p-4 rounded-2xl border text-xs cursor-pointer transition-all space-y-3 hover:shadow-md ${getPriorityStyle(wo.priority)}`}
                 >
-                  <div className="flex justify-between items-center pb-2 border-b border-[#E5E5EA]">
+                  <div className="flex justify-between items-center pb-2 border-b border-line">
                     <span className="font-mono font-black text-[#136F9A] bg-[#136F9A]/10 px-2.5 py-1 rounded-md text-xs">
                       {wo.orderNumber}
                     </span>
@@ -592,7 +592,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center pt-2 border-t border-[#E5E5EA]">
+                  <div className="flex justify-between items-center pt-2 border-t border-line">
                     <div>
                       <span className="block text-[10px] text-[#7F7F7F] uppercase font-bold">Total Estimate</span>
                       <span className="font-mono font-black text-sm text-[#136F9A]">
