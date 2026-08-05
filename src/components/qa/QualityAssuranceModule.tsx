@@ -14,6 +14,7 @@ import {
   Palette
 } from 'lucide-react';
 import { WorkOrder, PostRepairChecklist, Technician, DiagnosticItemResult, AppUser } from '../../types';
+import { Button } from '../ui';
 import { DIAGNOSTIC_NAMES, getDiagnosticIcon } from '../intake/deviceData';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 
@@ -356,14 +357,15 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                  <button
+                  <Button
+                    type="button"
                     onClick={handleSaveQaPass}
                     title="Confirm QA pass and mark device ready"
-                    className="px-4 py-2 bg-[#34C759] hover:bg-[#30B753] text-white font-extrabold rounded-xl shadow-xs transition-all active:scale-95 flex items-center space-x-1.5"
+                    className="bg-[#34C759] hover:bg-[#30B753] text-white flex items-center space-x-1.5"
                   >
                     <CheckCircle2 className="w-4 h-4" />
                     <span>Confirm QA Pass</span>
-                  </button>
+                  </Button>
                 </div>
               </div>
 

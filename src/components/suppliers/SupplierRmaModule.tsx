@@ -19,6 +19,7 @@ import {
   List
 } from 'lucide-react';
 import { Supplier, RmaItem, PurchaseOrder, PartItem, RmaStatus } from '../../types';
+import { Button } from '../ui';
 
 interface SupplierRmaModuleProps {
   suppliers: Supplier[];
@@ -179,12 +180,12 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
           <p className="text-xs text-[#86868B]">Track vendor shipments, defective part returns, and vendor credit authorizations</p>
         </div>
 
-        {/* Subtab Toggle */}
-        <div className="bg-[#F5F5F7] p-1.5 rounded-2xl border border-[#E5E5EA] flex items-center space-x-1.5 overflow-x-auto no-scrollbar text-xs shadow-2xs">
+        {/* Subtab Toggle — full-width equal 3-column segmented on mobile */}
+        <div className="bg-[#F5F5F7] p-1.5 rounded-2xl border border-[#E5E5EA] grid grid-cols-3 gap-1.5 overflow-x-auto no-scrollbar text-xs shadow-2xs w-full md:flex md:items-center md:w-auto md:overflow-visible">
           <button
             type="button"
             onClick={() => setActiveSubTab('RMA')}
-            className={`px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
+            className={`w-full md:w-auto px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center justify-center md:justify-start space-x-2 cursor-pointer border select-none active:scale-95 ${
               activeSubTab === 'RMA'
                 ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-xs'
                 : 'bg-white hover:bg-slate-100 text-[#6E6E73] hover:text-[#1D1D1F] border-[#E5E5EA]'
@@ -202,7 +203,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
           <button
             type="button"
             onClick={() => setActiveSubTab('PO')}
-            className={`px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
+            className={`w-full md:w-auto px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center justify-center md:justify-start space-x-2 cursor-pointer border select-none active:scale-95 ${
               activeSubTab === 'PO'
                 ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-xs'
                 : 'bg-white hover:bg-slate-100 text-[#6E6E73] hover:text-[#1D1D1F] border-[#E5E5EA]'
@@ -220,7 +221,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
           <button
             type="button"
             onClick={() => setActiveSubTab('SUPPLIERS')}
-            className={`px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
+            className={`w-full md:w-auto px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center justify-center md:justify-start space-x-2 cursor-pointer border select-none active:scale-95 ${
               activeSubTab === 'SUPPLIERS'
                 ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-xs'
                 : 'bg-white hover:bg-slate-100 text-[#6E6E73] hover:text-[#1D1D1F] border-[#E5E5EA]'
@@ -264,13 +265,14 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                   <Grid className="h-3.5 w-3.5" />
                 </button>
               </div>
-              <button
+              <Button
+                type="button"
                 onClick={() => setShowNewRmaModal(true)}
-                className="px-3.5 py-1.5 bg-[#AF52DE] hover:bg-purple-600 text-white font-bold text-xs rounded-xl flex items-center space-x-1.5 shadow-xs transition-all active:scale-95"
+                className="bg-[#AF52DE] hover:bg-purple-600 text-white flex items-center space-x-1.5"
               >
                 <Plus className="w-4 h-4" />
                 <span>Flag Defective RMA</span>
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -445,13 +447,14 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
               </h2>
               <p className="text-xs text-[#86868B]">Manage part supplier profiles, codes, contact info, and RMA lead times</p>
             </div>
-            <button
+            <Button
+              type="button"
               onClick={() => setShowAddSupplierModal(true)}
-              className="px-3.5 py-1.5 bg-[#0071E3] hover:bg-[#0051B3] text-white font-bold text-xs rounded-xl shadow-xs flex items-center space-x-1.5 cursor-pointer"
+              className="bg-[#0071E3] hover:bg-[#0051B3] text-white flex items-center space-x-1.5"
             >
               <Plus className="w-4 h-4" />
               <span>Register Supplier</span>
-            </button>
+            </Button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
@@ -563,18 +566,20 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
             </div>
 
             <div className="flex justify-end space-x-2 pt-3">
-              <button
+              <Button
+                type="button"
                 onClick={() => setShowNewRmaModal(false)}
-                className="px-4 py-2 bg-white border border-[#E5E5EA] text-[#1D1D1F] font-semibold rounded-xl hover:bg-slate-50 transition-colors cursor-pointer"
+                variant="outline"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                type="button"
                 onClick={handleCreateRma}
-                className="px-5 py-2 bg-[#AF52DE] hover:bg-purple-600 text-white font-bold rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer"
+                className="bg-[#AF52DE] hover:bg-purple-600 text-white"
               >
                 Submit Defective RMA
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -658,19 +663,19 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
             </div>
 
             <div className="flex justify-end space-x-2 pt-2 border-t border-[#E5E5EA]">
-              <button
+              <Button
                 type="button"
                 onClick={() => setShowAddSupplierModal(false)}
-                className="px-3 py-2 bg-white border border-[#E5E5EA] text-[#1D1D1F] font-bold rounded-xl cursor-pointer"
+                variant="outline"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
-                className="px-4 py-2 bg-[#0071E3] hover:bg-[#0051B3] text-white font-extrabold rounded-xl shadow-xs cursor-pointer"
+                className="bg-[#0071E3] hover:bg-[#0051B3] text-white"
               >
                 Save Supplier
-              </button>
+              </Button>
             </div>
           </form>
         </div>
@@ -750,19 +755,19 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
             </div>
 
             <div className="flex justify-end space-x-2 pt-2 border-t border-[#E5E5EA]">
-              <button
+              <Button
                 type="button"
                 onClick={() => setEditingSupplier(null)}
-                className="px-3 py-2 bg-white border border-[#E5E5EA] text-[#1D1D1F] font-bold rounded-xl cursor-pointer"
+                variant="outline"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
-                className="px-4 py-2 bg-[#0071E3] hover:bg-[#0051B3] text-white font-extrabold rounded-xl shadow-xs cursor-pointer"
+                className="bg-[#0071E3] hover:bg-[#0051B3] text-white"
               >
                 Save Changes
-              </button>
+              </Button>
             </div>
           </form>
         </div>

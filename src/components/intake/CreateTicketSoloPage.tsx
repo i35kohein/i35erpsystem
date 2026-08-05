@@ -53,6 +53,7 @@ import {
   SystemSettings
 } from '../../types';
 import { ModelRepairPrice } from '../../types/priceCatalog';
+import { Button } from '../ui';
 import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
 import { 
   APPLE_MODEL_SERIES, 
@@ -568,29 +569,34 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             {!isEditMode && (
-              <button
+              <Button
+                type="button"
                 onClick={() => onSelectPrintTag(createdTicket)}
-                className="w-full sm:w-auto px-5 py-3 bg-white border border-[#D2D2D7] hover:bg-slate-50 text-[#1D1D1F] font-bold text-xs rounded-xl flex items-center justify-center space-x-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071E3]/40 focus-visible:ring-offset-2"
+                variant="outline"
+                className="w-full sm:w-auto border-[#D2D2D7] hover:bg-slate-50"
               >
                 <Printer className="w-4 h-4 text-[#0071E3] shrink-0" />
                 <span className="truncate">Print Sticker Tag Voucher</span>
-              </button>
+              </Button>
             )}
 
-            <button
+            <Button
+              type="button"
               onClick={onViewRepairTickets}
-              className="w-full sm:w-auto px-5 py-3 bg-[#0071E3] hover:bg-[#0077ED] text-white font-extrabold text-xs rounded-xl shadow-sm flex items-center justify-center space-x-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071E3]/40 focus-visible:ring-offset-2"
+              className="w-full sm:w-auto bg-[#0071E3] hover:bg-[#0077ED] text-white"
             >
               <List className="w-4 h-4 shrink-0" />
               <span className="truncate">{isEditMode ? 'Back to Ticket List' : 'View in Work Orders List'}</span>
-            </button>
+            </Button>
 
-            <button
+            <Button
+              type="button"
               onClick={isEditMode && onCancelEdit ? onCancelEdit : handleResetForm}
-              className="w-full sm:w-auto px-4 py-3 bg-[#F8F9FA] hover:bg-slate-200 text-[#1D1D1F] font-semibold text-xs rounded-xl border border-[#D2D2D7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/30 focus-visible:ring-offset-2"
+              variant="secondary"
+              className="w-full sm:w-auto border border-[#D2D2D7]"
             >
               {isEditMode ? 'Discard Changes' : '+ Create Another Ticket'}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -860,14 +866,14 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               <span>Serial Number & IMEI Information</span>
             </h3>
             <div className="flex items-center space-x-2">
-              <button
-                type="button"
-                onClick={() => setIsCameraScannerOpen(true)}
-                className="px-3.5 py-1.5 bg-[#1D1D1F] hover:bg-black text-white text-xs font-bold rounded-xl flex items-center space-x-1.5 transition-all cursor-pointer shadow-2xs"
-              >
-                <Camera className="w-3.5 h-3.5 text-[#0071E3]" />
-                <span>Scan QR / Barcode</span>
-              </button>
+            <Button
+              type="button"
+              onClick={() => setIsCameraScannerOpen(true)}
+              className="bg-[#1D1D1F] hover:bg-black text-white flex items-center space-x-1.5"
+            >
+              <Camera className="w-3.5 h-3.5 text-[#0071E3]" />
+              <span>Scan QR / Barcode</span>
+            </Button>
             </div>
           </div>
 
@@ -936,12 +942,13 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               <span>Available Repairs Selection (MMK Pricing)</span>
             </h3>
             {deviceModel && (
-              <button
+              <Button
+                type="button"
                 onClick={() => setIsRepairsModalOpen(true)}
-                className="px-3.5 py-1.5 bg-[#0071E3] text-white text-xs font-bold rounded-xl hover:bg-[#0077ED] transition-colors"
+                className="bg-[#0071E3] text-white hover:bg-[#0077ED]"
               >
                 + Add Repairs ({selectedRepairs.length})
-              </button>
+              </Button>
             )}
           </div>
 
@@ -956,14 +963,14 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                   Please select a device model first above to view specific repair services, catalog prices, and apply discounts.
                 </p>
               </div>
-              <button
+              <Button
                 type="button"
                 onClick={() => setIsModelModalOpen(true)}
-                className="px-5 py-2.5 bg-[#0071E3] hover:bg-[#0071E3]/90 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center space-x-2 cursor-pointer active:scale-95"
+                className="bg-[#0071E3] hover:bg-[#0071E3]/90 text-white flex items-center space-x-2"
               >
                 <Smartphone className="w-4 h-4" />
                 <span>Choose Device Model</span>
-              </button>
+              </Button>
             </div>
           ) : (
             <>
@@ -1306,13 +1313,15 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 </div>
               </div>
             )}
-            <button
+            <Button
+              type="button"
               onClick={handleRegisterDevice}
               disabled={isRegistering}
-              className={`w-full sm:w-auto sm:min-w-72 px-6 py-3.5 font-black text-sm rounded-xl shadow-sm transition-all flex items-center justify-center space-x-2 shrink-0 ${
+              size="lg"
+              className={`w-full sm:w-auto sm:min-w-72 font-black text-sm ${
                 isRegistering
-                  ? 'bg-[#86868B] text-white cursor-not-allowed opacity-80'
-                  : 'bg-[#0071E3] hover:bg-[#0077ED] text-white active:scale-95'
+                  ? 'bg-[#86868B] text-white opacity-80'
+                  : 'bg-[#0071E3] hover:bg-[#0077ED] text-white'
               }`}
             >
               {isRegistering ? (
@@ -1327,7 +1336,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                   <span className="sm:hidden">{isEditMode ? 'Save Changes' : 'Register Device'}</span>
                 </>
               )}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

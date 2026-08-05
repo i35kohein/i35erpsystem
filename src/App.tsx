@@ -1416,8 +1416,8 @@ export default function App() {
                 </div>
               </>
             ) : ['intake', 'pipeline', 'pos', 'inventory', 'crm', 'suppliers', 'qa'].includes(activeTab) ? (
-              /* Contextual Search Input */
-              <div className="relative w-32 sm:w-36 md:w-44 lg:w-52 shrink-0">
+              /* Contextual Search Input — desktop only (modules have their own mobile search) */
+              <div className="relative hidden lg:block w-52 shrink-0">
                 <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#86868B]" />
                 <input
                   type="text"

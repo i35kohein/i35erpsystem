@@ -244,6 +244,12 @@ body {
   font: inherit;
 }
 
+/* Remove iOS tap-highlight delay on all buttons — instant tap response */
+button {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* Form controls: inherit family but NOT size — lets Tailwind text-sm/text-xs utilities win
    (font: inherit on inputs silently overrode text-sm, leaving every input at 12px). */
 .basic-ui input,
@@ -1020,6 +1026,19 @@ html[data-theme] :is(
   }
 }
 
+/* Compact toolbar actions (Print Tags / Edit / Save in Parts Inventory) —
+   keep them at the standard 40px mobile touch floor, matching the view toggle
+   height so the whole row is uniform. */
+.basic-ui .module-toolbar .toolbar-compact-btn {
+  min-height: 40px;
+}
+
+/* Inner buttons of the segmented Card/Table toggle — the container itself is
+   exactly 40px, so drop the floor inside it to keep the whole row uniform. */
+.basic-ui .module-toolbar .toolbar-compact-btn--inner {
+  min-height: 0;
+}
+
 /* AI chat widget — slides up from the bottom-right corner (desktop) / bottom sheet (mobile) */
 @keyframes i35-slide-up {
   from { opacity: 0; transform: translateY(20px) scale(0.985); }
@@ -1027,4 +1046,13 @@ html[data-theme] :is(
 }
 .animate-i35-slide-up {
   animation: i35-slide-up 0.26s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+/* Fade-in used by popovers, sheets and modal overlays */
+@keyframes i35-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fadeIn {
+  animation: i35-fade-in 0.18s ease-out both;
 }

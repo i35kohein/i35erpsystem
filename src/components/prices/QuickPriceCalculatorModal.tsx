@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Calculator,
   X,
@@ -23,6 +23,7 @@ import {
   Share2,
 } from 'lucide-react';
 import { ModelRepairPrice, REPAIR_CATEGORIES, FolderConfig } from '../../types/priceCatalog';
+import { Button } from '../ui';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
 
 interface QuickPriceCalculatorModalProps {
@@ -49,6 +50,15 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
   const [selectedDevice, setSelectedDevice] = useState<string>(initialDevice);
   const [isDeviceChooserOpen, setIsDeviceChooserOpen] = useState(false);
   const [selectedServices, setSelectedServices] = useState<Map<string, { price: number; warranty: string; label: string }>>(new Map());
+
+  // ESC closes the calculator modal.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose]);
   
   // Discount & Tax States
   const [globalDiscountPct, setGlobalDiscountPct] = useState<number>(0);
@@ -622,11 +632,11 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
 
               {/* Action Buttons */}
               <div className="space-y-2 pt-3 border-t border-[#E5E5EA]">
-                <button
+                <Button
                   type="button"
                   onClick={handleCopyQuote}
                   disabled={selectedList.length === 0}
-                  className="w-full py-2.5 bg-[#0071E3] hover:bg-[#0071E3]/90 disabled:opacity-50 text-white font-extrabold rounded-xl text-xs transition-all flex items-center justify-center space-x-2 shadow-2xs cursor-pointer active:scale-95"
+                  className="w-full bg-[#0071E3] hover:bg-[#0071E3]/90 disabled:opacity-50 text-white"
                 >
                   {copiedQuote ? (
                     <>
@@ -639,7 +649,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                       <span>Copy Estimate Text (WhatsApp & Email)</span>
                     </>
                   )}
-                </button>
+                </Button>
 
                 <div className="grid grid-cols-3 gap-2 text-xs">
                   {onCreateTicketWithQuote && (
@@ -673,14 +683,15 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                   </button>
 
                   {!onCreateTicketWithQuote && (
-                    <button
+                    <Button
                       type="button"
                       onClick={handleReset}
-                      className="py-2 bg-white hover:bg-rose-50 text-rose-600 border border-[#E5E5EA] hover:border-rose-200 font-extrabold rounded-xl text-xs transition-all flex items-center justify-center space-x-1 cursor-pointer"
+                      variant="outline"
+                      className="text-rose-600 hover:bg-rose-50 hover:border-rose-200"
                     >
                       <RotateCcw className="w-3.5 h-3.5" />
                       <span>Reset</span>
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>

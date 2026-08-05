@@ -10,3 +10,6 @@ coverage/
 # Local backups — never commit these
 appleart_*_backup*/
 backups/
+
+# Runtime auth tokens (local dev only)
+auth-tokens.json

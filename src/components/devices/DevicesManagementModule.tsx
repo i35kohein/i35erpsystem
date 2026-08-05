@@ -29,6 +29,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { WorkOrder, Customer, AppleDeviceCategory } from '../../types';
+import { Button } from '../ui';
 import { checkIsDiagnosticCompleted, checkIsBeforeDiagnosticNeeded, checkIsAfterDiagnosticNeeded } from '../../utils/diagnosticUtils';
 import { DateFilterState, filterByDateRange } from '../common/DateFilterSelector';
 
@@ -496,13 +497,15 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
                       {/* Action Buttons */}
                       <td className="p-3.5 text-right">
                         <div className="flex items-center justify-end space-x-2">
-                          <button
+                          <Button
+                            type="button"
                             onClick={() => setSelectedDevice(device)}
-                            className="px-2.5 py-1.5 bg-[#F0F6FF] hover:bg-[#0071E3] text-[#0071E3] hover:text-white font-bold text-xs rounded-lg border border-[#0071E3]/20 transition-all cursor-pointer flex items-center space-x-1"
+                            size="sm"
+                            className="bg-[#F0F6FF] hover:bg-[#0071E3] text-[#0071E3] hover:text-white border border-[#0071E3]/20"
                           >
                             <ExternalLink className="w-3.5 h-3.5" />
                             <span>Dossier</span>
-                          </button>
+                          </Button>
 
                           {latestWo && (
                             <button

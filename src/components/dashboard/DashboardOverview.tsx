@@ -48,6 +48,7 @@ import {
   Filter
 } from 'lucide-react';
 import { WorkOrder, PartItem, RmaItem, Technician, WorkOrderStatus } from '../../types';
+import { Button } from '../ui';
 import { useLanguage } from '../../context/LanguageContext';
 import { DateFilterState, filterByDateRange, DateFilterSelector } from '../common/DateFilterSelector';
 import { timeAgoShort } from '../../utils/timeAgo';
@@ -647,24 +648,30 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </span>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <button
+            <Button
+              type="button"
               onClick={() => onNavigateToTab('finance')}
-              className="px-3 py-1.5 bg-white hover:bg-[#F5F5F7] text-amber-800 font-bold rounded-xl border border-amber-300 transition-all cursor-pointer"
+              variant="outline"
+              size="sm"
+              className="text-amber-800 border-amber-300 hover:bg-[#F5F5F7]"
             >
               View Details
-            </button>
-            <button
+            </Button>
+            <Button
+              type="button"
               onClick={() => onSettleInventoryFund?.(pendingFundTickets.map((wo) => wo.id))}
-              className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-extrabold rounded-xl transition-all cursor-pointer"
+              size="sm"
+              className="bg-amber-600 hover:bg-amber-700 text-white"
             >
               Mark All Settled
-            </button>
+            </Button>
           </div>
         </div>
       )}
 
       {/* Headline summary cards — always visible above the subtab tabs. */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 3xl:grid-cols-6 4xl:grid-cols-8 gap-3.5">
+      {/* 4 KPI cards stay 4-up on every large screen (no 6/8-col squeeze with only 4 cards) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Card 1: Active In-Shop Repairs */}
         <div
           role="button"
@@ -1012,13 +1019,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               </div>
             </div>
 
-            <button
+            <Button
+              type="button"
               onClick={() => setActiveDashboardSubTab('warranty-watch')}
-              className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs rounded-xl transition-all cursor-pointer shrink-0 shadow-2xs flex items-center space-x-1.5 active:scale-95"
+              className="bg-rose-600 hover:bg-rose-700 text-white shrink-0 flex items-center space-x-1.5"
             >
               <ShieldCheck className="w-4 h-4" />
               <span>Inspect Flagged Tickets ({expiringSoonWorkOrders.length})</span>
-            </button>
+            </Button>
           </div>
 
           {/* Quick Preview Chips of Top Expiring Tickets */}
@@ -1057,12 +1065,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   <p className="text-[11px] text-amber-800">These tickets have been inactive for over 48 hours. Consider reassigning technicians or updating customer status.</p>
                 </div>
               </div>
-              <button
+              <Button
+                type="button"
                 onClick={() => onNavigateToTab('pipeline')}
-                className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl transition-all cursor-pointer shrink-0 shadow-2xs"
+                size="sm"
+                className="bg-amber-600 hover:bg-amber-700 text-white shrink-0"
               >
                 Inspect Bottlenecks
-              </button>
+              </Button>
             </div>
           )}
 
@@ -1084,15 +1094,16 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               </div>
 
               <div className="flex items-center space-x-2">
-                <button
+                <Button
+                  type="button"
                   onClick={() => onNavigateToTab('pipeline')}
-                  className="px-4 py-2 bg-[#0071E3] hover:bg-[#0071E3]/90 text-white font-extrabold text-xs rounded-xl shadow-2xs flex items-center space-x-2 transition-all cursor-pointer active:scale-95"
+                  className="bg-[#0071E3] hover:bg-[#0071E3]/90 text-white flex items-center space-x-2"
                 >
                   <Kanban className="w-4 h-4" />
                   <span className="hidden sm:inline">Open Interactive Pipeline</span>
                   <span className="sm:hidden">Open Pipeline</span>
                   <ChevronRight className="w-4 h-4" />
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -1545,12 +1556,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <p className="text-xs text-[#86868B]">Replacement screens, batteries, and logic board ICs needing reorder</p>
               </div>
 
-              <button
+              <Button
+                type="button"
                 onClick={() => onNavigateToTab('inventory')}
-                className="px-3.5 py-1.5 bg-[#0071E3] hover:bg-[#0077ED] text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+                size="sm"
+                className="bg-[#0071E3] hover:bg-[#0077ED] text-white"
               >
                 Open Parts Inventory
-              </button>
+              </Button>
             </div>
 
             {/* Preview note — full module has stock/profit/matrix views */}
@@ -1594,7 +1607,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       {activeDashboardSubTab === 'finance' && (
         <div role="tabpanel" id="dash-panel-finance" aria-labelledby="dash-tab-finance" className="space-y-6">
           {/* Financial Performance KPI Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 3xl:grid-cols-6 4xl:grid-cols-8 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white border border-[#E5E5EA] rounded-2xl p-4 shadow-2xs space-y-1">
               <span className="text-xs font-bold text-[#86868B] uppercase">Total Revenue</span>
               <p className="text-2xl font-extrabold text-[#1D1D1F]">{totalRevenue.toLocaleString()} MMK</p>
@@ -1681,18 +1694,22 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               </div>
 
               <div className="flex items-center gap-2 flex-wrap">
-                <button
+                <Button
+                  type="button"
                   onClick={() => onNavigateToTab('finance')}
-                  className="px-3.5 py-1.5 bg-[#0071E3] hover:bg-[#0077ED] text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+                  size="sm"
+                  className="bg-[#0071E3] hover:bg-[#0077ED] text-white"
                 >
                   Open Shop Finance
-                </button>
-                <button
+                </Button>
+                <Button
+                  type="button"
                   onClick={() => onNavigateToTab('pos')}
-                  className="px-3.5 py-1.5 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] border border-[#E5E5EA] font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+                  variant="secondary"
+                  size="sm"
                 >
                   POS Register
-                </button>
+                </Button>
               </div>
             </div>
 

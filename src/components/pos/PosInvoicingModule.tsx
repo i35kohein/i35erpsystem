@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { DateFilterState, filterByDateRange } from '../common/DateFilterSelector';
 import { 
   CreditCard,
@@ -32,6 +32,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { WorkOrder, Customer, SystemSettings, PartItem, WorkOrderLineItem } from '../../types';
+import { Button } from '../ui';
 import { getActivePaymentMethods } from '../../data/seedData';
 import { PrintableInvoiceModal } from '../common/PrintableInvoiceModal';
 import { CustomerNotificationModal } from '../common/CustomerNotificationModal';
@@ -167,6 +168,16 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   const [inventoryPartQty, setInventoryPartQty] = useState<number>(1);
   const [isAddPartOpen, setIsAddPartOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+
+  // POS keyboard-first: focus the cash tendered field the moment the payment
+  // confirmation panel opens, so staff can type the amount immediately.
+  const cashInputRef = useRef<HTMLInputElement | null>(null);
+  useEffect(() => {
+    if (isConfirmOpen) {
+      const t = setTimeout(() => cashInputRef.current?.focus(), 60);
+      return () => clearTimeout(t);
+    }
+  }, [isConfirmOpen]);
 
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [splitPayments, setSplitPayments] = useState<{ method: string; amount: number }[]>([
@@ -1082,10 +1093,12 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       </div>
                     </div>
                     <input
+                      ref={cashInputRef}
                       type="number"
                       value={cashTendered || ''}
                       onChange={(e) => setCashTendered(Math.max(0, Number(e.target.value) || 0))}
                       placeholder="e.g. 250000"
+                      inputMode="numeric"
                       className="w-full bg-white border border-[#E5E5EA] rounded-lg p-2 text-[#1D1D1F] font-mono focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
                     />
                     {cashTendered > 0 && cashTendered < selectedWo.totalAmount && (
@@ -1104,7 +1117,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
-                <button
+                <Button
                   type="button"
                   onClick={() => {
                     if (selectedWo) {
@@ -1112,20 +1125,21 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       setIsInvoiceModalOpen(true);
                     }
                   }}
-                  className="w-full sm:w-1/2 py-3 bg-[#F5F5F7] hover:bg-[#E5E5EA] border border-[#D2D2D7] text-[#1D1D1F] font-bold text-xs rounded-xl transition-all flex items-center justify-center space-x-1.5 cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071E3]/40 focus-visible:ring-offset-2"
+                  variant="secondary"
+                  className="w-full sm:w-1/2 border border-[#D2D2D7]"
                 >
                   <FileText className="w-4 h-4 text-[#0071E3] shrink-0" />
                   <span className="truncate">Print Itemized Invoice</span>
-                </button>
+                </Button>
 
-                <button
+                <Button
                   type="button"
                   onClick={() => setIsConfirmOpen(true)}
                   disabled={isProcessingPayment}
-                  className={`w-full sm:w-1/2 py-3 font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center space-x-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#34C759]/40 focus-visible:ring-offset-2 ${
+                  className={`w-full sm:w-1/2 ${
                     isProcessingPayment
-                      ? 'bg-[#86868B] text-white cursor-not-allowed opacity-80'
-                      : 'bg-[#34C759] hover:bg-[#30B753] text-white cursor-pointer active:scale-95'
+                      ? 'bg-[#86868B] text-white opacity-80'
+                      : 'bg-[#34C759] hover:bg-[#30B753] text-white'
                   }`}
                 >
                   {isProcessingPayment ? (
@@ -1139,7 +1153,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       <span>Pay & Print Receipt</span>
                     </>
                   )}
-                </button>
+                </Button>
               </div>
             </div>
           ) : (
@@ -1240,25 +1254,26 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
             </div>
 
             <div className="flex gap-2">
-              <button
+              <Button
                 type="button"
                 onClick={() => setIsConfirmOpen(false)}
-                className="flex-1 py-2.5 bg-[#F5F5F7] hover:bg-[#E5E5EA] border border-[#D2D2D7] text-[#1D1D1F] font-bold text-xs rounded-xl transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/30 focus-visible:ring-offset-2"
+                variant="secondary"
+                className="flex-1 border border-[#D2D2D7]"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={() => {
                   setIsConfirmOpen(false);
                   handleProcessPayment();
                 }}
                 disabled={isProcessingPayment}
-                className="flex-1 py-2.5 bg-[#34C759] hover:bg-[#30B753] text-white font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center space-x-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#34C759]/40 focus-visible:ring-offset-2"
+                className="flex-1 bg-[#34C759] hover:bg-[#30B753] text-white"
               >
                 <ShieldCheck className="w-4 h-4 shrink-0" />
                 <span>Confirm & Print</span>
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -1361,24 +1376,30 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
             </div>
 
             <div className="flex flex-wrap items-center justify-end gap-2 pt-2 no-print">
-              <button
+              <Button
+                type="button"
                 onClick={() => setIsReceiptModalOpen(false)}
-                className="px-3 py-1.5 bg-white border border-[#E5E5EA] text-[#1D1D1F] font-semibold rounded-xl hover:bg-slate-50 transition-colors"
+                variant="outline"
+                size="sm"
               >
                 Close
-              </button>
-              <button
+              </Button>
+              <Button
+                type="button"
                 onClick={() => {
                   setIsReceiptModalOpen(false);
                   setPrintableInvoiceWo(selectedWo);
                   setIsInvoiceModalOpen(true);
                 }}
-                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-[#1D1D1F] font-bold rounded-xl flex items-center space-x-1 border border-[#D2D2D7]"
+                variant="secondary"
+                size="sm"
+                className="flex items-center space-x-1"
               >
                 <FileText className="w-3.5 h-3.5 text-[#0071E3]" />
                 <span>Full Invoice</span>
-              </button>
-              <button
+              </Button>
+              <Button
+                type="button"
                 onClick={() => {
                   try {
                     window.print();
@@ -1386,11 +1407,12 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     console.warn('Print failed:', e);
                   }
                 }}
-                className="px-4 py-1.5 bg-[#0071E3] hover:bg-[#0077ED] text-white font-bold rounded-xl flex items-center space-x-1 shadow-sm cursor-pointer"
+                size="sm"
+                className="bg-[#0071E3] hover:bg-[#0077ED] text-white flex items-center space-x-1"
               >
                 <Printer className="w-3.5 h-3.5" />
                 <span>Print Receipt</span>
-              </button>
+              </Button>
             </div>
           </div>
         </div>

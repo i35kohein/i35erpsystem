@@ -46,6 +46,7 @@ import {
   SystemSettings,
   AppUser
 } from '../../types';
+import { Button } from '../ui';
 import { 
   get21Diagnostics, 
   get21AfterDiagnostics, 
@@ -478,7 +479,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
       </div>
 
       {/* Horizontal Scrollable 6 Kanban Columns */}
-      <div className="flex min-h-[calc(100dvh-14rem)] space-x-3 overflow-x-auto pb-4 pt-1 snap-x touch-pan-x no-scrollbar">
+      <div className="flex min-h-[calc(100dvh-14rem)] space-x-3 overflow-x-auto pb-4 pt-1 snap-x touch-pan-x no-scrollbar md:grid md:grid-cols-3 md:gap-3 md:space-x-0 md:overflow-visible md:snap-none lg:flex lg:space-x-3 lg:overflow-x-auto lg:snap-x lg:grid-cols-none">
         {KANBAN_STAGES.filter((stage) => statusFilter === 'ALL' || stage.id === statusFilter).map((stage) => {
           const stageOrders = filteredWorkOrders.filter((w) => w.status === stage.id);
           const stageStagnantOrders = stageOrders.filter((w) => getIsStagnant(w));
@@ -511,7 +512,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   setDraggedWoId(null);
                 }
               }}
-              className={`rounded-2xl border ${stage.color} bg-white/50 backdrop-blur-xs p-3 flex flex-col min-w-[260px] flex-1 max-w-none shadow-2xs snap-start transition-all`}
+              className={`rounded-2xl border ${stage.color} bg-white/50 backdrop-blur-xs p-3 flex flex-col min-w-[260px] md:min-w-0 flex-1 max-w-none shadow-2xs snap-start transition-all`}
             >
               {/* Column Header */}
               <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-[#E5E5EA]">
@@ -1067,12 +1068,13 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
               />
             </div>
 
-            <button
+            <Button
+              type="button"
               onClick={handleAddRepairLog}
-              className="w-full py-2.5 bg-[#0071E3] text-white font-bold text-xs rounded-xl hover:bg-[#0077ED]"
+              className="w-full bg-[#0071E3] text-white hover:bg-[#0077ED]"
             >
               Save Repair Log
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -1159,12 +1161,13 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
               </div>
             </div>
 
-            <button
+            <Button
+              type="button"
               onClick={handleConfirmCheckout}
-              className="w-full max-w-md mx-auto py-3 bg-[#34C759] hover:bg-[#34C759]/90 text-white font-extrabold text-xs rounded-xl shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#34C759]/40 focus-visible:ring-offset-2"
+              className="w-full max-w-md mx-auto bg-[#34C759] hover:bg-[#34C759]/90 text-white"
             >
               <span className="truncate">Confirm Checkout & Move to Taken Out</span>
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -1292,13 +1295,13 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
               />
             </div>
 
-            <button
+            <Button
               type="button"
               onClick={handleSaveAfterDiagnostic}
-              className="w-full max-w-md mx-auto py-3 bg-[#0071E3] hover:bg-[#0077ED] text-white font-extrabold rounded-xl text-xs shadow-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071E3]/40 focus-visible:ring-offset-2"
+              className="w-full max-w-md mx-auto bg-[#0071E3] hover:bg-[#0077ED] text-white"
             >
               <span className="truncate">Save After-Repair Diagnostic & Update Ticket</span>
-            </button>
+            </Button>
           </div>
         </div>
       )}

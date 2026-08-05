@@ -7,6 +7,7 @@ import { PriorityBadge } from '../common/PriorityBadge';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
 import { CameraQrScannerModal } from '../common/CameraQrScannerModal';
 import { ConfirmDeleteModal } from '../common/ConfirmDeleteModal';
+import { Button } from '../ui';
 import { TicketDetailInspectorModal } from '../common/TicketDetailInspectorModal';
 import type { TicketPrefillData } from './CreateTicketSoloPage';
 import { 
@@ -259,46 +260,49 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center space-x-2 shrink-0">
-            {/* View Mode Switcher */}
-            <div className="bg-[#F8FBFD] p-1 rounded-xl border border-[#D8E5ED] flex items-center space-x-1">
+          <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto md:shrink-0 sm:items-stretch md:items-center">
+            {/* View Mode Switcher — full-width segmented control on mobile */}
+            <div className="bg-[#F8FBFD] p-1 rounded-xl border border-[#D8E5ED] flex items-center gap-1 w-full md:w-auto">
               <button
                 type="button"
                 onClick={() => setViewMode('table')}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-extrabold transition-all flex items-center space-x-1.5 cursor-pointer ${
+                className={`flex-1 md:flex-none px-2.5 sm:px-3 py-2 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center md:justify-start space-x-1.5 cursor-pointer ${
                   viewMode === 'table'
                     ? 'bg-[#136F9A] text-white shadow-2xs'
                     : 'text-[#7F7F7F] hover:text-[#2C3E50]'
                 }`}
                 title="Table View"
+                aria-label="Table View"
               >
-                <TableIcon className="w-3.5 h-3.5" />
+                <TableIcon className="w-3.5 h-3.5 shrink-0" />
                 <span>Table</span>
               </button>
               <button
                 type="button"
                 onClick={() => setViewMode('cards')}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-extrabold transition-all flex items-center space-x-1.5 cursor-pointer ${
+                className={`flex-1 md:flex-none px-2.5 sm:px-3 py-2 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center md:justify-start space-x-1.5 cursor-pointer ${
                   viewMode === 'cards'
                     ? 'bg-[#136F9A] text-white shadow-2xs'
                     : 'text-[#7F7F7F] hover:text-[#2C3E50]'
                 }`}
                 title="Cards Grid View"
+                aria-label="Cards Grid View"
               >
-                <LayoutGrid className="w-3.5 h-3.5" />
+                <LayoutGrid className="w-3.5 h-3.5 shrink-0" />
                 <span>Grid Cards</span>
               </button>
             </div>
 
-            <button
+            <Button
               type="button"
               onClick={() => setIsCameraScannerOpen(true)}
-              className="px-3.5 py-2.5 min-h-11 lg:min-h-0 bg-[#1D1D1F] hover:bg-black text-white font-extrabold text-xs rounded-xl shadow-2xs transition-all flex items-center space-x-2 cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/40 focus-visible:ring-offset-2"
+              className="w-full md:w-auto bg-[#1D1D1F] hover:bg-black text-white flex items-center justify-center md:justify-start space-x-1.5"
               title="Scan Device Barcode or QR Code"
             >
-              <Camera className="w-4 h-4 text-[#0071E3] shrink-0" />
-              <span>Scan Barcode / QR</span>
-            </button>
+              <Camera className="w-3.5 h-3.5 text-[#0071E3] shrink-0" />
+              <span className="hidden sm:inline">Scan Barcode / QR</span>
+              <span className="sm:hidden">Scan</span>
+            </Button>
           </div>
         </div>
 
@@ -854,13 +858,13 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
               <span className="text-xs font-bold text-[var(--text-muted)]">
                 Repair ticket record
               </span>
-              <button
+              <Button
                 type="button"
                 onClick={() => setIsDetailModalOpen(false)}
-                className="px-4 py-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-extrabold text-xs rounded-lg transition-colors cursor-pointer"
+                className="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white rounded-lg"
               >
                 Close
-              </button>
+              </Button>
             </div>
           </div>
         </div>

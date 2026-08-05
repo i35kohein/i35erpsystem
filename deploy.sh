@@ -4,9 +4,9 @@
 set -euo pipefail
 
 KEY="$HOME/.ssh/n8ndigitalocean"
-HOST="root@192.34.62.199"
+HOST="root@157.245.192.70"
 REMOTE_DIR="/opt/i35erp"
-PUBLIC_URL="http://192.34.62.199:3100"
+PUBLIC_URL="http://157.245.192.70:3100"
 
 # 1) Make sure the SSH key is loaded (macOS Keychain keeps the passphrase
 #    after the first time, so later runs are silent).

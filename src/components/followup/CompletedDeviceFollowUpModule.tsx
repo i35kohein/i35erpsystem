@@ -25,6 +25,7 @@ import {
   Cpu
 } from 'lucide-react';
 import { WorkOrder, FollowUpStatus, FollowUpRecord, SystemSettings } from '../../types';
+import { Button } from '../ui';
 import { DateFilterState, isDateMatchingFilter } from '../common/DateFilterSelector';
 
 interface CompletedDeviceFollowUpModuleProps {
@@ -69,9 +70,11 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
   const [formNotes, setFormNotes] = useState<string>('');
   const [formNextDate, setFormNextDate] = useState<string>('');
 
-  // Helper to calculate days since repair completion / pickup
+  // Helper to calculate days since repair completion / pickup.
+  // completedAt is the stable anchor (stamped once at Finished/Taken Out and
+  // never moved by later edits like follow-up logs) — fall back to updatedAt/createdAt.
   const getDaysSinceCompletion = (wo: WorkOrder): number => {
-    const completedTime = new Date(wo.updatedAt || wo.createdAt).getTime();
+    const completedTime = new Date(wo.completedAt || wo.updatedAt || wo.createdAt).getTime();
     const now = new Date().getTime();
     const diffDays = Math.floor((now - completedTime) / (1000 * 60 * 60 * 24));
     return Math.max(0, diffDays);
@@ -82,7 +85,13 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
     (wo) => wo.status === 'Taken Out'
   );
 
-  const filteredWorkOrders = completedWorkOrders.filter((wo) => {
+  // Composed roster: tickets are listed here ONLY once the 7-day post-delivery
+  // window is reached. Anything younger is not due for a follow-up call yet.
+  const followUpEligible = completedWorkOrders.filter(
+    (wo) => getDaysSinceCompletion(wo) >= 7
+  );
+
+  const filteredWorkOrders = followUpEligible.filter((wo) => {
     const q = searchQuery.toLowerCase();
     const matchesSearch =
       !q ||
@@ -112,21 +121,21 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
     return matchesSearch && matchesStatus && matchesDate;
   });
 
-  // Calculate Metrics
+  // Calculate Metrics (all roster metrics are based on the 7+ day eligible pool)
   const totalCompleted = completedWorkOrders.length;
-  const count7Days = completedWorkOrders.filter((wo) => getDaysSinceCompletion(wo) >= 7).length;
-  const count30Days = completedWorkOrders.filter((wo) => getDaysSinceCompletion(wo) >= 30).length;
-  const count60Days = completedWorkOrders.filter((wo) => getDaysSinceCompletion(wo) >= 60).length;
-  const pendingCallsCount = completedWorkOrders.filter(
+  const count7Days = followUpEligible.length;
+  const count30Days = followUpEligible.filter((wo) => getDaysSinceCompletion(wo) >= 30).length;
+  const count60Days = followUpEligible.filter((wo) => getDaysSinceCompletion(wo) >= 60).length;
+  const pendingCallsCount = followUpEligible.filter(
     (wo) => !wo.followUpStatus || wo.followUpStatus === 'Pending Call'
   ).length;
-  const satisfiedCount = completedWorkOrders.filter((wo) => wo.followUpStatus === 'Satisfied').length;
-  const issueReportedCount = completedWorkOrders.filter(
+  const satisfiedCount = followUpEligible.filter((wo) => wo.followUpStatus === 'Satisfied').length;
+  const issueReportedCount = followUpEligible.filter(
     (wo) => wo.followUpStatus === 'Issue Reported'
   ).length;
 
   // Average Rating calculation
-  const ratedOrders = completedWorkOrders.filter((wo) => {
+  const ratedOrders = followUpEligible.filter((wo) => {
     const lastRecord = wo.followUpRecords?.[wo.followUpRecords.length - 1];
     return lastRecord && lastRecord.satisfactionRating && lastRecord.satisfactionRating > 0;
   });
@@ -257,21 +266,21 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                   <span className="sm:hidden">Completed Repairs & Follow-Ups</span>
                 </h2>
                 <p className="text-xs text-[#86868B]">
-                  Conduct post-service quality calls for repaired & delivered devices to ensure satisfaction and manage warranty queries.
+                  Conduct post-service quality calls for repaired & delivered devices. Tickets appear here starting <strong className="text-[#0071E3]">7 days</strong> after delivery.
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center space-x-2 shrink-0">
-            <div className="relative">
+          <div className="flex items-center space-x-2 w-full md:w-auto md:shrink-0">
+            <div className="relative w-full md:w-auto">
               <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#86868B]" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search ticket, customer, device..."
-                className="pl-8 pr-3 py-1.5 bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl text-xs focus:outline-none focus:border-[#0071E3] focus:bg-white transition-all w-48 sm:w-64"
+                className="pl-8 pr-3 py-1.5 bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl text-xs focus:outline-none focus:border-[#0071E3] focus:bg-white transition-all w-full md:w-64"
               />
             </div>
           </div>
@@ -326,8 +335,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white border border-[#E5E5EA] p-3 rounded-2xl shadow-2xs">
         <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
           {[
-            { id: 'ALL', label: `All Completed (${completedWorkOrders.length})` },
-            { id: '7_DAYS', label: `7 Days Follow-Up (${count7Days})` },
+            { id: 'ALL', label: `All 7+ Day Due (${followUpEligible.length})` },
             { id: '1_MONTH', label: `1 Month (30 Days) (${count30Days})` },
             { id: '2_MONTHS', label: `2 Months (60 Days) (${count60Days})` },
             { id: 'Pending Call', label: `Pending Call (${pendingCallsCount})` },
@@ -369,7 +377,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
       <div className="bg-white border border-[#E5E5EA] rounded-2xl shadow-2xs overflow-hidden">
         <div className="px-5 py-3.5 border-b border-[#E5E5EA] flex items-center justify-between bg-[#FAFAFC]">
           <h3 className="text-xs font-extrabold text-[#1D1D1F] uppercase tracking-wider">
-            Repaired & Delivered Devices ({filteredWorkOrders.length})
+            Devices Due for Follow-Up ({filteredWorkOrders.length})
           </h3>
           <span className="text-[11px] text-[#86868B] font-semibold">
             Click 'Log Follow-Up' to record customer status
@@ -386,7 +394,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
               <p className="text-xs text-[#86868B]">
                 {searchQuery || statusFilter !== 'ALL'
                   ? 'Try adjusting your search query or status filter.'
-                  : 'Work orders marked as Finished or Taken Out will appear here for follow-up.'}
+                  : 'No follow-ups due yet. Tickets appear here automatically once 7 days have passed since delivery.'}
               </p>
             </div>
           </div>
@@ -546,24 +554,27 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                     </a>
 
                     {records.length > 0 && (
-                      <button
+                      <Button
                         type="button"
                         onClick={() => setHistoryModalWo(wo)}
-                        className="px-3 py-1.5 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] text-xs font-bold rounded-xl border border-[#E5E5EA] transition-colors flex items-center space-x-1 cursor-pointer"
+                        variant="secondary"
+                        size="sm"
+                        className="flex items-center space-x-1"
                       >
                         <History className="w-3.5 h-3.5 text-[#86868B]" />
                         <span>Logs ({records.length})</span>
-                      </button>
+                      </Button>
                     )}
 
-                    <button
+                    <Button
                       type="button"
                       onClick={() => handleOpenLogModal(wo)}
-                      className="px-3.5 py-1.5 bg-[#0071E3] hover:bg-[#0077ED] text-white text-xs font-bold rounded-xl shadow-2xs transition-all active:scale-95 flex items-center space-x-1.5 cursor-pointer"
+                      size="sm"
+                      className="bg-[#0071E3] hover:bg-[#0077ED] text-white flex items-center space-x-1.5"
                     >
                       <PhoneCall className="w-3.5 h-3.5" />
                       <span>Log Follow-Up</span>
-                    </button>
+                    </Button>
                   </div>
                 </div>
               );
@@ -764,21 +775,21 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
 
             {/* Modal Actions */}
             <div className="flex items-center justify-end space-x-2 pt-3 border-t border-[#E5E5EA]">
-              <button
+              <Button
                 type="button"
                 onClick={() => setIsLogModalOpen(false)}
-                className="px-4 py-2 bg-white border border-[#E5E5EA] text-[#1D1D1F] font-bold rounded-xl text-xs hover:bg-[#F5F5F7] transition-all cursor-pointer"
+                variant="outline"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={handleSaveFollowUpLog}
-                className="px-5 py-2 bg-[#0071E3] hover:bg-[#0077ED] text-white font-extrabold rounded-xl text-xs shadow-2xs transition-all active:scale-95 cursor-pointer flex items-center space-x-1.5"
+                className="bg-[#0071E3] hover:bg-[#0077ED] text-white flex items-center space-x-1.5"
               >
                 <Check className="w-4 h-4" />
                 <span>Save Follow-Up Log</span>
-              </button>
+              </Button>
             </div>
           </div>
         </div>

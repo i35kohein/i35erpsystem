@@ -41,6 +41,7 @@ import {
   SystemSettings 
 } from '../../types';
 import { getActivePaymentMethods } from '../../data/seedData';
+import { Button } from '../ui';
 import { toast } from '../../lib/toast';
 
 interface ShopFinancePlModuleProps {
@@ -329,16 +330,16 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 w-full md:w-auto">
           {/* Quick Add Expense Button */}
-          <button
+          <Button
             type="button"
             onClick={() => setShowAddExpenseModal(true)}
-            className="px-3.5 py-2 bg-[#0071E3] hover:opacity-90 text-white font-extrabold text-xs rounded-xl shadow-2xs transition-all flex items-center space-x-1.5 cursor-pointer active:scale-95"
+            className="w-full md:w-auto bg-[#0071E3] hover:opacity-90 text-white flex items-center justify-center md:justify-start space-x-1.5"
           >
             <Plus className="w-4 h-4" />
             <span>Record Expense</span>
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -693,14 +694,14 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
               <h3 className="font-extrabold text-base text-[#1D1D1F]">Operating Expenses (OpEx) & Fixed Shop Overhead</h3>
               <p className="text-xs text-[#86868B] font-medium">Rent, electricity, tools, marketing, and logistics expense logs</p>
             </div>
-            <button
+            <Button
               type="button"
               onClick={() => setShowAddExpenseModal(true)}
-              className="px-3.5 py-2 bg-[#0071E3] text-white font-extrabold text-xs rounded-xl shadow-2xs flex items-center space-x-1 cursor-pointer"
+              className="bg-[#0071E3] text-white flex items-center space-x-1"
             >
               <Plus className="w-4 h-4" />
               <span>Add Expense Entry</span>
-            </button>
+            </Button>
           </div>
 
           <div className="overflow-x-auto border border-[#E5E5EA] rounded-xl text-xs">
@@ -1052,19 +1053,19 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
             </div>
 
             <div className="flex justify-end space-x-2 pt-3 border-t border-[#E5E5EA]">
-              <button
+              <Button
                 type="button"
                 onClick={() => setShowAddExpenseModal(false)}
-                className="px-4 py-2 bg-[#F5F5F7] text-[#1D1D1F] font-bold rounded-xl cursor-pointer"
+                variant="secondary"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
-                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-extrabold rounded-xl shadow-2xs cursor-pointer"
+                className="bg-rose-600 hover:bg-rose-700 text-white"
               >
                 Save Expense
-              </button>
+              </Button>
             </div>
           </form>
         </div>
@@ -1133,20 +1134,20 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
             </div>
 
             <div className="flex justify-end space-x-2 pt-3 border-t border-[#E5E5EA]">
-              <button
+              <Button
                 type="button"
                 onClick={() => setSelectedDebtForPayment(null)}
-                className="px-4 py-2 bg-[#F5F5F7] text-[#1D1D1F] font-bold rounded-xl cursor-pointer"
+                variant="secondary"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={handleConfirmSupplierPayment}
-                className="px-4 py-2 bg-[#0071E3] text-white font-extrabold rounded-xl shadow-2xs cursor-pointer"
+                className="bg-[#0071E3] text-white"
               >
                 Submit Payment
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -1228,13 +1229,14 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                       </td>
                       <td className="p-3 text-right">
                         {pending ? (
-                          <button
+                          <Button
                             type="button"
                             onClick={() => onSettleInventoryFund?.([wo.id])}
-                            className="px-3 py-1.5 bg-[#0071E3] hover:bg-[#0051B3] text-white font-extrabold text-xs rounded-xl shadow-2xs cursor-pointer"
+                            size="sm"
+                            className="bg-[#0071E3] hover:bg-[#0051B3] text-white"
                           >
                             Mark Settled
-                          </button>
+                          </Button>
                         ) : (
                           <span className="text-[10px] text-emerald-700 font-bold">
                             ✓ {wo.inventorySettledAt ? new Date(wo.inventorySettledAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''}

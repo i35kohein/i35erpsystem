@@ -31,6 +31,7 @@ import {
   Award
 } from 'lucide-react';
 import { WorkOrder, SystemSettings, Customer } from '../../types';
+import { Button } from '../ui';
 import { applyEstimateApproval, applyEstimateRejection } from '../../utils/portalWorkflow';
 
 interface CustomerFacingWebPortalProps {
@@ -365,15 +366,18 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
               </button>
             )}
 
-            <button
+            <Button
+              type="button"
               onClick={() => {
                 setAuthenticatedCustomerPhoneOrEmail(null);
                 setSelectedWorkOrderId(null);
               }}
-              className="px-3 py-1.5 bg-[#FF3B30]/10 hover:bg-[#FF3B30]/20 text-[#FF3B30] font-bold rounded-xl border border-[#FF3B30]/20 transition-all cursor-pointer"
+              variant="ghost"
+              size="sm"
+              className="bg-[#FF3B30]/10 hover:bg-[#FF3B30]/20 text-[#FF3B30] border border-[#FF3B30]/20"
             >
               Log Out
-            </button>
+            </Button>
           </div>
         </div>
       </header>
@@ -402,19 +406,22 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             </div>
 
             <div className="flex items-center space-x-2 shrink-0">
-              <button
+              <Button
+                type="button"
                 onClick={() => setApprovalModalOpen(true)}
-                className="px-4 py-2.5 bg-[#34C759] hover:bg-[#30B753] text-white font-extrabold rounded-xl shadow-xs transition-all active:scale-95 flex items-center space-x-1.5 cursor-pointer"
+                className="bg-[#34C759] hover:bg-[#30B753] text-white flex items-center space-x-1.5"
               >
                 <ThumbsUp className="w-4 h-4" />
                 <span>Approve Estimate</span>
-              </button>
-              <button
+              </Button>
+              <Button
+                type="button"
                 onClick={() => setRejectionModalOpen(true)}
-                className="px-3 py-2.5 bg-white border border-[#E5E5EA] text-[#FF3B30] hover:bg-[#FF3B30]/10 font-bold rounded-xl transition-colors cursor-pointer"
+                variant="outline"
+                className="text-[#FF3B30] hover:bg-[#FF3B30]/10 hover:text-[#FF3B30] border-[#E5E5EA]"
               >
                 Decline / Request Call
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -456,13 +463,15 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   {currentWorkOrder.estimatedCompletion ? new Date(currentWorkOrder.estimatedCompletion).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Pending Bench Test'}
                 </p>
               </div>
-              <button
+              <Button
+                type="button"
                 onClick={() => setPrintModalOpen(true)}
-                className="p-2.5 bg-white border border-[#E5E5EA] text-[#1D1D1F] hover:bg-slate-50 rounded-xl font-bold transition-all shadow-2xs cursor-pointer"
+                variant="outline"
+                size="icon"
                 title="Print Digital Voucher Receipt"
               >
                 <Printer className="w-4 h-4 text-[#0071E3]" />
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -931,14 +940,14 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 placeholder="Type your message or question here..."
                 className="flex-1 bg-[#F5F5F7] border border-[#E5E5EA] rounded-xl px-4 py-2.5 text-xs text-[#1D1D1F] focus:outline-none focus:bg-white focus:border-[#0071E3] transition-all"
               />
-              <button
+              <Button
                 type="submit"
                 disabled={!messageInput.trim()}
-                className="px-5 py-2.5 bg-[#0071E3] hover:bg-[#0077ED] disabled:opacity-50 text-white font-bold rounded-xl text-xs shadow-xs transition-all flex items-center space-x-1 cursor-pointer"
+                className="bg-[#0071E3] hover:bg-[#0077ED] disabled:opacity-50 text-white flex items-center space-x-1"
               >
                 <span>Send</span>
                 <Send className="w-3.5 h-3.5" />
-              </button>
+              </Button>
             </form>
           </div>
         )}
@@ -1006,19 +1015,22 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             </div>
 
             <div className="flex space-x-2 pt-2 border-t border-[#E5E5EA]">
-              <button
+              <Button
+                type="button"
                 onClick={() => setApprovalModalOpen(false)}
-                className="flex-1 py-2.5 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] font-bold rounded-xl text-xs transition-colors cursor-pointer"
+                variant="secondary"
+                className="flex-1"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                type="button"
                 onClick={handleApproveEstimate}
                 disabled={!agreedToTerms || !customerNameSig.trim()}
-                className="flex-1 py-2.5 bg-[#34C759] hover:bg-[#30B753] disabled:opacity-50 text-white font-extrabold rounded-xl text-xs shadow-xs transition-all active:scale-95 cursor-pointer"
+                className="flex-1 bg-[#34C759] hover:bg-[#30B753] disabled:opacity-50 text-white"
               >
                 Confirm & Authorize
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -1069,18 +1081,21 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             </div>
 
             <div className="flex space-x-2 pt-2 border-t border-[#E5E5EA]">
-              <button
+              <Button
+                type="button"
                 onClick={() => setRejectionModalOpen(false)}
-                className="flex-1 py-2.5 bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] font-bold rounded-xl text-xs cursor-pointer"
+                variant="secondary"
+                className="flex-1"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                type="button"
                 onClick={handleRejectEstimate}
-                className="flex-1 py-2.5 bg-[#FF3B30] hover:bg-red-600 text-white font-extrabold rounded-xl text-xs shadow-xs cursor-pointer"
+                className="flex-1 bg-[#FF3B30] hover:bg-red-600 text-white"
               >
                 Submit Request
-              </button>
+              </Button>
             </div>
           </div>
         </div>

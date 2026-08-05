@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Boxes, 
-  Search, 
   Plus, 
   AlertTriangle, 
   Layers, 
@@ -16,6 +16,7 @@ import {
   Smartphone, 
   RefreshCw,
   Grid,
+  LayoutGrid,
   List,
   DollarSign,
   TrendingUp,
@@ -151,6 +152,17 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const [localQuality, setLocalQuality] = useState<string>('ALL');
   const [localCategory, setLocalCategory] = useState<string>('ALL');
   const [selectedModelFilter, setSelectedModelFilter] = useState<string>('ALL');
+  // Which filter opened the popup modal (model | category | tier) — popup instead of dropdown
+  const [filterModal, setFilterModal] = useState<'model' | 'category' | 'tier' | null>(null);
+  // ESC closes the filter modal
+  useEffect(() => {
+    if (!filterModal) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setFilterModal(null);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [filterModal]);
   const [localSearchQuery, setLocalSearchQuery] = useState<string>('');
   const [localShowAddModal, setLocalShowAddModal] = useState(false);
   const [viewMode, setViewMode] = useState<'stock' | 'profit' | 'matrix'>('stock');
@@ -409,6 +421,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const activeSearchQuery = propSetSearchQuery ? searchQuery : localSearchQuery;
   const setSearchQuery = propSetSearchQuery || setLocalSearchQuery;
 
+
   const selectedQuality = propSelectedQuality !== undefined ? propSelectedQuality : localQuality;
   const setSelectedQuality = propSetSelectedQuality || setLocalQuality;
 
@@ -440,6 +453,38 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const categories = useMemo(() => {
     return [...new Set(inventoryCategories.filter(Boolean))];
   }, [inventoryCategories]);
+
+  // Memoized filter-option lists (badge counts are expensive — computed once per data change, not per tap/render)
+  const modelFilterOptions = useMemo(
+    () => [
+      { value: 'ALL', label: 'All Models', badge: inventoryDeviceModels.length },
+      ...inventoryDeviceModels.map((model) => ({
+        value: model,
+        label: model,
+        badge: parts.filter((part) =>
+          part.deviceCompatibility.some((device) => isSameDeviceModel(device, model)),
+        ).length,
+      })),
+    ],
+    [parts, inventoryDeviceModels],
+  );
+
+  const categoryFilterOptions = useMemo(
+    () => [
+      { value: 'ALL', label: 'All Categories', badge: categories.length },
+      ...categories.map((category) => ({
+        value: category,
+        label: category,
+        badge: parts.filter((part) => part.category === category).length,
+      })),
+    ],
+    [parts, categories],
+  );
+
+  const tierFilterOptions = useMemo(
+    () => [{ value: 'ALL', label: 'All Tiers' }, ...customQualityTiers.map((tier) => ({ value: tier, label: tier }))],
+    [customQualityTiers],
+  );
 
   const generatePartName = (part: Partial<PartItem>) => {
     const model = part.deviceCompatibility?.[0]?.trim();
@@ -867,9 +912,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
   return (
     <div className="space-y-3">
-      {/* Module Title Header Bar */}
-      <div className="module-toolbar overflow-visible flex flex-col md:flex-row md:items-center justify-between gap-2 bg-white p-3 rounded-xl border border-[#E5E5EA] shadow-xs">
-        <div className="module-subheader">
+      {/* Module Title Header Bar — one line on lg: title | switcher | filters | actions */}
+      <div className="module-toolbar overflow-visible bg-white p-3 rounded-xl border border-[#E5E5EA] shadow-xs flex flex-col lg:flex-row lg:items-center gap-2">
+        <div className="module-subheader lg:shrink-0">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 rounded-lg bg-[#0071E3] text-white flex items-center justify-center font-bold shadow-2xs">
               <Boxes className="w-4 h-4" />
@@ -880,16 +925,14 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           </div>
         </div>
 
-        {/* Action Controls & View Switcher */}
-        <div className="flex flex-1 flex-wrap items-center gap-1.5">
-          {/* Left group: view switcher + filters (stays in place across modes) */}
-          <div className="flex flex-wrap items-center gap-1.5">
-          {/* Dual View Switcher */}
-          <div className="bg-[#F5F5F7] rounded-xl border border-[#E5E5EA] flex h-8 items-center p-1">
+        {/* Right cluster — one line on md+ */}
+        <div className="flex flex-col md:flex-row md:items-center gap-2 w-full lg:w-auto lg:ml-auto min-w-0">
+          {/* Dual View Switcher — full-width equal segmented on mobile */}
+          <div className="bg-[#F5F5F7] rounded-xl border border-[#E5E5EA] flex items-center p-1 w-full md:w-auto md:shrink-0">
             <button
               type="button"
               onClick={() => setViewMode('stock')}
-              className={`h-8 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer ${
+              className={`flex-1 md:flex-none h-9 lg:h-8 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
                 viewMode === 'stock'
                   ? 'bg-white text-[#0071E3] shadow-xs border border-[#0071E3]/20'
                   : 'text-[#86868B] hover:text-[#1D1D1F]'
@@ -901,7 +944,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             <button
               type="button"
               onClick={() => setViewMode('profit')}
-              className={`h-8 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer ${
+              className={`flex-1 md:flex-none h-9 lg:h-8 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
                 viewMode === 'profit'
                   ? 'bg-white text-[#0071E3] shadow-xs border border-[#0071E3]/20'
                   : 'text-[#86868B] hover:text-[#1D1D1F]'
@@ -913,93 +956,149 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             <button
               type="button"
               onClick={() => setViewMode('matrix')}
-              className={`h-8 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer ${
+              className={`flex-1 md:flex-none h-9 lg:h-8 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
                 viewMode === 'matrix'
                   ? 'bg-white text-[#0071E3] shadow-xs border border-[#0071E3]/20'
                   : 'text-[#86868B] hover:text-[#1D1D1F]'
               }`}
             >
               <Grid className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Matrix</span>
+              <span>Matrix</span>
             </button>
           </div>
 
-          {/* Model → Category → Tier filters, same line as view switcher */}
-          <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-            <div className="flex h-8 items-center gap-1 rounded-lg bg-[#F5F5F7] p-1">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white text-[#0071E3]">
-                <Smartphone className="h-3 w-3" />
-              </span>
-              <CustomDropdownMenu
-                value={selectedModelFilter}
-                onChange={setSelectedModelFilter}
-                options={[
-                  { value: 'ALL', label: 'All Models', badge: inventoryDeviceModels.length },
-                  ...inventoryDeviceModels.map((model) => ({
-                    value: model,
-                    label: model,
-                    badge: parts.filter((part) =>
-                      part.deviceCompatibility.some(
-                        (device) => isSameDeviceModel(device, model),
-                      ),
-                    ).length,
-                  })),
-                ]}
-                className="min-w-0"
-                buttonClassName="min-w-[130px] border-0 bg-transparent hover:bg-white"
-                size="sm"
-                menuAlign="group-left"
-              />
+          {/* Filters — mobile: compact one-line pills (popup modal) · desktop: dropdown menus */}
+          <div className="flex w-full md:w-auto items-stretch md:items-center gap-1.5 md:shrink-0">
+            <div className="flex h-9 lg:h-8 items-center gap-1 rounded-lg bg-[#F5F5F7] p-1 flex-1 min-w-0 md:flex-none">
+              {/* Mobile: inline pill → popup modal */}
+              <button
+                type="button"
+                onClick={() => setFilterModal('model')}
+                className="flex items-center justify-center gap-1 rounded-lg bg-transparent p-0 h-full w-full hover:bg-[#ECF0F3] transition-colors cursor-pointer min-w-0 md:hidden"
+                title="Filter by device model"
+              >
+                <Smartphone className="w-3.5 h-3.5 shrink-0 text-[#0071E3]" />
+                <span className="truncate min-w-0 font-bold text-[#1D1D1F] text-xs">
+                  {selectedModelFilter === 'ALL' ? 'All Models' : selectedModelFilter}
+                </span>
+              </button>
+              {/* Desktop: dropdown menu */}
+              <div className="hidden md:flex items-center gap-1 w-full">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white text-[#0071E3]">
+                  <Smartphone className="h-3 w-3" />
+                </span>
+                <CustomDropdownMenu
+                  value={selectedModelFilter}
+                  onChange={setSelectedModelFilter}
+                  options={modelFilterOptions}
+                  className="min-w-0"
+                  buttonClassName="min-w-[110px] lg:min-w-[130px] border-0 bg-transparent hover:bg-white"
+                  size="sm"
+                  menuAlign="group-left"
+                />
+              </div>
             </div>
 
-            <div className="flex h-8 items-center gap-1 rounded-lg bg-[#F5F5F7] p-1">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white text-[#0071E3]">
-                <Layers className="h-3 w-3" />
-              </span>
-              <CustomDropdownMenu
-                value={selectedCategory}
-                onChange={setSelectedCategory}
-                options={[
-                  { value: 'ALL', label: 'All Categories', badge: categories.length },
-                  ...categories.map((category) => ({
-                    value: category,
-                    label: category,
-                    badge: parts.filter((part) => part.category === category).length,
-                  })),
-                ]}
-                className="min-w-0"
-                buttonClassName="min-w-[130px] border-0 bg-transparent hover:bg-white"
-                size="sm"
-                menuAlign="group-left"
-              />
+            <div className="flex h-9 lg:h-8 items-center gap-1 rounded-lg bg-[#F5F5F7] p-1 flex-1 min-w-0 md:flex-none">
+              {/* Mobile: inline pill → popup modal */}
+              <button
+                type="button"
+                onClick={() => setFilterModal('category')}
+                className="flex items-center justify-center gap-1 rounded-lg bg-transparent p-0 h-full w-full hover:bg-[#ECF0F3] transition-colors cursor-pointer min-w-0 md:hidden"
+                title="Filter by category"
+              >
+                <Layers className="w-3.5 h-3.5 shrink-0 text-[#0071E3]" />
+                <span className="truncate min-w-0 font-bold text-[#1D1D1F] text-xs">
+                  {selectedCategory === 'ALL' ? 'All Categories' : selectedCategory}
+                </span>
+              </button>
+              {/* Desktop: dropdown menu */}
+              <div className="hidden md:flex items-center gap-1 w-full">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white text-[#0071E3]">
+                  <Layers className="h-3 w-3" />
+                </span>
+                <CustomDropdownMenu
+                  value={selectedCategory}
+                  onChange={setSelectedCategory}
+                  options={categoryFilterOptions}
+                  className="min-w-0"
+                  buttonClassName="min-w-[110px] lg:min-w-[130px] border-0 bg-transparent hover:bg-white"
+                  size="sm"
+                  menuAlign="group-left"
+                />
+              </div>
             </div>
 
-            <div className="flex h-8 items-center gap-1 rounded-lg bg-[#F5F5F7] p-1">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white text-[#0071E3]">
-                <Filter className="h-3 w-3" />
-              </span>
-              <CustomDropdownMenu
-                value={selectedQuality}
-                onChange={setSelectedQuality}
-                options={[
-                  { value: 'ALL', label: 'All Tiers' },
-                  ...customQualityTiers.map((tier) => ({ value: tier, label: tier })),
-                ]}
-                className="min-w-0"
-                buttonClassName="min-w-[120px] border-0 bg-transparent hover:bg-white"
-                size="sm"
-                menuAlign="group-left"
-              />
+            <div className="flex h-9 lg:h-8 items-center gap-1 rounded-lg bg-[#F5F5F7] p-1 flex-1 min-w-0 md:flex-none">
+              {/* Mobile: inline pill → popup modal */}
+              <button
+                type="button"
+                onClick={() => setFilterModal('tier')}
+                className="flex items-center justify-center gap-1 rounded-lg bg-transparent p-0 h-full w-full hover:bg-[#ECF0F3] transition-colors cursor-pointer min-w-0 md:hidden"
+                title="Filter by quality tier"
+              >
+                <Filter className="w-3.5 h-3.5 shrink-0 text-[#0071E3]" />
+                <span className="truncate min-w-0 font-bold text-[#1D1D1F] text-xs">
+                  {selectedQuality === 'ALL' ? 'All Tiers' : selectedQuality}
+                </span>
+              </button>
+              {/* Desktop: dropdown menu */}
+              <div className="hidden md:flex items-center gap-1 w-full">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white text-[#0071E3]">
+                  <Filter className="h-3 w-3" />
+                </span>
+                <CustomDropdownMenu
+                  value={selectedQuality}
+                  onChange={setSelectedQuality}
+                  options={tierFilterOptions}
+                  className="min-w-0"
+                  buttonClassName="min-w-[110px] lg:min-w-[120px] border-0 bg-transparent hover:bg-white"
+                  size="sm"
+                  menuAlign="group-left"
+                />
+              </div>
             </div>
-          </div>
           </div>
 
           {viewMode === 'stock' && (
-            <div className="ml-auto flex items-center gap-1.5">
+            <div className={`grid items-center gap-1 w-full md:flex md:w-auto md:ml-auto md:shrink-0 md:pl-1 ${inlineEditMode ? 'grid-cols-3' : 'grid-cols-4'}`}>
+              {/* Table view — left, joined pair with Card */}
+              {!inlineEditMode && (
+                <button
+                  type="button"
+                  onClick={() => setStockView('table')}
+                  title="Table view"
+                  aria-label="Stock table view"
+                  className={`toolbar-compact-btn flex-1 min-w-0 inline-flex items-center justify-center rounded-l-lg border transition-colors ${
+                    stockView === 'table'
+                      ? 'bg-[#0071E3] text-white border-[#0071E3]'
+                      : 'bg-white text-[#6E6E73] border-[#D2D2D7] hover:bg-slate-100'
+                  }`}
+                >
+                  <List className="h-3.5 w-3.5" />
+                </button>
+              )}
+              {/* Card view — joined pair with Table */}
+              {!inlineEditMode && (
+                <button
+                  type="button"
+                  onClick={() => setStockView('cards')}
+                  title="Card view"
+                  aria-label="Stock card view"
+                  className={`toolbar-compact-btn flex-1 min-w-0 inline-flex items-center justify-center rounded-r-lg border transition-colors ${
+                    stockView === 'cards'
+                      ? 'bg-[#0071E3] text-white border-[#0071E3]'
+                      : 'bg-white text-[#6E6E73] border-[#D2D2D7] hover:bg-slate-100'
+                  }`}
+                >
+                  <LayoutGrid className="h-3.5 w-3.5" />
+                </button>
+              )}
+
               <button
                 type="button"
                 onClick={() => { setIsTagsPrintOpen(true); setSelectedTagIds(new Set()); }}
-                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#E5E5EA] bg-white px-2.5 py-1.5 text-xs font-bold text-[#1D1D1F] transition-colors hover:border-[#0071E3] hover:text-[#0071E3]"
+                className="toolbar-compact-btn flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#E5E5EA] bg-white px-2 py-1.5 text-[11px] font-bold text-[#1D1D1F] transition-colors hover:border-[#0071E3] hover:text-[#0071E3]"
                 title="Print spare parts tags (A4)"
               >
                 <Printer className="h-3.5 w-3.5" />
@@ -1017,15 +1116,15 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   setInlineEditMode((value) => !value);
                   setInlineDrafts({});
                 }}
-                className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-bold transition-colors ${
+                className={`toolbar-compact-btn flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 rounded-lg border px-2 py-1.5 text-[11px] font-bold transition-colors ${
                   inlineEditMode
                     ? 'border-amber-300 bg-amber-50 text-amber-700 hover:border-amber-400'
-                    : 'border-[#E5E5EA] bg-white text-[#1D1D1F] hover:border-[#0071E3] hover:text-[#0071E3]'
+                    : 'border-amber-200 bg-amber-50 text-amber-700 hover:border-amber-400 hover:bg-amber-100'
                 }`}
                 title={inlineEditMode ? 'Cancel inline edit mode' : 'Edit stock rows'}
               >
                 <Edit2 className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">{inlineEditMode ? 'Done' : 'Edit'}</span>
+                <span>{inlineEditMode ? 'Done' : 'Edit'}</span>
               </button>
 
               {/* Save — far right end, only while editing */}
@@ -1042,16 +1141,15 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     }
                     setShowInlineSaveConfirm(true);
                   }}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#0071E3] bg-[#0071E3] px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition-colors hover:bg-blue-700"
+                  className="toolbar-compact-btn flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#0071E3] bg-[#0071E3] px-3 py-1.5 text-[11px] font-bold text-white shadow-xs transition-colors hover:bg-blue-700"
                   title="Save all inline edits"
                 >
                   <Check className="h-3.5 w-3.5" />
-                  Save
+                  <span className="hidden sm:inline">Save</span>
                 </button>
               )}
             </div>
           )}
-
         </div>
       </div>
 
@@ -1137,21 +1235,39 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       {/* VIEW MODE 1: STOCK TABLE */}
       {viewMode === 'stock' && (
         <>
-        {/* Barcode scan bar — keyboard-wedge scanners type the SKU + Enter here */}
-        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-[#0071E3]/25 bg-blue-50/50 px-3 py-2">
+        {/* Scan + search bar — barcode scanners type SKU + Enter (exact lookup);
+            typing also live-filters the list (search by name/SKU/category) */}
+        <div className="flex items-center gap-2 rounded-xl border border-[#0071E3]/25 bg-blue-50/50 px-3 py-2">
           <ScanLine className="h-4 w-4 shrink-0 text-[#0071E3]" />
           <input
             ref={scanInputRef}
             value={scanQuery}
-            onChange={(e) => setScanQuery(e.target.value)}
+            onChange={(e) => {
+              setScanQuery(e.target.value);
+              setSearchQuery(e.target.value);
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Enter') { e.preventDefault(); handleScanSubmit(); }
             }}
-            placeholder="Scan barcode — or type SKU then press Enter"
+            placeholder="Scan barcode or search part..."
             autoComplete="off"
             autoFocus
-            className="min-w-0 flex-1 basis-[160px] rounded-lg border border-[#D2D2D7] bg-white px-3 py-1.5 font-mono text-xs font-semibold text-[#1D1D1F] outline-none transition focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
+            className="min-w-0 flex-1 basis-[140px] rounded-lg border border-[#D2D2D7] bg-white px-3 py-1.5 font-mono text-xs font-semibold text-[#1D1D1F] outline-none transition focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20"
           />
+          {scanQuery && (
+            <button
+              type="button"
+              onClick={() => {
+                setScanQuery('');
+                setSearchQuery('');
+                scanInputRef.current?.focus();
+              }}
+              aria-label="Clear search"
+              className="shrink-0 w-7 h-7 flex items-center justify-center rounded-full text-[#86868B] hover:bg-blue-100 hover:text-[#1D1D1F] transition-colors cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
           <button
             type="button"
             onClick={handleScanSubmit}
@@ -1159,29 +1275,32 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           >
             Lookup
           </button>
-          {!inlineEditMode && (
-            <div className="ml-auto flex shrink-0 items-center rounded-lg border border-[#D2D2D7] bg-white p-0.5 shadow-2xs">
-              <button
-                type="button"
-                onClick={() => setStockView('table')}
-                title="Table view"
-                aria-label="Stock table view"
-                className={`inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors ${stockView === 'table' ? 'bg-[#0071E3] text-white' : 'text-[#6E6E73] hover:bg-slate-100'}`}
-              >
-                <List className="h-3.5 w-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setStockView('cards')}
-                title="Card view"
-                aria-label="Stock card view"
-                className={`inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors ${stockView === 'cards' ? 'bg-[#0071E3] text-white' : 'text-[#6E6E73] hover:bg-slate-100'}`}
-              >
-                <Grid className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          )}
         </div>
+
+        {/* Low-stock quick audit banner — visible in Stock view too (not just Profit) */}
+        {metrics.lowStockCount > 0 && (
+          <button
+            type="button"
+            onClick={() => setShowLowStockOnly(!showLowStockOnly)}
+            className={`w-full flex items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-xs transition-all cursor-pointer active:scale-[0.99] ${
+              showLowStockOnly
+                ? 'bg-amber-500 border-amber-600 text-white'
+                : 'bg-amber-50 hover:bg-amber-100/80 border-amber-200 text-amber-900'
+            }`}
+          >
+            <span className="flex items-center gap-2 min-w-0">
+              <AlertTriangle className={`w-4 h-4 shrink-0 ${showLowStockOnly ? 'text-white' : 'text-amber-600'}`} />
+              <span className="truncate">
+                <strong className="font-mono">{metrics.lowStockCount}</strong> SKUs at or below reorder point
+                {metrics.outOfStockCount > 0 && <span className="opacity-80"> · {metrics.outOfStockCount} out of stock</span>}
+              </span>
+            </span>
+            <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black ${showLowStockOnly ? 'bg-white text-amber-800' : 'bg-amber-200/80 text-amber-900'}`}>
+              {showLowStockOnly ? 'Filter Active ✓' : 'Tap to Filter'}
+            </span>
+          </button>
+        )}
+
         <div className="workspace-panel workspace-panel--standard rounded-2xl border border-[#E5E5EA] bg-white text-xs shadow-xs">
           {filteredParts.length === 0 ? (
             <div className="flex min-h-[280px] flex-col items-center justify-center p-12 text-center space-y-4">
@@ -1203,9 +1322,10 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 Reset All Filters
               </button>
             </div>
-          ) : stockView === 'cards' && !inlineEditMode ? (
-            /* PHONE CARD GRID — read-only; price/stock editing stays in the desktop table */
-            <div className="grid grid-cols-1 gap-3 p-3 content-start">
+          ) : stockView === 'cards' ? (
+            /* PHONE CARD GRID — read-only; in edit mode cards switch to instant −/+ steppers */
+            <div className="workspace-panel__scroll rounded-xl">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 p-3 content-start">
               {paginatedParts.map((part) => {
                 const isLow = part.quantityInStock <= part.reorderPoint;
                 const isOut = part.quantityInStock === 0;
@@ -1249,7 +1369,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         onClick={() => setSelectedPartForDetails(part)}
                         aria-label={`View ${part.name} details`}
                         title="View part details"
-                        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] text-[#1D1D1F] transition-colors hover:border-[#0071E3] hover:bg-blue-50 hover:text-[#0071E3]"
+                        className="inline-flex h-10 w-10 lg:h-8 lg:w-8 shrink-0 items-center justify-center rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] text-[#1D1D1F] transition-colors hover:border-[#0071E3] hover:bg-blue-50 hover:text-[#0071E3]"
                       >
                         <FileText className="h-3.5 w-3.5" />
                       </button>
@@ -1265,6 +1385,28 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       )}
                     </div>
 
+                    {inlineEditMode ? (
+                      <div className="flex items-center justify-between gap-2 rounded-xl border border-amber-200 bg-amber-50/60 p-2.5">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wide text-amber-700">Adjust Stock</span>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => onUpdatePartStock(part.id, Math.max(0, part.quantityInStock - 1))}
+                            aria-label={`Decrease stock for ${part.name}`}
+                            title="Decrease stock"
+                            className="flex h-10 w-10 lg:h-8 lg:w-8 items-center justify-center rounded-lg border border-amber-300 bg-white font-black text-rose-600 active:scale-95"
+                          >−</button>
+                          <span className="min-w-10 text-center font-mono text-base font-black text-[#1D1D1F]">{part.quantityInStock}</span>
+                          <button
+                            type="button"
+                            onClick={() => onUpdatePartStock(part.id, part.quantityInStock + 1)}
+                            aria-label={`Increase stock for ${part.name}`}
+                            title="Increase stock"
+                            className="flex h-10 w-10 lg:h-8 lg:w-8 items-center justify-center rounded-lg border border-amber-300 bg-white font-black text-[#0071E3] active:scale-95"
+                          >+</button>
+                        </div>
+                      </div>
+                    ) : (
                     <div className="space-y-1.5 rounded-xl border border-[#D8E5ED] bg-[#F8FBFD] p-2.5">
                       <div className="flex items-center justify-between">
                         <span className={`font-mono text-[15px] font-black tracking-wide ${isOut ? 'text-red-600' : isLow ? 'text-amber-600' : 'text-[#1D1D1F]'}`}>
@@ -1285,6 +1427,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         />
                       </div>
                     </div>
+                    )}
 
                     <div className="flex items-end justify-between gap-2 border-t border-[#E5E5EA] pt-1">
                       <div>
@@ -1298,6 +1441,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   </div>
                 );
               })}
+            </div>
             </div>
           ) : (
             <div className="workspace-panel__scroll rounded-xl">
@@ -1487,7 +1631,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                             type="button"
                             onClick={() => setSelectedPartForDetails(part)}
                             aria-label={`View ${part.name} details`}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] text-[#1D1D1F] transition-colors hover:border-[#0071E3] hover:bg-blue-50 hover:text-[#0071E3]"
+                            className="inline-flex h-10 w-10 lg:h-8 lg:w-8 items-center justify-center rounded-lg border border-[#E5E5EA] bg-[#F5F5F7] text-[#1D1D1F] transition-colors hover:border-[#0071E3] hover:bg-blue-50 hover:text-[#0071E3]"
                             title="View part details"
                           >
                             <FileText className="h-3.5 w-3.5" />
@@ -1535,7 +1679,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   <th className="p-2.5 hidden md:table-cell">Cost</th>
                   <th className="p-2.5">Selling</th>
                   <th className="p-2.5">Profit / Unit</th>
-                  <th className="p-2.5 hidden lg:table-cell">Margin</th>
+                  <th className="p-2.5 hidden sm:table-cell">Margin</th>
                   <th className="p-2.5 text-right">Detail</th>
                 </tr>
               </thead>
@@ -1548,9 +1692,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       <td className="p-2.5"><p className="max-w-[260px] truncate font-bold text-[#1D1D1F]">{part.name}</p><p className="mt-0.5 font-mono text-[10px] text-[#86868B]">{part.sku}</p></td>
                       <td className="p-2.5 font-mono text-[#6E6E73] whitespace-nowrap hidden md:table-cell">{part.costPrice.toLocaleString()} MMK</td>
                       <td className="p-2.5 font-mono font-bold text-[#16A34A] whitespace-nowrap">{part.sellingPrice.toLocaleString()} MMK</td>
-                      <td className={`p-2.5 font-mono font-black whitespace-nowrap ${profit >= 0 ? 'text-[#0071E3]' : 'text-rose-600'}`}>{profit >= 0 ? '+' : ''}{profit.toLocaleString()} MMK</td>
-                      <td className="p-2.5 hidden lg:table-cell"><span className={`rounded-md px-1.5 py-0.5 font-mono text-[10px] font-black ${margin >= 0 ? 'bg-blue-50 text-[#0071E3]' : 'bg-rose-50 text-rose-600'}`}>{margin}%</span></td>
-                      <td className="p-2.5 text-right"><button type="button" aria-label={`View ${part.name} details`} title="View part details" onClick={() => setSelectedPartForDetails(part)} className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-[#E5E5EA] bg-white text-[#1D1D1F] hover:border-[#0071E3] hover:text-[#0071E3]"><Eye className="h-3 w-3" /></button></td>
+                      <td className={`p-2.5 font-mono font-black whitespace-nowrap ${profit >= 0 ? 'text-[#0071E3]' : 'text-rose-600'}`}>{profit >= 0 ? '+' : ''}{profit.toLocaleString()} MMK<span className={`mt-0.5 block w-max rounded-md px-1.5 py-0.5 font-mono text-[9px] font-black sm:hidden ${margin >= 0 ? 'bg-blue-50 text-[#0071E3]' : 'bg-rose-50 text-rose-600'}`}>{margin}%</span></td>
+                      <td className="p-2.5 hidden sm:table-cell"><span className={`rounded-md px-1.5 py-0.5 font-mono text-[10px] font-black ${margin >= 0 ? 'bg-blue-50 text-[#0071E3]' : 'bg-rose-50 text-rose-600'}`}>{margin}%</span></td>
+                      <td className="p-2.5 text-right"><button type="button" aria-label={`View ${part.name} details`} title="View part details" onClick={() => setSelectedPartForDetails(part)} className="inline-flex h-10 w-10 lg:h-7 lg:w-7 items-center justify-center rounded-lg border border-[#E5E5EA] bg-white text-[#1D1D1F] hover:border-[#0071E3] hover:text-[#0071E3]"><Eye className="h-3 w-3" /></button></td>
                     </tr>
                   );
                 })}
@@ -1567,7 +1711,10 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             <div className="flex items-center gap-2">
               <Grid className="h-4 w-4 text-[#0071E3]" />
               <div>
-                <h3 className="font-extrabold text-[#1D1D1F]">Apple Device Model × Component Stock Matrix</h3>
+                <h3 className="font-extrabold text-[#1D1D1F]">
+                  <span className="hidden sm:inline">Apple Device Model × Component Stock Matrix</span>
+                  <span className="sm:hidden">Device × Component Matrix</span>
+                </h3>
                 <p className="text-[10px] text-[#86868B]">Live totals from saved inventory components</p>
               </div>
             </div>
@@ -1586,7 +1733,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           </div>
 
           {matrixModels.length && matrixCategories.length ? (
-            <div className="workspace-panel__scroll">
+            <div className="workspace-panel__scroll overscroll-x-contain">
               <table className="min-w-max w-full text-left">
                 <thead className="sticky top-0 z-20 border-b border-[#E5E5EA] bg-[#F5F5F7] font-mono text-[10px] uppercase text-[#86868B]">
                   <tr>
@@ -1610,7 +1757,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         const isLow = matchingParts.length > 0 && quantity <= reorderPoint;
                         const sharedLabel = merge && merge.models.length > 1 ? ` · Shared: ${merge.models.join(' + ')}` : '';
                         return (
-                          <td key={category} rowSpan={merge?.rowSpan ?? 1} className="p-1.5 text-center align-middle">
+                          <td key={category} rowSpan={merge?.rowSpan ?? 1} className="p-1.5 md:p-2 text-center align-middle">
                             {matchingParts.length ? (
                               <button
                                 type="button"
@@ -1619,7 +1766,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                                   setSelectedCategory(category);
                                   setViewMode('stock');
                                 }}
-                                className={`min-w-14 rounded-lg border px-2 py-1 font-mono text-xs font-black ${
+                                className={`min-w-14 min-h-9 md:min-h-8 rounded-lg border px-2 py-1 font-mono text-xs font-black ${
                                   quantity === 0 ? 'border-rose-200 bg-rose-50 text-rose-600' : isLow ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'
                                 }`}
                                 title={`${matchingParts.length} SKU${matchingParts.length === 1 ? '' : 's'} · ${quantity} units${sharedLabel}`}
@@ -2004,8 +2151,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 <p className="text-[10px] font-bold uppercase tracking-wide text-[#86868B]">In Stock</p>
                 <p className="mt-1 font-mono text-xl font-black text-[#1D1D1F]">{selectedPartForDetails.quantityInStock}</p>
                 <div className="mt-2 flex gap-1.5">
-                  <button type="button" onClick={() => { onUpdatePartStock(selectedPartForDetails.id, Math.max(0, selectedPartForDetails.quantityInStock - 1)); setSelectedPartForDetails({ ...selectedPartForDetails, quantityInStock: Math.max(0, selectedPartForDetails.quantityInStock - 1) }); }} aria-label="Subtract one from stock" title="Subtract one" className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#E5E5EA] bg-white font-black hover:bg-rose-50 hover:text-rose-600">−</button>
-                  <button type="button" onClick={() => { onUpdatePartStock(selectedPartForDetails.id, selectedPartForDetails.quantityInStock + 1); setSelectedPartForDetails({ ...selectedPartForDetails, quantityInStock: selectedPartForDetails.quantityInStock + 1 }); }} aria-label="Add one to stock" title="Add one" className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#E5E5EA] bg-white font-black text-[#0071E3] hover:bg-emerald-50 hover:text-emerald-600">+</button>
+                  <button type="button" onClick={() => { onUpdatePartStock(selectedPartForDetails.id, Math.max(0, selectedPartForDetails.quantityInStock - 1)); setSelectedPartForDetails({ ...selectedPartForDetails, quantityInStock: Math.max(0, selectedPartForDetails.quantityInStock - 1) }); }} aria-label="Subtract one from stock" title="Subtract one" className="flex h-10 w-10 lg:h-7 lg:w-7 items-center justify-center rounded-lg border border-[#E5E5EA] bg-white font-black hover:bg-rose-50 hover:text-rose-600">−</button>
+                  <button type="button" onClick={() => { onUpdatePartStock(selectedPartForDetails.id, selectedPartForDetails.quantityInStock + 1); setSelectedPartForDetails({ ...selectedPartForDetails, quantityInStock: selectedPartForDetails.quantityInStock + 1 }); }} aria-label="Add one to stock" title="Add one" className="flex h-10 w-10 lg:h-7 lg:w-7 items-center justify-center rounded-lg border border-[#E5E5EA] bg-white font-black text-[#0071E3] hover:bg-emerald-50 hover:text-emerald-600">+</button>
                   <span className="self-center text-[10px] font-bold text-[#86868B]">Min: {selectedPartForDetails.reorderPoint}</span>
                 </div>
               </div>
@@ -3118,6 +3265,110 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           </div>
         </div>
       )}
+
+      {/* Filter picker popup modal — options open here instead of dropdown menus */}
+      {filterModal &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 backdrop-blur-sm animate-fadeIn"
+            onClick={() => setFilterModal(null)}
+          >
+            <div
+              className="w-72 max-h-[70vh] flex flex-col rounded-2xl border border-[#E5E5EA] bg-white p-3 shadow-2xl animate-i35-slide-up"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between px-1 pb-2 border-b border-[#F0F0F2]">
+                <div className="flex items-center gap-2 min-w-0">
+                  <p className="text-xs font-extrabold text-[#1D1D1F] truncate">
+                    {filterModal === 'model' ? 'Select Device Model' : filterModal === 'category' ? 'Select Category' : 'Select Quality Tier'}
+                  </p>
+                  <span className="shrink-0 rounded-full bg-[#F0F6FF] text-[#0071E3] px-2 py-0.5 text-[10px] font-mono font-bold">
+                    {filterModal === 'model'
+                      ? `${inventoryDeviceModels.length + 1} options`
+                      : filterModal === 'category'
+                        ? `${categories.length + 1} options`
+                        : `${customQualityTiers.length + 1} options`}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFilterModal(null)}
+                  aria-label="Close filter picker"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-[#86868B] hover:bg-[#F5F5F7] hover:text-[#1D1D1F] transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="min-h-0 flex-1 overflow-y-auto py-2 space-y-1 custom-scrollbar">
+                {filterModal === 'model' &&
+                  modelFilterOptions.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => {
+                        setSelectedModelFilter(opt.value);
+                        setFilterModal(null);
+                      }}
+                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-xs font-bold transition-colors cursor-pointer text-left ${
+                        selectedModelFilter === opt.value
+                          ? 'bg-[#0071E3] text-white'
+                          : 'hover:bg-[#F5F5F7] text-[#1D1D1F]'
+                      }`}
+                    >
+                      <span className="truncate">{opt.label}</span>
+                      <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-mono font-bold ${selectedModelFilter === opt.value ? 'bg-white/20 text-white' : 'bg-[#E5E5EA] text-[#1D1D1F]'}`}>
+                        {opt.badge}
+                      </span>
+                    </button>
+                  ))}
+
+                {filterModal === 'category' &&
+                  categoryFilterOptions.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => {
+                        setSelectedCategory(opt.value);
+                        setFilterModal(null);
+                      }}
+                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-xs font-bold transition-colors cursor-pointer text-left ${
+                        selectedCategory === opt.value
+                          ? 'bg-[#0071E3] text-white'
+                          : 'hover:bg-[#F5F5F7] text-[#1D1D1F]'
+                      }`}
+                    >
+                      <span className="truncate">{opt.label}</span>
+                      <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-mono font-bold ${selectedCategory === opt.value ? 'bg-white/20 text-white' : 'bg-[#E5E5EA] text-[#1D1D1F]'}`}>
+                        {opt.badge}
+                      </span>
+                    </button>
+                  ))}
+
+                {filterModal === 'tier' &&
+                  tierFilterOptions.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => {
+                        setSelectedQuality(opt.value);
+                        setFilterModal(null);
+                      }}
+                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-xs font-bold transition-colors cursor-pointer text-left ${
+                        selectedQuality === opt.value
+                          ? 'bg-[#0071E3] text-white'
+                          : 'hover:bg-[#F5F5F7] text-[#1D1D1F]'
+                      }`}
+                    >
+                      <span className="truncate">{opt.label}</span>
+                      {selectedQuality === opt.value && <Check className="w-4 h-4 shrink-0" />}
+                    </button>
+                  ))}
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 };

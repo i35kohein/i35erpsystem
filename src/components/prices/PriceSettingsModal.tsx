@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { 
   X, 
   Save, 
@@ -30,6 +30,7 @@ import {
   Globe
 } from 'lucide-react';
 import { ModelRepairPrice, PriceCatalogImportRow, REPAIR_CATEGORIES, RepairCategoryDef, FolderConfig, getModelFolderId } from '../../types/priceCatalog';
+import { Button } from '../ui';
 import { toast } from '../../lib/toast';
 
 const normalizeCsvHeader = (value: string) => value.replace(/^\uFEFF/, '').trim().toLowerCase().replace(/\s+/g, ' ');
@@ -138,6 +139,17 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
   const [editingCategoryLabel, setEditingCategoryLabel] = useState<string>('');
   const [newCategoryKey, setNewCategoryKey] = useState<string>('');
   const [newCategoryLabel, setNewCategoryLabel] = useState<string>('');
+
+  // ESC closes the settings modal.
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [isOpen, onClose]);
+
   const [newCategoryGroup, setNewCategoryGroup] = useState<RepairCategoryDef['group']>('Display');
 
   // Folder Editor State
@@ -588,19 +600,22 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                           className="flex-1 px-3 py-2 bg-white border border-[#0071E3] rounded-lg text-xs font-bold text-[#1D1D1F] focus:outline-none focus:ring-2 focus:ring-[#0071E3]"
                           placeholder="New Model Name"
                         />
-                        <button
+                        <Button
                           type="submit"
-                          className="px-3 py-2 bg-[#0071E3] text-white text-xs font-bold rounded-lg hover:bg-[#0071E3]/90 cursor-pointer"
+                          size="sm"
+                          className="bg-[#0071E3] text-white hover:bg-[#0071E3]/90 rounded-lg"
                         >
                           Save
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="button"
                           onClick={() => setIsRenamingModel(false)}
-                          className="px-3 py-2 bg-[#E5E5EA] text-[#1D1D1F] text-xs font-bold rounded-lg hover:bg-[#D1D1D6] cursor-pointer"
+                          variant="secondary"
+                          size="sm"
+                          className="rounded-lg"
                         >
                           Cancel
-                        </button>
+                        </Button>
                       </form>
                     ) : (
                       <select
@@ -656,14 +671,14 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                     </div>
 
                     <div>
-                      <button
+                      <Button
                         type="submit"
                         disabled={!newModelInput.trim()}
-                        className="w-full px-3 py-1.5 bg-[#0071E3] hover:bg-[#0071E3]/90 disabled:opacity-50 text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer shadow-2xs"
+                        className="w-full bg-[#0071E3] hover:bg-[#0071E3]/90 disabled:opacity-50 text-white rounded-lg"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         <span>Add Model to Catalog</span>
-                      </button>
+                      </Button>
                     </div>
                   </form>
                 </div>
@@ -892,20 +907,24 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                   </div>
 
                   <div className="flex items-center space-x-2 shrink-0">
-                    <button
+                    <Button
                       type="button"
                       onClick={() => setAllFoldersEnabled(true)}
-                      className="px-3 py-1.5 bg-white hover:bg-[#0071E3] hover:text-white border border-[#E5E5EA] text-[#0071E3] font-extrabold rounded-xl text-xs transition-all cursor-pointer shadow-2xs"
+                      variant="outline"
+                      size="sm"
+                      className="text-[#0071E3] hover:bg-[#0071E3] hover:text-white"
                     >
                       Show All
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
                       onClick={() => setAllFoldersEnabled(false)}
-                      className="px-3 py-1.5 bg-white hover:bg-red-500 hover:text-white border border-[#E5E5EA] text-[#86868B] font-extrabold rounded-xl text-xs transition-all cursor-pointer shadow-2xs"
+                      variant="outline"
+                      size="sm"
+                      className="text-[#86868B] hover:bg-red-500 hover:text-white hover:border-red-500"
                     >
                       Hide All
-                    </button>
+                    </Button>
                   </div>
                 </div>
 
@@ -1117,14 +1136,14 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                 </div>
 
                 <div className="pt-2 flex justify-end">
-                  <button
+                  <Button
                     type="button"
                     onClick={handleApplyGlobalAdjustment}
-                    className="px-4 py-2 bg-[#0071E3] hover:bg-[#0071E3]/90 text-white rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 cursor-pointer shadow-2xs"
+                    className="bg-[#0071E3] hover:bg-[#0071E3]/90 text-white flex items-center space-x-1.5"
                   >
                     <TrendingUp className="w-3.5 h-3.5" />
                     <span>Apply Price Adjustment Globally</span>
-                  </button>
+                  </Button>
                 </div>
               </div>
 
@@ -1164,14 +1183,14 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                   </div>
 
                   <div>
-                    <button
+                    <Button
                       type="button"
                       onClick={handleApplyGlobalWarrantySubmit}
-                      className="w-full px-4 py-2 bg-[#34C759] hover:bg-[#34C759]/90 text-white rounded-xl text-xs font-extrabold transition-all flex items-center justify-center space-x-1.5 cursor-pointer shadow-2xs"
+                      className="w-full bg-[#34C759] hover:bg-[#34C759]/90 text-white"
                     >
                       <ShieldCheck className="w-3.5 h-3.5" />
                       <span>Set Warranty Globally</span>
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>

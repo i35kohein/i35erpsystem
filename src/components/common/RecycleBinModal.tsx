@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Trash2, RotateCcw, Search, X, AlertTriangle, RefreshCw, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { WorkOrder } from '../../types';
+import { Button } from '../ui';
 import { StatusBadge } from './StatusBadge';
 import { PriorityBadge } from './PriorityBadge';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
@@ -69,23 +70,27 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
           <div className="flex items-center space-x-2">
             {archivedWorkOrders.length > 0 && (
               <>
-                <button
+                <Button
                   type="button"
                   onClick={onRestoreAll}
-                  className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                  variant="secondary"
+                  size="sm"
+                  className="hidden sm:flex items-center space-x-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>Restore All</span>
-                </button>
+                </Button>
 
-                <button
+                <Button
                   type="button"
                   onClick={() => setConfirmEmptyOpen(true)}
-                  className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                  variant="secondary"
+                  size="sm"
+                  className="hidden sm:flex items-center space-x-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border-rose-200"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>Empty Bin</span>
-                </button>
+                </Button>
               </>
             )}
 
@@ -185,24 +190,25 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
 
                 {/* Actions */}
                 <div className="flex items-center space-x-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-[#E5E5EA]">
-                  <button
+                  <Button
                     type="button"
                     onClick={() => onRestoreWorkOrder(wo.id)}
-                    className="flex-1 sm:flex-initial px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold transition-all shadow-2xs flex items-center justify-center space-x-1.5 cursor-pointer"
+                    className="flex-1 sm:flex-initial bg-emerald-600 hover:bg-emerald-700 text-white"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     <span>Restore Ticket</span>
-                  </button>
+                  </Button>
 
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setSingleToDelete(wo)}
-                    className="px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 active:scale-95 text-rose-600 border border-rose-200 text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
+                    variant="outline"
+                    className="flex-1 sm:flex-initial bg-rose-50 hover:bg-rose-100 text-rose-600 border-rose-200"
                     title="Permanently Delete"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     <span className="hidden md:inline">Delete Permanently</span>
-                  </button>
+                  </Button>
                 </div>
               </div>
             ))
@@ -215,13 +221,13 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
             Showing <span className="font-bold text-[#1D1D1F]">{filteredWorkOrders.length}</span> of{' '}
             <span className="font-bold text-[#1D1D1F]">{archivedWorkOrders.length}</span> archived repair tickets
           </div>
-          <button
+          <Button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] font-bold transition-colors cursor-pointer"
+            variant="secondary"
           >
             Close
-          </button>
+          </Button>
         </div>
 
         {/* Confirm Empty Recycle Bin Modal Popup */}
@@ -236,13 +242,14 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
                 This will permanently remove all <span className="font-bold text-rose-600">{archivedWorkOrders.length}</span> archived repair tickets from the database. This action cannot be undone.
               </p>
               <div className="flex items-center justify-end space-x-2 pt-2">
-                <button
+                <Button
                   type="button"
                   onClick={() => setConfirmEmptyOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-[#F5F5F7] text-[#1D1D1F] font-bold text-xs hover:bg-[#E5E5EA] transition-colors cursor-pointer"
+                  variant="secondary"
+                  size="sm"
                 >
                   Cancel
-                </button>
+                </Button>
                 <button
                   type="button"
                   onClick={() => {

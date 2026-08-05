@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Folder,
   Smartphone,
@@ -34,6 +34,16 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
   const { catalog, folders } = usePriceCatalog();
   const [deviceSearchQuery, setDeviceSearchQuery] = useState('');
   const [activeFamilyTab, setActiveFamilyTab] = useState<'All' | 'iPhone' | 'iPad' | 'Apple Watch' | 'Mac' | 'Other'>('All');
+
+  // ESC closes the device chooser (embedded mode stays inert).
+  useEffect(() => {
+    if (!isOpen || embedded) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [isOpen, embedded, onClose]);
 
   if (!isOpen) return null;
 
