@@ -330,7 +330,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
 
               <div className="overflow-hidden rounded-lg border border-[var(--border)]">
                 {/* Mini table header */}
-                <div className="grid grid-cols-[24px_minmax(0,1fr)_auto_auto] items-center gap-x-3 border-b border-[var(--border)] bg-[var(--bg)] px-3 py-1.5 text-[9px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">
+                <div className="sticky top-0 z-10 grid grid-cols-[24px_minmax(0,1fr)_auto_auto] items-center gap-x-3 border-b border-[var(--border)] bg-[var(--bg)] px-3 py-1.5 text-[9px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">
                   <span>#</span>
                   <span>Check item</span>
                   <span className="w-14 text-right">Before</span>
