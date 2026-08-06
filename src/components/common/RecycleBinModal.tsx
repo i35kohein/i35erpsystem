@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trash2, RotateCcw, Search, X, AlertTriangle, RefreshCw, CheckCircle2, ShieldAlert } from 'lucide-react';
+import {Trash2, RotateCcw, Search, X, ShieldAlert} from 'lucide-react';
 import { WorkOrder } from '../../types';
 import { Button } from '../ui';
 import { StatusBadge } from './StatusBadge';

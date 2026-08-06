@@ -1,33 +1,26 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useIsIpad } from '../../hooks/useIsIpad';
 import { DateFilterState, filterByDateRange } from '../common/DateFilterSelector';
-import { 
-  CreditCard,
+import {CreditCard,
   DollarSign,
   Receipt,
   Coins,
   CheckCircle2, 
   Printer, 
   ShieldCheck, 
-  Smartphone, 
-  User, 
-  Percent,
+  Smartphone,
   Plus,
   FileText,
   QrCode,
   Landmark,
   Copy,
-  PackageX,
   PackageCheck,
   Check,
-  ChevronLeft,
-  ChevronRight,
   ChevronDown,
   BellRing,
   AlertTriangle, 
   XCircle, 
   Split,
-  Filter,
   Wrench,
   Palette,
   type LucideIcon,
@@ -164,7 +157,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
   const [printableInvoiceWo, setPrintableInvoiceWo] = useState<WorkOrder | null>(null);
-  const [localDateFilter, setLocalDateFilter] = useState<DateFilterState>({ preset: 'all' });
+  const [localDateFilter] = useState<DateFilterState>({ preset: 'all' });
   const [isNotifModalOpen, setIsNotifModalOpen] = useState(false);
   const [notifWo, setNotifWo] = useState<WorkOrder | null>(null);
   const [inventoryPartId, setInventoryPartId] = useState<string>('');
@@ -192,7 +185,6 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   const selectedMethodConfig = activePaymentMethods.find((m) => m.name === paymentMethod);
 
   const dateFilter = propDateFilter !== undefined ? propDateFilter : localDateFilter;
-  const setDateFilter = propSetDateFilter || setLocalDateFilter;
 
   // Filter Work Orders by date, search, and status - ONLY show devices AFTER diagnostic is completed
   const dateFiltered = filterByDateRange<WorkOrder>(workOrders, dateFilter);

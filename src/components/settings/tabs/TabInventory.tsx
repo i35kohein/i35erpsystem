@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertCircle, Boxes, ChevronDown, MapPin, Phone, Plus, Save, ShieldCheck, Truck } from 'lucide-react';
+import {AlertCircle, Boxes, ChevronDown, MapPin, Plus, ShieldCheck, Truck} from 'lucide-react';
 import type { Supplier } from '../../../types';
 import type { SystemSettings } from '../../../types';
 import type { PartItem } from '../../../types';

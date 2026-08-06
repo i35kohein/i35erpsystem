@@ -1,29 +1,17 @@
 import React, { useState } from 'react';
-import { 
-  PhoneCall, 
-  MessageSquare, 
+import {PhoneCall, 
   Star, 
   CheckCircle2, 
   Clock, 
   AlertTriangle, 
   UserCheck, 
   Search, 
-  Plus, 
   X, 
-  Calendar, 
   Smartphone, 
-  ChevronRight, 
-  Send, 
-  Phone, 
-  Filter, 
-  Sparkles,
+  Phone,
   History,
-  ShieldCheck,
   Check,
-  FileText,
-  DollarSign,
-  Cpu
-} from 'lucide-react';
+  Cpu} from 'lucide-react';
 import { WorkOrder, FollowUpStatus, FollowUpRecord, SystemSettings } from '../../types';
 import { Button } from '../ui';
 import { DateFilterState, isDateMatchingFilter } from '../common/DateFilterSelector';
@@ -49,14 +37,13 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
 }) => {
   // Local or controlled filter states
   const [localSearchQuery, setLocalSearchQuery] = useState('');
-  const [localDateFilter, setLocalDateFilter] = useState<DateFilterState>({ preset: 'all' });
+  const [localDateFilter] = useState<DateFilterState>({ preset: 'all' });
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
 
   const searchQuery = propSearchQuery !== undefined ? propSearchQuery : localSearchQuery;
   const setSearchQuery = propSetSearchQuery || setLocalSearchQuery;
 
   const dateFilter = propDateFilter !== undefined ? propDateFilter : localDateFilter;
-  const setDateFilter = propSetDateFilter || setLocalDateFilter;
 
   // Selected ticket for modal
   const [selectedWo, setSelectedWo] = useState<WorkOrder | null>(null);

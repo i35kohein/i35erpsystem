@@ -211,7 +211,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
           <button
             type="button"
             onClick={() => setActiveTab('details')}
-            className={`inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-xs font-extrabold transition-colors ${
+            className={`inline-flex h-10 lg:h-8 items-center gap-1.5 rounded-md px-3 text-xs font-extrabold transition-colors ${
               activeTab === 'details'
                 ? 'bg-[var(--card-bg)] text-[var(--primary)] shadow-sm ring-1 ring-[var(--border)]'
                 : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
@@ -223,7 +223,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
           <button
             type="button"
             onClick={() => setActiveTab('log')}
-            className={`inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-xs font-extrabold transition-colors ${
+            className={`inline-flex h-10 lg:h-8 items-center gap-1.5 rounded-md px-3 text-xs font-extrabold transition-colors ${
               activeTab === 'log'
                 ? 'bg-[var(--card-bg)] text-[var(--primary)] shadow-sm ring-1 ring-[var(--border)]'
                 : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'

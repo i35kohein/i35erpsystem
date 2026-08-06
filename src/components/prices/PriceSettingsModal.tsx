@@ -1,6 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { 
-  X, 
+import {X, 
   Save, 
   RotateCcw, 
   Plus, 
@@ -24,11 +23,8 @@ import {
   Trash2,
   Tag,
   FolderPlus,
-  Percent,
-  Copy,
   TrendingUp,
-  Globe
-} from 'lucide-react';
+  Globe} from 'lucide-react';
 import { ModelRepairPrice, PriceCatalogImportRow, REPAIR_CATEGORIES, RepairCategoryDef, FolderConfig, getModelFolderId } from '../../types/priceCatalog';
 import { Button } from '../ui';
 import { toast } from '../../lib/toast';
@@ -166,7 +162,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
 
   // Global Warranty Presets State
   const [globalWarrantyFolder, setGlobalWarrantyFolder] = useState<string>('ALL');
-  const [globalWarrantyCategory, setGlobalWarrantyCategory] = useState<string>('ALL');
+  const [globalWarrantyCategory] = useState<string>('ALL');
   const [globalWarrantyTerm, setGlobalWarrantyTerm] = useState<string>('3 Month');
   const importInputRef = useRef<HTMLInputElement>(null);
 
@@ -228,14 +224,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
     }
   };
 
-  const handleApplyBatchWarranty = (warrantyTerm: string) => {
-    if (!currentModelData) return;
-    categories.forEach((cat) => {
-      const price = currentModelData.prices[cat.key] ?? null;
-      updatePriceAndWarranty(selectedModel, cat.key, price, warrantyTerm);
-    });
-    triggerToast(`Applied "${warrantyTerm}" warranty to all services on ${selectedModel}.`);
-  };
+  
 
   // Category Actions
   const handleStartEditingCategory = (cat: RepairCategoryDef) => {

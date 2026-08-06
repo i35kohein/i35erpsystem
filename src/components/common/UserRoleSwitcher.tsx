@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, HardHat, UserCheck, ChevronDown, Check, UserPlus, Lock } from 'lucide-react';
+import { Shield, HardHat, UserCheck, ChevronDown, Check, UserPlus} from 'lucide-react';
 import { AppUser, UserRole } from '../../types';
 
 interface UserRoleSwitcherProps {

@@ -27,7 +27,6 @@ export const TechnicianLeaderboardView: React.FC<TechnicianLeaderboardViewProps>
     .sort((a, b) => b.liveCompleted - a.liveCompleted || b.laborRevenue - a.laborRevenue);
 
   const topLeader = leaderboardData[0];
-  const maxCompleted = topLeader ? Math.max(topLeader.liveCompleted, 1) : 1;
   const totalShopCompleted = leaderboardData.reduce((sum, item) => sum + item.liveCompleted, 0);
 
   return (
@@ -108,7 +107,6 @@ export const TechnicianLeaderboardView: React.FC<TechnicianLeaderboardViewProps>
               <tbody className="divide-y divide-line">
                 {leaderboardData.map((item, index) => {
                   const rank = index + 1;
-                  const pctOfMax = Math.round((item.liveCompleted / maxCompleted) * 100);
                   const hasRate = item.commissionRateParts > 0 || item.commissionRateHardware > 0;
 
                   return (

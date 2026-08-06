@@ -1,70 +1,38 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { 
-  Sliders, 
+import {
   Users, 
   FileText, 
   DollarSign, 
   Boxes, 
   Printer, 
   ShieldCheck, 
-  Plus, 
-  Edit2, 
   Trash2, 
   CheckCircle2, 
   AlertCircle, 
   Save, 
   RotateCcw, 
   UserPlus, 
-  Phone, 
-  Mail, 
   Award, 
   X,
-  Building2,
-  Tag,
-  Hash,
   Palette,
-  Check,
-  Square,
-  Circle,
   Store,
-  Upload,
-  Image as ImageIcon,
-  Globe,
-  MapPin,
   CreditCard,
-  QrCode,
-  Wallet,
-  ToggleLeft,
-  ToggleRight,
-  Landmark,
-  CheckSquare,
-  User,
-  Smartphone,
   AlignLeft,
   AlignCenter,
   AlignRight,
-  Type,
-  ExternalLink,
-  Scissors,
   BellRing,
-  Send,
-  MessageSquare,
   Sparkles,
-  RefreshCw,
-  Truck,
-  ChevronDown,
   ChevronRight,
   Search,
-  ArrowLeft
-} from 'lucide-react';
+  ArrowLeft} from 'lucide-react';
 import { Technician, SystemSettings, TechnicianLevel, PaymentMethodConfig, WorkOrder, NotificationTemplate, AppUser, UserRole, UserPermissions, PartItem, PartQualityTier, Supplier } from '../../types';
-import { DEFAULT_PAYMENT_METHODS, getActivePaymentMethods, DEFAULT_NOTIFICATION_TEMPLATES } from '../../data/seedData';
+import {DEFAULT_PAYMENT_METHODS, DEFAULT_NOTIFICATION_TEMPLATES} from '../../data/seedData';
 import { Button } from '../ui';
-import { useTheme, THEME_PRESETS, ThemeMode } from '../../context/ThemeContext';
+import {useTheme} from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { LanguageSwitcher } from '../common/LanguageSwitcher';
+
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
-import { QRCodeSVG } from 'qrcode.react';
+
 import { DeviceTagPrinterModal } from '../common/DeviceTagPrinterModal';
 import { toast } from '../../lib/toast';
 
@@ -127,22 +95,7 @@ const RECEIPT_FOOTER_SIZE_OPTIONS = [
 
 // Quick-select model presets per provider (OpenRouter IDs verified against
 // openrouter.ai/api/v1/models on 2026-08-05).
-const AI_MODEL_PRESETS: Record<string, { id: string; label: string }[]> = {
-  openrouter: [
-    { id: 'anthropic/claude-opus-5', label: 'Claude Opus 5 (flagship)' },
-    { id: 'anthropic/claude-opus-4.8', label: 'Claude Opus 4.8' },
-    { id: 'anthropic/claude-opus-4', label: 'Claude Opus 4' },
-    { id: 'anthropic/claude-sonnet-5', label: 'Claude Sonnet 5' },
-    { id: 'anthropic/claude-haiku-4.5', label: 'Claude Haiku 4.5' },
-    { id: 'deepseek/deepseek-v4-pro', label: 'DeepSeek V4 Pro' },
-    { id: 'deepseek/deepseek-v4-flash', label: 'DeepSeek V4 Flash' },
-  ],
-  anthropic: [{ id: 'claude-3-5-haiku-latest', label: 'Claude 3.5 Haiku (server default)' }],
-  openai: [{ id: 'gpt-4o-mini', label: 'GPT-4o mini (server default)' }],
-  gemini: [{ id: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash (server default)' }],
-  deepseek: [{ id: 'deepseek-chat', label: 'DeepSeek Chat (server default)' }],
-  groq: [{ id: 'llama-3.1-8b-instant', label: 'Llama 3.1 8B Instant (server default)' }],
-};
+
 
 const splitFooterTextBySize = (text: string, start: number, ranges: Array<{ start: number; end: number; size: 'small' | 'medium' | 'large' }>, fallback: 'small' | 'medium' | 'large') => {
   const end = start + text.length;
@@ -194,8 +147,6 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   initialSubTab,
   onAiRescanTickets,
 }) => {
-  const { theme, setTheme, geometry, setGeometry } = useTheme();
-  const { t, language, setLanguage } = useLanguage();
   const [activeSubTab, setActiveSubTab] = useState<'shop' | 'theme' | 'users' | 'technicians' | 'intake' | 'pricing' | 'payment' | 'inventory' | 'pos' | 'notifications' | 'qa' | 'recycle' | 'ai'>(initialSubTab || 'users');
   // Two-level navigation: launcher menu → drilled-in tab view (Back returns).
   // App only sets initialSubTab='ai' when jumping from the dashboard AI shortcut — drill in then.

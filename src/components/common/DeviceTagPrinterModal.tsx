@@ -1,11 +1,8 @@
 import React, { useState } from 'react';
-import { 
-  Printer, 
+import {Printer, 
   X, 
   QrCode, 
   FileText, 
-  CheckCircle, 
-  AlertCircle, 
   ShieldCheck, 
   CircleDot, 
   User, 
@@ -14,11 +11,10 @@ import {
   Scissors, 
   Phone,
   Globe,
-  MapPin
-} from 'lucide-react';
+  MapPin} from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { WorkOrder, SystemSettings } from '../../types';
-import { DIAGNOSTIC_NAMES } from '../intake/deviceData';
+
 import { get21Diagnostics, get21AfterDiagnostics } from '../../utils/diagnosticUtils';
 
 interface DeviceTagPrinterModalProps {

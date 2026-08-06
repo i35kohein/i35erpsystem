@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   X, 
   History, 
@@ -6,23 +6,10 @@ import {
   Phone, 
   Mail, 
   Building, 
-  DollarSign, 
-  Calendar, 
   Clock, 
   CheckCircle2, 
-  Search, 
-  Filter, 
-  Printer, 
-  Tag, 
-  Smartphone, 
-  ShieldCheck, 
-  AlertCircle,
-  FileText,
-  ExternalLink,
-  ChevronRight,
-  TrendingUp,
-  RotateCcw
-} from 'lucide-react';
+  Tag,
+  TrendingUp} from 'lucide-react';
 import { Customer, WorkOrder, SystemSettings } from '../../types';
 import { CustomerRepairTimeline } from './CustomerRepairTimeline';
 import { DEFAULT_SYSTEM_SETTINGS } from '../../data/seedData';
@@ -36,26 +23,7 @@ interface CustomerRepairHistoryModalProps {
   onPrintInvoice?: (wo: WorkOrder) => void;
 }
 
-const getStatusBadgeStyle = (status: string) => {
-  switch (status) {
-    case 'Finished':
-      return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-    case 'In Progress':
-      return 'bg-blue-50 text-blue-700 border-blue-200';
-    case 'Pending':
-      return 'bg-amber-50 text-amber-700 border-amber-200';
-    case 'Receive':
-      return 'bg-purple-50 text-purple-700 border-purple-200';
-    case 'Taken Out':
-      return 'bg-slate-100 text-slate-700 border-slate-200';
-    case 'Cant Repair':
-      return 'bg-rose-50 text-rose-700 border-rose-200';
-    case 'Customer Not Repair':
-      return 'bg-orange-50 text-orange-700 border-orange-200';
-    default:
-      return 'bg-gray-50 text-gray-700 border-gray-200';
-  }
-};
+
 
 export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProps> = ({
   isOpen,
@@ -65,8 +33,6 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
   systemSettings = DEFAULT_SYSTEM_SETTINGS,
   onPrintInvoice,
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('ALL');
 
   if (!isOpen || !customer) return null;
 
@@ -79,20 +45,7 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
   );
 
   // Filtered orders
-  const filteredOrders = customerOrders.filter((wo) => {
-    const q = searchTerm.toLowerCase();
-    const matchesSearch =
-      !q ||
-      (wo.orderNumber && wo.orderNumber.toLowerCase().includes(q)) ||
-      (wo.deviceModel && wo.deviceModel.toLowerCase().includes(q)) ||
-      (wo.serialNumber && wo.serialNumber.toLowerCase().includes(q)) ||
-      (wo.imei && wo.imei.toLowerCase().includes(q)) ||
-      (wo.symptomsReported && wo.symptomsReported.toLowerCase().includes(q));
-
-    const matchesStatus = statusFilter === 'ALL' || wo.status === statusFilter;
-
-    return matchesSearch && matchesStatus;
-  });
+  
 
   // Calculate metrics
   const completedCount = customerOrders.filter((wo) => wo.status === 'Finished').length;

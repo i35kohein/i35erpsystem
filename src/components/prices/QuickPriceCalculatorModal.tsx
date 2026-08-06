@@ -1,15 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import {
-  Calculator,
+import {Calculator,
   X,
   Smartphone,
-  CheckCircle2,
   Copy,
   Check,
   ShieldCheck,
-  Tag,
-  DollarSign,
-  Percent,
   Clock,
   Printer,
   RotateCcw,
@@ -18,9 +13,6 @@ import {
   ListChecks,
   Sparkles,
   ChevronRight,
-  MessageSquare,
-  Mail,
-  Share2,
 } from 'lucide-react';
 import { ModelRepairPrice, REPAIR_CATEGORIES, FolderConfig } from '../../types/priceCatalog';
 import { Button } from '../ui';
@@ -64,7 +56,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
   const [globalDiscountPct, setGlobalDiscountPct] = useState<number>(0);
   const [flatDiscountAmount, setFlatDiscountAmount] = useState<number>(0);
   const [enableSalesTax, setEnableSalesTax] = useState<boolean>(false);
-  const [salesTaxRate, setSalesTaxRate] = useState<number>(8.0);
+  const [salesTaxRate] = useState<number>(8.0);
   const [copiedQuote, setCopiedQuote] = useState<boolean>(false);
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');

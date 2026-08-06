@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlignLeft, CheckCircle2, ChevronDown, ExternalLink, FileText, Globe, Mail, MapPin, Palette, Phone, Printer, QrCode, Store, Tag, Type } from 'lucide-react';
+import {AlignLeft, CheckCircle2, ChevronDown, ExternalLink, FileText, Globe, Mail, MapPin, Phone, Printer, QrCode, Store, Tag, Type} from 'lucide-react';
 import type { SystemSettings } from '../../../types';
 
 interface PosTabProps {

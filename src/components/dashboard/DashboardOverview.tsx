@@ -1,56 +1,34 @@
 import React, { useState, useMemo } from 'react';
-import { ConfirmDeleteModal } from '../common/ConfirmDeleteModal';
-import { 
-  Coins, 
-  CircleDot, 
+
+import {Coins, 
   AlertTriangle, 
   CheckCircle2, 
   Clock, 
   TrendingUp, 
-  Users, 
-  RotateCcw,
-  Sparkles,
+  Users,
   ChevronRight,
   BarChart3,
-  LayoutDashboard,
   Smartphone,
-  Laptop,
-  Tablet,
-  PieChart,
   Activity,
   Zap,
-  Target,
-  DollarSign,
   ShieldCheck,
   ShieldAlert,
   Check,
   ArrowUpRight,
   Boxes,
-  CreditCard,
-  Wallet,
   ClipboardList,
   Inbox,
   ListFilter,
-  Layers,
-  FileCheck,
-  AlertCircle,
-  Crown,
-  Trash2,
   Copy,
-  Send,
   Search,
   RefreshCw,
   Printer,
   Kanban,
-  Plus,
-  Eye,
-  X,
-  Filter
-} from 'lucide-react';
+  Eye} from 'lucide-react';
 import { WorkOrder, PartItem, RmaItem, Technician, WorkOrderStatus } from '../../types';
 import { Button } from '../ui';
-import { useLanguage } from '../../context/LanguageContext';
-import { DateFilterState, filterByDateRange, DateFilterSelector } from '../common/DateFilterSelector';
+
+import { DateFilterState, filterByDateRange} from '../common/DateFilterSelector';
 import { timeAgoShort } from '../../utils/timeAgo';
 import { TechnicianPerformanceTab } from './TechnicianPerformanceTab';
 import { TechnicianLeaderboardView } from './TechnicianLeaderboardView';
@@ -186,10 +164,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   setDateFilter: externalSetDateFilter,
   onSettleInventoryFund,
 }) => {
-  const { t } = useLanguage();
-  const [internalDateFilter, setInternalDateFilter] = useState<DateFilterState>({ preset: 'all' });
+  const [internalDateFilter] = useState<DateFilterState>({ preset: 'all' });
   const dateFilter = externalDateFilter || internalDateFilter;
-  const setDateFilter = externalSetDateFilter || setInternalDateFilter;
 
   const [activeDashboardSubTab, setActiveDashboardSubTab] = useState<'status-queue' | 'repair-data' | 'tech-kpi' | 'inventory' | 'finance' | 'warranty-watch'>('status-queue');
 
@@ -208,7 +184,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const [warrantySearchQuery, setWarrantySearchQuery] = useState<string>('');
   const [warrantyFilterTab, setWarrantyFilterTab] = useState<'ALL_EXPIRING' | 'CRITICAL' | 'WARNING' | 'EXPIRED' | 'ALL'>('ALL_EXPIRING');
   const [copiedNoticeId, setCopiedNoticeId] = useState<string | null>(null);
-  const [ticketToDelete, setTicketToDelete] = useState<WorkOrder | null>(null);
   const [rosterTicket, setRosterTicket] = useState<WorkOrder | null>(null);
 
   // Background Warranty Telemetry & Expiry Check (Flags work orders nearing end of 90-day warranty)
@@ -367,7 +342,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const avgTicketValue = revenueWorkOrders.length > 0 ? Math.round(totalRevenue / revenueWorkOrders.length) : 0;
 
   // Monthly Repairs & Turnaround Metrics
-  const monthlyRepairsCount = technicians.reduce((sum, tech) => sum + tech.completedThisMonth, 0);
 
   // Average turnaround over COMPLETED tickets only (Finished / Taken Out).
   // Open tickets are excluded — mixing them in with Date.now() inflated the
@@ -1358,7 +1332,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                               <button
                                 type="button"
                                 onClick={() => setRosterTicket(wo)}
-                                className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--blue-tint)] px-2.5 text-xs font-extrabold text-[var(--primary)] transition-colors hover:bg-[var(--card-bg)]"
+                                className="inline-flex h-10 lg:h-8 items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--blue-tint)] px-2.5 text-xs font-extrabold text-[var(--primary)] transition-colors hover:bg-[var(--card-bg)]"
                                 title="View Ticket Status"
                                 aria-label={`View status for ${wo.orderNumber || wo.id}`}
                               >
@@ -1369,7 +1343,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                               <button
                                 type="button"
                                 onClick={() => onSelectPrintTag(wo)}
-                                className="p-1.5 bg-surface hover:bg-line text-ink rounded-lg border border-line transition-all cursor-pointer inline-flex items-center space-x-1 text-xs font-bold"
+                                className="h-10 lg:h-8 px-2.5 bg-surface hover:bg-line text-ink rounded-lg border border-line transition-all cursor-pointer inline-flex items-center space-x-1 text-xs font-bold"
                                 title="Print Device Label Tag"
                               >
                                 <Printer className="w-3.5 h-3.5 text-brand" />

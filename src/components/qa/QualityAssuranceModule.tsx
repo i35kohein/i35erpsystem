@@ -1,19 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useIsIpad } from '../../hooks/useIsIpad';
-import { 
-  ShieldCheck, 
+import {ShieldCheck, 
   CheckCircle2, 
-  X, 
-  RotateCcw, 
-  UserCheck, 
-  Sparkles,
-  Smartphone,
+  X,
   Check,
-  AlertTriangle,
-  MinusCircle,
   Wrench,
-  Palette
-} from 'lucide-react';
+  Palette} from 'lucide-react';
 import { WorkOrder, PostRepairChecklist, Technician, DiagnosticItemResult, AppUser } from '../../types';
 import { Button } from '../ui';
 import { DIAGNOSTIC_NAMES, getDiagnosticIcon } from '../intake/deviceData';
@@ -171,12 +163,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
     }
   }, [selectedWoId, selectedWo, technicians]);
 
-  const handleToggleQaItem = (key: keyof PostRepairChecklist) => {
-    setQaData((prev) => ({
-      ...prev,
-      [key]: typeof prev[key] === 'boolean' ? !prev[key] : prev[key],
-    }));
-  };
+  
 
   const handleDiagnosticStatusChange = (id: string, status: 'Pass' | 'Fail' | 'N/A') => {
     setQaDiagnostics((prev) =>

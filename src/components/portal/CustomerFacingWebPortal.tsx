@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { 
-  CircleDot, 
+import {CircleDot, 
   Search, 
   CheckCircle2, 
   Clock, 
@@ -9,27 +8,17 @@ import {
   MessageSquare, 
   ShieldCheck, 
   FileText, 
-  Phone, 
-  Mail, 
-  User, 
   Printer, 
   Send, 
   X, 
   ChevronRight, 
   ArrowLeft, 
-  Check, 
-  Lock, 
-  ClipboardCheck,
-  Sparkles, 
+  ClipboardCheck, 
   ThumbsUp, 
-  ThumbsDown, 
-  RefreshCw,
+  ThumbsDown,
   Info,
-  Calendar,
   CreditCard,
-  MapPin,
-  Award
-} from 'lucide-react';
+  Award} from 'lucide-react';
 import { WorkOrder, SystemSettings, Customer } from '../../types';
 import { Button } from '../ui';
 import { applyEstimateApproval, applyEstimateRejection } from '../../utils/portalWorkflow';

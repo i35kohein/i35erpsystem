@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Search, X, Wrench, Package, Users, CornerDownLeft, TicketCheck } from 'lucide-react';
+import {Search, X, Package, Users, CornerDownLeft, TicketCheck} from 'lucide-react';
 import type { WorkOrder } from '../../types';
 import type { PartItem } from '../../types';
 import type { Customer } from '../../types';

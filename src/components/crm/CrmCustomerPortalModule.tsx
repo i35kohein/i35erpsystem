@@ -1,29 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  Users, 
-  Search, 
+import {Users, 
   Plus, 
-  ExternalLink, 
-  CheckCircle2, 
-  Clock, 
-  ShieldAlert, 
-  Smartphone, 
-  MessageSquare,
-  Sparkles,
+  ExternalLink,
   X,
   ChevronDown,
   ChevronUp,
   History,
-  Calendar,
-  Tag,
-  DollarSign,
   FileText,
   Printer,
   Trash2,
-  ChevronLeft,
-  ChevronRight,
-  Edit2
-} from 'lucide-react';
+  Edit2} from 'lucide-react';
 import { Customer, CustomerType, WorkOrder, SystemSettings } from '../../types';
 import { Button } from '../ui';
 import { CustomerFacingWebPortal } from '../portal/CustomerFacingWebPortal';
@@ -165,11 +151,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
     });
   }, [customers]);
 
-  const openAddCustomerModal = () => {
-    setEditingCustomer(null);
-    setNewCustomerForm({ name: '', phone: '', email: '', company: '', type: 'Retail', discountPercentage: 0, notes: '' });
-    setIsAddCustomerModalOpen(true);
-  };
+  
 
   const openEditCustomerModal = (cust: Customer) => {
     setEditingCustomer(cust);

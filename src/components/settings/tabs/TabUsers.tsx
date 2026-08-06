@@ -1,7 +1,7 @@
 import React from 'react';
-import { Edit2, Plus, Trash2, User, UserPlus, Users } from 'lucide-react';
+import {Edit2, Plus, Trash2, UserPlus} from 'lucide-react';
 import { Button } from '../../ui';
-import type { Technician } from '../../../types';
+
 import type { SystemSettings } from '../../../types';
 import type { AppUser } from '../../../types';
 

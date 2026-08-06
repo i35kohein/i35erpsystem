@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, X, Check, Clock } from 'lucide-react';
-import { CustomDropdownMenu, DropdownOption } from './CustomDropdownMenu';
+import { Calendar, ChevronLeft, ChevronRight, X, Check} from 'lucide-react';
+import { CustomDropdownMenu} from './CustomDropdownMenu';
 
 export type DatePreset = 'all' | 'today' | '7days' | '30days' | '60days' | 'custom';
 

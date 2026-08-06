@@ -1,22 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { 
-  X, 
+import {X, 
   Camera, 
   QrCode, 
   Upload, 
-  Sparkles, 
   CheckCircle2, 
   AlertCircle, 
   RotateCw, 
-  Zap, 
-  Search, 
   ArrowRight,
   Volume2,
   VolumeX,
-  FileCode,
-  ShieldCheck,
-  Smartphone
-} from 'lucide-react';
+  FileCode} from 'lucide-react';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 
 interface CameraQrScannerModalProps {
@@ -47,7 +40,6 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
   const [isScanning, setIsScanning] = useState(false);
   const [scannedResult, setScannedResult] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string>('');
-  const [isTorchOn, setIsTorchOn] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
 
   const scannerRef = useRef<Html5Qrcode | null>(null);

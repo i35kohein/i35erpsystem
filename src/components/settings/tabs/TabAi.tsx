@@ -1,5 +1,5 @@
 import React from 'react';
-import { RefreshCw, Sparkles, Type } from 'lucide-react';
+import { RefreshCw, Sparkles} from 'lucide-react';
 import { Button } from '../../ui';
 import type { SystemSettings } from '../../../types';
 

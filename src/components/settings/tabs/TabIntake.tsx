@@ -1,6 +1,6 @@
 import React from 'react';
 import type { SystemSettings } from '../../../types';
-import { Check, Hash, ShieldCheck } from 'lucide-react';
+import { Hash, ShieldCheck } from 'lucide-react';
 
 interface IntakeTabProps {
   formData: SystemSettings;

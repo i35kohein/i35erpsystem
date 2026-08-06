@@ -1,7 +1,7 @@
 import React from 'react';
 import type { SystemSettings } from '../../../types';
-import { CheckSquare, CreditCard, DollarSign, Landmark, Phone, Plus, QrCode, RotateCcw, ToggleLeft, ToggleRight, Wallet } from 'lucide-react';
-import { Button } from '../../ui';
+import {CheckSquare, CreditCard, DollarSign, Landmark, Plus, QrCode, RotateCcw, ToggleLeft, ToggleRight, Wallet} from 'lucide-react';
+
 
 interface PaymentTabProps {
   formData: SystemSettings;

@@ -1,10 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { 
-  Clock, 
+import {Clock, 
   CheckCircle2, 
   Cog, 
   PackageCheck, 
-  XCircle, 
   AlertCircle, 
   AlertTriangle,
   ArrowRight, 
@@ -13,22 +11,13 @@ import {
   Send, 
   Copy, 
   Check, 
-  Filter, 
   Search, 
-  FileText, 
   ShieldCheck, 
   DollarSign, 
-  Activity, 
-  ChevronDown, 
-  ChevronUp, 
-  Calendar,
-  Sparkles,
-  Layers,
-  ArrowUpDown
-} from 'lucide-react';
+  Activity} from 'lucide-react';
 import { WorkOrder, WorkOrderStatus, RepairLogEntry } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
-import { checkIsDiagnosticCompleted, checkIsBeforeDiagnosticCompleted, checkIsAfterDiagnosticCompleted } from '../../utils/diagnosticUtils';
+import { checkIsBeforeDiagnosticCompleted, checkIsAfterDiagnosticCompleted } from '../../utils/diagnosticUtils';
 
 interface WorkOrderStatusTimelineProps {
   workOrder: WorkOrder;
@@ -77,7 +66,6 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
   const [targetStatus, setTargetStatus] = useState<WorkOrderStatus>(workOrder.status);
   
   const [isCopied, setIsCopied] = useState<boolean>(false);
-  const [expandedLogIds, setExpandedLogIds] = useState<string[]>([]);
 
   // Calculate status transition timeline data
   const { auditItems, stageDurationMap, currentStageIndex } = useMemo(() => {
@@ -215,11 +203,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
   }, [auditItems, searchQuery, filterType, selectedStageFilter]);
 
   // Toggle log expansion
-  const toggleExpand = (id: string) => {
-    setExpandedLogIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-    );
-  };
+  
 
   // Handle adding new status transition or log entry
   const handleAddNewTransitionLog = () => {
@@ -335,7 +319,6 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
               const isCurrent = workOrder.status === stage.status;
               const isPassed = idx < currentStageIndex;
               const logCount = stageDurationMap[stage.status] || 0;
-              const isTerminal = workOrder.status === 'Cant Repair' || workOrder.status === 'Customer Not Repair';
 
               return (
                 <div
@@ -573,7 +556,6 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
       {filteredAuditItems.length > 0 ? (
         <div className="relative pl-6 sm:pl-8 space-y-5 before:absolute before:left-3 sm:before:left-4 before:top-3 before:bottom-3 before:w-0.5 before:bg-gradient-to-b before:from-brand before:via-[#AF52DE] before:to-emerald-500">
           {filteredAuditItems.map((item, index) => {
-            const isExpanded = expandedLogIds.includes(item.id);
 
             // Determine Icon & Styling by Event Type
             let iconBg = 'bg-blue-600 text-white';

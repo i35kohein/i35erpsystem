@@ -1,5 +1,5 @@
 import React from 'react';
-import { Languages, Check } from 'lucide-react';
+import { Languages} from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
 interface LanguageSwitcherProps {
@@ -11,7 +11,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   variant = 'pills',
   className = '',
 }) => {
-  const { language, setLanguage, t } = useLanguage();
+  const { language, setLanguage } = useLanguage();
 
   if (variant === 'compact') {
     return (

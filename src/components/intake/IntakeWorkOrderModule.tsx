@@ -1,79 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import { DateFilterState, filterByDateRange } from '../common/DateFilterSelector';
-import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
+
 import { timeAgoShort } from '../../utils/timeAgo';
 import { StatusBadge } from '../common/StatusBadge';
 import { PriorityBadge } from '../common/PriorityBadge';
 import { useIsIpad } from '../../hooks/useIsIpad';
-import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
+
 import { CameraQrScannerModal } from '../common/CameraQrScannerModal';
 import { ConfirmDeleteModal } from '../common/ConfirmDeleteModal';
 import { Button } from '../ui';
 import { TicketDetailInspectorModal } from '../common/TicketDetailInspectorModal';
 import type { TicketPrefillData } from './CreateTicketSoloPage';
-import { 
-  ClipboardList, 
-  Search, 
-  Plus, 
-  Check, 
-  X, 
-  Sparkles, 
-  Smartphone, 
-  CircleDot, 
-  Cpu,
+import {ClipboardList, 
+  X,
   Printer, 
-  CheckCircle2, 
-  Camera, 
-  CheckSquare, 
-  ShieldCheck, 
-  MapPin,
-  Monitor, 
-  Hand, 
-  Scan, 
-  Video, 
-  Zap, 
-  Volume2, 
-  Activity, 
-  Sun, 
-  CreditCard, 
-  Mic, 
-  Battery, 
-  Wifi, 
-  Bluetooth, 
-  Square, 
-  Key,
-  Lock, 
-  Eye, 
-  Compass, 
-  RotateCcw, 
-  AlertTriangle, 
-  HelpCircle,
-  ClipboardCheck,
+  Camera,
+  Lock,
   Trash2,
-  ChevronLeft,
-  ChevronRight,
   Inbox,
   Ticket,
   SlidersHorizontal,
   LayoutGrid,
   Table as TableIcon,
   Maximize2,
-  Calendar,
-  User,
-  Phone,
-  Tag,
-  Hash,
-  ExternalLink
-} from 'lucide-react';
-import { 
-  WorkOrder, 
+  User} from 'lucide-react';
+import {WorkOrder, 
   PartItem, 
   Customer, 
-  Technician, 
-  DiagnosticItemResult,
-  SelectedRepairItem,
-  AppUser
-} from '../../types';
+  Technician,
+  AppUser} from '../../types';
 import { get21Diagnostics, get21AfterDiagnostics } from '../../utils/diagnosticUtils';
 import { 
   APPLE_MODEL_SERIES, 
@@ -107,31 +62,7 @@ interface IntakeWorkOrderModuleProps {
   onNavigateToCreateTicket?: (prefill?: TicketPrefillData) => void;
 }
 
-const getDiagnosticIcon = (name: string) => {
-  switch (name) {
-    case 'Display': return Monitor;
-    case 'Touch': return Hand;
-    case 'Face ID': return Scan;
-    case 'Main Camera': return Camera;
-    case 'Front Camera': return Video;
-    case 'Charger': return Zap;
-    case 'Sound': return Volume2;
-    case 'Vibrate': return Activity;
-    case 'Flash Light': return Sun;
-    case 'SIM': return CreditCard;
-    case 'Microphone': return Mic;
-    case 'Battery Health': return Battery;
-    case 'WiFi': return Wifi;
-    case 'Bluetooth': return Bluetooth;
-    case 'Backglass': return Square;
-    case 'Key': return Key;
-    case 'Proximity': return Eye;
-    case 'Compass': return Compass;
-    case 'Gyroscope': return RotateCcw;
-    case 'Panic Full Log': return AlertTriangle;
-    case 'Other': default: return HelpCircle;
-  }
-};
+
 
 export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   workOrders,
@@ -165,13 +96,12 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
     if (window.innerWidth < 768) setViewMode('cards');
   }, []);
   const [localFilterStatus, setLocalFilterStatus] = useState<string>('ALL');
-  const [localDateFilter, setLocalDateFilter] = useState<DateFilterState>({ preset: 'all' });
+  const [localDateFilter] = useState<DateFilterState>({ preset: 'all' });
 
   const filterStatus = propFilterStatus !== undefined ? propFilterStatus : localFilterStatus;
   const setFilterStatus = propSetFilterStatus || setLocalFilterStatus;
 
   const dateFilter = propDateFilter !== undefined ? propDateFilter : localDateFilter;
-  const setDateFilter = propSetDateFilter || setLocalDateFilter;
 
   // Roster State (no pagination — all matching tickets shown, like Parts Inventory)
   const [sortByPriority, setSortByPriority] = useState<boolean>(false);
@@ -427,7 +357,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           </div>
         ) : viewMode === 'table' ? (
           /* TABLE VIEW */
-          <div className="workspace-panel__scroll rounded-xl">
+          <div className="workspace-panel__scroll scroll-shadow-right rounded-xl">
             <table className="w-full text-left border-collapse">
               <thead className="sticky top-0 z-20 border-b border-line bg-surface font-mono text-xs uppercase text-muted shadow-2xs">
                 <tr>
@@ -563,9 +493,6 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           <div className="workspace-panel__scroll grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 content-start rounded-xl">
             {filteredOrders.map((wo) => {
               const woColorStyle = getRealisticColorStyle(wo.deviceColor);
-              const diag21 = get21Diagnostics(wo.beforeDiagnostics, wo.symptomsReported, wo.intakeChecklist);
-              const passCount = diag21.filter((d) => d.status === 'Pass').length;
-              const failCount = diag21.filter((d) => d.status === 'Fail').length;
 
               return (
                 <div

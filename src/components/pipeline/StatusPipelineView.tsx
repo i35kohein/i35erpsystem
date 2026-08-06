@@ -1,71 +1,42 @@
 import React, { useRef, useState } from 'react';
-import {
-  ChevronsRight,
+import {ChevronsRight,
   Eye,
-  EyeOff,
-  ChevronRight, 
-  ChevronLeft, 
-  MessageSquare, 
-  Sparkles, 
-  User, 
+  EyeOff, 
   Clock, 
   Timer,
   AlertCircle,
   AlertTriangle,
   X,
   Plus,
-  Printer,
-  CheckCircle2,
-  FileText,
   DollarSign,
   Coins,
-  Search,
-  Filter,
   UserCheck,
   ShieldCheck,
-  Camera,
-  Layers,
-  Phone,
   ClipboardCheck,
   Trash2,
   BellRing,
   Stethoscope,
-  Key,
-  Lock,
-  Barcode,
-  Palette,
-  Minus,
-  XCircle,
-  MapPin,
-  MoreHorizontal
-} from 'lucide-react';
-import { 
-  WorkOrder, 
+  MoreHorizontal} from 'lucide-react';
+import {WorkOrder, 
   WorkOrderStatus, 
   Technician, 
   RepairLogEntry, 
   DiagnosticItemResult,
-  DiagnosticStatus,
   SystemSettings,
-  AppUser
-} from '../../types';
+  AppUser} from '../../types';
 import { Button } from '../ui';
 import { ActiveFilterChips } from '../common/ActiveFilterChips';
-import { 
-  get21Diagnostics, 
-  get21AfterDiagnostics, 
-  checkIsDiagnosticCompleted,
+import {get21Diagnostics,
   checkIsBeforeDiagnosticNeeded,
   checkIsAfterDiagnosticNeeded,
   checkIsBeforeDiagnosticCompleted,
-  checkIsAfterDiagnosticCompleted
-} from '../../utils/diagnosticUtils';
+  checkIsAfterDiagnosticCompleted} from '../../utils/diagnosticUtils';
 import { getActivePaymentMethods } from '../../data/seedData';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
-import { DateFilterState, filterByDateRange, isDateMatchingFilter } from '../common/DateFilterSelector';
-import { StatusBadge } from '../common/StatusBadge';
+import {DateFilterState, isDateMatchingFilter} from '../common/DateFilterSelector';
+
 import { PriorityBadge } from '../common/PriorityBadge';
-import { WorkOrderStatusTimeline } from '../common/WorkOrderStatusTimeline';
+
 import { useLanguage } from '../../context/LanguageContext';
 import { CustomerNotificationModal } from '../common/CustomerNotificationModal';
 import { TicketDetailInspectorModal } from '../common/TicketDetailInspectorModal';
@@ -230,7 +201,6 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
     return wo.symptomsReported || 'General Device Repair & Inspection';
   };
 
-  const totalStagnantCount = workOrders.filter((w) => getIsStagnant(w)).length;
 
   const getCardStyle = (status: WorkOrderStatus, isStagnant: boolean) => {
     if (isStagnant) {
@@ -747,10 +717,6 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                 {stageOrders.length === 0 ? null : (
                   stageOrders.map((wo) => {
                     const tech = technicians.find((t) => t.id === wo.assignedTechId);
-                    const currentIdx = KANBAN_STAGES.findIndex((s) => s.id === wo.status);
-                    const diag21 = get21Diagnostics(wo.beforeDiagnostics, wo.symptomsReported, wo.intakeChecklist);
-                    const passCount = diag21.filter((d) => d.status === 'Pass').length;
-                    const failCount = diag21.filter((d) => d.status === 'Fail').length;
                     const hoursInStatus = getHoursInStatus(wo);
                     const isStagnant = getIsStagnant(wo);
                     // Age chip: neutral <24h · amber 24–48h · red ≥48h (red only matters for

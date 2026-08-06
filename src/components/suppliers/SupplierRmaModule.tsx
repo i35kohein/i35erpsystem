@@ -1,23 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  Truck, 
+import {Truck, 
   RotateCcw, 
   FileText, 
-  Plus, 
-  CheckCircle2, 
-  Clock, 
-  DollarSign, 
-  AlertCircle,
-  ExternalLink,
-  ShieldCheck,
+  Plus,
   Edit2,
   Trash2,
   X,
   Phone,
   Mail,
   Grid,
-  List
-} from 'lucide-react';
+  List} from 'lucide-react';
 import { Supplier, RmaItem, PurchaseOrder, PartItem, RmaStatus } from '../../types';
 import { Button } from '../ui';
 
@@ -459,7 +451,6 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
             {suppliers.map((sup) => {
-              const countParts = parts.filter((p) => p.supplierId === sup.id || p.supplierName === sup.name).length;
               return (
                 <div key={sup.id} className="p-4 bg-white border border-line rounded-2xl space-y-2.5 shadow-xs relative">
                   <div className="flex items-start justify-between">

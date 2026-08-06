@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { 
-  CheckCircle2, 
+import {CheckCircle2, 
   XCircle, 
   Clock, 
   Cog, 
@@ -13,16 +12,9 @@ import {
   ArrowUpDown, 
   Calendar, 
   ShieldCheck, 
-  Cpu, 
-  FileText, 
   ChevronDown, 
   ChevronUp, 
-  Tag, 
-  DollarSign, 
-  Activity,
-  Check,
-  AlertTriangle
-} from 'lucide-react';
+  Activity} from 'lucide-react';
 import { WorkOrder, SystemSettings } from '../../types';
 import { DEFAULT_SYSTEM_SETTINGS } from '../../data/seedData';
 import { WorkOrderStatusTimeline } from '../common/WorkOrderStatusTimeline';
@@ -263,8 +255,6 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
             });
 
             // Calculate parts used list
-            const lineItemsCount = wo.lineItems?.length || 0;
-            const selectedRepairsCount = wo.selectedRepairs?.length || 0;
 
             return (
               <div key={wo.id} className="relative group">

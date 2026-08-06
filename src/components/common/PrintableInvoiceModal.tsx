@@ -1,6 +1,5 @@
 import React from 'react';
-import { 
-  X, 
+import {X, 
   Printer, 
   CheckCircle2, 
   Clock, 
@@ -8,15 +7,9 @@ import {
   User, 
   Smartphone, 
   FileText, 
-  ShieldCheck, 
-  DollarSign,
-  Download,
-  Building2,
-  Phone,
-  Mail,
+  ShieldCheck,
   Receipt,
-  ExternalLink
-} from 'lucide-react';
+  ExternalLink} from 'lucide-react';
 import { WorkOrder, SystemSettings } from '../../types';
 
 interface PrintableInvoiceModalProps {

@@ -1,6 +1,6 @@
 import React from 'react';
 import type { SystemSettings } from '../../../types';
-import { BellRing, ChevronDown, MessageSquare, Phone, Plus, RefreshCw, Send, Sparkles, Store, Tag, Trash2 } from 'lucide-react';
+import {BellRing, ChevronDown, MessageSquare, Plus, RefreshCw, Send, Sparkles, Trash2} from 'lucide-react';
 
 interface NotificationsTabProps {
   formData: SystemSettings;

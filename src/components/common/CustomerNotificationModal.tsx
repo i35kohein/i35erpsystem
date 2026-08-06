@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Phone, Send, Copy, Check, X, BellRing, Sparkles, ExternalLink } from 'lucide-react';
+import {MessageSquare, Phone, Send, Copy, Check, X, BellRing, ExternalLink} from 'lucide-react';
 import { WorkOrder, SystemSettings, NotificationTemplate } from '../../types';
 import { DEFAULT_NOTIFICATION_TEMPLATES } from '../../data/seedData';
 

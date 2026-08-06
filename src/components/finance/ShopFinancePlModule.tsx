@@ -1,35 +1,18 @@
 import React, { useState, useMemo } from 'react';
-import { 
-  DollarSign, 
+import {DollarSign, 
   TrendingUp, 
-  TrendingDown, 
-  CreditCard, 
   Receipt, 
   Boxes, 
   Users, 
   Truck, 
   Plus, 
-  Filter, 
-  Calendar, 
-  Building2, 
   PieChart, 
   CheckCircle2, 
-  AlertCircle, 
-  Clock, 
-  ShieldCheck, 
-  ArrowUpRight, 
-  ArrowDownRight, 
-  ChevronRight, 
-  Check, 
-  X, 
-  FileText,
+  X,
   Percent,
   Coins,
   Wallet,
-  Sparkles,
-  Search,
-  Download
-} from 'lucide-react';
+  Sparkles} from 'lucide-react';
 import { 
   WorkOrder, 
   PartItem, 

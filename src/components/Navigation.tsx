@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import {
-  LogOut,
+import {LogOut,
   CircleDot,
   LayoutDashboard,
   ClipboardList,
@@ -10,7 +9,6 @@ import {
   CreditCard,
   Users,
   ShieldCheck,
-  Menu,
   X,
   Plus,
   PanelLeftClose,
@@ -18,13 +16,11 @@ import {
   Tag,
   Settings,
   PhoneCall,
-  DollarSign
-} from 'lucide-react';
+  DollarSign} from 'lucide-react';
 import { WorkOrder, SystemSettings, AppUser } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { UserRoleSwitcher } from './common/UserRoleSwitcher';
-import { Button } from './ui';
-import { Badge } from './ui';
+import { Button, Badge } from './ui';
 
 interface NavigationProps {
   activeTab: string;

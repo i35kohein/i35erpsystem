@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { WorkOrder, Technician } from '../../types';
 import { StatusBadge } from '../common/StatusBadge';
-import { computeTechStats, getLoadBadge } from '../../utils/techAnalytics';
+import { computeTechStats} from '../../utils/techAnalytics';
 
 interface TechnicianPerformanceTabProps {
   technicians: Technician[];
@@ -153,7 +153,7 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {filteredTechStats.map((stats) => {
           const {
-            tech, activeOrders, activeCount, finishedOrders, liveCompleted, baselineMonthly,
+            tech, activeOrders, activeCount, liveCompleted, baselineMonthly,
             avgDurationHours, successRate, warrantyReturnCount, loadBadge,
           } = stats;
           const baselinePct =

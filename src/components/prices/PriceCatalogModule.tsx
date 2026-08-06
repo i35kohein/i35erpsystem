@@ -7,11 +7,7 @@ import {
   ShieldCheck, 
   Smartphone, 
   ListChecks, 
-  SlidersHorizontal, 
-  Download, 
-  Plus, 
   Check, 
-  ShoppingBag, 
   Receipt, 
   X, 
   Copy, 
@@ -23,14 +19,8 @@ import {
   Scan, 
   Power, 
   Mic, 
-  CheckCircle2, 
   FileText, 
-  Folder, 
-  Tablet, 
-  Watch, 
-  Laptop, 
-  Settings,
-  Calculator,
+  Folder,
   Sparkles,
   Tag,
   ChevronDown,
@@ -42,9 +32,7 @@ import {
   REPAIR_CATEGORIES, 
   RepairCategoryDef, 
   FolderConfig, 
-  DEFAULT_DEVICE_FOLDERS, 
-  getModelFolderId 
-} from '../../types/priceCatalog';
+  DEFAULT_DEVICE_FOLDERS} from '../../types/priceCatalog';
 import { PriceSettingsModal } from './PriceSettingsModal';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
 import { QuickPriceCalculatorModal } from './QuickPriceCalculatorModal';
@@ -105,18 +93,7 @@ interface CartItem {
   discountPercent: number;
 }
 
-const DEVICE_SERIES_ORDER = [
-  'iPhone 16 Series',
-  'iPhone 15 Series',
-  'iPhone 14 Series',
-  'iPhone 13 Series',
-  'iPhone 12 Series',
-  'iPhone 11 Series',
-  'iPhone X / XS / XR',
-  'iPhone 8 / SE Series',
-  'iPhone 7 / 6 Series',
-  'iPad / Watch / Mac / Other'
-];
+
 
 export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
   catalog,
@@ -154,7 +131,6 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
   // State
   const [selectedDevice, setSelectedDevice] = useState<string>(catalog[0]?.model || 'iPhone 15 Pro Max');
   const isIpad = useIsIpad();
-  const [viewMode, setViewMode] = useState<'pos' | 'matrix' | 'cards'>('pos');
   
   // Controlled / Uncontrolled state synchronization
   const [localSearchQuery, setLocalSearchQuery] = useState('');
@@ -176,8 +152,6 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
   const quickCalcOpen = externalQuickCalcOpen !== undefined ? externalQuickCalcOpen : localQuickCalcOpen;
   const setQuickCalcOpen = setExternalQuickCalcOpen || setLocalQuickCalcOpen;
 
-  const [deviceSearchQuery, setDeviceSearchQuery] = useState('');
-  const [activeFamilyTab, setActiveFamilyTab] = useState<'All' | 'iPhone' | 'iPad' | 'Apple Watch' | 'Mac' | 'Other'>('All');
   const [quoteCopied, setQuoteCopied] = useState(false);
   const [isCartSheetOpen, setIsCartSheetOpen] = useState(false);
   // Which cart item has its discount picker expanded (mobile sheet only).
@@ -197,13 +171,9 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
   const [cart, setCart] = useState<Map<string, CartItem>>(() => new Map<string, CartItem>());
 
   // Filter folders enabled by user
-  const enabledFolders = useMemo(() => {
-    return folders.filter((f) => f.enabled);
-  }, [folders]);
+  
 
-  const enabledFolderIds = useMemo(() => {
-    return new Set(enabledFolders.map((f) => f.id));
-  }, [enabledFolders]);
+  
 
   // Category Icon & Color Configuration matching 21 diagnostic tests
   const getCategoryConfig = (key: string, group: string) => {
@@ -279,26 +249,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
   };
 
   // Group catalog devices by series for modal selection
-  const categorizedDevices = useMemo(() => {
-    const groups: { [key: string]: string[] } = {};
-    DEVICE_SERIES_ORDER.forEach((g) => (groups[g] = []));
-
-    catalog.forEach((item) => {
-      const m = item.model;
-      if (m.includes('16')) groups['iPhone 16 Series'].push(m);
-      else if (m.includes('15')) groups['iPhone 15 Series'].push(m);
-      else if (m.includes('14')) groups['iPhone 14 Series'].push(m);
-      else if (m.includes('13')) groups['iPhone 13 Series'].push(m);
-      else if (m.includes('12')) groups['iPhone 12 Series'].push(m);
-      else if (m.includes('11')) groups['iPhone 11 Series'].push(m);
-      else if (m.includes('X') || m.includes('XS') || m.includes('XR')) groups['iPhone X / XS / XR'].push(m);
-      else if (m.includes('8') || m.includes('SE')) groups['iPhone 8 / SE Series'].push(m);
-      else if (m.includes('7') || m.includes('6')) groups['iPhone 7 / 6 Series'].push(m);
-      else groups['iPad / Watch / Mac / Other'].push(m);
-    });
-
-    return groups;
-  }, [catalog]);
+  
 
   // Selected Active Device Data
   const activeDeviceData = useMemo(() => {
@@ -406,11 +357,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
     toast.info('Cart cleared', 'Cart');
   };
 
-  const handleSelectDevice = (modelName: string) => {
-    setSelectedDevice(modelName);
-    setDeviceModalOpen(false);
-    setCart(new Map()); // clear cart on device change for accuracy
-  };
+  
 
   const handleCopyCustomerQuote = () => {
     if (cart.size === 0) {

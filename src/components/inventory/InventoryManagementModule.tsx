@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import { 
-  Boxes, 
+
+import {Boxes, 
   Plus, 
   AlertTriangle, 
   Layers, 
@@ -9,12 +8,10 @@ import {
   ShieldCheck, 
   ShieldAlert,
   Truck,
-  RotateCcw,
   FileText,
   Cpu, 
   MapPin, 
-  Smartphone, 
-  RefreshCw,
+  Smartphone,
   Grid,
   LayoutGrid,
   List,
@@ -24,27 +21,18 @@ import {
   PackageX,
   Filter,
   Check,
-  Building2,
   Sparkles,
   ArrowRight,
   Edit2,
   Eye,
   Trash2,
   X,
-  Settings,
-  Globe,
-  Phone,
-  Mail,
-  Star,
-  PlusCircle,
   Palette,
-  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
   Printer,
-  ScanLine
-} from 'lucide-react';
+  ScanLine} from 'lucide-react';
 import { PartItem, PartQualityTier, Supplier, SystemSettings, RmaItem } from '../../types';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
@@ -320,11 +308,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     setEditingSupplier(null);
   };
 
-  const handleDeleteSupplierClick = (supplierId: string, _supplierName: string) => {
-    if (onDeleteSupplier) {
-      onDeleteSupplier(supplierId);
-    }
-  };
+  
 
   const handleSaveEditQualityTier = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -352,23 +336,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     setEditingQualityTier(null);
   };
 
-  const handleDeleteQualityTierClick = (tierName: string) => {
-    const updated = customQualityTiers.filter((t) => t !== tierName);
-    setCustomQualityTiers(updated);
-    try {
-      localStorage.setItem('custom_quality_tiers', JSON.stringify(updated));
-    } catch (err) {
-      console.error(err);
-    }
-    if (onUpdatePart && updated.length > 0) {
-      const fallbackTier = updated[0];
-      parts.forEach((p) => {
-        if (p.qualityTier === tierName) {
-          onUpdatePart({ ...p, qualityTier: fallbackTier as PartQualityTier });
-        }
-      });
-    }
-  };
+  
 
   const activeDeviceModels = useMemo(() => {
     return sortModelsNewestFirst([...new Set(deviceModels?.filter(Boolean) || [])]);
@@ -499,18 +467,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     unitCost: 0,
   });
 
-  const handleOpenWarrantyModal = (part: PartItem) => {
-    setClaimingWarrantyPart(part);
-    const matchedSup = suppliers.find((s) => s.id === part.supplierId) || suppliers[0];
-    setWarrantyForm({
-      supplierId: matchedSup?.id || part.supplierId || 'sup-1',
-      supplierName: matchedSup?.name || part.supplierName || 'MobileSentrix OEM',
-      quantity: 1,
-      reason: 'Screen touch unresponsive / defect after installation',
-      trackingNumber: `RMA-${Date.now().toString().slice(-6)}`,
-      unitCost: part.costPrice || 0,
-    });
-  };
+  
 
   const handleSubmitWarrantyClaim = () => {
     if (!claimingWarrantyPart) return;
@@ -850,7 +807,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     };
   }, [parts]);
 
-  const [currentPage, setCurrentPage] = useState<number>(1);
 
   // Filter Parts
   const filteredParts = useMemo(() => {
@@ -897,8 +853,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     });
   }, [parts, selectedQuality, selectedCategory, selectedModelFilter, showLowStockOnly, activeSearchQuery, sortKey, sortDir]);
 
-  const totalPages = 1;
-  const safeCurrentPage = 1;
   const paginatedParts = filteredParts;
 
   // Table pagination (stock table only — cards/profit/matrix stay full list)
@@ -966,26 +920,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     });
   };
 
-  const saveInlineEdit = (part: PartItem) => {
-    const draft = inlineDrafts[part.id];
-    if (!draft || !onUpdatePart) return;
-    const parsedQuantity = draft.quantityInStock?.trim() ? Number(draft.quantityInStock) : part.quantityInStock;
-    const parsedReorder = draft.reorderPoint?.trim() ? Number(draft.reorderPoint) : part.reorderPoint;
-    const parsedCost = draft.costPrice?.trim() ? Number(draft.costPrice) : part.costPrice;
-    const parsedSelling = draft.sellingPrice?.trim() ? Number(draft.sellingPrice) : part.sellingPrice;
-    const selectedSup = suppliers.find((supplier) => supplier.id === draft.supplierId);
-    onUpdatePart({
-      ...part,
-      ...draft,
-      quantityInStock: parsedQuantity,
-      reorderPoint: parsedReorder,
-      costPrice: parsedCost,
-      sellingPrice: parsedSelling,
-      supplierId: draft.supplierId || part.supplierId,
-      supplierName: selectedSup?.name || part.supplierName,
-    });
-    setInlineDrafts((current) => { const next = { ...current }; delete next[part.id]; return next; });
-  };
+  
 
   const inlineSaveReview = useMemo(() => {
     return Object.entries(inlineDrafts)
@@ -1897,7 +1832,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       type="button"
                       onClick={() => setTablePage((p) => Math.max(1, p - 1))}
                       disabled={tablePageSafe <= 1}
-                      className="flex h-8 items-center gap-1 rounded-lg border border-line bg-white px-2.5 text-xs font-bold text-ink hover:border-brand hover:text-brand disabled:opacity-40 disabled:hover:border-line disabled:hover:text-ink transition-colors cursor-pointer"
+                      className="flex h-10 lg:h-8 items-center gap-1 rounded-lg border border-line bg-white px-2.5 text-xs font-bold text-ink hover:border-brand hover:text-brand disabled:opacity-40 disabled:hover:border-line disabled:hover:text-ink transition-colors cursor-pointer"
                     >
                       <ChevronLeft className="w-3.5 h-3.5" />
                       Prev
@@ -1906,7 +1841,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       type="button"
                       onClick={() => setTablePage((p) => Math.min(tableTotalPages, p + 1))}
                       disabled={tablePageSafe >= tableTotalPages}
-                      className="flex h-8 items-center gap-1 rounded-lg border border-line bg-white px-2.5 text-xs font-bold text-ink hover:border-brand hover:text-brand disabled:opacity-40 disabled:hover:border-line disabled:hover:text-ink transition-colors cursor-pointer"
+                      className="flex h-10 lg:h-8 items-center gap-1 rounded-lg border border-line bg-white px-2.5 text-xs font-bold text-ink hover:border-brand hover:text-brand disabled:opacity-40 disabled:hover:border-line disabled:hover:text-ink transition-colors cursor-pointer"
                     >
                       Next
                       <ChevronRight className="w-3.5 h-3.5" />
@@ -2243,7 +2178,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                           key={colorName}
                           type="button"
                           onClick={() => applyPartSpecification({ backGlassColor: colorName })}
-                          className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-2 text-xs font-bold transition-colors ${
+                          className={`inline-flex h-10 lg:h-8 items-center gap-1.5 rounded-lg border px-2 text-xs font-bold transition-colors ${
                             isSelected
                               ? 'border-brand bg-white text-brand shadow-xs'
                               : 'border-line bg-white text-ink hover:border-brand/50'
@@ -2506,9 +2441,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             </div>
 
             <div className="flex flex-wrap justify-end gap-2 border-t border-line pt-3">
-              <button type="button" onClick={() => { setClaimingWarrantyPart(selectedPartForDetails); setSelectedPartForDetails(null); }} className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 font-extrabold text-amber-700 hover:bg-amber-100"><ShieldAlert className="h-3.5 w-3.5" /> Warranty</button>
-              <button type="button" onClick={() => { setEditingPart(selectedPartForDetails); setSelectedPartForDetails(null); }} className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 font-extrabold text-ink hover:bg-line"><Edit2 className="h-3.5 w-3.5" /> Edit</button>
-              <button type="button" onClick={() => { if (window.confirm(`Delete part “${selectedPartForDetails.name}” (${selectedPartForDetails.sku})?`)) { onDeletePart?.(selectedPartForDetails.id); setSelectedPartForDetails(null); } }} className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-2.5 font-extrabold text-rose-600 hover:bg-rose-100"><Trash2 className="h-3.5 w-3.5" /> Delete</button>
+              <button type="button" onClick={() => { setClaimingWarrantyPart(selectedPartForDetails); setSelectedPartForDetails(null); }} className="inline-flex h-10 lg:h-8 items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 font-extrabold text-amber-700 hover:bg-amber-100"><ShieldAlert className="h-3.5 w-3.5" /> Warranty</button>
+              <button type="button" onClick={() => { setEditingPart(selectedPartForDetails); setSelectedPartForDetails(null); }} className="inline-flex h-10 lg:h-8 items-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 font-extrabold text-ink hover:bg-line"><Edit2 className="h-3.5 w-3.5" /> Edit</button>
+              <button type="button" onClick={() => { if (window.confirm(`Delete part “${selectedPartForDetails.name}” (${selectedPartForDetails.sku})?`)) { onDeletePart?.(selectedPartForDetails.id); setSelectedPartForDetails(null); } }} className="inline-flex h-10 lg:h-8 items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-2.5 font-extrabold text-rose-600 hover:bg-rose-100"><Trash2 className="h-3.5 w-3.5" /> Delete</button>
             </div>
           </div>
         </div>

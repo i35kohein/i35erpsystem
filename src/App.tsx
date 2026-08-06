@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect, useMemo, lazy, Suspense } from 'react';
+import  {useState, useRef, useEffect, useMemo, lazy, Suspense} from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Sparkles, Plus, CircleDot, Search, Filter, Calculator, Folder, Settings, Download, Database, ExternalLink, ClipboardList, Kanban, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, ChevronDown, PhoneCall, Truck, Boxes, CreditCard, Users, DollarSign, LayoutDashboard, Timer, MoreHorizontal, SlidersHorizontal, Eye, Stethoscope, Edit2, List, LayoutGrid, Printer, Smartphone, Layers, ScanLine } from 'lucide-react';
-import { subscribeToCollection, fetchCloudCollection, saveDocument, saveBatchDocuments, deleteDocument, clearCollection } from './lib/supabase';
+import {Sparkles, Plus, Search, Filter, Calculator, Folder, Settings, Download, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, Timer, MoreHorizontal, SlidersHorizontal, Eye, Stethoscope, Edit2, List, LayoutGrid, Printer, Smartphone, Layers, ScanLine} from 'lucide-react';
+import {subscribeToCollection, fetchCloudCollection, saveDocument, deleteDocument, clearCollection} from './lib/supabase';
 import { setActiveUserId, notifyAccountChanged } from './utils/accountSettings';
 
 // ---- AI repair-type classification (Spareparts Change vs Hardware Repair) ----
@@ -57,24 +57,19 @@ import {
   Technician, 
   WorkOrderStatus, 
   RmaStatus, 
-  MicroSolderingLog, 
   PostRepairChecklist,
   DiagnosticItemResult,
   SystemSettings,
   ExpenseItem,
   SupplierDebtRecord,
   TechnicianPayoutRecord,
-  AppUser,
-  UserRole
-} from './types';
+  AppUser} from './types';
 import { DateFilterSelector, DateFilterState } from './components/common/DateFilterSelector';
 import { RightFilterDrawer } from './components/common/RightFilterDrawer';
 import { ActiveFilterChips } from './components/common/ActiveFilterChips';
 import { DrawerSelect } from './components/common/DrawerSelect';
-import { checkIsBeforeDiagnosticNeeded, checkIsAfterDiagnosticNeeded } from './utils/diagnosticUtils';
-import { checkIsDiagnosticCompleted, checkIsBeforeDiagnosticCompleted, checkIsAfterDiagnosticCompleted } from './utils/diagnosticUtils';
+import { checkIsBeforeDiagnosticNeeded, checkIsAfterDiagnosticNeeded, checkIsDiagnosticCompleted, checkIsBeforeDiagnosticCompleted, checkIsAfterDiagnosticCompleted } from './utils/diagnosticUtils';
 import { CustomDropdownMenu } from './components/common/CustomDropdownMenu';
-import { UserRoleSwitcher } from './components/common/UserRoleSwitcher';
 import { ModuleLoadingSkeleton } from './components/common/ModuleLoadingSkeleton';
 import { useLanguage } from './context/LanguageContext';
 import { Navigation } from './components/Navigation';
@@ -87,7 +82,6 @@ const InventoryManagementModule = lazy(() => import('./components/inventory/Inve
 const SupplierRmaModule = lazy(() => import('./components/suppliers/SupplierRmaModule').then((m) => ({ default: m.SupplierRmaModule })));
 const PosInvoicingModule = lazy(() => import('./components/pos/PosInvoicingModule').then((m) => ({ default: m.PosInvoicingModule })));
 const CrmCustomerPortalModule = lazy(() => import('./components/crm/CrmCustomerPortalModule').then((m) => ({ default: m.CrmCustomerPortalModule })));
-const MicroSolderingModule = lazy(() => import('./components/microsoldering/MicroSolderingModule').then((m) => ({ default: m.MicroSolderingModule })));
 const QualityAssuranceModule = lazy(() => import('./components/qa/QualityAssuranceModule').then((m) => ({ default: m.QualityAssuranceModule })));
 const PriceCatalogModule = lazy(() => import('./components/prices/PriceCatalogModule').then((m) => ({ default: m.PriceCatalogModule })));
 const SystemManagementSettingsModule = lazy(() => import('./components/settings/SystemManagementSettingsModule').then((m) => ({ default: m.SystemManagementSettingsModule })));
@@ -194,7 +188,7 @@ export default function App() {
   const [expenses, setExpenses] = useState<ExpenseItem[]>([]);
   const [supplierDebts, setSupplierDebts] = useState<SupplierDebtRecord[]>([]);
   const [technicianPayouts, setTechnicianPayouts] = useState<TechnicianPayoutRecord[]>([]);
-  const [isDbSynced, setIsDbSynced] = useState<boolean>(true);
+  const [, setIsDbSynced] = useState<boolean>(true);
   const [isGlobalSearchOpen, setIsGlobalSearchOpen] = useState(false);
 
   // User Management Handlers
@@ -658,7 +652,6 @@ export default function App() {
           showNeedsDiagOnly ? { key: 'ndiag', label: 'Needs Diag', onClear: () => setShowNeedsDiagOnly(false) } : null,
         ].filter(Boolean) as Array<{ key: string; label: string; onClear: () => void }>)
       : [];
-    const selectCls = "w-full rounded-xl border border-line bg-white px-3 py-2.5 text-xs font-extrabold text-ink focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none";
     const labelCls = "mb-1 block text-xs font-extrabold uppercase tracking-wider text-muted";
     const rowCls = "flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-xs font-extrabold transition-colors cursor-pointer";
     return (
@@ -952,11 +945,7 @@ export default function App() {
     );
   };
 
-  const activePipelineFilterCount =
-    (showBottlenecksOnly ? 1 : 0) +
-    (statusFilter !== 'ALL' ? 1 : 0) +
-    (techFilter !== 'ALL' ? 1 : 0) +
-    (dateFilter.preset !== 'all' ? 1 : 0);
+  
 
   const hasActiveFilters =
     searchQuery !== '' ||
@@ -1402,19 +1391,6 @@ export default function App() {
     addToast(`Payment recorded for ${workOrder.orderNumber} via ${paymentMethod} — Moved to Takeout`, 'success', 'Payment Received');
   };
 
-  const handleSaveMicroSolderingLog = (workOrderId: string, log: MicroSolderingLog) => {
-    setWorkOrders((prev) =>
-      prev.map((w) => {
-        if (w.id === workOrderId) {
-          const updated = { ...w, microSolderingLog: log };
-          saveDocument('workOrders', updated).catch(reportSaveError);
-          return updated;
-        }
-        return w;
-      })
-    );
-    addToast(`Micro-soldering diagnostic log saved for ${workOrderId}`, 'success', 'Log Saved');
-  };
 
   const handleSavePostRepairChecklist = (
     workOrderId: string,
@@ -1478,16 +1454,7 @@ export default function App() {
     addToast('Operating expense recorded successfully.', 'success', 'Expense Recorded');
   };
 
-  const handleDeleteExpense = (expenseId: string) => {
-    if (currentUser.role !== 'Admin') {
-      addToast('🔒 Access Denied: Only Admin accounts can delete expenses.', 'error', 'Permission Required');
-      return;
-    }
-    const exp = expenses.find((e) => e.id === expenseId);
-    setExpenses((prev) => prev.filter((e) => e.id !== expenseId));
-    deleteDocument('expenses', expenseId).catch(reportSaveError);
-    addToast(`Expense record "${exp ? exp.description : expenseId}" deleted`, 'info', 'Expense Deleted');
-  };
+  
 
   const handleRecordSupplierPayment = (debtId: string, paymentAmount: number, paymentMethod: string, note: string) => {
     setSupplierDebts((prev) => prev.map((d) => {

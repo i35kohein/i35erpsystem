@@ -3,15 +3,12 @@ import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
 import { CameraQrScannerModal } from '../common/CameraQrScannerModal';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 import { useIsIpad } from '../../hooks/useIsIpad';
-import { 
-  Plus, 
+import {
   Check, 
   X, 
   Sparkles, 
   Smartphone, 
-  User, 
   CircleDot, 
-  FileText, 
   Printer, 
   CheckCircle2, 
   AlertCircle,
@@ -43,9 +40,7 @@ import {
   RotateCcw, 
   AlertTriangle, 
   HelpCircle,
-  MessageSquare,
-  Search
-} from 'lucide-react';
+  Search} from 'lucide-react';
 import { 
   WorkOrder, 
   Customer, 
@@ -57,14 +52,11 @@ import {
 import { ModelRepairPrice } from '../../types/priceCatalog';
 import { Button } from '../ui';
 import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
-import { 
-  APPLE_MODEL_SERIES, 
+import {
   getAvailableColorsForModel, 
   WARRANTY_OPTIONS, 
-  AVAILABLE_REPAIRS, 
   DIAGNOSTIC_NAMES,
-  getRealisticColorStyle
-} from './deviceData';
+  getRealisticColorStyle } from './deviceData';
 import { toast } from '../../lib/toast';
 
 export interface TicketPrefillData {
@@ -134,7 +126,6 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
   onViewRepairTickets,
   onCancelEdit,
 }) => {
-  const [isAiLoading, setIsAiLoading] = useState(false);
   const [createdTicket, setCreatedTicket] = useState<WorkOrder | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
   // Wizard mode: one step at a time (Customer → Device → Repairs → Review)
@@ -335,23 +326,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
     }));
   };
 
-  const toggleRepairItem = (repair: typeof AVAILABLE_REPAIRS[0]) => {
-    const exists = selectedRepairs.some(r => r.id === repair.id);
-    if (exists) {
-      setSelectedRepairs(prev => prev.filter(r => r.id !== repair.id));
-    } else {
-      setSelectedRepairs(prev => [
-        ...prev,
-        {
-          id: repair.id,
-          name: repair.name,
-          basePrice: repair.basePrice,
-          discountPercent: 0,
-          finalPrice: repair.basePrice
-        }
-      ]);
-    }
-  };
+  
 
   // Submit / Register Device — validates, then shows inline errors + scrolls to the first one
   const handleRegisterDevice = () => {
