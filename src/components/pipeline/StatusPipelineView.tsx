@@ -507,15 +507,10 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
 
   return (
     <div className="space-y-3">
-      {/* Top Controls Bar (Kanban Pipeline Specific Actions) */}
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line-strong bg-white px-2.5 py-2 text-[11px] shadow-2xs">
-        <div className="flex min-w-0 items-center gap-1.5">
-          <span className="whitespace-nowrap font-extrabold text-ink">Active Pipeline Overview</span>
-          <span className="truncate text-[10px] font-medium text-muted">({filteredWorkOrders.length} tickets matching filters)</span>
-        </div>
-
-        <div className="flex items-center justify-end gap-1.5">
-          {onClearAllWorkOrders && workOrders.length > 0 && (
+      {/* Top Controls Bar (Kanban Pipeline Specific Actions) — header removed:
+          the page title already says "Pipeline", and filter toggles live in the drawer. */}
+      {onClearAllWorkOrders && workOrders.length > 0 && (
+        <div className="flex items-center justify-end rounded-xl border border-line-strong bg-white px-2.5 py-2 text-[11px] shadow-2xs">
             <button
               type="button"
               onClick={() => {
@@ -529,10 +524,8 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
               <Trash2 className="h-3 w-3 shrink-0 text-rose-600" />
               <span>Delete All Tickets ({workOrders.length})</span>
             </button>
-          )}
-
         </div>
-      </div>
+      )}
 
       {/* Active filter summary chips — one-tap clear (all viewports; wraps on mobile) */}
       <div className="block">
