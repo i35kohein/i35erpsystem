@@ -176,7 +176,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
   
 
   // Category Icon & Color Configuration matching 21 diagnostic tests
-  const getCategoryConfig = (key: string, group: string) => {
+  const getCategoryConfig = (key: string, _group: string) => {
     const k = key.toLowerCase();
     if (k.includes('battery')) {
       return {

@@ -167,7 +167,7 @@ export function usePriceCatalog(globalCurrencySymbol?: string, onUpdateGlobalCur
   };
 
   // Model operations
-  const addModel = (modelName: string, folderId?: string, cloneFromModel?: string) => {
+  const addModel = (modelName: string, _folderId?: string, cloneFromModel?: string) => {
     const trimmed = modelName.trim();
     if (!trimmed) return;
     if (catalog.some((m) => m.model.toLowerCase() === trimmed.toLowerCase())) return;

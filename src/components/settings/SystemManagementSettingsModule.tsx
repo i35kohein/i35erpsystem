@@ -28,8 +28,6 @@ import {
 import { Technician, SystemSettings, TechnicianLevel, PaymentMethodConfig, WorkOrder, NotificationTemplate, AppUser, UserRole, UserPermissions, PartItem, PartQualityTier, Supplier } from '../../types';
 import {DEFAULT_PAYMENT_METHODS, DEFAULT_NOTIFICATION_TEMPLATES} from '../../data/seedData';
 import { Button } from '../ui';
-import {useTheme} from '../../context/ThemeContext';
-import { useLanguage } from '../../context/LanguageContext';
 
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 

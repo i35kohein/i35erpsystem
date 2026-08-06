@@ -33,7 +33,6 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
   searchQuery: propSearchQuery,
   setSearchQuery: propSetSearchQuery,
   dateFilter: propDateFilter,
-  setDateFilter: propSetDateFilter,
 }) => {
   // Local or controlled filter states
   const [localSearchQuery, setLocalSearchQuery] = useState('');

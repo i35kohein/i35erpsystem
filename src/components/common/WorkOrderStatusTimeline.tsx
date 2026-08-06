@@ -555,7 +555,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
       {/* SECTION 4: Interactive Chronological Audit Timeline */}
       {filteredAuditItems.length > 0 ? (
         <div className="relative pl-6 sm:pl-8 space-y-5 before:absolute before:left-3 sm:before:left-4 before:top-3 before:bottom-3 before:w-0.5 before:bg-gradient-to-b before:from-brand before:via-[#AF52DE] before:to-emerald-500">
-          {filteredAuditItems.map((item, index) => {
+          {filteredAuditItems.map((item) => {
 
             // Determine Icon & Styling by Event Type
             let iconBg = 'bg-blue-600 text-white';

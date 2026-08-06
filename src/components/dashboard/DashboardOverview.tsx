@@ -156,12 +156,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   technicians,
   onNavigateToTab,
   onOpenNewWorkOrder,
-  onOpenAiAssistant,
-  onDeleteWorkOrder,
-  onUpdateWorkOrderStatus,
   onSelectPrintTag,
   dateFilter: externalDateFilter,
-  setDateFilter: externalSetDateFilter,
   onSettleInventoryFund,
 }) => {
   const [internalDateFilter] = useState<DateFilterState>({ preset: 'all' });

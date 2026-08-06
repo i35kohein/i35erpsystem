@@ -24,7 +24,7 @@ interface PosTabProps {
   splitFooterTextBySize: (text: string, start: number, ranges: Array<{ start: number; end: number; size: 'small' | 'medium' | 'large' }>, fallback: 'small' | 'medium' | 'large') => Array<{ text: string; size: string }>;
 }
 
-const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, settings, isSectionOpen, toggleSection, setIsDeviceTagPrinterOpen, setActiveSubTab, visibleStorePhones, receiptFooterEditorRef, receiptFooterPreviewLines, receiptFooterPreviewFontSize, selectedFooterAlignment, updateSelectedFooterLines, handleReceiptFooterChange, applyReceiptFooterAlignment, applyReceiptFooterTextSize, RECEIPT_FOOTER_ALIGNMENT_OPTIONS, RECEIPT_FOOTER_SIZE_OPTIONS, splitFooterTextBySize }) => {
+const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, toggleSection, setIsDeviceTagPrinterOpen, setActiveSubTab, visibleStorePhones, receiptFooterEditorRef, receiptFooterPreviewLines, receiptFooterPreviewFontSize, selectedFooterAlignment, updateSelectedFooterLines, handleReceiptFooterChange, applyReceiptFooterAlignment, applyReceiptFooterTextSize, RECEIPT_FOOTER_ALIGNMENT_OPTIONS, RECEIPT_FOOTER_SIZE_OPTIONS, splitFooterTextBySize }) => {
   return (
         <div className="space-y-6">
           {/* Top Banner Header */}

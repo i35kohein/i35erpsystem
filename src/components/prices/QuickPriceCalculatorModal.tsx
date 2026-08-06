@@ -33,7 +33,6 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
   isOpen,
   onClose,
   catalog,
-  folders,
   currencySymbol = '$',
   initialDevice = 'iPhone 15 Pro',
   onSelectModelForCatalog,

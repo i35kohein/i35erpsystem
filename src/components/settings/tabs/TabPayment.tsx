@@ -14,7 +14,7 @@ interface PaymentTabProps {
   handleSetAllPaymentMethodsState: (enabled: boolean) => void;
 }
 
-const PaymentTab: React.FC<PaymentTabProps> = ({ formData, setFormData, currentPaymentMethods, handleTogglePaymentMethod, handleUpdatePaymentMethodField, handleAddCustomPaymentMethod, handleResetPaymentMethods, handleSetAllPaymentMethodsState }) => {
+const PaymentTab: React.FC<PaymentTabProps> = ({ currentPaymentMethods, handleTogglePaymentMethod, handleUpdatePaymentMethodField, handleAddCustomPaymentMethod, handleResetPaymentMethods, handleSetAllPaymentMethodsState }) => {
   return (
         <div className="bg-white p-6 rounded-2xl border border-line-strong shadow-2xs space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line pb-4">

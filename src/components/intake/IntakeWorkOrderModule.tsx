@@ -66,21 +66,15 @@ interface IntakeWorkOrderModuleProps {
 
 export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   workOrders,
-  customers,
-  technicians,
   currentUser,
-  onSaveWorkOrder,
   onSelectPrintTag,
-  onOpenAiAssistant,
   onOpenNewWorkOrder,
   onDeleteWorkOrder,
   onClearAllWorkOrders,
   searchQuery,
-  setSearchQuery,
   filterStatus: propFilterStatus,
   setFilterStatus: propSetFilterStatus,
   dateFilter: propDateFilter,
-  setDateFilter: propSetDateFilter,
   onNavigateToCreateTicket,
 }) => {
   const [selectedWorkOrder, setSelectedWorkOrder] = useState<WorkOrder | null>(null);

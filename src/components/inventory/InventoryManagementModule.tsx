@@ -155,7 +155,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   onAddRma,
   onAddSupplier,
   onUpdateSupplier,
-  onDeleteSupplier,
+  // onDeleteSupplier removed (unused)
   onDeletePart,
   onUpdatePartStock,
   searchQuery,
@@ -970,7 +970,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
     setIsInlineSaving(true);
     try {
-      inlineSaveReview.forEach(({ part, changes }) => {
+      inlineSaveReview.forEach(({ part }) => {
         const draft = inlineDrafts[part.id];
         if (!draft) return;
         const parsedQuantity = draft.quantityInStock?.trim() ? Number(draft.quantityInStock) : part.quantityInStock;

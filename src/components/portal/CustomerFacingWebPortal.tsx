@@ -34,7 +34,6 @@ interface CustomerFacingWebPortalProps {
 
 export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = ({
   workOrders,
-  customers = [],
   systemSettings,
   onUpdateWorkOrder,
   onExitPortalMode,

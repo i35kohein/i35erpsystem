@@ -15,7 +15,7 @@ interface UsersTabProps {
   onDeleteUser?: (id: string) => void;
 }
 
-const UsersTab: React.FC<UsersTabProps> = ({ formData, setFormData, users, currentUser, handleOpenAddUser, handleOpenEditUser, onDeleteUser }) => {
+const UsersTab: React.FC<UsersTabProps> = ({ users, currentUser, handleOpenAddUser, handleOpenEditUser, onDeleteUser }) => {
   return (
         <div className="space-y-6">
           <div className="bg-white p-6 rounded-2xl border border-line-strong shadow-2xs space-y-6">

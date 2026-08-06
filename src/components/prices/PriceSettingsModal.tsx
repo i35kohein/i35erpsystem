@@ -118,7 +118,6 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
   deleteCategory,
   applyGlobalPriceAdjustment,
   applyGlobalWarranty,
-  formatPrice,
 }) => {
   const [selectedModel, setSelectedModel] = useState<string>(catalog[0]?.model || 'iPhone 15 Pro Max');
   const [newModelInput, setNewModelInput] = useState('');

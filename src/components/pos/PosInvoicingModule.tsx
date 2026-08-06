@@ -136,7 +136,6 @@ interface PosInvoicingModuleProps {
 
 export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   workOrders,
-  customers,
   parts = [],
   systemSettings,
   onMarkPaid,
@@ -144,7 +143,6 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   onSaveWorkOrder,
   searchQuery = '',
   dateFilter: propDateFilter,
-  setDateFilter: propSetDateFilter,
   statusFilter = 'ALL',
   onOpenSettings,
 }) => {

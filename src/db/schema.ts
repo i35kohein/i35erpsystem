@@ -75,6 +75,6 @@ export const parts = pgTable('parts', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, () => ({
   // Optional relations
 }));

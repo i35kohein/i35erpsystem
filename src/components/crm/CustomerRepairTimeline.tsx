@@ -110,7 +110,6 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
   systemSettings = DEFAULT_SYSTEM_SETTINGS,
   onPrintInvoice,
   showFilters = true,
-  compact = false,
   emptyClassName = '',
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -237,7 +236,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
       {/* Chronological Timeline Container */}
       {sortedOrders.length > 0 ? (
         <div className="relative pl-6 sm:pl-8 space-y-6 before:absolute before:left-3 sm:before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-gradient-to-b before:from-brand before:via-line before:to-line">
-          {sortedOrders.map((wo, index) => {
+          {sortedOrders.map((wo) => {
             const outcomeMeta = getOutcomeMeta(wo.status);
             const NodeIcon = outcomeMeta.icon;
             const isLogsExpanded = expandedLogWoIds.includes(wo.id);

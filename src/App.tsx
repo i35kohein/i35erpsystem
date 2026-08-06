@@ -1225,7 +1225,7 @@ export default function App() {
     );
   };
 
-  const handleConsumeInventoryFromWorkOrder = (workOrder: WorkOrder, paymentMethod: string) => {
+  const handleConsumeInventoryFromWorkOrder = (workOrder: WorkOrder, _paymentMethod: string) => {
     const inventoryLines = (workOrder.lineItems || []).filter((item) => item.partId && !item.isLabor && item.quantity > 0);
     if (!inventoryLines.length || workOrder.inventoryConsumedAt) return;
 

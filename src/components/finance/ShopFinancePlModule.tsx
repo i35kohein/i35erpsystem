@@ -47,8 +47,6 @@ interface ShopFinancePlModuleProps {
 export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
   workOrders,
   parts,
-  technicians,
-  suppliers,
   expenses,
   supplierDebts,
   technicianPayouts,
@@ -58,7 +56,6 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
   onUpdatePayoutStatus,
   onSettleInventoryFund,
   dateFilter,
-  setDateFilter,
 }) => {
   const activePaymentMethods = getActivePaymentMethods(systemSettings).filter((m) => m.enabled);
   const [activeTab, setActiveTab] = useState<'overview' | 'revenue' | 'expenses' | 'inventory-asset' | 'commissions' | 'accounts-payable' | 'inventory-fund' | 'parts-revenue'>('overview');

@@ -116,13 +116,11 @@ const getDiagnosticIcon = (name: string) => {
 export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
   workOrders,
   customers,
-  technicians,
   systemSettings,
   priceCatalog,
   prefill,
   onSaveWorkOrder,
   onSelectPrintTag,
-  onOpenAiAssistant,
   onViewRepairTickets,
   onCancelEdit,
 }) => {
