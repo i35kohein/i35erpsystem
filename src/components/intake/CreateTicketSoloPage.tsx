@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
 import { CameraQrScannerModal } from '../common/CameraQrScannerModal';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
+import { useIsIpad } from '../../hooks/useIsIpad';
 import { 
   Plus, 
   Check, 
@@ -138,6 +139,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
   const [isRegistering, setIsRegistering] = useState(false);
   // Wizard mode: one step at a time (Customer → Device → Repairs → Review)
   const [wizardMode, setWizardMode] = useState(false);
+  const isIpad = useIsIpad();
   const [wizardStep, setWizardStep] = useState(0);
   const editWorkOrder = prefill?.editWorkOrder ?? null;
   const isEditMode = !!editWorkOrder;
@@ -539,7 +541,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
     const selectedColorStyle = getRealisticColorStyle(createdTicket.deviceColor);
 
     return (
-      <div className="max-w-3xl xl:max-w-6xl mx-auto space-y-6 py-6">
+      <div className={`mx-auto space-y-6 py-6 ${isIpad ? 'max-w-6xl' : 'max-w-3xl xl:max-w-6xl'}`}>
         <div className="bg-white border border-line-strong rounded-2xl p-8 shadow-sm space-y-6 text-center">
           <div className="w-16 h-16 bg-[#E8F8EE] text-[#1E7E34] rounded-2xl flex items-center justify-center mx-auto shadow-inner">
             <CheckCircle2 className="w-8 h-8" />
@@ -628,7 +630,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
   const activeColorStyle = getRealisticColorStyle(deviceColor);
 
   return (
-    <div className="max-w-3xl xl:max-w-6xl mx-auto space-y-3 pb-5">
+    <div className={`mx-auto space-y-3 pb-5 ${isIpad ? 'max-w-6xl' : 'max-w-3xl xl:max-w-6xl'}`}>
       {/* Top Banner Header */}
       <div className="module-toolbar bg-white px-3.5 py-3 rounded-xl border border-line shadow-2xs flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2.5">
