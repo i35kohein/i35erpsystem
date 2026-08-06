@@ -824,7 +824,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                               ariaLabel={`Assign technician for ${wo.orderNumber}`}
                               placeholder="Assign"
                               menuAlign="right"
-                              buttonClassName="!h-8 !min-w-0 !px-2 !border-0 !bg-transparent !text-brand hover:!bg-transparent !shadow-none !text-xs"
+                              buttonClassName="!h-8 !min-w-0 !px-2 !border-0 !bg-transparent text-brand hover:!bg-transparent !shadow-none !text-xs"
                               options={[
                                 { value: 'unassigned', label: 'Unassigned' },
                                 ...technicians.map((t) => ({

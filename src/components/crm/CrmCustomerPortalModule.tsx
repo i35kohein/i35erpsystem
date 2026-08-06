@@ -336,6 +336,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                     {/* Expandable Row Toggle Bar */}
                     <div className="flex justify-between items-center mt-1.5 pt-1.5 border-t border-line/70">
                       <Button
+                        variant="ghost"
                         type="button"
                         onClick={(e) => toggleExpandCustomer(cust.id, e)}
                         className={`flex items-center space-x-1 text-xs font-bold text-brand hover:text-brand-deep transition-colors py-0.5 px-1.5 rounded-md hover:bg-blue-100/50 cursor-pointer ${FOCUS}`}

@@ -163,8 +163,10 @@ html[data-theme="dark-slate"] {
 
 
 
-/* F7: dark-slate CONTRAST overrides — text colors that fail on dark surfaces.
-   !important so they beat important-variant utilities like `!text-brand`. */
+/* F7: dark-slate CONTRAST overrides — text colors remapped for dark surfaces.
+   Text rules sit in @layer utilities AFTER generated utilities so they also beat
+   important-variant utilities like `!text-brand` (for !important, layered wins).
+   bg/border overrides stay unlayered (unlayered normal beats layered normal). */
 html[data-theme="dark-slate"] .text-brand { color: #6EA8FE !important; }
 html[data-theme="dark-slate"] .text-brand-deep { color: #6EA8FE !important; }
 html[data-theme="dark-slate"] .text-success { color: #4ADE80 !important; }
@@ -179,59 +181,63 @@ html[data-theme="dark-slate"] [class~="text-[#27B1AE]"] { color: #2DD4BF !import
 html[data-theme="dark-slate"] [class~="text-[#ED7132]"] { color: #FB923C !important; }
 html[data-theme="dark-slate"] [class~="text-[#5A3FD4]"] { color: #C4B5FD !important; }
 html[data-theme="dark-slate"] .text-slate-700 { color: #E2E8F0 !important; }
+html[data-theme="dark-slate"] .text-slate-600 { color: #CBD5E1 !important; }
 html[data-theme="dark-slate"] .text-emerald-700 { color: #34D399 !important; }
 html[data-theme="dark-slate"] .text-emerald-600 { color: #34D399 !important; }
+html[data-theme="dark-slate"] .text-emerald-800 { color: #4ADE80 !important; }
+html[data-theme="dark-slate"] .text-emerald-900 { color: #4ADE80 !important; }
 html[data-theme="dark-slate"] .text-rose-600 { color: #FB7185 !important; }
+html[data-theme="dark-slate"] .text-rose-700 { color: #FDA4AF !important; }
+html[data-theme="dark-slate"] .text-rose-800 { color: #FDA4AF !important; }
+html[data-theme="dark-slate"] .text-rose-950 { color: #FDA4AF !important; }
 html[data-theme="dark-slate"] .text-red-700 { color: #F87171 !important; }
+html[data-theme="dark-slate"] .text-red-800 { color: #FCA5A5 !important; }
 html[data-theme="dark-slate"] .text-violet-700 { color: #C4B5FD !important; }
+html[data-theme="dark-slate"] .text-violet-800 { color: #C4B5FD !important; }
+html[data-theme="dark-slate"] .text-violet-900 { color: #C4B5FD !important; }
 html[data-theme="dark-slate"] .text-amber-700, html[data-theme="dark-slate"] .text-amber-600, html[data-theme="dark-slate"] .text-amber-500 { color: #FBBF24 !important; }
-/* Light pastel wells → translucent dark tints (unlayered, non-important is fine;
-   bg-white is already mapped to var(--card-bg) by the dynamic section) */
+html[data-theme="dark-slate"] .text-amber-800 { color: #FBBF24 !important; }
+html[data-theme="dark-slate"] .text-amber-900 { color: #FBBF24 !important; }
+html[data-theme="dark-slate"] .text-orange-700 { color: #FDBA74 !important; }
+html[data-theme="dark-slate"] .text-orange-800 { color: #FDBA74 !important; }
+html[data-theme="dark-slate"] .text-teal-700 { color: #2DD4BF !important; }
+html[data-theme="dark-slate"] .text-blue-800 { color: #93C5FD !important; }
 html[data-theme="dark-slate"] .bg-amber-50\/20 { background-color: rgba(245, 158, 11, 0.10) !important; }
 html[data-theme="dark-slate"] .bg-amber-50\/40 { background-color: rgba(245, 158, 11, 0.12) !important; }
 html[data-theme="dark-slate"] .bg-amber-50\/50 { background-color: rgba(245, 158, 11, 0.13) !important; }
 html[data-theme="dark-slate"] .bg-amber-50\/60 { background-color: rgba(245, 158, 11, 0.14) !important; }
+html[data-theme="dark-slate"] .bg-amber-50\/80 { background-color: rgba(245, 158, 11, 0.15) !important; }
+html[data-theme="dark-slate"] .bg-amber-50 { background-color: rgba(245, 158, 11, 0.13) !important; }
+html[data-theme="dark-slate"] .bg-yellow-50 { background-color: rgba(234, 179, 8, 0.13) !important; }
 html[data-theme="dark-slate"] .bg-blue-50\/60 { background-color: rgba(59, 130, 246, 0.16) !important; }
+html[data-theme="dark-slate"] .bg-blue-50 { background-color: rgba(59, 130, 246, 0.16) !important; }
 html[data-theme="dark-slate"] .bg-teal-50\/60 { background-color: rgba(20, 184, 166, 0.14) !important; }
+html[data-theme="dark-slate"] .bg-teal-50 { background-color: rgba(20, 184, 166, 0.14) !important; }
 html[data-theme="dark-slate"] .bg-orange-50\/60 { background-color: rgba(249, 115, 22, 0.14) !important; }
+html[data-theme="dark-slate"] .bg-orange-50 { background-color: rgba(249, 115, 22, 0.14) !important; }
 html[data-theme="dark-slate"] .bg-emerald-50\/60 { background-color: rgba(16, 185, 129, 0.14) !important; }
 html[data-theme="dark-slate"] .bg-emerald-50\/50 { background-color: rgba(16, 185, 129, 0.13) !important; }
+html[data-theme="dark-slate"] .bg-emerald-50 { background-color: rgba(16, 185, 129, 0.14) !important; }
 html[data-theme="dark-slate"] .bg-rose-50\/60 { background-color: rgba(244, 63, 94, 0.14) !important; }
 html[data-theme="dark-slate"] .bg-rose-50 { background-color: rgba(244, 63, 94, 0.14) !important; }
 html[data-theme="dark-slate"] .bg-red-50 { background-color: rgba(239, 68, 68, 0.14) !important; }
-html[data-theme="dark-slate"] .bg-emerald-50 { background-color: rgba(16, 185, 129, 0.14) !important; }
 html[data-theme="dark-slate"] .bg-violet-50\/80 { background-color: rgba(139, 92, 246, 0.15) !important; }
+html[data-theme="dark-slate"] .bg-violet-50 { background-color: rgba(139, 92, 246, 0.15) !important; }
 html[data-theme="dark-slate"] .bg-purple-50 { background-color: rgba(139, 92, 246, 0.15) !important; }
+html[data-theme="dark-slate"] .bg-slate-100 { background-color: rgba(100, 116, 139, 0.18) !important; }
+html[data-theme="dark-slate"] .bg-slate-50 { background-color: rgba(100, 116, 139, 0.12) !important; }
 html[data-theme="dark-slate"] .bg-white\/50 { background-color: rgba(19, 27, 46, 0.7) !important; }
 html[data-theme="dark-slate"] .bg-ink { background-color: #26334D !important; }
-/* Sidebar active nav item (hardcoded light-blue) */
 html[data-theme="dark-slate"] [class~="bg-[#EAF2FF]"] { background-color: rgba(21, 89, 166, 0.25) !important; }
 html[data-theme="dark-slate"] [class~="text-[#1559A6]"] { color: #6EA8FE !important; }
 html[data-theme="dark-slate"] [class~="border-[#B8D3F4]"] { border-color: rgba(107, 150, 205, 0.45) !important; }
 html[data-theme="dark-slate"] [class~="bg-[#7360F2]/10"] { background-color: rgba(115, 96, 242, 0.16) !important; }
-/* Light chip borders → translucent tinted borders */
+html[data-theme="dark-slate"] [class~="bg-[#FAFAFC]"] { background-color: rgba(19, 27, 46, 0.55) !important; }
+html[data-theme="dark-slate"] [class~="bg-[#F8FAFC]"] { background-color: rgba(19, 27, 46, 0.55) !important; }
+html[data-theme="dark-slate"] [class~="bg-sky-400"] { background-color: #0284C7 !important; }
 html[data-theme="dark-slate"] .border-amber-200 { border-color: rgba(253, 230, 138, 0.3) !important; }
 html[data-theme="dark-slate"] .border-rose-200 { border-color: rgba(253, 164, 175, 0.3) !important; }
-html[data-theme="dark-slate"] .text-rose-800 { color: #FDA4AF !important; }
-html[data-theme="dark-slate"] .text-rose-700 { color: #FDA4AF !important; }
-html[data-theme="dark-slate"] .text-red-800 { color: #FCA5A5 !important; }
-html[data-theme="dark-slate"] .text-emerald-800 { color: #4ADE80 !important; }
-html[data-theme="dark-slate"] .text-teal-700 { color: #2DD4BF !important; }
-html[data-theme="dark-slate"] .text-blue-800 { color: #93C5FD !important; }
-html[data-theme="dark-slate"] .text-violet-800 { color: #C4B5FD !important; }
-html[data-theme="dark-slate"] .text-amber-800 { color: #FBBF24 !important; }
-html[data-theme="dark-slate"] .text-orange-700 { color: #FDBA74 !important; }
-html[data-theme="dark-slate"] .text-slate-600 { color: #CBD5E1 !important; }
-html[data-theme="dark-slate"] .bg-slate-100 { background-color: rgba(100, 116, 139, 0.18) !important; }
-html[data-theme="dark-slate"] .bg-slate-50 { background-color: rgba(100, 116, 139, 0.12) !important; }
-html[data-theme="dark-slate"] .bg-blue-50 { background-color: rgba(59, 130, 246, 0.16) !important; }
-html[data-theme="dark-slate"] .bg-teal-50 { background-color: rgba(20, 184, 166, 0.14) !important; }
-html[data-theme="dark-slate"] .bg-orange-50 { background-color: rgba(249, 115, 22, 0.14) !important; }
-html[data-theme="dark-slate"] .bg-violet-50 { background-color: rgba(139, 92, 246, 0.15) !important; }
-html[data-theme="dark-slate"] .bg-amber-50 { background-color: rgba(245, 158, 11, 0.13) !important; }
-html[data-theme="dark-slate"] .bg-yellow-50 { background-color: rgba(234, 179, 8, 0.13) !important; }
 html[data-theme="dark-slate"] .border-red-200 { border-color: rgba(252, 165, 165, 0.3) !important; }
-
 /* Component Geometry: Square / Rectangular Design System vs Curved Soft Geometry */
 html[data-geometry="square"] *,
 html[data-geometry="square"] ::before,
@@ -753,6 +759,20 @@ html[data-theme] [class~="bg-[#ED7132]"] {
   scrollbar-gutter: stable;
 }
 
+/* Fade the bottom edge of tall scrollable tables on touch devices so a
+   half-visible row reads as "more below" instead of a clipping bug. */
+@media (hover: none), (pointer: coarse) {
+  .workspace-panel__scroll.scroll-shadow-bottom {
+    -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 22px), transparent 100%);
+    mask-image: linear-gradient(to bottom, black calc(100% - 22px), transparent 100%);
+  }
+  /* keep the existing right-edge fade when both apply */
+  .workspace-panel__scroll.scroll-shadow-right.scroll-shadow-bottom {
+    -webkit-mask-image: linear-gradient(to right, transparent 0, black 18px), linear-gradient(to bottom, black calc(100% - 22px), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, black 18px), linear-gradient(to bottom, black calc(100% - 22px), transparent 100%);
+  }
+}
+
 /* Fade the right edge of wide (horizontally scrollable) tables on mobile
    until the user scrolls to the end. Class toggled by the modules that
    render .workspace-panel__scroll. Only active on touch-sized screens so
@@ -1206,3 +1226,16 @@ html[data-theme] :is(
 body {
   scrollbar-gutter: stable;
 }
+
+/* Button backgrounds that map to var(--primary) — in dark --primary is a bright
+   accent (#38BDF8) that fails with white text, so re-map to dark button blues. */
+html[data-theme="dark-slate"] [class~="bg-[#AF52DE]"] { background-color: #6D28D9 !important; }
+html[data-theme="dark-slate"] [class~="bg-[#7360F2]"] { background-color: #5A3FD4 !important; }
+html[data-theme="dark-slate"] [class~="bg-[#0077ED]"] { background-color: #0051B3 !important; }
+html[data-theme="dark-slate"] .bg-purple-500, html[data-theme="dark-slate"] .bg-purple-600, html[data-theme="dark-slate"] .bg-purple-700 { background-color: #6D28D9 !important; }
+html[data-theme="dark-slate"] .bg-indigo-600 { background-color: #4338CA !important; }
+html[data-theme="dark-slate"] .bg-teal-500, html[data-theme="dark-slate"] .bg-teal-600 { background-color: #0F766E !important; }
+html[data-theme="dark-slate"] [class~="text-[#1E7E34]"] { color: #4ADE80 !important; }
+html[data-theme="dark-slate"] .text-amber-950 { color: #FBBF24 !important; }
+
+

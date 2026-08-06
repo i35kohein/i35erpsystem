@@ -495,6 +495,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       </span>
                       {(wo.imei || wo.serialNumber) && (
                         <Button
+                          variant="ghost"
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -801,7 +802,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     <CreditCard className="w-3.5 h-3.5" />
                     <span>Payment Method Selection ({activePaymentMethods.length} Enabled)</span>
                   </h3>
-                  <Button type="button" onClick={onOpenSettings} className="text-xs text-brand hover:underline font-semibold cursor-pointer" title="Open Settings → Payment Methods">Configured in Settings → Payment Methods</Button>
+                  <Button variant="ghost" type="button" onClick={onOpenSettings} className="text-xs text-brand hover:underline font-semibold cursor-pointer" title="Open Settings → Payment Methods">Configured in Settings → Payment Methods</Button>
                 </div>
 
                 {activePaymentMethods.length === 0 ? (

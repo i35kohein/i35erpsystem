@@ -896,12 +896,12 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
 
         {/* Serial / IMEI Input */}
         <div className="p-3 bg-surface/80 rounded-xl border border-line space-y-2.5">
-          <div className="flex items-center justify-between border-b border-line pb-2">
-            <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
-              <Smartphone className="w-4 h-4 text-brand" />
-              <span>Serial Number & IMEI Information</span>
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-2">
+            <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2 min-w-0">
+              <Smartphone className="w-4 h-4 text-brand shrink-0" />
+              <span className="truncate">Serial Number &amp; IMEI Information</span>
             </h3>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 shrink-0">
             <Button
               type="button"
               onClick={() => setIsCameraScannerOpen(true)}
@@ -929,7 +929,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             <div>
               <label htmlFor="field-imei" className="flex items-center justify-between text-muted mb-1 font-medium">
                 <span>IMEI Number (15 Digits)</span>
-                <span className={`text-xs font-mono font-bold ${imei.length === 15 ? 'text-success' : 'text-muted'}`}>{imei.length}/15</span>
+                <span className={`shrink-0 text-xs font-mono font-bold ${imei.length === 15 ? 'text-success' : 'text-muted'}`}>{imei.length}/15</span>
               </label>
               <input
                 id="field-imei"
@@ -1346,7 +1346,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             {repairCount === 0 ? (
               <div className="flex-1 flex items-center gap-2 text-xs min-w-0" role="status">
                 <AlertCircle className="w-4 h-4 text-amber-500 shrink-0" />
-                <span className="font-semibold text-[#51525C] truncate">
+                <span className="font-semibold text-[#51525C] line-clamp-2 leading-snug">
                   {!customerName.trim() || !customerPhone.trim()
                     ? 'Start with Step 1 — customer name & phone'
                     : !deviceModel

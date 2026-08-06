@@ -342,7 +342,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           </div>
         ) : viewMode === 'table' ? (
           /* TABLE VIEW */
-          <div className="workspace-panel__scroll scroll-shadow-right rounded-xl">
+          <div className="workspace-panel__scroll scroll-shadow-right scroll-shadow-bottom rounded-xl pb-3">
             <table className="w-full text-left border-collapse">
               <thead className="sticky top-0 z-20 border-b border-line bg-surface font-mono text-xs uppercase text-muted shadow-2xs">
                 <tr>
@@ -353,7 +353,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                   <th className="w-[112px] px-2 py-2 bg-surface hidden lg:table-cell">Assigned Tech</th>
                   <th className="w-[92px] px-2 py-2 bg-surface hidden lg:table-cell">Priority</th>
                   <th className="w-[114px] px-2 py-2 bg-surface">Stage & Status</th>
-                  <th className="w-[112px] px-2 py-2 bg-surface">Amount</th>
+                  <th className="w-[112px] px-2 py-2 bg-surface text-right">Amount</th>
                   <th className="w-[44px] px-2 py-2 text-right bg-surface hidden xl:table-cell">Detail</th>
                 </tr>
               </thead>
@@ -389,8 +389,8 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                     >
                       {/* Ticket # & Date */}
                       <td className="px-2 py-2">
-                        <div className="flex items-start space-x-2">
-                          <div className="mt-0.5 shrink-0 rounded-md bg-brand/10 p-1 text-brand-deep">
+                        <div className="flex items-center space-x-2">
+                          <div className="shrink-0 rounded-md bg-brand/10 p-1 text-brand-deep">
                             <Ticket className="h-3 w-3" />
                           </div>
                           <div className="min-w-0">
@@ -420,7 +420,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
 
                       {/* Symptoms / Service */}
                       <td className="px-2 py-2 text-ink hidden lg:table-cell">
-                        <p className="line-clamp-1 max-w-[180px] text-xs font-semibold" title={wo.symptomsReported || wo.serviceType}>
+                        <p className="line-clamp-2 max-w-[190px] text-xs font-semibold leading-snug" title={wo.symptomsReported || wo.serviceType}>
                           {wo.symptomsReported || wo.serviceType || 'General Repair'}
                         </p>
                       </td>
@@ -436,7 +436,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                       </td>
 
                       <td className="px-2 py-2 hidden lg:table-cell">
-                        <PriorityBadge priority={wo.priority} size="xs" />
+                        <PriorityBadge priority={wo.priority} size="xs" showNormal />
                       </td>
 
                       <td className="px-2 py-2">
