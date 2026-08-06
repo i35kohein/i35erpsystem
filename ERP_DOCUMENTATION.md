@@ -100,7 +100,10 @@ React SPA (src/) ──┬── Supabase (erp_records, realtime channels, offli
 - **Kebab action menus:** `ui/dropdown-menu.tsx` (Radix) — table/modal action rows use
   a ⋮ menu (e.g. TicketDetailInspectorModal: Edit/Print/Delete; inventory part detail).
 - **Create Ticket = slide-over drawer** (right-side, max-w-2xl/3xl, backdrop close) —
-  not a full page; `embedded` prop on CreateTicketSoloPage.
+  not a full page; `embedded` prop on CreateTicketSoloPage. Drawer defaults to the
+  **wizard** (Customer → Device → Repairs → Review) with a **Quick Create** button
+  (customer + device + fault only — repairs added later via "Add Repairs & Details"
+  which reopens edit mode). Full ticket details live in TicketDetailInspectorModal tabs.
 
 ## 9. Development Workflow
 
