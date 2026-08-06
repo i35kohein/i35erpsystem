@@ -75,4 +75,5 @@ Screenshots: `~/Desktop/erp-micro/` (also workspace `erp-micro/`)
 ## Fix status (applied live 2026-08-06)
 - **P0 ✅ (commit 972c45b):** font floor 10/11px→12px app-wide (62 files, 909 spots); tokens documented in @theme. Dashboard buttons 32/39/40/41→32/38/40; no <12px text anywhere.
 - **P1 ✅ (this commit):** Work Intake toolbar toggle buttons py-2→h-9 (Table/Grid/Scan all 36px — verified live); sidebar badges unified text-xs 12px (was 9/8px mixed; all 23px tall now); topbar Reset Draft py-1.5→h-10 (40px, matches Search/Save).
-- Remaining P1: card padding normalization (p-8×25, p-12×8 → token), remaining raw-button height strays (38px padding buttons). P2: baseline alignment, gap rhythm.
+- **P1b ✅ (this commit):** Dashboard tab pills `py-2 min-h-10` → `h-10` fixed — all 7+ pills exactly 40px (was 38/40 mixed); POS compact cards p-3(12px)→p-4(16px) — POS now 16/20px only (was 12/16/20). p-8/p-12 reviewed: all are standalone cards or empty states (intentional, kept).
+- P1 complete. Remaining: P2 (baseline alignment — POS line items/table headers, gap rhythm — dashboard badge spacing, finance spacing).

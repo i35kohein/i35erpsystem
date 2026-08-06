@@ -453,7 +453,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         handleSelectWo();
                       }
                     }}
-                    className={`p-3 rounded-xl border transition-all cursor-pointer ${
+                    className={`p-4 rounded-xl border transition-all cursor-pointer ${
                       isSelected
                         ? 'bg-brand-soft border-brand shadow-xs'
                         : 'bg-surface border-line hover:bg-slate-100'
@@ -684,7 +684,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-6 rounded-r-xl bg-gradient-to-l from-white/70 to-transparent xl:hidden" />
                 </div>
 
-                <div className="bg-white border border-line rounded-xl p-3 space-y-2">
+                <div className="bg-white border border-line rounded-xl p-4 space-y-2">
                   <button
                     type="button"
                     onClick={() => setIsAddPartOpen(!isAddPartOpen)}
@@ -764,7 +764,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 </div>
 
                 {/* Calculation Summary */}
-                <div className="bg-surface/80 p-3 rounded-xl border border-line space-y-1.5 text-right">
+                <div className="bg-surface/80 p-4 rounded-xl border border-line space-y-1.5 text-right">
                   <div className="flex justify-between text-muted">
                     <span>Subtotal:</span>
                     <span className="font-mono text-ink">{selectedWo.subtotal.toLocaleString()} MMK</span>
@@ -785,7 +785,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       <span className="font-mono">-{selectedWo.depositAmount.toLocaleString()} MMK</span>
                     </div>
                   )}
-                  <div className="rounded-xl bg-brand-soft border border-brand/20 p-3 flex items-center justify-between">
+                  <div className="rounded-xl bg-brand-soft border border-brand/20 p-4 flex items-center justify-between">
                     <span className="text-sm font-extrabold text-ink">Amount Due Now:</span>
                     <span className="text-brand font-mono text-2xl font-black tracking-tight">
                       {selectedWo.totalAmount.toLocaleString()} <span className="text-sm font-extrabold">MMK</span>
@@ -1074,7 +1074,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 )}
 
                 {paymentMethod === 'Cash' && (
-                  <div className="p-3 bg-surface/80 border border-line rounded-xl space-y-2">
+                  <div className="p-4 bg-surface/80 border border-line rounded-xl space-y-2">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <label className="block text-xs font-extrabold text-ink">Cash Amount Tendered (MMK):</label>
                       <div className="flex flex-wrap items-center gap-1">
@@ -1308,7 +1308,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               )}
             </div>
 
-            <div className="rounded-xl bg-brand-soft border border-brand/20 p-3 flex items-center justify-between">
+            <div className="rounded-xl bg-brand-soft border border-brand/20 p-4 flex items-center justify-between">
               <span className="text-xs font-extrabold text-ink">Total to collect</span>
               <span className="text-brand font-mono text-lg font-black">{selectedWo.totalAmount.toLocaleString()} MMK</span>
             </div>
@@ -1422,7 +1422,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               </div>
             </div>
 
-            <div className="p-3 bg-surface rounded-xl border border-line space-y-1 font-mono">
+            <div className="p-4 bg-surface rounded-xl border border-line space-y-1 font-mono">
               <div className="flex justify-between text-[#28A745] font-bold">
                 <span>TOTAL PAID:</span>
                 <span>
