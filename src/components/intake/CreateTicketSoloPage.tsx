@@ -648,12 +648,6 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       {/* Main Container */}
       <div className="bg-white border border-line rounded-xl p-4 shadow-xs space-y-4">
 
-        {/* UI Direction Helper Banner */}
-        <div className="flex items-center gap-2 rounded-lg border border-brand/20 bg-[#F0F7FF] px-3 py-2 text-xs text-[#51525C]">
-          <HelpCircle className="w-3.5 h-3.5 text-brand shrink-0" />
-          <span>Enter customer details, choose the device, add repairs, then complete the intake check.</span>
-        </div>
-
         {/* Stepper removed per Ko Hein 2026-08-05 — jump anchors (intake-customer/device/repairs/diagnostics)
            are kept for validation-error scrolling; scroll-mt-40 still applies. */}
 
@@ -1417,8 +1411,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                       setWizardStep((step) => Math.min(3, step + 1));
                       window.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
-                    size="lg"
-                    className="flex-1 sm:flex-none sm:min-w-40 bg-brand hover:bg-[#0077ED] text-white font-black"
+                    className="flex-1 h-10 sm:flex-none sm:min-w-40 bg-brand hover:bg-[#0077ED] text-white font-black"
                   >
                     Next <ArrowRight className="w-4 h-4" />
                   </Button>
@@ -1427,8 +1420,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                     type="button"
                     onClick={handleRegisterDevice}
                     disabled={isRegistering}
-                    size="lg"
-                    className="flex-1 sm:flex-none bg-brand hover:bg-[#0077ED] text-white font-black"
+                    className="flex-1 h-10 sm:flex-none bg-brand hover:bg-[#0077ED] text-white font-black"
                   >
                     {isRegistering ? (
                       <span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
@@ -1444,8 +1436,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               type="button"
               onClick={handleRegisterDevice}
               disabled={isRegistering}
-              size="lg"
-              className={`w-full sm:w-auto sm:min-w-72 font-black text-sm ${
+              className={`h-10 w-full sm:w-auto sm:min-w-72 font-black text-sm ${
                 isRegistering
                   ? 'bg-muted text-white opacity-80'
                   : 'bg-brand hover:bg-[#0077ED] text-white'
