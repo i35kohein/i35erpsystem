@@ -353,11 +353,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   }, [revenueWorkOrders]);
 
   const totalPartsCost = useMemo(() => {
-    return filteredWorkOrders.reduce((sum, wo) => {
+    // Match revenue timing: COGS only for revenue-eligible tickets (Finished / Taken Out).
+    // Counting line-item estimates of still-open quotes (Receive / In Progress / Pending)
+    // against completed revenue produced a misleading negative margin.
+    return revenueWorkOrders.reduce((sum, wo) => {
       const lineItems = wo.lineItems || [];
       return sum + lineItems.reduce((c, li) => c + (li.unitCost || 0) * (li.quantity || 1), 0);
     }, 0);
-  }, [filteredWorkOrders]);
+  }, [revenueWorkOrders]);
 
   const totalMargin = totalRevenue - totalPartsCost;
   const marginPercent = totalRevenue > 0 ? Math.round((totalMargin / totalRevenue) * 100) : 0;
