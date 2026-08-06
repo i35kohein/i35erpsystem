@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo, lazy, Suspense } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Sparkles, Plus, CircleDot, Search, Filter, Calculator, Folder, Settings, Download, Database, ExternalLink, ClipboardList, Kanban, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, ChevronDown, PhoneCall, Truck, Boxes, CreditCard, Users, DollarSign, LayoutDashboard, Timer, MoreHorizontal, SlidersHorizontal, Eye, Stethoscope } from 'lucide-react';
+import { Sparkles, Plus, CircleDot, Search, Filter, Calculator, Folder, Settings, Download, Database, ExternalLink, ClipboardList, Kanban, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, ChevronDown, PhoneCall, Truck, Boxes, CreditCard, Users, DollarSign, LayoutDashboard, Timer, MoreHorizontal, SlidersHorizontal, Eye, Stethoscope, Edit2 } from 'lucide-react';
 import { subscribeToCollection, fetchCloudCollection, saveDocument, saveBatchDocuments, deleteDocument, clearCollection } from './lib/supabase';
 import { setActiveUserId, notifyAccountChanged } from './utils/accountSettings';
 
@@ -132,6 +132,9 @@ export default function App() {
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
   const [stockFilter, setStockFilter] = useState<string>('ALL');
   const [modelFilter, setModelFilter] = useState<string>('ALL');
+  // Inventory view/edit — drawer controls these on iPad (module toolbar keeps them on desktop)
+  const [inventoryViewMode, setInventoryViewMode] = useState<'stock' | 'profit' | 'matrix'>('stock');
+  const [inventoryEditMode, setInventoryEditMode] = useState(false);
   const [customerTypeFilter, setCustomerTypeFilter] = useState<string>('ALL');
   const [dateFilter, setDateFilter] = useState<DateFilterState>({ preset: 'all' });
   const [showBottlenecksOnly, setShowBottlenecksOnly] = useState<boolean>(false);
@@ -795,6 +798,43 @@ export default function App() {
 
         {tab === 'inventory' && (
           <>
+            <div>
+              <label className={labelCls}>View</label>
+              <div className="grid grid-cols-3 gap-1.5">
+                {(['stock', 'profit', 'matrix'] as const).map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => setInventoryViewMode(v)}
+                    className={`flex items-center justify-center rounded-xl border px-2 py-2.5 text-xs font-extrabold transition-colors cursor-pointer active:scale-95 ${
+                      inventoryViewMode === v
+                        ? 'bg-ink text-white border-ink shadow-2xs'
+                        : 'bg-white text-ink border-line hover:bg-slate-100'
+                    }`}
+                  >
+                    {v === 'stock' ? 'Stock' : v === 'profit' ? 'Profit' : 'Matrix'}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className={labelCls}>Edit</label>
+              <button
+                type="button"
+                onClick={() => setInventoryEditMode((m) => !m)}
+                className={`${rowCls} ${
+                  inventoryEditMode
+                    ? 'bg-amber-500 text-white border-amber-600 shadow-2xs'
+                    : 'bg-white text-ink border-line hover:bg-slate-100'
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <Edit2 className={`w-4 h-4 ${inventoryEditMode ? 'text-white' : 'text-amber-600'}`} />
+                  Edit Rows
+                </span>
+                <span className={`text-[10px] ${inventoryEditMode ? 'text-white/80' : 'text-muted'}`}>{inventoryEditMode ? 'On' : 'Off'}</span>
+              </button>
+            </div>
             <div>
               <label className={labelCls}>Device Model</label>
               <DrawerSelect
@@ -2197,6 +2237,10 @@ export default function App() {
                   setSelectedQuality={setStockFilter}
                   selectedModelFilter={modelFilter}
                   setSelectedModelFilter={setModelFilter}
+                  viewMode={inventoryViewMode}
+                  setViewMode={setInventoryViewMode}
+                  inlineEditMode={inventoryEditMode}
+                  setInlineEditMode={setInventoryEditMode}
                   showAddModal={inventoryAddModalOpen}
                   setShowAddModal={setInventoryAddModalOpen}
                 />

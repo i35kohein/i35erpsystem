@@ -109,6 +109,10 @@ interface InventoryManagementModuleProps {
   setSelectedQuality?: (q: string) => void;
   selectedModelFilter?: string;
   setSelectedModelFilter?: (m: string) => void;
+  viewMode?: 'stock' | 'profit' | 'matrix';
+  setViewMode?: (v: 'stock' | 'profit' | 'matrix') => void;
+  inlineEditMode?: boolean;
+  setInlineEditMode?: (v: boolean | ((prev: boolean) => boolean)) => void;
   showAddModal?: boolean;
   setShowAddModal?: (s: boolean) => void;
 }
@@ -166,6 +170,10 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   setSelectedQuality: propSetSelectedQuality,
   selectedModelFilter: propSelectedModelFilter,
   setSelectedModelFilter: propSetSelectedModelFilter,
+  viewMode: propViewMode,
+  setViewMode: propSetViewMode,
+  inlineEditMode: propInlineEditMode,
+  setInlineEditMode: propSetInlineEditMode,
   showAddModal: propShowAddModal,
   setShowAddModal: propSetShowAddModal,
 }) => {
@@ -189,11 +197,16 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   }, [filterModal]);
   const [localSearchQuery, setLocalSearchQuery] = useState<string>('');
   const [localShowAddModal, setLocalShowAddModal] = useState(false);
-  const [viewMode, setViewMode] = useState<'stock' | 'profit' | 'matrix'>('stock');
+  const [localViewMode, setLocalViewMode] = useState<'stock' | 'profit' | 'matrix'>('stock');
+  // Controlled by App (iPad drawer) when provided; falls back to local state.
+  const viewMode = propViewMode !== undefined ? propViewMode : localViewMode;
+  const setViewMode = propSetViewMode || setLocalViewMode;
   const [isMatrixPrintOpen, setIsMatrixPrintOpen] = useState(false);
   const [isTagsPrintOpen, setIsTagsPrintOpen] = useState(false);
   const [selectedTagIds, setSelectedTagIds] = useState<Set<string>>(new Set());
-  const [inlineEditMode, setInlineEditMode] = useState(false);
+  const [localInlineEditMode, setLocalInlineEditMode] = useState(false);
+  const inlineEditMode = propInlineEditMode !== undefined ? propInlineEditMode : localInlineEditMode;
+  const setInlineEditMode = propSetInlineEditMode || setLocalInlineEditMode;
   // Phones default to the card grid — the stock table is unusable below md.
   const [stockView, setStockView] = useState<'table' | 'cards'>('table');
   const [inlineDrafts, setInlineDrafts] = useState<Record<string, InlineDraft>>({});
@@ -1044,7 +1057,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
         {/* Right cluster — one line on md+ */}
         <div className="flex flex-col md:flex-row md:items-center gap-2 w-full lg:w-auto lg:ml-auto min-w-0">
-          {/* Dual View Switcher — full-width equal segmented on mobile */}
+          {/* Dual View Switcher — desktop toolbar; iPad: lives in the filter drawer */}
+          {!isIpad && (
           <div className="bg-surface rounded-xl border border-line flex items-center p-1 w-full md:w-auto md:shrink-0">
             <button
               type="button"
@@ -1083,6 +1097,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <span>Matrix</span>
             </button>
           </div>
+          )}
 
           {/* Filters — desktop only (iPad: side drawer) */}
           {!isIpad && (
@@ -1198,7 +1213,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 <span className="hidden sm:inline">Print Tags</span>
               </button>
 
-              {/* Edit / Done toggle */}
+              {/* Edit / Done toggle — desktop toolbar; iPad: lives in the filter drawer */}
+              {!isIpad && (
               <button
                 type="button"
                 onClick={() => {
@@ -1219,6 +1235,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 <Edit2 className="h-3.5 w-3.5" />
                 <span>{inlineEditMode ? 'Done' : 'Edit'}</span>
               </button>
+              )}
 
               {/* Save — far right end, only while editing */}
               {inlineEditMode && (
