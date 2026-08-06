@@ -11,7 +11,7 @@ import {Truck,
   Grid,
   List} from 'lucide-react';
 import { Supplier, RmaItem, PurchaseOrder, PartItem, RmaStatus } from '../../types';
-import { Button } from '../ui';
+import { Button , Input } from '../ui';
 
 interface SupplierRmaModuleProps {
   suppliers: Supplier[];
@@ -546,7 +546,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
 
               <div>
                 <label className="block text-muted mb-1">Return Shipment Tracking #</label>
-                <input
+                <Input
                   type="text"
                   value={newRmaData.trackingNumber || ''}
                   onChange={(e) => setNewRmaData({ ...newRmaData, trackingNumber: e.target.value })}
@@ -597,7 +597,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
             <div className="space-y-3">
               <div>
                 <label className="block font-bold text-ink mb-1">Supplier Vendor Name *</label>
-                <input
+                <Input
                   type="text"
                   required
                   value={newSupplierForm.name}
@@ -610,7 +610,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="block font-bold text-ink mb-1">Short Code *</label>
-                  <input
+                  <Input
                     type="text"
                     required
                     value={newSupplierForm.code}
@@ -621,7 +621,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                 </div>
                 <div>
                   <label className="block font-bold text-ink mb-1">Phone Number</label>
-                  <input
+                  <Input
                     type="text"
                     value={newSupplierForm.phone}
                     onChange={(e) => setNewSupplierForm({ ...newSupplierForm, phone: e.target.value })}
@@ -633,7 +633,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
 
               <div>
                 <label className="block font-bold text-ink mb-1">Contact Email</label>
-                <input
+                <Input
                   type="email"
                   value={newSupplierForm.contactEmail}
                   onChange={(e) => setNewSupplierForm({ ...newSupplierForm, contactEmail: e.target.value })}
@@ -644,7 +644,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
 
               <div>
                 <label className="block font-bold text-ink mb-1">Avg RMA Lead Time (Days)</label>
-                <input
+                <Input
                   type="number"
                   value={newSupplierForm.avgRmaTurnaroundDays}
                   onChange={(e) => setNewSupplierForm({ ...newSupplierForm, avgRmaTurnaroundDays: Number(e.target.value) })}
@@ -693,7 +693,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
             <div className="space-y-3">
               <div>
                 <label className="block font-bold text-ink mb-1">Supplier Name *</label>
-                <input
+                <Input
                   type="text"
                   required
                   value={editingSupplier.name}
@@ -705,7 +705,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="block font-bold text-ink mb-1">Short Code *</label>
-                  <input
+                  <Input
                     type="text"
                     required
                     value={editingSupplier.code}
@@ -715,7 +715,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                 </div>
                 <div>
                   <label className="block font-bold text-ink mb-1">Phone Number</label>
-                  <input
+                  <Input
                     type="text"
                     value={editingSupplier.phone}
                     onChange={(e) => setEditingSupplier({ ...editingSupplier, phone: e.target.value })}
@@ -726,7 +726,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
 
               <div>
                 <label className="block font-bold text-ink mb-1">Contact Email</label>
-                <input
+                <Input
                   type="email"
                   value={editingSupplier.contactEmail}
                   onChange={(e) => setEditingSupplier({ ...editingSupplier, contactEmail: e.target.value })}
@@ -736,7 +736,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
 
               <div>
                 <label className="block font-bold text-ink mb-1">Avg RMA Lead Time (Days)</label>
-                <input
+                <Input
                   type="number"
                   value={editingSupplier.avgRmaTurnaroundDays}
                   onChange={(e) => setEditingSupplier({ ...editingSupplier, avgRmaTurnaroundDays: Number(e.target.value) })}

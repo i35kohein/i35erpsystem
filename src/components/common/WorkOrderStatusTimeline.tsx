@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Button } from '../ui';
+import { Button , Input } from '../ui';
 import {Clock, 
   CheckCircle2, 
   Cog, 
@@ -448,7 +448,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
 
             <div>
               <label className="block font-bold text-ink mb-1">Technician / Author Name</label>
-              <input
+              <Input
                 type="text"
                 value={newLogAuthor}
                 onChange={(e) => setNewLogAuthor(e.target.value)}
@@ -495,7 +495,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
           {/* Search Bar */}
           <div className="relative w-full sm:w-72">
             <Search className="w-3.5 h-3.5 text-muted absolute left-3 top-2.5" />
-            <input
+            <Input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

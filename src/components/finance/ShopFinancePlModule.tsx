@@ -24,7 +24,7 @@ import {
   SystemSettings 
 } from '../../types';
 import { getActivePaymentMethods } from '../../data/seedData';
-import { Button } from '../ui';
+import { Button , Input } from '../ui';
 import { toast } from '../../lib/toast';
 
 interface ShopFinancePlModuleProps {
@@ -958,7 +958,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block font-bold text-ink mb-1">Date</label>
-                <input
+                <Input
                   type="date"
                   value={newExpense.date}
                   onChange={(e) => setNewExpense({ ...newExpense, date: e.target.value })}
@@ -985,7 +985,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
 
               <div className="col-span-2">
                 <label className="block font-bold text-ink mb-1">Description *</label>
-                <input
+                <Input
                   type="text"
                   value={newExpense.description}
                   onChange={(e) => setNewExpense({ ...newExpense, description: e.target.value })}
@@ -996,7 +996,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
 
               <div>
                 <label className="block font-bold text-ink mb-1">Amount (MMK) *</label>
-                <input
+                <Input
                   type="number"
                   value={newExpense.amount || ''}
                   onChange={(e) => setNewExpense({ ...newExpense, amount: Number(e.target.value) })}
@@ -1021,7 +1021,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
 
               <div className="col-span-2">
                 <label className="block font-bold text-ink mb-1">Payee / Vendor Name</label>
-                <input
+                <Input
                   type="text"
                   value={newExpense.payee}
                   onChange={(e) => setNewExpense({ ...newExpense, payee: e.target.value })}
@@ -1079,7 +1079,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
             <div className="space-y-3">
               <div>
                 <label className="block font-bold text-ink mb-1">Payment Amount (MMK)</label>
-                <input
+                <Input
                   type="number"
                   value={paymentAmountInput}
                   onChange={(e) => setPaymentAmountInput(Number(e.target.value))}
@@ -1102,7 +1102,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
 
               <div>
                 <label className="block font-bold text-ink mb-1">Payment Note / Receipt Reference</label>
-                <input
+                <Input
                   type="text"
                   value={paymentNoteInput}
                   onChange={(e) => setPaymentNoteInput(e.target.value)}

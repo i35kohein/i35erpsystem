@@ -26,7 +26,7 @@ import {Coins,
   Kanban,
   Eye} from 'lucide-react';
 import { WorkOrder, PartItem, RmaItem, Technician, WorkOrderStatus } from '../../types';
-import { Button } from '../ui';
+import { Button , Input } from '../ui';
 
 import { DateFilterState, filterByDateRange} from '../common/DateFilterSelector';
 import { timeAgoShort } from '../../utils/timeAgo';
@@ -1151,7 +1151,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-[#F8F9FA] p-3 rounded-xl border border-line">
               <div className="relative flex-1 min-w-[200px]">
                 <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-                <input
+                <Input
                   type="text"
                   value={queueSearchQuery}
                   onChange={(e) => setQueueSearchQuery(e.target.value)}
@@ -1805,7 +1805,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               {/* Search input */}
               <div className="relative w-full md:w-80">
                 <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-                <input
+                <Input
                   type="text"
                   value={warrantySearchQuery}
                   onChange={(e) => setWarrantySearchQuery(e.target.value)}

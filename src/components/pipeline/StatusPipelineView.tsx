@@ -24,7 +24,7 @@ import {WorkOrder,
   DiagnosticItemResult,
   SystemSettings,
   AppUser} from '../../types';
-import { Button } from '../ui';
+import { Button , Input } from '../ui';
 import { ActiveFilterChips } from '../common/ActiveFilterChips';
 import {get21Diagnostics,
   checkIsBeforeDiagnosticNeeded,
@@ -1063,7 +1063,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
             <div className="space-y-3">
               <div>
                 <label className="block text-muted mb-1 font-medium">Paid Amount (MMK) *</label>
-                <input
+                <Input
                   type="number"
                   value={paidAmountInput}
                   onChange={(e) => setPaidAmountInput(e.target.value)}
@@ -1194,7 +1194,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                     </Button>
                   </div>
 
-                  <input
+                  <Input
                     type="text"
                     value={item.note || ''}
                     onChange={(e) => {

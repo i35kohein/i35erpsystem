@@ -13,7 +13,7 @@ import {PhoneCall,
   Check,
   Cpu} from 'lucide-react';
 import { WorkOrder, FollowUpStatus, FollowUpRecord, SystemSettings } from '../../types';
-import { Button } from '../ui';
+import { Button , Input } from '../ui';
 import { DateFilterState, isDateMatchingFilter } from '../common/DateFilterSelector';
 
 interface CompletedDeviceFollowUpModuleProps {
@@ -261,7 +261,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
           <div className="flex items-center space-x-2 w-full md:w-auto md:shrink-0">
             <div className="relative w-full md:w-auto">
               <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-              <input
+              <Input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -709,7 +709,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
               {/* Staff Author */}
               <div className="space-y-1">
                 <label className="font-bold text-ink">Logged By (Staff / Advisor Name)</label>
-                <input
+                <Input
                   type="text"
                   value={formAuthor}
                   onChange={(e) => setFormAuthor(e.target.value)}
@@ -750,7 +750,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
               {/* Next Follow-up Date */}
               <div className="space-y-1">
                 <label className="font-bold text-ink">Next Follow-Up Date (Optional)</label>
-                <input
+                <Input
                   type="date"
                   value={formNextDate}
                   onChange={(e) => setFormNextDate(e.target.value)}

@@ -1,7 +1,7 @@
 import React from 'react';
 import type { SystemSettings } from '../../../types';
 import { CreditCard, DollarSign, Tag } from 'lucide-react';
-import { Button } from '../../ui';
+import { Button , Input } from '../../ui';
 
 interface PricingTabProps {
   formData: SystemSettings;
@@ -45,7 +45,7 @@ const PricingTab: React.FC<PricingTabProps> = ({ formData, setFormData, setActiv
                 <DollarSign className="w-3.5 h-3.5 text-success" />
                 <span>Sales Tax / Commercial VAT (%)</span>
               </label>
-              <input
+              <Input
                 type="number"
                 value={formData.taxPercentage}
                 onChange={(e) => setFormData({ ...formData, taxPercentage: Number(e.target.value) })}
@@ -62,7 +62,7 @@ const PricingTab: React.FC<PricingTabProps> = ({ formData, setFormData, setActiv
                 <Tag className="w-3.5 h-3.5 text-[#AF52DE]" />
                 <span>Default Labor Discount (%)</span>
               </label>
-              <input
+              <Input
                 type="number"
                 value={formData.defaultLaborDiscountPercent}
                 onChange={(e) => setFormData({ ...formData, defaultLaborDiscountPercent: Number(e.target.value) })}

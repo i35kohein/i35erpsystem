@@ -51,7 +51,7 @@ import {
   SystemSettings
 } from '../../types';
 import { ModelRepairPrice } from '../../types/priceCatalog';
-import { Button } from '../ui';
+import { Button , Input } from '../ui';
 import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
 import {
   getAvailableColorsForModel, 
@@ -705,7 +705,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                   </span>
                 )}
               </label>
-              <input
+              <Input
                 id="field-customer-phone"
                 type="text"
                 required
@@ -727,7 +727,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
 
             <div>
               <label htmlFor="field-customer-name" className="block text-muted mb-1 font-medium">Customer Name *</label>
-              <input
+              <Input
                 id="field-customer-name"
                 type="text"
                 required
@@ -751,7 +751,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               <label htmlFor="field-customer-town" className="block text-muted mb-1 font-medium">Town / City</label>
               <div className="relative">
                 <MapPin className="w-4 h-4 text-brand absolute left-3 top-2.5" />
-                <input
+                <Input
                   id="field-customer-town"
                   type="text"
                   value={customerTown}
@@ -916,7 +916,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div>
               <label htmlFor="field-serial" className="block text-muted mb-1 font-medium">Serial Number</label>
-              <input
+              <Input
                 id="field-serial"
                 type="text"
                 value={serialNumber}
@@ -931,7 +931,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 <span>IMEI Number (15 Digits)</span>
                 <span className={`shrink-0 text-xs font-mono font-bold ${imei.length === 15 ? 'text-success' : 'text-muted'}`}>{imei.length}/15</span>
               </label>
-              <input
+              <Input
                 id="field-imei"
                 type="text"
                 inputMode="numeric"
@@ -955,7 +955,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
 
             <div className="sm:col-span-2">
               <label htmlFor="field-passcode" className="block text-muted mb-1 font-medium">Device Passcode</label>
-              <input
+              <Input
                 id="field-passcode"
                 type="text"
                 value={passcode}
@@ -1044,7 +1044,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                       <div className="flex items-center space-x-2 bg-white md:bg-transparent px-2 py-1 md:p-0 border border-line md:border-none rounded-lg">
                         <span className="text-xs text-muted font-semibold">Discount:</span>
                         <div className="relative">
-                          <input
+                          <Input
                             type="number"
                             min="0"
                             max="100"
@@ -1226,7 +1226,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                   {/* Diagnostic Comment Box — only for Fail (or when a note exists); 90% of comments are on failed items */}
                   {(item.status === 'Fail' || (item.note || '').length > 0) ? (
                     <div className="relative pt-1">
-                      <input
+                      <Input
                         type="text"
                         value={item.note || ''}
                         onChange={(e) => {
@@ -1279,7 +1279,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               </div>
             ))}
 
-            <input
+            <Input
               ref={photoInputRef}
               type="file"
               accept="image/*"
@@ -1549,7 +1549,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               ))}
 
               <div className="pt-2 border-t border-line flex items-center space-x-2">
-                <input
+                <Input
                   type="number"
                   placeholder="Custom Days (e.g. 60)"
                   value={customWarrantyInput}
@@ -1600,7 +1600,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             <div className="space-y-2">
               <div className="relative">
                 <Search className="w-4 h-4 text-muted absolute left-3 top-2.5" />
-                <input
+                <Input
                   type="text"
                   value={priceSearchQuery}
                   onChange={(e) => setPriceSearchQuery(e.target.value)}

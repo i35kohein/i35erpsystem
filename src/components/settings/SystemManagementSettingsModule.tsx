@@ -27,7 +27,7 @@ import {
   ArrowLeft} from 'lucide-react';
 import { Technician, SystemSettings, TechnicianLevel, PaymentMethodConfig, WorkOrder, NotificationTemplate, AppUser, UserRole, UserPermissions, PartItem, PartQualityTier, Supplier } from '../../types';
 import {DEFAULT_PAYMENT_METHODS, DEFAULT_NOTIFICATION_TEMPLATES} from '../../data/seedData';
-import { Button } from '../ui';
+import { Button , Input } from '../ui';
 
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 
@@ -839,7 +839,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
         {/* Settings search filter */}
         <div className="relative">
           <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-          <input
+          <Input
             type="text"
             value={settingsTabQuery}
             onChange={(e) => setSettingsTabQuery(e.target.value)}
@@ -1065,7 +1065,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             <form onSubmit={handleTechSubmit} className="space-y-4 text-xs">
               <div>
                 <label className="font-bold text-ink block mb-1.5">Technician Full Name *</label>
-                <input
+                <Input
                   type="text"
                   required
                   value={techFormData.name}
@@ -1080,7 +1080,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="font-bold text-ink block mb-1.5">Email Address</label>
-                    <input
+                    <Input
                       type="email"
                       value={techFormData.email}
                       onChange={(e) => setTechFormData({ ...techFormData, email: e.target.value })}
@@ -1091,7 +1091,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
 
                   <div>
                     <label className="font-bold text-ink block mb-1.5">Phone Number</label>
-                    <input
+                    <Input
                       type="text"
                       value={techFormData.phone}
                       onChange={(e) => setTechFormData({ ...techFormData, phone: e.target.value })}
@@ -1139,7 +1139,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
 
               <div>
                 <label className="font-bold text-ink block mb-1.5">Specialty / Hardware Focus</label>
-                <input
+                <Input
                   type="text"
                   value={techFormData.specialty}
                   onChange={(e) => setTechFormData({ ...techFormData, specialty: e.target.value })}
@@ -1153,7 +1153,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="bg-[#F8F9FA] border border-line rounded-xl p-3">
                     <label className="font-bold text-ink block mb-1.5">Spareparts Change (%)</label>
-                    <input
+                    <Input
                       type="number"
                       value={techFormData.commissionRateParts}
                       onChange={(e) => setTechFormData({ ...techFormData, commissionRateParts: Number(e.target.value) })}
@@ -1166,7 +1166,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
 
                   <div className="bg-[#F8F9FA] border border-line rounded-xl p-3">
                     <label className="font-bold text-ink block mb-1.5">Hardware Repair (%)</label>
-                    <input
+                    <Input
                       type="number"
                       value={techFormData.commissionRateHardware}
                       onChange={(e) => setTechFormData({ ...techFormData, commissionRateHardware: Number(e.target.value) })}
@@ -1258,7 +1258,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                   <label className="font-bold text-ink block">
                     Full Name <span className="text-rose-500">*</span>
                   </label>
-                  <input
+                  <Input
                     type="text"
                     value={userFormData.name}
                     onChange={(e) => setUserFormData({ ...userFormData, name: e.target.value })}
@@ -1269,7 +1269,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
 
                 <div className="space-y-1">
                   <label className="font-bold text-ink block">Email Address</label>
-                  <input
+                  <Input
                     type="email"
                     value={userFormData.email}
                     onChange={(e) => setUserFormData({ ...userFormData, email: e.target.value })}
@@ -1283,7 +1283,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="font-bold text-ink block">Phone Number</label>
-                  <input
+                  <Input
                     type="text"
                     value={userFormData.phone}
                     onChange={(e) => setUserFormData({ ...userFormData, phone: e.target.value })}
@@ -1423,7 +1423,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-surface p-3 rounded-xl border border-line">
                   <label className="flex items-center space-x-2 cursor-pointer font-bold text-ink">
-                    <input
+                    <Input
                       type="checkbox"
                       checked={!!userFormData.permissions?.canDeleteWorkOrders}
                       onChange={(e) =>
@@ -1441,7 +1441,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                   </label>
 
                   <label className="flex items-center space-x-2 cursor-pointer font-bold text-ink">
-                    <input
+                    <Input
                       type="checkbox"
                       checked={!!userFormData.permissions?.canDeleteInventory}
                       onChange={(e) =>
@@ -1459,7 +1459,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                   </label>
 
                   <label className="flex items-center space-x-2 cursor-pointer font-bold text-ink">
-                    <input
+                    <Input
                       type="checkbox"
                       checked={!!userFormData.permissions?.canDeleteCustomers}
                       onChange={(e) =>
@@ -1477,7 +1477,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                   </label>
 
                   <label className="flex items-center space-x-2 cursor-pointer font-bold text-ink">
-                    <input
+                    <Input
                       type="checkbox"
                       checked={!!userFormData.permissions?.canAccessSettings}
                       onChange={(e) =>
@@ -1495,7 +1495,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                   </label>
 
                   <label className="flex items-center space-x-2 cursor-pointer font-bold text-ink">
-                    <input
+                    <Input
                       type="checkbox"
                       checked={!!userFormData.permissions?.canAccessFinance}
                       onChange={(e) =>
@@ -1513,7 +1513,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                   </label>
 
                   <label className="flex items-center space-x-2 cursor-pointer font-bold text-ink">
-                    <input
+                    <Input
                       type="checkbox"
                       checked={!!userFormData.permissions?.canEditPrices}
                       onChange={(e) =>

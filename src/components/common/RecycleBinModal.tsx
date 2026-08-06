@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {Trash2, RotateCcw, Search, X, ShieldAlert} from 'lucide-react';
 import { WorkOrder } from '../../types';
-import { Button } from '../ui';
+import { Button , Input } from '../ui';
 import { StatusBadge } from './StatusBadge';
 import { PriorityBadge } from './PriorityBadge';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
@@ -107,7 +107,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
           <div className="p-3 sm:p-4 border-b border-line bg-white flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="relative w-full sm:w-72">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-              <input
+              <Input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}

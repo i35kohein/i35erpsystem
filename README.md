@@ -3,10 +3,12 @@
 iPad-optimized repair-shop ERP (React + Vite + TypeScript + Tailwind v4 + Supabase).
 Live: https://erp.i35appleservice.com · Deploy: `./deploy.sh` · Lint: `npm run lint`
 
-## Button policy (required reading before adding UI)
+## UI component policy (required reading before adding UI)
 
-**Every interactive button MUST use the `<Button>` component** from `src/components/ui`
-(barrel: `import { Button } from './ui'`). Raw `<button>` tags are banned outside the ui kit.
+**Every interactive button MUST use the `<Button>` component** and **every text input
+MUST use the `<Input>` component** from `src/components/ui`
+(barrel: `import { Button, Input } from './ui'`). Raw `<button>` and `<input>` tags
+are banned outside the ui kit.
 
 Why: one definition = one look, one touch-target standard (40px), tokenized colors,
 consistent hover/focus/disabled states. The earlier whole-site audits found 477 raw
@@ -28,6 +30,11 @@ buttons with 40+ different inline class combinations — that's what this policy
 
 `className` is merged via tailwind-merge (`cn`) — you can override size/spacing per use.
 
+### Input
+
+`<Input>` base: 40px (h-10), white bg, text-sm, rounded-xl, hairline border,
+brand focus ring, muted placeholder, disabled/`invalid` states. Same `cn` merge rule.
+
 ```tsx
 import { Button } from './ui';
 <Button size="sm" onClick={...}>Save</Button>
@@ -38,9 +45,9 @@ import { Button } from './ui';
 ### Enforcement
 
 `npm run lint` runs `tsc --noEmit` + `scripts/check-button-policy.mjs`, which fails
-the build if the raw-`<button>` count EXCEEDS the baseline (477 at adoption). The
-baseline is lowered as legacy buttons are migrated. Migration is in progress —
-do NOT add new raw buttons.
+the build if ANY raw `<button>` or `<input>` appears outside the ui kit + the 3
+allowed primitives (CustomDropdownMenu, DrawerSelect, UserRoleSwitcher). Migration
+complete 2026-08-06: 477 buttons + 178 inputs → 0. Do NOT add raw elements.
 
 ### Legacy migration status
 

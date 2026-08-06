@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Button } from '../ui';
+import { Button , Input } from '../ui';
 import {Search, X, Package, Users, CornerDownLeft, TicketCheck} from 'lucide-react';
 import type { WorkOrder } from '../../types';
 import type { PartItem } from '../../types';
@@ -117,7 +117,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
       >
         <div className="flex items-center gap-2 border-b border-line px-4">
           <Search className="h-4 w-4 shrink-0 text-muted" />
-          <input
+          <Input
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}

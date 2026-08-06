@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '../../ui';
+import { Button , Input } from '../../ui';
 import type { SystemSettings } from '../../../types';
 import {CheckSquare, CreditCard, DollarSign, Landmark, Plus, QrCode, RotateCcw, ToggleLeft, ToggleRight, Wallet} from 'lucide-react';
 
@@ -177,7 +177,7 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ currentPaymentMethods, handleTo
                           <div className="grid grid-cols-2 gap-2">
                             <div>
                               <label className="text-xs font-bold text-muted block mb-0.5">Gateway / Bank Name</label>
-                              <input
+                              <Input
                                 type="text"
                                 value={method.name}
                                 onChange={(e) => handleUpdatePaymentMethodField(method.id, 'name', e.target.value)}
@@ -186,7 +186,7 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ currentPaymentMethods, handleTo
                             </div>
                             <div>
                               <label className="text-xs font-bold text-muted block mb-0.5">Account / Phone No.</label>
-                              <input
+                              <Input
                                 type="text"
                                 value={method.accountNumber || ''}
                                 onChange={(e) => handleUpdatePaymentMethodField(method.id, 'accountNumber', e.target.value)}
@@ -200,7 +200,7 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ currentPaymentMethods, handleTo
                             <div className="grid grid-cols-2 gap-2">
                               <div>
                                 <label className="text-xs font-bold text-muted block mb-0.5">Account Beneficiary Name</label>
-                                <input
+                                <Input
                                   type="text"
                                   value={method.accountName || ''}
                                   onChange={(e) => handleUpdatePaymentMethodField(method.id, 'accountName', e.target.value)}
@@ -210,7 +210,7 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ currentPaymentMethods, handleTo
                               </div>
                               <div>
                                 <label className="text-xs font-bold text-muted block mb-0.5">Receipt / Note Reference</label>
-                                <input
+                                <Input
                                   type="text"
                                   value={method.notes || ''}
                                   onChange={(e) => handleUpdatePaymentMethodField(method.id, 'notes', e.target.value)}

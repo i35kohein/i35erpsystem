@@ -15,7 +15,7 @@ import {Calculator,
   ChevronRight,
 } from 'lucide-react';
 import { ModelRepairPrice, REPAIR_CATEGORIES, FolderConfig } from '../../types/priceCatalog';
-import { Button } from '../ui';
+import { Button , Input } from '../ui';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
 
 interface QuickPriceCalculatorModalProps {
@@ -336,7 +336,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
               {/* Quick Search */}
               <div className="relative flex-1 max-w-md">
                 <Search className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
-                <input
+                <Input
                   type="text"
                   placeholder="Quick filter service name..."
                   value={searchQuery}
@@ -565,7 +565,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                 {/* Tax & Deposit Toggles */}
                 <div className="flex items-center justify-between pt-2 border-t border-line text-xs">
                   <label className="flex items-center space-x-2 cursor-pointer select-none">
-                    <input
+                    <Input
                       type="checkbox"
                       checked={enableSalesTax}
                       onChange={(e) => setEnableSalesTax(e.target.checked)}

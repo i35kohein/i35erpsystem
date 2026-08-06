@@ -20,7 +20,7 @@ import {CircleDot,
   CreditCard,
   Award} from 'lucide-react';
 import { WorkOrder, SystemSettings, Customer } from '../../types';
-import { Button } from '../ui';
+import { Button , Input } from '../ui';
 import { applyEstimateApproval, applyEstimateRejection } from '../../utils/portalWorkflow';
 
 interface CustomerFacingWebPortalProps {
@@ -267,7 +267,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 <label className="block text-ink font-bold mb-1">Unique Identifier</label>
                 <div className="relative">
                   <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
-                  <input
+                  <Input
                     type="text"
                     value={identifierInput}
                     onChange={(e) => {
@@ -921,7 +921,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
 
             {/* Input form */}
             <form onSubmit={handleSendMessage} className="flex gap-2">
-              <input
+              <Input
                 type="text"
                 value={messageInput}
                 onChange={(e) => setMessageInput(e.target.value)}
@@ -981,7 +981,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
 
               <div>
                 <label className="block text-xs font-bold mb-1">Customer Digital Signature / Full Name</label>
-                <input
+                <Input
                   type="text"
                   value={customerNameSig}
                   onChange={(e) => setCustomerNameSig(e.target.value)}
@@ -991,7 +991,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
               </div>
 
               <label className="flex items-start space-x-2 cursor-pointer pt-1">
-                <input
+                <Input
                   type="checkbox"
                   checked={agreedToTerms}
                   onChange={(e) => setAgreedToTerms(e.target.checked)}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '../../ui';
+import { Button , Input } from '../../ui';
 import {AlertCircle, Boxes, ChevronDown, MapPin, Plus, ShieldCheck, Truck} from 'lucide-react';
 import type { Supplier } from '../../../types';
 import type { SystemSettings } from '../../../types';
@@ -91,7 +91,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <input
+              <Input
                 type="text"
                 value={categoryDraft}
                 onChange={(event) => setCategoryDraft(event.target.value)}
@@ -113,7 +113,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
               {inventoryCategories.map((category) => (
                 <div key={category} className="flex items-center gap-2 px-3 py-2">
                   {editingCategoryKey === category ? (
-                    <input
+                    <Input
                       autoFocus
                       value={editingCategoryLabel}
                       onChange={(event) => setEditingCategoryLabel(event.target.value)}
@@ -150,19 +150,19 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
             </div>
 
             <form onSubmit={handleAddInventorySupplier} className="grid grid-cols-1 gap-2 rounded-xl border border-line bg-[#F8F9FA] p-3 sm:grid-cols-2 lg:grid-cols-5">
-              <input required value={supplierDraft.name} onChange={(event) => setSupplierDraft({ ...supplierDraft, name: event.target.value })} placeholder="Supplier name" className="h-9 rounded-lg border border-line-strong bg-white px-2.5 text-xs font-semibold outline-none focus:border-brand" />
-              <input required value={supplierDraft.code} onChange={(event) => setSupplierDraft({ ...supplierDraft, code: event.target.value })} placeholder="Code" className="h-9 rounded-lg border border-line-strong bg-white px-2.5 font-mono text-xs outline-none focus:border-brand" />
-              <input value={supplierDraft.phone} onChange={(event) => setSupplierDraft({ ...supplierDraft, phone: event.target.value })} placeholder="Phone" className="h-9 rounded-lg border border-line-strong bg-white px-2.5 text-xs outline-none focus:border-brand" />
-              <input type="number" min="1" value={supplierDraft.avgRmaTurnaroundDays} onChange={(event) => setSupplierDraft({ ...supplierDraft, avgRmaTurnaroundDays: Number(event.target.value) })} placeholder="RMA days" className="h-9 rounded-lg border border-line-strong bg-white px-2.5 text-xs outline-none focus:border-brand" />
+              <Input required value={supplierDraft.name} onChange={(event) => setSupplierDraft({ ...supplierDraft, name: event.target.value })} placeholder="Supplier name" className="h-9 rounded-lg border border-line-strong bg-white px-2.5 text-xs font-semibold outline-none focus:border-brand" />
+              <Input required value={supplierDraft.code} onChange={(event) => setSupplierDraft({ ...supplierDraft, code: event.target.value })} placeholder="Code" className="h-9 rounded-lg border border-line-strong bg-white px-2.5 font-mono text-xs outline-none focus:border-brand" />
+              <Input value={supplierDraft.phone} onChange={(event) => setSupplierDraft({ ...supplierDraft, phone: event.target.value })} placeholder="Phone" className="h-9 rounded-lg border border-line-strong bg-white px-2.5 text-xs outline-none focus:border-brand" />
+              <Input type="number" min="1" value={supplierDraft.avgRmaTurnaroundDays} onChange={(event) => setSupplierDraft({ ...supplierDraft, avgRmaTurnaroundDays: Number(event.target.value) })} placeholder="RMA days" className="h-9 rounded-lg border border-line-strong bg-white px-2.5 text-xs outline-none focus:border-brand" />
               <Button type="submit" className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-brand px-3 text-xs font-extrabold text-white hover:bg-brand-deep"><Plus className="h-3.5 w-3.5" /> Add supplier</Button>
             </form>
 
             {editingInventorySupplier && (
               <form onSubmit={(event) => { event.preventDefault(); onUpdateSupplier?.(editingInventorySupplier); setEditingInventorySupplier(null); }} className="grid grid-cols-1 gap-2 rounded-xl border border-blue-200 bg-blue-50/60 p-3 sm:grid-cols-2 lg:grid-cols-5">
-                <input required value={editingInventorySupplier.name} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, name: event.target.value })} className="h-9 rounded-lg border border-blue-200 bg-white px-2.5 text-xs font-semibold outline-none focus:border-brand" />
-                <input required value={editingInventorySupplier.code} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, code: event.target.value })} className="h-9 rounded-lg border border-blue-200 bg-white px-2.5 font-mono text-xs outline-none focus:border-brand" />
-                <input value={editingInventorySupplier.phone} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, phone: event.target.value })} className="h-9 rounded-lg border border-blue-200 bg-white px-2.5 text-xs outline-none focus:border-brand" />
-                <input type="number" min="1" value={editingInventorySupplier.avgRmaTurnaroundDays} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, avgRmaTurnaroundDays: Number(event.target.value) })} className="h-9 rounded-lg border border-blue-200 bg-white px-2.5 text-xs outline-none focus:border-brand" />
+                <Input required value={editingInventorySupplier.name} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, name: event.target.value })} className="h-9 rounded-lg border border-blue-200 bg-white px-2.5 text-xs font-semibold outline-none focus:border-brand" />
+                <Input required value={editingInventorySupplier.code} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, code: event.target.value })} className="h-9 rounded-lg border border-blue-200 bg-white px-2.5 font-mono text-xs outline-none focus:border-brand" />
+                <Input value={editingInventorySupplier.phone} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, phone: event.target.value })} className="h-9 rounded-lg border border-blue-200 bg-white px-2.5 text-xs outline-none focus:border-brand" />
+                <Input type="number" min="1" value={editingInventorySupplier.avgRmaTurnaroundDays} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, avgRmaTurnaroundDays: Number(event.target.value) })} className="h-9 rounded-lg border border-blue-200 bg-white px-2.5 text-xs outline-none focus:border-brand" />
                 <div className="flex gap-2"><Button type="submit" className="h-9 flex-1 rounded-lg bg-brand text-xs font-extrabold text-white">Save</Button><Button type="button" onClick={() => setEditingInventorySupplier(null)} className="h-9 rounded-lg border border-line-strong px-3 text-xs font-bold">Cancel</Button></div>
               </form>
             )}
@@ -190,14 +190,14 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
               <span className="rounded-full bg-purple-100 px-2 py-0.5 font-mono text-xs font-bold text-purple-700">{inventoryQualityTiers.length} tiers</span>
             </div>
             <div className="flex gap-2">
-              <input value={qualityTierDraft} onChange={(event) => setQualityTierDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleAddInventoryQualityTier(); } }} placeholder="New quality tier" className="h-9 min-w-0 flex-1 rounded-lg border border-line-strong bg-surface px-3 text-xs font-medium outline-none focus:border-brand focus:bg-white" />
+              <Input value={qualityTierDraft} onChange={(event) => setQualityTierDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleAddInventoryQualityTier(); } }} placeholder="New quality tier" className="h-9 min-w-0 flex-1 rounded-lg border border-line-strong bg-surface px-3 text-xs font-medium outline-none focus:border-brand focus:bg-white" />
               <Button type="button" onClick={handleAddInventoryQualityTier} disabled={!qualityTierDraft.trim()} className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-purple-600 px-3 text-xs font-extrabold text-white hover:bg-purple-700 disabled:opacity-45"><Plus className="h-3.5 w-3.5" /> Add</Button>
             </div>
             <div className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-[#F8F9FA]">
               {inventoryQualityTiers.map((tier) => (
                 <div key={tier} className="flex items-center gap-2 px-3 py-2">
                   <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-purple-600" />
-                  {editingQualityTier === tier ? <input autoFocus value={editingQualityTierLabel} onChange={(event) => setEditingQualityTierLabel(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') handleSaveInventoryQualityTier(tier); if (event.key === 'Escape') setEditingQualityTier(null); }} className="h-7 min-w-0 flex-1 rounded-lg border border-purple-300 bg-white px-2 text-xs font-semibold outline-none" /> : <span className="min-w-0 flex-1 truncate text-xs font-semibold text-ink">{tier}</span>}
+                  {editingQualityTier === tier ? <Input autoFocus value={editingQualityTierLabel} onChange={(event) => setEditingQualityTierLabel(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') handleSaveInventoryQualityTier(tier); if (event.key === 'Escape') setEditingQualityTier(null); }} className="h-7 min-w-0 flex-1 rounded-lg border border-purple-300 bg-white px-2 text-xs font-semibold outline-none" /> : <span className="min-w-0 flex-1 truncate text-xs font-semibold text-ink">{tier}</span>}
                   <span className="rounded-full bg-white px-2 py-0.5 text-xs font-bold text-muted">{parts.filter((part) => part.qualityTier === tier).length} parts</span>
                   {editingQualityTier === tier ? <Button type="button" onClick={() => handleSaveInventoryQualityTier(tier)} className="text-xs font-extrabold text-purple-700">Save</Button> : <Button type="button" onClick={() => { setEditingQualityTier(tier); setEditingQualityTierLabel(tier); }} className="text-xs font-extrabold text-brand">Edit</Button>}
                   <Button type="button" onClick={() => handleDeleteInventoryQualityTier(tier)} className="text-xs font-extrabold text-rose-600">Delete</Button>
@@ -211,7 +211,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
               <div><h4 className="text-xs font-extrabold text-ink">Storage Bin Names</h4><p className="text-xs text-muted">Saved bin names appear when registering or editing inventory parts.</p></div>
               <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-bold text-brand-deep">{inventoryBinNames.length} bins</span>
             </div>
-            <div className="flex gap-2"><input value={binDraft} onChange={(event) => setBinDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleAddInventoryBin(); } }} placeholder="e.g. BIN-A01" className="h-9 min-w-0 flex-1 rounded-lg border border-line-strong bg-surface px-3 text-xs font-mono font-bold outline-none focus:border-brand focus:bg-white" /><Button type="button" onClick={handleAddInventoryBin} disabled={!binDraft.trim()} className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-brand px-3 text-xs font-extrabold text-white hover:bg-brand-deep disabled:opacity-45"><Plus className="h-3.5 w-3.5" /> Add bin</Button></div>
+            <div className="flex gap-2"><Input value={binDraft} onChange={(event) => setBinDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleAddInventoryBin(); } }} placeholder="e.g. BIN-A01" className="h-9 min-w-0 flex-1 rounded-lg border border-line-strong bg-surface px-3 text-xs font-mono font-bold outline-none focus:border-brand focus:bg-white" /><Button type="button" onClick={handleAddInventoryBin} disabled={!binDraft.trim()} className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-brand px-3 text-xs font-extrabold text-white hover:bg-brand-deep disabled:opacity-45"><Plus className="h-3.5 w-3.5" /> Add bin</Button></div>
             <div className="space-y-2 rounded-xl border border-line bg-[#F8F9FA] p-3">
               {inventoryBinNames.length ? inventoryBinNames.map((bin) => {
                 const binParts = partsByBin.get(bin) || [];
@@ -268,7 +268,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                 <AlertCircle className="w-3.5 h-3.5 text-[#FF9500]" />
                 <span>Global Low Stock Warning Threshold</span>
               </label>
-              <input
+              <Input
                 type="number"
                 value={formData.lowStockThreshold}
                 onChange={(e) => setFormData({ ...formData, lowStockThreshold: Number(e.target.value) })}
@@ -284,7 +284,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                 <Boxes className="w-3.5 h-3.5 text-[#5856D6]" />
                 <span>Default Vendor RMA Turnaround (Days)</span>
               </label>
-              <input
+              <Input
                 type="number"
                 value={formData.defaultSupplierSlaDays}
                 onChange={(e) => setFormData({ ...formData, defaultSupplierSlaDays: Number(e.target.value) })}
@@ -296,7 +296,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
 
             <div className="md:col-span-2 space-y-3 pt-3 border-t border-line">
               <label className="flex items-center space-x-3 cursor-pointer p-3 bg-[#F8F9FA] rounded-xl border border-line hover:border-brand transition-all">
-                <input
+                <Input
                   type="checkbox"
                   checked={formData.autoReserveOnAssignment}
                   onChange={(e) => setFormData({ ...formData, autoReserveOnAssignment: e.target.checked })}

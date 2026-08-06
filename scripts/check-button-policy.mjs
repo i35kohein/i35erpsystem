@@ -27,7 +27,7 @@ const ALLOWED_FILES = [
   'src/components/common/UserRoleSwitcher.tsx',
 ];
 
-const out = execSync("grep -rn '<button' src --include='*.tsx' --include='*.ts' || true", {
+const out = execSync("grep -rn '<button\|<input' src --include='*.tsx' --include='*.ts' | grep -v '<Input' || true", {
   encoding: 'utf8',
 });
 
@@ -42,9 +42,9 @@ for (const line of out.split('\n')) {
 }
 
 if (violations.length > 0) {
-  console.log(`\n❌ Button policy: ${violations.length} raw <button> found — ALL buttons must use <Button> from src/components/ui.`);
+  console.log(`\n❌ UI policy: ${violations.length} raw <button>/<input> found — use <Button>/<Input> from src/components/ui.`);
   console.log('   See README "Button policy".');
   process.exit(1);
 } else {
-  console.log('✅ Button policy: no raw <button> outside the ui kit.');
+  console.log('✅ UI policy: no raw <button>/<input> outside the ui kit.');
 }

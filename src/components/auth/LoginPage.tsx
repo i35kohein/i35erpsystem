@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button } from '../ui';
+import { Button , Input } from '../ui';
 import { Lock, Mail, Eye, EyeOff, ShieldCheck, Loader2 } from 'lucide-react';
 
 interface LoginPageProps {
@@ -55,7 +55,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
               <label className="mb-1.5 block text-xs font-bold text-ink">Email</label>
               <div className="relative">
                 <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-                <input
+                <Input
                   type="email"
                   required
                   value={email}
@@ -70,7 +70,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
               <label className="mb-1.5 block text-xs font-bold text-ink">Password</label>
               <div className="relative">
                 <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-                <input
+                <Input
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={password}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '../../ui';
+import { Button , Input } from '../../ui';
 import type { SystemSettings } from '../../../types';
 import {BellRing, ChevronDown, MessageSquare, Plus, RefreshCw, Send, Sparkles, Trash2} from 'lucide-react';
 
@@ -85,7 +85,7 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
 
               <div className="p-4 bg-surface rounded-2xl border border-line space-y-3 flex flex-col justify-center">
                 <label className="flex items-center space-x-3 cursor-pointer">
-                  <input
+                  <Input
                     type="checkbox"
                     checked={formData.autoPromptNotificationModal ?? true}
                     onChange={(e) => setFormData({ ...formData, autoPromptNotificationModal: e.target.checked })}
@@ -108,7 +108,7 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                 <div>
                   <label className="block text-xs font-bold text-muted mb-1">Telegram Bot Token</label>
-                  <input
+                  <Input
                     type="text"
                     placeholder="e.g. 7890123456:AAFx..."
                     value={formData.telegramBotToken || ''}
@@ -118,7 +118,7 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-muted mb-1">Telegram Admin Chat ID / Channel ID</label>
-                  <input
+                  <Input
                     type="text"
                     placeholder="e.g. @applerepair_updates or -100123456789"
                     value={formData.telegramChatId || ''}
@@ -174,7 +174,7 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-line">
                       <div className="flex items-center space-x-3">
                         <label className="relative inline-flex items-center cursor-pointer">
-                          <input
+                          <Input
                             type="checkbox"
                             checked={tmpl.enabled ?? true}
                             onChange={(e) => handleUpdateTemplateField(tmpl.id, 'enabled', e.target.checked)}
@@ -183,7 +183,7 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
                           <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-success"></div>
                         </label>
                         <div>
-                          <input
+                          <Input
                             type="text"
                             value={tmpl.title}
                             onChange={(e) => handleUpdateTemplateField(tmpl.id, 'title', e.target.value)}

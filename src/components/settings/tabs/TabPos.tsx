@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '../../ui';
+import { Button , Input } from '../../ui';
 import {AlignLeft, CheckCircle2, ChevronDown, ExternalLink, FileText, Globe, Mail, MapPin, Phone, Printer, QrCode, Store, Tag, Type} from 'lucide-react';
 import type { SystemSettings } from '../../../types';
 
@@ -205,7 +205,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
               <div className="grid grid-cols-1 gap-4 text-xs">
                 <div className="space-y-1">
                   <label className="font-extrabold text-ink">Receipt & Voucher Header Subtitle</label>
-                  <input
+                  <Input
                     type="text"
                     value={formData.receiptHeaderTitle}
                     onChange={(e) => setFormData({ ...formData, receiptHeaderTitle: e.target.value })}
@@ -359,7 +359,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
 
               <div className="space-y-1.5">
                 <label className="font-bold text-ink block">Voucher Header Subtitle</label>
-                <input
+                <Input
                   type="text"
                   value={formData.a4CustomHeaderNote || 'Official Device Intake & Hardware Diagnostic Voucher'}
                   onChange={(e) => setFormData({ ...formData, a4CustomHeaderNote: e.target.value })}
@@ -384,7 +384,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
               <label className="flex items-center space-x-2.5 p-3 bg-[#F8F9FA] rounded-xl border border-line cursor-pointer hover:border-brand transition-all">
-                <input
+                <Input
                   type="checkbox"
                   checked={formData.a4ShowDiagnosticsTable ?? true}
                   onChange={(e) => setFormData({ ...formData, a4ShowDiagnosticsTable: e.target.checked })}
@@ -397,7 +397,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
               </label>
 
               <label className="flex items-center space-x-2.5 p-3 bg-[#F8F9FA] rounded-xl border border-line cursor-pointer hover:border-brand transition-all">
-                <input
+                <Input
                   type="checkbox"
                   checked={formData.a4ShowPricingTable ?? true}
                   onChange={(e) => setFormData({ ...formData, a4ShowPricingTable: e.target.checked })}
@@ -410,7 +410,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
               </label>
 
               <label className="flex items-center space-x-2.5 p-3 bg-[#F8F9FA] rounded-xl border border-line cursor-pointer hover:border-brand transition-all">
-                <input
+                <Input
                   type="checkbox"
                   checked={formData.a4ShowTermsDisclaimer ?? true}
                   onChange={(e) => setFormData({ ...formData, a4ShowTermsDisclaimer: e.target.checked })}

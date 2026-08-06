@@ -28,7 +28,7 @@ import {CreditCard,
   type LucideIcon,
 } from 'lucide-react';
 import { WorkOrder, Customer, SystemSettings, PartItem, WorkOrderLineItem } from '../../types';
-import { Button } from '../ui';
+import { Button , Input } from '../ui';
 import { StatusChip } from '../common/StatusChip';
 import { getActivePaymentMethods } from '../../data/seedData';
 import { PrintableInvoiceModal } from '../common/PrintableInvoiceModal';
@@ -731,7 +731,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
                     <label className="block shrink-0">
                       <span className="block text-xs font-bold text-muted mb-1">Qty</span>
-                      <input
+                      <Input
                         type="number"
                         min={1}
                         max={selectedInventoryPart?.quantityInStock || 99}
@@ -916,7 +916,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
                             {/* Amount Input */}
                             <div className="flex-1 flex items-center space-x-1.5">
-                              <input
+                              <Input
                                 type="number"
                                 value={sp.amount || ''}
                                 onChange={(e) => {
@@ -1088,7 +1088,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           ))}
                       </div>
                     </div>
-                    <input
+                    <Input
                       ref={cashInputRef}
                       type="number"
                       value={cashTendered || ''}

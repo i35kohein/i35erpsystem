@@ -1,7 +1,7 @@
 import React from 'react';
 import type { SystemSettings } from '../../../types';
 import { Building2, CheckCircle2, Globe, Hash, Image as ImageIcon, Mail, Phone, Plus, Save, Store, Trash2, Upload } from 'lucide-react';
-import { Button } from '../../ui';
+import { Button , Input } from '../../ui';
 
 interface ShopTabProps {
   formData: SystemSettings;
@@ -61,7 +61,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                   <label className="w-full py-2.5 px-3 bg-brand hover:bg-brand-deep text-white font-bold text-xs rounded-xl transition-all shadow-2xs flex items-center justify-center space-x-2 cursor-pointer">
                     <Upload className="w-4 h-4" />
                     <span>Upload Logo Image</span>
-                    <input
+                    <Input
                       type="file"
                       accept="image/*"
                       className="hidden"
@@ -87,7 +87,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                   <label className="block text-xs font-bold text-ink mb-1.5">
                     Shop Name <span className="text-red-500">*</span>
                   </label>
-                  <input
+                  <Input
                     type="text"
                     value={formData.shopName || ''}
                     onChange={(e) => setFormData({ ...formData, shopName: e.target.value })}
@@ -103,7 +103,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                   <label className="block text-xs font-bold text-ink mb-1.5">
                     Shop Logo Image URL (Alternative to File Upload)
                   </label>
-                  <input
+                  <Input
                     type="text"
                     value={formData.shopLogoUrl || ''}
                     onChange={(e) => setFormData({ ...formData, shopLogoUrl: e.target.value })}
@@ -201,7 +201,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                       <span className="text-xs font-extrabold font-mono text-muted w-20 shrink-0">
                         {idx === 0 ? 'Primary Line:' : `Line #${idx + 1}:`}
                       </span>
-                      <input
+                      <Input
                         type="text"
                         value={phoneNum}
                         onChange={(e) => {
@@ -249,7 +249,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                   <Mail className="w-3.5 h-3.5 text-brand" />
                   <span>Shop Support Email Address</span>
                 </label>
-                <input
+                <Input
                   type="email"
                   value={formData.shopEmail || ''}
                   onChange={(e) => setFormData({ ...formData, shopEmail: e.target.value })}
@@ -263,7 +263,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                   <Globe className="w-3.5 h-3.5 text-brand" />
                   <span>Shop Official Website URL</span>
                 </label>
-                <input
+                <Input
                   type="text"
                   value={formData.shopWebsite || ''}
                   onChange={(e) => setFormData({ ...formData, shopWebsite: e.target.value })}
@@ -277,7 +277,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                   <Hash className="w-3.5 h-3.5 text-brand" />
                   <span>Tax ID / Business Reg No</span>
                 </label>
-                <input
+                <Input
                   type="text"
                   value={formData.taxId || ''}
                   onChange={(e) => setFormData({ ...formData, taxId: e.target.value })}
@@ -291,7 +291,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                   <Building2 className="w-3.5 h-3.5 text-brand" />
                   <span>Store Physical Address</span>
                 </label>
-                <input
+                <Input
                   type="text"
                   value={formData.shopAddress || ''}
                   onChange={(e) => setFormData({ ...formData, shopAddress: e.target.value })}

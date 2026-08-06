@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button } from '../ui';
+import { Button , Input } from '../ui';
 import {CheckCircle2, 
   XCircle, 
   Clock, 
@@ -175,7 +175,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
             {/* Search Input */}
             <div className="relative w-full sm:w-64">
               <Search className="w-3.5 h-3.5 text-muted absolute left-3 top-2.5" />
-              <input
+              <Input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Button } from '../ui';
+import { Button , Input } from '../ui';
 import {X, 
   Camera, 
   QrCode, 
@@ -374,7 +374,7 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
               <label className="inline-flex items-center space-x-2 px-5 py-2.5 bg-brand hover:bg-brand-deep text-white font-extrabold text-xs rounded-2xl shadow-sm cursor-pointer transition-all">
                 <FileCode className="w-4 h-4" />
                 <span>Choose Image File</span>
-                <input
+                <Input
                   type="file"
                   accept="image/*"
                   onChange={handleFileUpload}

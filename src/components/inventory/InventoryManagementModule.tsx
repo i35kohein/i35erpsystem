@@ -39,7 +39,7 @@ import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
 import { getAvailableColorsForModel, getRealisticColorStyle } from '../intake/deviceData';
 import { useIsIpad } from '../../hooks/useIsIpad';
-import { Button, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '../ui';
+import { Button, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem , Input } from '../ui';
 import { toast } from '../../lib/toast';
 import { sortModelsNewestFirst, compareModelsNewestFirst } from '../../utils/modelSort';
 import JsBarcode from 'jsbarcode';
@@ -1319,7 +1319,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         {!isIpad && (
         <div className="flex items-center gap-2 rounded-xl border border-brand/25 bg-blue-50/50 px-3 py-2">
           <ScanLine className="h-4 w-4 shrink-0 text-brand" />
-          <input
+          <Input
             ref={scanInputRef}
             value={scanQuery}
             onChange={(e) => {
@@ -1596,7 +1596,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   <tr>
                     {!inlineEditMode && (
                       <th className="w-[40px] px-2 py-2 bg-surface">
-                        <input
+                        <Input
                           type="checkbox"
                           checked={paginatedParts.length > 0 && paginatedParts.every((p) => selectedPartIds.has(p.id))}
                           onChange={toggleSelectAllVisible}
@@ -1641,7 +1641,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         {/* Selection checkbox */}
                         {!inlineEditMode && (
                           <td className="px-2 py-2">
-                            <input
+                            <Input
                               type="checkbox"
                               checked={selectedPartIds.has(part.id)}
                               onChange={() => togglePartSelection(part.id)}
@@ -1696,7 +1696,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                             <div className="grid grid-cols-1 gap-1" onFocus={() => beginInlineEdit(part)}>
                               <label className="flex min-w-0 flex-col gap-0.5 text-xs font-bold uppercase tracking-wide text-muted">
                                 <span>Stock</span>
-                                <input aria-label={`Stock quantity for ${part.name}`} type="text" inputMode="numeric" value={inlineDrafts[part.id]?.quantityInStock ?? String(part.quantityInStock)} onWheel={(e) => e.currentTarget.blur()} onChange={(e) => setInlineDrafts((current) => ({ ...current, [part.id]: { ...current[part.id], quantityInStock: e.target.value } }))} className="w-full min-w-0 rounded-md border border-line-strong bg-white px-2 py-1.5 text-sm font-semibold font-sans tabular-nums tracking-normal text-[#111111]" />
+                                <Input aria-label={`Stock quantity for ${part.name}`} type="text" inputMode="numeric" value={inlineDrafts[part.id]?.quantityInStock ?? String(part.quantityInStock)} onWheel={(e) => e.currentTarget.blur()} onChange={(e) => setInlineDrafts((current) => ({ ...current, [part.id]: { ...current[part.id], quantityInStock: e.target.value } }))} className="w-full min-w-0 rounded-md border border-line-strong bg-white px-2 py-1.5 text-sm font-semibold font-sans tabular-nums tracking-normal text-[#111111]" />
                               </label>
                             </div>
                           ) : null}
@@ -1740,11 +1740,11 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                             <div className="grid grid-cols-2 gap-2">
                               <label className="flex min-w-0 flex-col gap-0.5 text-xs font-bold uppercase tracking-wide text-muted">
                                 <span>Purchase</span>
-                                <input aria-label={`Purchase price for ${part.name}`} type="text" inputMode="numeric" value={inlineDrafts[part.id]?.costPrice ?? String(part.costPrice)} onWheel={(e) => e.currentTarget.blur()} onFocus={() => beginInlineEdit(part)} onChange={(e) => setInlineDrafts((current) => ({ ...current, [part.id]: { ...current[part.id], costPrice: e.target.value } }))} className="w-full min-w-0 rounded-md border border-line-strong bg-white px-2 py-1.5 text-sm font-semibold font-sans tabular-nums tracking-normal text-[#111111]" />
+                                <Input aria-label={`Purchase price for ${part.name}`} type="text" inputMode="numeric" value={inlineDrafts[part.id]?.costPrice ?? String(part.costPrice)} onWheel={(e) => e.currentTarget.blur()} onFocus={() => beginInlineEdit(part)} onChange={(e) => setInlineDrafts((current) => ({ ...current, [part.id]: { ...current[part.id], costPrice: e.target.value } }))} className="w-full min-w-0 rounded-md border border-line-strong bg-white px-2 py-1.5 text-sm font-semibold font-sans tabular-nums tracking-normal text-[#111111]" />
                               </label>
                               <label className="flex min-w-0 flex-col gap-0.5 text-xs font-bold uppercase tracking-wide text-muted">
                                 <span>Selling</span>
-                                <input aria-label={`Selling price for ${part.name}`} type="text" inputMode="numeric" value={inlineDrafts[part.id]?.sellingPrice ?? String(part.sellingPrice)} onWheel={(e) => e.currentTarget.blur()} onChange={(e) => setInlineDrafts((current) => ({ ...current, [part.id]: { ...current[part.id], sellingPrice: e.target.value } }))} className="w-full min-w-0 rounded-md border border-line-strong bg-white px-2 py-1.5 text-sm font-semibold font-sans tabular-nums tracking-normal text-[#111111]" />
+                                <Input aria-label={`Selling price for ${part.name}`} type="text" inputMode="numeric" value={inlineDrafts[part.id]?.sellingPrice ?? String(part.sellingPrice)} onWheel={(e) => e.currentTarget.blur()} onChange={(e) => setInlineDrafts((current) => ({ ...current, [part.id]: { ...current[part.id], sellingPrice: e.target.value } }))} className="w-full min-w-0 rounded-md border border-line-strong bg-white px-2 py-1.5 text-sm font-semibold font-sans tabular-nums tracking-normal text-[#111111]" />
                               </label>
                             </div>
                           ) : `${part.sellingPrice.toLocaleString()} MMK`}
@@ -2217,7 +2217,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     <Sparkles className="h-3 w-3" /> Auto-generate
                   </Button>
                 </div>
-                <input
+                <Input
                   type="text"
                   value={newPartData.name || ''}
                   onChange={(e) => setNewPartData({ ...newPartData, name: e.target.value })}
@@ -2239,7 +2239,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     <Sparkles className="h-3 w-3" /> Auto-generate
                   </Button>
                 </div>
-                <input
+                <Input
                   type="text"
                   value={newPartData.sku || ''}
                   onChange={(e) => setNewPartData({ ...newPartData, sku: e.target.value })}
@@ -2281,7 +2281,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
               <div>
                 <label className="block font-bold text-ink mb-1">Cost Price (MMK)</label>
-                <input
+                <Input
                   type="number"
                   value={newPartData.costPrice || ''}
                   onChange={(e) => setNewPartData({ ...newPartData, costPrice: Number(e.target.value) })}
@@ -2291,7 +2291,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
               <div>
                 <label className="block font-bold text-ink mb-1">Selling Price (MMK)</label>
-                <input
+                <Input
                   type="number"
                   value={newPartData.sellingPrice || ''}
                   onChange={(e) => setNewPartData({ ...newPartData, sellingPrice: Number(e.target.value) })}
@@ -2301,7 +2301,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
               <div>
                 <label className="block font-bold text-ink mb-1">Initial Stock Qty</label>
-                <input
+                <Input
                   type="number"
                   value={newPartData.quantityInStock || ''}
                   onChange={(e) => setNewPartData({ ...newPartData, quantityInStock: Number(e.target.value) })}
@@ -2317,7 +2317,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   )}
                 </div>
                 <div className="relative">
-                  <input
+                  <Input
                     type="text"
                     value={newPartData.locationBin || ''}
                     onFocus={() => setIsLocationBinMenuOpen(true)}
@@ -2487,7 +2487,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             <div className="space-y-2.5">
               <div>
                 <label className="block font-bold text-ink mb-1">Part Name</label>
-                <input
+                <Input
                   type="text"
                   value={editingPart.name}
                   onChange={(e) => setEditingPart({ ...editingPart, name: e.target.value })}
@@ -2498,7 +2498,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block font-bold text-ink mb-1">Current Stock Qty</label>
-                  <input
+                  <Input
                     type="number"
                     value={editingPart.quantityInStock}
                     onChange={(e) => setEditingPart({ ...editingPart, quantityInStock: Number(e.target.value) })}
@@ -2508,7 +2508,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
                 <div>
                   <label className="block font-bold text-ink mb-1">Reorder Point Threshold</label>
-                  <input
+                  <Input
                     type="number"
                     value={editingPart.reorderPoint}
                     onChange={(e) => setEditingPart({ ...editingPart, reorderPoint: Number(e.target.value) })}
@@ -2518,7 +2518,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
                 <div>
                   <label className="block font-bold text-ink mb-1">Cost Price (MMK)</label>
-                  <input
+                  <Input
                     type="number"
                     value={editingPart.costPrice}
                     onChange={(e) => setEditingPart({ ...editingPart, costPrice: Number(e.target.value) })}
@@ -2528,7 +2528,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
                 <div>
                   <label className="block font-bold text-ink mb-1">Selling Price (MMK)</label>
-                  <input
+                  <Input
                     type="number"
                     value={editingPart.sellingPrice}
                     onChange={(e) => setEditingPart({ ...editingPart, sellingPrice: Number(e.target.value) })}
@@ -2545,7 +2545,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   )}
                 </div>
                 <div className="relative">
-                  <input
+                  <Input
                     type="text"
                     value={editingPart.locationBin}
                     onFocus={() => setIsEditLocationBinMenuOpen(true)}
@@ -2718,7 +2718,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block font-bold text-ink mb-1">Claim Quantity</label>
-                  <input
+                  <Input
                     type="number"
                     min={1}
                     max={claimingWarrantyPart.quantityInStock || 99}
@@ -2730,7 +2730,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
                 <div>
                   <label className="block font-bold text-ink mb-1">Unit Cost (MMK)</label>
-                  <input
+                  <Input
                     type="number"
                     value={warrantyForm.unitCost}
                     onChange={(e) => setWarrantyForm({ ...warrantyForm, unitCost: Number(e.target.value) })}
@@ -2753,7 +2753,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   <option value="DOA (Dead On Arrival) / No power">DOA (Dead On Arrival) / No power</option>
                   <option value="Wrong part delivered / mislabeled">Wrong part delivered / mislabeled</option>
                 </select>
-                <input
+                <Input
                   type="text"
                   value={warrantyForm.reason}
                   onChange={(e) => setWarrantyForm({ ...warrantyForm, reason: e.target.value })}
@@ -2764,7 +2764,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
               <div>
                 <label className="block font-bold text-ink mb-1">Return Tracking / RMA Reference Number</label>
-                <input
+                <Input
                   type="text"
                   value={warrantyForm.trackingNumber}
                   onChange={(e) => setWarrantyForm({ ...warrantyForm, trackingNumber: e.target.value })}
@@ -2816,7 +2816,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             <div className="space-y-3">
               <div>
                 <label className="block font-bold text-ink mb-1">Supplier Name *</label>
-                <input
+                <Input
                   type="text"
                   required
                   value={newSupplierForm.name}
@@ -2827,7 +2827,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               </div>
               <div>
                 <label className="block font-bold text-ink mb-1">Supplier Short Code *</label>
-                <input
+                <Input
                   type="text"
                   required
                   value={newSupplierForm.code}
@@ -2838,7 +2838,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               </div>
               <div>
                 <label className="block font-bold text-ink mb-1">Avg RMA Turnaround (Days)</label>
-                <input
+                <Input
                   type="number"
                   value={newSupplierForm.avgRmaTurnaroundDays}
                   onChange={(e) => setNewSupplierForm({ ...newSupplierForm, avgRmaTurnaroundDays: Number(e.target.value) })}
@@ -2884,7 +2884,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             </div>
             <div>
               <label className="block font-bold text-ink mb-1">Quality Tier Name *</label>
-              <input
+              <Input
                 type="text"
                 required
                 value={newQualityForm.name}
@@ -2933,7 +2933,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             <div className="space-y-3">
               <div>
                 <label className="block font-bold text-ink mb-1">Supplier Name *</label>
-                <input
+                <Input
                   type="text"
                   required
                   value={editingSupplier.name}
@@ -2945,7 +2945,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="block font-bold text-ink mb-1">Short Code *</label>
-                  <input
+                  <Input
                     type="text"
                     required
                     value={editingSupplier.code}
@@ -2955,7 +2955,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 </div>
                 <div>
                   <label className="block font-bold text-ink mb-1">Phone Number</label>
-                  <input
+                  <Input
                     type="text"
                     value={editingSupplier.phone}
                     onChange={(e) => setEditingSupplier({ ...editingSupplier, phone: e.target.value })}
@@ -2966,7 +2966,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
               <div>
                 <label className="block font-bold text-ink mb-1">Contact Email</label>
-                <input
+                <Input
                   type="email"
                   value={editingSupplier.contactEmail}
                   onChange={(e) => setEditingSupplier({ ...editingSupplier, contactEmail: e.target.value })}
@@ -2976,7 +2976,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
               <div>
                 <label className="block font-bold text-ink mb-1">Avg RMA Turnaround (Days)</label>
-                <input
+                <Input
                   type="number"
                   value={editingSupplier.avgRmaTurnaroundDays}
                   onChange={(e) => setEditingSupplier({ ...editingSupplier, avgRmaTurnaroundDays: Number(e.target.value) })}
@@ -3024,7 +3024,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
             <div>
               <label className="block font-bold text-ink mb-1">Quality Tier Name *</label>
-              <input
+              <Input
                 type="text"
                 required
                 value={editingQualityTier.newName}
@@ -3473,7 +3473,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               </div>
               <div className="flex items-center gap-2 text-xs font-bold text-muted">
                 <label className="flex cursor-pointer items-center gap-1.5">
-                  <input
+                  <Input
                     type="checkbox"
                     checked={selectedTagIds.size === filteredParts.length && filteredParts.length > 0}
                     onChange={(e) => {
@@ -3519,7 +3519,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       }`}
                     >
                       <div className="tag-selector absolute right-1 top-1 z-10 flex h-5 w-5 items-center justify-center rounded-full border bg-white shadow-xs">
-                        <input
+                        <Input
                           type="checkbox"
                           checked={isSelected}
                           onChange={toggleSelect}

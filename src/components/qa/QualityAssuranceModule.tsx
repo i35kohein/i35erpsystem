@@ -7,7 +7,7 @@ import {ShieldCheck,
   Wrench,
   Palette} from 'lucide-react';
 import { WorkOrder, PostRepairChecklist, Technician, DiagnosticItemResult, AppUser } from '../../types';
-import { Button } from '../ui';
+import { Button , Input } from '../ui';
 import { DIAGNOSTIC_NAMES, getDiagnosticIcon } from '../intake/deviceData';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 
@@ -439,7 +439,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
 
                         {/* Diagnostic Comment Box */}
                         <div className="relative pt-1">
-                          <input
+                          <Input
                             type="text"
                             value={item.note || ''}
                             onChange={(e) => handleDiagnosticNoteChange(item.id, e.target.value)}

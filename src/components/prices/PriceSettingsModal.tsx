@@ -26,7 +26,7 @@ import {X,
   TrendingUp,
   Globe} from 'lucide-react';
 import { ModelRepairPrice, PriceCatalogImportRow, REPAIR_CATEGORIES, RepairCategoryDef, FolderConfig, getModelFolderId } from '../../types/priceCatalog';
-import { Button } from '../ui';
+import { Button , Input } from '../ui';
 import { toast } from '../../lib/toast';
 
 const normalizeCsvHeader = (value: string) => value.replace(/^\uFEFF/, '').trim().toLowerCase().replace(/\s+/g, ' ');
@@ -491,7 +491,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
           </div>
 
           <div className="flex items-center space-x-2">
-            <input
+            <Input
               ref={importInputRef}
               type="file"
               accept=".csv,text/csv"
@@ -581,7 +581,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
 
                     {isRenamingModel ? (
                       <form onSubmit={handleRenameModelSubmit} className="flex space-x-2">
-                        <input
+                        <Input
                           type="text"
                           value={renameModelInput}
                           onChange={(e) => setRenameModelInput(e.target.value)}
@@ -633,7 +633,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                   <form onSubmit={handleAddNewModel} className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 items-end">
                     <div>
                       <label className="text-xs font-extrabold text-ink block mb-1">New Model Name</label>
-                      <input
+                      <Input
                         type="text"
                         placeholder="e.g. iPhone 16 Pro, iPad Air 6"
                         value={newModelInput}
@@ -703,7 +703,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                               <span className="px-2.5 py-1.5 bg-line/60 border-r border-line text-xs font-bold text-muted select-none shrink-0 font-mono">
                                 {currencySymbol}
                               </span>
-                              <input
+                              <Input
                                 type="text"
                                 placeholder="e.g. 120000 or empty if N/A"
                                 value={currentPrice === null || currentPrice === undefined ? '' : currentPrice}
@@ -713,7 +713,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                             </div>
                           </td>
                           <td className="py-2.5 px-4">
-                            <input
+                            <Input
                               type="text"
                               placeholder="e.g. 3 Month, 12 Month"
                               value={currentWarranty}
@@ -748,7 +748,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                 <form onSubmit={handleAddCategorySubmit} className="pt-3 border-t border-line grid grid-cols-1 sm:grid-cols-4 gap-2.5 items-end">
                   <div>
                     <label className="text-xs font-extrabold text-ink block mb-1">Category Key (ID)</label>
-                    <input
+                    <Input
                       type="text"
                       placeholder="e.g. Camera_Lens_Glass"
                       value={newCategoryKey}
@@ -758,7 +758,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                   </div>
                   <div>
                     <label className="text-xs font-extrabold text-ink block mb-1">Display Name / Label</label>
-                    <input
+                    <Input
                       type="text"
                       placeholder="e.g. Rear Camera Lens Glass"
                       value={newCategoryLabel}
@@ -814,7 +814,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                           <td className="py-2.5 px-4 font-extrabold text-ink">
                             {isEditing ? (
                               <div className="flex items-center space-x-2">
-                                <input
+                                <Input
                                   type="text"
                                   value={editingCategoryLabel}
                                   onChange={(e) => setEditingCategoryLabel(e.target.value)}
@@ -919,7 +919,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                   <form onSubmit={handleAddFolderSubmit} className="pt-3 border-t border-line grid grid-cols-1 sm:grid-cols-3 gap-2.5 items-end">
                     <div>
                       <label className="text-xs font-extrabold text-ink block mb-1">New Folder Name</label>
-                      <input
+                      <Input
                         type="text"
                         placeholder="e.g. Google Pixel Series, Samsung Galaxy"
                         value={newFolderName}
@@ -982,7 +982,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                         <div className="min-w-0 flex-1 pr-2">
                           {isEditing ? (
                             <div className="flex items-center space-x-1.5">
-                              <input
+                              <Input
                                 type="text"
                                 value={editingFolderName}
                                 onChange={(e) => setEditingFolderName(e.target.value)}
@@ -1100,7 +1100,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
 
                   <div>
                     <label className="text-xs font-extrabold text-ink block mb-1">Percentage Change (%)</label>
-                    <input
+                    <Input
                       type="number"
                       placeholder="e.g. 10 for +10% or -5 for -5%"
                       value={globalAdjPercent || ''}
@@ -1111,7 +1111,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
 
                   <div>
                     <label className="text-xs font-extrabold text-ink block mb-1">Flat Price Change ({currencySymbol})</label>
-                    <input
+                    <Input
                       type="number"
                       placeholder="e.g. 5000 or -2000"
                       value={globalAdjFlat || ''}
@@ -1159,7 +1159,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
 
                   <div>
                     <label className="text-xs font-extrabold text-ink block mb-1">Warranty Term</label>
-                    <input
+                    <Input
                       type="text"
                       value={globalWarrantyTerm}
                       onChange={(e) => setGlobalWarrantyTerm(e.target.value)}
@@ -1214,7 +1214,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
 
                 <div className="pt-3 border-t border-line">
                   <label className="text-xs font-bold text-ink block mb-1">Custom Currency Symbol</label>
-                  <input
+                  <Input
                     type="text"
                     value={currencySymbol}
                     onChange={(e) => setCurrencySymbol(e.target.value)}

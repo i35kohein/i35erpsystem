@@ -13,7 +13,7 @@ import {Users,
   Trash2,
   Edit2} from 'lucide-react';
 import { Customer, CustomerType, WorkOrder, SystemSettings } from '../../types';
-import { Button } from '../ui';
+import { Button , Input } from '../ui';
 import { CustomerFacingWebPortal } from '../portal/CustomerFacingWebPortal';
 import { PrintableInvoiceModal } from '../common/PrintableInvoiceModal';
 import { CustomerRepairHistoryModal } from './CustomerRepairHistoryModal';
@@ -598,7 +598,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
             <div className="space-y-3">
               <div>
                 <label className="block font-bold text-ink mb-1">Customer Name *</label>
-                <input
+                <Input
                   type="text"
                   required
                   value={newCustomerForm.name}
@@ -611,7 +611,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="block font-bold text-ink mb-1">Phone Number *</label>
-                  <input
+                  <Input
                     type="tel"
                     required
                     value={newCustomerForm.phone}
@@ -636,7 +636,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
 
               <div>
                 <label className="block font-bold text-ink mb-1">Email Address</label>
-                <input
+                <Input
                   type="email"
                   value={newCustomerForm.email}
                   onChange={(e) => setNewCustomerForm({ ...newCustomerForm, email: e.target.value })}
@@ -648,7 +648,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="block font-bold text-ink mb-1">Company (B2B)</label>
-                  <input
+                  <Input
                     type="text"
                     value={newCustomerForm.company}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, company: e.target.value })}
@@ -658,7 +658,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                 </div>
                 <div>
                   <label className="block font-bold text-ink mb-1">Discount %</label>
-                  <input
+                  <Input
                     type="number"
                     min={0}
                     max={100}

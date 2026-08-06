@@ -1,4 +1,5 @@
 import React from 'react';
+import { Input } from '../../ui';
 import type { SystemSettings } from '../../../types';
 import { Hash, ShieldCheck } from 'lucide-react';
 
@@ -24,7 +25,7 @@ const IntakeTab: React.FC<IntakeTabProps> = ({ formData, setFormData }) => {
                 <Hash className="w-3.5 h-3.5 text-brand" />
                 <span>Ticket / Voucher Prefix Format</span>
               </label>
-              <input
+              <Input
                 type="text"
                 value={formData.ticketPrefix}
                 onChange={(e) => setFormData({ ...formData, ticketPrefix: e.target.value })}
@@ -56,7 +57,7 @@ const IntakeTab: React.FC<IntakeTabProps> = ({ formData, setFormData }) => {
             {/* Checkbox Toggles */}
             <div className="md:col-span-2 space-y-3 pt-3 border-t border-line">
               <label className="flex items-center space-x-3 cursor-pointer p-3 bg-[#F8F9FA] rounded-xl border border-line hover:border-brand transition-all">
-                <input
+                <Input
                   type="checkbox"
                   checked={formData.requirePasscodeIntake}
                   onChange={(e) => setFormData({ ...formData, requirePasscodeIntake: e.target.checked })}
@@ -69,7 +70,7 @@ const IntakeTab: React.FC<IntakeTabProps> = ({ formData, setFormData }) => {
               </label>
 
               <label className="flex items-center space-x-3 cursor-pointer p-3 bg-[#F8F9FA] rounded-xl border border-line hover:border-brand transition-all">
-                <input
+                <Input
                   type="checkbox"
                   checked={formData.requireFindMyCheck}
                   onChange={(e) => setFormData({ ...formData, requireFindMyCheck: e.target.checked })}

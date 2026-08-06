@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, X, Check} from 'lucide-react';
 import { CustomDropdownMenu} from './CustomDropdownMenu';
-import { Button } from '../ui';
+import { Button , Input } from '../ui';
 
 export type DatePreset = 'all' | 'today' | '7days' | '30days' | '60days' | 'custom';
 
@@ -388,7 +388,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div>
                 <label className="block text-muted font-semibold mb-0.5">Start Date</label>
-                <input
+                <Input
                   type="date"
                   value={tempStartDate || ''}
                   onChange={(e) => setTempStartDate(e.target.value)}
@@ -397,7 +397,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
               </div>
               <div>
                 <label className="block text-muted font-semibold mb-0.5">End Date</label>
-                <input
+                <Input
                   type="date"
                   value={tempEndDate || ''}
                   onChange={(e) => setTempEndDate(e.target.value)}

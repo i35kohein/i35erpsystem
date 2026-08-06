@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from '../ui';
+import { Button , Input } from '../ui';
 import {
   Folder,
   Smartphone,
@@ -142,7 +142,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
           {/* Search Box */}
           <div className="relative">
             <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-            <input
+            <Input
               type="text"
               placeholder="Type model name (e.g. 15 Pro, M2, Series 9)..."
               value={deviceSearchQuery}

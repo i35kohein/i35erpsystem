@@ -36,7 +36,7 @@ import {
 import { PriceSettingsModal } from './PriceSettingsModal';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
 import { QuickPriceCalculatorModal } from './QuickPriceCalculatorModal';
-import { Button } from '../ui';
+import { Button , Input } from '../ui';
 import { toast } from '../../lib/toast';
 
 interface PriceCatalogModuleProps {
@@ -843,7 +843,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
         {/* Mobile: in-module full-width search (lg:hidden) — topbar search is desktop-only */}
         <div className="lg:hidden relative mt-1.5">
           <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-          <input
+          <Input
             type="text"
             value={queryToUse}
             onChange={(e) => handleSearchChange(e.target.value)}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { RefreshCw, Sparkles} from 'lucide-react';
-import { Button } from '../../ui';
+import { Button , Input } from '../../ui';
 import type { SystemSettings } from '../../../types';
 
 interface AiTabProps {
@@ -66,7 +66,7 @@ const AiTab: React.FC<AiTabProps> = ({ formData, setFormData, aiRescanning, aiRe
 
             <label className="space-y-1.5 text-xs font-bold text-ink">
               <span>Model</span>
-              <input
+              <Input
                 list="ai-model-presets"
                 value={formData.aiModel || ''}
                 onChange={(event) => setFormData({ ...formData, aiModel: event.target.value })}
@@ -118,7 +118,7 @@ const AiTab: React.FC<AiTabProps> = ({ formData, setFormData, aiRescanning, aiRe
             ) : (
               <label className="space-y-1.5 text-xs font-bold text-ink">
                 <span>API Key</span>
-                <input
+                <Input
                   type="password"
                   value={formData.aiApiKey || ''}
                   onChange={(event) => setFormData({ ...formData, aiApiKey: event.target.value })}
@@ -132,7 +132,7 @@ const AiTab: React.FC<AiTabProps> = ({ formData, setFormData, aiRescanning, aiRe
 
             <label className="space-y-1.5 text-xs font-bold text-ink">
               <span>Custom Base URL</span>
-              <input
+              <Input
                 value={formData.aiBaseUrl || ''}
                 onChange={(event) => setFormData({ ...formData, aiBaseUrl: event.target.value })}
                 placeholder="https://your-api.example.com/v1"

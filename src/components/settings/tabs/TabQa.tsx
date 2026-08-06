@@ -1,4 +1,5 @@
 import React from 'react';
+import { Input } from '../../ui';
 import type { SystemSettings } from '../../../types';
 
 interface QaTabProps {
@@ -18,7 +19,7 @@ const QaTab: React.FC<QaTabProps> = ({ formData, setFormData }) => {
 
           <div className="space-y-3 text-xs">
             <label className="flex items-center space-x-3 cursor-pointer p-3 bg-[#F8F9FA] rounded-xl border border-line hover:border-brand transition-all">
-              <input
+              <Input
                 type="checkbox"
                 checked={formData.mandatoryQaChecklist}
                 onChange={(e) => setFormData({ ...formData, mandatoryQaChecklist: e.target.checked })}
@@ -31,7 +32,7 @@ const QaTab: React.FC<QaTabProps> = ({ formData, setFormData }) => {
             </label>
 
             <label className="flex items-center space-x-3 cursor-pointer p-3 bg-[#F8F9FA] rounded-xl border border-line hover:border-brand transition-all">
-              <input
+              <Input
                 type="checkbox"
                 checked={formData.requireMicroSolderingLog}
                 onChange={(e) => setFormData({ ...formData, requireMicroSolderingLog: e.target.checked })}

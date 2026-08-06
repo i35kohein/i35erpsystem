@@ -70,7 +70,7 @@ import { ActiveFilterChips } from './components/common/ActiveFilterChips';
 import { DrawerSelect } from './components/common/DrawerSelect';
 import { checkIsBeforeDiagnosticNeeded, checkIsAfterDiagnosticNeeded, checkIsDiagnosticCompleted, checkIsBeforeDiagnosticCompleted, checkIsAfterDiagnosticCompleted } from './utils/diagnosticUtils';
 import { CustomDropdownMenu } from './components/common/CustomDropdownMenu';
-import { Button } from './components/ui';
+import { Button , Input } from './components/ui';
 import { ModuleLoadingSkeleton } from './components/common/ModuleLoadingSkeleton';
 import { useLanguage } from './context/LanguageContext';
 import { Navigation } from './components/Navigation';
@@ -1653,7 +1653,7 @@ export default function App() {
               <>
                 <div className="relative hidden lg:block w-52 shrink-0">
                   <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted" />
-                  <input
+                  <Input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -1786,7 +1786,7 @@ export default function App() {
               !(isIpad && activeTab === 'inventory') && (
               <div className="relative hidden lg:block w-52 shrink-0">
                 <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted" />
-                <input
+                <Input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -2095,7 +2095,7 @@ export default function App() {
                 <div className="flex items-center gap-1.5 shrink-0">
                   <div className="relative">
                     <ScanLine className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-brand" />
-                    <input
+                    <Input
                       value={inventoryScanQuery}
                       onChange={(e) => {
                         setInventoryScanQuery(e.target.value);
