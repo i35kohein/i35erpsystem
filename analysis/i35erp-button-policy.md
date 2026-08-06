@@ -14,10 +14,10 @@ baseline; baseline drops as migration progresses). Details in README "Button pol
 | 2026-08-06 (adoption) | 477 | — |
 | 2026-08-06 (round 1, commit `8db2c32`) | **448** | Navigation (2), ActiveFilterChips (1), TechnicianLeaderboardView (1), TechnicianPerformanceTab (1), TabAi (1), TabTheme (1), LanguageSwitcher (4), ConfirmDeleteModal (2), DeviceTagPrinterModal (6), DateFilterSelector (6) |
 | 2026-08-06 (round 2, commits `c0b85df` + `680e16e`) | **389** | **App.tsx (35 — drawer rows/toggles)**, **DashboardOverview (20 — tabs incl. role=tab, queue/warranty filters, roster View/Print, Copy Notice, search ×)**, POS (12 — Pay&Print, quick amounts, numpad, account copy, confirm X), StatusPipelineView tag fix (accidental h3→div mismatch reverted), dashboard tab 40px guard (`lg:h-10`) |
+| 2026-08-06 (round 3, commit `6d857a7`) | **0** 🎉 | **Batch tag-swap all remaining 41 files (311 buttons)** — Inventory(78), Pipeline(27), CreateTicket(26), PriceSettings(20), TabInventory(18), portal(13), PriceCatalog(12), POS(12), SystemSettings(11), SupplierRma(11), CrmPortal(11), Intake(11), QuickPrice(10), CameraQr(9), Timeline(9), follow-up(8), finance(7), QA(6), + 17 more. **Button default size → `h-10` (40px everywhere)** — fixes the silent `lg:h-9` (36px) shrink that hit every `h-10`-className button at lg. Guard now **strict: baseline 0** — any raw `<button>` fails lint. |
 
-## Remaining offenders (by count)
-- InventoryManagementModule **78** · StatusPipelineView **27** · CreateTicketSoloPage **26** ·
-  PriceSettingsModal **20** · PosInvoicingModule **~13** · TabInventory **16** · CustomerFacingWebPortal **13** ·
+## ✅ MIGRATION COMPLETE (2026-08-06) — 0 raw buttons remaining.
+Guard is strict (baseline 0): adding a raw `<button>` anywhere outside the ui kit now fails `npm run lint`.
   PriceCatalogModule **12** · SupplierRmaModule **11** · SystemManagementSettingsModule **11** ·
   CrmCustomerPortalModule **11** · IntakeWorkOrderModule **11** · QuickPriceCalculatorModal **10** …
 - Note: many remaining are legitimately tricky (dynamic role/state colors, table cell micro-buttons,
