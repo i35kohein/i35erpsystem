@@ -1633,11 +1633,11 @@ export default function App() {
 
           {/* Dynamic Header Actions & Quick Filters per Tab */}
           <div className="app-topbar-actions flex min-w-0 items-center flex-nowrap justify-end gap-1.5 sm:gap-2 text-xs py-1 shrink-0 relative z-30 overflow-x-auto no-scrollbar max-w-full lg:overflow-visible">
-            {/* Global Search (Cmd/Ctrl+K) */}
+            {/* Global Search (Cmd/Ctrl+K) — hidden on iPad: the contextual search box (and inventory scan box) already cover it */}
             <button
               type="button"
               onClick={() => setIsGlobalSearchOpen(true)}
-              className="inline-flex h-11 w-11 lg:h-10 lg:w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2"
+              className={`${isIpad ? 'hidden' : 'inline-flex'} h-11 w-11 lg:h-10 lg:w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2`}
               title="Global search (⌘K)"
               aria-label="Global search (⌘K)"
             >
@@ -1813,7 +1813,9 @@ export default function App() {
                 </div>
               </>
             ) : ['intake', 'pipeline', 'pos', 'inventory', 'crm', 'suppliers', 'qa'].includes(activeTab) ? (
-              /* Contextual Search Input — desktop only (modules have their own mobile search) */
+              /* Contextual Search Input — desktop only (modules have their own mobile search);
+                  also hidden on iPad inventory where the navbar scan box handles search */
+              !(isIpad && activeTab === 'inventory') && (
               <div className="relative hidden lg:block w-52 shrink-0">
                 <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted" />
                 <input
@@ -1848,6 +1850,7 @@ export default function App() {
                   </button>
                 )}
               </div>
+              )
             ) : null}
 
             {/* Dynamic Filters depending on Active Tab */}
