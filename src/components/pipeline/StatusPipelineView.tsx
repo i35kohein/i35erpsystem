@@ -866,12 +866,12 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         </div>
 
                         {/* Primary Card Action + ⋯ More menu (Detail/Log/Notify stay one tap away) */}
-                        <div className="grid grid-cols-2 gap-1 pt-1 border-t border-slate-100 text-[10px]">
+                        <div className="flex items-stretch gap-1 pt-1 border-t border-slate-100 text-[10px]">
                           {stage.id === 'Finished' ? (
                             <button
                               type="button"
                               onClick={() => openCheckoutModal(wo)}
-                              className="py-1.5 px-1 bg-success hover:bg-success/90 text-white font-extrabold rounded-lg border border-success text-center flex items-center justify-center space-x-0.5 truncate shadow-xs min-h-9"
+                              className="flex-1 py-1.5 px-1 bg-success hover:bg-success/90 text-white font-extrabold rounded-lg border border-success text-center flex items-center justify-center space-x-0.5 truncate shadow-xs min-h-9"
                             >
                               <DollarSign className="w-3 h-3 shrink-0" />
                               <span>Checkout</span>
@@ -883,7 +883,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                                 setNotifWo(wo);
                                 setIsNotifModalOpen(true);
                               }}
-                              className="py-1.5 px-1 bg-[#7360F2]/10 hover:bg-[#7360F2]/20 text-[#7360F2] font-extrabold rounded-lg border border-[#7360F2]/20 text-center flex items-center justify-center space-x-0.5 truncate min-h-9"
+                              className="flex-1 py-1.5 px-1 bg-[#7360F2]/10 hover:bg-[#7360F2]/20 text-[#7360F2] font-extrabold rounded-lg border border-[#7360F2]/20 text-center flex items-center justify-center space-x-0.5 truncate min-h-9"
                               title="Alert Customer SMS/Viber/Telegram"
                             >
                               <BellRing className="w-3 h-3 shrink-0" />
@@ -893,7 +893,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                             <button
                               type="button"
                               onClick={() => setAddLogModalWo(wo)}
-                              className="py-1.5 px-1 bg-brand/10 hover:bg-brand/15 text-brand font-extrabold rounded-lg border border-brand/20 text-center flex items-center justify-center space-x-0.5 truncate min-h-9"
+                              className="flex-1 py-1.5 px-1 bg-brand/10 hover:bg-brand/15 text-brand font-extrabold rounded-lg border border-brand/20 text-center flex items-center justify-center space-x-0.5 truncate min-h-9"
                             >
                               <Plus className="w-3 h-3 shrink-0" />
                               <span>Log</span>
@@ -905,7 +905,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                             ariaLabel={`More actions for ${wo.orderNumber}`}
                             iconOnly
                             triggerIcon={<MoreHorizontal className="w-4 h-4" />}
-                            buttonClassName="!h-9 !w-9"
+                            buttonClassName="!h-9 !w-9 shrink-0"
                             menuAlign="right"
                             options={[
                               { value: 'detail', label: 'Detail' },
