@@ -1,3 +1,5 @@
+const FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2';
+
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useIsIpad } from '../../hooks/useIsIpad';
 import { DateFilterState, filterByDateRange } from '../common/DateFilterSelector';
@@ -494,7 +496,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         )}
                       </span>
                       {(wo.imei || wo.serialNumber) && (
-                        <Button
+                        <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -503,10 +505,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           }}
                           title="Copy IMEI"
                           aria-label={`Copy IMEI ${wo.imei || wo.serialNumber}`}
-                          className="font-mono text-xs shrink-0 truncate text-muted hover:text-brand transition-colors"
+                          className={`font-mono text-xs shrink-0 truncate text-muted hover:text-brand transition-colors ${FOCUS}`}
                         >
                           #{formatSerialGrouped(wo.imei || wo.serialNumber)}
-                        </Button>
+                        </button>
                       )}
                     </div>
                   </div>

@@ -21,15 +21,17 @@
 - **heading-order** (4→1): dashboard section titles h3→h2; pipeline stage column labels h3→div (visual labels); Follow-Ups "Devices Due" h3→h2; Finance margin benchmark h4→h3.
 - **region**: HoverTooltip role="tooltip"; GlobalSearchModal role="dialog" aria-modal aria-label (tooltip still flagged — fixed-position outside landmarks is inherent).
 
-## Remaining — final (7 nodes, light theme)
-- Portal staff/technician name buttons (6): default-variant `<Button>` (bg-brand) with ink text — data-driven render not yet located in source; pattern documented. Fix: those buttons should use variant="ghost"/"outline" or explicit text-white.
-- POS confirm-modal close (1): iconGhost variant — axe background-propagation quirk vs the white modal; visually fine.
-- **Note — themes:** the app supports `app_theme` (light / dark-slate). This audit was run in LIGHT mode (66→7). The dark-slate theme needs its own contrast pass (light text on dark + brand-on-dark fail there).
+## FINAL — ✅ 0 real violations (light theme, all 11 tabs)
+- **color-contrast: 0** (was 66) · **heading-order: 0** · **landmark: 0** · **select-name/nested-interactive: 0**
+- Remaining: `region` ×9 — the fixed-position `role="tooltip"` overlay (axe known limitation for position:fixed elements outside landmarks; functionally fine — tooltip is aria-describedby-linked). Acceptable.
+- **Theme note:** app supports `app_theme` (light / dark-slate). This audit = LIGHT mode. dark-slate theme needs its own contrast pass (light-on-dark + brand-on-dark) — separate follow-up.
 
-## Root causes fixed this pass (light mode 66 → 7)
-- `--color-success` (Carbon #24a148) → #166534 (was white-on-green 3.35:1); muted/faint tokens → #616161 (passes on white AND surface #f4f4f4); carbon-coat `:root` overrides aligned.
-- Button default-variant bg-brand + className text overrides (invisible text) — fixed Work Intake view toggles + portal tab nav via `variant="ghost"`.
-- theme gotcha: stale `localStorage.app_theme = dark-slate` flips the whole audit — always clear it before light-mode runs.
+## Root causes fixed this pass (66 → 0)
+1. `--color-success` (Carbon #24a148) → #166534 (white-on-green 3.35 fail); muted/faint → #616161 (passes white AND surface).
+2. **Button default-variant bg-brand + className text override** (invisible text on blue) — the dominant pattern. Fixed by:
+   - Work Intake view toggles, Parts Stock/Profit/Matrix toggles, portal tab nav → `variant="ghost"`
+   - CRM roster name/expand/Full-History buttons, mobile close, details header name + Full History, POS IMEI copy → converted to **plain `<button>`** with same classes + focus ring (deterministic, no CSS order gamble)
+3. ⚠️ **Runtime crash lesson:** esbuild doesn't type-check — referencing an undefined `FOCUS` const in className template literals built fine but blank-screened the CRM module at runtime. Fix: define `const FOCUS` in each file. Always verify the affected tab renders after deploy (body text non-empty).
 
 ## How to re-run
 Inject axe-core 4.10.2 (CDN), `axe.run(document)` per tab — script: `/tmp/erp_micro/axe_verify.cjs` pattern.

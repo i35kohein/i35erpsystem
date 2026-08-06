@@ -1024,6 +1024,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           {!isIpad && (
           <div className="bg-surface rounded-xl border border-line flex items-center p-1 w-full md:w-auto md:shrink-0">
             <Button
+              variant="ghost"
               type="button"
               onClick={() => setViewMode('stock')}
               className={`flex-1 md:flex-none h-9 lg:h-8 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
@@ -1036,6 +1037,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <span>Stock</span>
             </Button>
             <Button
+              variant="ghost"
               type="button"
               onClick={() => setViewMode('profit')}
               className={`flex-1 md:flex-none h-9 lg:h-8 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
@@ -1048,6 +1050,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <span>Profit</span>
             </Button>
             <Button
+              variant="ghost"
               type="button"
               onClick={() => setViewMode('matrix')}
               className={`flex-1 md:flex-none h-9 lg:h-8 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${

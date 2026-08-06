@@ -1,3 +1,5 @@
+const FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2';
+
 import React, { useEffect, useState } from 'react';
 import {Users, 
   Plus, 
@@ -303,18 +305,18 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                     }`}
                   >
                     <div className="flex justify-between items-center">
-                      <Button
+                      <button
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleOpenHistoryModal(cust);
                         }}
-                        className="font-bold text-ink hover:text-brand hover:underline cursor-pointer text-left flex items-center space-x-1 group"
+                        className={`font-bold text-ink hover:text-brand hover:underline cursor-pointer text-left flex items-center space-x-1 group ${FOCUS}`}
                         title="Click to view full repair history modal"
                       >
                         <span>{cust.name}</span>
                         <ExternalLink className="w-3 h-3 text-brand opacity-70 group-hover:opacity-100 transition-opacity" />
-                      </Button>
+                      </button>
                       <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${
                         cust.type === 'B2B Corporate' ? 'bg-purple-50 text-purple-700 border-purple-200' :
                         cust.type === 'Wholesale Mail-In' ? 'bg-brand-soft text-brand border-brand/20' :
@@ -333,30 +335,30 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
 
                     {/* Expandable Row Toggle Bar */}
                     <div className="flex justify-between items-center mt-1.5 pt-1.5 border-t border-line/70">
-                      <Button
+                      <button
                         type="button"
                         onClick={(e) => toggleExpandCustomer(cust.id, e)}
-                        className="flex items-center space-x-1 text-xs font-bold text-brand hover:text-brand-deep transition-colors py-0.5 px-1.5 rounded-md hover:bg-blue-100/50 cursor-pointer"
+                        className={`flex items-center space-x-1 text-xs font-bold text-brand hover:text-brand-deep transition-colors py-0.5 px-1.5 rounded-md hover:bg-blue-100/50 cursor-pointer ${FOCUS}`}
                       >
                         {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                         <span>
                           {custOrders.length} Repair{custOrders.length === 1 ? '' : 's'}
                         </span>
-                      </Button>
+                      </button>
 
                       <div className="flex items-center space-x-1.5">
-                        <Button
+                        <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleOpenHistoryModal(cust);
                           }}
-                          className="px-2 py-0.5 bg-blue-50 text-brand hover:bg-blue-100 font-bold text-xs rounded-md transition-colors flex items-center space-x-1 cursor-pointer"
+                          className={`px-2 py-0.5 bg-blue-50 text-brand hover:bg-blue-100 font-bold text-xs rounded-md transition-colors flex items-center space-x-1 cursor-pointer ${FOCUS}`}
                           title="Open Full Repair History Modal"
                         >
                           <FileText className="w-2.5 h-2.5" />
                           <span>Full History</span>
-                        </Button>
+                        </button>
 
                         {(cloudCustomerIds?.has(cust.id) ?? true) && (
                           <Button
@@ -469,42 +471,41 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                 <span className="h-1 w-8 shrink-0 rounded-full bg-line-strong" />
                 <p className="truncate text-xs font-extrabold text-ink">{selectedCustomer?.name || 'Customer Details'}</p>
               </div>
-              <Button
+              <button
                 type="button"
                 onClick={() => setIsMobileDetailOpen(false)}
                 aria-label="Close customer details"
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted hover:bg-surface hover:text-ink transition-colors cursor-pointer"
+                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted hover:bg-surface hover:text-ink transition-colors cursor-pointer ${FOCUS}`}
               >
                 <X className="h-4 w-4" />
-              </Button>
+              </button>
             </div>
             {selectedCustomer ? (
               <div className="flex min-h-0 flex-1 flex-col gap-5">
                 <div className="border-b border-line pb-3">
                   <div className="flex justify-between items-start">
                     <div>
-                      <Button
+                      <button
                         type="button"
                         onClick={() => handleOpenHistoryModal(selectedCustomer)}
-                        className="text-base font-black text-ink hover:text-brand hover:underline flex items-center space-x-2 cursor-pointer text-left group"
+                        className={`text-base font-black text-ink hover:text-brand hover:underline flex items-center space-x-2 cursor-pointer text-left group ${FOCUS}`}
                         title="Click to view full repair history modal"
                       >
                         <span>{selectedCustomer.name}</span>
                         <ExternalLink className="w-4 h-4 text-brand opacity-80 group-hover:opacity-100 transition-opacity" />
-                      </Button>
+                      </button>
                       {selectedCustomer.company && <p className="text-muted text-xs font-medium">{selectedCustomer.company}</p>}
                     </div>
 
-                    <Button
+                    <button
                       type="button"
                       onClick={() => handleOpenHistoryModal(selectedCustomer)}
-                      size="sm"
-                      className="bg-brand/10 hover:bg-brand text-brand-deep hover:text-white border border-brand/30"
+                      className={`bg-brand/10 hover:bg-brand text-brand-deep hover:text-white border border-brand/30 rounded-lg px-3 py-1.5 text-xs font-bold transition-colors cursor-pointer ${FOCUS}`}
                     >
                       <FileText className="w-3.5 h-3.5" />
                       <span className="hidden sm:inline">Full History</span>
                       <span className="sm:hidden">History</span>
-                    </Button>
+                    </button>
                   </div>
                 </div>
 
