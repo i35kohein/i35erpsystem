@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo, lazy, Suspense } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Sparkles, Plus, CircleDot, Search, Filter, Calculator, Folder, Settings, Download, Database, ExternalLink, ClipboardList, Kanban, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, ChevronDown, PhoneCall, Truck, Boxes, CreditCard, Users, DollarSign, LayoutDashboard, Timer, MoreHorizontal, SlidersHorizontal, Eye, Stethoscope, Edit2, List, LayoutGrid, Printer } from 'lucide-react';
+import { Sparkles, Plus, CircleDot, Search, Filter, Calculator, Folder, Settings, Download, Database, ExternalLink, ClipboardList, Kanban, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, ChevronDown, PhoneCall, Truck, Boxes, CreditCard, Users, DollarSign, LayoutDashboard, Timer, MoreHorizontal, SlidersHorizontal, Eye, Stethoscope, Edit2, List, LayoutGrid, Printer, Smartphone, Layers } from 'lucide-react';
 import { subscribeToCollection, fetchCloudCollection, saveDocument, saveBatchDocuments, deleteDocument, clearCollection } from './lib/supabase';
 import { setActiveUserId, notifyAccountChanged } from './utils/accountSettings';
 
@@ -624,7 +624,7 @@ export default function App() {
       case 'qa':
         return (statusFilter !== 'ALL' ? 1 : 0) + d;
       case 'inventory':
-        return (categoryFilter !== 'ALL' ? 1 : 0) + (stockFilter !== 'ALL' ? 1 : 0) + d;
+        return (modelFilter !== 'ALL' ? 1 : 0) + (categoryFilter !== 'ALL' ? 1 : 0) + (stockFilter !== 'ALL' ? 1 : 0) + d;
       case 'crm':
         return (customerTypeFilter !== 'ALL' ? 1 : 0) + d;
       case 'finance':
@@ -2117,6 +2117,50 @@ export default function App() {
             {/* Contextual Action Button */}
             {activeTab === 'inventory' ? (
               <>
+              {/* Model / Category / Tier filter icons — iPad navbar quick access */}
+              {isIpad && (
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <CustomDropdownMenu
+                    value={modelFilter}
+                    onChange={(v) => setModelFilter(v)}
+                    iconOnly
+                    triggerIcon={<Smartphone className="h-4 w-4" />}
+                    ariaLabel="Filter by device model"
+                    menuAlign="right"
+                    buttonClassName="!h-10 !w-10"
+                    options={[
+                      { value: 'ALL', label: 'All Models' },
+                      ...inventoryDeviceModels.map((m) => ({ value: m, label: m })),
+                    ]}
+                  />
+                  <CustomDropdownMenu
+                    value={categoryFilter}
+                    onChange={(v) => setCategoryFilter(v)}
+                    iconOnly
+                    triggerIcon={<Layers className="h-4 w-4" />}
+                    ariaLabel="Filter inventory by category"
+                    menuAlign="right"
+                    buttonClassName="!h-10 !w-10"
+                    options={[
+                      { value: 'ALL', label: 'All Categories' },
+                      ...inventoryCategoryOptions.map((c) => ({ value: c, label: c })),
+                    ]}
+                  />
+                  <CustomDropdownMenu
+                    value={stockFilter}
+                    onChange={(v) => setStockFilter(v)}
+                    iconOnly
+                    triggerIcon={<Filter className="h-4 w-4" />}
+                    ariaLabel="Filter by quality tier"
+                    menuAlign="right"
+                    buttonClassName="!h-10 !w-10"
+                    options={[
+                      { value: 'ALL', label: 'All Tiers' },
+                      ...inventoryQualityOptions.map((t) => ({ value: t, label: t })),
+                    ]}
+                  />
+                </div>
+              )}
               {/* Table/Card view toggle — iPad only (toolbar moves here) */}
               {isIpad && (
                 <div className="flex items-center rounded-lg border border-line bg-surface p-0.5 shrink-0">
