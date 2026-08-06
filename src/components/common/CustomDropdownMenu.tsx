@@ -56,6 +56,7 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [menuPos, setMenuPos] = useState<{ top: number; left: number; placeTop: boolean } | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const selectedOption = options.find((o) => o.value === value);
 
@@ -94,7 +95,14 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
   // Close on scroll/resize while open so fixed coordinates never go stale.
   useEffect(() => {
     if (!isOpen) return;
-    const onViewportChange = () => close();
+    const onViewportChange = (e: Event) => {
+      // Ignore scrolls INSIDE the open menu — its own option list must be able
+      // to scroll freely (e.g. 40+ model/category options) without the menu
+      // closing itself on the first wheel/touch tick.
+      const target = e.target as Node | null;
+      if (target && menuRef.current?.contains(target)) return;
+      close();
+    };
     window.addEventListener('scroll', onViewportChange, true);
     window.addEventListener('resize', onViewportChange);
     window.addEventListener('orientationchange', onViewportChange);
@@ -125,6 +133,7 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
         aria-hidden="true"
       />
       <div
+        ref={menuRef}
         role="listbox"
         className={`fixed z-[96] w-56 max-w-[calc(100vw-1rem)] rounded-xl border border-[var(--border)] bg-[var(--card-bg)] p-1.5 shadow-lg ${menuPos.placeTop ? '-translate-y-full' : ''} ${menuClassName}`}
         style={{ top: menuPos.top, left: menuPos.left }}
