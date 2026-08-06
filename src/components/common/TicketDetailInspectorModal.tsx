@@ -119,12 +119,6 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
     return (Number.isFinite(bTime) ? bTime : 0) - (Number.isFinite(aTime) ? aTime : 0);
   });
 
-  const statusClass = (status: string) => {
-    if (status === 'Pass') return 'border-emerald-200 bg-emerald-50 text-emerald-700';
-    if (status === 'Fail') return 'border-rose-200 bg-rose-50 text-rose-700';
-    return 'border-[var(--border)] bg-[var(--bg)] text-[var(--text-muted)]';
-  };
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-3 sm:p-5">
       <div className="flex h-[92vh] max-h-[760px] min-h-0 w-full max-w-5xl flex-col overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card-bg)] shadow-xl">
@@ -334,39 +328,45 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-                {diagnosticRows.map(({ beforeItem, afterItem }, index) => (
-                  <div
-                    key={beforeItem.id || beforeItem.name}
-                    className={`flex flex-col gap-2 rounded-lg border p-3 ${
-                      beforeItem.status === 'Fail' || afterItem.status === 'Fail'
-                        ? 'border-rose-200 bg-rose-50/70'
-                        : 'border-[var(--border)] bg-[var(--card-bg)]'
-                    }`}
-                  >
-                    <p className="truncate text-xs font-extrabold text-[var(--text-main)]" title={beforeItem.name}>
-                      <span className="mr-1.5 inline-block w-6 shrink-0 text-right font-mono text-[10px] text-[var(--text-muted)]">{index + 1}.</span>
-                      {beforeItem.name}
-                    </p>
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-[10px] font-bold text-[var(--text-muted)]">Before intake</span>
-                      <span className={`inline-flex min-w-16 justify-center rounded-md border px-2 py-1 text-[10px] font-extrabold uppercase ${statusClass(beforeItem.status)}`}>
-                        {beforeItem.status}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-[10px] font-bold text-[var(--text-muted)]">After QA</span>
-                      <span className={`inline-flex min-w-16 justify-center rounded-md border px-2 py-1 text-[10px] font-extrabold uppercase ${statusClass(afterItem.status)}`}>
-                        {afterItem.status}
-                      </span>
-                    </div>
-                    {(afterItem.note || beforeItem.note) && (
-                      <p className="border-t border-[var(--border)] pt-2 text-[10px] italic leading-snug text-[var(--text-muted)]">
-                        {afterItem.note || beforeItem.note}
-                      </p>
-                    )}
-                  </div>
-                ))}
+              <div className="overflow-hidden rounded-lg border border-[var(--border)]">
+                {/* Mini table header */}
+                <div className="grid grid-cols-[24px_minmax(0,1fr)_auto_auto] items-center gap-x-3 border-b border-[var(--border)] bg-[var(--bg)] px-3 py-1.5 text-[9px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">
+                  <span>#</span>
+                  <span>Check item</span>
+                  <span className="w-14 text-right">Before</span>
+                  <span className="w-14 text-right">After</span>
+                </div>
+                <div className="divide-y divide-[var(--border)]">
+                  {diagnosticRows.map(({ beforeItem, afterItem }, index) => {
+                    const hasFail = beforeItem.status === 'Fail' || afterItem.status === 'Fail';
+                    const statusText = (status: string) =>
+                      status === 'Pass' ? 'text-emerald-600'
+                      : status === 'Fail' ? 'text-rose-600 font-extrabold'
+                      : 'text-[var(--text-muted)]';
+                    return (
+                      <div
+                        key={beforeItem.id || beforeItem.name}
+                        className={`grid grid-cols-[24px_minmax(0,1fr)_auto_auto] items-baseline gap-x-3 px-3 py-1.5 ${hasFail ? 'bg-rose-50/50' : ''}`}
+                      >
+                        <span className="font-mono text-[10px] text-[var(--text-muted)]">{index + 1}</span>
+                        <span className="min-w-0 text-xs font-semibold text-[var(--text-main)]">
+                          {beforeItem.name}
+                          {(afterItem.note || beforeItem.note) && (
+                            <span className="ml-1.5 text-[10px] font-normal italic text-[var(--text-muted)]">
+                              — {afterItem.note || beforeItem.note}
+                            </span>
+                          )}
+                        </span>
+                        <span className={`w-14 text-right text-[11px] font-bold uppercase ${statusText(beforeItem.status)}`}>
+                          {beforeItem.status}
+                        </span>
+                        <span className={`w-14 text-right text-[11px] font-bold uppercase ${statusText(afterItem.status)}`}>
+                          {afterItem.status}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </section>
           </main>
