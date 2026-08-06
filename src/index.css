@@ -143,6 +143,11 @@ html[data-theme="dark-slate"] {
   --blue-tint: #1E293B;
 }
 
+/* F5: logos always sit on a white chip so dark/black logos stay visible in dark mode */
+html[data-theme="dark-slate"] .logo-chip {
+  background-color: #FFFFFF !important;
+}
+
 /* F5: dark-slate also overrides the carbon TOKEN colors so modern token-based
    classes (bg-surface, text-ink, border-line, bg-brand-soft…) go dark too. */
 html[data-theme="dark-slate"] {

@@ -1163,7 +1163,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
               <div className="text-center border-b border-line pb-3 space-y-1">
                 {systemSettings.shopLogoUrl && (
                   <div className="flex justify-center mb-1">
-                    <img src={systemSettings.shopLogoUrl} alt="Logo" className="h-10 max-w-[140px] object-contain" />
+                    <img src={systemSettings.shopLogoUrl} alt="Logo" className="logo-chip h-10 max-w-[140px] object-contain bg-white border border-line rounded-lg p-0.5" />
                   </div>
                 )}
                 <h2 className="font-black text-base uppercase tracking-tight">{systemSettings.shopName}</h2>

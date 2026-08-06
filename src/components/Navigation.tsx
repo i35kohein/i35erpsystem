@@ -289,7 +289,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                   <img 
                     src={systemSettings.shopLogoUrl} 
                     alt="Shop Logo" 
-                    className="w-9 h-9 rounded-xl object-contain bg-white border border-line p-0.5 shrink-0" 
+                    className="logo-chip w-9 h-9 rounded-xl object-contain bg-white border border-line p-0.5 shrink-0" 
                   />
                 ) : (
                   <div className="w-9 h-9 rounded-xl bg-brand flex items-center justify-center text-white shrink-0">

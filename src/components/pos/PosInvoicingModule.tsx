@@ -1384,7 +1384,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   <img
                     src={systemSettings.shopLogoUrl}
                     alt="Shop Logo"
-                    className="h-10 max-w-[140px] object-contain"
+                    className="logo-chip h-10 max-w-[140px] object-contain bg-white border border-line rounded-lg p-0.5"
                   />
                 </div>
               )}

@@ -337,7 +337,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                   <img
                     src={formData.shopLogoUrl}
                     alt="Logo"
-                    className="w-9 h-9 rounded-xl object-contain bg-white border border-line p-0.5 shrink-0"
+                    className="logo-chip w-9 h-9 rounded-xl object-contain bg-white border border-line p-0.5 shrink-0"
                   />
                 ) : (
                   <div className="w-9 h-9 rounded-xl bg-brand flex items-center justify-center text-white shrink-0 font-bold text-sm">

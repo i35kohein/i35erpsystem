@@ -77,7 +77,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
             {/* Connected Store Branding Status Card — sourced only from Shop Settings. */}
             <div className="bg-white p-4 rounded-2xl border border-line-strong shadow-2xs flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-start space-x-3.5">
-                <div className="w-12 h-12 rounded-xl bg-surface border border-line p-1 flex items-center justify-center shrink-0 shadow-2xs">
+                <div className="logo-chip w-12 h-12 rounded-xl bg-surface border border-line p-1 flex items-center justify-center shrink-0 shadow-2xs">
                   {formData.shopLogoUrl ? (
                     <img
                       src={formData.shopLogoUrl}
