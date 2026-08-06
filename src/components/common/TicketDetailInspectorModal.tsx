@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '../ui';
+import { Button, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '../ui';
 import {
   Banknote,
   CalendarDays,
@@ -20,6 +20,7 @@ import {
   Trash2,
   UserRound,
   X,
+  MoreHorizontal,
 } from 'lucide-react';
 import { AppUser, WorkOrder } from '../../types';
 import { get21AfterDiagnostics, get21Diagnostics } from '../../utils/diagnosticUtils';
@@ -147,54 +148,49 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
           </div>
 
           <div className="flex shrink-0 items-center gap-1">
-            {onEdit && (
-              <Button
-                type="button"
-                onClick={() => onEdit(workOrder)}
-                aria-label="Edit ticket"
-                title="Edit ticket"
-                className="flex h-10 w-10 items-center justify-center rounded-lg text-[var(--text-muted)] transition-colors hover:bg-[var(--bg)] hover:text-[var(--primary)]"
-              >
-                <PencilLine className="h-4 w-4" />
-              </Button>
-            )}
-
-            {onPrint && (
-              <Button
-                type="button"
-                onClick={() => onPrint(workOrder)}
-                aria-label="Print ticket sticker"
-                title="Print sticker"
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-muted)] transition-colors hover:bg-[var(--bg)] hover:text-[var(--primary)]"
-              >
-                <Printer className="h-4 w-4" />
-              </Button>
-            )}
-
-            {currentUser?.role === 'Admin' && onDelete ? (
-              <Button
-                type="button"
-                aria-label="Delete ticket"
-                title="Delete ticket"
-                onClick={() => {
-                  if (window.confirm(`Are you sure you want to delete ticket ${workOrder.orderNumber || workOrder.id}?`)) {
-                    onDelete(workOrder.id);
-                    onClose();
-                  }
-                }}
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-muted)] transition-colors hover:bg-rose-50 hover:text-rose-600"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            ) : (
-              <span
-                aria-label="Delete locked"
-                title="Delete locked"
-                className="flex h-9 w-9 cursor-not-allowed items-center justify-center rounded-lg text-[var(--text-muted)] opacity-40"
-              >
-                <Lock className="h-4 w-4" />
-              </span>
-            )}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="iconGhost"
+                  size="icon"
+                  aria-label="Ticket actions"
+                  title="Ticket actions"
+                  className="text-[var(--text-muted)] hover:bg-[var(--bg)] hover:text-[var(--text-main)]"
+                >
+                  <MoreHorizontal className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {onEdit && (
+                  <DropdownMenuItem onSelect={() => onEdit(workOrder)}>
+                    <PencilLine className="h-4 w-4" /> Edit ticket
+                  </DropdownMenuItem>
+                )}
+                {onPrint && (
+                  <DropdownMenuItem onSelect={() => onPrint(workOrder)}>
+                    <Printer className="h-4 w-4" /> Print sticker
+                  </DropdownMenuItem>
+                )}
+                {currentUser?.role === 'Admin' && onDelete ? (
+                  <DropdownMenuItem
+                    destructive
+                    onSelect={() => {
+                      if (window.confirm(`Are you sure you want to delete ticket ${workOrder.orderNumber || workOrder.id}?`)) {
+                        onDelete(workOrder.id);
+                        onClose();
+                      }
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" /> Delete ticket
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem disabled>
+                    <Lock className="h-4 w-4" /> Delete locked
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <Button
               type="button"

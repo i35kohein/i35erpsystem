@@ -32,13 +32,14 @@ import {Boxes,
   ChevronRight,
   ChevronDown,
   Printer,
-  ScanLine} from 'lucide-react';
+  ScanLine,
+  MoreHorizontal} from 'lucide-react';
 import { PartItem, PartQualityTier, Supplier, SystemSettings, RmaItem } from '../../types';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
 import { getAvailableColorsForModel, getRealisticColorStyle } from '../intake/deviceData';
 import { useIsIpad } from '../../hooks/useIsIpad';
-import { Button } from '../ui';
+import { Button, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '../ui';
 import { toast } from '../../lib/toast';
 import { sortModelsNewestFirst, compareModelsNewestFirst } from '../../utils/modelSort';
 import JsBarcode from 'jsbarcode';
@@ -2444,10 +2445,23 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <p className="mt-1 font-semibold text-ink">{selectedPartForDetails.supplierName || 'No supplier assigned'}</p>
             </div>
 
-            <div className="flex flex-wrap justify-end gap-2 border-t border-line pt-3">
+            <div className="flex items-center justify-end gap-2 border-t border-line pt-3">
               <Button type="button" onClick={() => { setClaimingWarrantyPart(selectedPartForDetails); setSelectedPartForDetails(null); }} className="inline-flex h-10 lg:h-8 items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 font-extrabold text-amber-700 hover:bg-amber-100"><ShieldAlert className="h-3.5 w-3.5" /> Warranty</Button>
-              <Button type="button" onClick={() => { setEditingPart(selectedPartForDetails); setSelectedPartForDetails(null); }} className="inline-flex h-10 lg:h-8 items-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 font-extrabold text-ink hover:bg-line"><Edit2 className="h-3.5 w-3.5" /> Edit</Button>
-              <Button type="button" onClick={() => { if (window.confirm(`Delete part “${selectedPartForDetails.name}” (${selectedPartForDetails.sku})?`)) { onDeletePart?.(selectedPartForDetails.id); setSelectedPartForDetails(null); } }} className="inline-flex h-10 lg:h-8 items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-2.5 font-extrabold text-rose-600 hover:bg-rose-100"><Trash2 className="h-3.5 w-3.5" /> Delete</Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button type="button" variant="iconGhost" size="icon" aria-label="Part actions" className="border border-line">
+                    <MoreHorizontal className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onSelect={() => { setEditingPart(selectedPartForDetails); setSelectedPartForDetails(null); }}>
+                    <Edit2 className="h-4 w-4" /> Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem destructive onSelect={() => { if (window.confirm(`Delete part “${selectedPartForDetails.name}” (${selectedPartForDetails.sku})?`)) { onDeletePart?.(selectedPartForDetails.id); setSelectedPartForDetails(null); } }}>
+                    <Trash2 className="h-4 w-4" /> Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
