@@ -1606,7 +1606,7 @@ export default function App() {
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className={`${isIpad ? '' : 'lg:hidden'} min-h-11 min-w-11 flex items-center justify-center bg-surface hover:bg-line border border-line text-ink rounded-xl active:scale-95 transition-all shrink-0 cursor-pointer`}
+              className={`${isIpad ? '' : 'lg:hidden'} h-10 w-10 flex items-center justify-center bg-surface hover:bg-line border border-line text-ink rounded-xl active:scale-95 transition-all shrink-0 cursor-pointer`}
               aria-label="Toggle Navigation Menu"
               title="Toggle Navigation Menu"
             >
@@ -1648,7 +1648,7 @@ export default function App() {
               <button
                 type="button"
                 onClick={handleResetAllFilters}
-                className="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold rounded-xl transition-all flex items-center space-x-1 cursor-pointer shrink-0 active:scale-95 shadow-2xs"
+                className="h-10 px-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold rounded-xl transition-all flex items-center space-x-1 cursor-pointer shrink-0 active:scale-95 shadow-2xs"
                 title="Reset active search & filters"
               >
                 <X className="w-3.5 h-3.5 text-rose-600" />
@@ -1671,7 +1671,7 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => settingsSaveRef.current?.()}
-                  className="px-3 sm:px-3.5 py-1.5 bg-brand hover:bg-brand-deep text-white font-extrabold text-xs rounded-xl transition-all shadow-2xs flex items-center space-x-1 sm:space-x-1.5 cursor-pointer active:scale-95"
+                  className="h-10 px-3 sm:px-3.5 bg-brand hover:bg-brand-deep text-white font-extrabold text-xs rounded-xl transition-all shadow-2xs flex items-center space-x-1 sm:space-x-1.5 cursor-pointer active:scale-95"
                   title="Save all settings"
                 >
                   <Save className="w-3.5 h-3.5" />
@@ -1690,7 +1690,7 @@ export default function App() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Filter services..."
-                    className="w-full bg-surface text-xs text-ink placeholder-muted pl-7 pr-5 py-1.5 rounded-xl border border-line focus:bg-white focus:outline-none focus:border-brand transition-all shadow-2xs"
+                    className="w-full h-10 bg-surface text-xs text-ink placeholder-muted pl-7 pr-5 rounded-xl border border-line focus:bg-white focus:outline-none focus:border-brand transition-all shadow-2xs"
                   />
                   {searchQuery && (
                     <button
@@ -1839,7 +1839,7 @@ export default function App() {
                       ? "Search Ticket #, Customer, Model, IMEI..."
                       : `Search ${currentTab.title}...`
                   }
-                  className="w-full bg-surface text-xs text-ink placeholder-muted pl-7 pr-5 py-1.5 rounded-xl border border-line focus:bg-white focus:outline-none focus:border-brand transition-all shadow-2xs"
+                  className="w-full h-10 bg-surface text-xs text-ink placeholder-muted pl-7 pr-5 rounded-xl border border-line focus:bg-white focus:outline-none focus:border-brand transition-all shadow-2xs"
                 />
                 {searchQuery && (
                   <button
@@ -2141,13 +2141,13 @@ export default function App() {
                       }}
                       placeholder="Scan barcode..."
                       autoComplete="off"
-                      className="h-9 w-32 xl:w-40 rounded-lg border border-line bg-white pl-8 pr-2 font-mono text-xs text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
+                      className="h-10 w-32 xl:w-40 rounded-lg border border-line bg-white pl-8 pr-2 font-mono text-xs text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
                     />
                   </div>
                   <button
                     type="button"
                     onClick={() => inventoryScanSubmitRef.current?.()}
-                    className="h-9 rounded-lg bg-brand px-2.5 text-[11px] font-extrabold text-white transition hover:bg-brand-deep shrink-0"
+                    className="h-10 rounded-lg bg-brand px-2.5 text-[11px] font-extrabold text-white transition hover:bg-brand-deep shrink-0"
                   >
                     Lookup
                   </button>
@@ -2205,7 +2205,7 @@ export default function App() {
                     onClick={() => setInventoryStockView('table')}
                     title="Table view"
                     aria-label="Stock table view"
-                    className={`h-9 w-9 flex items-center justify-center rounded-md transition-colors cursor-pointer ${
+                    className={`h-10 w-10 flex items-center justify-center rounded-md transition-colors cursor-pointer ${
                       inventoryStockView === 'table' ? 'bg-brand text-white shadow-2xs' : 'text-muted hover:text-ink'
                     }`}
                   >
@@ -2216,7 +2216,7 @@ export default function App() {
                     onClick={() => setInventoryStockView('cards')}
                     title="Card view"
                     aria-label="Stock card view"
-                    className={`h-9 w-9 flex items-center justify-center rounded-md transition-colors cursor-pointer ${
+                    className={`h-10 w-10 flex items-center justify-center rounded-md transition-colors cursor-pointer ${
                       inventoryStockView === 'cards' ? 'bg-brand text-white shadow-2xs' : 'text-muted hover:text-ink'
                     }`}
                   >
@@ -2226,7 +2226,7 @@ export default function App() {
               )}
               <button
                 onClick={() => setInventoryAddModalOpen(true)}
-                className="flex items-center space-x-1.5 px-3.5 py-1.5 bg-brand hover:bg-brand-deep text-white text-xs font-bold rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+                className="h-10 flex items-center space-x-1.5 px-3.5 bg-brand hover:bg-brand-deep text-white text-xs font-bold rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>{t('addPart')}</span>
@@ -2235,7 +2235,7 @@ export default function App() {
             ) : activeTab === 'suppliers' ? (
               <button
                 onClick={() => setRmaModalOpen(true)}
-                className="flex items-center space-x-1.5 px-3.5 py-1.5 bg-[#AF52DE] hover:bg-purple-600 text-white text-xs font-bold rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+                className="h-10 flex items-center space-x-1.5 px-3.5 bg-[#AF52DE] hover:bg-purple-600 text-white text-xs font-bold rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>{t('flagRma')}</span>
