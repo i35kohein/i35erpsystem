@@ -16,7 +16,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
           {/* Shop Branding & Logo Card */}
           <div className="bg-white p-6 rounded-2xl border border-line shadow-xs space-y-6">
             <div>
-              <h3 className="text-base font-extrabold text-[#2C3E50] flex items-center space-x-2">
+              <h3 className="text-base font-extrabold text-ink flex items-center space-x-2">
                 <Store className="w-5 h-5 text-brand" />
                 <span>Shop Identity & Logo Settings</span>
               </h3>
@@ -27,8 +27,8 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
               {/* Logo Upload & Preview Box (4 cols) */}
-              <div className="md:col-span-4 bg-[#F8FBFD] p-5 rounded-2xl border border-[#D8E5ED] space-y-4 text-center">
-                <label className="block text-xs font-bold text-[#2C3E50]">Shop Logo Preview</label>
+              <div className="md:col-span-4 bg-surface p-5 rounded-2xl border border-line space-y-4 text-center">
+                <label className="block text-xs font-bold text-ink">Shop Logo Preview</label>
                 
                 <div className="flex flex-col items-center justify-center space-y-3">
                   <div className="w-24 h-24 rounded-2xl bg-white border-2 border-dashed border-brand/40 p-2 flex items-center justify-center shadow-xs relative group overflow-hidden">
@@ -86,7 +86,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
               {/* Logo URL & Shop Name Inputs (8 cols) */}
               <div className="md:col-span-8 space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-[#2C3E50] mb-1.5">
+                  <label className="block text-xs font-bold text-ink mb-1.5">
                     Shop Name <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -102,7 +102,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#2C3E50] mb-1.5">
+                  <label className="block text-xs font-bold text-ink mb-1.5">
                     Shop Logo Image URL (Alternative to File Upload)
                   </label>
                   <input
@@ -116,7 +116,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
 
                 {/* Quick Preset Logos */}
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-[#526375]">
+                  <label className="block text-xs font-bold text-muted">
                     Quick Preset Icons / Badges:
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -159,7 +159,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
           {/* Shop Contact & Store Location Card */}
           <div className="bg-white p-6 rounded-2xl border border-line shadow-xs space-y-4">
             <div>
-              <h3 className="text-base font-extrabold text-[#2C3E50] flex items-center space-x-2">
+              <h3 className="text-base font-extrabold text-ink flex items-center space-x-2">
                 <Building2 className="w-5 h-5 text-brand" />
                 <span>Store Contact & Location Information</span>
               </h3>
@@ -251,7 +251,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#2C3E50] mb-1 flex items-center space-x-1">
+                <label className="block text-xs font-bold text-ink mb-1 flex items-center space-x-1">
                   <Mail className="w-3.5 h-3.5 text-brand" />
                   <span>Shop Support Email Address</span>
                 </label>
@@ -265,7 +265,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#2C3E50] mb-1 flex items-center space-x-1">
+                <label className="block text-xs font-bold text-ink mb-1 flex items-center space-x-1">
                   <Globe className="w-3.5 h-3.5 text-brand" />
                   <span>Shop Official Website URL</span>
                 </label>
@@ -279,7 +279,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#2C3E50] mb-1 flex items-center space-x-1">
+                <label className="block text-xs font-bold text-ink mb-1 flex items-center space-x-1">
                   <Hash className="w-3.5 h-3.5 text-brand" />
                   <span>Tax ID / Business Reg No</span>
                 </label>
@@ -293,7 +293,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
               </div>
 
               <div className="sm:col-span-2 lg:col-span-3">
-                <label className="block text-xs font-bold text-[#2C3E50] mb-1 flex items-center space-x-1">
+                <label className="block text-xs font-bold text-ink mb-1 flex items-center space-x-1">
                   <Building2 className="w-3.5 h-3.5 text-brand" />
                   <span>Store Physical Address</span>
                 </label>
@@ -308,7 +308,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[#2C3E50] mb-1">
+              <label className="block text-xs font-bold text-ink mb-1">
                 Shop Business Info & Operating Hours / Disclaimer Note
               </label>
               <textarea
@@ -322,7 +322,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
           </div>
 
           {/* Live ERP Preview Banner */}
-          <div className="bg-[#F8FBFD] p-5 rounded-2xl border border-[#D8E5ED] space-y-3">
+          <div className="bg-surface p-5 rounded-2xl border border-line space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-black uppercase text-brand tracking-widest flex items-center space-x-1.5">
                 <CheckCircle2 className="w-4 h-4 text-success" />

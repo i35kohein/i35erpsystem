@@ -484,7 +484,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                               <Button
                                 type="button"
                                 onClick={() => handleToggleCartItem(item.categoryKey, item.label, item.price, item.warranty)}
-                                className="text-[#6E6E73] hover:text-danger hover:bg-danger/10 p-1.5 rounded-lg transition-colors cursor-pointer shrink-0"
+                                className="text-muted hover:text-danger hover:bg-danger/10 p-1.5 rounded-lg transition-colors cursor-pointer shrink-0"
                                 title="Remove item"
                               >
                                 <X className="w-4 h-4" />
@@ -496,7 +496,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                               <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Price</span>
                               <div className="flex items-baseline space-x-1.5 min-w-0">
                                 {item.discountPercent > 0 && (
-                                  <span className="text-xs text-[#6E6E73] line-through font-mono">
+                                  <span className="text-xs text-muted line-through font-mono">
                                     {formatPrice(item.price)}
                                   </span>
                                 )}
@@ -665,7 +665,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                           <div className="w-6 h-6 rounded-lg bg-white border border-line flex items-center justify-center font-extrabold text-xs text-[#C7C7CC] shrink-0">
                             {i + 1}
                           </div>
-                          <span className="text-xs font-bold text-[#6E6E73] truncate">
+                          <span className="text-xs font-bold text-muted truncate">
                             {i === 0 ? 'Primary Service Slot' : `Add-on Service #${i + 1}`}
                           </span>
                         </div>

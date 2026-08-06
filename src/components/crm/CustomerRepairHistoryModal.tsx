@@ -58,7 +58,7 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
     <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-[70] flex items-center justify-center p-3 sm:p-6 animate-fadeIn">
       <div className="bg-white border border-line rounded-3xl w-full max-w-5xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-line bg-[#F8FBFD] flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-line bg-surface flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="p-3 bg-brand/10 text-brand-deep rounded-2xl shadow-inner">
               <User className="w-6 h-6" />
@@ -179,7 +179,7 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 border-t border-line bg-[#F8FBFD] flex justify-end">
+        <div className="px-6 py-3 border-t border-line bg-surface flex justify-end">
           <Button
             onClick={onClose}
             className="px-5 py-2 bg-ink hover:bg-black text-white font-bold text-xs rounded-xl shadow-2xs transition-all cursor-pointer"

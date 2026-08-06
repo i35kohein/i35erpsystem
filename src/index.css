@@ -90,92 +90,35 @@ body.lang-mm .font-mono {
 }
 
 :root {
-  --font-family: 'Nunito', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --bg: #F4F4F4;
+  /* ONE palette source: the Tailwind tokens, which carbon-coat.css overrides
+     to the IBM Carbon palette. The .basic-ui theme vars below are aliases so
+     legacy var() consumers follow the same single system (F5 2026-08-06). */
+  --font-family: 'IBM Plex Sans', -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --bg: var(--color-surface);
   --sidebar: #FFFFFF;
   --card-bg: #FFFFFF;
-  --primary: #0F62FE;
-  --primary-hover: #0B53E0;
-  --turquoise: #0D9488;
-  --orange: #FF9500;
-  --dark-blue: #161616;
-  --text-main: #161616;
-  --text-secondary: #525252;
-  --text-muted: #6F6F6F;
-  --border: #E0E0E0;
-  --border-subtle: #E8E8E8;
-  --success: #166534;
-  --warning: #FF9500;
-  --danger: #DA1E28;
-  --purple: #8A3FFC;
-  --blue-tint: #EDF4FF;
+  --primary: var(--color-brand);
+  --primary-hover: var(--color-brand-deep);
+  --turquoise: var(--color-success);
+  --orange: var(--color-warning);
+  --dark-blue: var(--color-ink);
+  --text-main: var(--color-ink);
+  --text-secondary: var(--color-muted);
+  --text-muted: var(--color-muted);
+  --border: var(--color-line);
+  --border-subtle: var(--color-line);
+  --success: var(--color-success);
+  --warning: var(--color-warning);
+  --danger: var(--color-danger);
+  --purple: var(--color-purple);
+  --blue-tint: var(--color-brand-soft);
 }
 
+/* data-theme="minimalist-clean" is the legacy id for the default light theme —
+   it now just inherits :root (aliases resolve to the carbon palette). */
 html[data-theme="minimalist-clean"],
 html:not([data-theme]) {
-  --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --bg: #F4F4F4;
-  --sidebar: #FFFFFF;
-  --card-bg: #FFFFFF;
-  --primary: #0F62FE;
-  --primary-hover: #0B53E0;
-  --turquoise: #0D9488;
-  --orange: #FF9500;
-  --dark-blue: #161616;
-  --text-main: #161616;
-  --text-secondary: #525252;
-  --text-muted: #6F6F6F;
-  --border: #E0E0E0;
-  --border-subtle: #E8E8E8;
-  --success: #166534;
-  --warning: #FF9500;
-  --danger: #DA1E28;
-  --purple: #8A3FFC;
-  --blue-tint: #EDF4FF;
-}
-
-html[data-theme="nunito-navy"] {
-  --font-family: 'Nunito', sans-serif;
-  --bg: #F8FBFD;
-  --sidebar: #FFFFFF;
-  --card-bg: #FFFFFF;
-  --primary: #136F9A;
-  --primary-hover: #0E5374;
-  --turquoise: #27B1AE;
-  --orange: #ED7132;
-  --dark-blue: #2C3E50;
-  --text-main: #2C3E50;
-  --text-secondary: #526375;
-  --text-muted: #7F7F7F;
-  --border: #D8E5ED;
-  --border-subtle: #EBF3F8;
-  --success: #27B1AE;
-  --warning: #ED7132;
-  --danger: #E04848;
-  --purple: #136F9A;
-  --blue-tint: #F0F7FB;
-}
-
-html[data-theme="apple-clean"] {
-  --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-  --bg: #F5F5F7;
-  --sidebar: #FFFFFF;
-  --card-bg: #FFFFFF;
-  --primary: #0071E3;
-  --primary-hover: #0051B3;
-  --turquoise: #27B1AE;
-  --orange: #ED7132;
-  --dark-blue: #1D1D1F;
-  --text-main: #1D1D1F;
-  --text-secondary: #6E6E73;
-  --text-muted: #6E6E73; /* WCAG AA fix: was #86868B (3.5:1) */
-  --border: #E5E5EA;
-  --border-subtle: #F2F2F7;
-  --success: #34C759;
-  --warning: #FF9500;
-  --danger: #FF3B30;
-  --purple: #AF52DE;
-  --blue-tint: #F0F6FF;
+  --font-family: 'IBM Plex Sans', -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
 html[data-theme="dark-slate"] {
@@ -199,6 +142,20 @@ html[data-theme="dark-slate"] {
   --purple: #A78BFA;
   --blue-tint: #1E293B;
 }
+
+/* F5: dark-slate also overrides the carbon TOKEN colors so modern token-based
+   classes (bg-surface, text-ink, border-line, bg-brand-soft…) go dark too. */
+html[data-theme="dark-slate"] {
+  --color-surface: #131B2E;
+  --color-line: #26334D;
+  --color-line-strong: #33415E;
+  --color-ink: #F8FAFC;
+  --color-muted: #CBD5E1;
+  --color-faint: #94A3B8;
+  --color-brand-soft: #1E293B;
+  --color-success-deep: #34D399;
+}
+
 
 /* Component Geometry: Square / Rectangular Design System vs Curved Soft Geometry */
 html[data-geometry="square"] *,

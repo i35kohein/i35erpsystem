@@ -403,7 +403,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
         <div className={`md:col-span-5 bg-white border border-line rounded-2xl p-4 space-y-3 shadow-xs ${isIpad ? 'md:flex md:flex-col md:min-h-0' : 'md:self-start'}`}>
           <div className="flex justify-between items-center border-b border-line pb-2">
             <h2 className="font-bold text-ink text-xs">Diagnostic Completed Devices ({filteredWorkOrders.length})</h2>
-            <span className="text-xs font-mono font-bold bg-success/10 text-[#15803D] px-2 py-0.5 rounded-full border border-success/20">
+            <span className="text-xs font-mono font-bold bg-success/10 text-[#166534] px-2 py-0.5 rounded-full border border-success/20">
               Diag Finished
             </span>
           </div>
@@ -640,7 +640,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                               <span className="text-right">
                                 {hasDiscount && (
                                   <>
-                                    <span className="mr-1.5 text-xs text-[#6E6E73] line-through">
+                                    <span className="mr-1.5 text-xs text-muted line-through">
                                       {originalPrice.toLocaleString()} MMK
                                     </span>
                                     <span className="text-[#15803D] font-black">
@@ -681,10 +681,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     className="w-full min-h-10 flex items-center justify-between gap-2 text-left cursor-pointer"
                   >
                     <span>
-                      <h4 className="text-xs font-extrabold text-ink">Add Inventory Part Used</h4>
-                      <p className="text-xs text-muted">Pick the stock part used on this ticket before payment.</p>
+                      <h4 className="text-xs font-extrabold text-white">Add Inventory Part Used</h4>
+                      <p className="text-xs text-white">Pick the stock part used on this ticket before payment.</p>
                     </span>
-                    <ChevronDown className={`w-4 h-4 text-muted shrink-0 transition-transform ${isAddPartOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-4 h-4 text-white/70 shrink-0 transition-transform ${isAddPartOpen ? 'rotate-180' : ''}`} />
                   </Button>
 
                   {isAddPartOpen && (

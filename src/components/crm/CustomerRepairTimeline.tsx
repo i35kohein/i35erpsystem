@@ -411,7 +411,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                         <Button
                           type="button"
                           onClick={() => onPrintInvoice(wo)}
-                          className="px-3 py-1.5 bg-white hover:bg-blue-50 border border-[#D8E5ED] hover:border-brand text-brand font-bold text-xs rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer shadow-2xs active:scale-95"
+                          className="px-3 py-1.5 bg-white hover:bg-blue-50 border border-line hover:border-brand text-brand font-bold text-xs rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer shadow-2xs active:scale-95"
                           title="Print Customer Invoice"
                         >
                           <Printer className="w-3.5 h-3.5" />

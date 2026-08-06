@@ -15,7 +15,7 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
           <div className="bg-white p-6 rounded-2xl border border-line shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-base font-extrabold text-[#2C3E50] flex items-center space-x-2">
+                <h3 className="text-base font-extrabold text-ink flex items-center space-x-2">
                   <Palette className="w-5 h-5 text-[#27B1AE]" />
                   <span>Application Visual Theme & Typography</span>
                 </h3>
@@ -34,7 +34,7 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
                     onClick={() => setTheme(preset.id)}
                     className={`p-5 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-4 ${
                       isSelected
-                        ? 'border-[#27B1AE] bg-[#F8FBFD] shadow-md ring-2 ring-[#27B1AE]/20'
+                        ? 'border-[#27B1AE] bg-surface shadow-md ring-2 ring-[#27B1AE]/20'
                         : 'border-line bg-white hover:border-[#136F9A]/40 shadow-xs'
                     }`}
                   >
@@ -54,7 +54,7 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
                       </div>
 
                       <div>
-                        <h4 className="text-sm font-black text-[#2C3E50]">{preset.name}</h4>
+                        <h4 className="text-sm font-black text-ink">{preset.name}</h4>
                         <p className="text-xs text-[#7F7F7F] mt-1 leading-relaxed">{preset.description}</p>
                       </div>
 
@@ -102,7 +102,7 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
                       className={`w-full py-2.5 ${
                         isSelected
                           ? 'bg-[#27B1AE] text-white shadow-xs'
-                          : 'bg-[#2C3E50] hover:bg-[#136F9A] text-white'
+                          : 'bg-[#2C3E50] hover:bg-brand text-white'
                       }`}
                     >
                       {isSelected ? 'Currently Selected' : `Activate ${preset.name}`}
@@ -116,7 +116,7 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
           {/* Component Geometry & Design System Architecture Card */}
           <div className="bg-white p-6 rounded-2xl border border-line shadow-xs space-y-4">
             <div>
-              <h3 className="text-base font-extrabold text-[#2C3E50] flex items-center space-x-2">
+              <h3 className="text-base font-extrabold text-ink flex items-center space-x-2">
                 <Square className="w-5 h-5 text-brand" />
                 <span>Component Geometry & Design System Architecture</span>
               </h3>
@@ -137,13 +137,13 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Square className="w-5 h-5 text-brand" />
-                    <span className="font-extrabold text-sm text-[#2C3E50]">Square / Rectangular Design System</span>
+                    <span className="font-extrabold text-sm text-ink">Square / Rectangular Design System</span>
                   </div>
                   {geometry === 'square' && (
                     <span className="text-xs font-black px-2.5 py-0.5 bg-brand text-white rounded-none">Active</span>
                   )}
                 </div>
-                <p className="text-xs text-[#526375] leading-relaxed">
+                <p className="text-xs text-muted leading-relaxed">
                   Crisp 0px sharp rectangular borders for high-density engineering, maximum screen utilization, and modern structural architecture across all ERP modules.
                 </p>
               </div>
@@ -159,13 +159,13 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Circle className="w-5 h-5 text-success" />
-                    <span className="font-extrabold text-sm text-[#2C3E50]">Curved Soft Geometry</span>
+                    <span className="font-extrabold text-sm text-ink">Curved Soft Geometry</span>
                   </div>
                   {geometry === 'curved' && (
                     <span className="text-xs font-black px-2.5 py-0.5 bg-success text-white rounded-full">Active</span>
                   )}
                 </div>
-                <p className="text-xs text-[#526375] leading-relaxed">
+                <p className="text-xs text-muted leading-relaxed">
                   Classic soft 12px-24px rounded corners and pill buttons for a smooth, relaxed interface appearance.
                 </p>
               </div>
@@ -176,7 +176,7 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
           <div className="bg-white p-6 rounded-2xl border border-line shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-base font-extrabold text-[#2C3E50] flex items-center space-x-2">
+                <h3 className="text-base font-extrabold text-ink flex items-center space-x-2">
                   <span className="text-xl">🇲🇲</span>
                   <span>System Language & Localization</span>
                 </h3>

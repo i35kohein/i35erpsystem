@@ -172,11 +172,11 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-line">
           <div className="module-subheader space-y-1">
             <div className="flex items-center space-x-2.5">
-              <span className="p-2.5 bg-[#136F9A]/10 text-[#136F9A] rounded-xl">
+              <span className="p-2.5 bg-brand/10 text-brand rounded-xl">
                 <ClipboardList className="w-5 h-5" />
               </span>
               <div>
-                <h1 className="text-lg font-black text-[#2C3E50]">
+                <h1 className="text-lg font-black text-ink">
                   Work Intake & Active Tickets
                 </h1>
                 <p className="text-xs text-[#7F7F7F]">
@@ -188,14 +188,14 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
 
           <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto md:shrink-0 sm:items-stretch md:items-center">
             {/* View Mode Switcher — full-width segmented control on mobile */}
-            <div className="bg-[#F8FBFD] p-1 rounded-xl border border-[#D8E5ED] flex items-center gap-1 w-full md:w-auto">
+            <div className="bg-surface p-1 rounded-xl border border-line flex items-center gap-1 w-full md:w-auto">
               <Button
                 type="button"
                 onClick={() => setViewMode('table')}
                 className={`flex-1 md:flex-none px-2.5 sm:px-3 h-9 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center md:justify-start space-x-1.5 cursor-pointer ${
                   viewMode === 'table'
-                    ? 'bg-[#136F9A] text-white shadow-2xs'
-                    : 'text-[#7F7F7F] hover:text-[#2C3E50]'
+                    ? 'bg-brand text-white shadow-2xs'
+                    : 'text-[#7F7F7F] hover:text-ink'
                 }`}
                 title="Table View"
                 aria-label="Table View"
@@ -208,8 +208,8 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                 onClick={() => setViewMode('cards')}
                 className={`flex-1 md:flex-none px-2.5 sm:px-3 h-9 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center md:justify-start space-x-1.5 cursor-pointer ${
                   viewMode === 'cards'
-                    ? 'bg-[#136F9A] text-white shadow-2xs'
-                    : 'text-[#7F7F7F] hover:text-[#2C3E50]'
+                    ? 'bg-brand text-white shadow-2xs'
+                    : 'text-[#7F7F7F] hover:text-ink'
                 }`}
                 title="Cards Grid View"
                 aria-label="Cards Grid View"
@@ -235,8 +235,8 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
         {/* Quick Stats Filter Chips */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10 gap-3.5">
           {[
-            { id: 'ALL', label: 'All Active Tickets', count: counts.total, color: 'text-[#136F9A]', bg: 'bg-blue-50/60', border: 'border-blue-200' },
-            { id: 'Receive', label: 'Intake (Receive)', count: counts.receive, color: 'text-[#136F9A]', bg: 'bg-blue-50/60', border: 'border-blue-200' },
+            { id: 'ALL', label: 'All Active Tickets', count: counts.total, color: 'text-brand', bg: 'bg-blue-50/60', border: 'border-blue-200' },
+            { id: 'Receive', label: 'Intake (Receive)', count: counts.receive, color: 'text-brand', bg: 'bg-blue-50/60', border: 'border-blue-200' },
             { id: 'In Progress', label: 'In Progress', count: counts.inProgress, color: 'text-[#27B1AE]', bg: 'bg-teal-50/60', border: 'border-teal-200' },
             { id: 'Pending', label: 'Pending Approval', count: counts.pending, color: 'text-[#ED7132]', bg: 'bg-orange-50/60', border: 'border-orange-200' },
             { id: 'Finished', label: 'Ready (Finished)', count: counts.finished, color: 'text-emerald-700', bg: 'bg-emerald-50/60', border: 'border-emerald-200' },
@@ -260,7 +260,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                     : `${st.bg} ${st.border} hover:border-[#136F9A]/45`
                 }`}
               >
-                <span className="text-xs font-bold text-[#526375] uppercase tracking-[0.06em] block leading-4">
+                <span className="text-xs font-bold text-muted uppercase tracking-[0.06em] block leading-4">
                   {st.label}
                 </span>
                 <span className={`text-xl font-extrabold mt-2 leading-none ${st.color}`}>
@@ -277,16 +277,16 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
         {/* Controls Bar: Items Count, Filters, Clear All, Sort */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-line">
           <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-2 font-extrabold text-[#2C3E50] text-sm">
-              <Ticket className="w-4 h-4 text-[#136F9A]" />
+            <div className="flex items-center space-x-2 font-extrabold text-ink text-sm">
+              <Ticket className="w-4 h-4 text-brand" />
               <span>Repair Ticket Roster</span>
-              <span className="px-2.5 py-0.5 bg-[#136F9A]/10 text-[#136F9A] rounded-full text-xs font-mono font-bold">
+              <span className="px-2.5 py-0.5 bg-brand/10 text-brand rounded-full text-xs font-mono font-bold">
                 {filteredOrders.length}
               </span>
             </div>
 
             {filterStatus !== 'ALL' && (
-              <div className="flex items-center space-x-1.5 text-xs bg-[#F0F7FB] text-[#136F9A] px-3 py-1 rounded-lg border border-[#136F9A]/20">
+              <div className="flex items-center space-x-1.5 text-xs bg-[#F0F7FB] text-brand px-3 py-1 rounded-lg border border-[#136F9A]/20">
                 <span>Filter: <strong>{filterStatus}</strong></span>
                 <Button
                   type="button"
@@ -324,8 +324,8 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
               onClick={() => setSortByPriority(!sortByPriority)}
               className={`h-8 px-3 border text-xs font-bold rounded-lg transition-all inline-flex items-center space-x-1.5 cursor-pointer ${
                 sortByPriority 
-                  ? 'bg-[#136F9A] text-white border-[#136F9A] shadow-2xs' 
-                  : 'bg-[#F8FBFD] text-[#2C3E50] border-[#D8E5ED] hover:bg-slate-100'
+                  ? 'bg-brand text-white border-[#136F9A] shadow-2xs' 
+                  : 'bg-surface text-ink border-line hover:bg-slate-100'
               }`}
             >
               <SlidersHorizontal className="w-3.5 h-3.5 shrink-0" />
@@ -336,12 +336,12 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
 
         {/* View Content: Table or Grid Cards */}
         {filteredOrders.length === 0 ? (
-          <div className="flex min-h-0 flex-1 flex-col items-center justify-center p-12 text-center text-xs space-y-4 bg-[#F8FBFD] rounded-2xl border border-dashed border-[#D8E5ED] my-4">
-            <div className="w-14 h-14 bg-[#136F9A]/10 text-[#136F9A] rounded-2xl flex items-center justify-center mx-auto shadow-2xs">
+          <div className="flex min-h-0 flex-1 flex-col items-center justify-center p-12 text-center text-xs space-y-4 bg-surface rounded-2xl border border-dashed border-line my-4">
+            <div className="w-14 h-14 bg-brand/10 text-brand rounded-2xl flex items-center justify-center mx-auto shadow-2xs">
               <Inbox className="w-7 h-7" />
             </div>
             <div className="space-y-1 max-w-sm mx-auto">
-              <p className="font-extrabold text-base text-[#2C3E50]">No Repair Tickets Found</p>
+              <p className="font-extrabold text-base text-ink">No Repair Tickets Found</p>
               <p className="text-xs text-[#7F7F7F]">
                 {workOrders.length === 0 
                   ? "There are currently no active repair tickets in the database."
@@ -495,7 +495,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                   className={`p-4 rounded-2xl border text-xs cursor-pointer transition-all space-y-3 hover:shadow-md ${getPriorityStyle(wo.priority)}`}
                 >
                   <div className="flex justify-between items-center pb-2 border-b border-line">
-                    <span className="font-mono font-black text-[#136F9A] bg-[#136F9A]/10 px-2.5 py-1 rounded-md text-xs">
+                    <span className="font-mono font-black text-brand bg-brand/10 px-2.5 py-1 rounded-md text-xs">
                       {wo.orderNumber}
                     </span>
 
@@ -506,7 +506,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                   </div>
 
                   <div className="space-y-1">
-                    <div className="flex justify-between items-center font-extrabold text-sm text-[#2C3E50]">
+                    <div className="flex justify-between items-center font-extrabold text-sm text-ink">
                       <span>{wo.deviceModel}</span>
                       <div className="flex items-center space-x-1.5">
                         <span className="text-xs text-[#7F7F7F] font-medium">{wo.deviceColor || 'Standard'}</span>
@@ -517,16 +517,16 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                       </div>
                     </div>
                     <p className="text-xs text-[#7F7F7F]">
-                      Customer: <strong className="text-[#2C3E50]">{wo.customerName}</strong> ({wo.customerPhone})
+                      Customer: <strong className="text-ink">{wo.customerName}</strong> ({wo.customerPhone})
                     </p>
                   </div>
 
-                  <div className="p-2.5 bg-[#F8FBFD] border border-[#D8E5ED] rounded-xl flex items-center justify-between text-xs">
-                    <span className="font-bold text-[#2C3E50] flex items-center space-x-1.5">
-                      <User className="w-4 h-4 text-[#136F9A]" />
+                  <div className="p-2.5 bg-surface border border-line rounded-xl flex items-center justify-between text-xs">
+                    <span className="font-bold text-ink flex items-center space-x-1.5">
+                      <User className="w-4 h-4 text-brand" />
                       <span>Assigned Tech</span>
                     </span>
-                    <span className="font-bold text-xs text-[#2C3E50] bg-white border border-[#D8E5ED] px-2.5 py-0.5 rounded-lg shadow-2xs">
+                    <span className="font-bold text-xs text-ink bg-white border border-line px-2.5 py-0.5 rounded-lg shadow-2xs">
                       {wo.assignedTechName || 'Unassigned'}
                     </span>
                   </div>
@@ -534,7 +534,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                   <div className="flex justify-between items-center pt-2 border-t border-line">
                     <div>
                       <span className="block text-xs text-[#7F7F7F] uppercase font-bold">Total Estimate</span>
-                      <span className="font-mono font-black text-sm text-[#136F9A]">
+                      <span className="font-mono font-black text-sm text-brand">
                         {(wo.totalAmount || wo.subtotal || 0).toLocaleString()} MMK
                       </span>
                     </div>

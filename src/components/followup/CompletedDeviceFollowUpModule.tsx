@@ -456,13 +456,13 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                     </div>
 
                     {/* What Was Repaired Banner */}
-                    <div className="bg-[#F0F7FB] border border-[#D8E5ED] rounded-xl p-3 text-xs space-y-1.5 mt-2">
+                    <div className="bg-[#F0F7FB] border border-line rounded-xl p-3 text-xs space-y-1.5 mt-2">
                       <div className="flex items-center justify-between">
-                        <span className="font-extrabold text-[#136F9A] flex items-center space-x-1.5">
-                          <History className="w-3.5 h-3.5 text-[#136F9A]" />
+                        <span className="font-extrabold text-brand flex items-center space-x-1.5">
+                          <History className="w-3.5 h-3.5 text-brand" />
                           <span>Repaired Services & Replaced Components:</span>
                         </span>
-                        <span className="text-xs font-extrabold text-[#136F9A] bg-[#E5F1FF] px-2 py-0.5 rounded-md border border-[#BCE0FD]">
+                        <span className="text-xs font-extrabold text-brand bg-[#E5F1FF] px-2 py-0.5 rounded-md border border-[#BCE0FD]">
                           {systemSettings.currencySymbol}{wo.totalAmount || 0}
                         </span>
                       </div>
@@ -470,20 +470,20 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                       <div className="flex flex-wrap gap-1.5 pt-0.5">
                         {wo.selectedRepairs && wo.selectedRepairs.length > 0 ? (
                           wo.selectedRepairs.map((rep, idx) => (
-                            <span key={idx} className="px-2.5 py-1 bg-white border border-[#D8E5ED] text-[#2C3E50] font-extrabold text-xs rounded-lg shadow-2xs flex items-center space-x-1">
+                            <span key={idx} className="px-2.5 py-1 bg-white border border-line text-ink font-extrabold text-xs rounded-lg shadow-2xs flex items-center space-x-1">
                               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                               <span>{rep.name}</span>
                             </span>
                           ))
                         ) : wo.lineItems && wo.lineItems.length > 0 ? (
                           wo.lineItems.map((item, idx) => (
-                            <span key={idx} className="px-2.5 py-1 bg-white border border-[#D8E5ED] text-[#2C3E50] font-extrabold text-xs rounded-lg shadow-2xs flex items-center space-x-1">
+                            <span key={idx} className="px-2.5 py-1 bg-white border border-line text-ink font-extrabold text-xs rounded-lg shadow-2xs flex items-center space-x-1">
                               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                               <span>{item.description || item.partName}</span>
                             </span>
                           ))
                         ) : (
-                          <span className="px-2.5 py-1 bg-white border border-[#D8E5ED] text-[#2C3E50] font-extrabold text-xs rounded-lg flex items-center space-x-1">
+                          <span className="px-2.5 py-1 bg-white border border-line text-ink font-extrabold text-xs rounded-lg flex items-center space-x-1">
                             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                             <span>{wo.symptomsReported || 'Standard Repair & Servicing'}</span>
                           </span>
@@ -498,12 +498,12 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                       </div>
 
                       {(wo.afterRepairSummary || wo.symptomsReported || wo.diagnosticResult) && (
-                        <div className="text-xs text-[#526375] space-y-1 pt-1 border-t border-[#EBF3F8]">
+                        <div className="text-xs text-muted space-y-1 pt-1 border-t border-[#EBF3F8]">
                           {wo.afterRepairSummary && (
-                            <p><strong className="text-[#2C3E50]">Tech Repair Notes:</strong> {wo.afterRepairSummary}</p>
+                            <p><strong className="text-ink">Tech Repair Notes:</strong> {wo.afterRepairSummary}</p>
                           )}
                           {wo.symptomsReported && (
-                            <p><strong className="text-[#2C3E50]">Reported Symptom:</strong> {wo.symptomsReported}</p>
+                            <p><strong className="text-ink">Reported Symptom:</strong> {wo.symptomsReported}</p>
                           )}
                         </div>
                       )}
@@ -597,10 +597,10 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
 
             <div className="space-y-4 text-xs">
               {/* Repaired Device Quick Reference Card */}
-              <div className="bg-[#F0F7FB] border border-[#D8E5ED] rounded-xl p-3 space-y-2 text-xs">
-                <div className="flex items-center justify-between border-b border-[#D8E5ED] pb-1.5">
-                  <span className="font-extrabold text-[#136F9A] flex items-center space-x-1.5">
-                    <History className="w-4 h-4 text-[#136F9A]" />
+              <div className="bg-[#F0F7FB] border border-line rounded-xl p-3 space-y-2 text-xs">
+                <div className="flex items-center justify-between border-b border-line pb-1.5">
+                  <span className="font-extrabold text-brand flex items-center space-x-1.5">
+                    <History className="w-4 h-4 text-brand" />
                     <span>Repaired Service Summary</span>
                   </span>
                   <span className="font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
@@ -612,20 +612,20 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                   <div className="flex flex-wrap gap-1">
                     {selectedWo.selectedRepairs && selectedWo.selectedRepairs.length > 0 ? (
                       selectedWo.selectedRepairs.map((rep, idx) => (
-                        <span key={idx} className="px-2 py-0.5 bg-white border border-[#D8E5ED] text-[#2C3E50] font-bold text-xs rounded-md flex items-center space-x-1">
+                        <span key={idx} className="px-2 py-0.5 bg-white border border-line text-ink font-bold text-xs rounded-md flex items-center space-x-1">
                           <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                           <span>{rep.name}</span>
                         </span>
                       ))
                     ) : selectedWo.lineItems && selectedWo.lineItems.length > 0 ? (
                       selectedWo.lineItems.map((item, idx) => (
-                        <span key={idx} className="px-2 py-0.5 bg-white border border-[#D8E5ED] text-[#2C3E50] font-bold text-xs rounded-md flex items-center space-x-1">
+                        <span key={idx} className="px-2 py-0.5 bg-white border border-line text-ink font-bold text-xs rounded-md flex items-center space-x-1">
                           <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                           <span>{item.description || item.partName}</span>
                         </span>
                       ))
                     ) : (
-                      <span className="px-2 py-0.5 bg-white border border-[#D8E5ED] text-[#2C3E50] font-bold text-xs rounded-md flex items-center space-x-1">
+                      <span className="px-2 py-0.5 bg-white border border-line text-ink font-bold text-xs rounded-md flex items-center space-x-1">
                         <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                         <span>{selectedWo.symptomsReported || 'Standard Repair Service'}</span>
                       </span>
@@ -640,14 +640,14 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                   </div>
 
                   {selectedWo.afterRepairSummary && (
-                    <p className="text-xs text-[#526375] pt-0.5">
-                      <strong className="text-[#2C3E50]">Tech Summary:</strong> {selectedWo.afterRepairSummary}
+                    <p className="text-xs text-muted pt-0.5">
+                      <strong className="text-ink">Tech Summary:</strong> {selectedWo.afterRepairSummary}
                     </p>
                   )}
 
-                  <div className="flex items-center justify-between text-xs text-[#526375] pt-1 border-t border-[#EBF3F8]">
-                    <span>Assigned Tech: <strong className="text-[#2C3E50]">{selectedWo.assignedTechName || 'Shop Technician'}</strong></span>
-                    <span>Warranty: <strong className="text-[#2C3E50]">{selectedWo.warrantyDays || 30} Days</strong></span>
+                  <div className="flex items-center justify-between text-xs text-muted pt-1 border-t border-[#EBF3F8]">
+                    <span>Assigned Tech: <strong className="text-ink">{selectedWo.assignedTechName || 'Shop Technician'}</strong></span>
+                    <span>Warranty: <strong className="text-ink">{selectedWo.warrantyDays || 30} Days</strong></span>
                   </div>
                 </div>
               </div>
@@ -807,10 +807,10 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
 
             <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
               {/* Repaired Device Details */}
-              <div className="bg-[#F0F7FB] border border-[#D8E5ED] rounded-xl p-3 text-xs space-y-1.5">
-                <div className="flex items-center justify-between border-b border-[#D8E5ED] pb-1">
-                  <span className="font-extrabold text-[#136F9A] flex items-center space-x-1">
-                    <History className="w-3.5 h-3.5 text-[#136F9A]" />
+              <div className="bg-[#F0F7FB] border border-line rounded-xl p-3 text-xs space-y-1.5">
+                <div className="flex items-center justify-between border-b border-line pb-1">
+                  <span className="font-extrabold text-brand flex items-center space-x-1">
+                    <History className="w-3.5 h-3.5 text-brand" />
                     <span>Repaired Services:</span>
                   </span>
                   <span className="font-bold text-emerald-700">{systemSettings.currencySymbol}{historyModalWo.totalAmount || 0}</span>
@@ -818,18 +818,18 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                 <div className="flex flex-wrap gap-1">
                   {historyModalWo.selectedRepairs && historyModalWo.selectedRepairs.length > 0 ? (
                     historyModalWo.selectedRepairs.map((rep, idx) => (
-                      <span key={idx} className="px-2 py-0.5 bg-white border border-[#D8E5ED] text-[#2C3E50] font-bold text-xs rounded">
+                      <span key={idx} className="px-2 py-0.5 bg-white border border-line text-ink font-bold text-xs rounded">
                         ✓ {rep.name}
                       </span>
                     ))
                   ) : historyModalWo.lineItems && historyModalWo.lineItems.length > 0 ? (
                     historyModalWo.lineItems.map((item, idx) => (
-                      <span key={idx} className="px-2 py-0.5 bg-white border border-[#D8E5ED] text-[#2C3E50] font-bold text-xs rounded">
+                      <span key={idx} className="px-2 py-0.5 bg-white border border-line text-ink font-bold text-xs rounded">
                         ✓ {item.description || item.partName}
                       </span>
                     ))
                   ) : (
-                    <span className="px-2 py-0.5 bg-white border border-[#D8E5ED] text-[#2C3E50] font-bold text-xs rounded">
+                    <span className="px-2 py-0.5 bg-white border border-line text-ink font-bold text-xs rounded">
                       ✓ {historyModalWo.symptomsReported || 'Standard Repair'}
                     </span>
                   )}

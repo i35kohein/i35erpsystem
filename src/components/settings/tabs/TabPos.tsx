@@ -41,7 +41,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                     A4 & 3"x2" Tag Ready
                   </span>
                 </div>
-                <p className="text-xs text-[#526375] mt-0.5">
+                <p className="text-xs text-muted mt-0.5">
                   Configure official A4 workshop job sheets, customer invoices, and 3"×2" device intake sticker tags for your repair shop.
                 </p>
               </div>
@@ -77,7 +77,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
             {/* Connected Store Branding Status Card — sourced only from Shop Settings. */}
             <div className="bg-white p-4 rounded-2xl border border-line-strong shadow-2xs flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-start space-x-3.5">
-                <div className="w-12 h-12 rounded-xl bg-[#F8FBFD] border border-[#D8E5ED] p-1 flex items-center justify-center shrink-0 shadow-2xs">
+                <div className="w-12 h-12 rounded-xl bg-surface border border-line p-1 flex items-center justify-center shrink-0 shadow-2xs">
                   {formData.shopLogoUrl ? (
                     <img
                       src={formData.shopLogoUrl}
@@ -146,7 +146,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                 {/* Option 1: A4 Document */}
                 <div 
-                  className="p-4 rounded-xl border-2 border-brand bg-[#F8FBFD] transition-all relative space-y-2 shadow-2xs"
+                  className="p-4 rounded-xl border-2 border-brand bg-surface transition-all relative space-y-2 shadow-2xs"
                 >
                   <div className="flex items-center justify-between">
                     <div className="w-8 h-8 rounded-lg bg-brand/10 text-brand-deep flex items-center justify-center font-bold">
@@ -158,7 +158,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                   </div>
                   <div>
                     <span className="font-extrabold text-ink block text-xs">Standard A4 Workshop Sheet</span>
-                    <p className="text-xs text-[#526375] mt-1 leading-snug">
+                    <p className="text-xs text-muted mt-1 leading-snug">
                       Itemized job sheets, diagnostic reports, and customer tax invoices on standard A4 paper.
                     </p>
                   </div>
@@ -171,7 +171,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                 {/* Option 2: 3"x2" Sticker Tag */}
                 <div 
                   onClick={() => setIsDeviceTagPrinterOpen(true)}
-                  className="p-4 rounded-xl border border-line-strong bg-white hover:border-brand hover:bg-[#F8FBFD] transition-all cursor-pointer space-y-2 group shadow-2xs"
+                  className="p-4 rounded-xl border border-line-strong bg-white hover:border-brand hover:bg-surface transition-all cursor-pointer space-y-2 group shadow-2xs"
                 >
                   <div className="flex items-center justify-between">
                     <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold group-hover:bg-brand/10 group-hover:text-brand-deep transition-all">
@@ -233,7 +233,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
 
                   <div className="flex flex-col gap-1.5 rounded-lg border border-line bg-[#F8F9FA] p-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-1">
-                      <span className="flex items-center gap-0.5 text-xs font-extrabold text-[#526375]">
+                      <span className="flex items-center gap-0.5 text-xs font-extrabold text-muted">
                         <AlignLeft className="h-3 w-3" />
                         Selected line
                       </span>
@@ -248,7 +248,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                               onClick={() => applyReceiptFooterAlignment(value)}
                               style={{ height: 24, minHeight: 24, fontSize: 9, lineHeight: 1 }}
                               className={`flex h-6 items-center gap-0.5 rounded px-1.5 text-xs font-bold transition-colors ${
-                                isActive ? 'bg-brand text-white' : 'text-[#526375] hover:bg-surface'
+                                isActive ? 'bg-brand text-white' : 'text-muted hover:bg-surface'
                               }`}
                               aria-pressed={isActive}
                               title={`Align selected line(s) ${label}`}
@@ -262,7 +262,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                     </div>
 
                     <div className="flex items-center gap-1">
-                      <span className="flex items-center gap-0.5 text-xs font-extrabold text-[#526375]">
+                      <span className="flex items-center gap-0.5 text-xs font-extrabold text-muted">
                         <Type className="h-3 w-3" />
                         Text size
                       </span>
@@ -277,7 +277,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                               onClick={() => applyReceiptFooterTextSize(value)}
                               style={{ height: 24, minHeight: 24, fontSize: 9, lineHeight: 1 }}
                               className={`h-6 rounded px-1.5 text-xs font-bold transition-colors ${
-                                isActive ? 'bg-brand text-white' : 'text-[#526375] hover:bg-surface'
+                                isActive ? 'bg-brand text-white' : 'text-muted hover:bg-surface'
                               }`}
                               aria-pressed={isActive}
                             >

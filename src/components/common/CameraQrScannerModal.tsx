@@ -216,7 +216,7 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
     <div className="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-fadeIn">
       <div className="bg-white border border-line rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-line bg-[#F8FBFD] flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-line bg-surface flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="p-2.5 bg-brand/10 text-brand-deep rounded-2xl shadow-inner">
               <Camera className="w-5 h-5" />
@@ -362,7 +362,7 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
 
           {/* TAB 2: Upload Photo */}
           {activeTab === 'upload' && (
-            <div className="p-8 border-2 border-dashed border-line hover:border-brand rounded-3xl text-center space-y-4 bg-[#F8FBFD] transition-all">
+            <div className="p-8 border-2 border-dashed border-line hover:border-brand rounded-3xl text-center space-y-4 bg-surface transition-all">
               <div className="w-16 h-16 bg-brand/10 text-brand-deep rounded-2xl flex items-center justify-center mx-auto shadow-inner">
                 <Upload className="w-8 h-8" />
               </div>
@@ -402,7 +402,7 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
                   <Button
                     key={sample.value}
                     onClick={() => handleScanFound(sample.value)}
-                    className="p-3 bg-[#F8FBFD] hover:bg-brand/10 border border-line hover:border-brand rounded-2xl text-left transition-all cursor-pointer group"
+                    className="p-3 bg-surface hover:bg-brand/10 border border-line hover:border-brand rounded-2xl text-left transition-all cursor-pointer group"
                   >
                     <span className="block text-xs font-bold text-brand uppercase">{sample.type}</span>
                     <span className="font-extrabold text-xs text-ink block mt-0.5">{sample.label}</span>
@@ -456,7 +456,7 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 py-3 border-t border-line bg-[#F8FBFD] flex items-center justify-between">
+        <div className="px-6 py-3 border-t border-line bg-surface flex items-center justify-between">
           <span className="text-xs text-muted font-semibold">
             Formats: QR Code, Code 128, Code 39, EAN, UPC, DataMatrix
           </span>

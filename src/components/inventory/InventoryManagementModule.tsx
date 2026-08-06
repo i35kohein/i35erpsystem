@@ -1525,7 +1525,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         </div>
                       </div>
                     ) : (
-                    <div className="space-y-1.5 rounded-xl border border-[#D8E5ED] bg-[#F8FBFD] p-2.5">
+                    <div className="space-y-1.5 rounded-xl border border-line bg-surface p-2.5">
                       <div className="flex items-center justify-between">
                         <span className={`font-mono text-base font-black tracking-wide ${isOut ? 'text-red-600' : isLow ? 'text-amber-600' : 'text-ink'}`}>
                           {part.quantityInStock} <span className="text-xs font-normal text-muted">units</span>
@@ -1908,7 +1908,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         <Eye className="h-3.5 w-3.5" />
                       </Button>
                     </div>
-                    <div className="grid grid-cols-3 gap-2 rounded-xl border border-[#D8E5ED] bg-[#F8FBFD] p-3">
+                    <div className="grid grid-cols-3 gap-2 rounded-xl border border-line bg-surface p-3">
                       <div>
                         <p className="text-xs font-extrabold uppercase tracking-wider text-muted">Cost</p>
                         <p className="mt-0.5 font-mono text-xs font-bold text-faint break-words">{part.costPrice.toLocaleString()}</p>
