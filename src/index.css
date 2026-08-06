@@ -753,11 +753,13 @@ html[data-theme] [class~="bg-[#ED7132]"] {
   }
 }
 
-/* Keep controls stable while counts, loading labels, and async status text update. */
-.basic-ui button,
-.basic-ui [role="button"],
-.basic-ui input,
-.basic-ui select {
+/* Keep controls stable while counts, loading labels, and async status text update.
+   :where() keeps specificity 0 so Tailwind utilities (min-h-10 etc.) can override
+   this 32px floor where a larger touch target is wanted. */
+:where(.basic-ui) button,
+:where(.basic-ui) [role="button"],
+:where(.basic-ui) input,
+:where(.basic-ui) select {
   min-height: 32px;
 }
 
@@ -999,9 +1001,13 @@ html[data-theme] :is(
   .text-\[9px\] { font-size: 11px !important; line-height: 1.35 !important; }
   .text-\[10px\] { font-size: 12px !important; line-height: 1.4 !important; }
   .text-\[11px\] { font-size: 12px !important; line-height: 1.4 !important; }
-  /* Important variants must obey the same floor (e.g. !text-[10px] dropdown triggers). */
-  .\!text-\[10px\] { font-size: 12px !important; line-height: 1.4 !important; }
-  .\!text-\[11px\] { font-size: 12px !important; line-height: 1.4 !important; }
+  /* Important variants must obey the same floor (e.g. !text-[10px] dropdown triggers).
+     Must live in @layer base: layered !important beats unlayered !important, and the
+     Tailwind utility class is itself important — so it wins over an unlayered rule. */
+  @layer base {
+    .\!text-\[10px\] { font-size: 12px !important; line-height: 1.4 !important; }
+    .\!text-\[11px\] { font-size: 12px !important; line-height: 1.4 !important; }
+  }
 }
 
 /* Contrast fix (audit P1-5): Apple gray #86868B on white is 3.5:1 — fails WCAG AA
