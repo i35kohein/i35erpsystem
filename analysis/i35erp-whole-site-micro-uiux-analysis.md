@@ -90,4 +90,9 @@ Method: live DOM measurements at iPad 1180×820 (iPad UA) across all 12 tabs + s
 
 ### Still open (from the audit, not in this fix batch)
 - P3 design tokens: border-radius scale (6/8/12/16/full mixed) + card surface color — optional, needs Ko Hein's call.
+
+## P3 — DESIGN TOKENS DONE (2026-08-06 ~19:22–19:35, commit `3c0250d`, bundle `index-CnePNr2I.js`)
+- Documented the semantic radius + surface scale in `index.css` @theme (next to the existing color tokens): rounded-md 6px = tags/chips, rounded-lg 8px = inputs/compact controls, rounded-xl 12px = buttons/cards (default), rounded-2xl 16px = panels/modals, rounded-full = pills; bg-surface = inset wells, bg-white = elevated cards.
+- Normalized: Button component `sm` size rounded-lg → rounded-xl (all sizes now uniform 12px; was 8 vs 12); 2 outlier inputs in TabInventory rounded-xl → rounded-lg.
+- Verified live: Button-component buttons all 12px; cards 16px panels (12px cards) — distribution now matches the documented scale. Standalone compact buttons at 8px are within the documented compact tier. Deployed + pushed.
 - POS payment quick-amount buttons (Exact/50,000/Notify Customer etc.) measured 32–33px — NOT covered in this batch (POS-specific; next round if wanted).
