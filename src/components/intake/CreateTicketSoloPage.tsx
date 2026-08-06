@@ -824,7 +824,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         </Button>
 
         {/* STEP 3 & STEP 4: Color (REAL DEVICE COLOR BIG CIRCLE WITH SHADOW) & Warranty */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 ${wizardMode && wizardStep < 1 ? 'hidden' : ''}`}>
           {/* STEP 2b: Real Official Color Selection — only after a model is chosen */}
           {deviceModel ? (
             <Button

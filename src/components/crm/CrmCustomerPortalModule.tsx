@@ -476,6 +476,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                 <p className="truncate text-xs font-extrabold text-ink">{selectedCustomer?.name || 'Customer Details'}</p>
               </div>
               <Button
+                variant="ghost"
                 type="button"
                 onClick={() => setIsMobileDetailOpen(false)}
                 aria-label="Close customer details"
@@ -490,6 +491,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                   <div className="flex justify-between items-start">
                     <div>
                       <Button
+                        variant="ghost"
                         type="button"
                         onClick={() => handleOpenHistoryModal(selectedCustomer)}
                         className={`text-base font-black text-ink hover:text-brand hover:underline flex items-center space-x-2 cursor-pointer text-left group ${FOCUS}`}
