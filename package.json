@@ -9,7 +9,7 @@
     "start": "node dist/server.cjs",
     "preview": "vite preview",
     "clean": "rm -rf dist server.cjs",
-    "lint": "tsc --noEmit",
+    "lint": "tsc --noEmit && node scripts/check-button-policy.mjs",
     "test": "vitest run",
     "check:ui": "node scripts/check-ui.mjs --warn"
   },

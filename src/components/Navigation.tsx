@@ -107,28 +107,28 @@ export const Navigation: React.FC<NavigationProps> = ({
           label: t('navIntake'),
           icon: ClipboardList,
           badge: intakeCount > 0 ? intakeCount : myWorkOrders.length,
-          badgeColor: 'bg-brand',
+          badgeColor: 'bg-brand text-white',
         },
         {
           id: 'pipeline',
           label: isTech ? 'My Assigned Jobs' : t('navPipeline'),
           icon: Kanban,
           badge: activePipelineCount,
-          badgeColor: 'bg-success',
+          badgeColor: 'bg-success text-white',
         },
         {
           id: 'qa',
           label: t('navQa'),
           icon: ShieldCheck,
           badge: qaFinishedCount > 0 ? qaFinishedCount : undefined,
-          badgeColor: 'bg-[#AF52DE]',
+          badgeColor: 'bg-[#AF52DE] text-white',
         },
         {
           id: 'follow-up',
           label: t('navFollowUp'),
           icon: PhoneCall,
           badge: pendingFollowUpCount > 0 ? pendingFollowUpCount : undefined,
-          badgeColor: 'bg-[#FF9500]',
+          badgeColor: 'bg-[#FF9500] text-black',
         },
         {
           id: 'price-catalog',
@@ -145,7 +145,7 @@ export const Navigation: React.FC<NavigationProps> = ({
           label: t('navPos'),
           icon: CreditCard,
           badge: posReadyCount > 0 ? posReadyCount : undefined,
-          badgeColor: 'bg-[#16A34A]',
+          badgeColor: 'bg-[#16A34A] text-white',
         },
         {
           id: 'finance',
@@ -162,7 +162,7 @@ export const Navigation: React.FC<NavigationProps> = ({
           label: isCollapsed ? t('navPartsMatrix') : 'Parts & Stock Matrix',
           icon: Boxes,
           badge: inventoryLowStock > 0 ? inventoryLowStock : undefined,
-          badgeColor: 'bg-[#FF9500]',
+          badgeColor: 'bg-[#FF9500] text-black',
         },
         {
           id: 'suppliers',
@@ -252,9 +252,11 @@ export const Navigation: React.FC<NavigationProps> = ({
           {effectiveCollapsed ? (
             /* Collapsed Header: Centered Logo + Expand Toggle Stacked */
             <div className="flex flex-col items-center justify-center space-y-2 py-1">
-              <button
+              <Button
                 onClick={() => handleTabSelect('dashboard')}
-                className="w-10 h-10 rounded-xl bg-white border border-line p-0.5 flex items-center justify-center shadow-2xs hover:border-brand transition-all cursor-pointer overflow-hidden shrink-0"
+                variant="outline"
+                size="icon"
+                className="p-0.5 shadow-2xs hover:border-brand overflow-hidden shrink-0"
                 title={systemSettings?.shopName || 'AppleRepair Pro'}
               >
                 {systemSettings?.shopLogoUrl ? (
@@ -264,15 +266,17 @@ export const Navigation: React.FC<NavigationProps> = ({
                     <CircleDot className="w-5 h-5" />
                   </div>
                 )}
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => setIsCollapsed(false)}
-                className="hidden lg:flex w-10 h-10 items-center justify-center text-muted hover:text-brand hover:bg-[#F0F7FF] rounded-xl transition-all cursor-pointer border border-transparent hover:border-brand/20"
+                variant="iconGhost"
+                size="icon"
+                className="hidden lg:flex hover:text-brand hover:bg-[#F0F7FF] border border-transparent hover:border-brand/20"
                 title="Expand sidebar"
                 aria-label="Expand sidebar"
               >
                 <PanelLeftOpen className="w-4 h-4" />
-              </button>
+              </Button>
             </div>
           ) : (
             /* Expanded Header: Logo + Title + Collapse Toggle */
@@ -419,7 +423,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                       </div>
 
                       {item.badge !== undefined && (typeof item.badge === 'string' || item.badge > 0) && (
-                        <Badge className={`text-xs py-0.5 px-2 text-white shrink-0 ${item.badgeColor || 'bg-brand'} ${effectiveCollapsed ? 'absolute -top-1.5 -right-1.5 px-1 py-0.5 text-[10px] leading-none min-w-[18px] text-center border border-white shadow-2xs' : ''}`}>
+                        <Badge className={`text-xs py-0.5 px-2 shrink-0 ${item.badgeColor || 'bg-brand text-white'} ${effectiveCollapsed ? 'absolute -top-1.5 -right-1.5 px-1 py-0.5 text-[10px] leading-none min-w-[18px] text-center border border-white shadow-2xs' : ''}`}>
                           {effectiveCollapsed && typeof item.badge === 'number' && item.badge > 99 ? '99+' : item.badge}
                         </Badge>
                       )}

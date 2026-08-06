@@ -326,7 +326,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                 <button
                   type="button"
                   onClick={() => setIsDeviceChooserOpen(true)}
-                  className="p-1.5 rounded-xl bg-brand/10 hover:bg-brand/20 text-brand transition-all cursor-pointer shrink-0 ml-1.5"
+                  className="p-1.5 rounded-xl bg-brand/10 hover:bg-brand/20 text-brand-deep transition-all cursor-pointer shrink-0 ml-1.5"
                   title="Change device model"
                 >
                   <Folder className="w-4 h-4" />

@@ -217,7 +217,7 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
         {/* Header */}
         <div className="px-6 py-4 border-b border-line bg-[#F8FBFD] flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="p-2.5 bg-brand/10 text-brand rounded-2xl shadow-inner">
+            <div className="p-2.5 bg-brand/10 text-brand-deep rounded-2xl shadow-inner">
               <Camera className="w-5 h-5" />
             </div>
             <div>
@@ -362,7 +362,7 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
           {/* TAB 2: Upload Photo */}
           {activeTab === 'upload' && (
             <div className="p-8 border-2 border-dashed border-line hover:border-brand rounded-3xl text-center space-y-4 bg-[#F8FBFD] transition-all">
-              <div className="w-16 h-16 bg-brand/10 text-brand rounded-2xl flex items-center justify-center mx-auto shadow-inner">
+              <div className="w-16 h-16 bg-brand/10 text-brand-deep rounded-2xl flex items-center justify-center mx-auto shadow-inner">
                 <Upload className="w-8 h-8" />
               </div>
               <div>

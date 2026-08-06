@@ -403,7 +403,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
         <div className={`md:col-span-5 bg-white border border-line rounded-2xl p-4 space-y-3 shadow-xs ${isIpad ? 'md:flex md:flex-col md:min-h-0' : 'md:self-start'}`}>
           <div className="flex justify-between items-center border-b border-line pb-2">
             <h2 className="font-bold text-ink text-xs">Diagnostic Completed Devices ({filteredWorkOrders.length})</h2>
-            <span className="text-xs font-mono font-bold bg-success/10 text-[#28A745] px-2 py-0.5 rounded-full border border-success/20">
+            <span className="text-xs font-mono font-bold bg-success/10 text-[#15803D] px-2 py-0.5 rounded-full border border-success/20">
               Diag Finished
             </span>
           </div>
@@ -434,8 +434,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 return (
                   <div
                     key={wo.id}
-                    role="button"
-                    tabIndex={0}
+                    role="group"
                     onClick={handleSelectWo}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
@@ -457,7 +456,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       <div className="flex items-center space-x-1 shrink-0">
                         <StatusChip status={wo.status} />
                         <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded-md border ${
-                          wo.isPaid ? 'bg-[#EAF8ED] text-[#28A745] border-success/20' : 'bg-[#FFF4E5] text-[#B45309] border-[#FF9F0A]/20'
+                          wo.isPaid ? 'bg-[#EAF8ED] text-[#15803D] border-success/20' : 'bg-[#FFF4E5] text-[#B45309] border-[#FF9F0A]/20'
                         }`}>
                           {wo.isPaid ? 'PAID' : 'UNPAID'}
                         </span>
@@ -641,10 +640,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                               <span className="text-right">
                                 {hasDiscount && (
                                   <>
-                                    <span className="mr-1.5 text-xs text-[#A5A5AA] line-through">
+                                    <span className="mr-1.5 text-xs text-[#6E6E73] line-through">
                                       {originalPrice.toLocaleString()} MMK
                                     </span>
-                                    <span className="text-[#28A745] font-black">
+                                    <span className="text-[#15803D] font-black">
                                       {(li.unitPrice * li.quantity).toLocaleString()} MMK
                                     </span>
                                   </>
@@ -764,13 +763,13 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     <span className="font-mono text-ink">{selectedWo.taxAmount.toLocaleString()} MMK</span>
                   </div>
                   {selectedWo.discountAmount > 0 && (
-                    <div className="flex justify-between text-[#28A745]">
+                    <div className="flex justify-between text-[#15803D]">
                       <span>Discount:</span>
                       <span className="font-mono">-{selectedWo.discountAmount.toLocaleString()} MMK</span>
                     </div>
                   )}
                   {selectedWo.depositAmount > 0 && (
-                    <div className="flex justify-between text-[#28A745]">
+                    <div className="flex justify-between text-[#15803D]">
                       <span>Upfront Deposit Paid:</span>
                       <span className="font-mono">-{selectedWo.depositAmount.toLocaleString()} MMK</span>
                     </div>
@@ -1123,7 +1122,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     )}
                     {cashTendered >= selectedWo.totalAmount && (
                       <p className="flex items-center gap-1.5 text-[#1A7F37] font-extrabold text-sm bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
-                        <CheckCircle2 className="w-4 h-4 shrink-0 text-[#28A745]" />
+                        <CheckCircle2 className="w-4 h-4 shrink-0 text-[#15803D]" />
                         Change Due: {(cashTendered - selectedWo.totalAmount).toLocaleString()} MMK
                       </p>
                     )}
@@ -1223,7 +1222,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               <p className="text-xs font-bold text-muted uppercase tracking-wide">Amount Due</p>
               <p className="font-mono font-black text-brand text-base leading-tight">{selectedWo.totalAmount.toLocaleString()} MMK</p>
               {paymentMethod === 'Cash' && cashTendered >= selectedWo.totalAmount && (
-                <p className="text-xs font-extrabold text-[#28A745] leading-tight">
+                <p className="text-xs font-extrabold text-[#15803D] leading-tight">
                   Change: {(cashTendered - selectedWo.totalAmount).toLocaleString()} MMK
                 </p>
               )}
@@ -1413,7 +1412,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
             </div>
 
             <div className="p-4 bg-surface rounded-xl border border-line space-y-1 font-mono">
-              <div className="flex justify-between text-[#28A745] font-bold">
+              <div className="flex justify-between text-[#15803D] font-bold">
                 <span>TOTAL PAID:</span>
                 <span>
                   {selectedWo.totalAmount.toLocaleString()} {systemSettings?.currencySymbol || 'MMK'}

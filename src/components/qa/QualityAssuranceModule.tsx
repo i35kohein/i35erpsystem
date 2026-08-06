@@ -207,7 +207,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
           <p className="text-xs text-muted">Mandatory post-repair 21-hardware test re-inspection for finished devices in QA control before customer pickup</p>
         </div>
 
-        <div className="bg-[#EAF8ED] text-[#28A745] font-mono font-bold px-3 py-1 rounded-full border border-success/20">
+        <div className="bg-[#EAF8ED] text-[#15803D] font-mono font-bold px-3 py-1 rounded-full border border-success/20">
           QA Control • Zero Defect Standard
         </div>
       </div>
@@ -217,7 +217,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
         <div className={`space-y-2 rounded-xl border border-line bg-white p-3 md:col-span-3 ${isIpad ? 'md:flex md:flex-col md:min-h-0' : 'md:self-start'}`}>
           <div className="flex items-center justify-between gap-2 border-b border-line pb-2">
             <h2 className="min-w-0 truncate font-bold text-ink text-xs">QA Queue</h2>
-            <span className="shrink-0 text-xs font-mono font-bold bg-brand/10 text-brand px-2 py-0.5 rounded-full">
+            <span className="shrink-0 text-xs font-mono font-bold bg-brand/10 text-brand-deep px-2 py-0.5 rounded-full">
               {filteredWorkOrders.length} Pending
             </span>
           </div>
@@ -266,7 +266,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           {wo.status}
                         </span>
                         {isQaPassed ? (
-                          <span className="text-[11px] font-extrabold px-1.5 py-0.5 rounded-md border bg-[#EAF8ED] text-[#28A745] border-success/20 uppercase">
+                          <span className="text-[11px] font-extrabold px-1.5 py-0.5 rounded-md border bg-[#EAF8ED] text-[#15803D] border-success/20 uppercase">
                             Ready
                           </span>
                         ) : (

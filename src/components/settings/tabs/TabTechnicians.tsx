@@ -52,7 +52,7 @@ const TechniciansTab: React.FC<TechniciansTabProps> = ({ formData, setFormData, 
               <div>
                 <h3 className="text-sm font-extrabold text-ink flex items-center space-x-2">
                   <span>Active Technical Staff Roster</span>
-                  <span className="px-2 py-0.5 bg-brand/10 text-brand text-xs font-black rounded-full">
+                  <span className="px-2 py-0.5 bg-brand/10 text-brand-deep text-xs font-black rounded-full">
                     {technicians.length}
                   </span>
                 </h3>

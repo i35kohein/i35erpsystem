@@ -148,7 +148,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                   className="p-4 rounded-xl border-2 border-brand bg-[#F8FBFD] transition-all relative space-y-2 shadow-2xs"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="w-8 h-8 rounded-lg bg-brand/10 text-brand flex items-center justify-center font-bold">
+                    <div className="w-8 h-8 rounded-lg bg-brand/10 text-brand-deep flex items-center justify-center font-bold">
                       <FileText className="w-4 h-4" />
                     </div>
                     <span className="px-2 py-0.5 rounded-full text-[11px] font-black bg-brand text-white uppercase">
@@ -173,7 +173,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                   className="p-4 rounded-xl border border-line-strong bg-white hover:border-brand hover:bg-[#F8FBFD] transition-all cursor-pointer space-y-2 group shadow-2xs"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold group-hover:bg-brand/10 group-hover:text-brand transition-all">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold group-hover:bg-brand/10 group-hover:text-brand-deep transition-all">
                       <Tag className="w-4 h-4" />
                     </div>
                     <span className="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-slate-100 text-slate-700 border border-slate-200">
@@ -337,7 +337,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 text-xs">
               <div className="space-y-1.5">
                 <label className="font-bold text-ink block">Default Print Color Palette</label>
-                <select
+                <select aria-label="Black & White / Grayscale (Ink-Saver)"
                   value={formData.a4PrintColorMode || 'monochrome'}
                   onChange={(e) => setFormData({ ...formData, a4PrintColorMode: e.target.value as any })}
                   className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand"
@@ -349,7 +349,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
 
               <div className="space-y-1.5">
                 <label className="font-bold text-ink block">Default A4 Sheet Layout</label>
-                <select
+                <select aria-label="Standard Single A4 Page"
                   value={formData.a4PrintLayoutDensity || 'compact'}
                   onChange={(e) => setFormData({ ...formData, a4PrintLayoutDensity: e.target.value as any })}
                   className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand"
@@ -372,7 +372,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
 
               <div className="space-y-1.5">
                 <label className="font-bold text-ink block">21-Point Diagnostic Layout</label>
-                <select
+                <select aria-label="Before vs After Table"
                   value={formData.a4DiagnosticDisplayFormat || 'comparison_table'}
                   onChange={(e) => setFormData({ ...formData, a4DiagnosticDisplayFormat: e.target.value as SystemSettings['a4DiagnosticDisplayFormat'] })}
                   className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand"

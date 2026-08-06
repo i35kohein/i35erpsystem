@@ -114,7 +114,7 @@ export const OfflineSyncStatusBadge: React.FC = () => {
 const StatusRow: React.FC<{ ok: boolean; label: string; value: string }> = ({ ok, label, value }) => (
   <div className="flex items-center justify-between">
     <span className="text-muted font-medium">{label}</span>
-    <span className={`flex items-center space-x-1 font-bold ${ok ? 'text-[#28A745]' : 'text-rose-600'}`}>
+    <span className={`flex items-center space-x-1 font-bold ${ok ? 'text-[#15803D]' : 'text-rose-600'}`}>
       {ok ? <CheckCircle2 className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
       <span>{value}</span>
     </span>

@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { Button } from '../ui';
 import { AlertTriangle, Trash2, X } from 'lucide-react';
 
 interface ConfirmDeleteModalProps {
@@ -54,13 +55,15 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
               <p className="text-xs text-slate-500 font-medium">Action Requires Confirmation</p>
             </div>
           </div>
-          <button
+          <Button
             type="button"
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors cursor-pointer"
+            variant="iconGhost"
+            size="iconSm"
+            className="text-slate-400 hover:text-slate-600 hover:bg-slate-100"
           >
             <X className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
 
         <div className="space-y-3">
@@ -74,13 +77,14 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
         </div>
 
         <div className="flex items-center justify-end space-x-3 pt-2">
-          <button
+          <Button
             type="button"
             onClick={onClose}
-            className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer"
+            variant="secondary"
+            className="bg-slate-100 hover:bg-slate-200 text-slate-700"
           >
             Cancel
-          </button>
+          </Button>
           <button
             type="button"
             onClick={() => {

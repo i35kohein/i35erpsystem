@@ -400,7 +400,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                     <div className="flex items-center space-x-3">
                       <div className="text-right">
                         <span className="text-xs text-muted uppercase font-bold block leading-none">Total Cost</span>
-                        <span className="text-sm font-extrabold text-[#28A745]">
+                        <span className="text-sm font-extrabold text-[#15803D]">
                           {wo.totalAmount?.toLocaleString() || 0} {systemSettings.currencySymbol}
                         </span>
                       </div>

@@ -472,7 +472,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                             {/* Item header row — warranty pill sits beside the service name */}
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex items-center space-x-2 min-w-0 flex-1">
-                                <span className="w-5 h-5 rounded-md bg-brand/10 text-brand flex items-center justify-center font-extrabold text-xs shrink-0">
+                                <span className="w-5 h-5 rounded-md bg-brand/10 text-brand-deep flex items-center justify-center font-extrabold text-xs shrink-0">
                                   {idx + 1}
                                 </span>
                                 <h4 className="font-extrabold text-sm text-ink leading-snug truncate min-w-0">{item.label}</h4>
@@ -484,7 +484,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                               <button
                                 type="button"
                                 onClick={() => handleToggleCartItem(item.categoryKey, item.label, item.price, item.warranty)}
-                                className="text-[#A1A1A6] hover:text-danger hover:bg-danger/10 p-1.5 rounded-lg transition-colors cursor-pointer shrink-0"
+                                className="text-[#6E6E73] hover:text-danger hover:bg-danger/10 p-1.5 rounded-lg transition-colors cursor-pointer shrink-0"
                                 title="Remove item"
                               >
                                 <X className="w-4 h-4" />
@@ -496,7 +496,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                               <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted">Price</span>
                               <div className="flex items-baseline space-x-1.5 min-w-0">
                                 {item.discountPercent > 0 && (
-                                  <span className="text-xs text-[#A1A1A6] line-through font-mono">
+                                  <span className="text-xs text-[#6E6E73] line-through font-mono">
                                     {formatPrice(item.price)}
                                   </span>
                                 )}
@@ -665,7 +665,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                           <div className="w-6 h-6 rounded-lg bg-white border border-line flex items-center justify-center font-extrabold text-xs text-[#C7C7CC] shrink-0">
                             {i + 1}
                           </div>
-                          <span className="text-xs font-bold text-[#A1A1A6] truncate">
+                          <span className="text-xs font-bold text-[#6E6E73] truncate">
                             {i === 0 ? 'Primary Service Slot' : `Add-on Service #${i + 1}`}
                           </span>
                         </div>
@@ -870,7 +870,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <span className="text-xs font-extrabold uppercase tracking-widest text-brand bg-brand/10 px-2.5 py-0.5 rounded-full">
+                <span className="text-xs font-extrabold uppercase tracking-widest text-brand-deep bg-brand/10 px-2.5 py-0.5 rounded-full">
                   Active Device
                 </span>
                 <span className="text-xs font-bold text-muted">
@@ -1038,7 +1038,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
           {/* Cart Header */}
           <div className="p-3.5 sm:p-4 border-b border-line flex items-center justify-between bg-surface/80 h-[56px] shrink-0">
             <div className="flex items-center space-x-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-xl bg-brand/10 text-brand flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-xl bg-brand/10 text-brand-deep flex items-center justify-center shrink-0">
                 <Receipt className="w-4 h-4" />
               </div>
               <div className="min-w-0">
@@ -1117,13 +1117,13 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
             {/* Sheet Header */}
             <div className="shrink-0 px-4 pb-3 pt-1.5 border-b border-line bg-white flex items-center justify-between gap-2">
               <div className="flex items-center space-x-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-brand/10 text-brand flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-brand/10 text-brand-deep flex items-center justify-center shrink-0">
                   <Receipt className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center space-x-2">
                     <h3 className="font-extrabold text-sm text-ink truncate">Review Cart</h3>
-                    <span className="text-xs font-extrabold bg-brand/10 text-brand px-2 py-0.5 rounded-full shrink-0">
+                    <span className="text-xs font-extrabold bg-brand/10 text-brand-deep px-2 py-0.5 rounded-full shrink-0">
                       {cartSummary.count} {cartSummary.count === 1 ? 'Service' : 'Services'}
                     </span>
                   </div>

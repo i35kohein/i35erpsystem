@@ -328,7 +328,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
 
                     <div className="flex justify-between items-center text-xs text-muted mt-1.5">
                       <span>{cust.phone}</span>
-                      <span className="font-bold text-[#28A745]">{cust.totalSpent.toLocaleString()} {systemSettings.currencySymbol} Spent</span>
+                      <span className="font-bold text-[#15803D]">{cust.totalSpent.toLocaleString()} {systemSettings.currencySymbol} Spent</span>
                     </div>
 
                     {/* Expandable Row Toggle Bar */}
@@ -436,7 +436,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                                 </div>
                                 <div className="flex items-center justify-between">
                                   <span className="font-semibold text-ink truncate max-w-[160px]">{wo.deviceModel}</span>
-                                  <span className="font-bold text-[#28A745]">{wo.totalAmount?.toLocaleString() || 0} {systemSettings.currencySymbol}</span>
+                                  <span className="font-bold text-[#15803D]">{wo.totalAmount?.toLocaleString() || 0} {systemSettings.currencySymbol}</span>
                                 </div>
                                 {wo.symptomsReported && (
                                   <p className="text-xs text-muted line-clamp-1 italic">
@@ -499,7 +499,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                       type="button"
                       onClick={() => handleOpenHistoryModal(selectedCustomer)}
                       size="sm"
-                      className="bg-brand/10 hover:bg-brand text-brand hover:text-white border border-brand/30"
+                      className="bg-brand/10 hover:bg-brand text-brand-deep hover:text-white border border-brand/30"
                     >
                       <FileText className="w-3.5 h-3.5" />
                       <span className="hidden sm:inline">Full History</span>
@@ -523,7 +523,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                   </div>
                   <div>
                     <span className="text-muted">Total Spent:</span>
-                    <p className="font-bold text-[#28A745]">{selectedCustomer.totalSpent.toLocaleString()} {systemSettings.currencySymbol}</p>
+                    <p className="font-bold text-[#15803D]">{selectedCustomer.totalSpent.toLocaleString()} {systemSettings.currencySymbol}</p>
                   </div>
                 </div>
 

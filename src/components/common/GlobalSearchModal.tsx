@@ -106,7 +106,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   })).filter((g) => g.items.length > 0);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center bg-black/40 pt-[12vh] px-4" onMouseDown={onClose}>
+    <div role="dialog" aria-modal="true" aria-label="Global search" className="fixed inset-0 z-[100] flex items-start justify-center bg-black/40 pt-[12vh] px-4" onMouseDown={onClose}>
       <div
         className="w-full max-w-xl rounded-2xl border border-line bg-white shadow-2xl overflow-hidden"
         onMouseDown={(e) => e.stopPropagation()}

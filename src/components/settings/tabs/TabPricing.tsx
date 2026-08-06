@@ -26,7 +26,7 @@ const PricingTab: React.FC<PricingTabProps> = ({ formData, setFormData, setActiv
                 <Tag className="w-3.5 h-3.5 text-brand" />
                 <span>Default Currency Symbol / Unit</span>
               </label>
-              <select
+              <select aria-label="MMK (Myanmar Kyat)"
                 value={formData.currencySymbol}
                 onChange={(e) => setFormData({ ...formData, currencySymbol: e.target.value })}
                 className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand"

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Languages} from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import { Button } from '../ui';
 
 interface LanguageSwitcherProps {
   variant?: 'pills' | 'dropdown' | 'compact';
@@ -16,10 +17,12 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   if (variant === 'compact') {
     return (
       <div className={`flex items-center bg-surface p-1 rounded-xl border border-line ${className}`}>
-        <button
+        <Button
           type="button"
           onClick={() => setLanguage('en')}
-          className={`px-2 py-1 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
+          variant="ghost"
+          size="sm"
+          className={`px-2 py-1 ${
             language === 'en'
               ? 'bg-brand text-white shadow-xs'
               : 'text-ink hover:bg-slate-200/60'
@@ -27,7 +30,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
           title="English"
         >
           EN
-        </button>
+        </Button>
         <button
           type="button"
           onClick={() => setLanguage('mm')}
@@ -49,17 +52,19 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
       <div className="flex items-center px-2 py-0.5 text-slate-500 font-bold text-xs space-x-1">
         <Languages className="w-3.5 h-3.5 text-brand" />
       </div>
-      <button
+      <Button
         type="button"
         onClick={() => setLanguage('en')}
-        className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+        variant="ghost"
+        size="sm"
+        className={`flex items-center space-x-1.5 px-2.5 py-1 ${
           language === 'en'
             ? 'bg-white text-brand shadow-xs border border-line'
             : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
         }`}
       >
         <span>🇺🇸 EN</span>
-      </button>
+      </Button>
       <button
         type="button"
         onClick={() => setLanguage('mm')}

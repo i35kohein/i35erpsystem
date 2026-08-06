@@ -13,6 +13,7 @@ import {Printer,
   Globe,
   MapPin} from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
+import { Button } from '../ui';
 import { WorkOrder, SystemSettings } from '../../types';
 
 import { get21Diagnostics, get21AfterDiagnostics } from '../../utils/diagnosticUtils';
@@ -848,36 +849,42 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
           <div className="flex flex-wrap items-center gap-2">
             {/* Paper Format Segment */}
             <div className="flex items-center bg-surface p-1 rounded-xl border border-line h-10">
-              <button
+              <Button
                 type="button"
                 onClick={() => setPaperSize('a4_voucher')}
-                className={`h-8 flex items-center space-x-1.5 px-3 rounded-lg font-bold text-xs transition-all ${
+                variant="ghost"
+                size="sm"
+                className={`h-8 px-3 ${
                   paperSize === 'a4_voucher' ? 'bg-brand text-white shadow-xs' : 'text-muted hover:text-ink'
                 }`}
               >
                 <FileText className="w-3.5 h-3.5 shrink-0" />
                 <span>A4 Job Voucher</span>
-              </button>
+              </Button>
 
-              <button
+              <Button
                 type="button"
                 onClick={() => setPaperSize('3x2_tag')}
-                className={`h-8 flex items-center space-x-1.5 px-3 rounded-lg font-bold text-xs transition-all ${
+                variant="ghost"
+                size="sm"
+                className={`h-8 px-3 ${
                   paperSize === '3x2_tag' ? 'bg-brand text-white shadow-xs' : 'text-muted hover:text-ink'
                 }`}
               >
                 <QrCode className="w-3.5 h-3.5 shrink-0" />
                 <span>3"x2" Sticker Tag</span>
-              </button>
+              </Button>
             </div>
 
-            <button
+            <Button
               type="button"
               onClick={onClose}
-              className="h-10 w-10 flex items-center justify-center text-muted hover:text-ink rounded-xl hover:bg-surface transition-colors border border-transparent hover:border-line"
+              variant="iconGhost"
+              size="icon"
+              className="border border-transparent hover:border-line"
             >
               <X className="w-5 h-5" />
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -980,23 +987,24 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
           </div>
 
           <div className="flex items-center space-x-2">
-            <button
+            <Button
               type="button"
               onClick={onClose}
-              className="h-10 px-4 bg-white border border-line text-ink font-semibold rounded-xl hover:bg-slate-50 transition-colors"
+              variant="outline"
+              className="h-10 px-4"
             >
               Close
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={handlePrint}
-              className={`h-10 px-5 font-bold text-white rounded-xl flex items-center space-x-1.5 shadow-xs transition-all active:scale-95 cursor-pointer ${
-                a4ColorMode === 'monochrome' ? 'bg-black hover:bg-slate-800' : 'bg-brand hover:bg-[#0077ED]'
+              className={`h-10 px-5 ${
+                a4ColorMode === 'monochrome' ? 'bg-black hover:bg-slate-800' : 'bg-brand hover:bg-brand-deep'
               }`}
             >
               <Printer className="w-4 h-4" />
               <span>{paperSize === 'a4_voucher' ? 'Print / Save PDF' : 'Print Tag Sticker'}</span>
-            </button>
+            </Button>
           </div>
         </div>
       </div>

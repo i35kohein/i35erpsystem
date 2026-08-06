@@ -537,7 +537,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                     <span className="font-mono font-black text-ink text-sm block">
                       {financialSummary.totalInventoryAssetValue.toLocaleString()} MMK
                     </span>
-                    <span className="text-xs text-success font-bold">
+                    <span className="text-xs text-success-deep font-bold">
                       Retail Potential: {financialSummary.totalRetailValuation.toLocaleString()} MMK
                     </span>
                   </div>
@@ -611,7 +611,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
             {/* Parts Sales Income Card */}
             <div className="p-4 bg-emerald-50/60 border border-emerald-200 rounded-2xl space-y-2">
               <span className="text-xs font-bold text-emerald-900 uppercase tracking-wider block">📱 Replacement Parts Sales Revenue</span>
-              <div className="text-2xl font-black text-[#16A34A] font-mono">
+              <div className="text-2xl font-black text-[#15803D] font-mono">
                 {financialSummary.partsSalesIncome.toLocaleString()} MMK
               </div>
               <p className="text-xs text-emerald-800 font-medium">
@@ -649,10 +649,10 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                         </span>
                       </td>
                       <td className="p-3 font-mono">{wo.subtotal.toLocaleString()} MMK</td>
-                      <td className="p-3 font-mono font-bold text-[#16A34A]">{wo.totalAmount.toLocaleString()} MMK</td>
+                      <td className="p-3 font-mono font-bold text-[#15803D]">{wo.totalAmount.toLocaleString()} MMK</td>
                       <td className="p-3 text-right">
                         <span className={`text-xs font-black px-2 py-0.5 rounded-md ${
-                          wo.isPaid ? 'bg-emerald-100 text-[#16A34A]' : 'bg-amber-100 text-amber-800'
+                          wo.isPaid ? 'bg-emerald-100 text-[#15803D]' : 'bg-amber-100 text-amber-800'
                         }`}>
                           {wo.isPaid ? 'PAID' : 'PENDING'}
                         </span>
@@ -771,7 +771,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                       <td className="p-3 font-mono font-black text-sm text-ink">{part.quantityInStock}</td>
                       <td className="p-3 font-mono text-muted">{part.costPrice.toLocaleString()} MMK</td>
                       <td className="p-3 font-mono font-bold text-ink">{assetCostVal.toLocaleString()} MMK</td>
-                      <td className="p-3 font-mono font-bold text-[#16A34A]">{retailVal.toLocaleString()} MMK</td>
+                      <td className="p-3 font-mono font-bold text-[#15803D]">{retailVal.toLocaleString()} MMK</td>
                       <td className="p-3 text-right font-mono font-black text-brand">+{marginVal.toLocaleString()} MMK</td>
                     </tr>
                   );
@@ -792,7 +792,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
             </div>
             <div className="text-right font-mono">
               <span className="text-xs text-muted">Total Period Commissions:</span>
-              <span className="block text-lg font-black text-[#16A34A]">
+              <span className="block text-lg font-black text-[#15803D]">
                 {financialSummary.totalCommissionsEarned.toLocaleString()} MMK
               </span>
             </div>
@@ -823,7 +823,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                     <td className="p-3 font-mono text-emerald-800">
                       {payout.commissionAmount.toLocaleString()} + {payout.bonusAmount.toLocaleString()} MMK
                     </td>
-                    <td className="p-3 font-mono font-black text-[#16A34A] text-sm">{payout.netPayout.toLocaleString()} MMK</td>
+                    <td className="p-3 font-mono font-black text-[#15803D] text-sm">{payout.netPayout.toLocaleString()} MMK</td>
                     <td className="p-3 text-right space-x-1.5">
                       {payout.status === 'Pending' && (
                         <button
@@ -844,7 +844,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                         </button>
                       )}
                       {payout.status === 'Paid' && (
-                        <span className="bg-emerald-100 text-[#16A34A] font-black px-2.5 py-1 rounded-lg text-xs">
+                        <span className="bg-emerald-100 text-[#15803D] font-black px-2.5 py-1 rounded-lg text-xs">
                           ✓ PAID
                         </span>
                       )}
@@ -904,11 +904,11 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                         </span>
                       </td>
                       <td className="p-3 font-mono font-bold text-ink">{debt.totalAmount.toLocaleString()} MMK</td>
-                      <td className="p-3 font-mono font-bold text-[#16A34A]">{debt.paidAmount.toLocaleString()} MMK</td>
+                      <td className="p-3 font-mono font-bold text-[#15803D]">{debt.paidAmount.toLocaleString()} MMK</td>
                       <td className="p-3 font-mono font-black text-rose-600 text-sm">{balance.toLocaleString()} MMK</td>
                       <td className="p-3">
                         <span className={`text-xs font-black px-2.5 py-1 rounded-md ${
-                          debt.status === 'Paid' ? 'bg-emerald-100 text-[#16A34A]' :
+                          debt.status === 'Paid' ? 'bg-emerald-100 text-[#15803D]' :
                           debt.status === 'Partial' ? 'bg-blue-100 text-brand' :
                           isOverdue ? 'bg-rose-600 text-white animate-pulse' : 'bg-amber-100 text-amber-900'
                         }`}>
@@ -1145,7 +1145,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
             <div className="flex items-center gap-3 text-right font-mono">
               <div>
                 <span className="text-xs text-muted block">Parts Revenue</span>
-                <span className="text-lg font-black text-[#16A34A]">{partsRevenueTotal.toLocaleString()} MMK</span>
+                <span className="text-lg font-black text-[#15803D]">{partsRevenueTotal.toLocaleString()} MMK</span>
               </div>
               <div className="h-8 w-px bg-line" />
               <div>
@@ -1194,7 +1194,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                     <tr key={wo.id} className="hover:bg-slate-50">
                       <td className="p-3 font-mono font-bold text-brand">{wo.orderNumber}</td>
                       <td className="p-3 font-extrabold text-ink">{wo.deviceModel}</td>
-                      <td className="p-3 font-mono font-bold text-[#16A34A]">{partsRev.toLocaleString()} MMK</td>
+                      <td className="p-3 font-mono font-bold text-[#15803D]">{partsRev.toLocaleString()} MMK</td>
                       <td className="p-3 font-mono font-black text-ink">{partsCost.toLocaleString()} MMK</td>
                       <td className="p-3 font-mono font-black text-brand">+{(partsRev - partsCost).toLocaleString()} MMK</td>
                       <td className="p-3 font-mono text-muted">
@@ -1202,7 +1202,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                       </td>
                       <td className="p-3">
                         <span className={`text-xs font-black px-2.5 py-1 rounded-md ${
-                          pending ? 'bg-amber-100 text-amber-900' : 'bg-emerald-100 text-[#16A34A]'
+                          pending ? 'bg-amber-100 text-amber-900' : 'bg-emerald-100 text-[#15803D]'
                         }`}>
                           {pending ? 'PENDING SETTLE' : 'SETTLED'}
                         </span>
@@ -1250,7 +1250,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
             </div>
             <div className="text-right font-mono">
               <span className="text-xs text-muted">Parts Sold This Period:</span>
-              <span className="block text-lg font-black text-[#16A34A]">{financialSummary.partsSalesIncome.toLocaleString()} MMK</span>
+              <span className="block text-lg font-black text-[#15803D]">{financialSummary.partsSalesIncome.toLocaleString()} MMK</span>
             </div>
           </div>
 
@@ -1263,7 +1263,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
             </div>
             <div className="p-3.5 bg-white border border-line rounded-xl shadow-2xs">
               <span className="text-xs font-bold text-muted uppercase block">Parts Revenue</span>
-              <p className="text-xl font-black text-[#16A34A] mt-1">{financialSummary.partsSalesIncome.toLocaleString()} MMK</p>
+              <p className="text-xl font-black text-[#15803D] mt-1">{financialSummary.partsSalesIncome.toLocaleString()} MMK</p>
               <span className="text-xs text-muted font-bold">selling price</span>
             </div>
             <div className="p-3.5 bg-white border border-line rounded-xl shadow-2xs">
@@ -1276,7 +1276,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
               <div className="flex items-baseline justify-between mt-1">
                 <p className="text-xl font-black text-[#1E7E34]">+{financialSummary.partsProfit.toLocaleString()} MMK</p>
                 <span className={`text-xs font-black px-1.5 py-0.5 rounded-full ${
-                  financialSummary.partsMarginPercent >= 40 ? 'bg-emerald-100 text-[#16A34A]' : 'bg-amber-100 text-amber-800'
+                  financialSummary.partsMarginPercent >= 40 ? 'bg-emerald-100 text-[#15803D]' : 'bg-amber-100 text-amber-800'
                 }`}>
                   {financialSummary.partsMarginPercent}%
                 </span>
@@ -1312,7 +1312,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                       <tr key={row.category} className="hover:bg-slate-50">
                         <td className="p-3 font-extrabold text-ink">{row.category}</td>
                         <td className="p-3 text-center font-mono font-bold">{row.units}</td>
-                        <td className="p-3 text-center font-mono text-[#16A34A]">{row.revenue.toLocaleString()} MMK</td>
+                        <td className="p-3 text-center font-mono text-[#15803D]">{row.revenue.toLocaleString()} MMK</td>
                         <td className="p-3 text-center font-mono text-rose-600">{row.cost.toLocaleString()} MMK</td>
                         <td className="p-3 text-center font-mono font-black text-[#1E7E34]">+{row.profit.toLocaleString()} MMK</td>
                         <td className="p-3 text-right font-mono font-bold text-brand">
@@ -1356,7 +1356,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                           <span className="text-xs text-muted">{wo.customerName}</span>
                         </td>
                         <td className="p-3 text-center font-mono font-bold">{units}</td>
-                        <td className="p-3 text-center font-mono text-[#16A34A]">{revenue.toLocaleString()} MMK</td>
+                        <td className="p-3 text-center font-mono text-[#15803D]">{revenue.toLocaleString()} MMK</td>
                         <td className="p-3 text-center font-mono text-rose-600">{cost.toLocaleString()} MMK</td>
                         <td className="p-3 text-right font-mono font-black text-[#1E7E34]">+{(revenue - cost).toLocaleString()} MMK</td>
                       </tr>

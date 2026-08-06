@@ -330,7 +330,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             {matchingWorkOrders.length > 1 && (
               <div className="flex items-center space-x-1.5 bg-surface px-2.5 py-1.5 rounded-xl border border-line">
                 <label className="text-xs text-muted font-bold">Select Device:</label>
-                <select
+                <select aria-label="{wo.orderNumber} -"
                   value={currentWorkOrder.id}
                   onChange={(e) => setSelectedWorkOrderId(e.target.value)}
                   className="bg-transparent text-brand font-bold text-xs focus:outline-none"
@@ -424,7 +424,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 </span>
                 <span className={`text-xs font-bold px-2.5 py-1 rounded-lg border ${
                   currentWorkOrder.status === 'Finished' ? 'bg-success/10 text-success border-success/30' :
-                  currentWorkOrder.status === 'In Progress' ? 'bg-brand/10 text-brand border-brand/30' :
+                  currentWorkOrder.status === 'In Progress' ? 'bg-brand/10 text-brand-deep border-brand/30' :
                   'bg-[#FF9500]/10 text-[#FF9500] border-[#FF9500]/30'
                 }`}>
                   Status: {currentWorkOrder.status}
@@ -1044,7 +1044,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             <div className="space-y-4 text-xs text-ink">
               <div>
                 <label className="block font-bold mb-1">Reason for Requesting Modification</label>
-                <select
+                <select aria-label="Select"
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
                   className="w-full bg-surface border border-line rounded-xl px-3 py-2 text-xs font-semibold focus:bg-white focus:border-brand"

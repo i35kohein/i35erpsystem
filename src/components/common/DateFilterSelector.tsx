@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, X, Check} from 'lucide-react';
 import { CustomDropdownMenu} from './CustomDropdownMenu';
+import { Button } from '../ui';
 
 export type DatePreset = 'all' | 'today' | '7days' | '30days' | '60days' | 'custom';
 
@@ -173,7 +174,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
             ]}
           />
 
-          {!iconOnly && <button
+          {!iconOnly && <Button
             type="button"
             onClick={() => {
               setShowCalendarModal(!showCalendarModal);
@@ -181,7 +182,9 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
                 onChange({ ...currentFilter, preset: 'custom' });
               }
             }}
-            className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-line cursor-pointer transition-all ${
+            variant="iconGhost"
+            size="iconSm"
+            className={`shrink-0 rounded-xl border border-line ${
               currentFilter.preset === 'custom'
                 ? 'bg-brand text-white font-bold'
                 : 'bg-surface hover:bg-white text-[#424245]'
@@ -189,61 +192,61 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
             title="Calendar Picker"
           >
             <Calendar className="w-3.5 h-3.5" />
-          </button>}
+          </Button>}
         </div>
       ) : (
         /* Minimalistic Segmented Control */
         <div className="flex items-center bg-surface p-1 rounded-xl border border-line shadow-2xs space-x-1">
-          <button
+          <Button
             type="button"
             onClick={() => handlePresetChange('all')}
-            className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+            variant="ghost" size="sm" className={`px-3 py-1 ${
               currentFilter.preset === 'all'
                 ? 'bg-brand text-white shadow-2xs font-bold'
                 : 'text-[#424245] hover:text-ink hover:bg-white/60'
             }`}
           >
             All
-          </button>
+          </Button>
 
-          <button
+          <Button
             type="button"
             onClick={() => handlePresetChange('today')}
-            className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+            variant="ghost" size="sm" className={`px-3 py-1 ${
               currentFilter.preset === 'today'
                 ? 'bg-brand text-white shadow-2xs font-bold'
                 : 'text-[#424245] hover:text-ink hover:bg-white/60'
             }`}
           >
             Today
-          </button>
+          </Button>
 
-          <button
+          <Button
             type="button"
             onClick={() => handlePresetChange('7days')}
-            className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+            variant="ghost" size="sm" className={`px-3 py-1 ${
               currentFilter.preset === '7days'
                 ? 'bg-brand text-white shadow-2xs font-bold'
                 : 'text-[#424245] hover:text-ink hover:bg-white/60'
             }`}
           >
             7 Days
-          </button>
+          </Button>
 
-          <button
+          <Button
             type="button"
             onClick={() => handlePresetChange('30days')}
-            className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+            variant="ghost" size="sm" className={`px-3 py-1 ${
               currentFilter.preset === '30days'
                 ? 'bg-brand text-white shadow-2xs font-bold'
                 : 'text-[#424245] hover:text-ink hover:bg-white/60'
             }`}
           >
             30 Days
-          </button>
+          </Button>
 
           {/* Custom Calendar Trigger Button */}
-          <button
+          <Button
             type="button"
             onClick={() => {
               setShowCalendarModal(!showCalendarModal);
@@ -251,7 +254,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
                 onChange({ ...currentFilter, preset: 'custom' });
               }
             }}
-            className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center space-x-1.5 ${
+            variant="ghost" size="sm" className={`px-3 py-1 flex items-center space-x-1.5 ${
               currentFilter.preset === 'custom'
                 ? 'bg-brand text-white shadow-2xs font-bold'
                 : 'text-[#424245] hover:text-ink hover:bg-white/60'
@@ -265,7 +268,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
                   : formatDateLabel(currentFilter.startDate)
                 : 'Custom'}
             </span>
-          </button>
+          </Button>
         </div>
       )}
 

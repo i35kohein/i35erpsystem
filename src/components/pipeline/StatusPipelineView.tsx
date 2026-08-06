@@ -593,7 +593,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
           {showAllStages ? <EyeOff className="w-3.5 h-3.5 shrink-0" /> : <Eye className="w-3.5 h-3.5 shrink-0 text-brand" />}
           <span>{showAllStages ? 'Hide Exception Stages' : 'Show Exception Stages'}</span>
           {hiddenStageCounts.some((h) => h.count > 0) && (
-            <span className={`rounded-full px-1.5 py-0.5 text-xs font-black ${showAllStages ? 'bg-white/20 text-white' : 'bg-rose-100 text-rose-700'}`}>
+            <span className={`rounded-full px-1.5 py-0.5 text-xs font-black ${showAllStages ? 'bg-black/25 text-white' : 'bg-rose-100 text-rose-700'}`}>
               {hiddenStageCounts.filter((h) => h.count > 0).reduce((acc, h) => acc + h.count, 0)}
             </span>
           )}
@@ -866,7 +866,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                             <button
                               type="button"
                               onClick={() => setAddLogModalWo(wo)}
-                              className="flex-1 py-1.5 px-1 bg-brand/10 hover:bg-brand/15 text-brand font-extrabold rounded-lg border border-brand/20 text-center flex items-center justify-center space-x-0.5 truncate min-h-9"
+                              className="flex-1 py-1.5 px-1 bg-brand/10 hover:bg-brand/15 text-brand-deep font-extrabold rounded-lg border border-brand/20 text-center flex items-center justify-center space-x-0.5 truncate min-h-9"
                             >
                               <Plus className="w-3 h-3 shrink-0" />
                               <span>Log</span>

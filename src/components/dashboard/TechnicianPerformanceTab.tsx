@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Button } from '../ui';
 import {
   Users,
   Clock,
@@ -74,7 +75,7 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
           {/* Technician Selector Filter */}
           <div className="flex items-center space-x-2 shrink-0">
             <span className="text-xs font-bold text-muted">Filter Staff:</span>
-            <select
+            <select aria-label="All Technicians ({technicians.length})"
               value={selectedTechId}
               onChange={(e) => setSelectedTechId(e.target.value)}
               className="bg-surface border border-line text-ink text-xs font-bold rounded-xl px-3 py-1.5 focus:bg-white focus:border-brand focus:outline-none transition-all shadow-2xs"
@@ -97,7 +98,7 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
               <span className="text-xs font-bold text-muted uppercase tracking-wider">Total Successful Repairs</span>
               <div className="flex items-baseline space-x-2">
                 <span className="text-2xl font-extrabold text-ink">{totalShopLiveCompleted}</span>
-                <span className="text-xs text-[#28A745] font-bold">Completed This Period</span>
+                <span className="text-xs text-[#15803D] font-bold">Completed This Period</span>
               </div>
               <p className="text-xs text-[#1E7E34] font-medium flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5 text-success" />
@@ -301,16 +302,17 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
               </div>
 
               {/* Action: drill-down only (modal handles pipeline navigation) */}
-              <button
+              <Button
                 onClick={(e) => {
                   e.stopPropagation();
                   onOpenTechDetail?.(tech);
                 }}
-                className="w-full py-2 bg-brand-soft hover:bg-brand text-brand hover:text-white font-bold text-xs rounded-xl border border-brand/20 flex items-center justify-center space-x-1 transition-all cursor-pointer"
+                variant="secondary"
+                className="w-full bg-brand-soft hover:bg-brand text-brand hover:text-white border border-brand/20"
               >
                 <span>View Details</span>
                 <ChevronRight className="w-4 h-4" />
-              </button>
+              </Button>
             </div>
           );
         })}

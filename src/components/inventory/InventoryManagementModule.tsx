@@ -1239,7 +1239,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           </div>
           <div className="flex items-baseline justify-between">
             <span className="text-2xl font-black text-ink font-mono">{metrics.totalCount}</span>
-            <span className="text-xs font-bold text-brand bg-brand/10 px-2 py-0.5 rounded-full">
+            <span className="text-xs font-bold text-brand-deep bg-brand/10 px-2 py-0.5 rounded-full">
               {categories.length} Categories
             </span>
           </div>
@@ -1260,7 +1260,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               </span>
             </div>
             <div className="flex justify-between text-xs">
-              <span className="text-success font-bold">Retail Yield:</span>
+              <span className="text-success-deep font-bold">Retail Yield:</span>
               <span className="font-mono font-black text-success">
                 {metrics.totalRetailValuation.toLocaleString()} MMK
               </span>
@@ -1473,7 +1473,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   <div key={part.id} className="space-y-3 rounded-2xl border border-line bg-white p-4 text-xs shadow-xs">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex min-w-0 items-start space-x-2">
-                        <div className="mt-0.5 shrink-0 rounded-md bg-brand/10 p-1.5 text-brand">
+                        <div className="mt-0.5 shrink-0 rounded-md bg-brand/10 p-1.5 text-brand-deep">
                           <Cpu className="h-3.5 w-3.5" />
                         </div>
                         <div className="min-w-0">
@@ -1573,7 +1573,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     <div className="flex items-end justify-between gap-2 border-t border-line pt-1">
                       <div>
                         <span className="block text-xs font-bold uppercase text-[#7F7F7F]">Selling Price</span>
-                        <span className="font-mono text-sm font-black text-[#16A34A]">{part.sellingPrice.toLocaleString()} MMK</span>
+                        <span className="font-mono text-sm font-black text-[#15803D]">{part.sellingPrice.toLocaleString()} MMK</span>
                       </div>
                       {part.supplierName && (
                         <span className="max-w-[45%] truncate text-xs font-semibold text-muted">{part.supplierName}</span>
@@ -1648,7 +1648,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         {/* Part Name & SKU */}
                         <td className="px-2 py-2 space-y-1">
                           <div className="flex items-start space-x-2">
-                            <div className="p-1 rounded-md bg-brand/10 text-brand shrink-0 mt-0.5">
+                            <div className="p-1 rounded-md bg-brand/10 text-brand-deep shrink-0 mt-0.5">
                               <Cpu className="w-3 h-3" />
                             </div>
                             <div>
@@ -1730,7 +1730,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         </td>
 
                         {/* Selling price only — profit belongs in the Profit tab. */}
-                        <td className="w-[176px] min-w-[176px] pl-3 pr-1.5 py-2 font-sans text-sm font-semibold text-[#16A34A] whitespace-nowrap">
+                        <td className="w-[176px] min-w-[176px] pl-3 pr-1.5 py-2 font-sans text-sm font-semibold text-[#15803D] whitespace-nowrap">
                           {inlineEditMode ? (
                             <div className="grid grid-cols-2 gap-2">
                               <label className="flex min-w-0 flex-col gap-0.5 text-[11px] font-bold uppercase tracking-wide text-muted">
@@ -1914,7 +1914,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       </div>
                       <div>
                         <p className="text-[11px] font-extrabold uppercase tracking-wider text-muted">Selling</p>
-                        <p className="mt-0.5 font-mono text-xs font-bold text-[#16A34A] break-words">{part.sellingPrice.toLocaleString()}</p>
+                        <p className="mt-0.5 font-mono text-xs font-bold text-[#15803D] break-words">{part.sellingPrice.toLocaleString()}</p>
                       </div>
                       <div>
                         <p className="text-[11px] font-extrabold uppercase tracking-wider text-muted">Profit</p>
@@ -1955,7 +1955,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     <tr key={part.id} className="hover:bg-slate-50/80">
                       <td className="p-2.5"><p className="max-w-[260px] truncate font-bold text-ink">{part.name}</p><p className="mt-0.5 font-mono text-xs text-muted">{part.sku}</p></td>
                       <td className="p-2.5 font-mono text-faint whitespace-nowrap hidden md:table-cell">{part.costPrice.toLocaleString()} MMK</td>
-                      <td className="p-2.5 font-mono font-bold text-[#16A34A] whitespace-nowrap">{part.sellingPrice.toLocaleString()} MMK</td>
+                      <td className="p-2.5 font-mono font-bold text-[#15803D] whitespace-nowrap">{part.sellingPrice.toLocaleString()} MMK</td>
                       <td className={`p-2.5 font-mono font-black whitespace-nowrap ${profit >= 0 ? 'text-brand' : 'text-rose-600'}`}>{profit >= 0 ? '+' : ''}{profit.toLocaleString()} MMK<span className={`mt-0.5 block w-max rounded-md px-1.5 py-0.5 font-mono text-[11px] font-black sm:hidden ${heat}`}>{margin}%</span></td>
                       <td className="p-2.5 hidden sm:table-cell"><span className={`rounded-md px-1.5 py-0.5 font-mono text-xs font-black ${heat}`} title={margin >= 40 ? 'High margin' : margin >= 20 ? 'Good margin' : margin >= 0 ? 'Low margin' : 'Loss'}>{margin}%</span></td>
                       <td className="p-2.5 text-right"><button type="button" aria-label={`View ${part.name} details`} title="View part details" onClick={() => setSelectedPartForDetails(part)} className="inline-flex h-10 w-10 lg:h-7 lg:w-7 items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand"><Eye className="h-3 w-3" /></button></td>
@@ -2290,7 +2290,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   type="number"
                   value={newPartData.sellingPrice || ''}
                   onChange={(e) => setNewPartData({ ...newPartData, sellingPrice: Number(e.target.value) })}
-                  className="w-full rounded-lg border border-line bg-surface p-2 text-xs font-mono font-bold text-[#16A34A] focus:border-brand focus:bg-white focus:outline-none"
+                  className="w-full rounded-lg border border-line bg-surface p-2 text-xs font-mono font-bold text-[#15803D] focus:border-brand focus:bg-white focus:outline-none"
                 />
               </div>
 
@@ -2430,7 +2430,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <div className="rounded-xl border border-line bg-[#F8F9FA] p-3">
                 <p className="text-xs font-bold uppercase tracking-wide text-muted">Price & Location</p>
                 <p className="mt-1 font-mono text-xs font-bold text-ink">Cost {selectedPartForDetails.costPrice.toLocaleString()} MMK</p>
-                <p className="font-mono text-xs font-black text-[#16A34A]">Sell {selectedPartForDetails.sellingPrice.toLocaleString()} MMK</p>
+                <p className="font-mono text-xs font-black text-[#15803D]">Sell {selectedPartForDetails.sellingPrice.toLocaleString()} MMK</p>
                 <p className="mt-2 text-xs font-semibold text-muted">Bin: {selectedPartForDetails.locationBin || '—'}</p>
               </div>
             </div>
@@ -2514,7 +2514,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     type="number"
                     value={editingPart.sellingPrice}
                     onChange={(e) => setEditingPart({ ...editingPart, sellingPrice: Number(e.target.value) })}
-                    className="w-full bg-surface border border-line rounded-xl p-2.5 text-xs font-mono text-[#16A34A] font-bold"
+                    className="w-full bg-surface border border-line rounded-xl p-2.5 text-xs font-mono text-[#15803D] font-bold"
                   />
                 </div>
               </div>

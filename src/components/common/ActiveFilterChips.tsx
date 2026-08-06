@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '../ui';
 import { X } from 'lucide-react';
 
 export interface ActiveFilterChip {
@@ -13,16 +14,17 @@ export const ActiveFilterChips: React.FC<{ chips: ActiveFilterChip[] }> = ({ chi
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       {chips.map((chip) => (
-        <button
+        <Button
           key={chip.key}
           type="button"
           onClick={chip.onClear}
-          className="inline-flex items-center gap-1 rounded-full border border-brand/25 bg-brand-soft px-2.5 py-1 text-xs font-extrabold text-brand hover:bg-brand hover:text-white transition-colors cursor-pointer active:scale-95"
+          variant="chip"
+          className="border-brand/25 bg-brand-soft px-2.5 py-1 text-brand hover:bg-brand hover:text-white"
           title={`Clear ${chip.label}`}
         >
           {chip.label}
           <X className="w-3 h-3" />
-        </button>
+        </Button>
       ))}
     </div>
   );

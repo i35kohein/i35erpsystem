@@ -84,7 +84,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                 <h4 className="text-xs font-extrabold text-ink">Inventory Categories</h4>
                 <p className="text-xs text-muted">For stock parts only. Price List repair services stay separate.</p>
               </div>
-              <span className="rounded-full bg-brand/10 px-2 py-0.5 font-mono text-xs font-bold text-brand">
+              <span className="rounded-full bg-brand/10 px-2 py-0.5 font-mono text-xs font-bold text-brand-deep">
                 {inventoryCategories.length} categories
               </span>
             </div>
@@ -145,7 +145,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                 <h4 className="text-xs font-extrabold text-ink">Supplier Name Data</h4>
                 <p className="text-xs text-muted">Supplier records used when registering stock parts and RMA claims.</p>
               </div>
-              <span className="rounded-full bg-brand/10 px-2 py-0.5 font-mono text-xs font-bold text-brand">{suppliers.length} suppliers</span>
+              <span className="rounded-full bg-brand/10 px-2 py-0.5 font-mono text-xs font-bold text-brand-deep">{suppliers.length} suppliers</span>
             </div>
 
             <form onSubmit={handleAddInventorySupplier} className="grid grid-cols-1 gap-2 rounded-xl border border-line bg-[#F8F9FA] p-3 sm:grid-cols-2 lg:grid-cols-5">
@@ -208,7 +208,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
           <section className={`${inventoryDataTab === 'bins' ? 'space-y-3' : 'hidden'} border-b border-line pb-5`}>
             <div className="flex items-center justify-between gap-2">
               <div><h4 className="text-xs font-extrabold text-ink">Storage Bin Names</h4><p className="text-xs text-muted">Saved bin names appear when registering or editing inventory parts.</p></div>
-              <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-bold text-brand">{inventoryBinNames.length} bins</span>
+              <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-bold text-brand-deep">{inventoryBinNames.length} bins</span>
             </div>
             <div className="flex gap-2"><input value={binDraft} onChange={(event) => setBinDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleAddInventoryBin(); } }} placeholder="e.g. BIN-A01" className="h-9 min-w-0 flex-1 rounded-lg border border-line-strong bg-surface px-3 text-xs font-mono font-bold outline-none focus:border-brand focus:bg-white" /><button type="button" onClick={handleAddInventoryBin} disabled={!binDraft.trim()} className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-brand px-3 text-xs font-extrabold text-white hover:bg-brand-deep disabled:opacity-45"><Plus className="h-3.5 w-3.5" /> Add bin</button></div>
             <div className="space-y-2 rounded-xl border border-line bg-[#F8F9FA] p-3">
@@ -246,7 +246,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                                   <p className="truncate font-bold">{part.name}</p>
                                   <p className="truncate font-mono text-xs text-muted">{part.sku}</p>
                                 </div>
-                                <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-bold text-brand">{part.quantityInStock} stock</span>
+                                <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-bold text-brand-deep">{part.quantityInStock} stock</span>
                               </div>
                             ))}
                           </div>

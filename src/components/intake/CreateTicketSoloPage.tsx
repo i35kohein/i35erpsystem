@@ -675,7 +675,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               <span className="text-sm">Customer Information</span>
             </h3>
             {matchedCustomer && (
-              <span className="text-xs bg-[#EAF8ED] text-[#28A745] px-2.5 py-0.5 rounded-full font-bold flex items-center space-x-1 border border-success/20 shadow-2xs">
+              <span className="text-xs bg-[#EAF8ED] text-[#15803D] px-2.5 py-0.5 rounded-full font-bold flex items-center space-x-1 border border-success/20 shadow-2xs">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 <span>{isEditMode ? 'Editing Existing Ticket' : 'Existing Customer Profile Matched!'}</span>
               </span>
@@ -821,7 +821,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             >
               <div className="flex items-center justify-between border-b border-line pb-2.5">
                 <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
-                  <span className="w-6 h-6 rounded-full bg-brand/15 text-brand flex items-center justify-center text-xs font-black group-hover:scale-105 transition-transform border border-brand/30">2a</span>
+                  <span className="w-6 h-6 rounded-full bg-brand/15 text-brand-deep flex items-center justify-center text-xs font-black group-hover:scale-105 transition-transform border border-brand/30">2a</span>
                   <span className="text-xs">Realistic Color ({availableRealColors.length} Palette)</span>
                 </h3>
                 <span className="text-xs font-bold text-brand group-hover:underline">Change</span>
@@ -842,7 +842,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             <div className="w-full p-3 bg-[#F8F9FA] rounded-xl border border-line space-y-2.5 flex flex-col">
               <div className="flex items-center justify-between border-b border-line pb-2.5">
                 <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
-                  <span className="w-6 h-6 rounded-full bg-brand/15 text-brand flex items-center justify-center text-xs font-black border border-brand/30">2a</span>
+                  <span className="w-6 h-6 rounded-full bg-brand/15 text-brand-deep flex items-center justify-center text-xs font-black border border-brand/30">2a</span>
                   <span className="text-xs">Realistic Color (0 Palette)</span>
                 </h3>
               </div>
@@ -863,7 +863,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           >
             <div className="flex items-center justify-between border-b border-line pb-2.5">
               <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
-                <span className="w-6 h-6 rounded-full bg-brand/15 text-brand flex items-center justify-center text-xs font-black group-hover:scale-105 transition-transform border border-brand/30">2b</span>
+                <span className="w-6 h-6 rounded-full bg-brand/15 text-brand-deep flex items-center justify-center text-xs font-black group-hover:scale-105 transition-transform border border-brand/30">2b</span>
                 <span className="text-xs">Warranty Policy</span>
               </h3>
               <span className="text-xs font-bold text-brand group-hover:underline">Change</span>
@@ -1119,7 +1119,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             </h3>
             <div className="flex items-center space-x-2">
               <span className="hidden md:inline-flex items-center space-x-1.5 text-xs font-bold">
-                <span className="bg-[#16A34A]/10 text-[#16A34A] px-2 py-1 rounded-full">✓ {beforeDiagnostics.filter(d => d.status === 'Pass').length} Pass</span>
+                <span className="bg-[#16A34A]/10 text-[#15803D] px-2 py-1 rounded-full">✓ {beforeDiagnostics.filter(d => d.status === 'Pass').length} Pass</span>
                 <span className="bg-[#DC2626]/10 text-[#DC2626] px-2 py-1 rounded-full">✕ {beforeDiagnostics.filter(d => d.status === 'Fail').length} Fail</span>
               </span>
               <button 
@@ -1500,7 +1500,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             </button>
 
             <h3 className="text-sm font-bold text-ink border-b border-line pb-2 flex items-center space-x-2">
-              <ShieldCheck className="w-4 h-4 text-[#28A745]" />
+              <ShieldCheck className="w-4 h-4 text-[#15803D]" />
               <span>Standard Warranty Selection</span>
             </h3>
 
@@ -1651,7 +1651,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                           {item.price.toLocaleString()} MMK
                         </span>
                         {item.isCatalogMatch && (
-                          <span className="block text-[11px] text-success font-bold">Catalog Verified</span>
+                          <span className="block text-[11px] text-success-deep font-bold">Catalog Verified</span>
                         )}
                       </div>
                     </button>

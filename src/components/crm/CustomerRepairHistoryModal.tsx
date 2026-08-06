@@ -59,7 +59,7 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
         {/* Modal Header */}
         <div className="px-6 py-4 border-b border-line bg-[#F8FBFD] flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="p-3 bg-brand/10 text-brand rounded-2xl shadow-inner">
+            <div className="p-3 bg-brand/10 text-brand-deep rounded-2xl shadow-inner">
               <User className="w-6 h-6" />
             </div>
             <div>
@@ -152,9 +152,9 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
 
             <div className="bg-white p-3.5 rounded-2xl border border-line shadow-2xs">
               <span className="text-xs font-bold text-muted uppercase">Total Expenditure</span>
-              <div className="text-lg font-black text-[#28A745] mt-0.5 flex items-center justify-between">
+              <div className="text-lg font-black text-[#15803D] mt-0.5 flex items-center justify-between">
                 <span>{totalSpent.toLocaleString()} {systemSettings.currencySymbol}</span>
-                <TrendingUp className="w-5 h-5 text-[#28A745]" />
+                <TrendingUp className="w-5 h-5 text-[#15803D]" />
               </div>
             </div>
           </div>

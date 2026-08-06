@@ -712,7 +712,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
           <div className="mt-3 pt-2.5 border-t border-surface flex items-center justify-between text-xs text-muted">
             <span>Awaiting customer</span>
-            <span className="font-bold text-emerald-600 group-hover:underline flex items-center space-x-0.5">
+            <span className="font-bold text-emerald-700 group-hover:underline flex items-center space-x-0.5">
               <span>View Finished</span>
               <ChevronRight className="w-3 h-3" />
             </span>
@@ -816,7 +816,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           <span>Status Queue</span>
           <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold ${
             activeDashboardSubTab === 'status-queue'
-              ? 'bg-white/20 text-white'
+              ? 'bg-[#003A78] text-white'
               : 'bg-line text-ink'
           }`}>
             {activeRepairs.length} Active
@@ -842,7 +842,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           <span>Hardware Analytics</span>
           <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold ${
             activeDashboardSubTab === 'repair-data'
-              ? 'bg-white/20 text-white'
+              ? 'bg-[#003A78] text-white'
               : 'bg-line text-ink'
           }`}>
             {filteredWorkOrders.length} Tickets
@@ -868,7 +868,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           <span>Technicians</span>
           <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold ${
             activeDashboardSubTab === 'tech-kpi'
-              ? 'bg-white/20 text-white'
+              ? 'bg-[#003A78] text-white'
               : 'bg-line text-ink'
           }`}>
             {technicians.length} Staff
@@ -895,7 +895,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           {repairLowStockParts.length > 0 ? (
             <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-extrabold ${
               activeDashboardSubTab === 'inventory'
-                ? 'bg-white/20 text-white'
+                ? 'bg-[#003A78] text-white'
                 : 'bg-amber-100 text-amber-800 border border-amber-200'
             }`}>
               {repairLowStockParts.length} Low
@@ -903,7 +903,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           ) : (
             <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold ${
               activeDashboardSubTab === 'inventory'
-                ? 'bg-white/20 text-white'
+                ? 'bg-[#003A78] text-white'
                 : 'bg-line text-ink'
             }`}>
               {parts.length} Parts
@@ -958,7 +958,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           {expiringSoonWorkOrders.length > 0 ? (
             <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold ${
               activeDashboardSubTab === 'warranty-watch'
-                ? 'bg-white/20 text-white'
+                ? 'bg-[#003A78] text-white'
                 : 'bg-rose-100 text-rose-800 border border-rose-200'
             }`}>
               {expiringSoonWorkOrders.length} Flagged
@@ -966,7 +966,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           ) : (
             <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold ${
               activeDashboardSubTab === 'warranty-watch'
-                ? 'bg-white/20 text-white'
+                ? 'bg-[#003A78] text-white'
                 : 'bg-line text-ink'
             }`}>
               Clear
@@ -1062,11 +1062,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <div className="space-y-0.5">
                 <div className="flex items-center space-x-2.5">
                   <ListFilter className="w-4 h-4 text-brand" />
-                  <h3 className="text-sm font-extrabold text-ink truncate">
+                  <h2 className="text-sm font-extrabold text-ink truncate">
                     <span className="hidden sm:inline">Status Queue & Stage Distribution</span>
                     <span className="sm:hidden">Stage Distribution</span>
-                  </h3>
-                  <span className="px-2.5 py-0.5 bg-brand/10 text-brand rounded-full text-xs font-mono font-bold whitespace-nowrap">
+                  </h2>
+                  <span className="px-2.5 py-0.5 bg-brand/10 text-brand-deep rounded-full text-xs font-mono font-bold whitespace-nowrap">
                     {filteredWorkOrders.length} <span className="hidden md:inline">Total Work Orders</span><span className="md:hidden">Orders</span>
                   </span>
                 </div>
@@ -1106,7 +1106,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
                       <div className={`h-full ${item.color} rounded-full transition-all duration-500`} style={{ width: `${pct}%` }} />
                     </div>
-                    <div className="flex justify-between items-center text-xs text-slate-500">
+                    <div className="flex justify-between items-center text-xs text-slate-600">
                       <span>{pct}% of active queue</span>
                       <button
                         onClick={() => {
@@ -1132,7 +1132,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     <span className="hidden md:inline">Live Work Order Status Analytics Queue Roster</span>
                     <span className="md:hidden">Queue Roster</span>
                   </h3>
-                  <span className="px-2.5 py-0.5 bg-brand/10 text-brand rounded-full text-xs font-mono font-bold whitespace-nowrap">
+                  <span className="px-2.5 py-0.5 bg-brand/10 text-brand-deep rounded-full text-xs font-mono font-bold whitespace-nowrap">
                     {statusQueueWorkOrders.length} <span className="hidden md:inline">{statusQueueWorkOrders.length === 1 ? 'Ticket' : 'Tickets'}</span>
                   </span>
                   {statusQueueFilter !== 'ALL' && (
@@ -1170,6 +1170,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <div className="flex items-center space-x-2 flex-wrap">
                 {/* Tech Filter Select */}
                 <select
+                  aria-label="Filter by technician"
                   value={queueTechFilter}
                   onChange={(e) => setQueueTechFilter(e.target.value)}
                   className="bg-white text-xs text-ink font-semibold py-1.5 px-2.5 rounded-lg border border-line focus:outline-none focus:border-brand"
@@ -1183,6 +1184,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
                 {/* Priority Filter Select */}
                 <select
+                  aria-label="Filter by priority"
                   value={queuePriorityFilter}
                   onChange={(e) => setQueuePriorityFilter(e.target.value)}
                   className="bg-white text-xs text-ink font-semibold py-1.5 px-2.5 rounded-lg border border-line focus:outline-none focus:border-brand"
@@ -1422,7 +1424,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-line">
               <div className="space-y-0.5">
                 <div className="flex items-center space-x-2">
-                  <div className="p-2 bg-brand/10 text-brand rounded-xl border border-brand/20">
+                  <div className="p-2 bg-brand/10 text-brand-deep rounded-xl border border-brand/20">
                     <BarChart3 className="w-5 h-5" />
                   </div>
                   <h3 className="text-base font-extrabold text-ink truncate">
@@ -1595,7 +1597,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-1">
               <span className="text-xs font-bold text-muted uppercase">Total Revenue</span>
               <p className="text-2xl font-extrabold text-ink">{totalRevenue.toLocaleString()} MMK</p>
-              <p className={`text-xs font-semibold flex items-center space-x-1 ${marginPercent < 0 ? 'text-rose-600' : 'text-[#28A745]'}`}>
+              <p className={`text-xs font-semibold flex items-center space-x-1 ${marginPercent < 0 ? 'text-rose-600' : 'text-[#15803D]'}`}>
                 {marginPercent < 0 && <AlertTriangle className="w-3 h-3 shrink-0" />}
                 <span>{marginPercent}% Gross Profit Margin</span>
               </p>
@@ -1625,7 +1627,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-line">
               <div className="space-y-0.5">
                 <div className="flex items-center space-x-2">
-                  <div className="p-2 bg-brand/10 text-brand rounded-xl border border-brand/20">
+                  <div className="p-2 bg-brand/10 text-brand-deep rounded-xl border border-brand/20">
                     <TrendingUp className="w-4 h-4" />
                   </div>
                   <h3 className="text-base font-extrabold text-ink">Revenue & Repairs Trend</h3>

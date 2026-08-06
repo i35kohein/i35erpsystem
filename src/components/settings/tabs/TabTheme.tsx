@@ -3,6 +3,7 @@ import { Check, Circle, Palette, Square } from 'lucide-react';
 import { useTheme, THEME_PRESETS } from '../../../context/ThemeContext';
 import { useLanguage } from '../../../context/LanguageContext';
 import { LanguageSwitcher } from '../../common/LanguageSwitcher';
+import { Button } from '../../ui';
 
 interface ThemeTabProps {}
 
@@ -92,20 +93,20 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
                       </div>
                     </div>
 
-                    <button
+                    <Button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         setTheme(preset.id);
                       }}
-                      className={`w-full py-2.5 rounded-xl font-black text-xs transition-all flex items-center justify-center space-x-2 ${
+                      className={`w-full py-2.5 ${
                         isSelected
                           ? 'bg-[#27B1AE] text-white shadow-xs'
                           : 'bg-[#2C3E50] hover:bg-[#136F9A] text-white'
                       }`}
                     >
                       {isSelected ? 'Currently Selected' : `Activate ${preset.name}`}
-                    </button>
+                    </Button>
                   </div>
                 );
               })}

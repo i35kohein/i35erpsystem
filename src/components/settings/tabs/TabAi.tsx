@@ -45,7 +45,7 @@ const AiTab: React.FC<AiTabProps> = ({ formData, setFormData, aiRescanning, aiRe
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <label className="space-y-1.5 text-xs font-bold text-ink">
               <span>Provider</span>
-              <select
+              <select aria-label="Local Analysis (No API)"
                 value={formData.aiProvider || 'local'}
                 onChange={(event) => {
                   const aiProvider = event.target.value as SystemSettings['aiProvider'];
@@ -89,19 +89,20 @@ const AiTab: React.FC<AiTabProps> = ({ formData, setFormData, aiRescanning, aiRe
               {(AI_MODEL_PRESETS[formData.aiProvider] || []).length > 0 && (
                 <div className="flex flex-wrap gap-1.5 pt-1">
                   {(AI_MODEL_PRESETS[formData.aiProvider] || []).map((m) => (
-                    <button
+                    <Button
                       key={m.id}
                       type="button"
                       onClick={() => setFormData({ ...formData, aiModel: m.id })}
                       title={m.id}
-                      className={`px-2.5 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer ${
+                      variant="chip"
+                      className={`px-2.5 py-1 ${
                         formData.aiModel === m.id
                           ? 'bg-brand text-white border-brand'
                           : 'bg-surface text-[#51525C] border-line hover:border-brand hover:text-brand'
                       }`}
                     >
                       {m.label}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               )}

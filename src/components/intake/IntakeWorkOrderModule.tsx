@@ -399,7 +399,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                       {/* Ticket # & Date */}
                       <td className="px-2 py-2">
                         <div className="flex items-start space-x-2">
-                          <div className="mt-0.5 shrink-0 rounded-md bg-brand/10 p-1 text-brand">
+                          <div className="mt-0.5 shrink-0 rounded-md bg-brand/10 p-1 text-brand-deep">
                             <Ticket className="h-3 w-3" />
                           </div>
                           <div className="min-w-0">
@@ -454,7 +454,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
 
                       {/* Amount & payment */}
                       <td className="px-2 py-2">
-                        <p className="whitespace-nowrap font-sans text-xs font-semibold text-[#16A34A]">{totalAmount.toLocaleString()} MMK</p>
+                        <p className="whitespace-nowrap font-sans text-xs font-semibold text-[#15803D]">{totalAmount.toLocaleString()} MMK</p>
                         <span className={`mt-0.5 inline-flex rounded-md border px-1.5 py-0.5 text-[11px] font-extrabold ${
                           wo.isPaid ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-rose-200 bg-rose-50 text-rose-800'
                         }`}>

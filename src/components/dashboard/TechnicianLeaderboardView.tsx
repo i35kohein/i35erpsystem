@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '../ui';
 import {
   Trophy,
   Crown,
@@ -74,12 +75,14 @@ export const TechnicianLeaderboardView: React.FC<TechnicianLeaderboardViewProps>
             Real labor revenue + commission · baseline for reference · click a row for drill-down
           </span>
 
-          <button
+          <Button
             onClick={() => onNavigateToTab('pipeline')}
-            className="px-3.5 py-1.5 bg-surface hover:bg-line text-brand font-bold text-xs rounded-xl border border-line flex items-center space-x-1.5 transition-all shrink-0 cursor-pointer"
+            variant="secondary"
+            size="sm"
+            className="hover:bg-line text-brand shrink-0"
           >
             <span>Open Pipeline</span>
-          </button>
+          </Button>
         </div>
 
         {leaderboardData.length === 0 ? (
@@ -128,7 +131,7 @@ export const TechnicianLeaderboardView: React.FC<TechnicianLeaderboardViewProps>
 
                       <td className="py-3 px-3">
                         <div className="flex items-center space-x-2.5">
-                          <div className="w-8 h-8 rounded-xl bg-brand/10 text-brand font-bold text-xs flex items-center justify-center shrink-0">
+                          <div className="w-8 h-8 rounded-xl bg-brand/10 text-brand-deep font-bold text-xs flex items-center justify-center shrink-0">
                             {item.tech.name.charAt(0)}
                           </div>
                           <div>
