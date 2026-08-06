@@ -78,6 +78,7 @@ import { Navigation } from './components/Navigation';
 const DashboardOverview = lazy(() => import('./components/dashboard/DashboardOverview').then((m) => ({ default: m.DashboardOverview })));
 const IntakeWorkOrderModule = lazy(() => import('./components/intake/IntakeWorkOrderModule').then((m) => ({ default: m.IntakeWorkOrderModule })));
 const CreateTicketSoloPage = lazy(() => import('./components/intake/CreateTicketSoloPage').then((m) => ({ default: m.CreateTicketSoloPage })));
+const CreateTicketWizardV2 = lazy(() => import('./components/intake/CreateTicketWizardV2').then((m) => ({ default: m.CreateTicketWizardV2 })));
 const StatusPipelineView = lazy(() => import('./components/pipeline/StatusPipelineView').then((m) => ({ default: m.StatusPipelineView })));
 const InventoryManagementModule = lazy(() => import('./components/inventory/InventoryManagementModule').then((m) => ({ default: m.InventoryManagementModule })));
 const SupplierRmaModule = lazy(() => import('./components/suppliers/SupplierRmaModule').then((m) => ({ default: m.SupplierRmaModule })));
@@ -602,6 +603,7 @@ export default function App() {
   const [isAiAssistantOpen, setIsAiAssistantOpen] = useState(false);
   const [settingsInitialSubTab, setSettingsInitialSubTab] = useState<'users' | 'ai'>('users');
   const [printableTagWo, setPrintableTagWo] = useState<WorkOrder | null>(null);
+  const [ticketUiV2, setTicketUiV2] = useState(true); // new wizard UI default; classic form via link
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const filtersTriggerRef = useRef<HTMLButtonElement | null>(null);
@@ -2241,33 +2243,50 @@ export default function App() {
               )}
 
               {activeTab === 'create-ticket' && (
-                <div className="fixed inset-0 z-50">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5">
                   <div
                     className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
                     onClick={() => {
                       setTicketPrefill(null);
+                      setTicketUiV2(true);
                       setActiveTab('intake');
                     }}
                   />
-                  <div className="absolute inset-y-0 right-0 w-full max-w-2xl xl:max-w-3xl bg-white shadow-2xl overflow-y-auto">
-                    <CreateTicketSoloPage
-                      embedded
-                      workOrders={workOrders}
-                      customers={rosterCustomers}
-                      technicians={technicians}
-                      systemSettings={systemSettings}
-                      priceCatalog={priceCatalog.catalog}
-                      prefill={ticketPrefill}
-                      onSaveWorkOrder={handleSaveWorkOrder}
-                      onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
-                      onOpenAiAssistant={() => setIsAiAssistantOpen(true)}
-                      onViewRepairTickets={() => {
-                        setTicketPrefill(null);
-                        setActiveTab('intake');
-                      }}
-                      onCancelEdit={handleCancelEdit}
-                      onContinueEditing={(wo) => setTicketPrefill({ editWorkOrder: wo })}
-                    />
+                  <div className="relative w-full max-w-2xl xl:max-w-3xl max-h-[92vh] bg-white rounded-2xl shadow-2xl overflow-y-auto">
+                    {ticketUiV2 ? (
+                      <CreateTicketWizardV2
+                        workOrders={workOrders}
+                        customers={rosterCustomers}
+                        systemSettings={systemSettings}
+                        priceCatalog={priceCatalog.catalog as any}
+                        onSaveWorkOrder={handleSaveWorkOrder}
+                        onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
+                        onViewRepairTickets={() => {
+                          setTicketPrefill(null);
+                          setActiveTab('intake');
+                        }}
+                        onOpenClassicForm={() => setTicketUiV2(false)}
+                      />
+                    ) : (
+                      <CreateTicketSoloPage
+                        embedded
+                        workOrders={workOrders}
+                        customers={rosterCustomers}
+                        technicians={technicians}
+                        systemSettings={systemSettings}
+                        priceCatalog={priceCatalog.catalog}
+                        prefill={ticketPrefill}
+                        onSaveWorkOrder={handleSaveWorkOrder}
+                        onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
+                        onOpenAiAssistant={() => setIsAiAssistantOpen(true)}
+                        onViewRepairTickets={() => {
+                          setTicketPrefill(null);
+                          setActiveTab('intake');
+                        }}
+                        onCancelEdit={handleCancelEdit}
+                        onContinueEditing={(wo) => setTicketPrefill({ editWorkOrder: wo })}
+                      />
+                    )}
                   </div>
                 </div>
               )}
