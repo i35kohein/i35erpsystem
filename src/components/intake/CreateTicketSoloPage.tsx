@@ -895,7 +895,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         </div>
 
         {/* Serial / IMEI Input */}
-        <div className="p-3 bg-surface/80 rounded-xl border border-line space-y-2.5">
+        <div className={`p-3 bg-surface/80 rounded-xl border border-line space-y-2.5 ${wizardMode && wizardStep < 1 ? 'hidden' : ''}`}>
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-2">
             <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2 min-w-0">
               <Smartphone className="w-4 h-4 text-brand shrink-0" />
@@ -1104,7 +1104,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         </div>
 
         {/* STEP 4A (Phase 4): Intake Notes */}
-        <div className="p-3 bg-[#F8F9FA] rounded-xl border border-line-strong space-y-2.5">
+        <div className={`p-3 bg-[#F8F9FA] rounded-xl border border-line-strong space-y-2.5 ${wizardMode && wizardStep < 3 ? 'hidden' : ''}`}>
           <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2 border-b border-line-strong pb-2">
             <span className="px-1.5 h-5 rounded-full bg-brand text-white flex items-center justify-center text-xs font-black">4A</span>
             <span>Intake Notes & Customer Symptoms</span>

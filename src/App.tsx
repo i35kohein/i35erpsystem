@@ -425,7 +425,11 @@ export default function App() {
     const dismissible = options?.dismissible ?? true;
     const workOrderId = options?.workOrderId;
 
-    setToasts((prev) => [...prev, { id, type, title, message, persistent, dismissible, workOrderId }]);
+    // Dedup: identical message+type already visible → skip (prevents toast stacking)
+    setToasts((prev) => {
+      if (prev.some((t) => t.type === type && t.message === message && t.title === title)) return prev;
+      return [...prev, { id, type, title, message, persistent, dismissible, workOrderId }];
+    });
     if (!persistent) {
       setTimeout(() => {
         setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -2633,7 +2637,7 @@ export default function App() {
       <HoverTooltip />
 
       {/* Floating Toast Notification Container */}
-      <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] lg:bottom-6 right-3 sm:right-6 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none">
+      <div className="fixed top-24 right-3 sm:right-6 z-[60] flex flex-col items-end gap-2.5 max-w-sm w-full pointer-events-none">
         <AnimatePresence>
           {toasts.map((toast) => (
             <motion.div

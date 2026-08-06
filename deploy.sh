@@ -24,7 +24,7 @@ node scripts/precompress.mjs
 
 echo "==> [2/4] Uploading to VPS ($HOST:$REMOTE_DIR)..."
 # NOTE: `dist` without trailing slash => lands in $REMOTE_DIR/dist (server expects that layout)
-rsync -az --delete -e "ssh -i $KEY" dist package.json package-lock.json "$HOST:$REMOTE_DIR/"
+rsync -az -e "ssh -i $KEY" dist package.json package-lock.json "$HOST:$REMOTE_DIR/"
 
 echo "==> [3/4] Installing deps + restarting service..."
 # Keep the previous release for instant rollback (rollback.sh swaps dist.prev).
