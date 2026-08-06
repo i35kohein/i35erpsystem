@@ -431,7 +431,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
             <table className="w-full text-left border-collapse">
               <thead className="sticky top-0 z-20 border-b border-line bg-surface font-mono text-[10px] uppercase text-muted shadow-2xs">
                 <tr>
-                  <th className="w-[132px] px-2 py-2 bg-surface">Ticket # & Date</th>
+                  <th className="w-[92px] xl:w-[132px] px-2 py-2 bg-surface">Ticket # & Date</th>
                   <th className="w-[148px] px-2 py-2 bg-surface">Customer & Contact</th>
                   <th className="w-[158px] px-2 py-2 bg-surface">Device & Serial/IMEI</th>
                   <th className="px-2 py-2 bg-surface hidden lg:table-cell">Symptoms / Service</th>
@@ -439,7 +439,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                   <th className="w-[92px] px-2 py-2 bg-surface hidden lg:table-cell">Priority</th>
                   <th className="w-[114px] px-2 py-2 bg-surface">Stage & Status</th>
                   <th className="w-[112px] px-2 py-2 bg-surface">Amount</th>
-                  <th className="w-[44px] px-2 py-2 text-right bg-surface">Detail</th>
+                  <th className="w-[44px] px-2 py-2 text-right bg-surface hidden xl:table-cell">Detail</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line text-xs">
@@ -465,7 +465,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                           </div>
                           <div className="min-w-0">
                             <p className="font-mono text-[11px] font-extrabold leading-snug text-brand">{wo.orderNumber || wo.id}</p>
-                            <p className="mt-0.5 text-[9px] font-medium text-muted" title={createdDateFull}>{createdDate}</p>
+                            <p className="mt-0.5 text-[9px] font-medium text-muted hidden xl:block" title={createdDateFull}>{createdDate}</p>
                           </div>
                         </div>
                       </td>
@@ -524,7 +524,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                       </td>
 
                       {/* Action */}
-                      <td className="px-2 py-2 text-right">
+                      <td className="px-2 py-2 text-right hidden xl:table-cell">
                         <div className="flex items-center justify-end" onClick={(e) => e.stopPropagation()}>
                           <button
                             type="button"

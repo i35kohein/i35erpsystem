@@ -1260,16 +1260,17 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 </div>
               </div>
             ) : (
+              <div className="relative">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead>
+                  <thead className="sticky top-0 z-10">
                     <tr className="border-b border-line text-muted font-bold text-[10px] uppercase tracking-wider bg-[#F8F9FA]">
                       <th className="py-2.5 px-3">Ticket # & Date</th>
                       <th className="py-2.5 px-3">Customer & Contact</th>
                       <th className="py-2.5 px-3">Device & Serial/IMEI</th>
                       <th className="py-2.5 px-3 hidden lg:table-cell">Symptoms / Service</th>
                       <th className="py-2.5 px-3 hidden lg:table-cell">Assigned Tech</th>
-                      <th className="py-2.5 px-3 hidden lg:table-cell">Priority</th>
+                      <th className="py-2.5 px-3 hidden xl:table-cell">Priority</th>
                       <th className="py-2.5 px-3">Stage & Status</th>
                       <th className="py-2.5 px-3">Amount</th>
                       <th className="py-2.5 px-3 text-right">Actions</th>
@@ -1326,7 +1327,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                           </td>
 
                           {/* Priority */}
-                          <td className="py-3 px-3 hidden lg:table-cell">
+                          <td className="py-3 px-3 hidden xl:table-cell">
                             <PriorityBadge priority={wo.priority} />
                           </td>
 
@@ -1378,6 +1379,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     })}
                   </tbody>
                 </table>
+              </div>
+              {/* Right-edge fade on scrollable roster (below xl) */}
+              <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-6 rounded-r-xl bg-gradient-to-l from-white/80 to-transparent xl:hidden" />
               </div>
             )}
           </div>

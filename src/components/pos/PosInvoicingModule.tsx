@@ -606,9 +606,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     part names used to get clipped with no way to reach them on
                     ≤390px phones (audit P1-B). min-w lets it scroll on mobile
                     instead of crushing; desktop is wide enough to fit. */}
+                <div className="relative">
                 <div className="border border-line rounded-xl overflow-x-auto bg-surface/80">
                   <table className="w-full text-left min-w-[520px]">
-                    <thead className="bg-surface text-muted text-[10px] uppercase font-mono border-b border-line">
+                    <thead className="sticky top-0 z-10 bg-surface text-muted text-[10px] uppercase font-mono border-b border-line">
                       <tr>
                         <th className="p-2.5">Item</th>
                         <th className="p-2.5 text-right">Qty</th>
@@ -629,7 +630,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         const hasDiscount = quote && typeof quote.discountPercent === 'number' && quote.discountPercent > 0;
                         return (
                         <tr key={li.id} className={li.partId && !li.isLabor ? 'bg-[#F8FBFF]' : ''}>
-                          <td className="p-2.5 text-ink">
+                          <td className="px-2.5 py-3 text-ink">
                             <div className="space-y-1">
                               <div className="font-medium">{li.description}</div>
                               {li.partId && !li.isLabor && (
@@ -639,11 +640,11 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                               )}
                             </div>
                           </td>
-                          <td className="p-2.5 text-right text-muted">{li.quantity}</td>
-                          <td className="p-2.5 text-right font-mono text-muted">
+                          <td className="px-2.5 py-3 text-right text-muted">{li.quantity}</td>
+                          <td className="px-2.5 py-3 text-right font-mono text-muted">
                             {Number(li.unitPrice || 0).toLocaleString()}
                           </td>
-                          <td className="p-2.5 text-right font-mono text-ink">
+                          <td className="px-2.5 py-3 text-right font-mono text-ink">
                             <div className="inline-flex items-center justify-end gap-2">
                               <span className="text-right">
                                 {hasDiscount && (
@@ -676,6 +677,9 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       })}
                     </tbody>
                   </table>
+                </div>
+                {/* Right-edge fade for the horizontally-scrolling invoice (below xl) */}
+                <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-6 rounded-r-xl bg-gradient-to-l from-white/70 to-transparent xl:hidden" />
                 </div>
 
                 <div className="bg-white border border-line rounded-xl p-3 space-y-2">
