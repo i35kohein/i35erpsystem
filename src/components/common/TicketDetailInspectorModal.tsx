@@ -345,7 +345,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                     }`}
                   >
                     <p className="truncate text-xs font-extrabold text-[var(--text-main)]" title={beforeItem.name}>
-                      <span className="mr-1.5 font-mono text-[10px] text-[var(--text-muted)]">{index + 1}.</span>
+                      <span className="mr-1.5 inline-block w-6 shrink-0 text-right font-mono text-[10px] text-[var(--text-muted)]">{index + 1}.</span>
                       {beforeItem.name}
                     </p>
                     <div className="flex items-center justify-between gap-2">
