@@ -370,13 +370,9 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
       if (next.has(categoryKey)) {
         next.delete(categoryKey);
       } else {
-        next.set(categoryKey, {
-          categoryKey,
-          label,
-          price,
-          warranty,
-          discountPercent: 0,
-        });
+        // Newest selection becomes the Primary Service Slot (move-to-front),
+        // so the card you just tapped is always slot #1.
+        return new Map([[categoryKey, { categoryKey, label, price, warranty, discountPercent: 0 }], ...next.entries()]);
       }
       return next;
     });
