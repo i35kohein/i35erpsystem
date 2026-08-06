@@ -50,9 +50,9 @@ Measured live: 7.5px and 9.5px computed on screen. The floor rules cover only in
 
 ---
 
-## Recommended fix batch (awaiting "fix")
-| # | P | Fix | Effort |
+## Fix status — ALL APPLIED (2026-08-06 ~20:02-20:10, commit `b78f854`, bundle `index-CnWPD-IH.js`)
+| # | P | Fix | Status |
 |---|---|---|---|
 | F3 | P0 | index.css: add `.\text-[7.5px]` / `.\text-[9.5px]` to the screen floor (12px) | 1 line |
-| F1 | P1 | Modal controls → 40px: segment container h-10 + inner h-8, header X h-10 w-10, footer Close/Print h-10 | small |
-| F2 | P1 | Intake + TicketDetailInspectorModal print triggers → h-10 w-10 | small |
+| F1 | P1 | Modal controls → 40px: segment container h-10 (inner h-8 = 32px segmented pattern), header X h-10 w-10, footer Close/Print h-10 | ✅ verified: X/Close/Print 40px |
+| F2 | P1 | Intake + TicketDetailInspectorModal print triggers → h-10 w-10 | ✅ source verified; modal opens via trigger |
