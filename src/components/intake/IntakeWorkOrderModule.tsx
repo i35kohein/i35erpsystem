@@ -374,23 +374,6 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           </div>
 
           <div className="flex items-center space-x-2 flex-wrap">
-            {workOrders.length > 0 && (
-              <button
-                type="button"
-                onClick={() => {
-                  if (window.confirm(`Are you sure you want to remove all ${workOrders.length} tickets?`)) {
-                    onClearAllWorkOrders?.();
-                    setSelectedWorkOrder(null);
-                  }
-                }}
-                className="h-8 px-3 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold rounded-lg transition-all inline-flex items-center space-x-1.5 cursor-pointer shadow-2xs"
-                title="Remove all tickets"
-              >
-                <Trash2 className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-                <span>Clear All ({workOrders.length})</span>
-              </button>
-            )}
-
             {/* Sort By Urgency Toggle */}
             <button
               type="button"

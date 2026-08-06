@@ -507,25 +507,8 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
 
   return (
     <div className="space-y-3">
-      {/* Top Controls Bar (Kanban Pipeline Specific Actions) — header removed:
-          the page title already says "Pipeline", and filter toggles live in the drawer. */}
-      {onClearAllWorkOrders && workOrders.length > 0 && (
-        <div className="flex items-center justify-end rounded-xl border border-line-strong bg-white px-2.5 py-2 text-[11px] shadow-2xs">
-            <button
-              type="button"
-              onClick={() => {
-                if (window.confirm(`Are you sure you want to clear all ${workOrders.length} tickets from the system?`)) {
-                  onClearAllWorkOrders();
-                }
-              }}
-              className="inline-flex h-7 items-center gap-1 rounded-md border border-rose-200 bg-rose-50 px-2 text-[10px] font-bold text-rose-700 shadow-2xs transition-colors hover:bg-rose-100"
-              title="⚠️ Permanently delete ALL tickets from the system (Admin only)"
-            >
-              <Trash2 className="h-3 w-3 shrink-0 text-rose-600" />
-              <span>Delete All Tickets ({workOrders.length})</span>
-            </button>
-        </div>
-      )}
+      {/* Top Controls Bar removed — page title covers the heading, filter toggles
+          live in the drawer, and the bulk-delete action was retired (2026-08-06). */}
 
       {/* Active filter summary chips — one-tap clear (all viewports; wraps on mobile) */}
       <div className="block">
