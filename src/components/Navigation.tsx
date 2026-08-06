@@ -260,7 +260,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                 title={systemSettings?.shopName || 'AppleRepair Pro'}
               >
                 {systemSettings?.shopLogoUrl ? (
-                  <img src={systemSettings.shopLogoUrl} alt="Shop Logo" className="w-full h-full object-contain" />
+                  <img src={systemSettings.shopLogoUrl} alt="Shop Logo" className="logo-chip w-full h-full object-contain" />
                 ) : (
                   <div className="w-full h-full rounded-lg bg-brand flex items-center justify-center text-white shrink-0">
                     <CircleDot className="w-5 h-5" />

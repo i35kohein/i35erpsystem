@@ -600,7 +600,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 <div className="relative">
                 <div className="border border-line rounded-xl overflow-x-auto bg-surface/80">
                   <table className="w-full text-left min-w-[520px]">
-                    <thead className="sticky top-0 z-10 bg-surface text-muted text-xs uppercase font-mono border-b border-line">
+                    <thead className="sticky top-0 z-10 bg-surface text-[#4A4A4F] text-xs uppercase font-mono border-b border-line">
                       <tr>
                         <th className="p-2.5">Item</th>
                         <th className="p-2.5 text-right">Qty</th>
