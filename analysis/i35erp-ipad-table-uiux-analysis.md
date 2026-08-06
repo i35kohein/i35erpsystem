@@ -93,3 +93,15 @@ Method: live measurements via CDP at iPad widths (768×1024 portrait, 1024×1024
 ## Files touched in analysis
 - Screenshots: `~/.openclaw/media/outbound/e90ef1bb…png` (intake @768)
 - Audit scripts: `/tmp/ipad-table-audit.mjs`, `/tmp/ipad-audit3.mjs`
+
+## Fix status — ALL APPLIED (2026-08-06 ~13:00, commit `f09e680`, bundle `index-_UGMf8F3.js`, deployed + pushed)
+
+| # | Fix | Change | Verified live (iPad mode) |
+|---|-----|--------|---------------------------|
+| 1 | P1 sticky headers | Dashboard roster thead `sticky top-0 z-10`; POS invoice thead `sticky top-0 z-10 bg-surface` (both are own-scroll-container wrappers, so sticky anchors below the topbar) | ✅ dashboard + POS sticky true |
+| 2 | P1 intake @1024 micro-scroll | Detail column + relative date sub-line `hidden xl:table-cell`/`hidden xl:block`; Ticket# th `w-[92px] xl:w-[132px]` | ✅ tScrollW 886 = wrapW 886, no scroll (was 936 vs 886); rowH 84→67px |
+| 3 | P2 dashboard Priority | `hidden lg:table-cell` → `hidden xl:table-cell` (th + td) — frees width at 1024–1279 | ✅ |
+| 4 | P2 scroll affordance | CSS right-edge fade div (`gradient-to-l from-white/80`) on dashboard roster + POS wrappers, `xl:hidden` | ✅ fade present on both |
+| 5 | P3 POS touch rows | invoice tds `p-2.5` → `px-2.5 py-3` | ✅ rowH 37→41px |
+
+Not changed (intentional): inventory stock table (already fits + sticky at all iPad widths; line-clamp polish = optional future), suppliers/finance/etc card layouts (consistent; toggle = feature decision).
