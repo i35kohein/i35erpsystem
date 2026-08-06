@@ -460,11 +460,11 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     }`}
                   >
                     <div className="flex justify-between items-center gap-1">
-                      <span className="font-mono font-bold text-brand flex items-center gap-1">
+                      <span className="font-mono font-bold text-brand flex items-center gap-1 min-w-0 truncate">
                         {isSelected && <Check className="w-3 h-3 shrink-0" />}
                         {wo.orderNumber}
                       </span>
-                      <div className="flex items-center space-x-1">
+                      <div className="flex items-center space-x-1 shrink-0">
                         <StatusChip status={wo.status} />
                         <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md border ${
                           wo.isPaid ? 'bg-[#EAF8ED] text-[#28A745] border-success/20' : 'bg-[#FFF4E5] text-[#D97706] border-[#FF9F0A]/20'

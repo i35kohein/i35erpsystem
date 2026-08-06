@@ -2675,7 +2675,7 @@ export default function App() {
                 {toast.type === 'info' && <Info className="w-4 h-4 text-blue-400" />}
               </div>
               <div className="flex-1 pr-2">
-                {toast.title && <div className="font-bold text-[13px] leading-tight mb-0.5">{toast.title}</div>}
+                {toast.title && <div className="font-bold text-sm leading-tight mb-0.5">{toast.title}</div>}
                 <div className="text-[11px] text-slate-300 leading-snug">{toast.message}</div>
                 {toast.persistent && (
                   <div className="mt-2 flex items-center gap-1.5 text-[10px] text-rose-300 font-extrabold bg-rose-950/70 px-2 py-1 rounded-lg border border-rose-500/40">

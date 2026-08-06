@@ -825,6 +825,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       </div>
 
 {/* Top Dashboard Navigation Subtabs Bar */}
+      <div className="relative">
       <div role="tablist" aria-label="Dashboard sections" className="bg-surface p-1.5 rounded-2xl border border-line flex items-center space-x-1.5 overflow-x-auto no-scrollbar w-full text-xs shadow-2xs">
         {/* Subtab 1: Status Queue */}
         <button
@@ -1002,6 +1003,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </span>
           )}
         </button>
+      </div>
+      {/* Right-edge fade on the scrollable subtab bar (below xl) */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-6 rounded-r-xl bg-gradient-to-l from-white/80 to-transparent xl:hidden" />
       </div>
 
       {/* Background Warranty Check Alert Banner on Dashboard */}

@@ -353,7 +353,7 @@ button {
 .basic-ui th {
   background: var(--border-subtle) !important;
   color: var(--text-secondary) !important;
-  font-size: 11px !important;
+  font-size: 12px !important;
   font-weight: 700 !important;
   letter-spacing: 0.02em !important;
 }
@@ -1008,9 +1008,9 @@ html[data-theme] :is(
    Print styles are exempt so receipts/tags keep compact layouts.
    ========================================================================== */
 @media screen {
-  .text-\[7px\] { font-size: 11px !important; line-height: 1.35 !important; }
-  .text-\[8px\] { font-size: 11px !important; line-height: 1.35 !important; }
-  .text-\[9px\] { font-size: 11px !important; line-height: 1.35 !important; }
+  .text-\[7px\] { font-size: 12px !important; line-height: 1.35 !important; }
+  .text-\[8px\] { font-size: 12px !important; line-height: 1.35 !important; }
+  .text-\[9px\] { font-size: 12px !important; line-height: 1.35 !important; }
   .text-\[10px\] { font-size: 12px !important; line-height: 1.4 !important; }
   .text-\[11px\] { font-size: 12px !important; line-height: 1.4 !important; }
   /* Important variants must obey the same floor (e.g. !text-[10px] dropdown triggers).

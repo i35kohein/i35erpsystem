@@ -1051,7 +1051,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                         <CheckSquare className="w-4 h-4" />
                       </div>
                       <div>
-                        <span className="block font-extrabold text-ink text-[13px]">{repair.name}</span>
+                        <span className="block font-extrabold text-ink text-sm">{repair.name}</span>
                         <span className="block text-muted text-[11px] font-medium">Base Price: {repair.basePrice.toLocaleString()} MMK</span>
                       </div>
                     </div>

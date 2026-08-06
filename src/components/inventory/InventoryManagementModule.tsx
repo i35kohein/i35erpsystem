@@ -1542,7 +1542,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                           <Cpu className="h-3.5 w-3.5" />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-[13px] font-extrabold leading-snug text-ink">{part.name}</p>
+                          <p className="text-sm font-extrabold leading-snug text-ink">{part.name}</p>
                           <p className="mt-0.5 font-mono text-[10px] font-medium text-muted">SKU {part.sku}</p>
                         </div>
                       </div>
@@ -1591,7 +1591,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     ) : (
                     <div className="space-y-1.5 rounded-xl border border-[#D8E5ED] bg-[#F8FBFD] p-2.5">
                       <div className="flex items-center justify-between">
-                        <span className={`font-mono text-[15px] font-black tracking-wide ${isOut ? 'text-red-600' : isLow ? 'text-amber-600' : 'text-ink'}`}>
+                        <span className={`font-mono text-base font-black tracking-wide ${isOut ? 'text-red-600' : isLow ? 'text-amber-600' : 'text-ink'}`}>
                           {part.quantityInStock} <span className="text-[10px] font-normal text-muted">units</span>
                         </span>
                         {isOut ? (
@@ -1756,13 +1756,13 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                             <div className="grid grid-cols-1 gap-1" onFocus={() => beginInlineEdit(part)}>
                               <label className="flex min-w-0 flex-col gap-0.5 text-[9px] font-bold uppercase tracking-wide text-muted">
                                 <span>Stock</span>
-                                <input aria-label={`Stock quantity for ${part.name}`} type="text" inputMode="numeric" value={inlineDrafts[part.id]?.quantityInStock ?? String(part.quantityInStock)} onWheel={(e) => e.currentTarget.blur()} onChange={(e) => setInlineDrafts((current) => ({ ...current, [part.id]: { ...current[part.id], quantityInStock: e.target.value } }))} className="w-full min-w-0 rounded-md border border-line-strong bg-white px-2 py-1.5 text-[14px] font-semibold font-sans tabular-nums tracking-normal text-[#111111]" />
+                                <input aria-label={`Stock quantity for ${part.name}`} type="text" inputMode="numeric" value={inlineDrafts[part.id]?.quantityInStock ?? String(part.quantityInStock)} onWheel={(e) => e.currentTarget.blur()} onChange={(e) => setInlineDrafts((current) => ({ ...current, [part.id]: { ...current[part.id], quantityInStock: e.target.value } }))} className="w-full min-w-0 rounded-md border border-line-strong bg-white px-2 py-1.5 text-sm font-semibold font-sans tabular-nums tracking-normal text-[#111111]" />
                               </label>
                             </div>
                           ) : null}
                           {!inlineEditMode && <div className="space-y-1">
                             <div className="flex items-center justify-between">
-                              <span className={`font-black text-[13px] font-mono tracking-wide ${
+                              <span className={`font-black text-sm font-mono tracking-wide ${
                                 isOut ? 'text-red-600' : isLow ? 'text-amber-600' : 'text-ink'
                               }`}>
                                 {(inlineEditMode ? editValue('quantityInStock', part.quantityInStock) : part.quantityInStock)} <span className="text-[10px] font-normal text-muted">units</span>
@@ -1795,16 +1795,16 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         </td>
 
                         {/* Selling price only — profit belongs in the Profit tab. */}
-                        <td className="w-[176px] min-w-[176px] pl-3 pr-1.5 py-2 font-sans text-[14px] font-semibold text-[#16A34A] whitespace-nowrap">
+                        <td className="w-[176px] min-w-[176px] pl-3 pr-1.5 py-2 font-sans text-sm font-semibold text-[#16A34A] whitespace-nowrap">
                           {inlineEditMode ? (
                             <div className="grid grid-cols-2 gap-2">
                               <label className="flex min-w-0 flex-col gap-0.5 text-[9px] font-bold uppercase tracking-wide text-muted">
                                 <span>Purchase</span>
-                                <input aria-label={`Purchase price for ${part.name}`} type="text" inputMode="numeric" value={inlineDrafts[part.id]?.costPrice ?? String(part.costPrice)} onWheel={(e) => e.currentTarget.blur()} onFocus={() => beginInlineEdit(part)} onChange={(e) => setInlineDrafts((current) => ({ ...current, [part.id]: { ...current[part.id], costPrice: e.target.value } }))} className="w-full min-w-0 rounded-md border border-line-strong bg-white px-2 py-1.5 text-[14px] font-semibold font-sans tabular-nums tracking-normal text-[#111111]" />
+                                <input aria-label={`Purchase price for ${part.name}`} type="text" inputMode="numeric" value={inlineDrafts[part.id]?.costPrice ?? String(part.costPrice)} onWheel={(e) => e.currentTarget.blur()} onFocus={() => beginInlineEdit(part)} onChange={(e) => setInlineDrafts((current) => ({ ...current, [part.id]: { ...current[part.id], costPrice: e.target.value } }))} className="w-full min-w-0 rounded-md border border-line-strong bg-white px-2 py-1.5 text-sm font-semibold font-sans tabular-nums tracking-normal text-[#111111]" />
                               </label>
                               <label className="flex min-w-0 flex-col gap-0.5 text-[9px] font-bold uppercase tracking-wide text-muted">
                                 <span>Selling</span>
-                                <input aria-label={`Selling price for ${part.name}`} type="text" inputMode="numeric" value={inlineDrafts[part.id]?.sellingPrice ?? String(part.sellingPrice)} onWheel={(e) => e.currentTarget.blur()} onChange={(e) => setInlineDrafts((current) => ({ ...current, [part.id]: { ...current[part.id], sellingPrice: e.target.value } }))} className="w-full min-w-0 rounded-md border border-line-strong bg-white px-2 py-1.5 text-[14px] font-semibold font-sans tabular-nums tracking-normal text-[#111111]" />
+                                <input aria-label={`Selling price for ${part.name}`} type="text" inputMode="numeric" value={inlineDrafts[part.id]?.sellingPrice ?? String(part.sellingPrice)} onWheel={(e) => e.currentTarget.blur()} onChange={(e) => setInlineDrafts((current) => ({ ...current, [part.id]: { ...current[part.id], sellingPrice: e.target.value } }))} className="w-full min-w-0 rounded-md border border-line-strong bg-white px-2 py-1.5 text-sm font-semibold font-sans tabular-nums tracking-normal text-[#111111]" />
                               </label>
                             </div>
                           ) : `${part.sellingPrice.toLocaleString()} MMK`}
@@ -1844,7 +1844,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                                   badge: `${supplier.avgRmaTurnaroundDays}d`,
                                 }))}
                                 className="w-full"
-                                buttonClassName="w-full rounded-md bg-white px-2 py-1.5 text-left text-[14px] font-semibold text-ink"
+                                buttonClassName="w-full rounded-md bg-white px-2 py-1.5 text-left text-sm font-semibold text-ink"
                                 menuAlign="left"
                               />
                             </div>
@@ -1856,7 +1856,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                           {inlineEditMode ? (
                             <div className="flex min-w-0 flex-col gap-0.5 text-[9px] font-bold uppercase tracking-wide text-muted">
                               <span>Bin</span>
-                              <select aria-label={`Bin for ${part.name}`} value={editValue('locationBin', part.locationBin) as string} onFocus={() => beginInlineEdit(part)} onChange={(e) => setInlineDrafts((current) => ({ ...current, [part.id]: { ...current[part.id], locationBin: e.target.value } }))} className="w-full min-w-0 rounded-md border border-line-strong bg-white px-2 py-1.5 text-[14px] font-semibold font-sans tabular-nums tracking-normal text-[#111111]"><option value="">Choose bin</option>{existingLocationBins.map((bin) => <option key={bin} value={bin}>{bin}</option>)}</select>
+                              <select aria-label={`Bin for ${part.name}`} value={editValue('locationBin', part.locationBin) as string} onFocus={() => beginInlineEdit(part)} onChange={(e) => setInlineDrafts((current) => ({ ...current, [part.id]: { ...current[part.id], locationBin: e.target.value } }))} className="w-full min-w-0 rounded-md border border-line-strong bg-white px-2 py-1.5 text-sm font-semibold font-sans tabular-nums tracking-normal text-[#111111]"><option value="">Choose bin</option>{existingLocationBins.map((bin) => <option key={bin} value={bin}>{bin}</option>)}</select>
                             </div>
                           ) : part.locationBin ? (
                             <div className="flex min-w-0 flex-col gap-0.5 text-[9px] font-bold uppercase tracking-wide text-muted">
@@ -1959,7 +1959,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   <div key={part.id} className="space-y-2.5 rounded-2xl border border-line bg-white p-4 text-xs shadow-xs">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <p className="text-[13px] font-extrabold leading-snug text-ink break-words">{part.name}</p>
+                        <p className="text-sm font-extrabold leading-snug text-ink break-words">{part.name}</p>
                         <p className="mt-0.5 font-mono text-[10px] font-medium text-muted">SKU {part.sku}</p>
                       </div>
                       <button
@@ -1975,15 +1975,15 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     <div className="grid grid-cols-3 gap-2 rounded-xl border border-[#D8E5ED] bg-[#F8FBFD] p-3">
                       <div>
                         <p className="text-[9px] font-extrabold uppercase tracking-wider text-muted">Cost</p>
-                        <p className="mt-0.5 font-mono text-[12px] font-bold text-faint break-words">{part.costPrice.toLocaleString()}</p>
+                        <p className="mt-0.5 font-mono text-xs font-bold text-faint break-words">{part.costPrice.toLocaleString()}</p>
                       </div>
                       <div>
                         <p className="text-[9px] font-extrabold uppercase tracking-wider text-muted">Selling</p>
-                        <p className="mt-0.5 font-mono text-[12px] font-bold text-[#16A34A] break-words">{part.sellingPrice.toLocaleString()}</p>
+                        <p className="mt-0.5 font-mono text-xs font-bold text-[#16A34A] break-words">{part.sellingPrice.toLocaleString()}</p>
                       </div>
                       <div>
                         <p className="text-[9px] font-extrabold uppercase tracking-wider text-muted">Profit</p>
-                        <p className={`mt-0.5 font-mono text-[12px] font-black break-words ${profit >= 0 ? 'text-brand' : 'text-rose-600'}`}>{profit >= 0 ? '+' : ''}{profit.toLocaleString()}</p>
+                        <p className={`mt-0.5 font-mono text-xs font-black break-words ${profit >= 0 ? 'text-brand' : 'text-rose-600'}`}>{profit >= 0 ? '+' : ''}{profit.toLocaleString()}</p>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
@@ -3586,7 +3586,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         </div>
                         <div className="shrink-0 text-right">
                           <p className="text-[8px] font-bold text-muted">Price</p>
-                          <p className="font-mono text-[16px] font-black leading-none text-ink">{Number(part.sellingPrice || 0).toLocaleString()} MMK</p>
+                          <p className="font-mono text-base font-black leading-none text-ink">{Number(part.sellingPrice || 0).toLocaleString()} MMK</p>
                         </div>
                       </div>
                       <div className="tag-barcode mt-1.5 border-t border-dashed border-[#C7C7CC] pt-1.5">

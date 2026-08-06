@@ -528,7 +528,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                 <span className="w-5 h-5 rounded-md bg-brand/10 text-brand flex items-center justify-center font-extrabold text-[10px] shrink-0">
                                   {idx + 1}
                                 </span>
-                                <h4 className="font-extrabold text-[13px] text-ink leading-snug truncate min-w-0">{item.label}</h4>
+                                <h4 className="font-extrabold text-sm text-ink leading-snug truncate min-w-0">{item.label}</h4>
                                 <span className="inline-flex items-center space-x-0.5 text-[8px] font-extrabold text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded-full border border-emerald-200 shrink-0">
                                   <ShieldCheck className="w-2 h-2 text-emerald-600 shrink-0" />
                                   <span>{item.warranty}</span>
@@ -878,7 +878,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[8px] font-extrabold uppercase tracking-widest text-brand leading-none">Active Device</p>
-            <p className="text-[12px] font-black text-ink truncate leading-tight mt-0.5">{selectedDevice}</p>
+            <p className="text-xs font-black text-ink truncate leading-tight mt-0.5">{selectedDevice}</p>
           </div>
           <span className="text-[9px] font-bold text-muted shrink-0 whitespace-nowrap">
             {availableRepairItems.filter((i) => i.price && i.price > 0).length} services
