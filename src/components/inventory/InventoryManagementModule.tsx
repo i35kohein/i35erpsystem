@@ -117,6 +117,10 @@ interface InventoryManagementModuleProps {
   setStockView?: (v: 'table' | 'cards') => void;
   isTagsPrintOpen?: boolean;
   setIsTagsPrintOpen?: (v: boolean) => void;
+  scanQuery?: string;
+  setScanQuery?: (q: string) => void;
+  /** iPad: the barcode input lives in the navbar — module registers its submit handler here. */
+  onRegisterScanHandler?: (fn: () => void) => void;
   showAddModal?: boolean;
   setShowAddModal?: (s: boolean) => void;
 }
@@ -182,6 +186,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   setStockView: propSetStockView,
   isTagsPrintOpen: propIsTagsPrintOpen,
   setIsTagsPrintOpen: propSetIsTagsPrintOpen,
+  scanQuery: propScanQuery,
+  setScanQuery: propSetScanQuery,
+  onRegisterScanHandler,
   showAddModal: propShowAddModal,
   setShowAddModal: propSetShowAddModal,
 }) => {
@@ -375,7 +382,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   // Edit Part Modal state
   const [editingPart, setEditingPart] = useState<PartItem | null>(null);
   const [selectedPartForDetails, setSelectedPartForDetails] = useState<PartItem | null>(null);
-  const [scanQuery, setScanQuery] = useState('');
+  const [localScanQuery, setScanQueryLocal] = useState('');
+  const scanQuery = propScanQuery !== undefined ? propScanQuery : localScanQuery;
+  const setScanQuery = propSetScanQuery || setScanQueryLocal;
   const scanInputRef = useRef<HTMLInputElement | null>(null);
 
   // Column sorting (stock table)
@@ -463,6 +472,11 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     // Keep focus so the next scan lands in the same box.
     requestAnimationFrame(() => scanInputRef.current?.focus());
   };
+
+  // iPad: navbar owns the barcode input — keep the module's submit handler registered.
+  useEffect(() => {
+    onRegisterScanHandler?.(handleScanSubmit);
+  });
   const [isDeviceModelChooserOpen, setIsDeviceModelChooserOpen] = useState(false);
   const [isLocationBinMenuOpen, setIsLocationBinMenuOpen] = useState(false);
   const [isEditLocationBinMenuOpen, setIsEditLocationBinMenuOpen] = useState(false);
@@ -1361,8 +1375,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       {/* VIEW MODE 1: STOCK TABLE */}
       {viewMode === 'stock' && (
         <>
-        {/* Scan + search bar — barcode scanners type SKU + Enter (exact lookup);
-            typing also live-filters the list (search by name/SKU/category) */}
+        {/* Scan + search bar — iPad: lives in the navbar (topbar) instead */}
+        {!isIpad && (
         <div className="flex items-center gap-2 rounded-xl border border-brand/25 bg-blue-50/50 px-3 py-2">
           <ScanLine className="h-4 w-4 shrink-0 text-brand" />
           <input
@@ -1402,6 +1416,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             Lookup
           </button>
         </div>
+        )}
 
         {/* Bulk actions bar — appears when parts are selected (stock table only) */}
         {selectedPartIds.size > 0 && !inlineEditMode && (

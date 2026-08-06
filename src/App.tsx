@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo, lazy, Suspense } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Sparkles, Plus, CircleDot, Search, Filter, Calculator, Folder, Settings, Download, Database, ExternalLink, ClipboardList, Kanban, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, ChevronDown, PhoneCall, Truck, Boxes, CreditCard, Users, DollarSign, LayoutDashboard, Timer, MoreHorizontal, SlidersHorizontal, Eye, Stethoscope, Edit2, List, LayoutGrid, Printer, Smartphone, Layers } from 'lucide-react';
+import { Sparkles, Plus, CircleDot, Search, Filter, Calculator, Folder, Settings, Download, Database, ExternalLink, ClipboardList, Kanban, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, ChevronDown, PhoneCall, Truck, Boxes, CreditCard, Users, DollarSign, LayoutDashboard, Timer, MoreHorizontal, SlidersHorizontal, Eye, Stethoscope, Edit2, List, LayoutGrid, Printer, Smartphone, Layers, ScanLine } from 'lucide-react';
 import { subscribeToCollection, fetchCloudCollection, saveDocument, saveBatchDocuments, deleteDocument, clearCollection } from './lib/supabase';
 import { setActiveUserId, notifyAccountChanged } from './utils/accountSettings';
 
@@ -137,6 +137,8 @@ export default function App() {
   const [inventoryEditMode, setInventoryEditMode] = useState(false);
   const [inventoryStockView, setInventoryStockView] = useState<'table' | 'cards'>('table');
   const [inventoryTagsPrintOpen, setInventoryTagsPrintOpen] = useState(false);
+  const [inventoryScanQuery, setInventoryScanQuery] = useState('');
+  const inventoryScanSubmitRef = useRef<(() => void) | null>(null);
   const [customerTypeFilter, setCustomerTypeFilter] = useState<string>('ALL');
   const [dateFilter, setDateFilter] = useState<DateFilterState>({ preset: 'all' });
   const [showBottlenecksOnly, setShowBottlenecksOnly] = useState<boolean>(false);
@@ -2117,6 +2119,37 @@ export default function App() {
             {/* Contextual Action Button */}
             {activeTab === 'inventory' ? (
               <>
+              {/* Barcode scan — iPad navbar (module bar hidden on iPad) */}
+              {isIpad && (
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <div className="relative">
+                    <ScanLine className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-brand" />
+                    <input
+                      value={inventoryScanQuery}
+                      onChange={(e) => {
+                        setInventoryScanQuery(e.target.value);
+                        setSearchQuery(e.target.value);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          inventoryScanSubmitRef.current?.();
+                        }
+                      }}
+                      placeholder="Scan barcode..."
+                      autoComplete="off"
+                      className="h-9 w-32 xl:w-40 rounded-lg border border-line bg-white pl-8 pr-2 font-mono text-xs text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => inventoryScanSubmitRef.current?.()}
+                    className="h-9 rounded-lg bg-brand px-2.5 text-[11px] font-extrabold text-white transition hover:bg-brand-deep shrink-0"
+                  >
+                    Lookup
+                  </button>
+                </div>
+              )}
               {/* Model / Category / Tier filter icons — iPad navbar quick access */}
               {isIpad && (
                 <div className="flex items-center gap-1.5 shrink-0">
@@ -2333,6 +2366,9 @@ export default function App() {
                   setStockView={setInventoryStockView}
                   isTagsPrintOpen={inventoryTagsPrintOpen}
                   setIsTagsPrintOpen={setInventoryTagsPrintOpen}
+                  scanQuery={inventoryScanQuery}
+                  setScanQuery={setInventoryScanQuery}
+                  onRegisterScanHandler={(fn) => { inventoryScanSubmitRef.current = fn; }}
                   showAddModal={inventoryAddModalOpen}
                   setShowAddModal={setInventoryAddModalOpen}
                 />
