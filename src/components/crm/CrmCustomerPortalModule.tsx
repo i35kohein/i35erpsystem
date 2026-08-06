@@ -232,7 +232,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
             <span className="hidden sm:inline">Customer Relationship Management & Self-Service Portal</span>
             <span className="sm:hidden truncate">Customer & Staff Portal</span>
           </h1>
-          <p className="hidden sm:block text-xs text-muted">Classify accounts (Retail, B2B, Wholesale) and simulate customer tracking portal</p>
+          <p className="hidden sm:block text-xs text-muted">Classify accounts (Retail, B2B, Wholesale).</p>
         </div>
 
         <div className="flex items-center gap-1 overflow-x-auto rounded-lg border border-line bg-surface p-1 text-xs no-scrollbar">

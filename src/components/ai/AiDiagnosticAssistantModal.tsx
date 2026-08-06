@@ -536,7 +536,7 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
               <Send className="w-4 h-4" />
             </Button>
           </div>
-          <p className="mt-1.5 text-xs text-[var(--text-muted)] text-center">Enter to send · Shift + Enter for a new line · Confirm critical decisions before acting.</p>
+          <p className="mt-1.5 text-xs text-[var(--text-muted)] text-center">Enter sends · Shift+Enter new line.</p>
         </form>
       </aside>
   );

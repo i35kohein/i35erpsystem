@@ -1070,7 +1070,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     {filteredWorkOrders.length} <span className="hidden md:inline">Total Work Orders</span><span className="md:hidden">Orders</span>
                   </span>
                 </div>
-                <p className="text-xs text-muted">High-level stage tracking, bottlenecks, and active repair distribution</p>
+                <p className="text-xs text-muted">Stage tracking, bottlenecks, active repairs</p>
               </div>
 
               <div className="flex items-center space-x-2">
@@ -1143,7 +1143,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     </span>
                   )}
                 </div>
-                <p className="hidden sm:block text-xs text-muted">Read-only analytic ticket roster filtered by repair stage, technician, and priority</p>
+                <p className="hidden sm:block text-xs text-muted">Analytic roster filtered by stage, tech, priority</p>
               </div>
             </div>
 
@@ -1563,15 +1563,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </div>
 
             {/* Preview note — full module has stock/profit/matrix views */}
-            <p className="text-xs text-muted -mt-1">
-              Quick glance — full stock, profit & matrix views live in the Parts Inventory module.
-            </p>
+            <p className="text-xs text-muted -mt-1">Quick stock/profit glance — full views in Inventory.</p>
 
             {repairLowStockParts.length === 0 ? (
               <div className="p-8 text-center text-xs text-success bg-[#EAF8ED] border border-success/20 rounded-xl space-y-1">
                 <CheckCircle2 className="w-6 h-6 mx-auto" />
                 <p className="font-extrabold text-sm text-ink">All Repair Components In Stock</p>
-                <p className="text-muted">No display, battery, or logic board micro-soldering parts are currently low.</p>
+                <p className="text-muted">No parts currently low on stock.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

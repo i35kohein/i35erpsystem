@@ -423,9 +423,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
                     <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 animate-pulse" />
                     <span>Initial Diagnostic Alert:</span>
                   </div>
-                  <p className="text-amber-900 leading-tight">
-                    Initial 21-point diagnostic inspection has not been completed for this device.
-                  </p>
+                  <p className="text-amber-900 leading-tight">Initial 21-point diagnostic not completed.</p>
                 </div>
               )}
               {targetStatus === 'Finished' && !checkIsAfterDiagnosticCompleted(workOrder) && (
@@ -434,9 +432,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
                     <AlertCircle className="w-3.5 h-3.5 text-rose-600 shrink-0 animate-pulse" />
                     <span>Finished Device Diagnostic Alert:</span>
                   </div>
-                  <p className="text-rose-900 leading-tight">
-                    This ticket is being marked as Finished, but the post-repair diagnostic test has not been completed.
-                  </p>
+                  <p className="text-rose-900 leading-tight">Marking Finished without post-repair diagnostic.</p>
                 </div>
               )}
               {targetStatus === 'Taken Out' && (
@@ -654,9 +650,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
         <div className="p-8 text-center text-muted bg-[#F8F9FA] rounded-2xl border border-dashed border-line">
           <Search className="w-8 h-8 text-muted/40 mx-auto mb-2" />
           <p className="font-extrabold text-xs text-ink">No Status Transition Events Found</p>
-          <p className="text-xs text-muted mt-0.5">
-            Try adjusting search keywords or selecting a different filter option above.
-          </p>
+          <p className="text-xs text-muted mt-0.5">Adjust keywords or filters.</p>
         </div>
       )}
     </div>

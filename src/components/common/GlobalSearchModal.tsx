@@ -132,7 +132,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
 
         <div ref={listRef} className="max-h-[52vh] overflow-y-auto p-2">
           {query.trim().length < 2 && (
-            <p className="px-3 py-8 text-center text-xs text-muted">Type at least 2 characters — search covers tickets, parts & customers.</p>
+            <p className="px-3 py-8 text-center text-xs text-muted">Type 2+ characters — searches tickets, parts, customers.</p>
           )}
           {query.trim().length >= 2 && results.length === 0 && (
             <p className="px-3 py-8 text-center text-xs text-muted">No matches for “{query}”.</p>
