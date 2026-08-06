@@ -1015,14 +1015,15 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         <span>{selectedMethodConfig.name} - Account Transfer Details</span>
                       </span>
                       {selectedMethodConfig.accountNumber && (
-                        <button
+                        <Button
                           type="button"
                           onClick={() => {
                             navigator.clipboard.writeText(selectedMethodConfig.accountNumber || '');
                             setCopiedAccount(true);
                             setTimeout(() => setCopiedAccount(false), 2000);
                           }}
-                          className="px-2 py-1 bg-white hover:bg-blue-100 text-brand font-bold rounded-lg border border-blue-200 transition-all flex items-center space-x-1 cursor-pointer"
+                          variant="outline"
+                          className="px-2 py-1 bg-white hover:bg-blue-100 text-brand border border-blue-200"
                         >
                           {copiedAccount ? (
                             <>
@@ -1035,7 +1036,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                               <span className="text-xs">Copy Number</span>
                             </>
                           )}
-                        </button>
+                        </Button>
                       )}
                     </div>
 
@@ -1070,18 +1071,19 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         {[selectedWo.totalAmount, 50000, 100000, 200000, 500000]
                           .filter((v, i, arr) => arr.indexOf(v) === i)
                           .map((amt) => (
-                            <button
+                            <Button
                               key={amt}
                               type="button"
                               onClick={() => setCashTendered(amt)}
-                              className={`h-10 px-2 rounded-lg border text-xs font-extrabold transition-all cursor-pointer ${
+                              variant="outline"
+                              className={`h-10 px-2 ${
                                 cashTendered === amt
                                   ? 'bg-brand text-white border-brand'
                                   : 'bg-white text-ink border-line hover:bg-brand-soft'
                               }`}
                             >
                               {amt === selectedWo.totalAmount ? 'Exact' : amt.toLocaleString()}
-                            </button>
+                            </Button>
                           ))}
                       </div>
                     </div>
@@ -1097,7 +1099,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     {/* On-screen numpad — cashier speed on phones */}
                     <div className="grid grid-cols-3 gap-1.5 md:hidden pt-0.5">
                       {['1', '2', '3', '4', '5', '6', '7', '8', '9', '00', '0', '⌫'].map((key) => (
-                        <button
+                        <Button
                           key={key}
                           type="button"
                           onClick={() => {
@@ -1107,11 +1109,12 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                               setCashTendered(Number(String(cashTendered || '') + key) || 0);
                             }
                           }}
-                          className="h-11 rounded-xl border border-line bg-white font-mono text-sm font-black text-ink hover:bg-brand-soft hover:border-brand transition-colors active:scale-95 cursor-pointer"
+                          variant="outline"
+                          className="h-11 font-mono text-sm font-black hover:bg-brand-soft hover:border-brand"
                           aria-label={`Numpad ${key}`}
                         >
                           {key}
-                        </button>
+                        </Button>
                       ))}
                     </div>
                     {cashTendered > 0 && cashTendered < selectedWo.totalAmount && (
@@ -1227,16 +1230,17 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 </p>
               )}
             </div>
-            <button
+            <Button
               type="button"
               onClick={() => setIsConfirmOpen(true)}
               disabled={isProcessingPayment}
-              className="flex-1 max-w-[220px] py-3 rounded-xl bg-success hover:bg-[#30B753] text-white font-extrabold text-xs shadow-xs transition-all flex items-center justify-center space-x-1.5 cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success/40 focus-visible:ring-offset-2"
+              variant="success"
+              className="flex-1 max-w-[220px] py-3 hover:bg-[#30B753]"
             >
               <CreditCard className="w-4 h-4 shrink-0" />
               <span className="truncate hidden sm:inline">Pay & Print Receipt</span>
               <span className="sm:hidden">Pay</span>
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -1250,14 +1254,16 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 <ShieldCheck className="w-5 h-5 text-success" />
                 <h3 className="font-extrabold text-sm text-ink">Confirm Payment</h3>
               </div>
-              <button
+              <Button
                 type="button"
                 onClick={() => setIsConfirmOpen(false)}
-                className="text-muted hover:text-ink cursor-pointer"
+                variant="iconGhost"
+                size="iconSm"
+                className="text-muted hover:text-ink"
                 aria-label="Close confirmation"
               >
                 <XCircle className="w-4 h-4" />
-              </button>
+              </Button>
             </div>
 
             <div className="space-y-2 text-xs">

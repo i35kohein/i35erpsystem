@@ -362,9 +362,9 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
       {/* Main Completed Tickets List */}
       <div className="bg-white border border-line rounded-2xl shadow-2xs overflow-hidden">
         <div className="px-5 py-3.5 border-b border-line flex items-center justify-between bg-[#FAFAFC]">
-          <h3 className="text-xs font-extrabold text-ink uppercase tracking-wider">
+          <h2 className="text-xs font-extrabold text-ink uppercase tracking-wider">
             Devices Due for Follow-Up ({filteredWorkOrders.length})
-          </h3>
+          </h2>
           <span className="text-xs text-muted font-semibold">
             Click 'Log Follow-Up' to record customer status
           </span>

@@ -70,6 +70,7 @@ import { ActiveFilterChips } from './components/common/ActiveFilterChips';
 import { DrawerSelect } from './components/common/DrawerSelect';
 import { checkIsBeforeDiagnosticNeeded, checkIsAfterDiagnosticNeeded, checkIsDiagnosticCompleted, checkIsBeforeDiagnosticCompleted, checkIsAfterDiagnosticCompleted } from './utils/diagnosticUtils';
 import { CustomDropdownMenu } from './components/common/CustomDropdownMenu';
+import { Button } from './components/ui';
 import { ModuleLoadingSkeleton } from './components/common/ModuleLoadingSkeleton';
 import { useLanguage } from './context/LanguageContext';
 import { Navigation } from './components/Navigation';
@@ -668,7 +669,7 @@ export default function App() {
         )}
         {tab === 'pipeline' && (
           <>
-          <button
+          <Button
             type="button"
             onClick={() => setShowBottlenecksOnly(!showBottlenecksOnly)}
             className={`${rowCls} ${showBottlenecksOnly ? 'bg-red-500 text-white border-red-600 shadow-2xs' : 'bg-white text-ink border-line hover:bg-slate-100'}`}
@@ -678,9 +679,9 @@ export default function App() {
               Bottlenecks (&gt;48h)
             </span>
             <span className={`text-xs ${showBottlenecksOnly ? 'text-white/80' : 'text-muted'}`}>{showBottlenecksOnly ? 'On' : 'Off'}</span>
-          </button>
+          </Button>
 
-          <button
+          <Button
             type="button"
             onClick={() => setShowAllStages(!showAllStages)}
             className={`${rowCls} ${showAllStages ? 'bg-ink text-white border-ink shadow-2xs' : 'bg-white text-ink border-line hover:bg-slate-100'}`}
@@ -695,9 +696,9 @@ export default function App() {
               )}
             </span>
             <span className={`text-xs ${showAllStages ? 'text-white/80' : 'text-muted'}`}>{showAllStages ? 'On' : 'Off'}</span>
-          </button>
+          </Button>
 
-          <button
+          <Button
             type="button"
             onClick={() => { setShowBeforeNeedsDiagOnly(!showBeforeNeedsDiagOnly); setShowNeedsDiagOnly(false); }}
             className={`${rowCls} ${showBeforeNeedsDiagOnly ? 'bg-blue-600 text-white border-blue-700 shadow-2xs' : 'bg-white text-ink border-line hover:bg-slate-100'}`}
@@ -712,9 +713,9 @@ export default function App() {
               )}
             </span>
             <span className={`text-xs ${showBeforeNeedsDiagOnly ? 'text-white/80' : 'text-muted'}`}>{showBeforeNeedsDiagOnly ? 'On' : 'Off'}</span>
-          </button>
+          </Button>
 
-          <button
+          <Button
             type="button"
             onClick={() => { setShowNeedsDiagOnly(!showNeedsDiagOnly); setShowBeforeNeedsDiagOnly(false); }}
             className={`${rowCls} ${showNeedsDiagOnly ? 'bg-purple-600 text-white border-purple-700 shadow-2xs' : 'bg-white text-ink border-line hover:bg-slate-100'}`}
@@ -729,7 +730,7 @@ export default function App() {
               )}
             </span>
             <span className={`text-xs ${showNeedsDiagOnly ? 'text-white/80' : 'text-muted'}`}>{showNeedsDiagOnly ? 'On' : 'Off'}</span>
-          </button>
+          </Button>
           </>
         )}
 
@@ -799,7 +800,7 @@ export default function App() {
               <label className={labelCls}>View</label>
               <div className="grid grid-cols-3 gap-1.5">
                 {(['stock', 'profit', 'matrix'] as const).map((v) => (
-                  <button
+                  <Button
                     key={v}
                     type="button"
                     onClick={() => setInventoryViewMode(v)}
@@ -810,13 +811,13 @@ export default function App() {
                     }`}
                   >
                     {v === 'stock' ? 'Stock' : v === 'profit' ? 'Profit' : 'Matrix'}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
             <div>
               <label className={labelCls}>Edit</label>
-              <button
+              <Button
                 type="button"
                 onClick={() => setInventoryEditMode((m) => !m)}
                 className={`${rowCls} ${
@@ -830,11 +831,11 @@ export default function App() {
                   Edit Rows
                 </span>
                 <span className={`text-xs ${inventoryEditMode ? 'text-white/80' : 'text-muted'}`}>{inventoryEditMode ? 'On' : 'Off'}</span>
-              </button>
+              </Button>
             </div>
             <div>
               <label className={labelCls}>Actions</label>
-              <button
+              <Button
                 type="button"
                 onClick={() => setInventoryTagsPrintOpen(true)}
                 className={`${rowCls} bg-white text-ink border-line hover:bg-slate-100`}
@@ -843,7 +844,7 @@ export default function App() {
                   <Printer className="w-4 h-4 text-brand" />
                   Print Spare-Parts Tags (A4)
                 </span>
-              </button>
+              </Button>
             </div>
             <div>
               <label className={labelCls}>Device Model</label>
@@ -926,7 +927,7 @@ export default function App() {
         )}
 
         {(tab === 'intake' || tab === 'pipeline') && (
-          <button
+          <Button
             type="button"
             onClick={() => { setIsRecycleBinOpen(true); setIsFilterDrawerOpen(false); }}
             className={`${rowCls} bg-white text-ink border-line hover:bg-slate-100`}
@@ -938,7 +939,7 @@ export default function App() {
             {archivedWorkOrders.length > 0 && (
               <span className="rounded-full bg-rose-600 px-2 py-0.5 text-xs font-black text-white">{archivedWorkOrders.length}</span>
             )}
-          </button>
+          </Button>
         )}
 
       </div>
@@ -1570,7 +1571,7 @@ export default function App() {
         <header className="app-topbar flex flex-row items-center justify-between px-3 sm:px-5 h-[52px] min-h-[52px] bg-white border-b border-line sticky top-0 z-40 gap-2 shrink-0">
           {/* Active Tab Title & Mobile Toggle */}
           <div className="flex items-center space-x-2 sm:space-x-3 shrink-0 min-w-0 flex-1">
-            <button
+            <Button
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className={`${isIpad ? '' : 'lg:hidden'} h-10 w-10 flex items-center justify-center bg-surface hover:bg-line border border-line text-ink rounded-xl active:scale-95 transition-all shrink-0 cursor-pointer`}
@@ -1592,7 +1593,7 @@ export default function App() {
                 <path d="M3.5 12h17" />
                 <path d="M3.5 17.5h17" />
               </svg>
-            </button>
+            </Button>
             <h1 className="font-extrabold text-ink tracking-tight text-sm sm:text-base truncate">
               {currentTab.title}
             </h1>
@@ -1601,7 +1602,7 @@ export default function App() {
           {/* Dynamic Header Actions & Quick Filters per Tab */}
           <div className="app-topbar-actions flex min-w-0 items-center flex-nowrap justify-end gap-1.5 sm:gap-2 text-xs py-1 shrink-0 relative z-30 overflow-x-auto no-scrollbar max-w-full lg:overflow-visible">
             {/* Global Search (Cmd/Ctrl+K) — hidden on iPad: the contextual search box (and inventory scan box) already cover it */}
-            <button
+            <Button
               type="button"
               onClick={() => setIsGlobalSearchOpen(true)}
               className={`${isIpad ? 'hidden' : 'inline-flex'} h-11 w-11 lg:h-10 lg:w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2`}
@@ -1609,10 +1610,10 @@ export default function App() {
               aria-label="Global search (⌘K)"
             >
               <Search className="h-4 w-4" />
-            </button>
+            </Button>
             {/* Reset All Filters Pill Button when any filter is active */}
             {hasActiveFilters && (
-              <button
+              <Button
                 type="button"
                 onClick={handleResetAllFilters}
                 className="h-10 px-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold rounded-xl transition-all flex items-center space-x-1 cursor-pointer shrink-0 active:scale-95 shadow-2xs"
@@ -1621,12 +1622,12 @@ export default function App() {
                 <X className="w-3.5 h-3.5 text-rose-600" />
                 <span className="hidden sm:inline">Reset Filters</span>
                 <span className="sm:hidden">Reset</span>
-              </button>
+              </Button>
             )}
             {/* System Settings Header Actions */}
             {activeTab === 'settings' && (
               <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
-                <button
+                <Button
                   type="button"
                   onClick={() => settingsResetRef.current?.()}
                   className="h-10 px-2.5 sm:px-3 bg-surface hover:bg-line text-ink font-bold text-xs rounded-xl border border-line-strong transition-all flex items-center space-x-1 sm:space-x-1.5 cursor-pointer shadow-2xs active:scale-95"
@@ -1634,8 +1635,8 @@ export default function App() {
                 >
                   <RotateCcw className="w-3.5 h-3.5 text-muted" />
                   <span className="hidden sm:inline">Reset Draft</span>
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
                   onClick={() => settingsSaveRef.current?.()}
                   className="h-10 px-3 sm:px-3.5 bg-brand hover:bg-brand-deep text-white font-extrabold text-xs rounded-xl transition-all shadow-2xs flex items-center space-x-1 sm:space-x-1.5 cursor-pointer active:scale-95"
@@ -1643,7 +1644,7 @@ export default function App() {
                 >
                   <Save className="w-3.5 h-3.5" />
                   <span>Save All Settings</span>
-                </button>
+                </Button>
               </div>
             )}
 
@@ -1660,36 +1661,36 @@ export default function App() {
                     className="w-full h-10 bg-surface text-xs text-ink placeholder-muted pl-7 pr-5 rounded-xl border border-line focus:bg-white focus:outline-none focus:border-brand transition-all shadow-2xs"
                   />
                   {searchQuery && (
-                    <button
+                    <Button
                       onClick={() => setSearchQuery('')}
                       className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-muted hover:text-ink"
                     >
                       ×
-                    </button>
+                    </Button>
                   )}
                 </div>
 
                 {/* Desktop: all four actions inline (lg+) */}
                 <div className="hidden lg:flex items-center space-x-1.5 sm:space-x-2 shrink-0">
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setPriceCatalogQuickCalcOpen(true)}
                     className="px-2.5 sm:px-3 py-1.5 bg-success hover:bg-success/90 text-white font-extrabold text-xs rounded-xl transition-all flex items-center space-x-1 sm:space-x-1.5 shadow-2xs cursor-pointer shrink-0 active:scale-95"
                   >
                     <Calculator className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">Calc</span>
-                  </button>
+                  </Button>
 
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setPriceCatalogDeviceModalOpen(true)}
                     className="px-2.5 sm:px-3 py-1.5 bg-brand hover:bg-brand/90 text-white font-extrabold text-xs rounded-xl transition-all flex items-center space-x-1 sm:space-x-1.5 shadow-2xs cursor-pointer shrink-0 active:scale-95"
                   >
                     <Folder className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">Model</span>
-                  </button>
+                  </Button>
 
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setPriceCatalogSettingsModalOpen(true)}
                     className="px-2.5 sm:px-3 py-1.5 bg-surface hover:bg-line text-ink font-bold text-xs rounded-xl border border-line transition-all cursor-pointer shrink-0 shadow-2xs flex items-center space-x-1.5"
@@ -1697,9 +1698,9 @@ export default function App() {
                   >
                     <Settings className="w-3.5 h-3.5 text-brand" />
                     <span className="hidden md:inline">Settings</span>
-                  </button>
+                  </Button>
 
-                  <button
+                  <Button
                     type="button"
                     onClick={() => priceCatalogExportRef.current?.()}
                     className="px-2.5 sm:px-3 py-1.5 bg-surface hover:bg-line text-ink font-bold text-xs rounded-xl border border-line transition-all cursor-pointer shrink-0 shadow-2xs flex items-center space-x-1.5"
@@ -1707,12 +1708,12 @@ export default function App() {
                   >
                     <Download className="w-3.5 h-3.5 text-success" />
                     <span className="hidden md:inline">Export</span>
-                  </button>
+                  </Button>
                 </div>
 
                 {/* Mobile: all four actions behind a ⋯ overflow menu (lg:hidden) */}
                 <div className="relative lg:hidden shrink-0">
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setPriceCatalogMenuOpen(!priceCatalogMenuOpen)}
                     className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-surface hover:bg-line border border-line text-ink transition-all cursor-pointer active:scale-95"
@@ -1720,7 +1721,7 @@ export default function App() {
                     title="More actions"
                   >
                     <MoreHorizontal className="w-5 h-5" />
-                  </button>
+                  </Button>
 
                   {priceCatalogMenuOpen && (
                     <>
@@ -1730,7 +1731,7 @@ export default function App() {
                         aria-hidden="true"
                       />
                       <div className="absolute right-0 top-full mt-1.5 z-50 w-48 rounded-xl border border-line bg-white p-1.5 shadow-xl">
-                        <button
+                        <Button
                           type="button"
                           onClick={() => {
                             setPriceCatalogQuickCalcOpen(true);
@@ -1740,8 +1741,8 @@ export default function App() {
                         >
                           <Calculator className="w-4 h-4 text-success shrink-0" />
                           Quick Price Calculator
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="button"
                           onClick={() => {
                             setPriceCatalogDeviceModalOpen(true);
@@ -1751,8 +1752,8 @@ export default function App() {
                         >
                           <Folder className="w-4 h-4 text-brand shrink-0" />
                           Switch Model
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="button"
                           onClick={() => {
                             setPriceCatalogSettingsModalOpen(true);
@@ -1762,8 +1763,8 @@ export default function App() {
                         >
                           <Settings className="w-4 h-4 text-brand shrink-0" />
                           Catalog Settings
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="button"
                           onClick={() => {
                             priceCatalogExportRef.current?.();
@@ -1773,7 +1774,7 @@ export default function App() {
                         >
                           <Download className="w-4 h-4 text-success shrink-0" />
                           Export to CSV
-                        </button>
+                        </Button>
                       </div>
                     </>
                   )}
@@ -1809,12 +1810,12 @@ export default function App() {
                   className="w-full h-10 bg-surface text-xs text-ink placeholder-muted pl-7 pr-5 rounded-xl border border-line focus:bg-white focus:outline-none focus:border-brand transition-all shadow-2xs"
                 />
                 {searchQuery && (
-                  <button
+                  <Button
                     onClick={() => setSearchQuery('')}
                     className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-muted hover:text-ink"
                   >
                     ×
-                  </button>
+                  </Button>
                 )}
               </div>
               )
@@ -1848,7 +1849,7 @@ export default function App() {
             )}
 
             {FILTER_TABS.includes(activeTab) && (
-              <button
+              <Button
                 ref={filtersTriggerRef}
                 type="button"
                 onClick={() => setIsFilterDrawerOpen(true)}
@@ -1862,13 +1863,13 @@ export default function App() {
                     {getActiveFilterCount(activeTab)}
                   </span>
                 )}
-              </button>
+              </Button>
             )}
 
             {activeTab === 'pipeline' && (
               <>
                 <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
-                <button
+                <Button
                   type="button"
                   onClick={() => setShowBottlenecksOnly(!showBottlenecksOnly)}
                   className={`py-1.5 px-3 min-h-10 rounded-xl border text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 ${
@@ -1896,7 +1897,7 @@ export default function App() {
                     }).length})` : ''}
                   </span>
                   <span className="sm:hidden">&gt;48h</span>
-                </button>
+                </Button>
 
                 <CustomDropdownMenu
                   value={statusFilter}
@@ -1934,7 +1935,7 @@ export default function App() {
               <>
                 <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
                 {!isIpad && <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />}
-                <button
+                <Button
                   type="button"
                   onClick={() => setIsAiAssistantOpen(true)}
                   className="px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-bold rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 active:scale-95"
@@ -1942,7 +1943,7 @@ export default function App() {
                 >
                   <Sparkles className="w-3.5 h-3.5 text-purple-600" />
                   <span className="hidden sm:inline">AI Assistant</span>
-                </button>
+                </Button>
                 </div>
               </>
             )}
@@ -2067,7 +2068,7 @@ export default function App() {
 
             {/* Quick Access Recycle Bin Button (Only shown in Work Intake & Status Pipeline) */}
             {(activeTab === 'intake' || activeTab === 'pipeline') && (
-              <button
+              <Button
                 onClick={() => setIsRecycleBinOpen(true)}
                 className={`${isIpad ? 'hidden' : 'hidden lg:flex'} items-center space-x-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all active:scale-95 cursor-pointer shrink-0 ${
                   archivedWorkOrders.length > 0
@@ -2083,7 +2084,7 @@ export default function App() {
                     {archivedWorkOrders.length}
                   </span>
                 )}
-              </button>
+              </Button>
             )}
 
             {/* Contextual Action Button */}
@@ -2111,13 +2112,13 @@ export default function App() {
                       className="h-10 w-32 xl:w-40 rounded-lg border border-line bg-white pl-8 pr-2 font-mono text-xs text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
                     />
                   </div>
-                  <button
+                  <Button
                     type="button"
                     onClick={() => inventoryScanSubmitRef.current?.()}
                     className="h-10 rounded-lg bg-brand px-2.5 text-xs font-extrabold text-white transition hover:bg-brand-deep shrink-0"
                   >
                     Lookup
-                  </button>
+                  </Button>
                 </div>
               )}
               {/* Model / Category / Tier filter icons — iPad navbar quick access */}
@@ -2167,7 +2168,7 @@ export default function App() {
               {/* Table/Card view toggle — iPad only (toolbar moves here) */}
               {isIpad && (
                 <div className="flex items-center rounded-lg border border-line bg-surface p-0.5 shrink-0">
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setInventoryStockView('table')}
                     title="Table view"
@@ -2177,8 +2178,8 @@ export default function App() {
                     }`}
                   >
                     <List className="h-4 w-4" />
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
                     onClick={() => setInventoryStockView('cards')}
                     title="Card view"
@@ -2188,25 +2189,25 @@ export default function App() {
                     }`}
                   >
                     <LayoutGrid className="h-4 w-4" />
-                  </button>
+                  </Button>
                 </div>
               )}
-              <button
+              <Button
                 onClick={() => setInventoryAddModalOpen(true)}
                 className="h-10 flex items-center space-x-1.5 px-3.5 bg-brand hover:bg-brand-deep text-white text-xs font-bold rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>{t('addPart')}</span>
-              </button>
+              </Button>
               </>
             ) : activeTab === 'suppliers' ? (
-              <button
+              <Button
                 onClick={() => setRmaModalOpen(true)}
                 className="h-10 flex items-center space-x-1.5 px-3.5 bg-[#AF52DE] hover:bg-purple-600 text-white text-xs font-bold rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>{t('flagRma')}</span>
-              </button>
+              </Button>
             ) : null}
 
             {/* Live Supabase connection indicator — desktop only; hidden on iPad (declutter) */}
@@ -2547,7 +2548,7 @@ export default function App() {
           above the bottom nav / POS checkout bar; on desktop it's a bottom-right
           launcher for the chat widget (which slides up from the corner). */}
       {!isAiAssistantOpen && (
-        <button
+        <Button
           type="button"
           onClick={() => setIsAiAssistantOpen(true)}
           className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-4 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent)] text-white shadow-lg lg:bottom-5 lg:right-5 cursor-pointer active:scale-95 transition-transform hover:scale-105"
@@ -2555,7 +2556,7 @@ export default function App() {
           title="Open AI Assistant"
         >
           <Sparkles size={20} />
-        </button>
+        </Button>
       )}
 
       {/* AI Diagnostic Assistant Modal */}
@@ -2652,13 +2653,13 @@ export default function App() {
                 )}
               </div>
               {toast.dismissible !== false && (
-                <button
+                <Button
                   type="button"
                   onClick={() => removeToast(toast.id)}
                   className="shrink-0 text-slate-400 hover:text-white transition-colors cursor-pointer p-0.5"
                 >
                   <X className="w-3.5 h-3.5" />
-                </button>
+                </Button>
               )}
             </motion.div>
           ))}

@@ -798,7 +798,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       <div className="relative">
       <div role="tablist" aria-label="Dashboard sections" className="bg-surface p-1.5 rounded-2xl border border-line flex items-center space-x-1.5 overflow-x-auto no-scrollbar w-full text-xs shadow-2xs">
         {/* Subtab 1: Status Queue */}
-        <button
+        <Button
           type="button"
           role="tab"
           id="dash-tab-status-queue"
@@ -821,10 +821,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           }`}>
             {activeRepairs.length} Active
           </span>
-        </button>
+        </Button>
 
         {/* Subtab 2: Repair Data */}
-        <button
+        <Button
           type="button"
           role="tab"
           id="dash-tab-repair-data"
@@ -847,10 +847,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           }`}>
             {filteredWorkOrders.length} Tickets
           </span>
-        </button>
+        </Button>
 
         {/* Subtab 3: Technician KPI & Leaderboard (merged) */}
-        <button
+        <Button
           type="button"
           role="tab"
           id="dash-tab-tech-kpi"
@@ -873,10 +873,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           }`}>
             {technicians.length} Staff
           </span>
-        </button>
+        </Button>
 
         {/* Subtab 4: Inventory */}
-        <button
+        <Button
           type="button"
           role="tab"
           id="dash-tab-inventory"
@@ -909,10 +909,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               {parts.length} Parts
             </span>
           )}
-        </button>
+        </Button>
 
         {/* Subtab 6: Finance */}
-        <button
+        <Button
           type="button"
           role="tab"
           id="dash-tab-finance"
@@ -936,10 +936,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             {marginPercent < 0 && !(activeDashboardSubTab === 'finance') && <AlertTriangle className="w-2.5 h-2.5 shrink-0" />}
             <span>{marginPercent}% Margin</span>
           </span>
-        </button>
+        </Button>
 
         {/* Subtab 7: Warranty Watch */}
-        <button
+        <Button
           type="button"
           role="tab"
           id="dash-tab-warranty-watch"
@@ -972,7 +972,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               Clear
             </span>
           )}
-        </button>
+        </Button>
       </div>
       {/* Right-edge fade on the scrollable subtab bar (below xl) */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-6 rounded-r-xl bg-gradient-to-l from-white/80 to-transparent xl:hidden" />
@@ -1108,15 +1108,17 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     </div>
                     <div className="flex justify-between items-center text-xs text-slate-600">
                       <span>{pct}% of active queue</span>
-                      <button
+                      <Button
+  variant="link"
+  
                         onClick={() => {
                           setStatusQueueFilter(item.stage);
                         }}
-                        className="min-h-10 font-bold text-brand hover:underline flex items-center space-x-0.5"
+                        className="min-h-10 flex items-center space-x-0.5"
                       >
                         <span>Filter Queue Below</span>
                         <ChevronRight className="w-3 h-3" />
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 );
@@ -1157,13 +1159,15 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   className="w-full h-10 bg-white text-xs text-ink placeholder-muted pl-8 pr-7 rounded-lg border border-line focus:outline-none focus:border-brand transition-all"
                 />
                 {queueSearchQuery && (
-                  <button
+                  <Button
+  variant="ghost" size="iconSm"
+  
                     type="button"
                     onClick={() => setQueueSearchQuery('')}
                     className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-muted hover:text-ink"
                   >
                     ×
-                  </button>
+                  </Button>
                 )}
               </div>
 
@@ -1225,13 +1229,15 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 </p>
                 <div className="pt-2 flex items-center justify-center space-x-2">
                   {statusQueueFilter !== 'ALL' && (
-                    <button
+                    <Button
+  variant="default" size="sm"
+  
                       type="button"
                       onClick={() => setStatusQueueFilter('ALL')}
                       className="px-3 py-1.5 bg-brand text-white text-xs font-bold rounded-lg hover:bg-brand-deep transition-all cursor-pointer"
                     >
                       Show All Stages
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
@@ -1327,26 +1333,30 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                           {/* Ticket status inspector and label export */}
                           <td className="py-3 px-3 text-right">
                             <div className="inline-flex items-center justify-end gap-1.5">
-                              <button
+                              <Button
+  variant="secondary" size="sm"
+  
                                 type="button"
                                 onClick={() => setRosterTicket(wo)}
-                                className="inline-flex h-10 lg:h-8 items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--blue-tint)] px-2.5 text-xs font-extrabold text-[var(--primary)] transition-colors hover:bg-[var(--card-bg)]"
+                                className="border border-[var(--border)] bg-[var(--blue-tint)] px-2.5 text-[var(--primary)] hover:bg-[var(--card-bg)]"
                                 title="View Ticket Status"
                                 aria-label={`View status for ${wo.orderNumber || wo.id}`}
                               >
                                 <Eye className="h-3.5 w-3.5" />
                                 <span>View</span>
-                              </button>
+                              </Button>
                               {onSelectPrintTag && (
-                              <button
+                              <Button
+  variant="secondary" size="sm"
+  
                                 type="button"
                                 onClick={() => onSelectPrintTag(wo)}
-                                className="h-10 lg:h-8 px-2.5 bg-surface hover:bg-line text-ink rounded-lg border border-line transition-all cursor-pointer inline-flex items-center space-x-1 text-xs font-bold"
+                                className="px-2.5 hover:bg-line border border-line"
                                 title="Print Device Label Tag"
                               >
                                 <Printer className="w-3.5 h-3.5 text-brand" />
                                 <span>Tag</span>
-                              </button>
+                              </Button>
                               )}
                             </div>
                           </td>
@@ -1807,73 +1817,65 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   className="w-full bg-surface text-xs text-ink placeholder-muted pl-8 pr-8 py-1.5 rounded-xl border border-line focus:bg-white focus:outline-none focus:border-brand transition-all"
                 />
                 {warrantySearchQuery && (
-                  <button
+                  <Button
+  variant="ghost" size="iconSm"
+  
                     type="button"
                     onClick={() => setWarrantySearchQuery('')}
                     className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-muted hover:text-ink"
                   >
                     ×
-                  </button>
+                  </Button>
                 )}
               </div>
 
               {/* Filter Tabs */}
               <div className="flex items-center space-x-1 bg-surface p-1 rounded-xl border border-line overflow-x-auto no-scrollbar">
-                <button
+                <Button
+  variant="ghost" size="sm"
+  
                   type="button"
                   onClick={() => setWarrantyFilterTab('ALL_EXPIRING')}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer shrink-0 ${
-                    warrantyFilterTab === 'ALL_EXPIRING'
-                      ? 'bg-rose-600 text-white shadow-xs'
-                      : 'text-muted hover:text-ink'
-                  }`}
+                  className="px-3 py-1 shrink-0"
                 >
                   Flagged Expiration ({expiringSoonWorkOrders.length})
-                </button>
-                <button
+                </Button>
+                <Button
+  variant="ghost" size="sm"
+  
                   type="button"
                   onClick={() => setWarrantyFilterTab('CRITICAL')}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer shrink-0 ${
-                    warrantyFilterTab === 'CRITICAL'
-                      ? 'bg-rose-600 text-white shadow-xs'
-                      : 'text-muted hover:text-ink'
-                  }`}
+                  className="px-3 py-1 shrink-0"
                 >
                   Critical &le;7d ({criticalWarrantyCount})
-                </button>
-                <button
+                </Button>
+                <Button
+  variant="ghost" size="sm"
+  
                   type="button"
                   onClick={() => setWarrantyFilterTab('WARNING')}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer shrink-0 ${
-                    warrantyFilterTab === 'WARNING'
-                      ? 'bg-amber-500 text-white shadow-xs'
-                      : 'text-muted hover:text-ink'
-                  }`}
+                  className="px-3 py-1 shrink-0"
                 >
                   Warning 8-14d ({warningWarrantyCount})
-                </button>
-                <button
+                </Button>
+                <Button
+  variant="ghost" size="sm"
+  
                   type="button"
                   onClick={() => setWarrantyFilterTab('EXPIRED')}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer shrink-0 ${
-                    warrantyFilterTab === 'EXPIRED'
-                      ? 'bg-slate-700 text-white shadow-xs'
-                      : 'text-muted hover:text-ink'
-                  }`}
+                  className="px-3 py-1 shrink-0"
                 >
                   Expired ({expiredWarrantyCount})
-                </button>
-                <button
+                </Button>
+                <Button
+  variant="ghost" size="sm"
+  
                   type="button"
                   onClick={() => setWarrantyFilterTab('ALL')}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer shrink-0 ${
-                    warrantyFilterTab === 'ALL'
-                      ? 'bg-brand text-white shadow-xs'
-                      : 'text-muted hover:text-ink'
-                  }`}
+                  className="px-3 py-1 shrink-0"
                 >
                   All Tickets ({warrantyCheckData.length})
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -2005,7 +2007,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
                             <td className="py-3 px-3 text-right">
                               <div className="flex items-center justify-end space-x-1.5">
-                                <button
+                                <Button
+  variant="secondary"
+  
                                   type="button"
                                   onClick={() => handleCopyWarrantyCourtesyMessage(item)}
                                   className={`px-2.5 py-1.5 font-bold text-xs rounded-lg border transition-all flex items-center space-x-1 cursor-pointer active:scale-95 ${
@@ -2017,16 +2021,18 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                                 >
                                   {isCopied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                                   <span>{isCopied ? 'Copied Notice' : 'Copy Notice'}</span>
-                                </button>
+                                </Button>
 
-                                <button
+                                <Button
+  variant="iconGhost" size="iconSm"
+  
                                   type="button"
                                   onClick={() => onNavigateToTab('crm')}
-                                  className="p-1.5 bg-surface hover:bg-line text-ink rounded-lg border border-line transition-all cursor-pointer"
+                                  className="bg-surface hover:bg-line border border-line"
                                   title="Open Customer Dossier in CRM"
                                 >
                                   <Users className="w-3.5 h-3.5" />
-                                </button>
+                                </Button>
                               </div>
                             </td>
                           </tr>

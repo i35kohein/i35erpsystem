@@ -187,7 +187,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
             <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
               <div className="flex items-center space-x-1 bg-white px-2.5 py-1 rounded-xl border border-line">
                 <Filter className="w-3 h-3 text-muted" />
-                <select
+                <select aria-label="Sort tickets" 
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                   className="bg-transparent text-xs font-bold text-ink focus:outline-none cursor-pointer"
@@ -205,7 +205,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
               {availableCategories.length > 1 && (
                 <div className="flex items-center space-x-1 bg-white px-2.5 py-1 rounded-xl border border-line">
                   <Smartphone className="w-3 h-3 text-muted" />
-                  <select
+                  <select aria-label="Filter tickets" 
                     value={deviceFilter}
                     onChange={(e) => setDeviceFilter(e.target.value)}
                     className="bg-transparent text-xs font-bold text-ink focus:outline-none cursor-pointer"

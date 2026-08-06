@@ -670,7 +670,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   className="flex flex-col items-center justify-center gap-2 py-3"
                   title={`${stage.title} — no tickets. Drag a ticket here to move it.`}
                 >
-                  <h3 className="[writing-mode:vertical-rl] rotate-180 text-xs font-extrabold text-muted tracking-wide whitespace-nowrap">
+                  <div className="[writing-mode:vertical-rl] rotate-180 text-xs font-extrabold text-muted tracking-wide whitespace-nowrap">
                     {stage.id === 'Receive' ? t('statusReceive') :
                      stage.id === 'In Progress' ? t('statusInProgress') :
                      stage.id === 'Pending' ? t('statusPending') :
@@ -678,13 +678,13 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                      stage.id === 'Taken Out' ? t('statusTakenOut') :
                      stage.id === 'Cant Repair' ? t('statusCantRepair') :
                      stage.id === 'Customer Not Repair' ? t('statusCustomerNotRepair') : stage.title}
-                  </h3>
+                  </div>
                   <span className={`text-[11px] font-extrabold px-1.5 py-0.5 rounded-full shadow-2xs ${stage.badgeColor}`}>0</span>
                 </div>
               ) : (
                 <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-line">
                   <div>
-                    <h3 className="text-xs font-extrabold text-ink tracking-tight">
+                    <div className="text-xs font-extrabold text-ink tracking-tight">
                       {stage.id === 'Receive' ? t('statusReceive') :
                        stage.id === 'In Progress' ? t('statusInProgress') :
                        stage.id === 'Pending' ? t('statusPending') :
@@ -692,7 +692,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                        stage.id === 'Taken Out' ? t('statusTakenOut') :
                        stage.id === 'Cant Repair' ? t('statusCantRepair') :
                        stage.id === 'Customer Not Repair' ? t('statusCustomerNotRepair') : stage.title}
-                    </h3>
+                    </div>
                     <p className="text-xs text-muted font-medium">{stage.subtitle}</p>
                   </div>
                   <div className="flex items-center space-x-1">
