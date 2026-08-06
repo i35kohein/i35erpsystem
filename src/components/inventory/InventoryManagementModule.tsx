@@ -106,6 +106,8 @@ interface InventoryManagementModuleProps {
   setSelectedCategory?: (c: string) => void;
   selectedQuality?: string;
   setSelectedQuality?: (q: string) => void;
+  selectedModelFilter?: string;
+  setSelectedModelFilter?: (m: string) => void;
   showAddModal?: boolean;
   setShowAddModal?: (s: boolean) => void;
 }
@@ -161,12 +163,17 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   setSelectedCategory: propSetSelectedCategory,
   selectedQuality: propSelectedQuality,
   setSelectedQuality: propSetSelectedQuality,
+  selectedModelFilter: propSelectedModelFilter,
+  setSelectedModelFilter: propSetSelectedModelFilter,
   showAddModal: propShowAddModal,
   setShowAddModal: propSetShowAddModal,
 }) => {
   const [localQuality, setLocalQuality] = useState<string>('ALL');
   const [localCategory, setLocalCategory] = useState<string>('ALL');
-  const [selectedModelFilter, setSelectedModelFilter] = useState<string>('ALL');
+  const [localModelFilter, setLocalModelFilter] = useState<string>('ALL');
+  // Controlled by App (filter drawer) when provided; falls back to local state.
+  const selectedModelFilter = propSelectedModelFilter !== undefined ? propSelectedModelFilter : localModelFilter;
+  const setSelectedModelFilter = propSetSelectedModelFilter || setLocalModelFilter;
   // Which filter opened the popup modal (model | category | tier) — popup instead of dropdown
   const [filterModal, setFilterModal] = useState<'model' | 'category' | 'tier' | null>(null);
   // ESC closes the filter modal
@@ -1017,18 +1024,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
   return (
     <div className="space-y-3">
-      {/* Module Title Header Bar — one line on lg: title | switcher | filters | actions */}
+      {/* Module Toolbar — title removed (topbar covers it); filters live in the drawer */}
       <div className="module-toolbar overflow-visible bg-white p-3 rounded-xl border border-line shadow-xs flex flex-col lg:flex-row lg:items-center gap-2">
-        <div className="module-subheader lg:shrink-0">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-lg bg-brand text-white flex items-center justify-center font-bold shadow-2xs">
-              <Boxes className="w-4 h-4" />
-            </div>
-            <div>
-              <h1 className="text-base font-black text-ink tracking-tight">Parts Inventory</h1>
-            </div>
-          </div>
-        </div>
 
         {/* Right cluster — one line on md+ */}
         <div className="flex flex-col md:flex-row md:items-center gap-2 w-full lg:w-auto lg:ml-auto min-w-0">
@@ -1072,98 +1069,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             </button>
           </div>
 
-          {/* Filters — mobile: compact one-line pills (popup modal) · desktop: dropdown menus */}
-          <div className="flex w-full md:w-auto items-stretch md:items-center gap-1.5 md:shrink-0">
-            <div className="flex h-9 lg:h-8 items-center gap-1 rounded-lg bg-surface p-1 flex-1 min-w-0 md:flex-none">
-              {/* Mobile: inline pill → popup modal */}
-              <button
-                type="button"
-                onClick={() => setFilterModal('model')}
-                className="flex items-center justify-center gap-1 rounded-lg bg-transparent p-0 h-full w-full hover:bg-[#ECF0F3] transition-colors cursor-pointer min-w-0 md:hidden"
-                title="Filter by device model"
-              >
-                <Smartphone className="w-3.5 h-3.5 shrink-0 text-brand" />
-                <span className="truncate min-w-0 font-bold text-ink text-xs">
-                  {selectedModelFilter === 'ALL' ? 'All Models' : selectedModelFilter}
-                </span>
-              </button>
-              {/* Desktop: dropdown menu */}
-              <div className="hidden md:flex items-center gap-1 w-full">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white text-brand">
-                  <Smartphone className="h-3 w-3" />
-                </span>
-                <CustomDropdownMenu
-                  value={selectedModelFilter}
-                  onChange={setSelectedModelFilter}
-                  options={modelFilterOptions}
-                  className="min-w-0"
-                  buttonClassName="min-w-[110px] lg:min-w-[130px] border-0 bg-transparent hover:bg-white"
-                  size="sm"
-                  menuAlign="group-left"
-                />
-              </div>
-            </div>
-
-            <div className="flex h-9 lg:h-8 items-center gap-1 rounded-lg bg-surface p-1 flex-1 min-w-0 md:flex-none">
-              {/* Mobile: inline pill → popup modal */}
-              <button
-                type="button"
-                onClick={() => setFilterModal('category')}
-                className="flex items-center justify-center gap-1 rounded-lg bg-transparent p-0 h-full w-full hover:bg-[#ECF0F3] transition-colors cursor-pointer min-w-0 md:hidden"
-                title="Filter by category"
-              >
-                <Layers className="w-3.5 h-3.5 shrink-0 text-brand" />
-                <span className="truncate min-w-0 font-bold text-ink text-xs">
-                  {selectedCategory === 'ALL' ? 'All Categories' : selectedCategory}
-                </span>
-              </button>
-              {/* Desktop: dropdown menu */}
-              <div className="hidden md:flex items-center gap-1 w-full">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white text-brand">
-                  <Layers className="h-3 w-3" />
-                </span>
-                <CustomDropdownMenu
-                  value={selectedCategory}
-                  onChange={setSelectedCategory}
-                  options={categoryFilterOptions}
-                  className="min-w-0"
-                  buttonClassName="min-w-[110px] lg:min-w-[130px] border-0 bg-transparent hover:bg-white"
-                  size="sm"
-                  menuAlign="group-left"
-                />
-              </div>
-            </div>
-
-            <div className="flex h-9 lg:h-8 items-center gap-1 rounded-lg bg-surface p-1 flex-1 min-w-0 md:flex-none">
-              {/* Mobile: inline pill → popup modal */}
-              <button
-                type="button"
-                onClick={() => setFilterModal('tier')}
-                className="flex items-center justify-center gap-1 rounded-lg bg-transparent p-0 h-full w-full hover:bg-[#ECF0F3] transition-colors cursor-pointer min-w-0 md:hidden"
-                title="Filter by quality tier"
-              >
-                <Filter className="w-3.5 h-3.5 shrink-0 text-brand" />
-                <span className="truncate min-w-0 font-bold text-ink text-xs">
-                  {selectedQuality === 'ALL' ? 'All Tiers' : selectedQuality}
-                </span>
-              </button>
-              {/* Desktop: dropdown menu */}
-              <div className="hidden md:flex items-center gap-1 w-full">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white text-brand">
-                  <Filter className="h-3 w-3" />
-                </span>
-                <CustomDropdownMenu
-                  value={selectedQuality}
-                  onChange={setSelectedQuality}
-                  options={tierFilterOptions}
-                  className="min-w-0"
-                  buttonClassName="min-w-[110px] lg:min-w-[120px] border-0 bg-transparent hover:bg-white"
-                  size="sm"
-                  menuAlign="group-left"
-                />
-              </div>
-            </div>
-          </div>
 
           {viewMode === 'stock' && (
             <div className={`grid items-center gap-1 w-full md:flex md:w-auto md:ml-auto md:shrink-0 md:pl-1 ${inlineEditMode ? 'grid-cols-3' : 'grid-cols-5'}`}>
@@ -3579,109 +3484,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         </div>
       )}
 
-      {/* Filter picker popup modal — options open here instead of dropdown menus */}
-      {filterModal &&
-        createPortal(
-          <div
-            className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 backdrop-blur-sm animate-fadeIn"
-            onClick={() => setFilterModal(null)}
-          >
-            <div
-              className="w-72 max-h-[70vh] flex flex-col rounded-2xl border border-line bg-white p-3 shadow-2xl animate-i35-slide-up"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between px-1 pb-2 border-b border-[#F0F0F2]">
-                <div className="flex items-center gap-2 min-w-0">
-                  <p className="text-xs font-extrabold text-ink truncate">
-                    {filterModal === 'model' ? 'Select Device Model' : filterModal === 'category' ? 'Select Category' : 'Select Quality Tier'}
-                  </p>
-                  <span className="shrink-0 rounded-full bg-brand-soft text-brand px-2 py-0.5 text-[10px] font-mono font-bold">
-                    {filterModal === 'model'
-                      ? `${inventoryDeviceModels.length + 1} options`
-                      : filterModal === 'category'
-                        ? `${categories.length + 1} options`
-                        : `${customQualityTiers.length + 1} options`}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setFilterModal(null)}
-                  aria-label="Close filter picker"
-                  className="w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:bg-surface hover:text-ink transition-colors cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
 
-              <div className="min-h-0 flex-1 overflow-y-auto py-2 space-y-1 custom-scrollbar">
-                {filterModal === 'model' &&
-                  modelFilterOptions.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => {
-                        setSelectedModelFilter(opt.value);
-                        setFilterModal(null);
-                      }}
-                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-xs font-bold transition-colors cursor-pointer text-left ${
-                        selectedModelFilter === opt.value
-                          ? 'bg-brand text-white'
-                          : 'hover:bg-surface text-ink'
-                      }`}
-                    >
-                      <span className="truncate">{opt.label}</span>
-                      <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-mono font-bold ${selectedModelFilter === opt.value ? 'bg-white/20 text-white' : 'bg-line text-ink'}`}>
-                        {opt.badge}
-                      </span>
-                    </button>
-                  ))}
-
-                {filterModal === 'category' &&
-                  categoryFilterOptions.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => {
-                        setSelectedCategory(opt.value);
-                        setFilterModal(null);
-                      }}
-                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-xs font-bold transition-colors cursor-pointer text-left ${
-                        selectedCategory === opt.value
-                          ? 'bg-brand text-white'
-                          : 'hover:bg-surface text-ink'
-                      }`}
-                    >
-                      <span className="truncate">{opt.label}</span>
-                      <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-mono font-bold ${selectedCategory === opt.value ? 'bg-white/20 text-white' : 'bg-line text-ink'}`}>
-                        {opt.badge}
-                      </span>
-                    </button>
-                  ))}
-
-                {filterModal === 'tier' &&
-                  tierFilterOptions.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => {
-                        setSelectedQuality(opt.value);
-                        setFilterModal(null);
-                      }}
-                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-xs font-bold transition-colors cursor-pointer text-left ${
-                        selectedQuality === opt.value
-                          ? 'bg-brand text-white'
-                          : 'hover:bg-surface text-ink'
-                      }`}
-                    >
-                      <span className="truncate">{opt.label}</span>
-                      {selectedQuality === opt.value && <Check className="w-4 h-4 shrink-0" />}
-                    </button>
-                  ))}
-              </div>
-            </div>
-          </div>,
-          document.body,
-        )}
     </div>
   );
 };

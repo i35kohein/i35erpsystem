@@ -130,6 +130,7 @@ export default function App() {
   const [techFilter, setTechFilter] = useState<string>('ALL');
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
   const [stockFilter, setStockFilter] = useState<string>('ALL');
+  const [modelFilter, setModelFilter] = useState<string>('ALL');
   const [customerTypeFilter, setCustomerTypeFilter] = useState<string>('ALL');
   const [dateFilter, setDateFilter] = useState<DateFilterState>({ preset: 'all' });
   const [showBottlenecksOnly, setShowBottlenecksOnly] = useState<boolean>(false);
@@ -241,6 +242,8 @@ export default function App() {
   // System Management. Part rows must not create new filter options.
   const inventoryCategoryOptions = [...inventoryCategories].sort((a, b) => a.localeCompare(b));
   const inventoryQualityOptions = Array.from(new Set(parts.map((part) => part.qualityTier).filter(Boolean))).sort((a, b) => a.localeCompare(b));
+  // Device models for the inventory filter (mirrors what the module used to own).
+  const inventoryDeviceModels = useMemo(() => priceCatalog.catalog.map((m) => m.model), [priceCatalog.catalog]);
 
   const normalizeInventoryPartCategory = (category: unknown) => {
     const value = String(category || '').trim().toLowerCase().replace(/\s+/g, ' ');
@@ -789,6 +792,18 @@ export default function App() {
 
         {tab === 'inventory' && (
           <>
+            <div>
+              <label className={labelCls}>Device Model</label>
+              <DrawerSelect
+                label="Device Model"
+                value={modelFilter}
+                onChange={(v) => setModelFilter(v as any)}
+                options={[
+                  { value: 'ALL', label: 'All Models' },
+                  ...inventoryDeviceModels.map((model) => ({ value: model, label: model })),
+                ]}
+              />
+            </div>
             <div>
               <label className={labelCls}>Category</label>
               <DrawerSelect
@@ -2157,7 +2172,7 @@ export default function App() {
                   parts={parts}
                   suppliers={suppliers}
                   systemSettings={systemSettings}
-                  deviceModels={priceCatalog.catalog.map((m) => m.model)}
+                  deviceModels={inventoryDeviceModels}
                   inventoryCategories={inventoryCategoryOptions}
                   onAddPart={handleAddPart}
                   onUpdatePart={handleUpdatePart}
@@ -2173,6 +2188,8 @@ export default function App() {
                   setSelectedCategory={setCategoryFilter}
                   selectedQuality={stockFilter}
                   setSelectedQuality={setStockFilter}
+                  selectedModelFilter={modelFilter}
+                  setSelectedModelFilter={setModelFilter}
                   showAddModal={inventoryAddModalOpen}
                   setShowAddModal={setInventoryAddModalOpen}
                 />
