@@ -1777,7 +1777,7 @@ export default function App() {
             {/* Dynamic Filters depending on Active Tab */}
             {activeTab === 'intake' && (
               <>
-                <div className="hidden lg:flex items-center gap-2">
+                <div className="hidden">
                 {/* Status Dropdown */}
                 <CustomDropdownMenu
                   value={statusFilter}
@@ -1806,7 +1806,7 @@ export default function App() {
                 ref={filtersTriggerRef}
                 type="button"
                 onClick={() => setIsFilterDrawerOpen(true)}
-                className="lg:hidden inline-flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand transition-all cursor-pointer relative shrink-0"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand transition-all cursor-pointer relative shrink-0"
                 title="Open filters"
                 aria-label="Open filters"
               >
@@ -1821,7 +1821,7 @@ export default function App() {
 
             {activeTab === 'pipeline' && (
               <>
-                <div className="hidden lg:flex items-center gap-2">
+                <div className="hidden">
                 <button
                   type="button"
                   onClick={() => setShowBottlenecksOnly(!showBottlenecksOnly)}
@@ -1887,7 +1887,6 @@ export default function App() {
             {activeTab === 'dashboard' && (
               <>
                 <div className="hidden lg:flex items-center gap-2">
-                <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
                 <button
                   type="button"
                   onClick={() => setIsAiAssistantOpen(true)}
@@ -1903,7 +1902,7 @@ export default function App() {
 
             {activeTab === 'inventory' && (
               <>
-                <div className="hidden lg:flex items-center gap-2">
+                <div className="hidden">
                 <CustomDropdownMenu
                   value={categoryFilter}
                   onChange={(val) => setCategoryFilter(val)}
@@ -1937,7 +1936,7 @@ export default function App() {
 
             {activeTab === 'pos' && (
               <>
-                <div className="hidden lg:flex items-center gap-2">
+                <div className="hidden">
                 <CustomDropdownMenu
                   value={statusFilter}
                   onChange={(val) => setStatusFilter(val)}
@@ -1956,7 +1955,7 @@ export default function App() {
 
             {activeTab === 'crm' && (
               <>
-                <div className="hidden lg:flex items-center gap-2">
+                <div className="hidden">
                 <CustomDropdownMenu
                   value={customerTypeFilter}
                   onChange={(val) => setCustomerTypeFilter(val)}
@@ -1976,7 +1975,7 @@ export default function App() {
 
             {activeTab === 'suppliers' && (
               <>
-                <div className="hidden lg:flex items-center gap-2">
+                <div className="hidden">
                 <CustomDropdownMenu
                   value={statusFilter}
                   onChange={(val) => setStatusFilter(val)}
@@ -1997,7 +1996,7 @@ export default function App() {
 
             {activeTab === 'qa' && (
               <>
-                <div className="hidden lg:flex items-center gap-2">
+                <div className="hidden">
                 <CustomDropdownMenu
                   value={statusFilter}
                   onChange={(val) => setStatusFilter(val)}
@@ -2014,9 +2013,7 @@ export default function App() {
             )}
 
             {activeTab === 'finance' && (
-              <div className="hidden lg:flex items-center gap-2">
-                <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
-              </div>
+              <div className="hidden" />
             )}
 
             {/* Quick Access Recycle Bin Button (Only shown in Work Intake & Status Pipeline) */}
