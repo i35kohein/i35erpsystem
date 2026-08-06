@@ -306,6 +306,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                   >
                     <div className="flex justify-between items-center">
                       <Button
+                        variant="ghost"
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -349,6 +350,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
 
                       <div className="flex items-center space-x-1.5">
                         <Button
+                          variant="ghost"
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -363,6 +365,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
 
                         {(cloudCustomerIds?.has(cust.id) ?? true) && (
                           <Button
+                            variant="ghost"
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();

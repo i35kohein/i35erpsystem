@@ -927,8 +927,8 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             </div>
 
             <div>
-              <label htmlFor="field-imei" className="flex items-center justify-between text-muted mb-1 font-medium">
-                <span>IMEI Number (15 Digits)</span>
+              <label htmlFor="field-imei" className="flex items-center justify-between gap-2 text-muted mb-1 font-medium">
+                <span>IMEI Number</span>
                 <span className={`shrink-0 text-xs font-mono font-bold ${imei.length === 15 ? 'text-success' : 'text-muted'}`}>{imei.length}/15</span>
               </label>
               <Input
@@ -1341,7 +1341,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         )}
 
         {/* Sticky Action Bar — live ticket summary + register, always reachable on desktop */}
-        <div className="sticky bottom-0 z-20 -mx-4 -mb-4 mt-1 rounded-b-xl bg-white/95 backdrop-blur border-t border-line px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-6px_16px_rgba(0,0,0,0.06)]">
+        <div className={`sticky bottom-0 z-20 ${embedded ? 'rounded-b-none' : '-mx-4 -mb-4 mt-1 rounded-b-xl'} bg-white border-t border-line px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-6px_16px_rgba(0,0,0,0.06)]`}>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             {repairCount === 0 ? (
               <div className="flex-1 flex items-center gap-2 text-xs min-w-0" role="status">
