@@ -1662,7 +1662,7 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => settingsResetRef.current?.()}
-                  className="px-2.5 sm:px-3 py-1.5 bg-surface hover:bg-line text-ink font-bold text-xs rounded-xl border border-line-strong transition-all flex items-center space-x-1 sm:space-x-1.5 cursor-pointer shadow-2xs active:scale-95"
+                  className="h-10 px-2.5 sm:px-3 bg-surface hover:bg-line text-ink font-bold text-xs rounded-xl border border-line-strong transition-all flex items-center space-x-1 sm:space-x-1.5 cursor-pointer shadow-2xs active:scale-95"
                   title="Reset settings draft"
                 >
                   <RotateCcw className="w-3.5 h-3.5 text-muted" />

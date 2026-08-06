@@ -268,7 +268,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
               <button
                 type="button"
                 onClick={() => setViewMode('table')}
-                className={`flex-1 md:flex-none px-2.5 sm:px-3 py-2 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center md:justify-start space-x-1.5 cursor-pointer ${
+                className={`flex-1 md:flex-none px-2.5 sm:px-3 h-9 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center md:justify-start space-x-1.5 cursor-pointer ${
                   viewMode === 'table'
                     ? 'bg-[#136F9A] text-white shadow-2xs'
                     : 'text-[#7F7F7F] hover:text-[#2C3E50]'
@@ -282,7 +282,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
               <button
                 type="button"
                 onClick={() => setViewMode('cards')}
-                className={`flex-1 md:flex-none px-2.5 sm:px-3 py-2 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center md:justify-start space-x-1.5 cursor-pointer ${
+                className={`flex-1 md:flex-none px-2.5 sm:px-3 h-9 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center md:justify-start space-x-1.5 cursor-pointer ${
                   viewMode === 'cards'
                     ? 'bg-[#136F9A] text-white shadow-2xs'
                     : 'text-[#7F7F7F] hover:text-[#2C3E50]'

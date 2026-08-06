@@ -423,7 +423,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                       </div>
 
                       {item.badge !== undefined && (typeof item.badge === 'string' || item.badge > 0) && (
-                        <Badge className={`text-[9px] py-0.2 px-1.5 text-white shrink-0 ${item.badgeColor || 'bg-brand'} ${effectiveCollapsed ? 'absolute -top-1.5 -right-1.5 px-[5px] py-[2px] text-[length:8px] leading-none min-w-[16px] text-center border border-white shadow-2xs' : ''}`}>
+                        <Badge className={`text-xs py-0.5 px-2 text-white shrink-0 ${item.badgeColor || 'bg-brand'} ${effectiveCollapsed ? 'absolute -top-1.5 -right-1.5 px-1 py-0.5 text-[10px] leading-none min-w-[18px] text-center border border-white shadow-2xs' : ''}`}>
                           {effectiveCollapsed && typeof item.badge === 'number' && item.badge > 99 ? '99+' : item.badge}
                         </Badge>
                       )}
