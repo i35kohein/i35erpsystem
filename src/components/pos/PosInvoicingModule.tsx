@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useIsIpad } from '../../hooks/useIsIpad';
 import { DateFilterState, filterByDateRange } from '../common/DateFilterSelector';
 import { 
   CreditCard,
@@ -156,6 +157,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 }) => {
   const activePaymentMethods = getActivePaymentMethods(systemSettings).filter((m) => m.enabled);
   const [selectedWoId, setSelectedWoId] = useState<string>(workOrders[0]?.id || '');
+  const isIpad = useIsIpad();
   const [paymentMethod, setPaymentMethod] = useState<string>(activePaymentMethods[0]?.name || 'Cash');
   const [cashTendered, setCashTendered] = useState<number>(0);
   const [copiedAccount, setCopiedAccount] = useState(false);
@@ -405,10 +407,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   };
 
   return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-1 gap-3 text-xs md:grid-cols-12 pb-16 md:pb-0">
+    <div className={`space-y-3 ${isIpad ? 'flex min-h-0 flex-1 flex-col' : ''}`}>
+      <div className={`grid grid-cols-1 gap-3 text-xs md:grid-cols-12 pb-16 md:pb-0 ${isIpad ? 'md:flex-1 md:min-h-0 md:grid-rows-1' : ''}`}>
         {/* Left Column: Select Work Order to Checkout (5 cols) */}
-        <div className="md:col-span-5 bg-white border border-line rounded-2xl p-4 space-y-3 shadow-xs md:self-start">
+        <div className={`md:col-span-5 bg-white border border-line rounded-2xl p-4 space-y-3 shadow-xs ${isIpad ? 'md:flex md:flex-col md:min-h-0' : 'md:self-start'}`}>
           <div className="flex justify-between items-center border-b border-line pb-2">
             <h2 className="font-bold text-ink text-xs">Diagnostic Completed Devices ({filteredWorkOrders.length})</h2>
             <span className="text-[10px] font-mono font-bold bg-success/10 text-[#28A745] px-2 py-0.5 rounded-full border border-success/20">
@@ -416,7 +418,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
             </span>
           </div>
 
-          <div className="space-y-2 min-h-[360px] max-h-[calc(100dvh-280px)] overflow-y-auto">
+          <div className={`space-y-2 overflow-y-auto ${isIpad ? 'md:min-h-0 md:flex-1 md:max-h-none' : 'min-h-[360px] max-h-[calc(100dvh-280px)]'}`}>
             {filteredWorkOrders.length === 0 ? (
               <div className="p-8 text-center text-muted space-y-2 bg-surface rounded-xl border border-dashed border-line-strong my-4">
                 <CheckCircle2 className="w-8 h-8 mx-auto text-emerald-500 opacity-70" />
@@ -531,7 +533,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
         </div>
 
         {/* Right Column: Dynamic Invoice & Terminal Checkout (7 cols) */}
-        <div className="md:col-span-7 bg-white border border-line rounded-2xl p-5 space-y-5 shadow-xs">
+        <div className={`md:col-span-7 bg-white border border-line rounded-2xl p-5 space-y-5 shadow-xs ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:overflow-y-auto' : ''}`}>
           {selectedWo ? (
             <div className="space-y-5">
               <div className="border-b border-line pb-3 space-y-2">
