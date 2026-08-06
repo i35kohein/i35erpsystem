@@ -2673,7 +2673,7 @@ export default function App() {
                 <Button
                   type="button"
                   onClick={() => removeToast(toast.id)}
-                  className="shrink-0 text-slate-400 hover:text-white transition-colors cursor-pointer p-0.5"
+                  className="shrink-0 -mr-1 p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </Button>
