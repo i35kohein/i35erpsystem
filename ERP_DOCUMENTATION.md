@@ -17,7 +17,7 @@ Supabase, offline-tolerant with a local cache, AI assistant for diagnostics.
 |---|---|
 | Frontend | **React 18 + TypeScript + Vite** |
 | Styling | **Tailwind CSS v4** (`@tailwindcss/vite`), design tokens, **carbon-coat.css** (IBM Carbon palette override), SCSS |
-| UI kit | **Radix UI** (dialog/dropdown/popover/select/tabs/slot), **@carbon/react**, **lucide-react** icons, **motion** |
+| UI kit | **Radix UI** (dialog/dropdown/popover/select/tabs/slot) — incl. `ui/dropdown-menu.tsx` kebab primitive, **lucide-react** icons, **motion** |
 | Helpers | class-variance-authority + tailwind-merge (Button variants), html5-qrcode, jsbarcode, qrcode.react |
 | Backend | **Node.js + Express** (server.ts, port 3100 on VPS; 3000 locally) — static SPA + AI proxy |
 | AI | Gemini (`@google/genai`) + OpenRouter (multi-provider) via server proxy |
@@ -97,6 +97,10 @@ React SPA (src/) ──┬── Supabase (erp_records, realtime channels, offli
   default(h-10)/sm/lg/icon(h-10)/iconSm. **Raw `<button>` banned outside the ui kit**
   (lint-enforced, `scripts/check-button-policy.mjs`). Logo always on a white `logo-chip`
   in dark mode.
+- **Kebab action menus:** `ui/dropdown-menu.tsx` (Radix) — table/modal action rows use
+  a ⋮ menu (e.g. TicketDetailInspectorModal: Edit/Print/Delete; inventory part detail).
+- **Create Ticket = slide-over drawer** (right-side, max-w-2xl/3xl, backdrop close) —
+  not a full page; `embedded` prop on CreateTicketSoloPage.
 
 ## 9. Development Workflow
 
