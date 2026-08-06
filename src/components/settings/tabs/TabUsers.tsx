@@ -119,16 +119,16 @@ const UsersTab: React.FC<UsersTabProps> = ({ users, currentUser, handleOpenAddUs
                         </div>
 
                         <div className="flex items-center space-x-1">
-                          <button
+                          <Button
                             type="button"
                             onClick={() => handleOpenEditUser(usr)}
                             className="p-1.5 text-brand hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
                             title="Edit User & Permissions"
                           >
                             <Edit2 className="w-4 h-4" />
-                          </button>
+                          </Button>
                           {usr.id !== 'usr-admin-1' && usr.id !== currentUser?.id && (
-                            <button
+                            <Button
                               type="button"
                               onClick={() => {
                                 if (window.confirm(`Delete user account "${usr.name}"?`)) {
@@ -139,7 +139,7 @@ const UsersTab: React.FC<UsersTabProps> = ({ users, currentUser, handleOpenAddUs
                               title="Delete User Account"
                             >
                               <Trash2 className="w-4 h-4" />
-                            </button>
+                            </Button>
                           )}
                         </div>
                       </div>

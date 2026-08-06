@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '../../ui';
 import {AlertCircle, Boxes, ChevronDown, MapPin, Plus, ShieldCheck, Truck} from 'lucide-react';
 import type { Supplier } from '../../../types';
 import type { SystemSettings } from '../../../types';
@@ -72,9 +73,9 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
               ['bins', 'Storage Bins'],
               ['rules', 'Stock Rules'],
             ] as const).map(([id, label]) => (
-              <button key={id} type="button" onClick={() => setInventoryDataTab(id)} className={`rounded-lg px-3 py-1.5 text-xs font-extrabold ${inventoryDataTab === id ? 'bg-brand text-white' : 'bg-surface text-faint hover:bg-line'}`}>
+              <Button key={id} type="button" onClick={() => setInventoryDataTab(id)} className={`rounded-lg px-3 py-1.5 text-xs font-extrabold ${inventoryDataTab === id ? 'bg-brand text-white' : 'bg-surface text-faint hover:bg-line'}`}>
                 {label}
-              </button>
+              </Button>
             ))}
           </div>
 
@@ -98,14 +99,14 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                 placeholder="New category, e.g. Camera"
                 className="h-9 min-w-0 flex-1 rounded-xl border border-line-strong bg-surface px-3 text-xs font-medium text-ink outline-none focus:border-brand focus:bg-white"
               />
-              <button
+              <Button
                 type="button"
                 onClick={handleAddInventoryCategory}
                 disabled={!categoryDraft.trim()}
                 className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-brand px-3 text-xs font-extrabold text-white transition-colors hover:bg-brand-deep disabled:cursor-not-allowed disabled:opacity-45"
               >
                 <Plus className="h-3.5 w-3.5" /> Add
-              </button>
+              </Button>
             </div>
 
             <div className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-[#F8F9FA]">
@@ -123,17 +124,17 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                     <span className="min-w-0 flex-1 truncate text-xs font-semibold text-ink">{category}</span>
                   )}
                   {editingCategoryKey === category ? (
-                    <button type="button" onClick={() => handleSaveInventoryCategory(category)} className="text-xs font-extrabold text-brand">Save</button>
+                    <Button type="button" onClick={() => handleSaveInventoryCategory(category)} className="text-xs font-extrabold text-brand">Save</Button>
                   ) : (
-                    <button type="button" onClick={() => { setEditingCategoryKey(category); setEditingCategoryLabel(category); }} className="text-xs font-extrabold text-brand">Edit</button>
+                    <Button type="button" onClick={() => { setEditingCategoryKey(category); setEditingCategoryLabel(category); }} className="text-xs font-extrabold text-brand">Edit</Button>
                   )}
-                  <button
+                  <Button
                     type="button"
                     onClick={() => { if (window.confirm(`Delete category “${category}”? It will no longer appear for new inventory parts.`)) { const nextCategories = inventoryCategories.filter((item) => item !== category); onUpdateInventoryCategories?.(nextCategories); setFormData((current) => ({ ...current, inventoryCategories: nextCategories })); } }}
                     className="text-xs font-extrabold text-rose-600"
                   >
                     Delete
-                  </button>
+                  </Button>
                 </div>
               ))}
             </div>
@@ -153,7 +154,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
               <input required value={supplierDraft.code} onChange={(event) => setSupplierDraft({ ...supplierDraft, code: event.target.value })} placeholder="Code" className="h-9 rounded-lg border border-line-strong bg-white px-2.5 font-mono text-xs outline-none focus:border-brand" />
               <input value={supplierDraft.phone} onChange={(event) => setSupplierDraft({ ...supplierDraft, phone: event.target.value })} placeholder="Phone" className="h-9 rounded-lg border border-line-strong bg-white px-2.5 text-xs outline-none focus:border-brand" />
               <input type="number" min="1" value={supplierDraft.avgRmaTurnaroundDays} onChange={(event) => setSupplierDraft({ ...supplierDraft, avgRmaTurnaroundDays: Number(event.target.value) })} placeholder="RMA days" className="h-9 rounded-lg border border-line-strong bg-white px-2.5 text-xs outline-none focus:border-brand" />
-              <button type="submit" className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-brand px-3 text-xs font-extrabold text-white hover:bg-brand-deep"><Plus className="h-3.5 w-3.5" /> Add supplier</button>
+              <Button type="submit" className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-brand px-3 text-xs font-extrabold text-white hover:bg-brand-deep"><Plus className="h-3.5 w-3.5" /> Add supplier</Button>
             </form>
 
             {editingInventorySupplier && (
@@ -162,7 +163,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                 <input required value={editingInventorySupplier.code} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, code: event.target.value })} className="h-9 rounded-lg border border-blue-200 bg-white px-2.5 font-mono text-xs outline-none focus:border-brand" />
                 <input value={editingInventorySupplier.phone} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, phone: event.target.value })} className="h-9 rounded-lg border border-blue-200 bg-white px-2.5 text-xs outline-none focus:border-brand" />
                 <input type="number" min="1" value={editingInventorySupplier.avgRmaTurnaroundDays} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, avgRmaTurnaroundDays: Number(event.target.value) })} className="h-9 rounded-lg border border-blue-200 bg-white px-2.5 text-xs outline-none focus:border-brand" />
-                <div className="flex gap-2"><button type="submit" className="h-9 flex-1 rounded-lg bg-brand text-xs font-extrabold text-white">Save</button><button type="button" onClick={() => setEditingInventorySupplier(null)} className="h-9 rounded-lg border border-line-strong px-3 text-xs font-bold">Cancel</button></div>
+                <div className="flex gap-2"><Button type="submit" className="h-9 flex-1 rounded-lg bg-brand text-xs font-extrabold text-white">Save</Button><Button type="button" onClick={() => setEditingInventorySupplier(null)} className="h-9 rounded-lg border border-line-strong px-3 text-xs font-bold">Cancel</Button></div>
               </form>
             )}
 
@@ -173,8 +174,8 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                   <span className="min-w-0 flex-1 truncate font-extrabold text-ink">{supplier.name}</span>
                   <span className="font-mono text-xs text-muted">{supplier.code}</span>
                   <span className="hidden text-xs text-muted sm:inline">{supplier.avgRmaTurnaroundDays} days</span>
-                  <button type="button" onClick={() => setEditingInventorySupplier(supplier)} className="text-xs font-extrabold text-brand">Edit</button>
-                  <button type="button" onClick={() => { if (window.confirm(`Delete supplier “${supplier.name}”?`)) onDeleteSupplier?.(supplier.id); }} className="text-xs font-extrabold text-rose-600">Delete</button>
+                  <Button type="button" onClick={() => setEditingInventorySupplier(supplier)} className="text-xs font-extrabold text-brand">Edit</Button>
+                  <Button type="button" onClick={() => { if (window.confirm(`Delete supplier “${supplier.name}”?`)) onDeleteSupplier?.(supplier.id); }} className="text-xs font-extrabold text-rose-600">Delete</Button>
                 </div>
               )) : <p className="px-3 py-4 text-center text-xs text-muted">No suppliers yet.</p>}
             </div>
@@ -190,7 +191,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
             </div>
             <div className="flex gap-2">
               <input value={qualityTierDraft} onChange={(event) => setQualityTierDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleAddInventoryQualityTier(); } }} placeholder="New quality tier" className="h-9 min-w-0 flex-1 rounded-lg border border-line-strong bg-surface px-3 text-xs font-medium outline-none focus:border-brand focus:bg-white" />
-              <button type="button" onClick={handleAddInventoryQualityTier} disabled={!qualityTierDraft.trim()} className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-purple-600 px-3 text-xs font-extrabold text-white hover:bg-purple-700 disabled:opacity-45"><Plus className="h-3.5 w-3.5" /> Add</button>
+              <Button type="button" onClick={handleAddInventoryQualityTier} disabled={!qualityTierDraft.trim()} className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-purple-600 px-3 text-xs font-extrabold text-white hover:bg-purple-700 disabled:opacity-45"><Plus className="h-3.5 w-3.5" /> Add</Button>
             </div>
             <div className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-[#F8F9FA]">
               {inventoryQualityTiers.map((tier) => (
@@ -198,8 +199,8 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                   <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-purple-600" />
                   {editingQualityTier === tier ? <input autoFocus value={editingQualityTierLabel} onChange={(event) => setEditingQualityTierLabel(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') handleSaveInventoryQualityTier(tier); if (event.key === 'Escape') setEditingQualityTier(null); }} className="h-7 min-w-0 flex-1 rounded-lg border border-purple-300 bg-white px-2 text-xs font-semibold outline-none" /> : <span className="min-w-0 flex-1 truncate text-xs font-semibold text-ink">{tier}</span>}
                   <span className="rounded-full bg-white px-2 py-0.5 text-xs font-bold text-muted">{parts.filter((part) => part.qualityTier === tier).length} parts</span>
-                  {editingQualityTier === tier ? <button type="button" onClick={() => handleSaveInventoryQualityTier(tier)} className="text-xs font-extrabold text-purple-700">Save</button> : <button type="button" onClick={() => { setEditingQualityTier(tier); setEditingQualityTierLabel(tier); }} className="text-xs font-extrabold text-brand">Edit</button>}
-                  <button type="button" onClick={() => handleDeleteInventoryQualityTier(tier)} className="text-xs font-extrabold text-rose-600">Delete</button>
+                  {editingQualityTier === tier ? <Button type="button" onClick={() => handleSaveInventoryQualityTier(tier)} className="text-xs font-extrabold text-purple-700">Save</Button> : <Button type="button" onClick={() => { setEditingQualityTier(tier); setEditingQualityTierLabel(tier); }} className="text-xs font-extrabold text-brand">Edit</Button>}
+                  <Button type="button" onClick={() => handleDeleteInventoryQualityTier(tier)} className="text-xs font-extrabold text-rose-600">Delete</Button>
                 </div>
               ))}
             </div>
@@ -210,7 +211,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
               <div><h4 className="text-xs font-extrabold text-ink">Storage Bin Names</h4><p className="text-xs text-muted">Saved bin names appear when registering or editing inventory parts.</p></div>
               <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-bold text-brand-deep">{inventoryBinNames.length} bins</span>
             </div>
-            <div className="flex gap-2"><input value={binDraft} onChange={(event) => setBinDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleAddInventoryBin(); } }} placeholder="e.g. BIN-A01" className="h-9 min-w-0 flex-1 rounded-lg border border-line-strong bg-surface px-3 text-xs font-mono font-bold outline-none focus:border-brand focus:bg-white" /><button type="button" onClick={handleAddInventoryBin} disabled={!binDraft.trim()} className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-brand px-3 text-xs font-extrabold text-white hover:bg-brand-deep disabled:opacity-45"><Plus className="h-3.5 w-3.5" /> Add bin</button></div>
+            <div className="flex gap-2"><input value={binDraft} onChange={(event) => setBinDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleAddInventoryBin(); } }} placeholder="e.g. BIN-A01" className="h-9 min-w-0 flex-1 rounded-lg border border-line-strong bg-surface px-3 text-xs font-mono font-bold outline-none focus:border-brand focus:bg-white" /><Button type="button" onClick={handleAddInventoryBin} disabled={!binDraft.trim()} className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-brand px-3 text-xs font-extrabold text-white hover:bg-brand-deep disabled:opacity-45"><Plus className="h-3.5 w-3.5" /> Add bin</Button></div>
             <div className="space-y-2 rounded-xl border border-line bg-[#F8F9FA] p-3">
               {inventoryBinNames.length ? inventoryBinNames.map((bin) => {
                 const binParts = partsByBin.get(bin) || [];
@@ -218,7 +219,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                 return (
                   <div key={bin} className="rounded-lg border border-line bg-white">
                     <div className="flex items-center justify-between gap-2 px-3 py-2">
-                      <button
+                      <Button
                         type="button"
                         onClick={() => setExpandedBinName((current) => current === bin ? null : bin)}
                         className="inline-flex min-w-0 flex-1 items-center gap-2 text-left"
@@ -228,12 +229,12 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                         <MapPin className="h-3.5 w-3.5 shrink-0 text-brand" />
                         <span className="truncate font-mono text-xs font-bold text-ink">{bin}</span>
                         <span className="rounded-full bg-surface px-2 py-0.5 text-xs font-bold text-muted">{binParts.length} parts</span>
-                      </button>
+                      </Button>
                       <div className="flex items-center gap-2">
-                        <button type="button" onClick={() => setExpandedBinName((current) => current === bin ? null : bin)} className="rounded-lg p-1 text-muted hover:bg-surface" aria-label={isOpen ? `Collapse ${bin}` : `Expand ${bin}`}>
+                        <Button type="button" onClick={() => setExpandedBinName((current) => current === bin ? null : bin)} className="rounded-lg p-1 text-muted hover:bg-surface" aria-label={isOpen ? `Collapse ${bin}` : `Expand ${bin}`}>
                           <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180 text-brand' : ''}`} />
-                        </button>
-                        <button type="button" onClick={() => onUpdateSettings({ ...settings, inventoryBinNames: inventoryBinNames.filter((item) => item !== bin) })} className="text-rose-600" aria-label={`Delete ${bin}`}>×</button>
+                        </Button>
+                        <Button type="button" onClick={() => onUpdateSettings({ ...settings, inventoryBinNames: inventoryBinNames.filter((item) => item !== bin) })} className="text-rose-600" aria-label={`Delete ${bin}`}>×</Button>
                       </div>
                     </div>
                     {isOpen && (

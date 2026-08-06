@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Button } from '../ui';
 import { Database, WifiOff, RefreshCw, X, CheckCircle2, AlertTriangle } from 'lucide-react';
 import type { SyncStatusDetail } from '../../lib/supabase';
 
@@ -52,7 +53,7 @@ export const OfflineSyncStatusBadge: React.FC = () => {
 
   return (
     <div className="relative hidden lg:block shrink-0" ref={rootRef}>
-      <button
+      <Button
         type="button"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
@@ -65,20 +66,20 @@ export const OfflineSyncStatusBadge: React.FC = () => {
         aria-label={`${label} — click for details`}
       >
         {unavailable ? <WifiOff className="h-4 w-4" /> : <Database className="h-4 w-4" />}
-      </button>
+      </Button>
 
       {open && (
         <div className="absolute right-0 top-9 z-[70] w-64 rounded-xl border border-line bg-white p-3 shadow-xl text-xs">
           <div className="flex items-center justify-between border-b border-line pb-2 mb-2">
             <span className="font-extrabold text-ink">Live Database Status</span>
-            <button
+            <Button
               type="button"
               onClick={() => setOpen(false)}
               aria-label="Close status panel"
               className="text-muted hover:text-ink transition-colors cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
-            </button>
+            </Button>
           </div>
 
           <div className="space-y-1.5">
@@ -96,7 +97,7 @@ export const OfflineSyncStatusBadge: React.FC = () => {
             )}
           </div>
 
-          <button
+          <Button
             type="button"
             onClick={handleRefresh}
             disabled={refreshing}
@@ -104,7 +105,7 @@ export const OfflineSyncStatusBadge: React.FC = () => {
           >
             <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
             <span>{refreshing ? 'Refreshing…' : 'Refresh Data Now'}</span>
-          </button>
+          </Button>
         </div>
       )}
     </div>

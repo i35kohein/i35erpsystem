@@ -234,13 +234,13 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
           </div>
 
           {onExitPortalMode && (
-            <button
+            <Button
               onClick={onExitPortalMode}
               className="flex items-center space-x-1.5 px-3 py-1.5 bg-surface hover:bg-line text-ink font-bold text-xs rounded-xl border border-line transition-all cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Return to Staff ERP</span>
-            </button>
+            </Button>
           )}
         </header>
 
@@ -282,13 +282,13 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 </div>
               </div>
 
-              <button
+              <Button
                 type="submit"
                 className="w-full max-w-md mx-auto py-3 bg-brand hover:bg-[#0077ED] text-white font-bold rounded-xl text-sm shadow-xs transition-all active:scale-95 flex items-center justify-center space-x-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2"
               >
                 <span className="truncate">Track Repair Voucher</span>
                 <ChevronRight className="w-4 h-4 shrink-0" />
-              </button>
+              </Button>
             </form>
 
           </div>
@@ -345,13 +345,13 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             )}
 
             {onExitPortalMode && (
-              <button
+              <Button
                 onClick={onExitPortalMode}
                 className="hidden sm:flex items-center space-x-1 px-3 py-1.5 bg-surface hover:bg-line text-ink font-bold rounded-xl border border-line transition-all cursor-pointer"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>ERP Mode</span>
-              </button>
+              </Button>
             )}
 
             <Button
@@ -545,7 +545,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
 
         {/* Portal Navigation Tabs */}
         <div className="flex border-b border-line space-x-2 bg-white px-4 pt-2 rounded-2xl border shadow-2xs overflow-x-auto no-scrollbar">
-          <button
+          <Button
             onClick={() => setActiveTab('OVERVIEW')}
             className={`pb-3 px-3 font-extrabold text-xs transition-all border-b-2 flex items-center space-x-1.5 cursor-pointer whitespace-nowrap ${
               activeTab === 'OVERVIEW'
@@ -555,9 +555,9 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
           >
             <Info className="w-4 h-4" />
             <span>Repair Summary & Details</span>
-          </button>
+          </Button>
 
-          <button
+          <Button
             onClick={() => setActiveTab('ESTIMATE')}
             className={`pb-3 px-3 font-extrabold text-xs transition-all border-b-2 flex items-center space-x-1.5 cursor-pointer whitespace-nowrap relative ${
               activeTab === 'ESTIMATE'
@@ -570,9 +570,9 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             {currentWorkOrder.estimateStatus === 'Pending Approval' && (
               <span className="w-2 h-2 rounded-full bg-[#FF9500] animate-ping" />
             )}
-          </button>
+          </Button>
 
-          <button
+          <Button
             onClick={() => setActiveTab('DIAGNOSTICS')}
             className={`pb-3 px-3 font-extrabold text-xs transition-all border-b-2 flex items-center space-x-1.5 cursor-pointer whitespace-nowrap ${
               activeTab === 'DIAGNOSTICS'
@@ -582,9 +582,9 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
           >
             <ShieldCheck className="w-4 h-4" />
             <span>21-Point Diagnostic Inspection</span>
-          </button>
+          </Button>
 
-          <button
+          <Button
             onClick={() => setActiveTab('MESSAGES')}
             className={`pb-3 px-3 font-extrabold text-xs transition-all border-b-2 flex items-center space-x-1.5 cursor-pointer whitespace-nowrap relative ${
               activeTab === 'MESSAGES'
@@ -599,7 +599,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 {currentWorkOrder.customerInquiries.length}
               </span>
             )}
-          </button>
+          </Button>
         </div>
 
         {/* Tab 1: OVERVIEW */}
@@ -814,22 +814,22 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             {currentWorkOrder.estimateStatus !== 'Approved' ? (
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-line">
                 {(currentWorkOrder.status === 'Receive' || currentWorkOrder.status === 'Pending') && (
-                  <button
+                  <Button
                     onClick={() => setRejectionModalOpen(true)}
                     className="w-full sm:w-auto px-5 py-3 bg-white border border-line text-danger hover:bg-danger/10 font-extrabold rounded-xl transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger/40 focus-visible:ring-offset-2"
                   >
                     <span className="hidden sm:inline">Decline / Request Callback</span>
                     <span className="sm:hidden">Decline</span>
-                  </button>
+                  </Button>
                 )}
-                <button
+                <Button
                   onClick={() => setApprovalModalOpen(true)}
                   className="w-full sm:w-auto px-6 py-3 bg-success hover:bg-[#30B753] text-white font-extrabold rounded-xl shadow-xs transition-all active:scale-95 flex items-center justify-center space-x-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success/40 focus-visible:ring-offset-2"
                 >
                   <ThumbsUp className="w-4 h-4 shrink-0" />
                   <span className="truncate hidden sm:inline">Approve Estimate & Authorize Repair</span>
                   <span className="sm:hidden">Approve Estimate</span>
-                </button>
+                </Button>
               </div>
             ) : (
               <div className="p-4 bg-success/10 border border-success/30 rounded-2xl flex items-center justify-between text-success">
@@ -950,12 +950,12 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 <CheckCircle2 className="w-5 h-5" />
                 <h3 className="font-extrabold text-base text-ink">Authorize Repair Estimate</h3>
               </div>
-              <button
+              <Button
                 onClick={() => setApprovalModalOpen(false)}
                 className="p-1 text-muted hover:text-ink rounded-lg"
               >
                 <X className="w-5 h-5" />
-              </button>
+              </Button>
             </div>
 
             <div className="space-y-3 text-xs text-ink">
@@ -1033,12 +1033,12 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 <ThumbsDown className="w-5 h-5" />
                 <h3 className="font-extrabold text-base text-ink">Decline Estimate / Request Callback</h3>
               </div>
-              <button
+              <Button
                 onClick={() => setRejectionModalOpen(false)}
                 className="p-1 text-muted hover:text-ink rounded-lg"
               >
                 <X className="w-5 h-5" />
-              </button>
+              </Button>
             </div>
 
             <div className="space-y-4 text-xs text-ink">
@@ -1136,7 +1136,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             <div className="flex items-center justify-between border-b border-line pb-3 print:hidden">
               <h3 className="font-extrabold text-sm text-ink">Digital Service Voucher & Estimate Receipt</h3>
               <div className="flex items-center space-x-2">
-                <button
+                <Button
                   onClick={() => {
                     try {
                       window.print();
@@ -1148,13 +1148,13 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 >
                   <Printer className="w-3.5 h-3.5" />
                   <span>Print</span>
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => setPrintModalOpen(false)}
                   className="p-1 text-muted hover:text-ink"
                 >
                   <X className="w-5 h-5" />
-                </button>
+                </Button>
               </div>
             </div>
 

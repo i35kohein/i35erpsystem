@@ -328,9 +328,9 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     <CheckCircle2 className="w-4 h-4 text-success" />
                     <span>QA Inspection Confirmed! Card updated to Green & Ready for Checkout.</span>
                   </div>
-                  <button onClick={() => setQaSavedNotice(false)} aria-label="Dismiss confirmation" className="text-[#1E7E34] hover:opacity-75">
+                  <Button onClick={() => setQaSavedNotice(false)} aria-label="Dismiss confirmation" className="text-[#1E7E34] hover:opacity-75">
                     <X className="w-4 h-4" />
-                  </button>
+                  </Button>
                 </div>
               )}
 
@@ -366,20 +366,20 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     <span>21-Point Post-Repair Hardware Inspection</span>
                   </h3>
                   <div className="flex space-x-2">
-                    <button
+                    <Button
                       type="button"
                       onClick={handleMarkAllPass}
                       className="rounded-full bg-success px-3 py-2 min-h-10 text-xs font-bold text-white shadow-xs transition-colors hover:bg-[#28A745]"
                     >
                       Mark All Pass
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
                       onClick={() => setQaDiagnostics((prev) => prev.map((diagnostic) => ({ ...diagnostic, status: 'N/A' })))}
                       className="rounded-full border border-line-strong bg-surface px-3 py-2 min-h-10 text-xs font-bold text-ink shadow-xs transition-colors hover:bg-line"
                     >
                       Mark All N/A
-                    </button>
+                    </Button>
                   </div>
                 </div>
 
@@ -408,7 +408,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                         {/* Status Toggle Buttons — min-h-10 so the highest-frequency
                             tap action in QA clears the 40px touch floor (audit 3.1) */}
                         <div className="flex space-x-1 text-xs">
-                          <button
+                          <Button
                             type="button"
                             onClick={() => handleDiagnosticStatusChange(item.id, 'Pass')}
                             className={`flex-1 min-h-10 py-2 rounded-lg font-black transition-all ${
@@ -416,8 +416,8 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                             }`}
                           >
                             Pass
-                          </button>
-                          <button
+                          </Button>
+                          <Button
                             type="button"
                             onClick={() => handleDiagnosticStatusChange(item.id, 'Fail')}
                             className={`flex-1 min-h-10 py-2 rounded-lg font-black transition-all ${
@@ -425,8 +425,8 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                             }`}
                           >
                             Fail
-                          </button>
-                          <button
+                          </Button>
+                          <Button
                             type="button"
                             onClick={() => handleDiagnosticStatusChange(item.id, 'N/A')}
                             className={`flex-1 min-h-10 py-2 rounded-lg font-black transition-all ${
@@ -434,7 +434,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                             }`}
                           >
                             N/A
-                          </button>
+                          </Button>
                         </div>
 
                         {/* Diagnostic Comment Box */}

@@ -330,7 +330,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
             { id: 'No Answer', label: 'No Answer' },
             { id: 'Callback Scheduled', label: 'Callback Scheduled' },
           ].map((tab) => (
-            <button
+            <Button
               key={tab.id}
               type="button"
               onClick={() => setStatusFilter(tab.id)}
@@ -341,12 +341,12 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
               }`}
             >
               {tab.label}
-            </button>
+            </Button>
           ))}
         </div>
 
         {statusFilter !== 'ALL' || searchQuery ? (
-          <button
+          <Button
             type="button"
             onClick={() => {
               setStatusFilter('ALL');
@@ -355,7 +355,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
             className="text-xs text-brand font-bold hover:underline shrink-0 text-right sm:text-left"
           >
             Reset Filters
-          </button>
+          </Button>
         ) : null}
       </div>
 
@@ -587,12 +587,12 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                   </p>
                 </div>
               </div>
-              <button
+              <Button
                 onClick={() => setIsLogModalOpen(false)}
                 className="p-1 rounded-lg text-muted hover:bg-surface hover:text-ink transition-colors"
               >
                 <X className="w-4 h-4" />
-              </button>
+              </Button>
             </div>
 
             <div className="space-y-4 text-xs">
@@ -666,7 +666,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                       { id: 'Closed', label: 'Closed' },
                     ] as { id: FollowUpStatus; label: string }[]
                   ).map((s) => (
-                    <button
+                    <Button
                       key={s.id}
                       type="button"
                       onClick={() => setFormStatus(s.id)}
@@ -677,7 +677,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                       }`}
                     >
                       {s.label}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
@@ -688,7 +688,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                   <label className="font-bold text-amber-900 block">Customer Satisfaction Rating</label>
                   <div className="flex items-center space-x-2 pt-1">
                     {[1, 2, 3, 4, 5].map((star) => (
-                      <button
+                      <Button
                         key={star}
                         type="button"
                         onClick={() => setFormRating(star)}
@@ -699,7 +699,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                             star <= formRating ? 'fill-amber-400 text-amber-400' : 'text-slate-300'
                           }`}
                         />
-                      </button>
+                      </Button>
                     ))}
                     <span className="font-bold text-amber-900 ml-2">{formRating} / 5 Stars</span>
                   </div>
@@ -727,14 +727,14 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
 
                 <div className="flex flex-wrap gap-1.5 pb-1">
                   {quickNotesTemplates.map((tmpl, idx) => (
-                    <button
+                    <Button
                       key={idx}
                       type="button"
                       onClick={() => setFormNotes(tmpl)}
                       className="px-2 py-1 bg-surface hover:bg-line text-ink border border-line rounded-lg text-xs font-semibold transition-all text-left cursor-pointer"
                     >
                       + {tmpl.slice(0, 32)}...
-                    </button>
+                    </Button>
                   ))}
                 </div>
 
@@ -797,12 +797,12 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                   </p>
                 </div>
               </div>
-              <button
+              <Button
                 onClick={() => setHistoryModalWo(null)}
                 className="p-1 rounded-lg text-muted hover:bg-surface hover:text-ink transition-colors"
               >
                 <X className="w-4 h-4" />
-              </button>
+              </Button>
             </div>
 
             <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
@@ -866,13 +866,13 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
             </div>
 
             <div className="pt-2 text-right">
-              <button
+              <Button
                 type="button"
                 onClick={() => setHistoryModalWo(null)}
                 className="px-4 py-2 bg-surface border border-line text-ink font-bold rounded-xl text-xs hover:bg-line transition-all cursor-pointer"
               >
                 Close
-              </button>
+              </Button>
             </div>
           </div>
         </div>

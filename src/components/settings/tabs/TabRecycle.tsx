@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '../../ui';
 import { Trash2 } from 'lucide-react';
 import type { SystemSettings } from '../../../types';
 
@@ -24,14 +25,14 @@ const RecycleTab: React.FC<RecycleTabProps> = ({ onOpenRecycleBin, archivedCount
             </div>
 
             {onOpenRecycleBin && (
-              <button
+              <Button
                 type="button"
                 onClick={onOpenRecycleBin}
                 className="px-4 py-2.5 bg-danger hover:bg-[#D70015] text-white font-extrabold text-xs rounded-xl transition-all shadow-2xs flex items-center space-x-2 shrink-0 cursor-pointer active:scale-95"
               >
                 <Trash2 className="w-4 h-4" />
                 <span>Open Recycle Bin ({archivedCount})</span>
-              </button>
+              </Button>
             )}
           </div>
 
@@ -51,13 +52,13 @@ const RecycleTab: React.FC<RecycleTabProps> = ({ onOpenRecycleBin, archivedCount
             <div className="p-4 bg-surface rounded-xl border border-line space-y-1">
               <span className="text-xs text-muted font-bold block">Action Manager</span>
               {onOpenRecycleBin ? (
-                <button
+                <Button
                   type="button"
                   onClick={onOpenRecycleBin}
                   className="mt-2 text-xs font-bold text-brand hover:underline flex items-center space-x-1 cursor-pointer"
                 >
                   <span>Launch Recycle Bin Modal →</span>
-                </button>
+                </Button>
               ) : (
                 <span className="text-xs text-muted">No items pending action</span>
               )}

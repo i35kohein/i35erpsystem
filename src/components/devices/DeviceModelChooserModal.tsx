@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Button } from '../ui';
 import {
   Folder,
   Smartphone,
@@ -66,7 +67,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
 
           <div className="flex items-center space-x-2">
             {onOpenSettings && (
-              <button
+              <Button
                 type="button"
                 onClick={() => {
                   onClose();
@@ -76,14 +77,14 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
               >
                 <Settings className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Folder Settings</span>
-              </button>
+              </Button>
             )}
-            <button
+            <Button
               onClick={onClose}
               className="w-7 h-7 rounded-lg bg-line hover:bg-[#D1D1D6] text-ink transition-all cursor-pointer flex items-center justify-center"
             >
               <X className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -109,7 +110,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
               const count = catalog.filter((m) => famFolderIds.has(getModelFolderId(m.model))).length;
 
               return (
-                <button
+                <Button
                   key={fam.key}
                   type="button"
                   onClick={() => { if (count > 0 || fam.key === 'All') setActiveFamilyTab(fam.key as any); }}
@@ -133,7 +134,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                   >
                     {count}
                   </span>
-                </button>
+                </Button>
               );
             })}
           </div>
@@ -149,13 +150,13 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
               className="w-full pl-9 pr-4 py-2 bg-surface border border-line rounded-lg text-xs font-bold text-ink focus:outline-none focus:ring-2 focus:ring-brand"
             />
             {deviceSearchQuery && (
-              <button
+              <Button
                 type="button"
                 onClick={() => setDeviceSearchQuery('')}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-extrabold text-muted hover:text-ink"
               >
                 Clear
-              </button>
+              </Button>
             )}
           </div>
         </div>
@@ -201,7 +202,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                       const activeServiceCount = Object.values(item.prices).filter((p) => p !== null).length;
 
                       return (
-                        <button
+                        <Button
                           key={item.model}
                           type="button"
                           onClick={() => {
@@ -225,7 +226,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                             </span>
                           </div>
                           {isSelected && <Check className="w-4 h-4 shrink-0 text-white stroke-[3]" />}
-                        </button>
+                        </Button>
                       );
                     })}
                   </div>

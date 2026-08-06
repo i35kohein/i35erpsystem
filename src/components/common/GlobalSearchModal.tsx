@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Button } from '../ui';
 import {Search, X, Package, Users, CornerDownLeft, TicketCheck} from 'lucide-react';
 import type { WorkOrder } from '../../types';
 import type { PartItem } from '../../types';
@@ -124,9 +125,9 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
             className="h-12 w-full bg-transparent text-sm text-ink placeholder-muted focus:outline-none"
             aria-label="Search tickets, parts, customers"
           />
-          <button type="button" onClick={onClose} aria-label="Close search" className="shrink-0 text-muted hover:text-ink cursor-pointer">
+          <Button type="button" onClick={onClose} aria-label="Close search" className="shrink-0 text-muted hover:text-ink cursor-pointer">
             <X className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
 
         <div ref={listRef} className="max-h-[52vh] overflow-y-auto p-2">
@@ -145,7 +146,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                 const idx = results.indexOf(item);
                 const active = idx === cursor;
                 return (
-                  <button
+                  <Button
                     key={item.kind + item.id}
                     type="button"
                     data-active={active}
@@ -161,7 +162,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                       <span className="block truncate text-xs text-muted">{item.sub}</span>
                     </span>
                     {active && <CornerDownLeft className="h-3.5 w-3.5 shrink-0 text-brand" />}
-                  </button>
+                  </Button>
                 );
               })}
             </div>

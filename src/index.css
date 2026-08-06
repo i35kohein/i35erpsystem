@@ -104,7 +104,7 @@ body.lang-mm .font-mono {
   --text-muted: #6F6F6F;
   --border: #E0E0E0;
   --border-subtle: #E8E8E8;
-  --success: #24A148;
+  --success: #15803D;
   --warning: #FF9500;
   --danger: #DA1E28;
   --purple: #8A3FFC;
@@ -127,7 +127,7 @@ html:not([data-theme]) {
   --text-muted: #6F6F6F;
   --border: #E0E0E0;
   --border-subtle: #E8E8E8;
-  --success: #24A148;
+  --success: #15803D;
   --warning: #FF9500;
   --danger: #DA1E28;
   --purple: #8A3FFC;

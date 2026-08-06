@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '../ui';
 import {
   Banknote,
   CalendarDays,
@@ -147,7 +148,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
 
           <div className="flex shrink-0 items-center gap-1">
             {onEdit && (
-              <button
+              <Button
                 type="button"
                 onClick={() => onEdit(workOrder)}
                 aria-label="Edit ticket"
@@ -155,11 +156,11 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                 className="flex h-10 w-10 items-center justify-center rounded-lg text-[var(--text-muted)] transition-colors hover:bg-[var(--bg)] hover:text-[var(--primary)]"
               >
                 <PencilLine className="h-4 w-4" />
-              </button>
+              </Button>
             )}
 
             {onPrint && (
-              <button
+              <Button
                 type="button"
                 onClick={() => onPrint(workOrder)}
                 aria-label="Print ticket sticker"
@@ -167,11 +168,11 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                 className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-muted)] transition-colors hover:bg-[var(--bg)] hover:text-[var(--primary)]"
               >
                 <Printer className="h-4 w-4" />
-              </button>
+              </Button>
             )}
 
             {currentUser?.role === 'Admin' && onDelete ? (
-              <button
+              <Button
                 type="button"
                 aria-label="Delete ticket"
                 title="Delete ticket"
@@ -184,7 +185,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                 className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-muted)] transition-colors hover:bg-rose-50 hover:text-rose-600"
               >
                 <Trash2 className="h-4 w-4" />
-              </button>
+              </Button>
             ) : (
               <span
                 aria-label="Delete locked"
@@ -195,7 +196,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
               </span>
             )}
 
-            <button
+            <Button
               type="button"
               onClick={onClose}
               aria-label="Close ticket details"
@@ -203,12 +204,12 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
               className="ml-1 flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-muted)] transition-colors hover:bg-[var(--bg)] hover:text-[var(--text-main)]"
             >
               <X className="h-4.5 w-4.5" />
-            </button>
+            </Button>
           </div>
         </header>
 
         <nav className="flex items-center gap-1 border-b border-[var(--border)] bg-[var(--bg)] px-4 py-1.5 sm:px-5" aria-label="Ticket detail sections">
-          <button
+          <Button
             type="button"
             onClick={() => setActiveTab('details')}
             className={`inline-flex h-10 lg:h-8 items-center gap-1.5 rounded-md px-3 text-xs font-extrabold transition-colors ${
@@ -219,8 +220,8 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
           >
             <FileText className="h-3.5 w-3.5" />
             Details
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             onClick={() => setActiveTab('log')}
             className={`inline-flex h-10 lg:h-8 items-center gap-1.5 rounded-md px-3 text-xs font-extrabold transition-colors ${
@@ -234,7 +235,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
             <span className="inline-flex min-w-5 justify-center rounded-full bg-[var(--blue-tint)] px-1.5 py-0.5 text-[11px] text-[var(--primary)]">
               {repairLogs.length}
             </span>
-          </button>
+          </Button>
         </nav>
 
         {activeTab === 'details' ? (
@@ -435,13 +436,13 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
 
         <footer className="flex items-center justify-between border-t border-[var(--border)] px-4 py-3 sm:px-5">
           <span className="text-xs font-bold text-[var(--text-muted)]">Repair ticket record</span>
-          <button
+          <Button
             type="button"
             onClick={onClose}
             className="rounded-lg bg-[var(--primary)] px-4 py-2 text-xs font-extrabold text-white transition-colors hover:bg-[var(--primary-hover)]"
           >
             Close
-          </button>
+          </Button>
         </footer>
       </div>
     </div>

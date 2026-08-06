@@ -283,33 +283,33 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
               <Calendar className="w-4 h-4 text-brand" />
               <span className="font-extrabold text-xs text-ink">Select Custom Date Range</span>
             </div>
-            <button
+            <Button
               onClick={() => setShowCalendarModal(false)}
               className="p-1 rounded-full text-muted hover:text-ink hover:bg-surface transition-all cursor-pointer"
             >
               <X className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
 
           {/* Month Navigation */}
           <div className="flex items-center justify-between mb-3 px-1">
-            <button
+            <Button
               type="button"
               onClick={handlePrevMonth}
               className="p-1.5 rounded-lg border border-line hover:bg-surface text-ink transition-all cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" />
-            </button>
+            </Button>
             <span className="font-bold text-xs text-ink">
               {monthNames[currentMonth]} {currentYear}
             </span>
-            <button
+            <Button
               type="button"
               onClick={handleNextMonth}
               className="p-1.5 rounded-lg border border-line hover:bg-surface text-ink transition-all cursor-pointer"
             >
               <ChevronRight className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
 
           {/* Days of Week */}
@@ -335,7 +335,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
               const inRange = isInRangeDate(day);
 
               return (
-                <button
+                <Button
                   key={`day-${day}`}
                   type="button"
                   onClick={() => handleDateClick(day)}
@@ -348,7 +348,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
                   }`}
                 >
                   {day}
-                </button>
+                </Button>
               );
             })}
           </div>
@@ -370,7 +370,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
               )}
             </div>
             {(tempStartDate || tempEndDate) && (
-              <button
+              <Button
                 type="button"
                 onClick={() => {
                   setTempStartDate(undefined);
@@ -379,7 +379,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
                 className="text-xs text-brand font-bold hover:underline cursor-pointer ml-2"
               >
                 Clear
-              </button>
+              </Button>
             )}
           </div>
 
@@ -407,14 +407,14 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
             </div>
 
             <div className="flex items-center justify-end space-x-2 pt-2 border-t border-line">
-              <button
+              <Button
                 type="button"
                 onClick={() => setShowCalendarModal(false)}
                 className="px-3 py-1.5 text-xs text-faint font-semibold hover:bg-surface rounded-lg transition-all cursor-pointer"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={handleApplyCustomRange}
                 disabled={!tempStartDate}
@@ -422,7 +422,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
               >
                 <Check className="w-3.5 h-3.5" />
                 <span>Apply Range</span>
-              </button>
+              </Button>
             </div>
           </div>
         </div>

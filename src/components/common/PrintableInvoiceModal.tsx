@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '../ui';
 import {X, 
   Printer, 
   CheckCircle2, 
@@ -172,7 +173,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
           </div>
 
           <div className="flex items-center space-x-2">
-            <button
+            <Button
               type="button"
               onClick={handlePopoutPrint}
               title="Open print in new window if direct print is blocked"
@@ -180,22 +181,22 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
             >
               <ExternalLink className="w-3.5 h-3.5 text-brand" />
               <span className="hidden sm:inline">Popout Print</span>
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={handlePrint}
               className="px-3.5 py-1.5 bg-brand hover:bg-brand-deep text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center space-x-1.5 cursor-pointer active:scale-95"
             >
               <Printer className="w-4 h-4" />
               <span>Print Invoice</span>
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={onClose}
               className="p-1.5 text-muted hover:text-ink hover:bg-line rounded-xl transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -476,21 +477,21 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
             Invoice ready for printing or digital distribution.
           </span>
           <div className="flex items-center space-x-2">
-            <button
+            <Button
               type="button"
               onClick={onClose}
               className="px-4 py-2 bg-white border border-line-strong text-ink font-semibold text-xs rounded-xl hover:bg-slate-100 transition-colors cursor-pointer"
             >
               Close
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={handlePrint}
               className="px-5 py-2 bg-brand hover:bg-brand-deep text-white font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center space-x-1.5 cursor-pointer active:scale-95"
             >
               <Printer className="w-4 h-4" />
               <span>Print Invoice</span>
-            </button>
+            </Button>
           </div>
         </div>
       </div>

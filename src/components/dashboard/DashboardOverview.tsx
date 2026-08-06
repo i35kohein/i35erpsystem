@@ -1201,7 +1201,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 </select>
 
                 {(statusQueueFilter !== 'ALL' || queueTechFilter !== 'ALL' || queuePriorityFilter !== 'ALL' || queueSearchQuery) && (
-                  <button
+                  <Button
                     type="button"
                     onClick={() => {
                       setStatusQueueFilter('ALL');
@@ -1212,7 +1212,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     className="px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-lg transition-all cursor-pointer shrink-0"
                   >
                     Reset Filters
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>

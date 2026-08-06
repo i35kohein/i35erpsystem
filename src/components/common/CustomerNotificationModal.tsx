@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Button } from '../ui';
 import {MessageSquare, Phone, Send, Copy, Check, X, BellRing, ExternalLink} from 'lucide-react';
 import { WorkOrder, SystemSettings, NotificationTemplate } from '../../types';
 import { DEFAULT_NOTIFICATION_TEMPLATES } from '../../data/seedData';
@@ -123,13 +124,13 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
               </p>
             </div>
           </div>
-          <button
+          <Button
             type="button"
             onClick={onClose}
             className="p-1.5 rounded-full hover:bg-white/10 text-slate-300 hover:text-white transition-all cursor-pointer"
           >
             <X className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
 
         <div className="p-6 space-y-5">
@@ -139,7 +140,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
               Select Notification Channel
             </label>
             <div className="grid grid-cols-3 gap-2">
-              <button
+              <Button
                 type="button"
                 onClick={() => setChannel('Viber')}
                 className={`py-2.5 px-3 rounded-2xl border font-extrabold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer ${
@@ -150,9 +151,9 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
               >
                 <MessageSquare className="w-4 h-4" />
                 <span>Viber</span>
-              </button>
+              </Button>
 
-              <button
+              <Button
                 type="button"
                 onClick={() => setChannel('SMS')}
                 className={`py-2.5 px-3 rounded-2xl border font-extrabold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer ${
@@ -163,9 +164,9 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
               >
                 <Phone className="w-4 h-4" />
                 <span>Direct SMS</span>
-              </button>
+              </Button>
 
-              <button
+              <Button
                 type="button"
                 onClick={() => setChannel('Telegram')}
                 className={`py-2.5 px-3 rounded-2xl border font-extrabold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer ${
@@ -176,7 +177,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
               >
                 <Send className="w-4 h-4" />
                 <span>Telegram</span>
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -189,7 +190,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
               {activeTemplates.map((tmpl) => {
                 const isSel = selectedTemplateId === tmpl.id;
                 return (
-                  <button
+                  <Button
                     key={tmpl.id}
                     type="button"
                     onClick={() => handleSelectTemplate(tmpl)}
@@ -200,7 +201,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
                     }`}
                   >
                     {tmpl.title}
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -234,7 +235,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
 
           {/* Action Buttons */}
           <div className="flex items-center space-x-2 pt-2 border-t border-line">
-            <button
+            <Button
               type="button"
               onClick={handleCopy}
               className="flex-1 py-3 bg-surface hover:bg-slate-200 text-ink font-extrabold text-xs rounded-2xl transition-all flex items-center justify-center space-x-1.5 cursor-pointer active:scale-95 border border-line-strong"
@@ -250,9 +251,9 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
                   <span>Copy Burmese Text</span>
                 </>
               )}
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
               onClick={handleSendAction}
               className={`flex-1 py-3 text-white font-extrabold text-xs rounded-2xl shadow-md transition-all flex items-center justify-center space-x-1.5 cursor-pointer active:scale-95 ${
@@ -265,7 +266,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
             >
               <ExternalLink className="w-4 h-4" />
               <span>Send via {channel}</span>
-            </button>
+            </Button>
           </div>
         </div>
       </div>

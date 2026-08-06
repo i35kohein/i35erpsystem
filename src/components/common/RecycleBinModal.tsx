@@ -94,13 +94,13 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
               </>
             )}
 
-            <button
+            <Button
               type="button"
               onClick={onClose}
               className="p-2 rounded-xl text-muted hover:text-ink hover:bg-line/50 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -120,22 +120,22 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
 
             {/* Mobile Restore All & Empty buttons */}
             <div className="flex sm:hidden items-center space-x-2 w-full justify-end">
-              <button
+              <Button
                 type="button"
                 onClick={onRestoreAll}
                 className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>Restore All</span>
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={() => setConfirmEmptyOpen(true)}
                 className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-rose-50 text-rose-600 border border-rose-200 text-xs font-bold"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Empty Bin</span>
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -250,7 +250,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
                 >
                   Cancel
                 </Button>
-                <button
+                <Button
                   type="button"
                   onClick={() => {
                     onEmptyRecycleBin();
@@ -259,7 +259,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
                   className="px-4 py-2 rounded-xl bg-rose-600 text-white font-bold text-xs hover:bg-rose-700 transition-all shadow-2xs cursor-pointer"
                 >
                   Yes, Empty Everything
-                </button>
+                </Button>
               </div>
             </div>
           </div>

@@ -47,14 +47,14 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                   </div>
 
                   {formData.shopLogoUrl && (
-                    <button
+                    <Button
                       type="button"
                       onClick={() => setFormData({ ...formData, shopLogoUrl: '' })}
                       className="text-xs font-bold text-red-500 hover:text-red-700 flex items-center space-x-1 cursor-pointer"
                     >
                       <Trash2 className="w-3 h-3" />
                       <span>Remove Logo</span>
-                    </button>
+                    </Button>
                   )}
                 </div>
 
@@ -120,7 +120,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                     Quick Preset Icons / Badges:
                   </label>
                   <div className="flex flex-wrap gap-2">
-                    <button
+                    <Button
                       type="button"
                       onClick={() => setFormData({ 
                         ...formData, 
@@ -129,8 +129,8 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                       className="px-2.5 py-1 bg-surface hover:bg-line border border-line-strong rounded-lg text-xs font-bold text-ink transition-all flex items-center space-x-1.5 cursor-pointer"
                     >
                       <span> Apple Metallic Badge</span>
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
                       onClick={() => setFormData({ 
                         ...formData, 
@@ -139,8 +139,8 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                       className="px-2.5 py-1 bg-surface hover:bg-line border border-line-strong rounded-lg text-xs font-bold text-ink transition-all flex items-center space-x-1.5 cursor-pointer"
                     >
                       <span>⚡ Tech Circuit Chip</span>
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
                       onClick={() => setFormData({ 
                         ...formData, 
@@ -149,7 +149,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                       className="px-2.5 py-1 bg-surface hover:bg-line border border-line-strong rounded-lg text-xs font-bold text-ink transition-all flex items-center space-x-1.5 cursor-pointer"
                     >
                       <span>🛡️ Cyber Lab Shield</span>
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -176,7 +176,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                     <Phone className="w-3.5 h-3.5 text-success" />
                     <span>Store Contact Phone Lines (Multiple Numbers Supported)</span>
                   </label>
-                  <button
+                  <Button
                     type="button"
                     onClick={() => {
                       const currentPhones = formData.shopPhones && formData.shopPhones.length > 0 
@@ -193,7 +193,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                   >
                     <Plus className="w-3 h-3" />
                     <span>Add Contact Phone Number</span>
-                  </button>
+                  </Button>
                 </div>
 
                 <div className="space-y-2">
@@ -223,7 +223,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                         className="flex-1 p-2.5 bg-white border border-line rounded-xl text-xs font-bold text-ink focus:outline-none focus:border-brand"
                       />
                       {((formData.shopPhones?.length || 1) > 1) && (
-                        <button
+                        <Button
                           type="button"
                           onClick={() => {
                             const currentPhones = formData.shopPhones && formData.shopPhones.length > 0 
@@ -240,7 +240,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                           title="Remove Phone Line"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                        </Button>
                       )}
                     </div>
                   ))}

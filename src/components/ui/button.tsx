@@ -19,7 +19,7 @@ const buttonVariants = cva(
         iconGhost: "text-muted hover:text-ink hover:bg-surface rounded-lg",
       },
       size: {
-        default: "h-11 lg:h-9 px-4 py-2",
+        default: "h-10 px-4 py-2",  // 40px everywhere (app touch standard)
         sm: "h-10 lg:h-8 rounded-xl px-3 text-xs",
         lg: "h-12 lg:h-11 rounded-xl px-6 lg:px-8 text-sm",
         icon: "h-10 w-10",

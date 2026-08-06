@@ -1,4 +1,5 @@
 import React, { useMemo, useRef, useState, useEffect } from 'react';
+import { Button } from '../ui';
 import { Bot, Send, Sparkles, X, AlertTriangle, PackageSearch, PhoneCall, Activity, Settings2, Copy, Database, RotateCcw } from 'lucide-react';
 import { Customer, PartItem, Supplier, SystemSettings, Technician, TechnicianPayoutRecord, WorkOrder } from '../../types';
 import { ModelRepairPrice as PriceCatalogItem } from '../../types/priceCatalog';
@@ -465,9 +466,9 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <button type="button" onClick={clearConversation} disabled={isLoading} title="New conversation" aria-label="New conversation" className="p-2 text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--blue-tint)] rounded-lg disabled:opacity-40"><RotateCcw className="w-4 h-4" /></button>
-            <button type="button" onClick={onOpenAiSettings} title="AI provider settings" aria-label="AI provider settings" className="p-2 text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--blue-tint)] rounded-lg"><Settings2 className="w-4 h-4" /></button>
-            <button type="button" onClick={onClose} title="Close assistant" aria-label="Close assistant" className="p-2 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--blue-tint)] rounded-lg"><X className="w-4 h-4" /></button>
+            <Button type="button" onClick={clearConversation} disabled={isLoading} title="New conversation" aria-label="New conversation" className="p-2 text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--blue-tint)] rounded-lg disabled:opacity-40"><RotateCcw className="w-4 h-4" /></Button>
+            <Button type="button" onClick={onOpenAiSettings} title="AI provider settings" aria-label="AI provider settings" className="p-2 text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--blue-tint)] rounded-lg"><Settings2 className="w-4 h-4" /></Button>
+            <Button type="button" onClick={onClose} title="Close assistant" aria-label="Close assistant" className="p-2 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--blue-tint)] rounded-lg"><X className="w-4 h-4" /></Button>
           </div>
         </div>
 
@@ -478,9 +479,9 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
           </div>
           <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
           {QUICK_PROMPTS.map(({ label, prompt, icon: Icon }) => (
-            <button key={label} type="button" disabled={isLoading} onClick={() => sendMessage(prompt)} className="px-2.5 py-1.5 bg-[var(--bg)] border border-[var(--border)] text-[var(--text-main)] rounded-lg text-xs font-bold flex items-center gap-1.5 shrink-0 hover:border-[var(--primary)] hover:bg-[var(--blue-tint)] disabled:opacity-50">
+            <Button key={label} type="button" disabled={isLoading} onClick={() => sendMessage(prompt)} className="px-2.5 py-1.5 bg-[var(--bg)] border border-[var(--border)] text-[var(--text-main)] rounded-lg text-xs font-bold flex items-center gap-1.5 shrink-0 hover:border-[var(--primary)] hover:bg-[var(--blue-tint)] disabled:opacity-50">
               <Icon className="w-3.5 h-3.5 text-[var(--primary)]" /> {label}
-            </button>
+            </Button>
           ))}
           </div>
         </div>
@@ -499,9 +500,9 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
                 {message.role === 'assistant' && <span className="block mb-1 text-[11px] font-bold uppercase tracking-wide text-[var(--text-muted)]">{message.source === 'ai' ? 'AI analysis' : 'Live ERP analysis'}</span>}
                 {message.content}
                 {message.role === 'assistant' && (
-                  <button type="button" onClick={() => void copyMessage(message.content)} aria-label="Copy response" title="Copy response" className="absolute -right-8 top-1.5 p-1 text-[var(--text-muted)] opacity-0 group-hover:opacity-100 hover:text-[var(--primary)]">
+                  <Button type="button" onClick={() => void copyMessage(message.content)} aria-label="Copy response" title="Copy response" className="absolute -right-8 top-1.5 p-1 text-[var(--text-muted)] opacity-0 group-hover:opacity-100 hover:text-[var(--primary)]">
                     <Copy className="w-3.5 h-3.5" />
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
@@ -531,9 +532,9 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
               placeholder="Ask a business question…"
               className="flex-1 min-h-[42px] max-h-28 resize-none border border-[var(--border)] bg-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[var(--primary)]"
             />
-            <button type="submit" disabled={!input.trim() || isLoading} title="Send message" aria-label="Send message" className="w-10 h-10 bg-[var(--primary)] text-white rounded-xl flex items-center justify-center disabled:opacity-40">
+            <Button type="submit" disabled={!input.trim() || isLoading} title="Send message" aria-label="Send message" className="w-10 h-10 bg-[var(--primary)] text-white rounded-xl flex items-center justify-center disabled:opacity-40">
               <Send className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
           <p className="mt-1.5 text-[11px] text-[var(--text-muted)] text-center">Enter to send · Shift + Enter for a new line · Confirm critical decisions before acting.</p>
         </form>

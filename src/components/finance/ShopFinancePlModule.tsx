@@ -338,7 +338,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
           return (
-            <button
+            <Button
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id as any)}
@@ -359,7 +359,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                   {tab.badge}
                 </span>
               )}
-            </button>
+            </Button>
           );
         })}
       </div>
@@ -826,22 +826,22 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                     <td className="p-3 font-mono font-black text-[#15803D] text-sm">{payout.netPayout.toLocaleString()} MMK</td>
                     <td className="p-3 text-right space-x-1.5">
                       {payout.status === 'Pending' && (
-                        <button
+                        <Button
                           type="button"
                           onClick={() => onUpdatePayoutStatus(payout.id, 'Approved')}
                           className="px-2.5 py-1 bg-brand hover:bg-brand-deep text-white font-bold rounded-lg text-xs cursor-pointer"
                         >
                           Approve
-                        </button>
+                        </Button>
                       )}
                       {payout.status === 'Approved' && (
-                        <button
+                        <Button
                           type="button"
                           onClick={() => onUpdatePayoutStatus(payout.id, 'Paid')}
                           className="px-2.5 py-1 bg-[#16A34A] hover:bg-emerald-700 text-white font-bold rounded-lg text-xs cursor-pointer"
                         >
                           Mark Paid
-                        </button>
+                        </Button>
                       )}
                       {payout.status === 'Paid' && (
                         <span className="bg-emerald-100 text-[#15803D] font-black px-2.5 py-1 rounded-lg text-xs">
@@ -917,7 +917,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                       </td>
                       <td className="p-3 text-right">
                         {debt.status !== 'Paid' && (
-                          <button
+                          <Button
                             type="button"
                             onClick={() => {
                               setSelectedDebtForPayment(debt);
@@ -926,7 +926,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                             className="px-3 py-1.5 bg-brand hover:bg-brand-deep text-white font-extrabold text-xs rounded-xl shadow-2xs cursor-pointer"
                           >
                             Record Payment
-                          </button>
+                          </Button>
                         )}
                       </td>
                     </tr>
@@ -947,13 +947,13 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                 <Receipt className="w-5 h-5 text-rose-600" />
                 <span>Record New Shop Operating Expense (OpEx)</span>
               </h3>
-              <button
+              <Button
                 type="button"
                 onClick={() => setShowAddExpenseModal(false)}
                 className="text-muted hover:text-ink"
               >
                 <X className="w-5 h-5" />
-              </button>
+              </Button>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -1059,9 +1059,9 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
               <h3 className="text-base font-extrabold text-ink">
                 Record Supplier Debt Payment
               </h3>
-              <button onClick={() => setSelectedDebtForPayment(null)} aria-label="Close debt payment" className="rounded-lg p-1 hover:bg-surface transition-colors">
+              <Button onClick={() => setSelectedDebtForPayment(null)} aria-label="Close debt payment" className="rounded-lg p-1 hover:bg-surface transition-colors">
                 <X className="w-5 h-5 text-muted" />
-              </button>
+              </Button>
             </div>
 
             <div className="p-3 bg-slate-50 rounded-xl space-y-1">
@@ -1161,14 +1161,14 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
           </div>
 
           {pendingFundTickets.length > 0 && (
-            <button
+            <Button
               type="button"
               onClick={() => onSettleInventoryFund?.(pendingFundTickets.map((wo) => wo.id))}
               className="w-full p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs font-extrabold text-amber-800 hover:bg-amber-100 transition-all cursor-pointer flex items-center justify-center gap-1.5"
             >
               <CheckCircle2 className="w-4 h-4" />
               Mark All {pendingFundTickets.length} Pending Tickets Settled ({pendingFundTotal.toLocaleString()} MMK)
-            </button>
+            </Button>
           )}
 
           <div className="overflow-x-auto border border-line rounded-xl text-xs">

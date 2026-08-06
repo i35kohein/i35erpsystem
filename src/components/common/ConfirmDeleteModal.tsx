@@ -85,7 +85,7 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
           >
             Cancel
           </Button>
-          <button
+          <Button
             type="button"
             onClick={() => {
               onConfirm();
@@ -97,7 +97,7 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
           >
             <Trash2 className="w-4 h-4" />
             <span>{confirmLabel}</span>
-          </button>
+          </Button>
         </div>
       </div>
     </div>

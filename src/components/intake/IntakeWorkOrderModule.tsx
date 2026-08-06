@@ -189,7 +189,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto md:shrink-0 sm:items-stretch md:items-center">
             {/* View Mode Switcher — full-width segmented control on mobile */}
             <div className="bg-[#F8FBFD] p-1 rounded-xl border border-[#D8E5ED] flex items-center gap-1 w-full md:w-auto">
-              <button
+              <Button
                 type="button"
                 onClick={() => setViewMode('table')}
                 className={`flex-1 md:flex-none px-2.5 sm:px-3 h-9 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center md:justify-start space-x-1.5 cursor-pointer ${
@@ -202,8 +202,8 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
               >
                 <TableIcon className="w-3.5 h-3.5 shrink-0" />
                 <span>Table</span>
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={() => setViewMode('cards')}
                 className={`flex-1 md:flex-none px-2.5 sm:px-3 h-9 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center md:justify-start space-x-1.5 cursor-pointer ${
@@ -216,7 +216,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
               >
                 <LayoutGrid className="w-3.5 h-3.5 shrink-0" />
                 <span>Grid Cards</span>
-              </button>
+              </Button>
             </div>
 
             <Button
@@ -244,7 +244,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           ].map((st) => {
             const isSelected = st.id === 'RUSH' ? sortByPriority : filterStatus === st.id;
             return (
-              <button
+              <Button
                 key={st.id}
                 type="button"
                 onClick={() => {
@@ -266,7 +266,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                 <span className={`text-xl font-extrabold mt-2 leading-none ${st.color}`}>
                   {st.count}
                 </span>
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -288,13 +288,13 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
             {filterStatus !== 'ALL' && (
               <div className="flex items-center space-x-1.5 text-xs bg-[#F0F7FB] text-[#136F9A] px-3 py-1 rounded-lg border border-[#136F9A]/20">
                 <span>Filter: <strong>{filterStatus}</strong></span>
-                <button
+                <Button
                   type="button"
                   onClick={() => setFilterStatus('ALL')}
                   className="text-xs font-bold underline hover:opacity-80 cursor-pointer ml-1"
                 >
                   Clear
-                </button>
+                </Button>
               </div>
             )}
           </div>
@@ -302,7 +302,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           <div className="flex items-center space-x-2 flex-wrap">
             {/* Clear All — desktop only (iPad: removed for declutter) */}
             {!isIpad && workOrders.length > 0 && (
-              <button
+              <Button
                 type="button"
                 onClick={() => {
                   if (window.confirm(`Are you sure you want to remove all ${workOrders.length} tickets?`)) {
@@ -315,11 +315,11 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
               >
                 <Trash2 className="w-3.5 h-3.5 text-rose-600 shrink-0" />
                 <span>Clear All ({workOrders.length})</span>
-              </button>
+              </Button>
             )}
 
             {/* Sort By Urgency Toggle */}
-            <button
+            <Button
               type="button"
               onClick={() => setSortByPriority(!sortByPriority)}
               className={`h-8 px-3 border text-xs font-bold rounded-lg transition-all inline-flex items-center space-x-1.5 cursor-pointer ${
@@ -330,7 +330,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
             >
               <SlidersHorizontal className="w-3.5 h-3.5 shrink-0" />
               <span>Priority First</span>
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -465,7 +465,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                       {/* Action */}
                       <td className="px-2 py-2 text-right hidden xl:table-cell">
                         <div className="flex items-center justify-end" onClick={(e) => e.stopPropagation()}>
-                          <button
+                          <Button
                             type="button"
                             onClick={() => handleOpenTicketDetail(wo)}
                             className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors hover:border-brand hover:bg-blue-50 hover:text-brand"
@@ -473,7 +473,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                             aria-label={`View status for ${wo.orderNumber || wo.id}`}
                           >
                             <Maximize2 className="h-4 w-4" />
-                          </button>
+                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -540,7 +540,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                     </div>
 
                     <div className="flex items-center space-x-1.5" onClick={(e) => e.stopPropagation()}>
-                      <button
+                      <Button
                         type="button"
                         onClick={() => handleOpenTicketDetail(wo)}
                         className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--blue-tint)] text-[var(--primary)] transition-colors hover:bg-[var(--primary)] hover:text-white"
@@ -548,7 +548,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                         aria-label={`View status for ${wo.orderNumber || wo.id}`}
                       >
                         <Maximize2 className="h-4 w-4" />
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -572,7 +572,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
               </div>
 
               <div className="flex items-center gap-1 shrink-0 sm:justify-end">
-                <button
+                <Button
                   type="button"
                   onClick={() => onSelectPrintTag(selectedWorkOrder)}
                   aria-label="Print ticket sticker"
@@ -583,10 +583,10 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                   <span className="pointer-events-none absolute right-0 top-full z-20 mt-2 hidden whitespace-nowrap rounded-md bg-[var(--text-main)] px-2 py-1 text-xs font-bold text-[var(--card-bg)] shadow-md group-hover:block">
                     Print sticker
                   </span>
-                </button>
+                </Button>
 
                 {currentUser?.role === 'Admin' ? (
-                  <button
+                  <Button
                     type="button"
                     aria-label="Delete ticket"
                     title="Delete ticket"
@@ -603,7 +603,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                     <span className="pointer-events-none absolute right-0 top-full z-20 mt-2 hidden whitespace-nowrap rounded-md bg-[var(--text-main)] px-2 py-1 text-xs font-bold text-[var(--card-bg)] shadow-md group-hover:block">
                       Delete ticket
                     </span>
-                  </button>
+                  </Button>
                 ) : (
                   <span
                     aria-label="Delete locked"
@@ -617,7 +617,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                   </span>
                 )}
 
-                <button
+                <Button
                   type="button"
                   aria-label="Close ticket details"
                   title="Close"
@@ -625,7 +625,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                   className="ml-1 flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-muted)] transition-colors hover:bg-[var(--bg)] hover:text-[var(--text-main)] cursor-pointer"
                 >
                   <X className="h-4.5 w-4.5" />
-                </button>
+                </Button>
               </div>
             </div>
 

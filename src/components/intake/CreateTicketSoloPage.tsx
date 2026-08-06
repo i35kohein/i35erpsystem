@@ -616,14 +616,14 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             <p className="text-xs text-muted truncate">{isEditMode ? 'Update customer, device and repair details' : 'Customer, device, repair estimate and intake diagnostics'}</p>
           </div>
         </div>
-        <button
+        <Button
           onClick={onViewRepairTickets}
           className="text-xs text-brand font-bold flex items-center gap-1 hover:bg-brand-soft rounded-lg px-2 py-1.5 shrink-0"
         >
           <ArrowLeft className="w-3 h-3" />
           <span className="hidden sm:inline">{isEditMode ? 'Back to Ticket' : 'Back to Tickets'}</span>
           <span className="sm:hidden">Back</span>
-        </button>
+        </Button>
       </div>
 
       {/* Main Container */}
@@ -647,20 +647,20 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             </p>
           </div>
           <div className="flex shrink-0 items-center rounded-lg border border-line bg-surface p-0.5">
-            <button
+            <Button
               type="button"
               onClick={() => { setWizardMode(false); setWizardStep(0); }}
               className={`rounded-md px-3 py-1.5 text-xs font-extrabold transition-colors cursor-pointer ${!wizardMode ? 'bg-white text-brand shadow-xs' : 'text-muted hover:text-ink'}`}
             >
               Standard
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={() => setWizardMode(true)}
               className={`rounded-md px-3 py-1.5 text-xs font-extrabold transition-colors cursor-pointer ${wizardMode ? 'bg-white text-brand shadow-xs' : 'text-muted hover:text-ink'}`}
             >
               Wizard
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -768,7 +768,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         </div>
 
         {/* STEP 2: Choose Device Model */}
-        <button
+        <Button
           type="button"
           id="intake-device"
           onClick={() => setIsModelModalOpen(true)}
@@ -808,13 +808,13 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               </span>
             </div>
           )}
-        </button>
+        </Button>
 
         {/* STEP 3 & STEP 4: Color (REAL DEVICE COLOR BIG CIRCLE WITH SHADOW) & Warranty */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* STEP 2b: Real Official Color Selection — only after a model is chosen */}
           {deviceModel ? (
-            <button
+            <Button
               type="button"
               onClick={() => setIsColorModalOpen(true)}
               className="w-full text-left p-3 bg-[#F8F9FA] rounded-xl border border-line space-y-2.5 cursor-pointer hover:border-brand/50 transition-all group flex flex-col"
@@ -837,7 +837,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                   style={{ background: activeColorStyle.gradient }}
                 />
               </div>
-            </button>
+            </Button>
           ) : (
             <div className="w-full p-3 bg-[#F8F9FA] rounded-xl border border-line space-y-2.5 flex flex-col">
               <div className="flex items-center justify-between border-b border-line pb-2.5">
@@ -856,7 +856,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           )}
 
           {/* STEP 2c: Warranty Selection */}
-          <button
+          <Button
             type="button"
             onClick={() => setIsWarrantyModalOpen(true)}
             className="w-full text-left p-3 bg-[#F8F9FA] rounded-xl border border-line space-y-2.5 cursor-pointer hover:border-brand/50 transition-all group flex flex-col"
@@ -878,7 +878,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 <ShieldCheck className="w-5 h-5" />
               </div>
             </div>
-          </button>
+          </Button>
         </div>
 
         {/* Serial / IMEI Input */}
@@ -1049,12 +1049,12 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                         {repair.finalPrice.toLocaleString()} MMK
                       </div>
 
-                      <button
+                      <Button
                         onClick={() => setSelectedRepairs(prev => prev.filter(r => r.id !== repair.id))}
                         className="bg-white md:bg-transparent border border-line md:border-none text-muted hover:text-rose-600 hover:bg-rose-50 p-1.5 rounded-lg transition-colors"
                       >
                         <X className="w-4 h-4" />
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -1122,7 +1122,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 <span className="bg-[#16A34A]/10 text-[#15803D] px-2 py-1 rounded-full">✓ {beforeDiagnostics.filter(d => d.status === 'Pass').length} Pass</span>
                 <span className="bg-[#DC2626]/10 text-[#DC2626] px-2 py-1 rounded-full">✕ {beforeDiagnostics.filter(d => d.status === 'Fail').length} Fail</span>
               </span>
-              <button 
+              <Button 
                 onClick={() => {
                   if (beforeDiagnostics.some(d => d.status === 'Pass' || d.status === 'Fail')) {
                     // Never silently overwrite a technician's Pass/Fail verdicts with a bulk Pass.
@@ -1133,20 +1133,20 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 className="text-xs text-white font-bold bg-success hover:bg-[#28A745] px-3 py-2 min-h-10 rounded-full shadow-xs transition-colors"
               >
                 Mark All Pass
-              </button>
-              <button 
+              </Button>
+              <Button 
                 onClick={() => setBeforeDiagnostics(prev => prev.map(d => ({ ...d, status: 'N/A' })))}
                 className="text-xs text-ink font-bold bg-surface hover:bg-line px-3 py-2 min-h-10 rounded-full shadow-xs transition-colors border border-line-strong"
               >
                 Mark All N/A
-              </button>
-              <button 
+              </Button>
+              <Button 
                 onClick={() => setBeforeDiagnostics(prev => prev.map(d => ({ ...d, status: 'N/A' as const, note: '' })))}
                 title="Reset all statuses and comments"
                 className="text-xs text-muted font-bold bg-white hover:bg-line px-3 py-2 min-h-10 rounded-full transition-colors border border-line-strong"
               >
                 Reset
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -1174,7 +1174,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                   </div>
 
                   <div className="flex space-x-1 text-xs">
-                    <button
+                    <Button
                       onClick={() => {
                         const updated = [...beforeDiagnostics];
                         updated[idx].status = 'Pass';
@@ -1185,8 +1185,8 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                       }`}
                     >
                       Pass
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={() => {
                         const updated = [...beforeDiagnostics];
                         updated[idx].status = 'Fail';
@@ -1197,8 +1197,8 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                       }`}
                     >
                       Fail
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={() => {
                         const updated = [...beforeDiagnostics];
                         updated[idx].status = 'N/A';
@@ -1209,7 +1209,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                       }`}
                     >
                       N/A
-                    </button>
+                    </Button>
                   </div>
 
                   {/* Diagnostic Comment Box — only for Fail (or when a note exists); 90% of comments are on failed items */}
@@ -1228,7 +1228,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                       />
                     </div>
                   ) : (
-                    <button
+                    <Button
                       type="button"
                       onClick={() => {
                         const updated = [...beforeDiagnostics];
@@ -1238,7 +1238,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                       className="pt-1 text-xs font-semibold text-muted hover:text-brand transition-colors"
                     >
                       + Add comment
-                    </button>
+                    </Button>
                   )}
                 </div>
               );
@@ -1257,14 +1257,14 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             {intakePhotos.map((photo, idx) => (
               <div key={idx} className="relative w-20 h-20 rounded-xl overflow-hidden border border-line group">
                 <img src={photo} alt="Intake" className="w-full h-full object-cover" />
-                <button
+                <Button
                   onClick={() => setIntakePhotos(prev => prev.filter((_, i) => i !== idx))}
                   aria-label={`Remove photo ${idx + 1}`}
                   title="Remove photo"
                   className="absolute top-1 right-1 bg-black/70 text-white p-0.5 rounded-full opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity active:scale-90"
                 >
                   <X className="w-3 h-3" />
-                </button>
+                </Button>
               </div>
             ))}
 
@@ -1293,14 +1293,14 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 e.target.value = '';
               }}
             />
-            <button
+            <Button
               type="button"
               onClick={() => photoInputRef.current?.click()}
               className="w-20 h-20 rounded-xl border-2 border-dashed border-line hover:border-brand flex flex-col items-center justify-center text-muted hover:text-brand text-xs space-y-1 bg-white transition-all"
             >
               <Camera className="w-5 h-5" />
               <span>Take / Add Photo</span>
-            </button>
+            </Button>
           </div>
           <p className="text-xs text-muted font-medium">Up to 4MB per photo · tap the × badge on a thumbnail to delete · on mobile the camera opens directly.</p>
         </div>
@@ -1312,7 +1312,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         {wizardMode && (
           <div className="flex items-center justify-between gap-2 rounded-xl border border-brand/20 bg-brand-soft p-2.5">
             {['Customer', 'Device', 'Repairs', 'Review'].map((label, idx) => (
-              <button
+              <Button
                 key={label}
                 type="button"
                 onClick={() => setWizardStep(idx)}
@@ -1324,7 +1324,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                   {idx + 1}
                 </span>
                 <span className="hidden sm:inline">{label}</span>
-              </button>
+              </Button>
             ))}
           </div>
         )}
@@ -1446,9 +1446,9 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       {isColorModalOpen && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border border-line rounded-2xl max-w-lg w-full p-6 space-y-4 text-xs shadow-2xl relative">
-            <button onClick={() => setIsColorModalOpen(false)} aria-label="Close color picker" className="absolute right-4 top-4 text-muted hover:text-ink">
+            <Button onClick={() => setIsColorModalOpen(false)} aria-label="Close color picker" className="absolute right-4 top-4 text-muted hover:text-ink">
               <X className="w-5 h-5" />
-            </button>
+            </Button>
 
             <div className="border-b border-line pb-2">
               <h3 className="text-base font-black text-ink">
@@ -1463,7 +1463,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 const isSelected = deviceColor === colorName;
 
                 return (
-                  <button
+                  <Button
                     key={colorName}
                     onClick={() => {
                       setDeviceColor(colorName);
@@ -1483,7 +1483,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                     <span className={`text-xs font-bold ${isSelected ? 'text-brand' : 'text-ink'}`}>
                       {colorName}
                     </span>
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -1495,9 +1495,9 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       {isWarrantyModalOpen && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border border-line rounded-2xl max-w-md w-full p-6 space-y-4 text-xs shadow-2xl relative">
-            <button onClick={() => setIsWarrantyModalOpen(false)} aria-label="Close warranty info" className="absolute right-4 top-4 text-muted hover:text-ink">
+            <Button onClick={() => setIsWarrantyModalOpen(false)} aria-label="Close warranty info" className="absolute right-4 top-4 text-muted hover:text-ink">
               <X className="w-5 h-5" />
-            </button>
+            </Button>
 
             <h3 className="text-sm font-bold text-ink border-b border-line pb-2 flex items-center space-x-2">
               <ShieldCheck className="w-4 h-4 text-[#15803D]" />
@@ -1506,7 +1506,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
 
             <div className="space-y-2">
               {WARRANTY_OPTIONS.map((opt) => (
-                <button
+                <Button
                   key={opt.label}
                   onClick={() => {
                     setWarrantyDays(opt.days);
@@ -1521,7 +1521,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 >
                   <span>{opt.label}</span>
                   <span>{opt.days} Days</span>
-                </button>
+                </Button>
               ))}
 
               <div className="pt-2 border-t border-line flex items-center space-x-2">
@@ -1532,7 +1532,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                   onChange={(e) => setCustomWarrantyInput(e.target.value)}
                   className="flex-1 bg-surface border border-line rounded-xl px-3 py-2 text-xs"
                 />
-                <button
+                <Button
                   onClick={() => {
                     const days = Number(customWarrantyInput);
                     if (days >= 0) {
@@ -1544,7 +1544,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                   className="px-3 py-2 bg-brand text-white font-bold text-xs rounded-xl"
                 >
                   Apply
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -1555,12 +1555,12 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       {isRepairsModalOpen && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border border-line rounded-2xl max-w-2xl w-full p-6 space-y-4 text-xs shadow-2xl relative max-h-[85vh] flex flex-col">
-            <button
+            <Button
               onClick={() => setIsRepairsModalOpen(false)}
               className="absolute right-4 top-4 text-muted hover:text-ink p-1 rounded-lg hover:bg-slate-100"
             >
               <X className="w-5 h-5" />
-            </button>
+            </Button>
 
             <div className="border-b border-line pb-3 space-y-1">
               <h3 className="text-base font-black text-ink flex items-center space-x-2">
@@ -1588,7 +1588,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               {/* Category Group Filter Pills */}
               <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs">
                 {['ALL', 'Battery', 'Display', 'Housing', 'Charging', 'Audio', 'Logic Board', 'Network', 'Sensors & Keys'].map((grp) => (
-                  <button
+                  <Button
                     key={grp}
                     onClick={() => setSelectedGroupFilter(grp)}
                     className={`px-3 py-1 rounded-lg font-bold shrink-0 transition-all ${
@@ -1598,7 +1598,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                     }`}
                   >
                     {grp}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -1619,7 +1619,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                     (s) => s.id === item.id || s.name.toLowerCase() === item.name.toLowerCase()
                   );
                   return (
-                    <button
+                    <Button
                       type="button"
                       key={item.id}
                       onClick={() => toggleCatalogRepair(item)}
@@ -1654,7 +1654,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                           <span className="block text-[11px] text-success-deep font-bold">Catalog Verified</span>
                         )}
                       </div>
-                    </button>
+                    </Button>
                   );
                 })}
             </div>
@@ -1663,12 +1663,12 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               <span className="text-xs text-muted font-semibold">
                 Selected: <strong className="text-ink">{selectedRepairs.length} repair(s)</strong>
               </span>
-              <button
+              <Button
                 onClick={() => setIsRepairsModalOpen(false)}
                 className="px-6 py-2.5 bg-brand text-white font-bold rounded-xl text-xs hover:bg-[#0077ED] transition-colors shadow-sm"
               >
                 Apply Selected Repairs ({selectedRepairs.length})
-              </button>
+              </Button>
             </div>
           </div>
         </div>

@@ -426,18 +426,18 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
               </p>
             </div>
           </div>
-          <button
+          <Button
             onClick={onClose}
             className="w-8 h-8 rounded-full bg-white hover:bg-line flex items-center justify-center text-muted hover:text-ink transition-all cursor-pointer border border-line"
           >
             <X className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
 
         {/* Navigation Sub-Tabs Bar */}
         <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-2.5 bg-surface border-b border-line text-xs">
           <div className="flex items-center space-x-1.5 flex-wrap gap-y-1 overflow-x-auto no-scrollbar">
-            <button
+            <Button
               type="button"
               onClick={() => setActiveSubTab('model-editor')}
               className={`px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
@@ -448,9 +448,9 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
             >
               <Smartphone className="w-4 h-4" />
               <span>Models & Prices ({catalog.length})</span>
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
               onClick={() => setActiveSubTab('categories-editor')}
               className={`px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
@@ -461,9 +461,9 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
             >
               <Tag className="w-4 h-4" />
               <span>Repair Categories ({categories.length})</span>
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
               onClick={() => setActiveSubTab('folder-visibility')}
               className={`px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
@@ -474,9 +474,9 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
             >
               <Folder className="w-4 h-4" />
               <span>Folders ({folders.filter((f) => f.enabled).length}/{folders.length} Visible)</span>
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
               onClick={() => setActiveSubTab('global-settings')}
               className={`px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
@@ -487,7 +487,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
             >
               <Globe className="w-4 h-4" />
               <span>Global Markup & Currency</span>
-            </button>
+            </Button>
           </div>
 
           <div className="flex items-center space-x-2">
@@ -498,7 +498,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
               className="hidden"
               onChange={handleImportCsv}
             />
-            <button
+            <Button
               type="button"
               onClick={() => importInputRef.current?.click()}
               className="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-brand font-bold text-xs transition-all flex items-center space-x-1.5 border border-blue-200 cursor-pointer"
@@ -506,15 +506,15 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
             >
               <FileUp className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Import CSV</span>
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleExportJson}
               className="px-3 py-1.5 rounded-lg bg-surface hover:bg-line text-ink font-bold text-xs transition-all flex items-center space-x-1.5 border border-line cursor-pointer"
             >
               <Download className="w-3.5 h-3.5 text-brand" />
               <span className="hidden sm:inline">Export JSON</span>
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => {
                 if (window.confirm('Reset all price tables, folder settings, and categories back to factory defaults?')) {
                   resetToDefaults();
@@ -526,7 +526,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Reset Defaults</span>
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -554,7 +554,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                       </label>
                       <div className="flex items-center space-x-2">
                         {renameModel && !isRenamingModel && (
-                          <button
+                          <Button
                             type="button"
                             onClick={() => {
                               setIsRenamingModel(true);
@@ -564,17 +564,17 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                           >
                             <Edit3 className="w-3 h-3" />
                             <span>Rename Model</span>
-                          </button>
+                          </Button>
                         )}
                         {deleteModel && catalog.length > 1 && (
-                          <button
+                          <Button
                             type="button"
                             onClick={handleDeleteModelClick}
                             className="text-xs font-bold text-red-600 hover:underline flex items-center space-x-1"
                           >
                             <Trash2 className="w-3 h-3" />
                             <span>Delete</span>
-                          </button>
+                          </Button>
                         )}
                       </div>
                     </div>
@@ -781,14 +781,14 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                     </select>
                   </div>
                   <div>
-                    <button
+                    <Button
                       type="submit"
                       disabled={!newCategoryKey.trim()}
                       className="w-full px-3 py-1.5 bg-brand hover:bg-brand/90 disabled:opacity-50 text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1 cursor-pointer shadow-2xs"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       <span>Add Category</span>
-                    </button>
+                    </Button>
                   </div>
                 </form>
               </div>
@@ -822,20 +822,20 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                                   onChange={(e) => setEditingCategoryLabel(e.target.value)}
                                   className="flex-1 px-2.5 py-1 bg-white border border-brand rounded-md text-xs font-extrabold text-ink focus:outline-none"
                                 />
-                                <button
+                                <Button
                                   type="button"
                                   onClick={() => handleSaveCategoryLabel(cat.key)}
                                   className="px-2.5 py-1 bg-brand text-white rounded-md text-xs font-bold cursor-pointer"
                                 >
                                   Save
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                   type="button"
                                   onClick={() => setEditingCategoryKey(null)}
                                   className="px-2.5 py-1 bg-line text-ink rounded-md text-xs font-bold cursor-pointer"
                                 >
                                   Cancel
-                                </button>
+                                </Button>
                               </div>
                             ) : (
                               <span>{cat.label}</span>
@@ -849,23 +849,23 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                           <td className="py-2.5 px-4 text-right">
                             {!isEditing && (
                               <div className="flex items-center justify-end space-x-2">
-                                <button
+                                <Button
                                   type="button"
                                   onClick={() => handleStartEditingCategory(cat)}
                                   className="p-1.5 hover:bg-line text-brand rounded-lg transition-all cursor-pointer"
                                   title="Change Category Name"
                                 >
                                   <Edit3 className="w-3.5 h-3.5" />
-                                </button>
+                                </Button>
                                 {deleteCategory && (
-                                  <button
+                                  <Button
                                     type="button"
                                     onClick={() => handleDeleteCategoryClick(cat.key, cat.label)}
                                     className="p-1.5 hover:bg-red-50 text-red-600 rounded-lg transition-all cursor-pointer"
                                     title="Delete Category"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
+                                  </Button>
                                 )}
                               </div>
                             )}
@@ -942,14 +942,14 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                       </select>
                     </div>
                     <div>
-                      <button
+                      <Button
                         type="submit"
                         disabled={!newFolderName.trim()}
                         className="w-full px-3 py-1.5 bg-brand hover:bg-brand/90 disabled:opacity-50 text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer shadow-2xs"
                       >
                         <FolderPlus className="w-3.5 h-3.5" />
                         <span>Create Folder</span>
-                      </button>
+                      </Button>
                     </div>
                   </form>
                 )}
@@ -990,13 +990,13 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                                 onChange={(e) => setEditingFolderName(e.target.value)}
                                 className="w-full px-2 py-1 border border-brand bg-white rounded-lg text-xs font-bold text-ink"
                               />
-                              <button
+                              <Button
                                 type="button"
                                 onClick={() => handleSaveFolderName(folder.id)}
                                 className="px-2 py-1 bg-brand text-white text-xs font-bold rounded-lg cursor-pointer"
                               >
                                 Save
-                              </button>
+                              </Button>
                             </div>
                           ) : (
                             <div className="flex items-center space-x-2">
@@ -1004,14 +1004,14 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                                 {folder.name}
                               </h4>
                               {renameFolder && (
-                                <button
+                                <Button
                                   type="button"
                                   onClick={() => handleStartEditingFolder(folder)}
                                   className="text-brand hover:text-brand/80 p-0.5 cursor-pointer"
                                   title="Rename folder"
                                 >
                                   <Edit3 className="w-3 h-3" />
-                                </button>
+                                </Button>
                               )}
                               <span className="text-xs font-extrabold px-2 py-0.5 rounded-full bg-surface text-muted border border-line">
                                 {modelCount} models
@@ -1200,7 +1200,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                     { label: 'Thai Baht (฿)', sym: '฿' },
                     { label: 'Euro (€)', sym: '€' },
                   ].map((curr) => (
-                    <button
+                    <Button
                       key={curr.sym}
                       type="button"
                       onClick={() => setCurrencySymbol(curr.sym)}
@@ -1212,7 +1212,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                     >
                       <div className="text-base font-black font-mono">{curr.sym}</div>
                       <div className="text-xs">{curr.label}</div>
-                    </button>
+                    </Button>
                   ))}
                 </div>
 
@@ -1249,7 +1249,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
           </span>
 
           <div className="flex items-center space-x-3">
-            <button
+            <Button
               onClick={() => {
                 triggerToast('All changes saved.');
                 setTimeout(() => {
@@ -1260,7 +1260,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
             >
               <Save className="w-4 h-4" />
               <span>Save & Close</span>
-            </button>
+            </Button>
           </div>
         </div>
       </div>

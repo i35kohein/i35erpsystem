@@ -847,14 +847,14 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             className="w-full bg-white border border-line text-xs text-ink placeholder-muted pl-8 pr-7 py-2 rounded-xl focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all"
           />
           {settingsTabQuery && (
-            <button
+            <Button
               type="button"
               onClick={() => setSettingsTabQuery('')}
               aria-label="Clear settings search"
               className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center text-muted hover:text-ink rounded-full hover:bg-surface transition-colors cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
-            </button>
+            </Button>
           )}
         </div>
 
@@ -905,7 +905,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                     const Icon = tab.icon;
                     const isActive = activeSubTab === tab.id;
                     return (
-                      <button
+                      <Button
                         key={tab.id}
                         type="button"
                         onClick={() => {
@@ -944,7 +944,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                           </span>
                         )}
                         <ChevronRight className="w-4 h-4 ml-auto md:hidden shrink-0 text-[#C7C7CC]" />
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>
@@ -1053,13 +1053,13 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                   </p>
                 </div>
               </div>
-              <button
+              <Button
                 type="button"
                 onClick={() => setTechModalOpen(false)}
                 className="p-1.5 text-muted hover:text-ink hover:bg-surface rounded-lg cursor-pointer"
               >
                 <X className="w-4 h-4" />
-              </button>
+              </Button>
             </div>
 
             <form onSubmit={handleTechSubmit} className="space-y-4 text-xs">
@@ -1188,12 +1188,12 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                 >
                   Cancel
                 </Button>
-                <button
+                <Button
                   type="submit"
                   className="font-extrabold"
                 >
                   {editingTech ? 'Update Record' : 'Save Technician'}
-                </button>
+                </Button>
               </div>
             </form>
           </div>
@@ -1212,20 +1212,20 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               Are you sure you want to remove this technician from the system roster? Active tickets assigned to them will remain in the pipeline.
             </p>
             <div className="flex items-center justify-end space-x-2 pt-2">
-              <button
+              <Button
                 type="button"
                 onClick={() => setDeleteConfirmId(null)}
                 className="px-3 py-1.5 bg-surface text-ink font-bold text-xs rounded-xl cursor-pointer"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={() => handleConfirmDeleteTech(deleteConfirmId)}
                 className="text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white"
               >
                 Confirm Delete
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -1244,13 +1244,13 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                   {editingUser ? 'Edit User Account & Permissions' : 'Add New System User'}
                 </h3>
               </div>
-              <button
+              <Button
                 type="button"
                 onClick={() => setUserModalOpen(false)}
                 className="p-1 text-muted hover:text-ink rounded-lg cursor-pointer"
               >
                 <X className="w-4 h-4" />
-              </button>
+              </Button>
             </div>
 
             <div className="space-y-4 text-xs">
@@ -1313,7 +1313,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                   Select User Role <span className="text-rose-500">*</span>
                 </label>
                 <div className="grid grid-cols-3 gap-2">
-                  <button
+                  <Button
                     type="button"
                     onClick={() => {
                       setUserFormData({
@@ -1338,9 +1338,9 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                   >
                     <div className="text-base mb-0.5">👑</div>
                     <div>Admin</div>
-                  </button>
+                  </Button>
 
-                  <button
+                  <Button
                     type="button"
                     onClick={() => {
                       setUserFormData({
@@ -1365,9 +1365,9 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                   >
                     <div className="text-base mb-0.5">🔧</div>
                     <div>Technician</div>
-                  </button>
+                  </Button>
 
-                  <button
+                  <Button
                     type="button"
                     onClick={() => {
                       setUserFormData({
@@ -1392,7 +1392,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                   >
                     <div className="text-base mb-0.5">📋</div>
                     <div>Reception</div>
-                  </button>
+                  </Button>
                 </div>
               </div>
 
@@ -1544,13 +1544,13 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               >
                 Cancel
               </Button>
-              <button
+              <Button
                 type="button"
                 onClick={handleSaveUser}
                 className="px-4 py-2 bg-brand hover:bg-brand-deep text-white font-extrabold text-xs rounded-xl shadow-2xs cursor-pointer active:scale-95"
               >
                 {editingUser ? 'Save Changes' : 'Create User Account'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

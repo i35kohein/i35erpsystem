@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '../../ui';
 import {AlignLeft, CheckCircle2, ChevronDown, ExternalLink, FileText, Globe, Mail, MapPin, Phone, Printer, QrCode, Store, Tag, Type} from 'lucide-react';
 import type { SystemSettings } from '../../../types';
 
@@ -46,7 +47,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
               </div>
             </div>
 
-            <button
+            <Button
               type="button"
               onClick={() => setIsDeviceTagPrinterOpen(true)}
               className="px-4 py-2 bg-brand hover:bg-brand-deep text-white font-extrabold text-xs rounded-xl flex items-center justify-center space-x-2 shadow-sm transition-all cursor-pointer active:scale-95 shrink-0"
@@ -54,12 +55,12 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
               <Printer className="w-4 h-4" />
               <span>Interactive Print Modal</span>
               <ExternalLink className="w-3.5 h-3.5" />
-            </button>
+            </Button>
           </div>
 
           {/* Formats, Branding & Text Fields — collapsible (mobile-friendly) */}
           <div className="bg-white rounded-2xl border border-line-strong shadow-2xs overflow-hidden">
-            <button
+            <Button
               type="button"
               onClick={() => toggleSection('pos-formats')}
               className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-[#F8F9FA] hover:bg-[#F0F1F4] transition-colors cursor-pointer"
@@ -70,7 +71,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                 <span>Formats, Branding & Text Fields</span>
               </span>
               <ChevronDown className={`w-4 h-4 text-muted transition-transform ${isSectionOpen('pos-formats') ? '' : 'rotate-180'}`} />
-            </button>
+            </Button>
             {isSectionOpen('pos-formats') && (
             <div className="space-y-6 p-4">
             {/* Connected Store Branding Status Card — sourced only from Shop Settings. */}
@@ -122,14 +123,14 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                 </div>
               </div>
 
-              <button
+              <Button
                 type="button"
                 onClick={() => setActiveSubTab('shop')}
                 className="px-3 py-1.5 bg-surface hover:bg-line text-brand font-extrabold text-xs rounded-xl border border-line-strong transition-all flex items-center space-x-1 shrink-0 cursor-pointer"
               >
                 <Store className="w-3.5 h-3.5" />
                 <span>Edit Shop Profile</span>
-              </button>
+              </Button>
             </div>
 
             {/* Standard Format Selection Cards */}
@@ -240,7 +241,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                         {RECEIPT_FOOTER_ALIGNMENT_OPTIONS.map(({ value, label, Icon }) => {
                           const isActive = selectedFooterAlignment === value;
                           return (
-                            <button
+                            <Button
                               key={value}
                               type="button"
                               onMouseDown={(event) => event.preventDefault()}
@@ -254,7 +255,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                             >
                               <Icon className="h-2.5 w-2.5" />
                               <span>{label}</span>
-                            </button>
+                            </Button>
                           );
                         })}
                       </div>
@@ -269,7 +270,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                         {RECEIPT_FOOTER_SIZE_OPTIONS.map(({ value, label }) => {
                           const isActive = (formData.receiptFooterFontSize || 'medium') === value;
                           return (
-                            <button
+                            <Button
                               key={value}
                               type="button"
                               onMouseDown={(event) => event.preventDefault()}
@@ -281,7 +282,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                               aria-pressed={isActive}
                             >
                               {label}
-                            </button>
+                            </Button>
                           );
                         })}
                       </div>

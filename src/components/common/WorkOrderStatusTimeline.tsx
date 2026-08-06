@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { Button } from '../ui';
 import {Clock, 
   CheckCircle2, 
   Cog, 
@@ -290,7 +291,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
           </div>
 
           <div className="flex items-center space-x-2">
-            <button
+            <Button
               type="button"
               onClick={handleCopyAuditSummary}
               className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white font-bold text-xs rounded-xl border border-white/20 transition-all flex items-center space-x-1.5 cursor-pointer shadow-2xs active:scale-95"
@@ -298,16 +299,16 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
             >
               {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
               <span>{isCopied ? t('copied') : t('copy')}</span>
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
               onClick={() => setIsAddingLog(!isAddingLog)}
               className="px-3 py-1.5 bg-brand hover:bg-[#0077ED] text-white font-bold text-xs rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer shadow-md active:scale-95"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>{t('logStatus')}</span>
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -386,13 +387,13 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
               <Activity className="w-4 h-4 text-brand" />
               <span>Record Status Transition or Technical Audit Entry</span>
             </span>
-            <button
+            <Button
               type="button"
               onClick={() => setIsAddingLog(false)}
               className="text-xs text-muted hover:text-ink font-bold"
             >
               Cancel ✕
-            </button>
+            </Button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
@@ -475,21 +476,21 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
           </div>
 
           <div className="flex justify-end space-x-2 pt-1">
-            <button
+            <Button
               type="button"
               onClick={() => setIsAddingLog(false)}
               className="px-3.5 py-1.5 bg-white border border-line hover:bg-slate-100 text-ink font-bold text-xs rounded-xl transition-all cursor-pointer"
             >
               Discard
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={handleAddNewTransitionLog}
               className="px-4 py-1.5 bg-brand hover:bg-[#0077ED] text-white font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center space-x-1 cursor-pointer"
             >
               <Send className="w-3.5 h-3.5" />
               <span>Save & Publish Transition Log</span>
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -512,7 +513,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
           {/* Filter Pills */}
           <div className="flex items-center space-x-1 overflow-x-auto no-scrollbar w-full sm:w-auto">
             <span className="text-xs font-bold text-muted uppercase tracking-wider pr-1">Filter:</span>
-            <button
+            <Button
               type="button"
               onClick={() => setFilterType('ALL')}
               className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
@@ -520,8 +521,8 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
               }`}
             >
               All Events ({auditItems.length})
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={() => setFilterType('TRANSITION')}
               className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
@@ -529,8 +530,8 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
               }`}
             >
               Transitions Only
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={() => setFilterType('NOTES')}
               className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
@@ -538,8 +539,8 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
               }`}
             >
               Tech Notes
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={() => setFilterType('QA')}
               className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
@@ -547,7 +548,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
               }`}
             >
               QA & Diagnostics
-            </button>
+            </Button>
           </div>
         </div>
       )}

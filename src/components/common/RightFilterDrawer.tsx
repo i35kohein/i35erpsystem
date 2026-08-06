@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { Button } from '../ui';
 import { createPortal } from 'react-dom';
 import { X, RotateCcw } from 'lucide-react';
 
@@ -102,14 +103,14 @@ export const RightFilterDrawer: React.FC<RightFilterDrawerProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
           <p id={titleId.current} className="text-sm font-extrabold text-ink">{title}</p>
-          <button
+          <Button
             type="button"
             onClick={onClose}
             aria-label="Close filters"
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted hover:bg-surface hover:text-ink transition-colors cursor-pointer"
           >
             <X className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
         {/* Body */}
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
@@ -118,7 +119,7 @@ export const RightFilterDrawer: React.FC<RightFilterDrawerProps> = ({
         {/* Sticky footer (P1) */}
         {onReset && (
           <div className="flex items-center gap-2 border-t border-line bg-white px-4 pt-2.5 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-            <button
+            <Button
               type="button"
               onClick={onReset}
               disabled={resetDisabled}
@@ -126,14 +127,14 @@ export const RightFilterDrawer: React.FC<RightFilterDrawerProps> = ({
             >
               <RotateCcw className="w-4 h-4" />
               Reset All
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={onClose}
               className="flex flex-1 items-center justify-center rounded-xl bg-brand px-3 py-2.5 text-xs font-extrabold text-white shadow-xs transition-colors cursor-pointer hover:bg-brand-deep active:scale-95"
             >
               Done
-            </button>
+            </Button>
           </div>
         )}
       </div>

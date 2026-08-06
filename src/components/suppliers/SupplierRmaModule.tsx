@@ -174,7 +174,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
 
         {/* Subtab Toggle — full-width equal 3-column segmented on mobile */}
         <div className="bg-surface p-1.5 rounded-2xl border border-line grid grid-cols-3 gap-1.5 overflow-x-auto no-scrollbar text-xs shadow-2xs w-full md:flex md:items-center md:w-auto md:overflow-visible">
-          <button
+          <Button
             type="button"
             onClick={() => setActiveSubTab('RMA')}
             className={`w-full md:w-auto px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center justify-center md:justify-start space-x-2 cursor-pointer border select-none active:scale-95 ${
@@ -191,8 +191,8 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
             >
               {rmas.length}
             </span>
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             onClick={() => setActiveSubTab('PO')}
             className={`w-full md:w-auto px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center justify-center md:justify-start space-x-2 cursor-pointer border select-none active:scale-95 ${
@@ -209,8 +209,8 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
             >
               {purchaseOrders.length}
             </span>
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             onClick={() => setActiveSubTab('SUPPLIERS')}
             className={`w-full md:w-auto px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center justify-center md:justify-start space-x-2 cursor-pointer border select-none active:scale-95 ${
@@ -220,7 +220,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
             }`}
           >
             <span>Vendor Catalog</span>
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -238,7 +238,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
 
             <div className="flex items-center gap-2">
               <div className="flex shrink-0 items-center rounded-lg border border-line bg-white p-0.5 shadow-2xs">
-                <button
+                <Button
                   type="button"
                   onClick={() => setRmaView('table')}
                   title="Table view"
@@ -246,8 +246,8 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                   className={`inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors ${rmaView === 'table' ? 'bg-brand text-white' : 'text-faint hover:bg-slate-100'}`}
                 >
                   <List className="h-3.5 w-3.5" />
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
                   onClick={() => setRmaView('cards')}
                   title="Card view"
@@ -255,7 +255,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                   className={`inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors ${rmaView === 'cards' ? 'bg-brand text-white' : 'text-faint hover:bg-slate-100'}`}
                 >
                   <Grid className="h-3.5 w-3.5" />
-                </button>
+                </Button>
               </div>
               <Button
                 type="button"
@@ -309,12 +309,12 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                     {rma.vendorCreditAmount ? (
                       <span className="text-xs text-[#15803D] font-extrabold">+{rma.vendorCreditAmount.toLocaleString()} MMK Credit</span>
                     ) : rma.status === 'Shipped to Vendor' ? (
-                      <button
+                      <Button
                         onClick={() => onUpdateRmaStatus(rma.id, 'Credit Approved', rma.unitCost * rma.quantity)}
                         className="px-2.5 py-1.5 bg-[#EAF8ED] hover:bg-emerald-100 text-[#15803D] border border-success/20 text-xs font-bold rounded-lg cursor-pointer"
                       >
                         Approve Credit
-                      </button>
+                      </Button>
                     ) : null}
                   </div>
                 </div>
@@ -373,12 +373,12 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
 
                     <td className="p-3 text-right">
                       {rma.status === 'Shipped to Vendor' && (
-                        <button
+                        <Button
                           onClick={() => onUpdateRmaStatus(rma.id, 'Credit Approved', rma.unitCost * rma.quantity)}
                           className="px-2 py-1 bg-[#EAF8ED] hover:bg-emerald-100 text-[#15803D] border border-success/20 text-xs font-bold rounded"
                         >
                           Approve Credit
-                        </button>
+                        </Button>
                       )}
                     </td>
                   </tr>
@@ -459,20 +459,20 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                       <span className="bg-surface text-ink border border-line px-2 py-0.5 rounded font-mono text-xs inline-block mt-0.5">{sup.code}</span>
                     </div>
                     <div className="flex items-center space-x-1">
-                      <button
+                      <Button
                         onClick={() => setEditingSupplier(sup)}
                         title="Edit Supplier"
                         className="p-1.5 text-slate-500 hover:text-brand hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
                       >
                         <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         onClick={() => handleDeleteSupplierClick(sup.id, sup.name)}
                         title="Delete Supplier"
                         className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                      </Button>
                     </div>
                   </div>
 
@@ -585,13 +585,13 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                 <Truck className="w-4 h-4 text-brand" />
                 <span>Register New Supplier Vendor</span>
               </h4>
-              <button
+              <Button
                 type="button"
                 onClick={() => setShowAddSupplierModal(false)}
                 className="text-muted hover:text-ink cursor-pointer"
               >
                 <X className="w-4 h-4" />
-              </button>
+              </Button>
             </div>
 
             <div className="space-y-3">
@@ -681,13 +681,13 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                 <Truck className="w-4 h-4 text-brand" />
                 <span>Edit Supplier Vendor Profile</span>
               </h4>
-              <button
+              <Button
                 type="button"
                 onClick={() => setEditingSupplier(null)}
                 className="text-muted hover:text-ink cursor-pointer"
               >
                 <X className="w-4 h-4" />
-              </button>
+              </Button>
             </div>
 
             <div className="space-y-3">

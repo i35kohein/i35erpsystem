@@ -481,14 +481,14 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                   <span>{item.warranty}</span>
                                 </span>
                               </div>
-                              <button
+                              <Button
                                 type="button"
                                 onClick={() => handleToggleCartItem(item.categoryKey, item.label, item.price, item.warranty)}
                                 className="text-[#6E6E73] hover:text-danger hover:bg-danger/10 p-1.5 rounded-lg transition-colors cursor-pointer shrink-0"
                                 title="Remove item"
                               >
                                 <X className="w-4 h-4" />
-                              </button>
+                              </Button>
                             </div>
 
                             {/* Price row */}
@@ -508,7 +508,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
                             {/* Compact Discount button — opens a centered modal popup, no layout shift */}
                             <div className="mt-2 flex items-center justify-between gap-2">
-                              <button
+                              <Button
                                 type="button"
                                 onClick={() => setDiscountMenuOpenFor(discountMenuOpenFor === item.categoryKey ? null : item.categoryKey)}
                                 className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg border text-xs font-extrabold transition-all cursor-pointer active:scale-95 ${
@@ -525,7 +525,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                   <span className="font-mono">{item.discountPercent}%</span>
                                 )}
                                 <ChevronDown className={`w-3 h-3 shrink-0 transition-transform ${discountMenuOpenFor === item.categoryKey ? 'rotate-180' : ''}`} />
-                              </button>
+                              </Button>
 
                               <span className="text-xs font-semibold text-muted">
                                 {item.discountPercent > 0
@@ -551,7 +551,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                     </div>
                                     <div className="grid grid-cols-3 gap-1.5">
                                       {DISCOUNT_OPTIONS.map((p) => (
-                                        <button
+                                        <Button
                                           key={p}
                                           type="button"
                                           autoFocus={item.discountPercent === p}
@@ -566,7 +566,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                           }`}
                                         >
                                           {p}%
-                                        </button>
+                                        </Button>
                                       ))}
                                     </div>
                                   </div>
@@ -611,14 +611,14 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                   </span>
                                 </div>
                               </div>
-                              <button
+                              <Button
                                 type="button"
                                 onClick={() => handleToggleCartItem(item.categoryKey, item.label, item.price, item.warranty)}
                                 className="text-muted hover:text-danger p-1 rounded transition-colors cursor-pointer shrink-0"
                                 title="Remove item"
                               >
                                 <X className="w-3.5 h-3.5" />
-                              </button>
+                              </Button>
                             </div>
 
                             <div className="flex items-center justify-between bg-surface px-2 py-1 rounded-lg text-xs">
@@ -700,14 +700,14 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                               </span>
                             </div>
                           </div>
-                          <button
+                          <Button
                             type="button"
                             onClick={() => handleToggleCartItem(item.categoryKey, item.label, item.price, item.warranty)}
                             className="text-muted hover:text-danger p-1 rounded transition-colors cursor-pointer shrink-0"
                             title="Remove item"
                           >
                             <X className="w-3.5 h-3.5" />
-                          </button>
+                          </Button>
                         </div>
 
                         <div className="flex items-center justify-between bg-surface px-2 py-1 rounded-lg text-xs">
@@ -830,14 +830,14 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
           <span className="text-[11px] font-bold text-muted shrink-0 whitespace-nowrap">
             {availableRepairItems.filter((i) => i.price && i.price > 0).length} services
           </span>
-          <button
+          <Button
             type="button"
             onClick={() => setDeviceModalOpen(true)}
             className="shrink-0 min-h-10 px-3 bg-surface hover:bg-line text-brand font-extrabold text-xs rounded-lg border border-line transition-all flex items-center space-x-1 cursor-pointer active:scale-95"
           >
             <Folder className="w-3 h-3" />
             <span>Switch</span>
-          </button>
+          </Button>
         </div>
 
         {/* Mobile: in-module full-width search (lg:hidden) — topbar search is desktop-only */}
@@ -851,14 +851,14 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
             className="w-full bg-white border border-line text-xs text-ink placeholder-muted pl-8 pr-8 py-2.5 rounded-xl focus:bg-white focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all shadow-2xs"
           />
           {queryToUse && (
-            <button
+            <Button
               type="button"
               onClick={() => handleSearchChange('')}
               aria-label="Clear search"
               className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center text-muted hover:text-ink rounded-full hover:bg-surface transition-colors cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
-            </button>
+            </Button>
           )}
         </div>
 
@@ -906,7 +906,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
           {/* Repair category quick-filter chips — mobile + desktop */}
           <div className="-mx-1 px-1 overflow-x-auto no-scrollbar flex items-center gap-1.5 pb-0.5">
-            <button
+            <Button
               type="button"
               onClick={() => setCategoryFilter('ALL')}
               className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-extrabold border transition-all cursor-pointer active:scale-95 ${
@@ -916,9 +916,9 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
               }`}
             >
               All ({availableRepairItems.length})
-            </button>
+            </Button>
             {chipGroups.map(([group, count]) => (
-              <button
+              <Button
                 key={group}
                 type="button"
                 onClick={() => setCategoryFilter(group)}
@@ -929,7 +929,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                 }`}
               >
                 {group} ({count})
-              </button>
+              </Button>
             ))}
           </div>
 
@@ -1053,14 +1053,14 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
             </div>
 
             {cart.size > 0 && (
-              <button
+              <Button
                 type="button"
                 onClick={handleClearCart}
                 className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 bg-danger/10 hover:bg-danger/20 text-danger text-xs font-extrabold rounded-lg border border-danger/20 transition-all cursor-pointer"
               >
                 <Trash2 className="w-3 h-3" />
                 Clear All
-              </button>
+              </Button>
             )}
           </div>
 
@@ -1132,22 +1132,22 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
               </div>
               <div className="flex items-center gap-0.5 shrink-0">
                 {cart.size > 0 && (
-                  <button
+                  <Button
                     type="button"
                     onClick={handleClearCart}
                     className="px-2.5 py-2 text-xs font-extrabold text-danger hover:bg-danger/10 rounded-lg transition-colors cursor-pointer"
                   >
                     Clear All
-                  </button>
+                  </Button>
                 )}
-                <button
+                <Button
                   type="button"
                   onClick={() => setIsCartSheetOpen(false)}
                   aria-label="Close cart"
                   className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface text-ink hover:bg-line transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
-                </button>
+                </Button>
               </div>
             </div>
 

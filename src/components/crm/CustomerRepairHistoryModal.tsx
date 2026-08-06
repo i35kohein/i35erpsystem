@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '../ui';
 import { 
   X, 
   History, 
@@ -77,12 +78,12 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
             </div>
           </div>
 
-          <button
+          <Button
             onClick={onClose}
             className="p-2 text-muted hover:text-ink hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
 
         {/* Modal Content Body */}
@@ -179,12 +180,12 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
 
         {/* Footer */}
         <div className="px-6 py-3 border-t border-line bg-[#F8FBFD] flex justify-end">
-          <button
+          <Button
             onClick={onClose}
             className="px-5 py-2 bg-ink hover:bg-black text-white font-bold text-xs rounded-xl shadow-2xs transition-all cursor-pointer"
           >
             Close Dossier
-          </button>
+          </Button>
         </div>
       </div>
     </div>

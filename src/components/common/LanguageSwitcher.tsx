@@ -31,7 +31,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         >
           EN
         </Button>
-        <button
+        <Button
           type="button"
           onClick={() => setLanguage('mm')}
           className={`px-2 py-1 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
@@ -42,7 +42,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
           title="မြန်မာဘာသာ"
         >
           မြန်မာ
-        </button>
+        </Button>
       </div>
     );
   }
@@ -65,7 +65,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
       >
         <span>🇺🇸 EN</span>
       </Button>
-      <button
+      <Button
         type="button"
         onClick={() => setLanguage('mm')}
         className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
@@ -75,7 +75,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         }`}
       >
         <span>🇲🇲 မြန်မာ</span>
-      </button>
+      </Button>
     </div>
   );
 };

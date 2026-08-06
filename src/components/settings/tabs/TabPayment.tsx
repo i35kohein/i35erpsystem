@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '../../ui';
 import type { SystemSettings } from '../../../types';
 import {CheckSquare, CreditCard, DollarSign, Landmark, Plus, QrCode, RotateCcw, ToggleLeft, ToggleRight, Wallet} from 'lucide-react';
 
@@ -29,30 +30,30 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ currentPaymentMethods, handleTo
             </div>
 
             <div className="flex items-center space-x-2 shrink-0">
-              <button
+              <Button
                 type="button"
                 onClick={() => handleSetAllPaymentMethodsState(true)}
                 className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl border border-emerald-200 transition-all flex items-center space-x-1 cursor-pointer"
               >
                 <CheckSquare className="w-3.5 h-3.5" />
                 <span>Enable All</span>
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={handleAddCustomPaymentMethod}
                 className="px-3 py-1.5 bg-brand hover:bg-brand-deep text-white font-bold text-xs rounded-xl shadow-2xs transition-all flex items-center space-x-1 cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Custom Gateway</span>
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={handleResetPaymentMethods}
                 className="px-3 py-1.5 bg-surface hover:bg-line text-ink font-bold text-xs rounded-xl border border-line-strong transition-all flex items-center space-x-1 cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5 text-muted" />
                 <span>Reset Defaults</span>
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -141,7 +142,7 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ currentPaymentMethods, handleTo
                           </div>
 
                           <div className="flex items-center space-x-2">
-                            <button
+                            <Button
                               type="button"
                               onClick={() => handleTogglePaymentMethod(method.id)}
                               className={`p-1.5 rounded-xl transition-colors cursor-pointer ${
@@ -156,10 +157,10 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ currentPaymentMethods, handleTo
                               ) : (
                                 <ToggleLeft className="w-5 h-5 text-slate-400" />
                               )}
-                            </button>
+                            </Button>
 
                             {/* Quick Toggle Button */}
-                            <button
+                            <Button
                               type="button"
                               onClick={() => handleTogglePaymentMethod(method.id)}
                               className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
@@ -169,7 +170,7 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ currentPaymentMethods, handleTo
                               }`}
                             >
                               {method.enabled ? 'Disable' : 'Enable'}
-                            </button>
+                            </Button>
                           </div>
                         </div>
 

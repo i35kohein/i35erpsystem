@@ -17,7 +17,7 @@
  */
 import { execSync } from "node:child_process";
 
-const BASELINE = 477; // raw <button> count at policy adoption (2026-08-06)
+const BASELINE = 0; // migration complete 2026-08-06 (was 477) — zero tolerance now
 
 const ALLOWED_FILES = [
   'src/components/ui/button.tsx',        // the Button definition itself
@@ -41,12 +41,10 @@ for (const line of out.split('\n')) {
   violations.push(line);
 }
 
-if (violations.length > BASELINE) {
-  console.log(`\n❌ Button policy: ${violations.length} raw <button> (baseline ${BASELINE}) — NEW raw buttons added!`);
-  console.log('   Policy: use <Button> from src/components/ui — see README "Button policy".');
+if (violations.length > 0) {
+  console.log(`\n❌ Button policy: ${violations.length} raw <button> found — ALL buttons must use <Button> from src/components/ui.`);
+  console.log('   See README "Button policy".');
   process.exit(1);
-} else if (violations.length > 0) {
-  console.log(`⚠️  Button policy: ${violations.length} raw <button> remaining (baseline ${BASELINE}) — migrating.`);
 } else {
   console.log('✅ Button policy: no raw <button> outside the ui kit.');
 }

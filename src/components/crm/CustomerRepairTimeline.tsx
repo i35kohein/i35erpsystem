@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Button } from '../ui';
 import {CheckCircle2, 
   XCircle, 
   Clock, 
@@ -219,7 +220,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
               )}
 
               {/* Sort Order Toggle */}
-              <button
+              <Button
                 type="button"
                 onClick={() => setSortOrder(prev => prev === 'NEWEST' ? 'OLDEST' : 'NEWEST')}
                 className="px-2.5 py-1 bg-white border border-line hover:border-brand text-ink font-bold text-xs rounded-xl flex items-center space-x-1 cursor-pointer transition-all shadow-2xs"
@@ -227,7 +228,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
               >
                 <ArrowUpDown className="w-3 h-3 text-brand" />
                 <span>{sortOrder === 'NEWEST' ? 'Newest First' : 'Oldest First'}</span>
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -407,7 +408,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
 
                       {/* Printable Invoice Action */}
                       {onPrintInvoice && (
-                        <button
+                        <Button
                           type="button"
                           onClick={() => onPrintInvoice(wo)}
                           className="px-3 py-1.5 bg-white hover:bg-blue-50 border border-[#D8E5ED] hover:border-brand text-brand font-bold text-xs rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer shadow-2xs active:scale-95"
@@ -415,19 +416,19 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                         >
                           <Printer className="w-3.5 h-3.5" />
                           <span>Invoice</span>
-                        </button>
+                        </Button>
                       )}
 
                       {/* Expand Repair Logs Button */}
                       {(wo.repairLogs?.length || 0) > 0 && (
-                        <button
+                        <Button
                           type="button"
                           onClick={() => toggleExpandLogs(wo.id)}
                           className="px-2.5 py-1.5 bg-surface hover:bg-line text-ink font-bold text-xs rounded-xl transition-all flex items-center space-x-1 cursor-pointer"
                         >
                           {isLogsExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                           <span>Logs ({wo.repairLogs?.length})</span>
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </div>
@@ -449,7 +450,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
         <div className="p-8 text-center text-muted bg-[#F8F9FA] rounded-2xl border border-dashed border-line">
           <Search className="w-6 h-6 text-muted/50 mx-auto mb-2" />
           <p className="font-semibold text-xs">No repair history matched your search filter.</p>
-          <button
+          <Button
             type="button"
             onClick={() => {
               setSearchTerm('');
@@ -459,7 +460,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
             className="mt-2 text-xs text-brand font-bold hover:underline cursor-pointer"
           >
             Reset Filters
-          </button>
+          </Button>
         </div>
       )}
     </div>

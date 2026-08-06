@@ -305,12 +305,12 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
               </div>
             </div>
 
-            <button
+            <Button
               onClick={onClose}
               className="w-8 h-8 rounded-full bg-line hover:bg-[#D1D1D6] text-ink transition-all cursor-pointer flex items-center justify-center shrink-0"
             >
               <X className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
 
           {/* Model Ribbon & Category Tabs */}
@@ -323,14 +323,14 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                 <span className="text-xs sm:text-sm font-black text-ink truncate min-w-0" title={selectedDevice}>
                   {selectedDevice}
                 </span>
-                <button
+                <Button
                   type="button"
                   onClick={() => setIsDeviceChooserOpen(true)}
                   className="p-1.5 rounded-xl bg-brand/10 hover:bg-brand/20 text-brand-deep transition-all cursor-pointer shrink-0 ml-1.5"
                   title="Change device model"
                 >
                   <Folder className="w-4 h-4" />
-                </button>
+                </Button>
               </div>
 
               {/* Quick Search */}
@@ -344,12 +344,12 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                   className="w-full pl-9 pr-3 py-1.5 bg-white border border-line rounded-xl text-xs font-bold text-ink focus:outline-none focus:ring-2 focus:ring-brand"
                 />
                 {searchQuery && (
-                  <button
+                  <Button
                     onClick={() => setSearchQuery('')}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted"
                   >
                     Clear
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
@@ -359,7 +359,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
               {groups.map((grp) => {
                 const isActive = categoryFilter === grp;
                 return (
-                  <button
+                  <Button
                     key={grp}
                     type="button"
                     onClick={() => setCategoryFilter(grp)}
@@ -370,7 +370,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                     }`}
                   >
                     {grp}
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -404,7 +404,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                     const isSelected = selectedServices.has(service.key);
 
                     return (
-                      <button
+                      <Button
                         key={service.key}
                         type="button"
                         onClick={() =>
@@ -456,7 +456,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                             {formatPrice(service.price)}
                           </span>
                         </div>
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>
@@ -504,7 +504,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                           <span className="font-black font-mono text-xs text-brand">
                             {formatPrice(item.price)}
                           </span>
-                          <button
+                          <Button
                             type="button"
                             onClick={() =>
                               handleToggleService(item.key, item.label, item.price, item.warranty)
@@ -513,7 +513,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                             title="Remove service"
                           >
                             <X className="w-3.5 h-3.5" />
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     ))
@@ -542,7 +542,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                           : globalDiscountPct === 0 && flatDiscountAmount === 0;
 
                       return (
-                        <button
+                        <Button
                           key={idx}
                           type="button"
                           onClick={() => {
@@ -556,7 +556,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                           }`}
                         >
                           {disc.label}
-                        </button>
+                        </Button>
                       );
                     })}
                   </div>
@@ -644,7 +644,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
 
                 <div className="grid grid-cols-3 gap-2 text-xs">
                   {onCreateTicketWithQuote && (
-                    <button
+                    <Button
                       type="button"
                       disabled={selectedList.length === 0}
                       onClick={() => {
@@ -658,10 +658,10 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                     >
                       <ChevronRight className="w-4 h-4" />
                       <span>Push to Ticket Intake</span>
-                    </button>
+                    </Button>
                   )}
 
-                  <button
+                  <Button
                     type="button"
                     onClick={handlePrintQuote}
                     disabled={selectedList.length === 0}
@@ -671,7 +671,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                   >
                     <Printer className="w-3.5 h-3.5 text-brand" />
                     <span>Print Slip</span>
-                  </button>
+                  </Button>
 
                   {!onCreateTicketWithQuote && (
                     <Button
@@ -694,14 +694,14 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
             <span className="font-semibold text-muted">
               Calculated for <strong className="text-ink">{selectedDevice}</strong>
             </span>
-            <button
+            <Button
               type="button"
               onClick={handleReset}
               className="text-danger font-extrabold hover:underline flex items-center space-x-1 cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Reset Calculator</span>
-            </button>
+            </Button>
           </div>
         </div>
       </div>

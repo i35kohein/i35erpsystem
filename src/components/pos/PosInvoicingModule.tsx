@@ -470,7 +470,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
                     <div className="flex flex-wrap items-center gap-1 mt-1">
                       {(wo.selectedRepairs || []).filter((r) => r && r.name).slice(0, 2).map((r, i) => (
-                        <span key={i} className="inline-flex items-center gap-1 rounded-md border border-brand/20 bg-brand/8 px-1.5 py-0.5 text-[11px] font-extrabold text-brand">
+                        <span key={i} className="inline-flex items-center gap-1 rounded-md border border-brand/20 bg-brand/8 px-1.5 py-0.5 text-[11px] font-extrabold text-brand-deep">
                           <Wrench className="h-2.5 w-2.5" />
                           {r.name}
                         </span>
@@ -494,7 +494,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         )}
                       </span>
                       {(wo.imei || wo.serialNumber) && (
-                        <button
+                        <Button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -506,7 +506,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           className="font-mono text-xs shrink-0 truncate text-muted hover:text-brand transition-colors"
                         >
                           #{formatSerialGrouped(wo.imei || wo.serialNumber)}
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </div>
@@ -533,7 +533,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     <StatusChip status={selectedWo.status} />
                   </div>
 
-                  <button
+                  <Button
                     type="button"
                     onClick={() => {
                       setNotifWo(selectedWo);
@@ -544,7 +544,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   >
                     <BellRing className="w-3.5 h-3.5 text-[#7360F2]" />
                     <span>Notify Customer</span>
-                  </button>
+                  </Button>
                 </div>
 
                 {/* Line 2: device + customer */}
@@ -578,13 +578,13 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     <span className="text-xs font-extrabold text-rose-950">
                       Standard Diagnostic Fee: 5,000 MMK
                     </span>
-                    <button
+                    <Button
                       type="button"
                       onClick={handleApplyDiagnosticFeeOnly}
                       className="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs rounded-xl transition-all shadow-2xs cursor-pointer active:scale-95"
                     >
                       Apply Diagnostic Fee Only (စက်စစ်ခ သာကောက်မည်)
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}
@@ -651,7 +651,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                 {!hasDiscount && <span>{(li.unitPrice * li.quantity).toLocaleString()} MMK</span>}
                               </span>
                               {li.partId && !li.isLabor && (
-                                <button
+                                <Button
                                   type="button"
                                   onClick={() => handleRemoveInventoryPartFromWorkOrder(li.id)}
                                   className="inline-flex h-9 w-9 items-center justify-center rounded-full text-rose-500 transition-colors hover:bg-rose-50 hover:text-rose-600 active:scale-90"
@@ -659,7 +659,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                   aria-label={`Remove ${li.description}`}
                                 >
                                   <XCircle className="h-4 w-4" />
-                                </button>
+                                </Button>
                               )}
                             </div>
                           </td>
@@ -674,7 +674,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 </div>
 
                 <div className="bg-white border border-line rounded-xl p-4 space-y-2">
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setIsAddPartOpen(!isAddPartOpen)}
                     aria-expanded={isAddPartOpen}
@@ -685,7 +685,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       <p className="text-xs text-muted">Pick the stock part used on this ticket before payment.</p>
                     </span>
                     <ChevronDown className={`w-4 h-4 text-muted shrink-0 transition-transform ${isAddPartOpen ? 'rotate-180' : ''}`} />
-                  </button>
+                  </Button>
 
                   {isAddPartOpen && (
                   <div className="flex items-end gap-2 pt-1">
@@ -740,14 +740,14 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       />
                     </label>
 
-                    <button
+                    <Button
                       type="button"
                       onClick={handleAddInventoryPartToWorkOrder}
                       disabled={!selectedInventoryPart}
                       className="inline-flex h-9 shrink-0 items-center justify-center rounded-lg bg-brand px-3.5 py-2 text-xs font-extrabold text-white transition-all hover:bg-[#005BBB] disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       Add Part
-                    </button>
+                    </Button>
                   </div>
                   )}
                 </div>
@@ -801,7 +801,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     <CreditCard className="w-3.5 h-3.5" />
                     <span>Payment Method Selection ({activePaymentMethods.length} Enabled)</span>
                   </h3>
-                  <button type="button" onClick={onOpenSettings} className="text-xs text-brand hover:underline font-semibold cursor-pointer" title="Open Settings → Payment Methods">Configured in Settings → Payment Methods</button>
+                  <Button type="button" onClick={onOpenSettings} className="text-xs text-brand hover:underline font-semibold cursor-pointer" title="Open Settings → Payment Methods">Configured in Settings → Payment Methods</Button>
                 </div>
 
                 {activePaymentMethods.length === 0 ? (
@@ -817,7 +817,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     const meta = getPaymentMeta(m.name);
                     const Icon = meta.icon;
                     return (
-                      <button
+                      <Button
                         key={m.id}
                         type="button"
                         onClick={() => setPaymentMethod(m.name)}
@@ -831,17 +831,17 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           <Icon className="w-4 h-4" style={{ color: isSelected ? '#FFFFFF' : meta.color }} />
                         </span>
                         <div className="min-w-0 flex-1">
-                          <div className={`leading-tight font-extrabold ${isSelected ? 'text-blue-100' : 'text-ink'}`}>{m.name}</div>
-                          <div className={`text-xs font-normal leading-tight ${isSelected ? 'text-blue-100' : 'text-muted'}`}>
+                          <div className={`leading-tight font-extrabold ${isSelected ? 'text-white' : 'text-ink'}`}>{m.name}</div>
+                          <div className={`text-xs font-normal leading-tight ${isSelected ? 'text-white' : 'text-muted'}`}>
                             {m.category}
                           </div>
                         </div>
-                      </button>
+                      </Button>
                     );
                   })}
 
                   {/* Split Payment Button */}
-                  <button
+                  <Button
                     type="button"
                     onClick={() => {
                       setPaymentMethod('Split Payment');
@@ -868,7 +868,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         Multi-Method
                       </div>
                     </div>
-                  </button>
+                  </Button>
                 </div>
                 )}
 
@@ -926,7 +926,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                 placeholder="Amount MMK"
                                 className="w-full bg-surface border border-line rounded-lg p-1.5 text-xs font-mono font-bold text-ink focus:border-[#7360F2] focus:ring-1 focus:ring-[#7360F2] outline-none"
                               />
-                              <button
+                              <Button
                                 type="button"
                                 onClick={() => {
                                   const updated = [...splitPayments];
@@ -937,19 +937,19 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                 title="Auto-fill remaining amount"
                               >
                                 Auto-Fill
-                              </button>
+                              </Button>
                             </div>
 
                             {/* Remove Row Button if > 2 */}
                             {splitPayments.length > 2 && (
-                              <button
+                              <Button
                                 type="button"
                                 onClick={() => setSplitPayments(splitPayments.filter((_, i) => i !== idx))}
                                 className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer shrink-0"
                                 title="Remove split method"
                               >
                                 <XCircle className="w-4 h-4" />
-                              </button>
+                              </Button>
                             )}
                           </div>
                         );
@@ -983,7 +983,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           </div>
 
                           {splitPayments.length < 4 && (
-                            <button
+                            <Button
                               type="button"
                               onClick={() => {
                                 const currentTotal = splitPayments.reduce((acc, curr) => acc + (curr.amount || 0), 0);
@@ -998,7 +998,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                             >
                               <Plus className="w-3.5 h-3.5" />
                               <span>Add Split Method</span>
-                            </button>
+                            </Button>
                           )}
                         </div>
                       );
