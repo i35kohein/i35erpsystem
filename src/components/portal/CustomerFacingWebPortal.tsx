@@ -546,6 +546,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
         {/* Portal Navigation Tabs */}
         <div className="flex border-b border-line space-x-2 bg-white px-4 pt-2 rounded-2xl border shadow-2xs overflow-x-auto no-scrollbar">
           <Button
+            variant="ghost"
             onClick={() => setActiveTab('OVERVIEW')}
             className={`pb-3 px-3 font-extrabold text-xs transition-all border-b-2 flex items-center space-x-1.5 cursor-pointer whitespace-nowrap ${
               activeTab === 'OVERVIEW'
@@ -558,6 +559,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
           </Button>
 
           <Button
+            variant="ghost"
             onClick={() => setActiveTab('ESTIMATE')}
             className={`pb-3 px-3 font-extrabold text-xs transition-all border-b-2 flex items-center space-x-1.5 cursor-pointer whitespace-nowrap relative ${
               activeTab === 'ESTIMATE'
@@ -573,6 +575,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
           </Button>
 
           <Button
+            variant="ghost"
             onClick={() => setActiveTab('DIAGNOSTICS')}
             className={`pb-3 px-3 font-extrabold text-xs transition-all border-b-2 flex items-center space-x-1.5 cursor-pointer whitespace-nowrap ${
               activeTab === 'DIAGNOSTICS'
@@ -585,6 +588,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
           </Button>
 
           <Button
+            variant="ghost"
             onClick={() => setActiveTab('MESSAGES')}
             className={`pb-3 px-3 font-extrabold text-xs transition-all border-b-2 flex items-center space-x-1.5 cursor-pointer whitespace-nowrap relative ${
               activeTab === 'MESSAGES'
@@ -951,6 +955,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 <h3 className="font-extrabold text-base text-ink">Authorize Repair Estimate</h3>
               </div>
               <Button
+                variant="ghost"
                 onClick={() => setApprovalModalOpen(false)}
                 className="p-1 text-muted hover:text-ink rounded-lg"
               >

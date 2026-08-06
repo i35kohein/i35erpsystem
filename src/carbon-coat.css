@@ -17,8 +17,8 @@
   --color-brand-deep: #0b53e0;       /* hover (Carbon blue-70 #0f62fe → 70) */
   --color-brand-soft: #edf4ff;       /* tinted blue bg (Carbon blue-10) */
   --color-ink: #161616;              /* was #1D1D1F (Carbon gray-100) */
-  --color-muted: #6f6f6f;            /* was #86868B (Carbon gray-70) */
-  --color-faint: #6f6f6f;            /* was #6E6E73 */
+  --color-muted: #616161;            /* was #86868B (Carbon gray-70) */
+  --color-faint: #616161;            /* was #6E6E73 */
   --color-line: #e0e0e0;             /* was #E5E5EA (Carbon gray-30) */
   --color-line-strong: #c6c6c6;      /* was #D2D2D7 (Carbon gray-40) */
   --color-surface: #f4f4f4;          /* was #F5F5F7 (Carbon gray-10) */

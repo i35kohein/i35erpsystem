@@ -21,12 +21,15 @@
 - **heading-order** (4→1): dashboard section titles h3→h2; pipeline stage column labels h3→div (visual labels); Follow-Ups "Devices Due" h3→h2; Finance margin benchmark h4→h3.
 - **region**: HoverTooltip role="tooltip"; GlobalSearchModal role="dialog" aria-modal aria-label (tooltip still flagged — fixed-position outside landmarks is inherent).
 
-## Remaining (20 contrast nodes, 4 tabs) — next round
-- Pipeline stage action buttons (Notify/Checkout/Log) — bg-brand/10 tint with brand text in specific rows
-- POS invoice line-item tinted cells + strike prices on some bgs
-- Finance small muted values on tinted panels
-- Price List "Calc" + service row mutes
-Each is a localized color tweak; suggest a contrast lint script (axe in CI) to keep it at 0.
+## Remaining — final (7 nodes, light theme)
+- Portal staff/technician name buttons (6): default-variant `<Button>` (bg-brand) with ink text — data-driven render not yet located in source; pattern documented. Fix: those buttons should use variant="ghost"/"outline" or explicit text-white.
+- POS confirm-modal close (1): iconGhost variant — axe background-propagation quirk vs the white modal; visually fine.
+- **Note — themes:** the app supports `app_theme` (light / dark-slate). This audit was run in LIGHT mode (66→7). The dark-slate theme needs its own contrast pass (light text on dark + brand-on-dark fail there).
+
+## Root causes fixed this pass (light mode 66 → 7)
+- `--color-success` (Carbon #24a148) → #166534 (was white-on-green 3.35:1); muted/faint tokens → #616161 (passes on white AND surface #f4f4f4); carbon-coat `:root` overrides aligned.
+- Button default-variant bg-brand + className text overrides (invisible text) — fixed Work Intake view toggles + portal tab nav via `variant="ghost"`.
+- theme gotcha: stale `localStorage.app_theme = dark-slate` flips the whole audit — always clear it before light-mode runs.
 
 ## How to re-run
 Inject axe-core 4.10.2 (CDN), `axe.run(document)` per tab — script: `/tmp/erp_micro/axe_verify.cjs` pattern.

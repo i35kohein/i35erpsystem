@@ -190,6 +190,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
             {/* View Mode Switcher — full-width segmented control on mobile */}
             <div className="bg-surface p-1 rounded-xl border border-line flex items-center gap-1 w-full md:w-auto">
               <Button
+                variant="ghost"
                 type="button"
                 onClick={() => setViewMode('table')}
                 className={`flex-1 md:flex-none px-2.5 sm:px-3 h-9 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center md:justify-start space-x-1.5 cursor-pointer ${
@@ -204,6 +205,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                 <span>Table</span>
               </Button>
               <Button
+                variant="ghost"
                 type="button"
                 onClick={() => setViewMode('cards')}
                 className={`flex-1 md:flex-none px-2.5 sm:px-3 h-9 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center md:justify-start space-x-1.5 cursor-pointer ${
