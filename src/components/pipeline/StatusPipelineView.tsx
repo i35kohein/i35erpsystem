@@ -764,7 +764,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         key={wo.id}
                         draggable
                         onDragStart={() => setDraggedWoId(wo.id)}
-                        className={`p-3 rounded-xl shadow-xs hover:shadow-md space-y-2 text-xs transition-shadow duration-150 ease-out cursor-grab active:cursor-grabbing group ${
+                        className={`p-3 rounded-xl shadow-xs hover:shadow-md space-y-2 text-xs min-h-[200px] transition-shadow duration-150 ease-out cursor-grab active:cursor-grabbing group ${
                           isBeforeDiagNeeded 
                             ? 'border-l-4 border-l-amber-500 bg-amber-50/20' 
                             : isAfterDiagNeeded 
@@ -813,14 +813,14 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         ) : (
                           <div className={`flex items-center space-x-1 text-[10px] ${ageChipClass}`}>
                             <Clock className={`w-3 h-3 shrink-0 ${ageChipIconClass}`} />
-                            <span>In stage: <strong className="text-ink">{hoursInStatus < 1 ? '&lt; 1h' : `${hoursInStatus}h`}</strong></span>
+                            <span>In stage: <strong className="text-ink">{hoursInStatus < 1 ? '< 1h' : `${hoursInStatus}h`}</strong></span>
                           </div>
                         )}
 
                         {/* Model & Customer & Repair Issue */}
                         <div role="button" tabIndex={0} aria-label={`Open detail for ${wo.deviceModel || wo.orderNumber || wo.id}`} className="cursor-pointer space-y-1" onClick={() => setDetailModalWo(wo)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setDetailModalWo(wo); } }}>
                           <p className="font-extrabold text-ink text-xs line-clamp-1 hover:text-brand transition-colors">{wo.deviceModel}</p>
-                          <p className="text-[10px] text-muted truncate">{wo.customerName} • {wo.customerPhone}</p>
+                          <p className="text-[10px] text-slate-500 truncate" title={`${wo.customerName} • ${wo.customerPhone}`}>{wo.customerName} • {wo.customerPhone}</p>
                           
                           {/* What to repair under Customer info */}
                           <div className="flex items-start space-x-1.5 pt-1 mt-1 border-t border-slate-100 text-[11px] text-ink">
@@ -832,13 +832,13 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         </div>
 
                         {/* Tech Tag — one-tap quick assign (dropdown for managers, self-assign for techs) */}
-                        <div className="flex items-center justify-between text-[10px] pt-1 border-t border-slate-100 text-muted">
+                        <div className="flex items-center justify-between text-[10px] pt-1 border-t border-slate-100 text-slate-500">
                           <span>Tech: <strong className="text-ink">{tech?.name?.split(' ')[0] || 'Unassigned'}</strong></span>
                           {isTechnicianUser && myTechId ? (
                             <button
                               type="button"
                               onClick={() => handleQuickAssign(wo, myTechId)}
-                              className="text-brand hover:underline flex items-center space-x-0.5 font-semibold cursor-pointer min-h-7"
+                              className="text-brand hover:underline flex items-center space-x-0.5 font-semibold cursor-pointer min-h-8"
                               title="Assign this ticket to yourself"
                             >
                               <UserCheck className="w-3 h-3" />
@@ -851,7 +851,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                               ariaLabel={`Assign technician for ${wo.orderNumber}`}
                               placeholder="Assign"
                               menuAlign="right"
-                              buttonClassName="!h-7 !min-w-0 !px-2 !border-0 !bg-transparent !text-brand hover:!bg-transparent !shadow-none !text-[10px]"
+                              buttonClassName="!h-8 !min-w-0 !px-2 !border-0 !bg-transparent !text-brand hover:!bg-transparent !shadow-none !text-[10px]"
                               options={[
                                 { value: 'unassigned', label: 'Unassigned' },
                                 ...technicians.map((t) => ({
@@ -893,7 +893,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                             <button
                               type="button"
                               onClick={() => setAddLogModalWo(wo)}
-                              className="py-1.5 px-1 bg-surface hover:bg-slate-100 text-brand font-semibold rounded-lg border border-line text-center flex items-center justify-center space-x-0.5 truncate min-h-9"
+                              className="py-1.5 px-1 bg-brand/10 hover:bg-brand/15 text-brand font-extrabold rounded-lg border border-brand/20 text-center flex items-center justify-center space-x-0.5 truncate min-h-9"
                             >
                               <Plus className="w-3 h-3 shrink-0" />
                               <span>Log</span>
@@ -905,7 +905,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                             ariaLabel={`More actions for ${wo.orderNumber}`}
                             iconOnly
                             triggerIcon={<MoreHorizontal className="w-4 h-4" />}
-                            buttonClassName="!h-10 !w-10"
+                            buttonClassName="!h-9 !w-9"
                             menuAlign="right"
                             options={[
                               { value: 'detail', label: 'Detail' },
