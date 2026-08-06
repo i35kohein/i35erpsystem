@@ -92,4 +92,4 @@ Page titles `text-2xl` (24), section `text-lg/xl` (18/20), stats `text-3xl` (30:
 | F5 | P2 | POS ticket row: order# min-w-0 truncate + status row shrink-0 | ✅ verified no row overflow |
 | F2 | P2 | Badge floor 7/8/9px → 12px (index.css) | ✅ verified UNPAID 12px |
 | F3 | P2 | 20 stray fixed sizes → token classes (13→sm, 12→xs, 14→sm, 15/16→base) across 5 files | ✅ 0 strays left |
-| F6 | P3 | Bulk source cleanup `text-[10px]/[11px]` → `text-xs` (no visual change) | ⏳ optional — NOT done (no visual value) |
+| F6 | P3 | Bulk source cleanup `text-[10px]/[11px]` → `text-xs` (no visual change) | ✅ DONE (commit `e3cda70`): 157 classes → text-xs (incl. 7/8/9/7.5/9.5px); 0 sub-12px classes remain in source; floor rules kept as safety net; verified 0 sub-12px text live |
