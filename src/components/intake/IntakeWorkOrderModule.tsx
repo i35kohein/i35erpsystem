@@ -242,7 +242,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   };
 
   return (
-    <div className="space-y-3">
+    <div className={`space-y-3 ${isIpad ? 'flex min-h-0 flex-1 flex-col' : ''}`}>
       {/* Top Header Banner & Actions */}
       <div className="bg-white border border-line rounded-2xl p-5 shadow-xs space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-line">
@@ -349,7 +349,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
       </div>
 
       {/* Main Full-Width Section: Controls Bar & Ticket List */}
-      <div className="workspace-panel workspace-panel--with-toolbar bg-white border border-line rounded-2xl p-5 space-y-4 shadow-xs">
+      <div className={`workspace-panel workspace-panel--with-toolbar bg-white border border-line rounded-2xl p-5 space-y-4 shadow-xs ${isIpad ? '!h-auto flex-1 min-h-0' : ''}`}>
         {/* Controls Bar: Items Count, Filters, Clear All, Sort */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-line">
           <div className="flex items-center space-x-3">
