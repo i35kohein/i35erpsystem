@@ -66,28 +66,28 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
                             <div className="h-9 rounded-xl border border-black/10 shadow-2xs flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: preset.colors.primary }}>
                               Blue
                             </div>
-                            <span className="text-[11px] font-mono text-[#7F7F7F] block">{preset.colors.primary}</span>
+                            <span className="text-xs font-mono text-[#7F7F7F] block">{preset.colors.primary}</span>
                           </div>
 
                           <div className="space-y-1 text-center">
                             <div className="h-9 rounded-xl border border-black/10 shadow-2xs flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: preset.colors.secondary }}>
                               Turquoise
                             </div>
-                            <span className="text-[11px] font-mono text-[#7F7F7F] block">{preset.colors.secondary}</span>
+                            <span className="text-xs font-mono text-[#7F7F7F] block">{preset.colors.secondary}</span>
                           </div>
 
                           <div className="space-y-1 text-center">
                             <div className="h-9 rounded-xl border border-black/10 shadow-2xs flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: preset.colors.orange }}>
                               Orange
                             </div>
-                            <span className="text-[11px] font-mono text-[#7F7F7F] block">{preset.colors.orange}</span>
+                            <span className="text-xs font-mono text-[#7F7F7F] block">{preset.colors.orange}</span>
                           </div>
 
                           <div className="space-y-1 text-center">
                             <div className="h-9 rounded-xl border border-black/10 shadow-2xs flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: preset.colors.darkBlue }}>
                               Navy
                             </div>
-                            <span className="text-[11px] font-mono text-[#7F7F7F] block">{preset.colors.darkBlue}</span>
+                            <span className="text-xs font-mono text-[#7F7F7F] block">{preset.colors.darkBlue}</span>
                           </div>
                         </div>
                       </div>

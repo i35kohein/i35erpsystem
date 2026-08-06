@@ -659,7 +659,7 @@ export default function App() {
       <div className="space-y-3">
         {drawerChips.length > 0 ? (
           <div className="rounded-xl border border-line bg-surface p-2.5">
-            <p className="mb-1.5 text-[11px] font-extrabold uppercase tracking-wider text-muted">Active ({drawerChips.length})</p>
+            <p className="mb-1.5 text-xs font-extrabold uppercase tracking-wider text-muted">Active ({drawerChips.length})</p>
             <ActiveFilterChips chips={drawerChips} />
           </div>
         ) : (
@@ -690,7 +690,7 @@ export default function App() {
               <Eye className={`w-4 h-4 ${showAllStages ? 'text-white' : 'text-brand'}`} />
               Show All Stages
               {pipelineDiagCounts.cant + pipelineDiagCounts.not > 0 && (
-                <span className={`rounded-full px-1.5 py-0.5 text-[11px] font-black ${showAllStages ? 'bg-white/20' : 'bg-ink/10 text-ink'}`}>
+                <span className={`rounded-full px-1.5 py-0.5 text-xs font-black ${showAllStages ? 'bg-white/20' : 'bg-ink/10 text-ink'}`}>
                   {pipelineDiagCounts.cant + pipelineDiagCounts.not}
                 </span>
               )}
@@ -707,7 +707,7 @@ export default function App() {
               <Stethoscope className={`w-4 h-4 ${showBeforeNeedsDiagOnly ? 'text-white' : 'text-blue-600'}`} />
               Before-Diag Pending
               {pipelineDiagCounts.before > 0 && (
-                <span className={`rounded-full px-1.5 py-0.5 text-[11px] font-black ${showBeforeNeedsDiagOnly ? 'bg-white/20' : 'bg-blue-100 text-blue-700'}`}>
+                <span className={`rounded-full px-1.5 py-0.5 text-xs font-black ${showBeforeNeedsDiagOnly ? 'bg-white/20' : 'bg-blue-100 text-blue-700'}`}>
                   {pipelineDiagCounts.before}
                 </span>
               )}
@@ -724,7 +724,7 @@ export default function App() {
               <ShieldCheck className={`w-4 h-4 ${showNeedsDiagOnly ? 'text-white' : 'text-purple-600'}`} />
               After-Diag Pending
               {pipelineDiagCounts.after > 0 && (
-                <span className={`rounded-full px-1.5 py-0.5 text-[11px] font-black ${showNeedsDiagOnly ? 'bg-white/20' : 'bg-purple-100 text-purple-700'}`}>
+                <span className={`rounded-full px-1.5 py-0.5 text-xs font-black ${showNeedsDiagOnly ? 'bg-white/20' : 'bg-purple-100 text-purple-700'}`}>
                   {pipelineDiagCounts.after}
                 </span>
               )}
@@ -1859,7 +1859,7 @@ export default function App() {
               >
                 <SlidersHorizontal className="h-4 w-4" />
                 {getActiveFilterCount(activeTab) > 0 && (
-                  <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[11px] font-black text-white">
+                  <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-xs font-black text-white">
                     {getActiveFilterCount(activeTab)}
                   </span>
                 )}

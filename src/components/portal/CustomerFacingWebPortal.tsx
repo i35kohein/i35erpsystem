@@ -317,7 +317,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             <div>
               <div className="flex items-center space-x-2">
                 <h1 className="font-extrabold text-sm text-ink">{systemSettings.shopName}</h1>
-                <span className="bg-success/15 text-success text-[11px] font-extrabold px-2 py-0.5 rounded-full border border-success/30">
+                <span className="bg-success/15 text-success text-xs font-extrabold px-2 py-0.5 rounded-full border border-success/30">
                   LIVE PORTAL
                 </span>
               </div>
@@ -383,7 +383,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
               <div className="space-y-0.5">
                 <div className="flex items-center space-x-2">
                   <h3 className="font-extrabold text-sm text-ink">Action Required: Review Repair Quote Estimate</h3>
-                  <span className="bg-[#FF9500] text-white text-[11px] font-black px-2 py-0.5 rounded-full uppercase">
+                  <span className="bg-[#FF9500] text-white text-xs font-black px-2 py-0.5 rounded-full uppercase">
                     Awaiting Approval
                   </span>
                 </div>
@@ -595,7 +595,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             <MessageSquare className="w-4 h-4" />
             <span>Message Shop & Technician</span>
             {currentWorkOrder.customerInquiries && currentWorkOrder.customerInquiries.length > 0 && (
-              <span className="bg-brand text-white text-[11px] font-bold px-1.5 py-0.2 rounded-full">
+              <span className="bg-brand text-white text-xs font-bold px-1.5 py-0.2 rounded-full">
                 {currentWorkOrder.customerInquiries.length}
               </span>
             )}
@@ -909,7 +909,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                     }`}>
                       <p className="font-medium">{msg.text}</p>
                     </div>
-                    <span className="text-[11px] text-muted mt-1 font-mono">{msg.timestamp}</span>
+                    <span className="text-xs text-muted mt-1 font-mono">{msg.timestamp}</span>
                   </div>
                 ))
               ) : (

@@ -1531,9 +1531,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                           {part.quantityInStock} <span className="text-xs font-normal text-muted">units</span>
                         </span>
                         {isOut ? (
-                          <span className="animate-pulse rounded bg-red-600 px-1.5 py-0.5 text-[11px] font-black uppercase leading-none tracking-[0.1em] text-white">OUT OF STOCK</span>
+                          <span className="animate-pulse rounded bg-red-600 px-1.5 py-0.5 text-xs font-black uppercase leading-none tracking-[0.1em] text-white">OUT OF STOCK</span>
                         ) : isLow ? (
-                          <span className="rounded bg-amber-500 px-1.5 py-0.5 text-[11px] font-black uppercase leading-none tracking-[0.1em] text-white">REORDER</span>
+                          <span className="rounded bg-amber-500 px-1.5 py-0.5 text-xs font-black uppercase leading-none tracking-[0.1em] text-white">REORDER</span>
                         ) : (
                           <span className="text-xs font-bold text-muted">Min: {part.reorderPoint}</span>
                         )}
@@ -1656,7 +1656,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                               <p className="font-extrabold text-ink text-xs leading-snug">
                                 {part.name}
                               </p>
-                              <p className="mt-0.5 font-mono text-[11px] font-medium text-muted">SKU {part.sku}</p>
+                              <p className="mt-0.5 font-mono text-xs font-medium text-muted">SKU {part.sku}</p>
                             </div>
                           </div>
                         </td>
@@ -1690,7 +1690,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         <td className="w-[96px] min-w-[96px] pr-2 py-2">
                           {inlineEditMode ? (
                             <div className="grid grid-cols-1 gap-1" onFocus={() => beginInlineEdit(part)}>
-                              <label className="flex min-w-0 flex-col gap-0.5 text-[11px] font-bold uppercase tracking-wide text-muted">
+                              <label className="flex min-w-0 flex-col gap-0.5 text-xs font-bold uppercase tracking-wide text-muted">
                                 <span>Stock</span>
                                 <input aria-label={`Stock quantity for ${part.name}`} type="text" inputMode="numeric" value={inlineDrafts[part.id]?.quantityInStock ?? String(part.quantityInStock)} onWheel={(e) => e.currentTarget.blur()} onChange={(e) => setInlineDrafts((current) => ({ ...current, [part.id]: { ...current[part.id], quantityInStock: e.target.value } }))} className="w-full min-w-0 rounded-md border border-line-strong bg-white px-2 py-1.5 text-sm font-semibold font-sans tabular-nums tracking-normal text-[#111111]" />
                               </label>
@@ -1704,15 +1704,15 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                                 {(inlineEditMode ? editValue('quantityInStock', part.quantityInStock) : part.quantityInStock)} <span className="text-xs font-normal text-muted">units</span>
                               </span>
                               {!inlineEditMode && isOut ? (
-                                <span className="bg-red-600 text-white text-[7px] font-black px-1 py-0.5 rounded uppercase tracking-[0.1em] leading-none animate-pulse">
+                                <span className="bg-red-600 text-white text-xs font-black px-1 py-0.5 rounded uppercase tracking-[0.1em] leading-none animate-pulse">
                                   OUT OF STOCK
                                 </span>
                               ) : !inlineEditMode && isLow ? (
-                                <span className="bg-amber-500 text-white text-[7px] font-black px-1 py-0.5 rounded uppercase tracking-[0.1em] leading-none">
+                                <span className="bg-amber-500 text-white text-xs font-black px-1 py-0.5 rounded uppercase tracking-[0.1em] leading-none">
                                   REORDER
                                 </span>
                               ) : !inlineEditMode ? (
-                                <span className="text-[11px] text-muted font-bold">
+                                <span className="text-xs text-muted font-bold">
                                   Min: {part.reorderPoint}
                                 </span>
                               ) : null}
@@ -1734,11 +1734,11 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         <td className="w-[176px] min-w-[176px] pl-3 pr-1.5 py-2 font-sans text-sm font-semibold text-[#15803D] whitespace-nowrap">
                           {inlineEditMode ? (
                             <div className="grid grid-cols-2 gap-2">
-                              <label className="flex min-w-0 flex-col gap-0.5 text-[11px] font-bold uppercase tracking-wide text-muted">
+                              <label className="flex min-w-0 flex-col gap-0.5 text-xs font-bold uppercase tracking-wide text-muted">
                                 <span>Purchase</span>
                                 <input aria-label={`Purchase price for ${part.name}`} type="text" inputMode="numeric" value={inlineDrafts[part.id]?.costPrice ?? String(part.costPrice)} onWheel={(e) => e.currentTarget.blur()} onFocus={() => beginInlineEdit(part)} onChange={(e) => setInlineDrafts((current) => ({ ...current, [part.id]: { ...current[part.id], costPrice: e.target.value } }))} className="w-full min-w-0 rounded-md border border-line-strong bg-white px-2 py-1.5 text-sm font-semibold font-sans tabular-nums tracking-normal text-[#111111]" />
                               </label>
-                              <label className="flex min-w-0 flex-col gap-0.5 text-[11px] font-bold uppercase tracking-wide text-muted">
+                              <label className="flex min-w-0 flex-col gap-0.5 text-xs font-bold uppercase tracking-wide text-muted">
                                 <span>Selling</span>
                                 <input aria-label={`Selling price for ${part.name}`} type="text" inputMode="numeric" value={inlineDrafts[part.id]?.sellingPrice ?? String(part.sellingPrice)} onWheel={(e) => e.currentTarget.blur()} onChange={(e) => setInlineDrafts((current) => ({ ...current, [part.id]: { ...current[part.id], sellingPrice: e.target.value } }))} className="w-full min-w-0 rounded-md border border-line-strong bg-white px-2 py-1.5 text-sm font-semibold font-sans tabular-nums tracking-normal text-[#111111]" />
                               </label>
@@ -1748,7 +1748,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
                         {inlineEditMode ? (
                           <td className="w-[108px] px-1.5 py-2 align-top">
-                            <div className="flex min-w-0 flex-col gap-0.5 text-[11px] font-bold uppercase tracking-wide text-muted">
+                            <div className="flex min-w-0 flex-col gap-0.5 text-xs font-bold uppercase tracking-wide text-muted">
                               <span>Supplier</span>
                               <CustomDropdownMenu
                                 value={inlineDrafts[part.id]?.supplierId ?? part.supplierId ?? ''}
@@ -1790,12 +1790,12 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         {/* Location Bin */}
                         <td className="w-[104px] max-w-[104px] px-1.5 py-2 hidden md:table-cell">
                           {inlineEditMode ? (
-                            <div className="flex min-w-0 flex-col gap-0.5 text-[11px] font-bold uppercase tracking-wide text-muted">
+                            <div className="flex min-w-0 flex-col gap-0.5 text-xs font-bold uppercase tracking-wide text-muted">
                               <span>Bin</span>
                               <select aria-label={`Bin for ${part.name}`} value={editValue('locationBin', part.locationBin) as string} onFocus={() => beginInlineEdit(part)} onChange={(e) => setInlineDrafts((current) => ({ ...current, [part.id]: { ...current[part.id], locationBin: e.target.value } }))} className="w-full min-w-0 rounded-md border border-line-strong bg-white px-2 py-1.5 text-sm font-semibold font-sans tabular-nums tracking-normal text-[#111111]"><option value="">Choose bin</option>{existingLocationBins.map((bin) => <option key={bin} value={bin}>{bin}</option>)}</select>
                             </div>
                           ) : part.locationBin ? (
-                            <div className="flex min-w-0 flex-col gap-0.5 text-[11px] font-bold uppercase tracking-wide text-muted">
+                            <div className="flex min-w-0 flex-col gap-0.5 text-xs font-bold uppercase tracking-wide text-muted">
                               <span>Bin</span>
                               <span className="inline-flex items-center gap-1 px-1 py-0.5 text-xs font-extrabold leading-none text-brand">
                                 <MapPin className="h-2.5 w-2.5 shrink-0 text-brand" />
@@ -1910,15 +1910,15 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     </div>
                     <div className="grid grid-cols-3 gap-2 rounded-xl border border-[#D8E5ED] bg-[#F8FBFD] p-3">
                       <div>
-                        <p className="text-[11px] font-extrabold uppercase tracking-wider text-muted">Cost</p>
+                        <p className="text-xs font-extrabold uppercase tracking-wider text-muted">Cost</p>
                         <p className="mt-0.5 font-mono text-xs font-bold text-faint break-words">{part.costPrice.toLocaleString()}</p>
                       </div>
                       <div>
-                        <p className="text-[11px] font-extrabold uppercase tracking-wider text-muted">Selling</p>
+                        <p className="text-xs font-extrabold uppercase tracking-wider text-muted">Selling</p>
                         <p className="mt-0.5 font-mono text-xs font-bold text-[#15803D] break-words">{part.sellingPrice.toLocaleString()}</p>
                       </div>
                       <div>
-                        <p className="text-[11px] font-extrabold uppercase tracking-wider text-muted">Profit</p>
+                        <p className="text-xs font-extrabold uppercase tracking-wider text-muted">Profit</p>
                         <p className={`mt-0.5 font-mono text-xs font-black break-words ${profit >= 0 ? 'text-brand' : 'text-rose-600'}`}>{profit >= 0 ? '+' : ''}{profit.toLocaleString()}</p>
                       </div>
                     </div>
@@ -1957,7 +1957,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       <td className="p-2.5"><p className="max-w-[260px] truncate font-bold text-ink">{part.name}</p><p className="mt-0.5 font-mono text-xs text-muted">{part.sku}</p></td>
                       <td className="p-2.5 font-mono text-faint whitespace-nowrap hidden md:table-cell">{part.costPrice.toLocaleString()} MMK</td>
                       <td className="p-2.5 font-mono font-bold text-[#15803D] whitespace-nowrap">{part.sellingPrice.toLocaleString()} MMK</td>
-                      <td className={`p-2.5 font-mono font-black whitespace-nowrap ${profit >= 0 ? 'text-brand' : 'text-rose-600'}`}>{profit >= 0 ? '+' : ''}{profit.toLocaleString()} MMK<span className={`mt-0.5 block w-max rounded-md px-1.5 py-0.5 font-mono text-[11px] font-black sm:hidden ${heat}`}>{margin}%</span></td>
+                      <td className={`p-2.5 font-mono font-black whitespace-nowrap ${profit >= 0 ? 'text-brand' : 'text-rose-600'}`}>{profit >= 0 ? '+' : ''}{profit.toLocaleString()} MMK<span className={`mt-0.5 block w-max rounded-md px-1.5 py-0.5 font-mono text-xs font-black sm:hidden ${heat}`}>{margin}%</span></td>
                       <td className="p-2.5 hidden sm:table-cell"><span className={`rounded-md px-1.5 py-0.5 font-mono text-xs font-black ${heat}`} title={margin >= 40 ? 'High margin' : margin >= 20 ? 'Good margin' : margin >= 0 ? 'Low margin' : 'Loss'}>{margin}%</span></td>
                       <td className="p-2.5 text-right"><Button type="button" aria-label={`View ${part.name} details`} title="View part details" onClick={() => setSelectedPartForDetails(part)} className="inline-flex h-10 w-10 lg:h-7 lg:w-7 items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand"><Eye className="h-3 w-3" /></Button></td>
                     </tr>
@@ -2041,7 +2041,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                                 {quantity}
                                 {/* Touch fallback for the title= tooltip (invisible on
                                     phones): SKU count + stock value under the number. */}
-                                <span className="block text-[11px] font-bold leading-none opacity-80 mt-0.5 sm:hidden">
+                                <span className="block text-xs font-bold leading-none opacity-80 mt-0.5 sm:hidden">
                                   {matchingParts.length} SKU · {costValue.toLocaleString()}
                                 </span>
                               </Button>
@@ -3048,7 +3048,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 <>
             <div className="flex items-start justify-between gap-2 border-b border-line pb-2">
               <div>
-                <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-brand">Confirm stock changes</p>
+                <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-brand">Confirm stock changes</p>
                 <h3 className="mt-0.5 text-sm font-black text-[#111111]">Review before saving</h3>
                 <p className="mt-0.5 text-xs font-semibold text-[#111111]">Approve only when the list below looks right.</p>
               </div>
@@ -3059,15 +3059,15 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
             <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
               <div className="rounded-xl border border-line bg-[#FAFAFA] px-3 py-2">
-                <p className="text-[11px] font-bold uppercase tracking-wide text-muted">Total changes</p>
+                <p className="text-xs font-bold uppercase tracking-wide text-muted">Total changes</p>
                 <p className="mt-0.5 text-sm font-black text-[#111111]">{totalChangeCount}</p>
               </div>
               <div className="rounded-xl border border-line bg-[#FAFAFA] px-3 py-2">
-                <p className="text-[11px] font-bold uppercase tracking-wide text-muted">Category changes</p>
+                <p className="text-xs font-bold uppercase tracking-wide text-muted">Category changes</p>
                 <p className="mt-0.5 text-sm font-black text-[#111111]">{categoryChangeCount}</p>
               </div>
               <div className="rounded-xl border border-line bg-[#FAFAFA] px-3 py-2">
-                <p className="text-[11px] font-bold uppercase tracking-wide text-muted">Rows affected</p>
+                <p className="text-xs font-bold uppercase tracking-wide text-muted">Rows affected</p>
                 <p className="mt-0.5 text-sm font-black text-[#111111]">{inlineSaveReview.length}</p>
               </div>
             </div>
@@ -3079,15 +3079,15 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
                         <p className="truncate text-xs font-black text-[#111111]">{part.name}</p>
-                        <p className="mt-0.5 font-mono text-[11px] font-bold text-[#111111]">{part.sku}</p>
+                        <p className="mt-0.5 font-mono text-xs font-bold text-[#111111]">{part.sku}</p>
                       </div>
-                      <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-extrabold text-brand">{changes.length} change{changes.length === 1 ? '' : 's'}</span>
+                      <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-extrabold text-brand">{changes.length} change{changes.length === 1 ? '' : 's'}</span>
                     </div>
                     <div className="mt-2 grid gap-1.5">
                       {changes.map((change) => (
                         <div key={`${part.id}-${change.label}`} className="flex items-center justify-between gap-2 rounded-lg bg-[#FAFAFA] px-2.5 py-1.5">
-                          <span className="text-[11px] font-bold uppercase tracking-wide text-[#111111]">{change.label}</span>
-                          <span className="font-mono text-[11px] font-black text-[#111111]">{change.value}</span>
+                          <span className="text-xs font-bold uppercase tracking-wide text-[#111111]">{change.label}</span>
+                          <span className="font-mono text-xs font-black text-[#111111]">{change.value}</span>
                         </div>
                       ))}
                     </div>
@@ -3095,7 +3095,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 ))
               ) : (
                 <div className="rounded-xl border border-dashed border-line-strong bg-white p-4 text-center">
-                  <p className="text-[11px] font-bold text-[#111111]">No pending changes to save.</p>
+                  <p className="text-xs font-bold text-[#111111]">No pending changes to save.</p>
                 </div>
               )}
             </div>
@@ -3309,7 +3309,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 </table>
               </div>
 
-              <div className="mt-3 flex justify-between text-[11px] text-muted">
+              <div className="mt-3 flex justify-between text-xs text-muted">
                 <span>i35 Apple Service · No 1031, Pyi Htaung Su Main Rd, North Dagon, Yangon</span>
                 <span>Sheet generated {new Date().toLocaleString()}</span>
               </div>
@@ -3511,17 +3511,17 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         />
                       </div>
                       <div className="flex items-center justify-between border-b border-dashed border-[#C7C7CC] pb-1.5">
-                        <span className="pr-1 text-[11px] font-black uppercase leading-tight text-ink">{part.category}</span>
-                        <span className="ml-1 shrink-0 rounded bg-ink px-1.5 py-0.5 text-[11px] font-black uppercase text-white">{part.qualityTier}</span>
+                        <span className="pr-1 text-xs font-black uppercase leading-tight text-ink">{part.category}</span>
+                        <span className="ml-1 shrink-0 rounded bg-ink px-1.5 py-0.5 text-xs font-black uppercase text-white">{part.qualityTier}</span>
                       </div>
                       <p className="mt-1.5 text-xs font-extrabold leading-snug text-ink">{part.name}</p>
-                      <p className="mt-0.5 truncate font-mono text-[11px] text-muted" title={part.sku}>SKU: {part.sku}</p>
+                      <p className="mt-0.5 truncate font-mono text-xs text-muted" title={part.sku}>SKU: {part.sku}</p>
                       <div className="mt-1.5 flex items-center justify-between gap-1">
-                        <div className="min-w-0 text-[11px] leading-tight text-muted">
+                        <div className="min-w-0 text-xs leading-tight text-muted">
                           <p>Bin: <span className="font-bold text-ink">{part.locationBin || '—'}</span></p>
                         </div>
                         <div className="shrink-0 text-right">
-                          <p className="text-[11px] font-bold text-muted">Price</p>
+                          <p className="text-xs font-bold text-muted">Price</p>
                           <p className="font-mono text-base font-black leading-none text-ink">{Number(part.sellingPrice || 0).toLocaleString()} MMK</p>
                         </div>
                       </div>

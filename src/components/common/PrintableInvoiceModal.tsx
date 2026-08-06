@@ -341,7 +341,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
                           )}
                         </td>
                         <td className="p-3">
-                          <span className={`inline-block px-2 py-0.5 text-[11px] font-bold rounded ${
+                          <span className={`inline-block px-2 py-0.5 text-xs font-bold rounded ${
                             item.isLabor ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-purple-50 text-purple-700 border border-purple-200'
                           }`}>
                             {item.isLabor ? 'LABOR' : 'PART'}
@@ -361,7 +361,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
                         {workOrder.deviceCategory} Hardware Repair Service ({workOrder.deviceModel})
                       </td>
                       <td className="p-3">
-                        <span className="px-2 py-0.5 text-[11px] font-bold rounded bg-blue-50 text-blue-700 border border-blue-200">
+                        <span className="px-2 py-0.5 text-xs font-bold rounded bg-blue-50 text-blue-700 border border-blue-200">
                           SERVICE
                         </span>
                       </td>

@@ -135,12 +135,12 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
               <span className="truncate">{workOrder.orderNumber}</span>
             </span>
             {workOrder.priority === 'Urgent' && (
-              <span className="inline-flex h-6 shrink-0 items-center gap-1.5 rounded-md border border-rose-200 bg-rose-50 px-2 text-[11px] font-extrabold uppercase tracking-[0.08em] text-rose-700">
+              <span className="inline-flex h-6 shrink-0 items-center gap-1.5 rounded-md border border-rose-200 bg-rose-50 px-2 text-xs font-extrabold uppercase tracking-[0.08em] text-rose-700">
                 <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
                 Urgent
               </span>
             )}
-            <span className="inline-flex h-6 shrink-0 items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--blue-tint)] px-2 text-[11px] font-extrabold uppercase tracking-[0.08em] text-[var(--primary)]">
+            <span className="inline-flex h-6 shrink-0 items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--blue-tint)] px-2 text-xs font-extrabold uppercase tracking-[0.08em] text-[var(--primary)]">
               <span className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" />
               {workOrder.status}
             </span>
@@ -232,7 +232,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
           >
             <History className="h-3.5 w-3.5" />
             Log
-            <span className="inline-flex min-w-5 justify-center rounded-full bg-[var(--blue-tint)] px-1.5 py-0.5 text-[11px] text-[var(--primary)]">
+            <span className="inline-flex min-w-5 justify-center rounded-full bg-[var(--blue-tint)] px-1.5 py-0.5 text-xs text-[var(--primary)]">
               {repairLogs.length}
             </span>
           </Button>
@@ -251,7 +251,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                   <h3 className="text-lg font-black leading-6 text-[var(--text-main)]">{workOrder.deviceModel}</h3>
                 </div>
                 <div className="mt-2 rounded-md border border-[var(--border)] bg-[var(--card-bg)] px-2.5 py-2">
-                  <p className="text-[11px] font-black uppercase tracking-wider text-[var(--text-muted)]">Repair Category</p>
+                  <p className="text-xs font-black uppercase tracking-wider text-[var(--text-muted)]">Repair Category</p>
                   <p className="mt-0.5 text-xs font-bold leading-snug text-[var(--text-main)]">
                     {repairCategoryLabel}
                   </p>
@@ -286,7 +286,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                       <Icon className="h-3.5 w-3.5" />
                     </span>
                     <div className="min-w-0">
-                      <dt className="text-[11px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">{typeof label === 'string' ? label : null}</dt>
+                      <dt className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-muted)]">{typeof label === 'string' ? label : null}</dt>
                       <dd className="mt-0.5 truncate font-bold text-[var(--text-main)]">{typeof value === 'string' ? value : null}</dd>
                     </div>
                   </div>
@@ -296,7 +296,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                     <Banknote className="h-3.5 w-3.5" />
                   </span>
                   <div className="min-w-0">
-                    <dt className="text-[11px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Total Estimate</dt>
+                    <dt className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Total Estimate</dt>
                     <dd className="mt-0.5 font-mono text-base font-black text-[var(--primary)]">
                       {(workOrder.totalAmount || workOrder.subtotal || 0).toLocaleString()} MMK
                     </dd>
@@ -331,7 +331,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
 
               <div className="overflow-hidden rounded-lg border border-[var(--border)]">
                 {/* Mini table header */}
-                <div className="sticky top-0 z-10 grid grid-cols-[24px_minmax(0,1fr)_auto_auto] items-center gap-x-3 border-b border-[var(--border)] bg-[var(--bg)] px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">
+                <div className="sticky top-0 z-10 grid grid-cols-[24px_minmax(0,1fr)_auto_auto] items-center gap-x-3 border-b border-[var(--border)] bg-[var(--bg)] px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider text-[var(--text-muted)]">
                   <span>#</span>
                   <span>Check item</span>
                   <span className="w-14 text-right">Before</span>
@@ -406,7 +406,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                           <span className="text-xs font-black text-[var(--text-main)]">{log.author || 'System'}</span>
                           {log.statusChange && (
-                            <span className="inline-flex rounded-md border border-[var(--border)] bg-[var(--blue-tint)] px-2 py-0.5 text-[11px] font-extrabold uppercase tracking-wide text-[var(--primary)]">
+                            <span className="inline-flex rounded-md border border-[var(--border)] bg-[var(--blue-tint)] px-2 py-0.5 text-xs font-extrabold uppercase tracking-wide text-[var(--primary)]">
                               {log.statusChange}
                             </span>
                           )}

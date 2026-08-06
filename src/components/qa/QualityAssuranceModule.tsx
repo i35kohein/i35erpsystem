@@ -260,17 +260,17 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                         {wo.orderNumber}
                       </span>
                       <div className="flex items-center space-x-1">
-                        <span className={`text-[11px] font-extrabold px-1.5 py-0.5 rounded-md border uppercase ${
+                        <span className={`text-xs font-extrabold px-1.5 py-0.5 rounded-md border uppercase ${
                           wo.status === 'Taken Out' ? 'bg-slate-100 text-slate-600 border-slate-300' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                         }`}>
                           {wo.status}
                         </span>
                         {isQaPassed ? (
-                          <span className="text-[11px] font-extrabold px-1.5 py-0.5 rounded-md border bg-[#EAF8ED] text-[#15803D] border-success/20 uppercase">
+                          <span className="text-xs font-extrabold px-1.5 py-0.5 rounded-md border bg-[#EAF8ED] text-[#15803D] border-success/20 uppercase">
                             Ready
                           </span>
                         ) : (
-                          <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-md border bg-[#FFF4E5] text-[#D97706] border-[#FF9F0A]/20 uppercase">
+                          <span className="text-xs font-bold px-1.5 py-0.5 rounded-md border bg-[#FFF4E5] text-[#D97706] border-[#FF9F0A]/20 uppercase">
                             QA Pending
                           </span>
                         )}
@@ -284,16 +284,16 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
 
                     <div className="flex flex-wrap items-center gap-1 mt-1">
                       {repairs.slice(0, 2).map((r, i) => (
-                        <span key={i} className="inline-flex items-center gap-1 rounded-md border border-brand/20 bg-brand/8 px-1.5 py-0.5 text-[11px] font-extrabold text-brand">
+                        <span key={i} className="inline-flex items-center gap-1 rounded-md border border-brand/20 bg-brand/8 px-1.5 py-0.5 text-xs font-extrabold text-brand">
                           <Wrench className="h-2.5 w-2.5" />
                           {r.name}
                         </span>
                       ))}
                       {repairs.length > 2 && (
-                        <span className="text-[11px] font-bold text-muted">+{repairs.length - 2}</span>
+                        <span className="text-xs font-bold text-muted">+{repairs.length - 2}</span>
                       )}
                       {wo.deviceColor && (
-                        <span className="inline-flex items-center gap-1 rounded-md bg-white px-1.5 py-0.5 text-[11px] font-bold text-ink border border-line">
+                        <span className="inline-flex items-center gap-1 rounded-md bg-white px-1.5 py-0.5 text-xs font-bold text-ink border border-line">
                           <Palette className="h-2.5 w-2.5 text-muted" />
                           {wo.deviceColor}
                         </span>

@@ -91,7 +91,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <span className="text-xs font-extrabold text-muted uppercase tracking-wider">Connected Store Branding</span>
-                    <span className="rounded-full bg-emerald-50 px-1.5 py-0.5 text-[11px] font-extrabold text-emerald-700">Shop Settings source</span>
+                    <span className="rounded-full bg-emerald-50 px-1.5 py-0.5 text-xs font-extrabold text-emerald-700">Shop Settings source</span>
                   </div>
                   <p className="font-extrabold text-sm text-ink">{formData.shopName || 'AppleRepair Pro'}</p>
                   <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1.5 text-xs text-muted">
@@ -152,7 +152,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                     <div className="w-8 h-8 rounded-lg bg-brand/10 text-brand-deep flex items-center justify-center font-bold">
                       <FileText className="w-4 h-4" />
                     </div>
-                    <span className="px-2 py-0.5 rounded-full text-[11px] font-black bg-brand text-white uppercase">
+                    <span className="px-2 py-0.5 rounded-full text-xs font-black bg-brand text-white uppercase">
                       Active Standard
                     </span>
                   </div>
@@ -177,7 +177,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                     <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold group-hover:bg-brand/10 group-hover:text-brand-deep transition-all">
                       <Tag className="w-4 h-4" />
                     </div>
-                    <span className="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-slate-100 text-slate-700 border border-slate-200">
+                    <span className="px-2 py-0.5 rounded-full text-xs font-extrabold bg-slate-100 text-slate-700 border border-slate-200">
                       Intake Tag
                     </span>
                   </div>
@@ -233,7 +233,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
 
                   <div className="flex flex-col gap-1.5 rounded-lg border border-line bg-[#F8F9FA] p-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-1">
-                      <span className="flex items-center gap-0.5 text-[11px] font-extrabold text-[#526375]">
+                      <span className="flex items-center gap-0.5 text-xs font-extrabold text-[#526375]">
                         <AlignLeft className="h-3 w-3" />
                         Selected line
                       </span>
@@ -247,7 +247,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                               onMouseDown={(event) => event.preventDefault()}
                               onClick={() => applyReceiptFooterAlignment(value)}
                               style={{ height: 24, minHeight: 24, fontSize: 9, lineHeight: 1 }}
-                              className={`flex h-6 items-center gap-0.5 rounded px-1.5 text-[11px] font-bold transition-colors ${
+                              className={`flex h-6 items-center gap-0.5 rounded px-1.5 text-xs font-bold transition-colors ${
                                 isActive ? 'bg-brand text-white' : 'text-[#526375] hover:bg-surface'
                               }`}
                               aria-pressed={isActive}
@@ -262,7 +262,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                     </div>
 
                     <div className="flex items-center gap-1">
-                      <span className="flex items-center gap-0.5 text-[11px] font-extrabold text-[#526375]">
+                      <span className="flex items-center gap-0.5 text-xs font-extrabold text-[#526375]">
                         <Type className="h-3 w-3" />
                         Text size
                       </span>
@@ -276,7 +276,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                               onMouseDown={(event) => event.preventDefault()}
                               onClick={() => applyReceiptFooterTextSize(value)}
                               style={{ height: 24, minHeight: 24, fontSize: 9, lineHeight: 1 }}
-                              className={`h-6 rounded px-1.5 text-[11px] font-bold transition-colors ${
+                              className={`h-6 rounded px-1.5 text-xs font-bold transition-colors ${
                                 isActive ? 'bg-brand text-white' : 'text-[#526375] hover:bg-surface'
                               }`}
                               aria-pressed={isActive}
@@ -293,7 +293,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                     data-testid="receipt-footer-live-preview"
                     className="min-h-[72px] rounded-lg border border-dashed border-line-strong bg-white px-3 py-2.5 shadow-inner"
                   >
-                    <div className="mb-1.5 flex items-center justify-between gap-2 text-[11px] font-extrabold uppercase tracking-wide text-muted">
+                    <div className="mb-1.5 flex items-center justify-between gap-2 text-xs font-extrabold uppercase tracking-wide text-muted">
                       <span>Live A4 footer preview</span>
                       <span>Updates as you edit</span>
                     </div>

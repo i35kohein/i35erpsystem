@@ -897,7 +897,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             const accent = accentByGroup[group.label] || 'bg-brand-soft text-brand';
             return (
               <div key={group.label}>
-                <p className="px-1 pb-1.5 text-[11px] font-extrabold uppercase tracking-wider text-muted">
+                <p className="px-1 pb-1.5 text-xs font-extrabold uppercase tracking-wider text-muted">
                   {group.label}
                 </p>
                 <div className="flex flex-col gap-1 md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 md:gap-2">
@@ -936,7 +936,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                         )}
                         {tab.badge !== undefined && (
                           <span
-                            className={`absolute top-1.5 right-1.5 px-1.5 rounded-full text-[11px] font-mono font-bold leading-[13px] ${
+                            className={`absolute top-1.5 right-1.5 px-1.5 rounded-full text-xs font-mono font-bold leading-[13px] ${
                               isActive ? 'bg-white/20 text-white' : 'bg-line text-ink'
                             }`}
                           >

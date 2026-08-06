@@ -351,7 +351,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
 
                   <p className="text-xs text-slate-300 line-clamp-1 leading-tight">{stage.desc}</p>
 
-                  <div className="flex justify-between items-center mt-2 pt-1 border-t border-white/10 text-[11px] text-slate-400">
+                  <div className="flex justify-between items-center mt-2 pt-1 border-t border-white/10 text-xs text-slate-400">
                     <span>{isCurrent ? 'Current Stage' : isPassed ? 'Completed' : 'Upcoming'}</span>
                     {logCount > 0 && (
                       <span className="font-mono font-bold bg-white/20 text-white px-1.5 rounded">

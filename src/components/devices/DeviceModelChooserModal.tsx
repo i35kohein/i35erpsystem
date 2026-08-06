@@ -128,7 +128,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                   <IconComp className="w-4 h-4" />
                   <span>{fam.label}</span>
                   <span
-                    className={`px-1.5 py-0.5 rounded-full text-[11px] font-mono font-bold ${
+                    className={`px-1.5 py-0.5 rounded-full text-xs font-mono font-bold ${
                       isActive ? 'bg-white/20 text-white' : 'bg-line text-ink'
                     }`}
                   >
@@ -218,7 +218,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                           <div className="min-w-0 pr-2">
                             <span className="truncate block">{item.model}</span>
                             <span
-                              className={`text-[11px] font-bold block mt-0.5 ${
+                              className={`text-xs font-bold block mt-0.5 ${
                                 isSelected ? 'text-white/80' : 'text-muted'
                               }`}
                             >

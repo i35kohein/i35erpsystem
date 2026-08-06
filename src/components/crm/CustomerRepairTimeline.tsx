@@ -360,7 +360,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                           <span>Repair Outcome Summary & Diagnosis</span>
                         </span>
                         {wo.postRepairChecklist && (
-                          <span className="text-[11px] font-extrabold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full flex items-center space-x-1">
+                          <span className="text-xs font-extrabold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full flex items-center space-x-1">
                             <ShieldCheck className="w-3 h-3" />
                             <span>QA Checklist Passed</span>
                           </span>

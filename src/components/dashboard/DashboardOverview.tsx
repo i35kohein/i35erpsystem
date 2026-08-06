@@ -1323,7 +1323,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                             <p className="font-mono font-extrabold text-xs text-ink">
                               {totalAmt.toLocaleString()} MMK
                             </p>
-                            <span className={`text-[11px] font-bold px-1.5 py-0.2 rounded ${
+                            <span className={`text-xs font-bold px-1.5 py-0.2 rounded ${
                               wo.isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
                             }`}>
                               {wo.isPaid ? 'Paid' : 'Unpaid'}
