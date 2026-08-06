@@ -235,9 +235,9 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
             </span>
           </div>
 
-          <div className={`space-y-2 overflow-y-auto pr-1 ${isIpad ? 'md:min-h-0 md:flex-1 md:max-h-none' : 'max-h-[calc(100dvh-260px)]'}`}>
+          <div className={`space-y-2 overflow-y-auto pr-1 ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:flex-1 md:max-h-none' : 'max-h-[calc(100dvh-260px)]'}`}>
             {filteredWorkOrders.length === 0 ? (
-              <div className="p-6 text-center text-muted space-y-2">
+              <div className="flex flex-1 flex-col items-center justify-center p-6 text-center text-muted space-y-2">
                 <CheckCircle2 className="w-8 h-8 text-success mx-auto opacity-50" />
                 <p className="font-semibold text-xs">No Finished Devices Pending QA Control</p>
                 <p className="text-[11px]">Devices moved to 'Finished' status in the repair pipeline automatically flow into QA Control for final inspection.</p>
@@ -500,7 +500,11 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
               </div>
             </div>
           ) : (
-            <div className="p-12 text-center text-muted">Select a work order to conduct QA checklist.</div>
+            <div className="flex min-h-0 flex-1 flex-col items-center justify-center p-12 text-center text-muted">
+              <CheckCircle2 className="mb-2 h-10 w-10 text-line-strong" />
+              <p className="text-xs font-extrabold text-ink">Select a work order</p>
+              <p className="mt-1 text-[11px]">Choose a device from the QA Queue to run the 21-point post-repair inspection.</p>
+            </div>
           )}
         </div>
       </div>
