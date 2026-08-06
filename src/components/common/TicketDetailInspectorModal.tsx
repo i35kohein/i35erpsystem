@@ -326,51 +326,45 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
               </div>
             )}
 
-            <section className="rounded-lg border border-[var(--border)] bg-[var(--bg)] p-3">
+            <section className="rounded-lg border border-[var(--border)] bg-[var(--bg)] p-4">
               <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)] pb-2.5">
                 <span className="text-xs font-black text-[var(--text-main)]">21-Point Hardware Diagnostic Comparison</span>
-                <div className="flex items-center gap-3 text-[9px] font-bold text-[var(--text-muted)]">
-                  <span className="flex items-center gap-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" />
-                    Before intake
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-violet-500" />
-                    After QA
-                  </span>
-                </div>
+                <span className="rounded-md border border-[var(--border)] bg-[var(--card-bg)] px-2 py-0.5 text-[10px] font-extrabold text-[var(--text-muted)]">
+                  {diagnosticRows.length} checks
+                </span>
               </div>
 
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
                 {diagnosticRows.map(({ beforeItem, afterItem }, index) => (
                   <div
                     key={beforeItem.id || beforeItem.name}
-                    className={`flex min-h-12 items-center justify-between gap-2 rounded-lg border px-2.5 py-2 ${
+                    className={`flex flex-col gap-2 rounded-lg border p-3 ${
                       beforeItem.status === 'Fail' || afterItem.status === 'Fail'
                         ? 'border-rose-200 bg-rose-50/70'
                         : 'border-[var(--border)] bg-[var(--card-bg)]'
                     }`}
                   >
-                    <div className="min-w-0">
-                      <p className="truncate text-xs font-extrabold text-[var(--text-main)]">
-                        <span className="mr-2 font-mono text-[10px] text-[var(--text-muted)]">{index + 1}.</span>
-                        {beforeItem.name}
-                      </p>
-                      {(afterItem.note || beforeItem.note) && (
-                        <p className="mt-0.5 max-w-32 truncate pl-5 text-[9px] italic text-[var(--text-muted)]">
-                          {afterItem.note || beforeItem.note}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex shrink-0 items-center gap-1">
-                      <span className={`inline-flex min-w-14 justify-center rounded-md border px-2 py-1 text-[9px] font-extrabold uppercase ${statusClass(beforeItem.status)}`}>
+                    <p className="truncate text-xs font-extrabold text-[var(--text-main)]" title={beforeItem.name}>
+                      <span className="mr-1.5 font-mono text-[10px] text-[var(--text-muted)]">{index + 1}.</span>
+                      {beforeItem.name}
+                    </p>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[10px] font-bold text-[var(--text-muted)]">Before intake</span>
+                      <span className={`inline-flex min-w-16 justify-center rounded-md border px-2 py-1 text-[10px] font-extrabold uppercase ${statusClass(beforeItem.status)}`}>
                         {beforeItem.status}
                       </span>
-                      <span className="text-[9px] font-bold text-[var(--text-muted)]">→</span>
-                      <span className={`inline-flex min-w-14 justify-center rounded-md border px-2 py-1 text-[9px] font-extrabold uppercase ${statusClass(afterItem.status)}`}>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[10px] font-bold text-[var(--text-muted)]">After QA</span>
+                      <span className={`inline-flex min-w-16 justify-center rounded-md border px-2 py-1 text-[10px] font-extrabold uppercase ${statusClass(afterItem.status)}`}>
                         {afterItem.status}
                       </span>
                     </div>
+                    {(afterItem.note || beforeItem.note) && (
+                      <p className="border-t border-[var(--border)] pt-2 text-[10px] italic leading-snug text-[var(--text-muted)]">
+                        {afterItem.note || beforeItem.note}
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>
