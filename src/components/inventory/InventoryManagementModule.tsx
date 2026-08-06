@@ -1064,7 +1064,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   };
 
   return (
-    <div className="space-y-3">
+    <div className={`space-y-3 ${isIpad ? 'flex min-h-0 flex-1 flex-col' : ''}`}>
       {/* Module Toolbar — iPad: title hidden (topbar covers it) + filters in drawer.
           Desktop: original layout (title + inline filter dropdowns).
           iPad hides the whole bar unless inline-edit is active (Save needs a home). */}
@@ -1483,7 +1483,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           </button>
         )}
 
-        <div className="workspace-panel workspace-panel--standard rounded-2xl border border-line bg-white text-xs shadow-xs">
+        <div className={`workspace-panel workspace-panel--standard rounded-2xl border border-line bg-white text-xs shadow-xs ${isIpad ? '!h-auto flex-1 min-h-0' : ''}`}>
           {filteredParts.length === 0 ? (
             <div className="flex min-h-[280px] flex-col items-center justify-center p-12 text-center space-y-4">
               <PackageX className="w-8 h-8 text-muted mx-auto" />
@@ -1932,7 +1932,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
       {/* VIEW MODE 2: PROFIT TABLE */}
       {viewMode === 'profit' && (
-        <div className="workspace-panel workspace-panel--with-summary rounded-2xl border border-line bg-white text-xs shadow-xs">
+        <div className={`workspace-panel workspace-panel--with-summary rounded-2xl border border-line bg-white text-xs shadow-xs ${isIpad ? '!h-auto flex-1 min-h-0' : ''}`}>
           <div className="flex items-center justify-between border-b border-line px-3 py-2.5">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-brand" />
@@ -2035,7 +2035,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
       {/* VIEW MODE 3: LIVE STOCK MATRIX — derived only from saved inventory rows. */}
       {viewMode === 'matrix' && (
-        <div className="workspace-panel workspace-panel--with-summary rounded-2xl border border-line bg-white text-xs shadow-xs">
+        <div className={`workspace-panel workspace-panel--with-summary rounded-2xl border border-line bg-white text-xs shadow-xs ${isIpad ? '!h-auto flex-1 min-h-0' : ''}`}>
           <div className="flex items-center justify-between border-b border-line px-3 py-2.5">
             <div className="flex items-center gap-2">
               <Grid className="h-4 w-4 text-brand" />
