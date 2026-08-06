@@ -754,13 +754,15 @@ html[data-theme] [class~="bg-[#ED7132]"] {
 }
 
 /* Keep controls stable while counts, loading labels, and async status text update.
-   :where() keeps specificity 0 so Tailwind utilities (min-h-10 etc.) can override
-   this 32px floor where a larger touch target is wanted. */
-:where(.basic-ui) button,
-:where(.basic-ui) [role="button"],
-:where(.basic-ui) input,
-:where(.basic-ui) select {
-  min-height: 32px;
+   Lives in @layer base so Tailwind utilities (min-h-10 etc., later layer) can
+   override this 32px floor where a larger touch target is wanted. */
+@layer base {
+  :where(.basic-ui) button,
+  :where(.basic-ui) [role="button"],
+  :where(.basic-ui) input,
+  :where(.basic-ui) select {
+    min-height: 32px;
+  }
 }
 
 .basic-ui table {
