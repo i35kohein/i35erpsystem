@@ -280,7 +280,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search ticket, customer, device..."
-                className="pl-8 pr-3 py-1.5 bg-surface border border-line rounded-xl text-xs focus:outline-none focus:border-brand focus:bg-white transition-all w-full md:w-64"
+                className="pl-8 pr-3 h-10 bg-surface border border-line rounded-xl text-xs focus:outline-none focus:border-brand focus:bg-white transition-all w-full md:w-64"
               />
             </div>
           </div>

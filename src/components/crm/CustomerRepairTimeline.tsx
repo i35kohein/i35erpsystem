@@ -188,7 +188,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search ticket, model, serial, notes..."
-                className="w-full bg-white border border-line rounded-xl pl-8 pr-3 py-1.5 text-xs font-semibold text-ink focus:border-brand focus:ring-2 focus:ring-brand/20 focus:outline-none"
+                className="w-full h-10 bg-white border border-line rounded-xl pl-8 pr-3 text-xs font-semibold text-ink focus:border-brand focus:ring-2 focus:ring-brand/20 focus:outline-none"
               />
             </div>
 
