@@ -1536,11 +1536,12 @@ export default function App() {
         isCollapsed={isCollapsed}
         setIsCollapsed={setIsCollapsed}
         isMobileMenuOpen={isMobileMenuOpen}
+        isIpad={isIpad}
         setIsMobileMenuOpen={setIsMobileMenuOpen}
       />
 
       {/* Main Right Content Column */}
-      <div id="main-content-scroll" className={`relative flex h-full h-dvh min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-gutter:stable] transition-[padding] duration-300 ${isCollapsed ? 'lg:pl-14' : 'lg:pl-64'}`}>
+      <div id="main-content-scroll" className={`relative flex h-full h-dvh min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-gutter:stable] transition-[padding] duration-300 ${isIpad ? '' : isCollapsed ? 'lg:pl-14' : 'lg:pl-64'}`}>
         {/* Top Navigation Bar Header */}
         <header className="app-topbar flex flex-row items-center justify-between px-3 sm:px-5 h-[52px] min-h-[52px] bg-white border-b border-line sticky top-0 z-40 gap-2 shrink-0">
           {/* Active Tab Title & Mobile Toggle */}
@@ -1548,7 +1549,7 @@ export default function App() {
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden min-h-11 min-w-11 flex items-center justify-center bg-surface hover:bg-line border border-line text-ink rounded-xl active:scale-95 transition-all shrink-0 cursor-pointer"
+              className={`${isIpad ? '' : 'lg:hidden'} min-h-11 min-w-11 flex items-center justify-center bg-surface hover:bg-line border border-line text-ink rounded-xl active:scale-95 transition-all shrink-0 cursor-pointer`}
               aria-label="Toggle Navigation Menu"
               title="Toggle Navigation Menu"
             >

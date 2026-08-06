@@ -44,6 +44,8 @@ interface NavigationProps {
   setIsCollapsed: (collapsed: boolean | ((prev: boolean) => boolean)) => void;
   isMobileMenuOpen?: boolean;
   setIsMobileMenuOpen?: (open: boolean | ((prev: boolean) => boolean)) => void;
+  /** iPad: sidebar behaves like the mobile drawer (hidden by default, hamburger opens it). */
+  isIpad?: boolean;
 }
 
 export const Navigation: React.FC<NavigationProps> = ({
@@ -63,6 +65,7 @@ export const Navigation: React.FC<NavigationProps> = ({
   setIsCollapsed,
   isMobileMenuOpen: externalMobileMenuOpen,
   setIsMobileMenuOpen: externalSetIsMobileMenuOpen,
+  isIpad = false,
 }) => {
   const { t } = useLanguage();
   const [internalMobileMenuOpen, setInternalMobileMenuOpen] = useState(false);
@@ -233,7 +236,7 @@ export const Navigation: React.FC<NavigationProps> = ({
       {/* Backdrop overlay for mobile menu drawer */}
       {isMobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-black/40 backdrop-blur-xs z-40 lg:hidden transition-opacity duration-300"
+          className={`fixed inset-0 bg-black/40 backdrop-blur-xs z-40 ${isIpad ? '' : 'lg:hidden'} transition-opacity duration-300`}
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
@@ -244,7 +247,7 @@ export const Navigation: React.FC<NavigationProps> = ({
         bg-white border-r border-line
         flex flex-col justify-between
         transition-all duration-300 ease-in-out select-none
-        ${isMobileMenuOpen ? 'translate-x-0 w-[280px] max-w-[85vw]' : '-translate-x-full lg:translate-x-0'}
+        ${isMobileMenuOpen ? 'translate-x-0 w-[280px] max-w-[85vw]' : isIpad ? '-translate-x-full' : '-translate-x-full lg:translate-x-0'}
         ${effectiveCollapsed ? 'lg:w-14' : 'lg:w-64'}
         ${!effectiveCollapsed ? 'lg:shadow-xl lg:shadow-ink/10' : ''}
       `}>
@@ -321,7 +324,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                   onClick={() => setIsMobileMenuOpen(false)}
                   variant="ghost"
                   size="icon"
-                  className="lg:hidden p-2 text-muted hover:text-ink rounded-xl"
+                  className={`${isIpad ? '' : 'lg:hidden'} p-2 text-muted hover:text-ink rounded-xl`}
                   aria-label="Close menu"
                 >
                   <X className="w-6 h-6" />
