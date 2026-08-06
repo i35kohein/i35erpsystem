@@ -424,24 +424,24 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                       </span>
                       <div className="flex items-center space-x-1 ml-auto md:ml-0 flex-wrap gap-1">
                         {getStatusBadge(wo.followUpStatus)}
-                        <span className="px-1.5 py-0.5 rounded-md text-[9px] font-extrabold bg-emerald-100 text-emerald-800">
+                        <span className="px-1.5 py-0.5 rounded-md text-[11px] font-extrabold bg-emerald-100 text-emerald-800">
                           Delivered / Taken Out
                         </span>
 
                         {daysElapsed >= 60 ? (
-                          <span className="px-1.5 py-0.5 rounded-md text-[9px] font-extrabold bg-violet-100 text-violet-900 border border-violet-300">
+                          <span className="px-1.5 py-0.5 rounded-md text-[11px] font-extrabold bg-violet-100 text-violet-900 border border-violet-300">
                             2 Months Due ({daysElapsed}d)
                           </span>
                         ) : daysElapsed >= 30 ? (
-                          <span className="px-1.5 py-0.5 rounded-md text-[9px] font-extrabold bg-purple-100 text-purple-900 border border-purple-300">
+                          <span className="px-1.5 py-0.5 rounded-md text-[11px] font-extrabold bg-purple-100 text-purple-900 border border-purple-300">
                             1 Month Due ({daysElapsed}d)
                           </span>
                         ) : daysElapsed >= 7 ? (
-                          <span className="px-1.5 py-0.5 rounded-md text-[9px] font-extrabold bg-indigo-100 text-indigo-900 border border-indigo-300">
+                          <span className="px-1.5 py-0.5 rounded-md text-[11px] font-extrabold bg-indigo-100 text-indigo-900 border border-indigo-300">
                             7 Days Due ({daysElapsed}d)
                           </span>
                         ) : (
-                          <span className="px-1.5 py-0.5 rounded-md text-[9px] font-semibold bg-gray-100 text-gray-700">
+                          <span className="px-1.5 py-0.5 rounded-md text-[11px] font-semibold bg-gray-100 text-gray-700">
                             {daysElapsed === 0 ? 'Completed Today' : `${daysElapsed}d Post Delivery`}
                           </span>
                         )}

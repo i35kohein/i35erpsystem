@@ -389,7 +389,7 @@ export const Navigation: React.FC<NavigationProps> = ({
           {navGroups.map((group) => (
             <div key={group.title} className="space-y-1 pb-2 border-b border-line/60 last:border-b-0">
               {!effectiveCollapsed && (
-                <div className="px-3 py-1 text-[9px] font-extrabold text-muted tracking-wider uppercase flex items-center justify-between">
+                <div className="px-3 py-1 text-[11px] font-extrabold text-muted tracking-wider uppercase flex items-center justify-between">
                   <span>{group.title}</span>
                   <span className="hidden sm:block w-8 h-[1px] bg-line" />
                 </div>
@@ -473,7 +473,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                 <span className="w-2 h-2 rounded-full bg-[#2E7D32]" />
                 <span className="font-medium">System online</span>
               </span>
-              <span className="font-mono text-[9px] bg-line px-1.5 py-0.5 rounded-md text-ink">v2.4.0</span>
+              <span className="font-mono text-[11px] bg-line px-1.5 py-0.5 rounded-md text-ink">v2.4.0</span>
             </div>
           )}
         </div>

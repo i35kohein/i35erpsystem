@@ -109,7 +109,7 @@ const UsersTab: React.FC<UsersTabProps> = ({ formData, setFormData, users, curre
                             <div className="flex items-center space-x-1.5">
                               <h5 className="font-extrabold text-sm text-ink truncate">{usr.name}</h5>
                               {usr.id === currentUser?.id && (
-                                <span className="px-1.5 py-0.2 bg-brand text-white text-[9px] font-extrabold rounded-md">
+                                <span className="px-1.5 py-0.2 bg-brand text-white text-[11px] font-extrabold rounded-md">
                                   YOU
                                 </span>
                               )}

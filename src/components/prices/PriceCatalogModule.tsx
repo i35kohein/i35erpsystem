@@ -529,7 +529,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                   {idx + 1}
                                 </span>
                                 <h4 className="font-extrabold text-sm text-ink leading-snug truncate min-w-0">{item.label}</h4>
-                                <span className="inline-flex items-center space-x-0.5 text-[8px] font-extrabold text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded-full border border-emerald-200 shrink-0">
+                                <span className="inline-flex items-center space-x-0.5 text-[11px] font-extrabold text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded-full border border-emerald-200 shrink-0">
                                   <ShieldCheck className="w-2 h-2 text-emerald-600 shrink-0" />
                                   <span>{item.warranty}</span>
                                 </span>
@@ -546,7 +546,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
                             {/* Price row */}
                             <div className="mt-2.5 pt-2.5 border-t border-[#F0F0F2] flex items-center justify-between gap-2">
-                              <span className="text-[9px] font-extrabold uppercase tracking-wider text-muted">Price</span>
+                              <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted">Price</span>
                               <div className="flex items-baseline space-x-1.5 min-w-0">
                                 {item.discountPercent > 0 && (
                                   <span className="text-xs text-[#A1A1A6] line-through font-mono">
@@ -658,7 +658,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                     {i + 1}
                                   </span>
                                   <h4 className="font-extrabold text-xs text-ink truncate leading-tight min-w-0">{item.label}</h4>
-                                  <span className="inline-flex items-center space-x-1 text-[9px] font-extrabold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-200 shrink-0">
+                                  <span className="inline-flex items-center space-x-1 text-[11px] font-extrabold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-200 shrink-0">
                                     <ShieldCheck className="w-2.5 h-2.5 text-emerald-600 shrink-0" />
                                     <span>{item.warranty}</span>
                                   </span>
@@ -696,7 +696,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
                               <div className="flex items-baseline space-x-1.5 shrink-0">
                                 {item.discountPercent > 0 && (
-                                  <span className="text-[9px] text-muted line-through font-mono">
+                                  <span className="text-[11px] text-muted line-through font-mono">
                                     {formatPrice(item.price)}
                                   </span>
                                 )}
@@ -747,7 +747,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                 {idx + 1}
                               </span>
                               <h4 className="font-extrabold text-xs text-ink truncate leading-tight min-w-0">{item.label}</h4>
-                              <span className="inline-flex items-center space-x-1 text-[9px] font-extrabold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-200 shrink-0">
+                              <span className="inline-flex items-center space-x-1 text-[11px] font-extrabold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-200 shrink-0">
                                 <ShieldCheck className="w-2.5 h-2.5 text-emerald-600 shrink-0" />
                                 <span>{item.warranty}</span>
                               </span>
@@ -785,7 +785,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
                           <div className="flex items-baseline space-x-1.5 shrink-0">
                             {item.discountPercent > 0 && (
-                              <span className="text-[9px] text-muted line-through font-mono">
+                              <span className="text-[11px] text-muted line-through font-mono">
                                 {formatPrice(item.price)}
                               </span>
                             )}
@@ -877,10 +877,10 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
             <Smartphone className="w-3.5 h-3.5" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[8px] font-extrabold uppercase tracking-widest text-brand leading-none">Active Device</p>
+            <p className="text-[11px] font-extrabold uppercase tracking-widest text-brand leading-none">Active Device</p>
             <p className="text-xs font-black text-ink truncate leading-tight mt-0.5">{selectedDevice}</p>
           </div>
-          <span className="text-[9px] font-bold text-muted shrink-0 whitespace-nowrap">
+          <span className="text-[11px] font-bold text-muted shrink-0 whitespace-nowrap">
             {availableRepairItems.filter((i) => i.price && i.price > 0).length} services
           </span>
           <button
@@ -1037,7 +1037,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                             {item.label}
                           </h3>
                           {/* Warranty pill — small, beside the service name */}
-                          <span className="inline-flex items-center space-x-0.5 text-[8px] font-extrabold text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded-full border border-emerald-200 shrink-0">
+                          <span className="inline-flex items-center space-x-0.5 text-[11px] font-extrabold text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded-full border border-emerald-200 shrink-0">
                             <ShieldCheck className="w-2 h-2 text-emerald-600 shrink-0" />
                             <span>{item.warranty}</span>
                           </span>
@@ -1051,7 +1051,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                     {/* Price (right on mobile / bottom on desktop) + selection checkmark */}
                     <div className="flex items-center gap-2 shrink-0 sm:w-full sm:mt-2 sm:pt-2 sm:border-t sm:border-line sm:flex-col sm:items-start sm:gap-0.5">
                       <div className="text-right sm:text-left min-w-0">
-                        <span className="hidden sm:block text-[9px] font-extrabold uppercase text-muted truncate">
+                        <span className="hidden sm:block text-[11px] font-extrabold uppercase text-muted truncate">
                           {discountPct > 0 ? 'Discounted Price' : 'Standard Price'}
                         </span>
                         <div className="flex items-baseline space-x-1 sm:mt-0.5">
@@ -1059,7 +1059,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                             {formatPrice(finalPrice)}
                           </span>
                           {discountPct > 0 && (
-                            <span className="text-[9px] sm:text-xs font-bold text-muted line-through font-mono">
+                            <span className="text-[11px] sm:text-xs font-bold text-muted line-through font-mono">
                               {formatPrice(item.price)}
                             </span>
                           )}
@@ -1135,7 +1135,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                 {cartSummary.count} <span className="text-xs font-normal text-muted">items · {formatPrice(cartSummary.totalDue)}</span>
               </p>
               {cartSummary.totalDiscountAmount > 0 && (
-                <p className="text-[9px] font-extrabold text-success leading-tight">
+                <p className="text-[11px] font-extrabold text-success leading-tight">
                   − {formatPrice(cartSummary.totalDiscountAmount)} saved
                 </p>
               )}

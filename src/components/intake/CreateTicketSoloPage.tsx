@@ -1111,7 +1111,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                   <span className="font-extrabold text-[#AF52DE] text-sm">{overallDiscountPercent}%</span>
                 </div>
                 <div className="col-span-2 md:col-span-2 bg-brand text-white rounded-xl p-2.5 flex flex-col justify-center">
-                  <span className="block text-[9px] opacity-90 uppercase font-bold tracking-wider">Final Estimate</span>
+                  <span className="block text-[11px] opacity-90 uppercase font-bold tracking-wider">Final Estimate</span>
                   <span className="font-black text-base">{finalEstimate.toLocaleString()} MMK</span>
                 </div>
               </div>
@@ -1347,7 +1347,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                   wizardStep === idx ? 'bg-brand text-white shadow-xs' : 'text-brand hover:bg-white'
                 }`}
               >
-                <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-black ${wizardStep === idx ? 'bg-white/20' : 'bg-white border border-brand/30'}`}>
+                <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[11px] font-black ${wizardStep === idx ? 'bg-white/20' : 'bg-white border border-brand/30'}`}>
                   {idx + 1}
                 </span>
                 <span className="hidden sm:inline">{label}</span>
@@ -1373,15 +1373,15 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             ) : (
               <div className="flex-1 grid grid-cols-3 sm:flex sm:items-center sm:gap-6 text-xs min-w-0">
                 <div className="text-center sm:text-left">
-                  <span className="block text-[9px] uppercase tracking-wider text-muted font-bold">Repairs</span>
+                  <span className="block text-[11px] uppercase tracking-wider text-muted font-bold">Repairs</span>
                   <span className="font-black text-ink text-sm">{repairCount} item{repairCount === 1 ? '' : 's'}</span>
                 </div>
                 <div className="text-center sm:text-left">
-                  <span className="block text-[9px] uppercase tracking-wider text-muted font-bold">Estimate</span>
+                  <span className="block text-[11px] uppercase tracking-wider text-muted font-bold">Estimate</span>
                   <span className="font-black text-brand text-sm">{finalEstimate.toLocaleString()} MMK</span>
                 </div>
                 <div className="text-center sm:text-left">
-                  <span className="block text-[9px] uppercase tracking-wider text-muted font-bold">{overallDiscountPercent > 0 ? `${overallDiscountPercent}% Off` : 'Saved'}</span>
+                  <span className="block text-[11px] uppercase tracking-wider text-muted font-bold">{overallDiscountPercent > 0 ? `${overallDiscountPercent}% Off` : 'Saved'}</span>
                   <span className={`font-bold text-sm ${savedAmount > 0 ? 'text-success' : 'text-muted'}`}>{savedAmount.toLocaleString()} MMK</span>
                 </div>
               </div>
@@ -1678,7 +1678,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                           {item.price.toLocaleString()} MMK
                         </span>
                         {item.isCatalogMatch && (
-                          <span className="block text-[9px] text-success font-bold">Catalog Verified</span>
+                          <span className="block text-[11px] text-success font-bold">Catalog Verified</span>
                         )}
                       </div>
                     </button>

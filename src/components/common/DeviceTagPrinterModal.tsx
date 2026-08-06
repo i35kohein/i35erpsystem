@@ -64,7 +64,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
   const voucherFooterLines = voucherFooterText.split(/\r?\n/);
   const voucherFooterFontSize = systemSettings?.receiptFooterFontSize ?? 'medium';
   const voucherFooterPreviewSizeClass = {
-    small: 'text-[9px]',
+    small: 'text-[11px]',
     medium: 'text-xs',
     large: 'text-xs',
   }[voucherFooterFontSize];
@@ -130,7 +130,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
   const renderDiagStatus = (status: string, isMono: boolean) => {
     if (status === 'Pass') {
       return (
-        <span className={`inline-flex items-center space-x-0.5 font-mono text-[9px] font-extrabold px-1.5 py-0.5 rounded ${
+        <span className={`inline-flex items-center space-x-0.5 font-mono text-[11px] font-extrabold px-1.5 py-0.5 rounded ${
           isMono 
             ? 'text-black bg-slate-100 border border-slate-300' 
             : 'text-emerald-800 bg-emerald-50 border border-emerald-200'
@@ -142,7 +142,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
     }
     if (status === 'Fail') {
       return (
-        <span className={`inline-flex items-center space-x-0.5 font-mono text-[9px] font-extrabold px-1.5 py-0.5 rounded ${
+        <span className={`inline-flex items-center space-x-0.5 font-mono text-[11px] font-extrabold px-1.5 py-0.5 rounded ${
           isMono 
             ? 'text-black bg-slate-200 border border-black' 
             : 'text-rose-800 bg-rose-50 border border-rose-200'
@@ -153,7 +153,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
       );
     }
     return (
-      <span className="inline-flex items-center space-x-0.5 font-mono text-[9px] text-slate-400 font-medium">
+      <span className="inline-flex items-center space-x-0.5 font-mono text-[11px] text-slate-400 font-medium">
         <span>— N/A</span>
       </span>
     );
@@ -207,7 +207,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                 <div className="flex items-center space-x-2">
                   <h1 className="font-black text-base text-black tracking-tight">{shopName}</h1>
                   {copyLabel && (
-                    <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-black text-white font-mono">
+                    <span className="text-[11px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-black text-white font-mono">
                       {copyLabel}
                     </span>
                   )}
@@ -402,7 +402,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                           <td className="p-1.5 font-semibold text-slate-900">{beforeItem.name}</td>
                           <td className="p-1.5 text-center">{renderDiagStatus(beforeItem.status, isMono)}</td>
                           <td className="p-1.5 text-center">{renderDiagStatus(afterItem.status, isMono)}</td>
-                          <td className="p-1.5 text-[9px] text-slate-600 italic">
+                          <td className="p-1.5 text-[11px] text-slate-600 italic">
                             {afterItem.note || beforeItem.note || (beforeItem.status === 'Fail' && afterItem.status === 'Pass' ? 'Repaired & Passed QA' : 'Normal')}
                           </td>
                         </tr>
@@ -420,7 +420,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                 <div className={`p-2 rounded-xl border space-y-1.5 ${isMono ? 'bg-white border-slate-300' : 'bg-slate-50/60 border-slate-200'}`}>
                   <div className="flex justify-between items-center border-b pb-1 border-slate-200">
                     <span className="font-extrabold text-black uppercase tracking-wide">1. Before Repair Intake</span>
-                    <span className="font-mono text-[9px] font-bold">{beforeDiagnosticList.filter(d => d.status === 'Pass').length}/21 Pass</span>
+                    <span className="font-mono text-[11px] font-bold">{beforeDiagnosticList.filter(d => d.status === 'Pass').length}/21 Pass</span>
                   </div>
                   <div className="grid grid-cols-2 gap-1">
                     {beforeDiagnosticList.map((item, idx) => (
@@ -436,7 +436,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                 <div className={`p-2 rounded-xl border space-y-1.5 ${isMono ? 'bg-white border-slate-300' : 'bg-slate-50/60 border-slate-200'}`}>
                   <div className="flex justify-between items-center border-b pb-1 border-slate-200">
                     <span className="font-extrabold text-black uppercase tracking-wide">2. After Repair QA Pass</span>
-                    <span className="font-mono text-[9px] font-bold">{afterDiagnosticList.filter(d => d.status === 'Pass').length}/21 Pass</span>
+                    <span className="font-mono text-[11px] font-bold">{afterDiagnosticList.filter(d => d.status === 'Pass').length}/21 Pass</span>
                   </div>
                   <div className="grid grid-cols-2 gap-1">
                     {afterDiagnosticList.map((item, idx) => (
@@ -457,7 +457,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                   <div key={item.name} className="a4-diagnostic-row min-h-[28px] p-1.5 rounded-lg border-0 border-b border-slate-200 bg-white grid grid-cols-[minmax(120px,0.8fr)_minmax(0,1.2fr)_auto] items-center gap-2">
                     <span className="order-1 font-semibold text-black truncate pr-1"><strong className="font-mono text-slate-400">{idx+1}.</strong> {item.name}</span>
                     {item.note && (
-                      <span className="order-2 border-l border-slate-200 pl-1 text-[8px] leading-tight text-slate-600 italic truncate" title={item.note}>Note: {item.note}</span>
+                      <span className="order-2 border-l border-slate-200 pl-1 text-[11px] leading-tight text-slate-600 italic truncate" title={item.note}>Note: {item.note}</span>
                     )}
                     {!item.note && <span className="order-2 block h-[9px]" aria-hidden="true" />}
                     <span className="order-3">{renderDiagStatus(item.status, isMono)}</span>
@@ -473,7 +473,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                   <div key={item.name} className="a4-diagnostic-row min-h-[28px] p-1.5 rounded-lg border-0 border-b border-slate-200 bg-white grid grid-cols-[minmax(120px,0.8fr)_minmax(0,1.2fr)_auto] items-center gap-2">
                     <span className="order-1 font-semibold text-black truncate pr-1"><strong className="font-mono text-slate-400">{idx+1}.</strong> {item.name}</span>
                     {item.note && (
-                      <span className="order-2 border-l border-slate-200 pl-1 text-[8px] leading-tight text-slate-600 italic truncate" title={item.note}>Note: {item.note}</span>
+                      <span className="order-2 border-l border-slate-200 pl-1 text-[11px] leading-tight text-slate-600 italic truncate" title={item.note}>Note: {item.note}</span>
                     )}
                     {!item.note && <span className="order-2 block h-[9px]" aria-hidden="true" />}
                     <span className="order-3">{renderDiagStatus(item.status, isMono)}</span>
@@ -902,12 +902,12 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                     )}
                     <div>
                       <p className="font-black text-sm tracking-tight text-black">{shopName}</p>
-                      <p className="font-mono text-[9px] text-slate-700">Ph: {shopPhones[0] || shopPhoneStr}</p>
+                      <p className="font-mono text-[11px] text-slate-700">Ph: {shopPhones[0] || shopPhoneStr}</p>
                     </div>
                   </div>
                   <div className="text-right space-y-0.5">
                     <p className="font-mono text-xs font-bold text-black">{workOrder.orderNumber}</p>
-                    <span className="text-[9px] font-black bg-black text-white px-1.5 py-0.5 rounded inline-block">
+                    <span className="text-[11px] font-black bg-black text-white px-1.5 py-0.5 rounded inline-block">
                       {workOrder.serviceType}
                     </span>
                   </div>
@@ -927,10 +927,10 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
 
                 <div className="pt-2 border-t border-dashed border-black flex items-center justify-between">
                   <div className="font-mono text-center">
-                    <div className="h-8 bg-black w-32 flex items-center justify-center text-white text-[9px] tracking-widest font-mono rounded-sm">
+                    <div className="h-8 bg-black w-32 flex items-center justify-center text-white text-[11px] tracking-widest font-mono rounded-sm">
                       |||| | |||||| | ||| | |||
                     </div>
-                    <span className="text-[9px] font-mono text-black">{workOrder.orderNumber}</span>
+                    <span className="text-[11px] font-mono text-black">{workOrder.orderNumber}</span>
                   </div>
 
                   <div className="flex flex-col items-center bg-white p-1 border-2 border-black rounded-md shrink-0">

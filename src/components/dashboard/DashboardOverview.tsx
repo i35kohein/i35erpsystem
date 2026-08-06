@@ -1090,7 +1090,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           <div className="bg-white border border-line rounded-2xl p-5 shadow-xs space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-line">
               <div className="space-y-0.5">
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2.5">
                   <ListFilter className="w-4 h-4 text-brand" />
                   <h3 className="text-sm font-extrabold text-ink truncate">
                     <span className="hidden sm:inline">Status Queue & Stage Distribution</span>
@@ -1345,7 +1345,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                             <p className="font-mono font-extrabold text-xs text-ink">
                               {totalAmt.toLocaleString()} MMK
                             </p>
-                            <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded ${
+                            <span className={`text-[11px] font-bold px-1.5 py-0.2 rounded ${
                               wo.isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
                             }`}>
                               {wo.isPaid ? 'Paid' : 'Unpaid'}

@@ -76,7 +76,7 @@ export const UserRoleSwitcher: React.FC<UserRoleSwitcherProps> = ({
                 <span className="font-extrabold truncate flex-1 min-w-0">
                   {currentUser.name}
                 </span>
-                <span className={`px-1.5 py-0.2 rounded-md text-[9px] font-extrabold border ${currentBadge.bgColor}`}>
+                <span className={`px-1.5 py-0.2 rounded-md text-[11px] font-extrabold border ${currentBadge.bgColor}`}>
                   {currentUser.role}
                 </span>
               </div>
@@ -135,7 +135,7 @@ export const UserRoleSwitcher: React.FC<UserRoleSwitcherProps> = ({
                       <div className="min-w-0">
                         <span className="font-extrabold block truncate text-ink">{usr.name}</span>
                         <div className="flex items-center space-x-1.5">
-                          <span className={`px-1.5 py-0.2 rounded-md text-[9px] font-bold border ${badge.bgColor}`}>
+                          <span className={`px-1.5 py-0.2 rounded-md text-[11px] font-bold border ${badge.bgColor}`}>
                             {usr.role}
                           </span>
                           {usr.role === 'Technician' && usr.technicianName && (

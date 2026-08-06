@@ -496,7 +496,7 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
                   ? 'bg-[var(--primary)] text-white border-[var(--primary)] rounded-2xl rounded-br-md'
                   : 'bg-white text-[var(--text-main)] border-[var(--border)] rounded-2xl rounded-bl-md shadow-sm'
               }`}>
-                {message.role === 'assistant' && <span className="block mb-1 text-[9px] font-bold uppercase tracking-wide text-[var(--text-muted)]">{message.source === 'ai' ? 'AI analysis' : 'Live ERP analysis'}</span>}
+                {message.role === 'assistant' && <span className="block mb-1 text-[11px] font-bold uppercase tracking-wide text-[var(--text-muted)]">{message.source === 'ai' ? 'AI analysis' : 'Live ERP analysis'}</span>}
                 {message.content}
                 {message.role === 'assistant' && (
                   <button type="button" onClick={() => void copyMessage(message.content)} aria-label="Copy response" title="Copy response" className="absolute -right-8 top-1.5 p-1 text-[var(--text-muted)] opacity-0 group-hover:opacity-100 hover:text-[var(--primary)]">
@@ -535,7 +535,7 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
               <Send className="w-4 h-4" />
             </button>
           </div>
-          <p className="mt-1.5 text-[9px] text-[var(--text-muted)] text-center">Enter to send · Shift + Enter for a new line · Confirm critical decisions before acting.</p>
+          <p className="mt-1.5 text-[11px] text-[var(--text-muted)] text-center">Enter to send · Shift + Enter for a new line · Confirm critical decisions before acting.</p>
         </form>
       </aside>
   );

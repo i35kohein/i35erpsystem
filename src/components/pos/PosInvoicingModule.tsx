@@ -466,7 +466,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       </span>
                       <div className="flex items-center space-x-1 shrink-0">
                         <StatusChip status={wo.status} />
-                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md border ${
+                        <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded-md border ${
                           wo.isPaid ? 'bg-[#EAF8ED] text-[#28A745] border-success/20' : 'bg-[#FFF4E5] text-[#D97706] border-[#FF9F0A]/20'
                         }`}>
                           {wo.isPaid ? 'PAID' : 'UNPAID'}
@@ -481,16 +481,16 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
                     <div className="flex flex-wrap items-center gap-1 mt-1">
                       {(wo.selectedRepairs || []).filter((r) => r && r.name).slice(0, 2).map((r, i) => (
-                        <span key={i} className="inline-flex items-center gap-1 rounded-md border border-brand/20 bg-brand/8 px-1.5 py-0.5 text-[9px] font-extrabold text-brand">
+                        <span key={i} className="inline-flex items-center gap-1 rounded-md border border-brand/20 bg-brand/8 px-1.5 py-0.5 text-[11px] font-extrabold text-brand">
                           <Wrench className="h-2.5 w-2.5" />
                           {r.name}
                         </span>
                       ))}
                       {(wo.selectedRepairs || []).filter((r) => r && r.name).length > 2 && (
-                        <span className="text-[9px] font-bold text-muted">+{((wo.selectedRepairs || []).filter((r) => r && r.name).length) - 2}</span>
+                        <span className="text-[11px] font-bold text-muted">+{((wo.selectedRepairs || []).filter((r) => r && r.name).length) - 2}</span>
                       )}
                       {wo.deviceColor && (
-                        <span className="inline-flex items-center gap-1 rounded-md bg-white px-1.5 py-0.5 text-[9px] font-bold text-ink border border-line">
+                        <span className="inline-flex items-center gap-1 rounded-md bg-white px-1.5 py-0.5 text-[11px] font-bold text-ink border border-line">
                           <Palette className="h-2.5 w-2.5 text-muted" />
                           {wo.deviceColor}
                         </span>
@@ -636,17 +636,17 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                             <div className="space-y-1">
                               <div className="font-medium">{li.description}</div>
                               {li.partId && !li.isLabor && (
-                                <span className="inline-flex items-center rounded-full border border-[#D6E7FF] bg-brand-soft px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-brand">
+                                <span className="inline-flex items-center rounded-full border border-[#D6E7FF] bg-brand-soft px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-brand">
                                   Inventory Part
                                 </span>
                               )}
                             </div>
                           </td>
-                          <td className="px-2.5 py-3 text-right text-muted">{li.quantity}</td>
-                          <td className="px-2.5 py-3 text-right font-mono text-muted">
+                          <td className="px-2.5 py-3 align-top text-right text-muted">{li.quantity}</td>
+                          <td className="px-2.5 py-3 align-top text-right font-mono text-muted">
                             {Number(li.unitPrice || 0).toLocaleString()}
                           </td>
-                          <td className="px-2.5 py-3 text-right font-mono text-ink">
+                          <td className="px-2.5 py-3 align-top text-right font-mono text-ink">
                             <div className="inline-flex items-center justify-end gap-2">
                               <span className="text-right">
                                 {hasDiscount && (
@@ -1147,7 +1147,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   <span className="text-xs font-extrabold uppercase tracking-wide text-muted">Receipt Preview</span>
                   <FileText className="w-3.5 h-3.5 text-[#C7C7CC]" />
                 </div>
-                <div className="mx-3 mb-3 rounded-lg border border-dashed border-line-strong bg-white px-3 py-2.5 font-mono text-[9px] leading-relaxed text-ink">
+                <div className="mx-3 mb-3 rounded-lg border border-dashed border-line-strong bg-white px-3 py-2.5 font-mono text-[11px] leading-relaxed text-ink">
                   <div className="text-center font-black uppercase tracking-widest text-xs">i35 Apple Service</div>
                   <div className="text-center text-muted">No 1031, Pyi Htaung Su Main Rd, North Dagon</div>
                   <div className="my-1.5 border-t border-dashed border-line-strong" />

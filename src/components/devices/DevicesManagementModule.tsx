@@ -438,7 +438,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
                                 {device.deviceCategory}
                               </span>
                               {!isLatestDiagDone && (
-                                <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-rose-100 text-rose-800 border border-rose-300 flex items-center space-x-0.5 animate-pulse">
+                                <span className="text-[11px] font-extrabold px-1.5 py-0.2 rounded bg-rose-100 text-rose-800 border border-rose-300 flex items-center space-x-0.5 animate-pulse">
                                   <AlertCircle className="w-2.5 h-2.5 text-rose-600 shrink-0" />
                                   <span>Needs Diag</span>
                                 </span>
@@ -460,12 +460,12 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
                           <p className="font-semibold text-ink">{device.deviceColor}</p>
                           <div className="flex items-center space-x-1">
                             {device.findMyStatus === 'OFF' ? (
-                              <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center space-x-1">
+                              <span className="text-[11px] font-extrabold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center space-x-1">
                                 <CheckCircle2 className="w-2.5 h-2.5" />
                                 <span>Find My OFF</span>
                               </span>
                             ) : (
-                              <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-amber-50 text-amber-700 border border-amber-200 flex items-center space-x-1">
+                              <span className="text-[11px] font-extrabold px-1.5 py-0.2 rounded bg-amber-50 text-amber-700 border border-amber-200 flex items-center space-x-1">
                                 <AlertCircle className="w-2.5 h-2.5" />
                                 <span>Find My ON</span>
                               </span>
@@ -625,7 +625,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
 
                       {wo.lineItems.length > 0 && (
                         <div className="bg-[#F9F9FB] p-2 rounded-lg text-xs space-y-1">
-                          <p className="font-bold text-muted text-[9px] uppercase">Replaced Components & Labor:</p>
+                          <p className="font-bold text-muted text-[11px] uppercase">Replaced Components & Labor:</p>
                           {wo.lineItems.map((li) => (
                             <div key={li.id} className="flex justify-between text-ink">
                               <span>• {li.description}</span>

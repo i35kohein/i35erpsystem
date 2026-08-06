@@ -709,7 +709,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                      stage.id === 'Cant Repair' ? t('statusCantRepair') :
                      stage.id === 'Customer Not Repair' ? t('statusCustomerNotRepair') : stage.title}
                   </h3>
-                  <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-full shadow-2xs ${stage.badgeColor}`}>0</span>
+                  <span className={`text-[11px] font-extrabold px-1.5 py-0.5 rounded-full shadow-2xs ${stage.badgeColor}`}>0</span>
                 </div>
               ) : (
                 <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-line">
@@ -728,7 +728,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   <div className="flex items-center space-x-1">
                     {stageStagnantOrders.length > 0 && (
                       <span
-                        className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300/80 flex items-center space-x-0.5"
+                        className="text-[11px] font-extrabold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300/80 flex items-center space-x-0.5"
                         title={`${stageStagnantOrders.length} ticket(s) stationary >48h in this stage`}
                       >
                         <AlertTriangle className="w-2.5 h-2.5 text-amber-600 shrink-0" />
@@ -785,7 +785,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         {/* Header: Order Number & Priority Badge */}
                         <div className="flex items-center justify-between gap-1.5">
                           <div className="flex items-center space-x-1.5 min-w-0">
-                            <span className="h-[20px] font-mono text-[9px] font-extrabold text-brand bg-brand-soft px-2 rounded-md border border-brand/20 inline-flex items-center justify-center shrink-0 leading-none">{wo.orderNumber}</span>
+                            <span className="h-[20px] font-mono text-[11px] font-extrabold text-brand bg-brand-soft px-2 rounded-md border border-brand/20 inline-flex items-center justify-center shrink-0 leading-none">{wo.orderNumber}</span>
                             <PriorityBadge priority={wo.priority} size="xs" />
                           </div>
                           <div className="flex items-center space-x-1 shrink-0">
@@ -958,7 +958,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   title={`Scroll to ${s.title} column`}
                 >
                   <span>{s.id}</span>
-                  <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-black ${count > 0 ? 'bg-brand text-white' : 'bg-slate-100 text-muted'}`}>{count}</span>
+                  <span className={`rounded-full px-1.5 py-0.5 text-[11px] font-black ${count > 0 ? 'bg-brand text-white' : 'bg-slate-100 text-muted'}`}>{count}</span>
                 </button>
               );
             })}

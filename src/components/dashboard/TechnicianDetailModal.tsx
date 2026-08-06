@@ -231,7 +231,7 @@ export const TechnicianDetailModal: React.FC<TechnicianDetailModalProps> = ({
                       </div>
                       <div className="flex items-center space-x-2 shrink-0">
                         <span
-                          className={`text-[9px] font-black px-1.5 py-0.5 rounded-md border flex items-center space-x-0.5 ${
+                          className={`text-[11px] font-black px-1.5 py-0.5 rounded-md border flex items-center space-x-0.5 ${
                             isHardware
                               ? 'bg-purple-50 text-[#AF52DE] border-purple-200'
                               : 'bg-brand-soft text-brand border-brand/20'

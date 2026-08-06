@@ -405,7 +405,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                         </button>
                       ) : (
                         <span
-                          className="px-1.5 py-0.5 text-[9px] font-bold text-muted bg-white border border-line rounded-md"
+                          className="px-1.5 py-0.5 text-[11px] font-bold text-muted bg-white border border-line rounded-md"
                           title="Ticket-derived customer — no standalone account to delete"
                         >
                           Derived
@@ -434,7 +434,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                                 <div className="flex items-center justify-between">
                                   <span className="font-mono font-bold text-ink">{wo.orderNumber || wo.id}</span>
                                   <div className="flex items-center space-x-1.5">
-                                    <span className={`px-1.5 py-0.5 text-[9px] font-bold rounded-full border ${getStatusBadgeStyle(wo.status)}`}>
+                                    <span className={`px-1.5 py-0.5 text-[11px] font-bold rounded-full border ${getStatusBadgeStyle(wo.status)}`}>
                                       {wo.status}
                                     </span>
                                     <button
@@ -444,7 +444,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                                         setSelectedInvoiceWo(wo);
                                         setIsInvoiceModalOpen(true);
                                       }}
-                                      className="px-1.5 py-0.5 bg-white hover:bg-blue-50 border border-line-strong hover:border-brand text-brand font-bold text-[9px] rounded flex items-center space-x-1 cursor-pointer transition-colors"
+                                      className="px-1.5 py-0.5 bg-white hover:bg-blue-50 border border-line-strong hover:border-brand text-brand font-bold text-[11px] rounded flex items-center space-x-1 cursor-pointer transition-colors"
                                       title="Print Invoice"
                                     >
                                       <Printer className="w-2.5 h-2.5" />
@@ -461,7 +461,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                                     "{wo.symptomsReported}"
                                   </p>
                                 )}
-                                <div className="flex justify-between items-center text-[9px] text-muted pt-0.5 border-t border-line/50">
+                                <div className="flex justify-between items-center text-[11px] text-muted pt-0.5 border-t border-line/50">
                                   <span>{new Date(wo.createdAt).toLocaleDateString()}</span>
                                   {wo.serialNumber && <span>SN: {wo.serialNumber}</span>}
                                 </div>

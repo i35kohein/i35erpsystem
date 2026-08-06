@@ -429,7 +429,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center space-x-1.5 mb-1 flex-wrap gap-y-1">
                               <span
-                                className={`text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full inline-block ${
+                                className={`text-[11px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full inline-block ${
                                   isSelected ? 'bg-white/20 text-white' : 'bg-surface text-muted'
                                 }`}
                               >
@@ -453,7 +453,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                           <div className="flex items-center space-x-1">
                             <ShieldCheck className={`w-3 h-3 ${isSelected ? 'text-white' : 'text-emerald-600'}`} />
                             <span
-                              className={`text-[9px] font-semibold ${
+                              className={`text-[11px] font-semibold ${
                                 isSelected ? 'text-white/90' : 'text-muted'
                               }`}
                             >
@@ -504,7 +504,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                           <span className="font-extrabold text-xs text-ink truncate leading-tight min-w-0">
                             {item.label}
                           </span>
-                          <span className="text-[9px] font-extrabold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-200 flex items-center space-x-0.5 shrink-0">
+                          <span className="text-[11px] font-extrabold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-200 flex items-center space-x-0.5 shrink-0">
                             <ShieldCheck className="w-2.5 h-2.5 text-emerald-600 shrink-0 inline" />
                             <span>{item.warranty}</span>
                           </span>
