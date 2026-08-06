@@ -71,3 +71,23 @@ Method: live DOM measurements at iPad 1180×820 (iPad UA) across all 12 tabs + s
 
 ## What's already good (keep — no changes)
 - Navbar/search 40px uniformity, panel fills, sticky tables, scroll fades, centered QA empty state, hash back-nav, iPad/desktop split, dropdown scroll fix, cart primary-slot order.
+
+## Fix status — ALL APPLIED (2026-08-06 ~19:10–20:00, commits `12e8400` + `5b48f50` + `bfacf93`, bundle `index-i2fyjHJe.js`)
+
+### P0 — font floor escape
+- `!text-[10px]`/`!text-[11px]` floor added — BUT first attempt (unlayered) FAILED because layered !important beats unlayered !important (CSS cascade layers). Fixed by wrapping in `@layer base`. Verified: pipeline assign labels 10px → **12px** ✓.
+
+### P1 — Dashboard touch targets (root cause discovered!)
+- **Root cause**: `.basic-ui button{min-height:32px}` (unlayered) beat Tailwind's LAYERED `min-h-10` regardless of specificity — so min-h-10 never worked anywhere. Fix: moved the floor into `@layer base` (base < utilities for normal declarations) + `:where()`. This fixes min-h-10 app-wide.
+- Applied: Inspect Bottlenecks / Open Interactive Pipeline / Filter Queue Below ×4 → **40px**; section tabs min-h-10; analytics search → h-10. Verified live: all 40px ✓ (tabs ~39).
+
+### P2 — dead code + empty states
+- Removed the legacy hidden ticket-detail modal (~300 lines) from StatusPipelineView — verified TicketDetailInspectorModal still opens via ⋯ Detail + card click ✓.
+- POS left empty state centered (list md:flex md:flex-col); intake table view got an empty-state row (was blank table).
+
+### Bonus finding during verification
+- CSS layer ordering is the recurring trap: any custom rule that must yield to Tailwind utilities must live in a layer EARLIER than utilities (or use @layer base). Same for important-variant floors.
+
+### Still open (from the audit, not in this fix batch)
+- P3 design tokens: border-radius scale (6/8/12/16/full mixed) + card surface color — optional, needs Ko Hein's call.
+- POS payment quick-amount buttons (Exact/50,000/Notify Customer etc.) measured 32–33px — NOT covered in this batch (POS-specific; next round if wanted).
