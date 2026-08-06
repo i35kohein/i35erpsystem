@@ -2262,6 +2262,7 @@ export default function App() {
                         setActiveTab('intake');
                       }}
                       onCancelEdit={handleCancelEdit}
+                      onContinueEditing={(wo) => setTicketPrefill({ editWorkOrder: wo })}
                     />
                   </div>
                 </div>

@@ -164,32 +164,54 @@ html[data-theme="dark-slate"] {
 
 
 /* F7: dark-slate CONTRAST overrides — text colors that fail on dark surfaces.
-   Unlayered + higher specificity → beats Tailwind utilities. Backgrounds stay
-   dark-tuned so solid buttons (bg-brand + white) keep AA. */
-html[data-theme="dark-slate"] .text-brand { color: #6EA8FE; }
-html[data-theme="dark-slate"] .text-brand-deep { color: #6EA8FE; }
-html[data-theme="dark-slate"] .text-success { color: #4ADE80; }
-html[data-theme="dark-slate"] .text-success-deep { color: #4ADE80; }
-html[data-theme="dark-slate"] .text-danger { color: #F87171; }
-html[data-theme="dark-slate"] .text-purple { color: #C4B5FD; }
-html[data-theme="dark-slate"] .text-warning { color: #FBBF24; }
-html[data-theme="dark-slate"] [class~="text-[#15803D]"] { color: #4ADE80; }
-html[data-theme="dark-slate"] [class~="text-[#16A34A]"] { color: #4ADE80; }
-html[data-theme="dark-slate"] [class~="text-[#166534]"] { color: #4ADE80; }
-html[data-theme="dark-slate"] [class~="text-[#27B1AE]"] { color: #2DD4BF; }
-html[data-theme="dark-slate"] [class~="text-[#ED7132]"] { color: #FB923C; }
-html[data-theme="dark-slate"] [class~="text-[#7F7F7F]"] { color: #94A3B8; }
-html[data-theme="dark-slate"] .text-emerald-700 { color: #34D399; }
-html[data-theme="dark-slate"] .text-rose-600 { color: #FB7185; }
-html[data-theme="dark-slate"] .text-slate-900, html[data-theme="dark-slate"] .text-slate-800 { color: #E2E8F0; }
-html[data-theme="dark-slate"] .text-slate-300 { color: #E2E8F0; }
-/* Light pastel chip wells → translucent dark tints (text on top re-mapped above) */
-html[data-theme="dark-slate"] .bg-blue-50\/60 { background-color: rgba(59, 130, 246, 0.16); }
-html[data-theme="dark-slate"] .bg-teal-50\/60 { background-color: rgba(20, 184, 166, 0.14); }
-html[data-theme="dark-slate"] .bg-orange-50\/60 { background-color: rgba(249, 115, 22, 0.14); }
-html[data-theme="dark-slate"] .bg-emerald-50\/60 { background-color: rgba(16, 185, 129, 0.14); }
-html[data-theme="dark-slate"] .bg-rose-50\/60 { background-color: rgba(244, 63, 94, 0.14); }
-html[data-theme="dark-slate"] .bg-purple-50 { background-color: rgba(139, 92, 246, 0.15); }
+   !important so they beat important-variant utilities like `!text-brand`. */
+html[data-theme="dark-slate"] .text-brand { color: #6EA8FE !important; }
+html[data-theme="dark-slate"] .text-brand-deep { color: #6EA8FE !important; }
+html[data-theme="dark-slate"] .text-success { color: #4ADE80 !important; }
+html[data-theme="dark-slate"] .text-success-deep { color: #4ADE80 !important; }
+html[data-theme="dark-slate"] .text-danger { color: #F87171 !important; }
+html[data-theme="dark-slate"] .text-purple { color: #C4B5FD !important; }
+html[data-theme="dark-slate"] .text-warning { color: #FBBF24 !important; }
+html[data-theme="dark-slate"] [class~="text-[#15803D]"] { color: #4ADE80 !important; }
+html[data-theme="dark-slate"] [class~="text-[#16A34A]"] { color: #4ADE80 !important; }
+html[data-theme="dark-slate"] [class~="text-[#166534]"] { color: #4ADE80 !important; }
+html[data-theme="dark-slate"] [class~="text-[#27B1AE]"] { color: #2DD4BF !important; }
+html[data-theme="dark-slate"] [class~="text-[#ED7132]"] { color: #FB923C !important; }
+html[data-theme="dark-slate"] [class~="text-[#5A3FD4]"] { color: #C4B5FD !important; }
+html[data-theme="dark-slate"] .text-slate-700 { color: #E2E8F0 !important; }
+html[data-theme="dark-slate"] .text-emerald-700 { color: #34D399 !important; }
+html[data-theme="dark-slate"] .text-emerald-600 { color: #34D399 !important; }
+html[data-theme="dark-slate"] .text-rose-600 { color: #FB7185 !important; }
+html[data-theme="dark-slate"] .text-red-700 { color: #F87171 !important; }
+html[data-theme="dark-slate"] .text-violet-700 { color: #C4B5FD !important; }
+html[data-theme="dark-slate"] .text-amber-700, html[data-theme="dark-slate"] .text-amber-600, html[data-theme="dark-slate"] .text-amber-500 { color: #FBBF24 !important; }
+/* Light pastel wells → translucent dark tints (unlayered, non-important is fine;
+   bg-white is already mapped to var(--card-bg) by the dynamic section) */
+html[data-theme="dark-slate"] .bg-amber-50\/20 { background-color: rgba(245, 158, 11, 0.10) !important; }
+html[data-theme="dark-slate"] .bg-amber-50\/40 { background-color: rgba(245, 158, 11, 0.12) !important; }
+html[data-theme="dark-slate"] .bg-amber-50\/50 { background-color: rgba(245, 158, 11, 0.13) !important; }
+html[data-theme="dark-slate"] .bg-amber-50\/60 { background-color: rgba(245, 158, 11, 0.14) !important; }
+html[data-theme="dark-slate"] .bg-blue-50\/60 { background-color: rgba(59, 130, 246, 0.16) !important; }
+html[data-theme="dark-slate"] .bg-teal-50\/60 { background-color: rgba(20, 184, 166, 0.14) !important; }
+html[data-theme="dark-slate"] .bg-orange-50\/60 { background-color: rgba(249, 115, 22, 0.14) !important; }
+html[data-theme="dark-slate"] .bg-emerald-50\/60 { background-color: rgba(16, 185, 129, 0.14) !important; }
+html[data-theme="dark-slate"] .bg-emerald-50\/50 { background-color: rgba(16, 185, 129, 0.13) !important; }
+html[data-theme="dark-slate"] .bg-rose-50\/60 { background-color: rgba(244, 63, 94, 0.14) !important; }
+html[data-theme="dark-slate"] .bg-rose-50 { background-color: rgba(244, 63, 94, 0.14) !important; }
+html[data-theme="dark-slate"] .bg-red-50 { background-color: rgba(239, 68, 68, 0.14) !important; }
+html[data-theme="dark-slate"] .bg-emerald-50 { background-color: rgba(16, 185, 129, 0.14) !important; }
+html[data-theme="dark-slate"] .bg-violet-50\/80 { background-color: rgba(139, 92, 246, 0.15) !important; }
+html[data-theme="dark-slate"] .bg-purple-50 { background-color: rgba(139, 92, 246, 0.15) !important; }
+html[data-theme="dark-slate"] .bg-white\/50 { background-color: rgba(19, 27, 46, 0.7) !important; }
+html[data-theme="dark-slate"] .bg-ink { background-color: #26334D !important; }
+/* Sidebar active nav item (hardcoded light-blue) */
+html[data-theme="dark-slate"] [class~="bg-[#EAF2FF]"] { background-color: rgba(21, 89, 166, 0.25) !important; }
+html[data-theme="dark-slate"] [class~="text-[#1559A6]"] { color: #6EA8FE !important; }
+html[data-theme="dark-slate"] [class~="border-[#B8D3F4]"] { border-color: rgba(107, 150, 205, 0.45) !important; }
+html[data-theme="dark-slate"] [class~="bg-[#7360F2]/10"] { background-color: rgba(115, 96, 242, 0.16) !important; }
+/* Light chip borders → translucent tinted borders */
+html[data-theme="dark-slate"] .border-amber-200 { border-color: rgba(253, 230, 138, 0.3) !important; }
+html[data-theme="dark-slate"] .border-red-200 { border-color: rgba(252, 165, 165, 0.3) !important; }
 
 /* Component Geometry: Square / Rectangular Design System vs Curved Soft Geometry */
 html[data-geometry="square"] *,

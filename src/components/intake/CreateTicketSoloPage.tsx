@@ -40,7 +40,8 @@ import {
   RotateCcw, 
   AlertTriangle, 
   HelpCircle,
-  Search} from 'lucide-react';
+  Search,
+  Wrench} from 'lucide-react';
 import { 
   WorkOrder, 
   Customer, 
@@ -86,6 +87,8 @@ interface CreateTicketSoloPageProps {
   onViewRepairTickets: () => void;
   onCancelEdit?: () => void;
   embedded?: boolean;
+  /** After quick-create: reopen the drawer in edit mode to add repairs/diagnostics. */
+  onContinueEditing?: (wo: WorkOrder) => void;
 }
 
 const getDiagnosticIcon = (name: string) => {
@@ -125,11 +128,12 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
   onViewRepairTickets,
   onCancelEdit,
   embedded = false,
+  onContinueEditing,
 }) => {
   const [createdTicket, setCreatedTicket] = useState<WorkOrder | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
   // Wizard mode: one step at a time (Customer → Device → Repairs → Review)
-  const [wizardMode, setWizardMode] = useState(false);
+  const [wizardMode, setWizardMode] = useState(embedded); // drawer → wizard-first (3-step quick intake)
   const isIpad = useIsIpad();
   const [wizardStep, setWizardStep] = useState(0);
   const editWorkOrder = prefill?.editWorkOrder ?? null;
@@ -568,6 +572,18 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             {!isEditMode && (
+              <>
+              {onContinueEditing && (
+                <Button
+                  type="button"
+                  onClick={() => onContinueEditing(createdTicket)}
+                  variant="outline"
+                  className="w-full sm:w-auto border-line-strong hover:bg-slate-50"
+                >
+                  <Wrench className="w-4 h-4 text-brand shrink-0" />
+                  <span className="truncate">Add Repairs & Details</span>
+                </Button>
+              )}
               <Button
                 type="button"
                 onClick={() => onSelectPrintTag(createdTicket)}
@@ -577,6 +593,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 <Printer className="w-4 h-4 text-brand shrink-0" />
                 <span className="truncate">Print Sticker Tag Voucher</span>
               </Button>
+              </>
             )}
 
             <Button
@@ -1363,6 +1380,22 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             )}
             {wizardMode && (
               <div className="flex w-full sm:w-auto items-center gap-2">
+                {embedded && wizardStep === 0 && (
+                  <Button
+                    type="button"
+                    onClick={handleRegisterDevice}
+                    disabled={isRegistering}
+                    variant="secondary"
+                    className="shrink-0 border border-brand/30 bg-brand-soft text-brand font-black"
+                    title="Create ticket with just customer, device and fault — add repairs later"
+                  >
+                    {isRegistering ? (
+                      <span className="w-4 h-4 border-2 border-brand/40 border-t-brand rounded-full animate-spin" />
+                    ) : (
+                      <><Zap className="w-4 h-4" /><span>Quick Create</span></>
+                    )}
+                  </Button>
+                )}
                 <Button
                   type="button"
                   variant="outline"
