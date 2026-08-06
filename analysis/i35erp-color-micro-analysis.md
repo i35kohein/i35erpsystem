@@ -57,11 +57,11 @@ Measured `rgb(15,23,42)` (#0F172A) — e.g. `text-blue-900` "KBZPay / WavePay" l
 
 ---
 
-## 4. Recommended fix batch (awaiting "fix")
-| # | P | Fix | Effort |
+## 4. Fix status — ALL APPLIED (2026-08-06 ~20:24-20:35, commit `6453c6a`, bundle `index-BAAgmOBp.js`)
+| # | P | Fix | Status |
 |---|---|---|---|
-| F1 | P1 | Contrast: finance green `text-[#16A34A]`→`var(--color-success)` (drop the theme-var remap), UNPAID `#D97706`→`#B45309`, Inspect Bottlenecks amber-600→amber-700 (white 4.5:1) | small |
-| F2 | P1 | Kill the dual-success-green: remove `.finance-module … var(--success)` emerald remap block (or point it at `--color-success`) — finance then renders carbon green like everywhere else | 1 block |
-| F3 | P2 | Tokenize top stragglers in carbon-coat: `#AF52DE`/`#7360F2`→`--color-purple`, `#FF9500`→`--color-warning`, `#F8F9FA`/`#F8FBFD`→`--color-surface`, `#DC2626`→`--color-danger`, `#111111`→`--color-ink`, `#D8E5ED`→`--color-line` (add a `--color-purple`/`--color-warning` token) | medium |
-| F4 | P2 | Point the minimalist-clean default theme vars at carbon values (or make data-theme default = a carbon-matching theme) so .basic-ui matches tokens | small |
+| F1 | P1 | Finance greens → `text-success-deep` #188038 (5.02/4.77:1 ✓), UNPAID → #B45309 (4.62 ✓), Inspect Bottlenecks → amber-700 (5.02 ✓) | ✅ all 4 verified |
+| F2 | P1 | Dual-success-green killed via F4 (theme var --success now #24a148 = carbon) — finance + coat + theme vars all resolve to the same green | ✅ verified |
+| F3 | P2 | carbon-coat: + `--color-purple #8a3ffc` / `--color-warning #ff9500` / `--color-success-deep #188038`; overrides for #AF52DE/#7360F2/#7C3AED→purple, #FF9500→warning, #FAFAFA→surface, #DC2626→danger, #111111→ink, #7F7F7F/#526375/#424245/#C7C7CC→muted, #D8E5ED/#C7C7CC→line, #229ED9→brand, #1E7E34/#30B753→success | ✅ applied (bg-vs-color split fixed) |
+| F4 | P2 | Default (`:root` + minimalist-clean) theme vars → carbon values: primary #0f62fe, text-main #161616, muted #6f6f6f, border #e0e0e0, success #24a148, danger #da1e28, purple #8a3ffc, bg #f4f4f4 | ✅ verified: --primary #0f62fe, --text-main #161616, --success #24a148 |
 | F5 | P3 | Consolidate: one theme system (either the coat or the CSS themes, not both) | big, optional |
