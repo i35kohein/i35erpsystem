@@ -13,11 +13,11 @@ baseline; baseline drops as migration progresses). Details in README "Button pol
 |---|---|---|
 | 2026-08-06 (adoption) | 477 | — |
 | 2026-08-06 (round 1, commit `8db2c32`) | **448** | Navigation (2), ActiveFilterChips (1), TechnicianLeaderboardView (1), TechnicianPerformanceTab (1), TabAi (1), TabTheme (1), LanguageSwitcher (4), ConfirmDeleteModal (2), DeviceTagPrinterModal (6), DateFilterSelector (6) |
+| 2026-08-06 (round 2, commits `c0b85df` + `680e16e`) | **389** | **App.tsx (35 — drawer rows/toggles)**, **DashboardOverview (20 — tabs incl. role=tab, queue/warranty filters, roster View/Print, Copy Notice, search ×)**, POS (12 — Pay&Print, quick amounts, numpad, account copy, confirm X), StatusPipelineView tag fix (accidental h3→div mismatch reverted), dashboard tab 40px guard (`lg:h-10`) |
 
 ## Remaining offenders (by count)
-- InventoryManagementModule **78** · App.tsx **35** · StatusPipelineView **27** ·
-  CreateTicketSoloPage **26** · PriceSettingsModal **20** · DashboardOverview **20** ·
-  PosInvoicingModule **17** · TabInventory **16** · CustomerFacingWebPortal **13** ·
+- InventoryManagementModule **78** · StatusPipelineView **27** · CreateTicketSoloPage **26** ·
+  PriceSettingsModal **20** · PosInvoicingModule **~13** · TabInventory **16** · CustomerFacingWebPortal **13** ·
   PriceCatalogModule **12** · SupplierRmaModule **11** · SystemManagementSettingsModule **11** ·
   CrmCustomerPortalModule **11** · IntakeWorkOrderModule **11** · QuickPriceCalculatorModal **10** …
 - Note: many remaining are legitimately tricky (dynamic role/state colors, table cell micro-buttons,
