@@ -91,3 +91,17 @@ already collapse to 52/64px strips (good).
    flat. Optionally tint `Log` with a stronger fill so stage-primary reads consistently.
 3. **P2:** Add `min-h-[160px]` (or so) to non-empty card content so drag targets are uniform.
 4. Consider bumping `text-muted` label contrast on customer/tech lines (~#667085 instead of current).
+
+## Fix status — ALL APPLIED (2026-08-06 ~08:30 MMT, commit `cc84c5d`, deployed + verified live)
+
+| # | Fix | Change | Verified live @1440 |
+|---|-----|--------|---------------------|
+| 1 | P0 entity leak | `'&lt; 1h'` → `'< 1h'` (line 816) | ✅ `In stage: < 1h` renders correctly |
+| 2 | P1 ⋯ height | `!h-10 !w-10` → `!h-9 !w-9` (36px, matches primary row) | ✅ action row flat: Log/Notify/Checkout 36px + ⋯ 36×36 |
+| 3 | P1 Log button weight | `bg-surface … font-semibold border-line` → `bg-brand/10 … font-extrabold border-brand/20` (blue tint = same visual family as Notify's purple tint; Checkout stays solid green as terminal payoff) | ✅ |
+| 4 | P1 tech-assign height | Assign Me `min-h-7`→`min-h-8`; dropdown `!h-7`→`!h-8` (both 32px) | ✅ 32px both variants |
+| 5 | P2 card min-height | `min-h-[200px]` floor on card | ✅ no visual distortion (cards ≥200px naturally) |
+| 6 | P2 customer line headroom | added `title` attr (full name/phone on hover) | ✅ |
+| 7 | P3 contrast | customer line + Tech label `text-muted`→`text-slate-500` | ✅ |
+
+Notes: line 799 `Bottleneck (&gt;48h)` was NOT a bug (JSX literal text, entities decode there — verified). Empty-column strips and diag accent semantics left as-is (intentional). Build: lint clean, bundle `index-DtPLLEJN.js`, deployed via deploy.sh, health OK.
