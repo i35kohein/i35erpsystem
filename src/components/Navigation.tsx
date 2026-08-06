@@ -268,7 +268,7 @@ export const Navigation: React.FC<NavigationProps> = ({
               </button>
               <button
                 onClick={() => setIsCollapsed(false)}
-                className="hidden lg:flex w-10 h-8 items-center justify-center text-muted hover:text-brand hover:bg-[#F0F7FF] rounded-xl transition-all cursor-pointer border border-transparent hover:border-brand/20"
+                className="hidden lg:flex w-10 h-10 items-center justify-center text-muted hover:text-brand hover:bg-[#F0F7FF] rounded-xl transition-all cursor-pointer border border-transparent hover:border-brand/20"
                 title="Expand sidebar"
                 aria-label="Expand sidebar"
               >
@@ -350,7 +350,7 @@ export const Navigation: React.FC<NavigationProps> = ({
               size="sm"
               title="New Intake Ticket"
               className={`w-full mt-1.5 ${
-                effectiveCollapsed ? 'w-10 h-10 mx-auto justify-center p-0' : 'justify-center px-3.5 py-2.5 min-h-10 lg:min-h-0'
+                effectiveCollapsed ? 'w-10 h-10 mx-auto justify-center p-0' : 'justify-center px-3.5 py-2.5 min-h-10'
               } font-bold ${activeTab === 'create-ticket' ? 'bg-brand-deep' : 'hover:bg-brand-deep'}`}
             >
               <div className="flex items-center justify-center min-w-0">
@@ -368,7 +368,7 @@ export const Navigation: React.FC<NavigationProps> = ({
               size="sm"
               title="Dashboard"
               className={`w-full mt-1.5 ${
-                effectiveCollapsed ? 'w-10 h-10 mx-auto justify-center p-0 relative' : 'justify-between px-3.5 py-2.5 min-h-10 lg:min-h-0'
+                effectiveCollapsed ? 'w-10 h-10 mx-auto justify-center p-0 relative' : 'justify-between px-3.5 py-2.5 min-h-10'
               } ${
                 activeTab === 'dashboard'
                   ? 'bg-[#EAF2FF] text-[#1559A6] font-bold border-[#B8D3F4]'
@@ -405,7 +405,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                       variant="outline"
                       size="sm"
                       className={`w-full ${
-                        effectiveCollapsed ? 'w-10 h-10 mx-auto justify-center p-0 relative' : 'justify-between px-3.5 py-2.5 min-h-10 lg:min-h-0'
+                        effectiveCollapsed ? 'w-10 h-10 mx-auto justify-center p-0 relative' : 'justify-between px-3.5 py-2.5 min-h-10'
                       } ${
                         isActive
                           ? 'bg-[#EAF2FF] text-[#1559A6] font-bold border-[#B8D3F4]'

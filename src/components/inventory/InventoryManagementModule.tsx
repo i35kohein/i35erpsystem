@@ -1528,7 +1528,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         onClick={() => setSelectedPartForDetails(part)}
                         aria-label={`View ${part.name} details`}
                         title="View part details"
-                        className="inline-flex h-10 w-10 lg:h-8 lg:w-8 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors hover:border-brand hover:bg-blue-50 hover:text-brand"
+                        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors hover:border-brand hover:bg-blue-50 hover:text-brand"
                       >
                         <FileText className="h-3.5 w-3.5" />
                       </button>
@@ -1553,7 +1553,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                             onClick={() => { onUpdatePartStock(part.id, Math.max(0, part.quantityInStock - 1)); toast.info(`${part.name}: ${Math.max(0, part.quantityInStock - 1)} units`, 'Stock −1'); }}
                             aria-label={`Decrease stock for ${part.name}`}
                             title="Decrease stock"
-                            className="flex h-10 w-10 lg:h-8 lg:w-8 items-center justify-center rounded-lg border border-amber-300 bg-white font-black text-rose-600 active:scale-95"
+                            className="flex h-10 w-10 items-center justify-center rounded-lg border border-amber-300 bg-white font-black text-rose-600 active:scale-95"
                           >−</button>
                           <span className="min-w-10 text-center font-mono text-base font-black text-ink">{part.quantityInStock}</span>
                           <button
@@ -1561,7 +1561,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                             onClick={() => { onUpdatePartStock(part.id, part.quantityInStock + 1); toast.success(`${part.name}: ${part.quantityInStock + 1} units`, 'Stock +1'); }}
                             aria-label={`Increase stock for ${part.name}`}
                             title="Increase stock"
-                            className="flex h-10 w-10 lg:h-8 lg:w-8 items-center justify-center rounded-lg border border-amber-300 bg-white font-black text-brand active:scale-95"
+                            className="flex h-10 w-10 items-center justify-center rounded-lg border border-amber-300 bg-white font-black text-brand active:scale-95"
                           >+</button>
                         </div>
                       </div>
@@ -1598,7 +1598,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                             onClick={() => onUpdatePart?.({ ...part, sellingPrice: Math.max(0, part.sellingPrice - 1000) })}
                             aria-label={`Decrease price for ${part.name}`}
                             title="Decrease price by 1,000 MMK"
-                            className="flex h-10 w-10 lg:h-8 lg:w-8 items-center justify-center rounded-lg border border-emerald-300 bg-white font-black text-rose-600 active:scale-95"
+                            className="flex h-10 w-10 items-center justify-center rounded-lg border border-emerald-300 bg-white font-black text-rose-600 active:scale-95"
                           >−</button>
                           <span className="min-w-[70px] text-center font-mono text-sm font-black text-ink">{part.sellingPrice.toLocaleString()}</span>
                           <button
@@ -1606,7 +1606,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                             onClick={() => onUpdatePart?.({ ...part, sellingPrice: part.sellingPrice + 1000 })}
                             aria-label={`Increase price for ${part.name}`}
                             title="Increase price by 1,000 MMK"
-                            className="flex h-10 w-10 lg:h-8 lg:w-8 items-center justify-center rounded-lg border border-emerald-300 bg-white font-black text-brand active:scale-95"
+                            className="flex h-10 w-10 items-center justify-center rounded-lg border border-emerald-300 bg-white font-black text-brand active:scale-95"
                           >+</button>
                         </div>
                       </div>
@@ -1852,7 +1852,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                             type="button"
                             onClick={() => setSelectedPartForDetails(part)}
                             aria-label={`View ${part.name} details`}
-                            className="inline-flex h-10 w-10 lg:h-8 lg:w-8 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors hover:border-brand hover:bg-blue-50 hover:text-brand"
+                            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors hover:border-brand hover:bg-blue-50 hover:text-brand"
                             title="View part details"
                           >
                             <FileText className="h-3.5 w-3.5" />

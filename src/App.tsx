@@ -115,7 +115,14 @@ export default function App() {
     } catch { return null; }
   });
   const [authChecking, setAuthChecking] = useState(true);
-  const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    // Restore tab from URL hash (#/pipeline) so deep links & reloads land correctly
+    if (typeof window !== 'undefined') {
+      const h = window.location.hash.replace(/^#\/?/, '');
+      if (h && ['dashboard','intake','pipeline','qa','follow-up','price-catalog','pos','finance','inventory','suppliers','crm','settings','create-ticket'].includes(h)) return h;
+    }
+    return 'dashboard';
+  });
   const [searchQuery, setSearchQuery] = useState<string>('');
   
   // Dynamic Header Top Bar Filter States
@@ -471,6 +478,29 @@ export default function App() {
       setTimeout(() => notifyAccountChanged(), 0);
     }
   }, [authUser, currentUser]);
+
+  // ── Browser Back/Forward support (iPad/desktop) ─────────────────────────
+  // activeTab ↔ URL hash (#/tab). Back/Forward & the iPad edge-swipe gesture
+  // now walk visited tabs instead of exiting the app.
+  const activeTabRef = useRef(activeTab);
+  activeTabRef.current = activeTab;
+  useEffect(() => {
+    const onPopState = () => {
+      const h = window.location.hash.replace(/^#\/?/, '');
+      if (h && h !== activeTabRef.current) setActiveTab(h);
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const target = '#/' + activeTab;
+    if (window.location.hash !== target) {
+      // First load: replace so the implicit landing entry isn't duplicated.
+      if (!window.location.hash) window.history.replaceState(null, '', target);
+      else window.history.pushState(null, '', target);
+    }
+  }, [activeTab]);
 
   // Smooth scroll to top & reset search on tab change for tab-isolated searching
   useEffect(() => {
@@ -1492,7 +1522,7 @@ export default function App() {
       />
 
       {/* Main Right Content Column */}
-      <div id="main-content-scroll" className="relative flex h-full h-dvh min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-gutter:stable] lg:pl-14">
+      <div id="main-content-scroll" className={`relative flex h-full h-dvh min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-gutter:stable] transition-[padding] duration-300 ${isCollapsed ? 'lg:pl-14' : 'lg:pl-64'}`}>
         {/* Top Navigation Bar Header */}
         <header className="app-topbar flex flex-row items-center justify-between px-3 sm:px-5 h-[52px] min-h-[52px] bg-white border-b border-line sticky top-0 z-40 gap-2 shrink-0">
           {/* Active Tab Title & Mobile Toggle */}
@@ -1531,7 +1561,7 @@ export default function App() {
             <button
               type="button"
               onClick={() => setIsGlobalSearchOpen(true)}
-              className="inline-flex h-11 w-11 lg:h-8 lg:w-8 shrink-0 items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2"
+              className="inline-flex h-11 w-11 lg:h-10 lg:w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2"
               title="Global search (⌘K)"
               aria-label="Global search (⌘K)"
             >
