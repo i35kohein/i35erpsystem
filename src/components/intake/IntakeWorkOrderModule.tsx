@@ -443,6 +443,21 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                 </tr>
               </thead>
               <tbody className="divide-y divide-line text-xs">
+                {filteredOrders.length === 0 && (
+                  <tr>
+                    <td colSpan={9} className="px-4 py-14 text-center">
+                      <div className="mx-auto max-w-sm space-y-2">
+                        <Inbox className="mx-auto h-8 w-8 text-line-strong" />
+                        <p className="font-extrabold text-sm text-ink">No Repair Tickets Found</p>
+                        <p className="text-xs text-muted">
+                          {workOrders.length === 0
+                            ? 'There are currently no active repair tickets in the database.'
+                            : 'No tickets match your active status filter or search query.'}
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
                 {filteredOrders.map((wo) => {
                   const createdDate = timeAgoShort(wo.createdAt);
                   const createdDateFull = new Date(wo.createdAt || Date.now()).toLocaleDateString('en-US', {

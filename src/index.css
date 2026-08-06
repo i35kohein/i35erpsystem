@@ -999,6 +999,9 @@ html[data-theme] :is(
   .text-\[9px\] { font-size: 11px !important; line-height: 1.35 !important; }
   .text-\[10px\] { font-size: 12px !important; line-height: 1.4 !important; }
   .text-\[11px\] { font-size: 12px !important; line-height: 1.4 !important; }
+  /* Important variants must obey the same floor (e.g. !text-[10px] dropdown triggers). */
+  .\!text-\[10px\] { font-size: 12px !important; line-height: 1.4 !important; }
+  .\!text-\[11px\] { font-size: 12px !important; line-height: 1.4 !important; }
 }
 
 /* Contrast fix (audit P1-5): Apple gray #86868B on white is 3.5:1 — fails WCAG AA

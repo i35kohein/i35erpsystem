@@ -835,7 +835,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           aria-selected={activeDashboardSubTab === 'status-queue'}
           onClick={() => setActiveDashboardSubTab('status-queue')}
           onKeyDown={(e) => handleDashboardTabKeyDown(e, 'status-queue')}
-          className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
+          className={`px-3.5 py-2 min-h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'status-queue'
               ? 'bg-brand text-white border-brand shadow-xs'
               : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
@@ -861,7 +861,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           aria-selected={activeDashboardSubTab === 'repair-data'}
           onClick={() => setActiveDashboardSubTab('repair-data')}
           onKeyDown={(e) => handleDashboardTabKeyDown(e, 'repair-data')}
-          className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
+          className={`px-3.5 py-2 min-h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'repair-data'
               ? 'bg-brand text-white border-brand shadow-xs'
               : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
@@ -887,7 +887,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           aria-selected={activeDashboardSubTab === 'tech-kpi'}
           onClick={() => setActiveDashboardSubTab('tech-kpi')}
           onKeyDown={(e) => handleDashboardTabKeyDown(e, 'tech-kpi')}
-          className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
+          className={`px-3.5 py-2 min-h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'tech-kpi'
               ? 'bg-brand text-white border-brand shadow-xs'
               : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
@@ -913,7 +913,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           aria-selected={activeDashboardSubTab === 'inventory'}
           onClick={() => setActiveDashboardSubTab('inventory')}
           onKeyDown={(e) => handleDashboardTabKeyDown(e, 'inventory')}
-          className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
+          className={`px-3.5 py-2 min-h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'inventory'
               ? 'bg-brand text-white border-brand shadow-xs'
               : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
@@ -949,7 +949,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           aria-selected={activeDashboardSubTab === 'finance'}
           onClick={() => setActiveDashboardSubTab('finance')}
           onKeyDown={(e) => handleDashboardTabKeyDown(e, 'finance')}
-          className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
+          className={`px-3.5 py-2 min-h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'finance'
               ? 'bg-brand text-white border-brand shadow-xs'
               : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
@@ -976,7 +976,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           aria-selected={activeDashboardSubTab === 'warranty-watch'}
           onClick={() => setActiveDashboardSubTab('warranty-watch')}
           onKeyDown={(e) => handleDashboardTabKeyDown(e, 'warranty-watch')}
-          className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
+          className={`px-3.5 py-2 min-h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'warranty-watch'
               ? 'bg-brand text-white border-brand shadow-xs'
               : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
@@ -1075,7 +1075,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 type="button"
                 onClick={() => onNavigateToTab('pipeline')}
                 size="sm"
-                className="bg-amber-600 hover:bg-amber-700 text-white shrink-0"
+                className="min-h-10 bg-amber-600 hover:bg-amber-700 text-white shrink-0"
               >
                 Inspect Bottlenecks
               </Button>
@@ -1103,7 +1103,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <Button
                   type="button"
                   onClick={() => onNavigateToTab('pipeline')}
-                  className="bg-brand hover:bg-brand/90 text-white flex items-center space-x-2"
+                  className="min-h-10 bg-brand hover:bg-brand/90 text-white flex items-center space-x-2"
                 >
                   <Kanban className="w-4 h-4" />
                   <span className="hidden sm:inline">Open Interactive Pipeline</span>
@@ -1138,7 +1138,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                         onClick={() => {
                           setStatusQueueFilter(item.stage);
                         }}
-                        className="font-bold text-brand hover:underline flex items-center space-x-0.5"
+                        className="min-h-10 font-bold text-brand hover:underline flex items-center space-x-0.5"
                       >
                         <span>Filter Queue Below</span>
                         <ChevronRight className="w-3 h-3" />
@@ -1180,7 +1180,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   value={queueSearchQuery}
                   onChange={(e) => setQueueSearchQuery(e.target.value)}
                   placeholder="Search analytics queue by order #, customer, model, serial..."
-                  className="w-full bg-white text-xs text-ink placeholder-muted pl-8 pr-7 py-1.5 rounded-lg border border-line focus:outline-none focus:border-brand transition-all"
+                  className="w-full h-10 bg-white text-xs text-ink placeholder-muted pl-8 pr-7 rounded-lg border border-line focus:outline-none focus:border-brand transition-all"
                 />
                 {queueSearchQuery && (
                   <button
