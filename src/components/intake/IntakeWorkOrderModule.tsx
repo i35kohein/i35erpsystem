@@ -534,7 +534,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                       <Button
                         type="button"
                         onClick={() => handleOpenTicketDetail(wo)}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--blue-tint)] text-[var(--primary)] transition-colors hover:bg-[var(--primary)] hover:text-white"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--blue-tint)] text-[var(--primary)] transition-colors hover:bg-brand hover:text-white"
                         title="View Ticket Status"
                         aria-label={`View status for ${wo.orderNumber || wo.id}`}
                       >

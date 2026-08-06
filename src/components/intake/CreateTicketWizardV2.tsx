@@ -11,13 +11,19 @@ import { WorkOrder, Customer, SystemSettings, WorkOrderLineItem } from '../../ty
 import { getAvailableColorsForModel, WARRANTY_OPTIONS, getRealisticColorStyle } from './deviceData';
 import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
 import { DIAGNOSTIC_NAMES } from './deviceData';
-import { toast } from '../../lib/toast';
 
 /**
  * CreateTicketWizardV2 — NEW ticket registration UI (2026-08-06).
  * Ko Hein's intake workflow, wizard flow only, fresh design:
  *   1 Customer → 2 Device → 3 Repairs & Estimate → 4 Diagnostics & Notes → 5 Review & Create
  * The old CreateTicketSoloPage is kept untouched (classic form still available).
+ *
+ * Design rules (2026-08-06 redesign):
+ * - Carbon theme tokens only (brand #0f62fe / ink / muted / line / surface)
+ * - Font floor 12px (text-xs); labels are text-xs font-semibold text-ink
+ * - Every interactive element = <Button>/<Input> from the ui kit (policy)
+ * - Compact single header + connected step pills; no triple-header bloat
+ * - Inline field validation (red hint + invalid ring) — no floating toasts for step gating
  */
 interface CreateTicketWizardV2Props {
   workOrders: WorkOrder[];
@@ -31,7 +37,6 @@ interface CreateTicketWizardV2Props {
 }
 
 const STEPS = ['Customer', 'Device', 'Repairs', 'Diagnostics', 'Review'];
-
 const diagnosticKeys = DIAGNOSTIC_NAMES.slice(0, 21);
 
 export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
@@ -53,6 +58,7 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerTown, setCustomerTown] = useState('');
   const [customerType, setCustomerType] = useState<'Retail' | 'B2B Corporate' | 'Wholesale Mail-In'>('Retail');
+  const [triedNext, setTriedNext] = useState(false); // inline validation after first Continue
 
   // Step 2 — Device
   const [deviceModel, setDeviceModel] = useState('');
@@ -73,30 +79,33 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
   const [beforeDiagnostics, setBeforeDiagnostics] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState('');
 
-  // Validation per step
-  const stepValid = (): boolean => {
-    if (step === 0) {
-      if (!customerName.trim() || !customerPhone.trim()) {
-        toast.error('Enter customer name and phone to continue.', 'Step 1 Required');
-        return false;
-      }
-    }
-    if (step === 1 && !deviceModel.trim()) {
-      toast.error('Select a device model to continue.', 'Step 2 Required');
-      return false;
-    }
-    if (step === 2 && selectedRepairs.length === 0) {
-      toast.error('Add at least one repair item, or skip to continue.', 'Step 3');
-      return false;
-    }
-    return true;
-  };
+  // Inline validation
+  const phoneDigits = customerPhone.replace(/\D/g, '');
+  const nameError = triedNext && !customerName.trim();
+  const phoneError = triedNext && phoneDigits.length < 7;
+  const modelError = triedNext && !deviceModel.trim();
+  const repairsError = triedNext && step === 2 && selectedRepairs.length === 0;
 
   const goNext = () => {
-    if (!stepValid()) return;
+    if (step === 0 && (!customerName.trim() || phoneDigits.length < 7)) {
+      setTriedNext(true);
+      return;
+    }
+    if (step === 1 && !deviceModel.trim()) {
+      setTriedNext(true);
+      return;
+    }
+    if (step === 2 && selectedRepairs.length === 0) {
+      setTriedNext(true);
+      return;
+    }
+    setTriedNext(false);
     setStep((s) => Math.min(4, s + 1));
   };
-  const goBack = () => setStep((s) => Math.max(0, s - 1));
+  const goBack = () => {
+    setTriedNext(false);
+    setStep((s) => Math.max(0, s - 1));
+  };
 
   // Repair catalog for the chosen model
   const catalog = useMemo(() => getModelPriceCatalogItems(deviceModel, priceCatalog as any), [deviceModel, priceCatalog]);
@@ -129,8 +138,9 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
 
   // Register the ticket
   const handleRegister = () => {
-    if (!customerName.trim() || !customerPhone.trim()) {
-      toast.error('Customer name and phone are required.', 'Step 1 Required');
+    if (!customerName.trim() || phoneDigits.length < 7) {
+      setStep(0);
+      setTriedNext(true);
       return;
     }
     setIsRegistering(true);
@@ -146,7 +156,7 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
     while (usedNumbers.has(`${prefix}${year}-${nextNum}`)) nextNum += 1;
 
     const matchedCustomer = customers.find(
-      (c) => c.phone && c.phone.replace(/\D/g, '') === customerPhone.replace(/\D/g, '')
+      (c) => c.phone && c.phone.replace(/\D/g, '') === phoneDigits
     );
 
     const nowIso = new Date().toISOString();
@@ -207,6 +217,7 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
 
   const resetForm = () => {
     setStep(0);
+    setTriedNext(false);
     setCreatedTicket(null);
     setCustomerName(''); setCustomerPhone(''); setCustomerTown(''); setCustomerType('Retail');
     setDeviceModel(''); setDeviceColor(''); setSerialNumber(''); setImei(''); setPasscode('');
@@ -261,16 +272,16 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
 
   /* ---------------- Wizard ---------------- */
   return (
-    <div className="w-full space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between gap-3 border-b border-line pb-3">
+    <div className="w-full space-y-5">
+      {/* Header — single compact row */}
+      <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-9 h-9 rounded-xl bg-brand text-white flex items-center justify-center shrink-0 shadow-sm">
-            <Sparkles className="w-4.5 h-4.5" />
+            <Sparkles className="w-4 h-4" />
           </div>
           <div className="min-w-0">
-            <h2 className="text-sm font-extrabold text-ink truncate">New Repair Ticket</h2>
-            <p className="text-[11px] text-muted truncate">Quick wizard — {STEPS.length} steps</p>
+            <h2 className="text-sm font-extrabold text-ink leading-tight">New Repair Ticket</h2>
+            <p className="text-xs text-muted leading-tight">Quick wizard · {STEPS.length} steps</p>
           </div>
         </div>
         {onOpenClassicForm && (
@@ -280,69 +291,76 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
         )}
       </div>
 
-      {/* Progress */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between text-[11px] font-extrabold text-muted">
-          <span>Step {step + 1} of {STEPS.length}</span>
-          <span className="text-brand truncate">{STEPS[step]}</span>
+      {/* Progress — connected step pills + thin bar (single block, no bloat) */}
+      <div className="space-y-2.5">
+        <div className="flex items-center">
+          {STEPS.map((label, idx) => {
+            const state = idx < step ? 'done' : idx === step ? 'active' : 'todo';
+            return (
+              <React.Fragment key={label}>
+                {idx > 0 && <div className={`flex-1 h-0.5 mx-1.5 rounded-full ${idx <= step ? 'bg-brand' : 'bg-line'}`} />}
+                <Button
+                  type="button"
+                  variant={state === 'active' ? 'secondary' : 'ghost'}
+                  size="sm"
+                  disabled={state === 'todo'}
+                  onClick={() => idx < step && setStep(idx)}
+                  className={`gap-1.5 px-2.5 ${state === 'active' ? 'bg-brand-soft text-brand border border-brand/30' : state === 'done' ? 'text-success-deep' : 'text-muted'}`}
+                >
+                  <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-black shrink-0 ${
+                    state === 'done' ? 'bg-success text-white' : state === 'active' ? 'bg-brand text-white' : 'bg-line text-muted'
+                  }`}>
+                    {state === 'done' ? <Check className="w-3 h-3" /> : idx + 1}
+                  </span>
+                  <span className="hidden md:inline text-xs font-bold">{label}</span>
+                </Button>
+              </React.Fragment>
+            );
+          })}
         </div>
-        <div className="h-1.5 w-full rounded-full bg-line overflow-hidden">
+        <div className="h-1 w-full rounded-full bg-line overflow-hidden">
           <div className="h-full rounded-full bg-brand transition-all duration-300" style={{ width: `${((step + 1) / STEPS.length) * 100}%` }} />
-        </div>
-        <div className="flex items-center justify-between pt-0.5">
-          {STEPS.map((label, idx) => (
-            <button
-              key={label}
-              type="button"
-              onClick={() => idx < step && setStep(idx)}
-              className={`flex items-center gap-1 text-[10px] font-extrabold transition-colors ${idx === step ? 'text-brand' : idx < step ? 'text-success-deep cursor-pointer hover:text-brand' : 'text-line-strong cursor-default'}`}
-            >
-              <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] ${idx < step ? 'bg-success text-white' : idx === step ? 'bg-brand text-white' : 'bg-line text-muted'}`}>
-                {idx < step ? <Check className="w-2.5 h-2.5" /> : idx + 1}
-              </span>
-              <span className="hidden sm:inline">{label}</span>
-            </button>
-          ))}
         </div>
       </div>
 
       {/* Step content */}
-      <div className="min-h-[340px]">
+      <div className="min-h-[320px]">
         {/* STEP 1 — CUSTOMER */}
         {step === 0 && (
-          <div className="space-y-3 animate-fade-in">
-            <div className="flex items-center gap-2 text-xs font-extrabold text-ink">
-              <span className="w-6 h-6 rounded-full bg-brand text-white flex items-center justify-center text-[11px]">1</span>
-              Customer Information
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="space-y-4 animate-fade-in">
+            <h3 className="text-sm font-extrabold text-ink">Customer Information</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="sm:col-span-2">
-                <label className="block text-xs text-muted mb-1 font-medium">Phone Number *</label>
+                <label className="block text-xs font-semibold text-ink mb-1.5">Phone Number *</label>
                 <Input
                   type="tel"
                   inputMode="tel"
+                  invalid={phoneError}
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
-                  placeholder="e.g. 09-123456789"
+                  placeholder="09 123 456 789"
                 />
+                {phoneError && <p className="mt-1 text-xs font-semibold text-rose-600 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> Phone number is required (min 7 digits)</p>}
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-xs text-muted mb-1 font-medium">Customer Name *</label>
+                <label className="block text-xs font-semibold text-ink mb-1.5">Customer Name *</label>
                 <Input
+                  invalid={nameError}
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
-                  placeholder="e.g. Mg Mg"
+                  placeholder="Mg Mg"
                 />
+                {nameError && <p className="mt-1 text-xs font-semibold text-rose-600 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> Customer name is required</p>}
               </div>
               <div>
-                <label className="block text-xs text-muted mb-1 font-medium">Town / City</label>
+                <label className="block text-xs font-semibold text-ink mb-1.5">Town / City</label>
                 <div className="relative">
-                  <MapPin className="w-4 h-4 text-brand absolute left-3 top-1/2 -translate-y-1/2" />
-                  <Input value={customerTown} onChange={(e) => setCustomerTown(e.target.value)} placeholder="e.g. Yangon" className="pl-9" />
+                  <MapPin className="w-4 h-4 text-muted absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Input value={customerTown} onChange={(e) => setCustomerTown(e.target.value)} placeholder="Yangon" className="pl-9" />
                 </div>
               </div>
               <div>
-                <label className="block text-xs text-muted mb-1 font-medium">Customer Type</label>
+                <label className="block text-xs font-semibold text-ink mb-1.5">Customer Type</label>
                 <CustomDropdownMenu
                   value={customerType}
                   onChange={(v) => setCustomerType(v as typeof customerType)}
@@ -355,7 +373,7 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
                 />
               </div>
             </div>
-            <p className="text-[11px] text-muted flex items-center gap-1.5 pt-1">
+            <p className="text-xs text-muted flex items-center gap-1.5">
               <AlertCircle className="w-3.5 h-3.5 text-brand shrink-0" />
               {matchedCustomerHint(customers, customerPhone)}
             </p>
@@ -364,34 +382,34 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
 
         {/* STEP 2 — DEVICE */}
         {step === 1 && (
-          <div className="space-y-3 animate-fade-in">
-            <div className="flex items-center gap-2 text-xs font-extrabold text-ink">
-              <span className="w-6 h-6 rounded-full bg-brand text-white flex items-center justify-center text-[11px]">2</span>
-              Device Details
+          <div className="space-y-4 animate-fade-in">
+            <h3 className="text-sm font-extrabold text-ink">Device Details</h3>
+
+            <div>
+              <label className="block text-xs font-semibold text-ink mb-1.5">Device Model *</label>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsModelModalOpen(true)}
+                className={`w-full min-h-12 justify-between bg-white ${modelError ? 'border-rose-500' : 'border-line'}`}
+              >
+                <span className="flex items-center gap-2.5 min-w-0">
+                  <span className="w-8 h-8 rounded-lg bg-brand-soft text-brand flex items-center justify-center shrink-0">
+                    <Smartphone className="w-4 h-4" />
+                  </span>
+                  <span className="min-w-0 text-left">
+                    <span className="block text-sm font-bold text-ink truncate">{deviceModel || 'Select Apple Device Model'}</span>
+                    <span className="block text-xs text-muted">{deviceModel ? 'Tap to change' : 'iPhone, iPad, MacBook, Watch…'}</span>
+                  </span>
+                </span>
+                <ChevronDown className="w-4 h-4 text-muted shrink-0" />
+              </Button>
+              {modelError && <p className="mt-1 text-xs font-semibold text-rose-600 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> Select a device model to continue</p>}
             </div>
 
-            {/* Model selector */}
-            <Button
-              type="button"
-              onClick={() => setIsModelModalOpen(true)}
-              className="w-full min-h-16 justify-between bg-surface/80 border border-line rounded-xl hover:border-brand/50 p-3.5"
-            >
-              <span className="flex items-center gap-2.5 min-w-0">
-                <span className="w-8 h-8 rounded-lg bg-brand-soft text-brand flex items-center justify-center shrink-0">
-                  <Smartphone className="w-4 h-4" />
-                </span>
-                <span className="min-w-0 text-left">
-                  <span className="block text-xs font-extrabold text-ink truncate">{deviceModel || 'Select Apple Device Model'}</span>
-                  <span className="block text-[11px] text-muted">{deviceModel ? 'Tap to change' : 'iPhone, iPad, MacBook, Watch…'}</span>
-                </span>
-              </span>
-              <ChevronDown className="w-4 h-4 text-muted shrink-0" />
-            </Button>
-
-            {/* Color */}
             {deviceModel && (
               <div>
-                <label className="block text-xs text-muted mb-1 font-medium">Color</label>
+                <label className="block text-xs font-semibold text-ink mb-1.5">Color</label>
                 <div className="flex flex-wrap gap-1.5">
                   {availableColors.map((c) => {
                     const style = getRealisticColorStyle(c);
@@ -414,14 +432,13 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
               </div>
             )}
 
-            {/* Serial / IMEI */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs text-muted mb-1 font-medium">Serial Number</label>
-                <Input value={serialNumber} onChange={(e) => setSerialNumber(e.target.value.toUpperCase())} placeholder="e.g. F2LXK09PN6T" className="font-mono" />
+                <label className="block text-xs font-semibold text-ink mb-1.5">Serial Number</label>
+                <Input value={serialNumber} onChange={(e) => setSerialNumber(e.target.value.toUpperCase())} placeholder="F2LXK09PN6T" className="font-mono" />
               </div>
               <div>
-                <label className="flex items-center justify-between gap-2 text-xs text-muted mb-1 font-medium">
+                <label className="flex items-center justify-between gap-2 text-xs font-semibold text-ink mb-1.5">
                   <span>IMEI Number</span>
                   <span className={`font-mono font-bold ${imei.length === 15 ? 'text-success-deep' : 'text-muted'}`}>{imei.length}/15</span>
                 </label>
@@ -445,14 +462,13 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
                 </div>
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-xs text-muted mb-1 font-medium">Device Passcode (optional)</label>
-                <Input value={passcode} onChange={(e) => setPasscode(e.target.value)} placeholder="e.g. 1234 or Face ID" />
+                <label className="block text-xs font-semibold text-ink mb-1.5">Device Passcode <span className="text-muted font-normal">(optional)</span></label>
+                <Input value={passcode} onChange={(e) => setPasscode(e.target.value)} placeholder="1234 or Face ID" />
               </div>
             </div>
 
-            {/* Warranty */}
             <div>
-              <label className="block text-xs text-muted mb-1 font-medium">Warranty</label>
+              <label className="block text-xs font-semibold text-ink mb-1.5">Warranty</label>
               <CustomDropdownMenu
                 value={WARRANTY_OPTIONS.find((w) => w.days === warrantyDays)?.label || `${warrantyDays} Days Standard Warranty`}
                 onChange={(label) => {
@@ -468,12 +484,9 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
 
         {/* STEP 3 — REPAIRS */}
         {step === 2 && (
-          <div className="space-y-3 animate-fade-in">
+          <div className="space-y-4 animate-fade-in">
             <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-xs font-extrabold text-ink">
-                <span className="w-6 h-6 rounded-full bg-brand text-white flex items-center justify-center text-[11px]">3</span>
-                Repairs & Estimate
-              </div>
+              <h3 className="text-sm font-extrabold text-ink">Repairs &amp; Estimate</h3>
               <span className="font-mono font-black text-brand text-sm">{finalEstimate.toLocaleString()} MMK</span>
             </div>
 
@@ -488,42 +501,47 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
             </div>
 
             {!deviceModel ? (
-              <div className="p-6 text-center text-xs text-muted bg-surface rounded-xl border border-dashed border-line space-y-2">
+              <div className="p-8 text-center text-xs text-muted bg-surface rounded-xl border border-dashed border-line space-y-2">
                 <Smartphone className="w-6 h-6 mx-auto opacity-50" />
                 <p className="font-extrabold text-ink">Select a device model first</p>
                 <Button variant="outline" size="sm" onClick={() => setStep(1)}>Go to Step 2</Button>
               </div>
             ) : filteredCatalog.length === 0 ? (
-              <div className="p-6 text-center text-xs text-muted bg-surface rounded-xl border border-dashed border-line">
+              <div className="p-8 text-center text-xs text-muted bg-surface rounded-xl border border-dashed border-line">
                 No repair items found for this model.
               </div>
             ) : (
-              <div className="space-y-1.5 max-h-[320px] overflow-y-auto pr-2">
+              <div className="space-y-1.5 max-h-[300px] overflow-y-auto pr-2">
                 {filteredCatalog.map((item) => {
                   const selected = selectedRepairs.find((r) => r.id === item.id);
                   return (
-                    <button
+                    <Button
                       key={item.id}
                       type="button"
+                      variant={selected ? 'secondary' : 'outline'}
                       onClick={() => toggleRepair(item)}
-                      className={`w-full flex items-center justify-between gap-3 p-3 rounded-xl border text-left transition-all ${
-                        selected ? 'border-brand bg-brand-soft' : 'border-line bg-white hover:border-brand/50'
+                      className={`w-full min-h-12 justify-between gap-3 px-3.5 text-left ${
+                        selected ? 'border-brand bg-brand-soft' : 'border-line bg-white'
                       }`}
                     >
                       <span className="min-w-0">
-                        <span className="block text-xs font-extrabold text-ink truncate">{item.name}</span>
-                        <span className="block text-[11px] text-muted">{item.group || 'Repair'}</span>
+                        <span className="block text-xs font-bold text-ink truncate">{item.name}</span>
+                        <span className="block text-xs text-muted">{item.group || 'Repair'}</span>
                       </span>
                       <span className="flex items-center gap-2 shrink-0">
-                        <span className="font-mono text-xs font-extrabold text-ink">{item.price.toLocaleString()} MMK</span>
+                        <span className="font-mono text-xs font-bold text-ink">{item.price.toLocaleString()} MMK</span>
                         <span className={`w-5 h-5 rounded-md border flex items-center justify-center ${selected ? 'bg-brand border-brand text-white' : 'border-line text-transparent'}`}>
                           <Check className="w-3 h-3" />
                         </span>
                       </span>
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
+            )}
+
+            {repairsError && (
+              <p className="text-xs font-semibold text-rose-600 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> Add at least one repair to continue</p>
             )}
 
             {selectedRepairs.length > 0 && (
@@ -550,24 +568,21 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
 
         {/* STEP 4 — DIAGNOSTICS & NOTES */}
         {step === 3 && (
-          <div className="space-y-3 animate-fade-in">
+          <div className="space-y-4 animate-fade-in">
             <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-xs font-extrabold text-ink">
-                <span className="w-6 h-6 rounded-full bg-brand text-white flex items-center justify-center text-[11px]">4</span>
-                Diagnostics & Notes
-              </div>
-              <div className="flex items-center gap-1.5 text-[11px] font-extrabold">
+              <h3 className="text-sm font-extrabold text-ink">Diagnostics &amp; Notes</h3>
+              <div className="flex items-center gap-1.5 text-xs font-bold">
                 <span className="px-2 py-0.5 rounded-full bg-success/10 text-success-deep">{diagPassCount} Pass</span>
                 <span className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-600">{diagFailCount} Fail</span>
               </div>
             </div>
 
-            <div className="max-h-[280px] overflow-y-auto pr-2 space-y-1">
+            <div className="max-h-[260px] overflow-y-auto pr-2 space-y-1">
               {diagnosticKeys.map((name, idx) => {
                 const status = beforeDiagnostics[name] || 'N/A';
                 return (
                   <div key={name} className="flex items-center gap-2 p-2 rounded-lg border border-line bg-white">
-                    <span className="w-5 text-center font-mono text-[11px] text-muted shrink-0">{idx + 1}</span>
+                    <span className="w-5 text-center font-mono text-xs text-muted shrink-0">{idx + 1}</span>
                     <span className="flex-1 min-w-0 text-xs font-semibold text-ink truncate">{name}</span>
                     <div className="flex gap-1 shrink-0">
                       {(['Pass', 'Fail', 'N/A'] as const).map((s) => (
@@ -588,8 +603,8 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
               })}
             </div>
 
-            <div className="pt-1">
-              <label className="block text-xs text-muted mb-1 font-medium">Symptoms / Notes</label>
+            <div>
+              <label className="block text-xs font-semibold text-ink mb-1.5">Symptoms / Notes</label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
@@ -603,11 +618,8 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
 
         {/* STEP 5 — REVIEW */}
         {step === 4 && (
-          <div className="space-y-3 animate-fade-in">
-            <div className="flex items-center gap-2 text-xs font-extrabold text-ink">
-              <span className="w-6 h-6 rounded-full bg-brand text-white flex items-center justify-center text-[11px]">5</span>
-              Review & Create
-            </div>
+          <div className="space-y-4 animate-fade-in">
+            <h3 className="text-sm font-extrabold text-ink">Review &amp; Create</h3>
             <div className="bg-surface rounded-xl border border-line p-4 space-y-2.5 text-xs">
               {[
                 ['Customer', `${customerName} — ${customerPhone}`],
@@ -628,7 +640,7 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
             </div>
             <div className="flex flex-wrap gap-1.5">
               {selectedRepairs.map((r) => (
-                <span key={r.id} className="inline-flex items-center gap-1 rounded-full bg-brand-soft text-brand px-2.5 py-1 text-[11px] font-bold border border-brand/20">
+                <span key={r.id} className="inline-flex items-center gap-1 rounded-full bg-brand-soft text-brand px-2.5 py-1 text-xs font-bold border border-brand/20">
                   <Wrench className="w-3 h-3" /> {r.name}
                 </span>
               ))}
@@ -638,11 +650,12 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
       </div>
 
       {/* Footer actions */}
-      <div className="flex items-center gap-2 border-t border-line pt-3">
+      <div className="flex items-center gap-2 border-t border-line pt-4">
         <Button type="button" variant="outline" onClick={goBack} disabled={step === 0} className="shrink-0">
           <ArrowLeft className="w-4 h-4" /> Back
         </Button>
         <div className="flex-1" />
+        <span className="text-xs font-bold text-muted mr-1 hidden sm:inline">Step {step + 1} / {STEPS.length}</span>
         {step < 4 ? (
           <Button type="button" onClick={goNext} className="bg-brand hover:bg-brand-deep text-white font-black shrink-0">
             Continue <ArrowRight className="w-4 h-4" />

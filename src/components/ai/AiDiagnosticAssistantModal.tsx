@@ -459,7 +459,7 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
     >
         <div className="px-4 py-3 border-b border-[var(--border)] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 bg-[var(--primary)] text-white flex items-center justify-center rounded-lg"><Bot className="w-4 h-4" /></div>
+            <div className="w-8 h-8 bg-brand text-white flex items-center justify-center rounded-lg"><Bot className="w-4 h-4" /></div>
             <div className="min-w-0">
               <h2 className="text-sm font-extrabold text-[var(--text-main)]">Operations Copilot</h2>
               <p className="text-xs text-[var(--text-muted)] truncate flex items-center gap-1"><span className={`w-1.5 h-1.5 rounded-full ${isExternalAi ? 'bg-emerald-500' : 'bg-[var(--primary)]'}`} />{providerLabel}</p>
@@ -494,7 +494,7 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
             <div key={message.id} className={`group flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`relative max-w-[90%] px-3 py-2.5 text-xs leading-relaxed whitespace-pre-wrap border ${
                 message.role === 'user'
-                  ? 'bg-[var(--primary)] text-white border-[var(--primary)] rounded-2xl rounded-br-md'
+                  ? 'bg-brand text-white border-brand rounded-2xl rounded-br-md'
                   : 'bg-white text-[var(--text-main)] border-[var(--border)] rounded-2xl rounded-bl-md shadow-sm'
               }`}>
                 {message.role === 'assistant' && <span className="block mb-1 text-xs font-bold uppercase tracking-wide text-[var(--text-muted)]">{message.source === 'ai' ? 'AI analysis' : 'Live ERP analysis'}</span>}
@@ -532,7 +532,7 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
               placeholder="Ask a business question…"
               className="flex-1 min-h-[42px] max-h-28 resize-none border border-[var(--border)] bg-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[var(--primary)]"
             />
-            <Button type="submit" disabled={!input.trim() || isLoading} title="Send message" aria-label="Send message" className="w-10 h-10 bg-[var(--primary)] text-white rounded-xl flex items-center justify-center disabled:opacity-40">
+            <Button type="submit" disabled={!input.trim() || isLoading} title="Send message" aria-label="Send message" className="w-10 h-10 bg-brand text-white rounded-xl flex items-center justify-center disabled:opacity-40">
               <Send className="w-4 h-4" />
             </Button>
           </div>

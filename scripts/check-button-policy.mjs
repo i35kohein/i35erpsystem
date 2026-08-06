@@ -21,13 +21,14 @@ const BASELINE = 0; // migration complete 2026-08-06 (was 477) — zero toleranc
 
 const ALLOWED_FILES = [
   'src/components/ui/button.tsx',        // the Button definition itself
+  'src/components/ui/input.tsx',         // the Input definition itself
   // reusable primitives that render their own trigger/option buttons (ui layer)
   'src/components/common/CustomDropdownMenu.tsx',
   'src/components/common/DrawerSelect.tsx',
   'src/components/common/UserRoleSwitcher.tsx',
 ];
 
-const out = execSync("grep -rn '<button\|<input' src --include='*.tsx' --include='*.ts' | grep -v '<Input' || true", {
+const out = execSync("grep -rnE '<button|<input' src --include='*.tsx' --include='*.ts' | grep -v '<Input' || true", {
   encoding: 'utf8',
 });
 

@@ -154,7 +154,7 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
                 }}
                 className={`min-h-9 w-full flex items-center justify-between gap-3 px-3 py-2 text-xs rounded-lg transition-colors cursor-pointer text-left ${
                   isSelected
-                    ? 'bg-[var(--primary)] text-white font-extrabold'
+                    ? 'bg-brand text-white font-extrabold'
                     : 'text-[var(--text-main)] hover:bg-[var(--blue-tint)] font-semibold'
                 }`}
               >

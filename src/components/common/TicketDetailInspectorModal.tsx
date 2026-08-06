@@ -193,6 +193,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
             </DropdownMenu>
 
             <Button
+                variant="iconGhost"
               type="button"
               onClick={onClose}
               aria-label="Close ticket details"
@@ -206,6 +207,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
 
         <nav className="flex items-center gap-1 border-b border-[var(--border)] bg-[var(--bg)] px-4 py-1.5 sm:px-5" aria-label="Ticket detail sections">
           <Button
+            variant="ghost"
             type="button"
             onClick={() => setActiveTab('details')}
             className={`inline-flex h-10 lg:h-8 items-center gap-1.5 rounded-md px-3 text-xs font-extrabold transition-colors ${
@@ -218,6 +220,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
             Details
           </Button>
           <Button
+            variant="ghost"
             type="button"
             onClick={() => setActiveTab('log')}
             className={`inline-flex h-10 lg:h-8 items-center gap-1.5 rounded-md px-3 text-xs font-extrabold transition-colors ${
@@ -236,10 +239,10 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
 
         {activeTab === 'details' ? (
           <div
-            className="grid min-h-0 flex-1 grid-cols-1 overflow-y-scroll md:grid-cols-[250px_minmax(0,1fr)]"
+            className="grid min-h-0 flex-1 grid-cols-1 overflow-y-scroll md:grid-cols-[250px_minmax(0,1fr)]" tabIndex={0}
             style={{ scrollbarGutter: 'stable' }}
           >
-          <aside className="border-b border-[var(--border)] bg-[var(--bg)] p-4 md:border-b-0 md:border-r md:p-5">
+          <aside aria-label="Ticket summary" className="border-b border-[var(--border)] bg-[var(--bg)] p-4 md:border-b-0 md:border-r md:p-5">
             <div className="space-y-5">
               <div>
                 <div className="flex items-start gap-2">
@@ -255,7 +258,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                 <div
                   className={`mt-2 h-2.5 w-full overflow-hidden rounded-sm border border-white shadow-sm ${deviceColor.border}`}
                   style={{ background: deviceColor.gradient }}
-                  aria-label={`${workOrder.deviceColor || 'Standard'} device color`}
+                  aria-hidden="true"
                 />
                 <div className="mt-1.5 flex items-center gap-1.5 text-xs font-bold text-[var(--text-muted)]">
                   <span
@@ -267,7 +270,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                 </div>
               </div>
 
-              <dl className="divide-y divide-[var(--border)] border-y border-[var(--border)] text-xs">
+              <div className="divide-y divide-[var(--border)] border-y border-[var(--border)] text-xs">
                 {[
                   ['Customer Name', workOrder.customerName || 'Unknown customer', UserRound],
                   ['Address', workOrder.customerAddress || 'No address', MapPin],
@@ -282,8 +285,8 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                       <Icon className="h-3.5 w-3.5" />
                     </span>
                     <div className="min-w-0">
-                      <dt className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-muted)]">{typeof label === 'string' ? label : null}</dt>
-                      <dd className="mt-0.5 truncate font-bold text-[var(--text-main)]">{typeof value === 'string' ? value : null}</dd>
+                      <div className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-muted)]">{typeof label === 'string' ? label : null}</div>
+                      <p className="mt-0.5 truncate font-bold text-[var(--text-main)]">{typeof value === 'string' ? value : null}</p>
                     </div>
                   </div>
                 ))}
@@ -292,17 +295,17 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                     <Banknote className="h-3.5 w-3.5" />
                   </span>
                   <div className="min-w-0">
-                    <dt className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Total Estimate</dt>
-                    <dd className="mt-0.5 font-mono text-base font-black text-[var(--primary)]">
+                    <div className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Total Estimate</div>
+                    <p className="mt-0.5 font-mono text-base font-black text-[var(--primary)]">
                       {(workOrder.totalAmount || workOrder.subtotal || 0).toLocaleString()} MMK
-                    </dd>
+                    </p>
                   </div>
                 </div>
-              </dl>
+              </div>
             </div>
           </aside>
 
-          <main className="min-w-0 space-y-4 p-4 sm:p-5">
+          <section className="min-w-0 space-y-4 p-4 sm:p-5">
             {cleanNotes && (
               <div className="rounded-lg border border-amber-200 bg-amber-50/80 p-3 text-xs shadow-sm">
                 <div className="flex items-start gap-2.5">
@@ -366,12 +369,13 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                 </div>
               </div>
             </section>
-          </main>
+          </section>
           </div>
         ) : (
-          <main
+          <section
             className="min-h-0 flex-1 overflow-y-scroll bg-[var(--bg)] p-4 sm:p-5"
             style={{ scrollbarGutter: 'stable' }}
+            tabIndex={0}
           >
             <section className="mx-auto max-w-3xl rounded-lg border border-[var(--border)] bg-[var(--card-bg)]">
               <div className="flex items-center justify-between gap-3 border-b border-[var(--border)] px-4 py-3">
@@ -427,7 +431,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                 </div>
               )}
             </section>
-          </main>
+          </section>
         )}
 
         <footer className="flex items-center justify-between border-t border-[var(--border)] px-4 py-3 sm:px-5">
@@ -435,7 +439,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
           <Button
             type="button"
             onClick={onClose}
-            className="rounded-lg bg-[var(--primary)] px-4 py-2 text-xs font-extrabold text-white transition-colors hover:bg-[var(--primary-hover)]"
+            className="rounded-lg bg-brand px-4 py-2 text-xs font-extrabold text-white transition-colors hover:bg-brand-deep"
           >
             Close
           </Button>
