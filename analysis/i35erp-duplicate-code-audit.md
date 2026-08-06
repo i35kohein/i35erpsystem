@@ -9,7 +9,9 @@
 
 ---
 
-## 1. Dead module files (never rendered — safe to delete)
+## 1. Dead module files (C1-C3 — see fix status below)
+
+> ⚠️ Audit correction: `UserRoleSwitcher` is rendered by Navigation.tsx (NOT dead) — restored.
 
 | File | Lines | Proof |
 |---|---|---|
@@ -55,12 +57,12 @@
 
 ---
 
-## 5. Recommended cleanup batch (awaiting "fix")
-| # | P | Action | Effort |
+## 5. Fix status — ALL APPLIED (2026-08-06 ~20:34-21:10, commit `d087cd0`, bundle `index-DN-GCg5M.js`)
+| # | P | Action | Status |
 |---|---|---|---|
-| C1 | P1 | Delete `DevicesManagementModule.tsx` (793) | 1 line |
-| C2 | P1 | Delete `MicroSolderingModule.tsx` (286) + App lazy import + `handleSaveMicroSolderingLog` + `MicroSolderingLog` type fields (verify: no nav/route — confirmed) | ~10 lines |
-| C3 | P1 | Delete `UserRoleSwitcher.tsx` (177) + App import | 2 lines |
-| C4 | P2 | Remove the 373 unused imports/decls (top 6 files = 165 of them) | mechanical |
-| C5 | P3 | Merge duplicate import statements (App, Navigation) | 2 edits |
-| C6 | P3 | Enable `noUnusedLocals: true` in tsconfig so future dead code fails lint (after C4) | 1 line |
+| C1 | P1 | Delete `DevicesManagementModule.tsx` (793) | ✅ deleted |
+| C2 | P1 | Delete `MicroSolderingModule.tsx` (286) + App lazy import + `handleSaveMicroSolderingLog` — **kept** `MicroSolderingLog` type + `microSolderingLog` field (READ by follow-up/QA/analytics) | ✅ deleted module + handler |
+| C3 | P1 | ~~Delete `UserRoleSwitcher.tsx`~~ — **NOT dead**: Navigation.tsx renders it (sidebar role switcher). Restored | ✅ kept (audit error corrected) |
+| C4 | P2 | Remove 373 unused decls + ~40 unused props/params (incl. setDateFilter ×4, torch state, AI_MODEL_PRESETS, RAW_WORK_ORDERS, DEVICE_SERIES_ORDER, enabledFolders/categorizedDevices, getStatusBadgeStyle, handleDeleteExpense…) | ✅ 0 unused left |
+| C5 | P3 | Merge duplicate imports: App diagnosticUtils, Navigation ./ui | ✅ merged |
+| C6 | P3 | tsconfig: `noUnusedLocals: true` + `noUnusedParameters: true` — future dead code fails lint | ✅ enabled; lint clean |
