@@ -24,9 +24,7 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ currentPaymentMethods, handleTo
                 <CreditCard className="w-5 h-5 text-brand" />
                 <span>Global Payment Gateways & Myanmar Banking Settings</span>
               </h3>
-              <p className="text-xs text-muted mt-1">
-                Configure enabled payment methods across your store (Cash, KBZ Pay, UAB Pay, AYA Pay, MMQR, CB Bank, Yoma Bank, Wave Money, etc.). Disabled payment options will be hidden automatically during POS checkout, Work Order intake, and invoicing.
-              </p>
+              <p className="text-xs text-muted mt-1">Enable payment methods for your store.</p>
             </div>
 
             <div className="flex items-center space-x-2 shrink-0">

@@ -1208,9 +1208,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               <AlertCircle className="w-6 h-6 shrink-0" />
               <h3 className="font-extrabold text-sm text-ink">Delete Technician?</h3>
             </div>
-            <p className="text-xs text-muted">
-              Are you sure you want to remove this technician from the system roster? Active tickets assigned to them will remain in the pipeline.
-            </p>
+            <p className="text-xs text-muted">Remove this technician? Their active tickets stay.</p>
             <div className="flex items-center justify-end space-x-2 pt-2">
               <Button
                 type="button"

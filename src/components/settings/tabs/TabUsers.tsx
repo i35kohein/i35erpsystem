@@ -25,9 +25,7 @@ const UsersTab: React.FC<UsersTabProps> = ({ users, currentUser, handleOpenAddUs
                   <UserPlus className="w-5 h-5 text-brand" />
                   <span>System Users & Role Access Control</span>
                 </h3>
-                <p className="text-xs text-muted mt-1">
-                  Manage accounts for Admin, Technicians, and Reception staff. Control granular deletion and access permissions.
-                </p>
+                <p className="text-xs text-muted mt-1">Manage Admin, Technician, and Reception accounts.</p>
               </div>
 
               <Button
@@ -57,9 +55,7 @@ const UsersTab: React.FC<UsersTabProps> = ({ users, currentUser, handleOpenAddUs
                   <span className="p-1.5 bg-blue-100 text-blue-700 rounded-lg">🔧</span>
                   <span className="font-extrabold text-sm text-blue-900">Technician Role</span>
                 </div>
-                <p className="text-xs text-blue-800 leading-relaxed">
-                  Mobile-first view for assigned repair pipeline only, QA diagnostic checklists, adding repair logs/status changes, and device repair history. Cannot delete anything.
-                </p>
+                <p className="text-xs text-blue-800 leading-relaxed">Mobile view: pipeline, QA checklists, logs, status changes.</p>
               </div>
 
               <div className="p-4 bg-amber-50/80 rounded-2xl border border-amber-200 space-y-2">
@@ -67,9 +63,7 @@ const UsersTab: React.FC<UsersTabProps> = ({ users, currentUser, handleOpenAddUs
                   <span className="p-1.5 bg-amber-100 text-amber-800 rounded-lg">📋</span>
                   <span className="font-extrabold text-sm text-amber-900">Reception Role</span>
                 </div>
-                <p className="text-xs text-amber-800 leading-relaxed">
-                  Access to intake ticketing, pipeline, inventory, POS invoicing, CRM customers, and QA. Excludes system settings. Cannot delete anything.
-                </p>
+                <p className="text-xs text-amber-800 leading-relaxed">Full access except system settings.</p>
               </div>
             </div>
 

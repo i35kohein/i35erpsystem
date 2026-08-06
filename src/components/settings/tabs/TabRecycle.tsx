@@ -19,9 +19,7 @@ const RecycleTab: React.FC<RecycleTabProps> = ({ onOpenRecycleBin, archivedCount
                 <Trash2 className="w-5 h-5 text-danger" />
                 <span>Recycle Bin & Archive Management</span>
               </h3>
-              <p className="text-xs text-muted mt-1">
-                Manage deleted repair work orders and archived customer records. Restore accidentally deleted items or permanently purge them.
-              </p>
+              <p className="text-xs text-muted mt-1">Restore or permanently purge deleted records.</p>
             </div>
 
             {onOpenRecycleBin && (

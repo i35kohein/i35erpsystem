@@ -276,9 +276,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                 max="20"
                 className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand"
               />
-              <p className="text-xs text-muted">
-                Parts with quantity equal to or below this count will trigger amber warning badges across the inventory matrix.
-              </p>
+              <p className="text-xs text-muted">Parts at or below this count get amber warnings.</p>
             </div>
 
             <div className="space-y-1.5">

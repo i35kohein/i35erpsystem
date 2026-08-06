@@ -41,9 +41,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                     A4 & 3"x2" Tag Ready
                   </span>
                 </div>
-                <p className="text-xs text-muted mt-0.5">
-                  Configure official A4 workshop job sheets, customer invoices, and 3"×2" device intake sticker tags for your repair shop.
-                </p>
+                <p className="text-xs text-muted mt-0.5">A4 job sheets, invoices, and 3"×2" sticker tags.</p>
               </div>
             </div>
 
@@ -229,7 +227,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                     className="w-full bg-surface text-ink font-bold px-3.5 py-2.5 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand transition-all"
                     placeholder="e.g. Thank you for choosing AppleRepair! All repairs covered by warranty under standard terms."
                   />
-                  <p className="text-xs text-muted">Plain text only. Select text in a line (or place the cursor there), then choose its alignment. Line breaks and text size are kept in the A4 print.</p>
+                  <p className="text-xs text-muted">Select a line, then choose alignment.</p>
 
                   <div className="flex flex-col gap-1.5 rounded-lg border border-line bg-[#F8F9FA] p-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-1">
@@ -330,9 +328,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                 <Printer className="w-4 h-4 text-brand" />
                 <span>A4 Intake Print Voucher & Job Sheet Defaults</span>
               </h4>
-              <p className="text-xs text-muted mt-0.5">
-                Configure the saved defaults used by every Device Intake Print Voucher. Changes apply after you save all settings.
-              </p>
+              <p className="text-xs text-muted mt-0.5">Defaults for every Device Intake Print Voucher.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 text-xs">

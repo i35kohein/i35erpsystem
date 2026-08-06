@@ -995,9 +995,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               </div>
               <div>
                 <h3 className="font-extrabold text-base text-amber-950">Choose Device Model First</h3>
-                <p className="text-xs text-amber-800 max-w-md mt-1">
-                  Please select a device model first above to view specific repair services, catalog prices, and apply discounts.
-                </p>
+                <p className="text-xs text-amber-800 max-w-md mt-1">Select a device model to see its repair services and prices.</p>
               </div>
               <Button
                 type="button"

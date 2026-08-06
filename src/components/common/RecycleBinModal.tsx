@@ -61,9 +61,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
                   {archivedWorkOrders.length} {archivedWorkOrders.length === 1 ? 'ticket' : 'tickets'}
                 </span>
               </div>
-              <p className="text-xs text-muted mt-0.5">
-                Deleted repair tickets are safely stored here. You can restore them anytime or permanently delete them.
-              </p>
+              <p className="text-xs text-muted mt-0.5">Deleted tickets are stored here — restore or purge.</p>
             </div>
           </div>
 
@@ -148,9 +146,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
                 <Trash2 className="w-8 h-8" />
               </div>
               <h3 className="font-bold text-base text-ink">Recycle Bin is Empty</h3>
-              <p className="text-xs text-muted max-w-md mx-auto leading-relaxed">
-                When repair tickets are deleted from the pipeline or intake portal, they will be archived here. You can safely restore them anytime with all diagnostics and logs intact.
-              </p>
+              <p className="text-xs text-muted max-w-md mx-auto leading-relaxed">Deleted tickets are archived here — recoverable.</p>
             </div>
           ) : filteredWorkOrders.length === 0 ? (
             <div className="py-12 text-center space-y-2 bg-white rounded-2xl border border-line p-6">

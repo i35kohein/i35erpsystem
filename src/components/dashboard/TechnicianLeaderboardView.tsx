@@ -47,9 +47,7 @@ export const TechnicianLeaderboardView: React.FC<TechnicianLeaderboardViewProps>
                 {periodLabel || 'This period'}
               </span>
             </div>
-            <p className="text-xs text-muted">
-              Ranked by verified completed repairs (Finished / Taken Out) in the selected period — live from work orders.
-            </p>
+            <p className="text-xs text-muted">Ranked by verified completed repairs — live.</p>
           </div>
           {totalShopCompleted > 0 && (
             <span className="text-xs text-muted font-semibold bg-white/70 px-3 py-1.5 rounded-xl border border-amber-200 shadow-2xs shrink-0">

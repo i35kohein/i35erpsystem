@@ -415,9 +415,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               <div className="flex min-h-0 flex-1 flex-col items-center justify-center p-8 text-center text-muted space-y-2 bg-surface rounded-xl border border-dashed border-line-strong my-4">
                 <CheckCircle2 className="w-8 h-8 mx-auto text-emerald-500 opacity-70" />
                 <p className="font-extrabold text-ink text-xs">No Devices with Finished Diagnostics</p>
-                <p className="text-xs text-muted">
-                  New intakes pending diagnostic inspection are hidden. Work orders automatically appear here in POS after diagnostic testing is completed.
-                </p>
+                <p className="text-xs text-muted">Appears here automatically after diagnostics.</p>
               </div>
             ) : (
               filteredWorkOrders.map((wo) => {
@@ -1209,9 +1207,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
             <div className="p-12 text-center text-muted flex flex-col items-center justify-center space-y-3 min-h-[380px]">
               <Receipt className="w-12 h-12 text-muted/30" />
               <p className="font-extrabold text-sm text-ink">No Finished Device Selected</p>
-              <p className="text-xs max-w-xs text-muted">
-                Only finished repairs appear in POS. Select a finished work order from the left list to process payment and automatically transition status to Taken Out.
-              </p>
+              <p className="text-xs max-w-xs text-muted">Finished repairs only — select one to process payment.</p>
             </div>
           )}
         </div>

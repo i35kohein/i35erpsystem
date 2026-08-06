@@ -149,9 +149,7 @@ const AiTab: React.FC<AiTabProps> = ({ formData, setFormData, aiRescanning, aiRe
                   <Sparkles className="w-3.5 h-3.5 text-brand" />
                   AI Repair-Type Classification
                 </p>
-                <p className="text-xs text-muted">
-                  Finished tickets are auto-classified as Spareparts Change or Hardware Repair. Re-scan applies AI to every finished ticket without a verdict (including previously failed ones).
-                </p>
+                <p className="text-xs text-muted">Auto-classifies finished tickets; re-scan applies AI to all tickets.</p>
               </div>
               <Button
                 type="button"
@@ -180,9 +178,7 @@ const AiTab: React.FC<AiTabProps> = ({ formData, setFormData, aiRescanning, aiRe
             />
           </label>
 
-          <div className="p-3 bg-surface border border-line rounded-xl text-xs text-muted">
-            The assistant sends a compact live operational summary to the selected provider. API credentials are used only for requests initiated from this ERP assistant. For shared production use, keep keys in server-side secrets instead of browser-synced settings.
-          </div>
+          <div className="p-3 bg-surface border border-line rounded-xl text-xs text-muted">Sends a live ops summary to the AI provider. Credentials stay private.</div>
         </div>
   );
 };

@@ -28,9 +28,7 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
                   <BellRing className="w-5 h-5 text-brand" />
                   <span>Automatic SMS & Telegram Notification Templates</span>
                 </h3>
-                <p className="text-xs text-muted mt-1">
-                  Customize automatic notification templates sent to customers for repair milestones (Finished, Ready for Pickup, Needs Attention, Pending Parts, Intake).
-                </p>
+                <p className="text-xs text-muted mt-1">Notification templates for repair milestones.</p>
               </div>
 
               <div className="flex items-center space-x-2 shrink-0">

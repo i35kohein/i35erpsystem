@@ -252,9 +252,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 <Smartphone className="w-6 h-6" />
               </div>
               <h2 className="text-lg font-extrabold text-ink">Check Your Repair Status</h2>
-              <p className="text-xs text-muted">
-                Enter your phone number, email, or Work Order # (e.g. WO-2026-1001) to view real-time repair progress, inspect diagnostic logs, and approve estimates.
-              </p>
+              <p className="text-xs text-muted">Enter phone, email, or Work Order # to view repair progress.</p>
             </div>
 
             {loginError && (
@@ -917,9 +915,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   </div>
                 ))
               ) : (
-                <div className="text-center py-8 text-muted text-xs">
-                  No messages sent yet. Use the box below to ask any question or leave instructions for the repair team.
-                </div>
+                <div className="text-center py-8 text-muted text-xs">No messages yet — leave instructions for the team.</div>
               )}
             </div>
 
@@ -1001,9 +997,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   onChange={(e) => setAgreedToTerms(e.target.checked)}
                   className="mt-0.5 rounded text-brand"
                 />
-                <span className="text-xs text-muted">
-                  I authorize the shop to install required components and confirm that all estimates are understood and agreed upon.
-                </span>
+                <span className="text-xs text-muted">I authorize the shop to install components and accept the estimates.</span>
               </label>
             </div>
 

@@ -81,9 +81,7 @@ const TechniciansTab: React.FC<TechniciansTabProps> = ({ formData, setFormData, 
                 </div>
                 <div>
                   <h4 className="font-extrabold text-sm text-ink">No Technical Staff Records Found</h4>
-                  <p className="text-xs text-muted max-w-sm mx-auto mt-1">
-                    There are currently no technician profiles in the system roster. Add a technician account when you are ready.
-                  </p>
+                  <p className="text-xs text-muted max-w-sm mx-auto mt-1">No technicians yet — add one to get started.</p>
                 </div>
                 <div className="flex items-center justify-center space-x-3 pt-2">
                   <Button

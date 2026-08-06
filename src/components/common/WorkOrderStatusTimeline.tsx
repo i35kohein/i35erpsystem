@@ -445,9 +445,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
                     <AlertCircle className="w-3.5 h-3.5 text-purple-600 shrink-0 animate-pulse" />
                     <span>POS Cashout Required for Taken Out:</span>
                   </div>
-                  <p className="text-purple-900 leading-tight">
-                    Manual transition to "Taken Out" is restricted. Submitting will launch the POS Cashout checkout module to collect payment and deliver the device.
-                  </p>
+                  <p className="text-purple-900 leading-tight">Taken Out opens the POS checkout to collect payment.</p>
                 </div>
               )}
             </div>

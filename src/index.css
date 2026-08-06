@@ -211,6 +211,25 @@ html[data-theme="dark-slate"] [class~="border-[#B8D3F4]"] { border-color: rgba(1
 html[data-theme="dark-slate"] [class~="bg-[#7360F2]/10"] { background-color: rgba(115, 96, 242, 0.16) !important; }
 /* Light chip borders → translucent tinted borders */
 html[data-theme="dark-slate"] .border-amber-200 { border-color: rgba(253, 230, 138, 0.3) !important; }
+html[data-theme="dark-slate"] .border-rose-200 { border-color: rgba(253, 164, 175, 0.3) !important; }
+html[data-theme="dark-slate"] .text-rose-800 { color: #FDA4AF !important; }
+html[data-theme="dark-slate"] .text-rose-700 { color: #FDA4AF !important; }
+html[data-theme="dark-slate"] .text-red-800 { color: #FCA5A5 !important; }
+html[data-theme="dark-slate"] .text-emerald-800 { color: #4ADE80 !important; }
+html[data-theme="dark-slate"] .text-teal-700 { color: #2DD4BF !important; }
+html[data-theme="dark-slate"] .text-blue-800 { color: #93C5FD !important; }
+html[data-theme="dark-slate"] .text-violet-800 { color: #C4B5FD !important; }
+html[data-theme="dark-slate"] .text-amber-800 { color: #FBBF24 !important; }
+html[data-theme="dark-slate"] .text-orange-700 { color: #FDBA74 !important; }
+html[data-theme="dark-slate"] .text-slate-600 { color: #CBD5E1 !important; }
+html[data-theme="dark-slate"] .bg-slate-100 { background-color: rgba(100, 116, 139, 0.18) !important; }
+html[data-theme="dark-slate"] .bg-slate-50 { background-color: rgba(100, 116, 139, 0.12) !important; }
+html[data-theme="dark-slate"] .bg-blue-50 { background-color: rgba(59, 130, 246, 0.16) !important; }
+html[data-theme="dark-slate"] .bg-teal-50 { background-color: rgba(20, 184, 166, 0.14) !important; }
+html[data-theme="dark-slate"] .bg-orange-50 { background-color: rgba(249, 115, 22, 0.14) !important; }
+html[data-theme="dark-slate"] .bg-violet-50 { background-color: rgba(139, 92, 246, 0.15) !important; }
+html[data-theme="dark-slate"] .bg-amber-50 { background-color: rgba(245, 158, 11, 0.13) !important; }
+html[data-theme="dark-slate"] .bg-yellow-50 { background-color: rgba(234, 179, 8, 0.13) !important; }
 html[data-theme="dark-slate"] .border-red-200 { border-color: rgba(252, 165, 165, 0.3) !important; }
 
 /* Component Geometry: Square / Rectangular Design System vs Curved Soft Geometry */

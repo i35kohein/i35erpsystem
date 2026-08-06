@@ -120,9 +120,7 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
                 <Square className="w-5 h-5 text-brand" />
                 <span>Component Geometry & Design System Architecture</span>
               </h3>
-              <p className="text-xs text-[#7F7F7F] mt-1">
-                Choose between a high-density Square / Rectangular Design System or a Soft Curved Geometry for all UI elements, cards, inputs, buttons, and tables.
-              </p>
+              <p className="text-xs text-[#7F7F7F] mt-1">Square (high-density) or Curved geometry for UI elements.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
@@ -143,9 +141,7 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
                     <span className="text-xs font-black px-2.5 py-0.5 bg-brand text-white rounded-none">Active</span>
                   )}
                 </div>
-                <p className="text-xs text-muted leading-relaxed">
-                  Crisp 0px sharp rectangular borders for high-density engineering, maximum screen utilization, and modern structural architecture across all ERP modules.
-                </p>
+                <p className="text-xs text-muted leading-relaxed">Sharp 0px borders — maximum screen density.</p>
               </div>
 
               <div
@@ -180,9 +176,7 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
                   <span className="text-xl">🇲🇲</span>
                   <span>System Language & Localization</span>
                 </h3>
-                <p className="text-xs text-[#7F7F7F] mt-1">
-                  Select your preferred system interface language. Supports English and Burmese (မြန်မာဘာသာ). UI defaults to English; Burmese is used for customer-facing messages.
-                </p>
+                <p className="text-xs text-[#7F7F7F] mt-1">Interface language: English or Burmese.</p>
               </div>
               <LanguageSwitcher variant="pills" />
             </div>

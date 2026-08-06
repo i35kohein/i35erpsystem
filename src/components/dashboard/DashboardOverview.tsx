@@ -1042,7 +1042,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
                 <div>
                   <p className="font-bold text-amber-950">{stagnantWorkOrders.length} Repair Ticket(s) Bottlenecked (&gt;48h in Queue)</p>
-                  <p className="text-xs text-amber-800">These tickets have been inactive for over 48 hours. Consider reassigning technicians or updating customer status.</p>
+                  <p className="text-xs text-amber-800">Inactive over 48h — reassign or update status.</p>
                 </div>
               </div>
               <Button
@@ -1753,9 +1753,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     <span>Background Scanner Active</span>
                   </span>
                 </div>
-                <p className="text-xs text-slate-300">
-                  Real-time monitor flagging work orders nearing the end of their 90-day warranty window (within 14 days of expiry).
-                </p>
+                <p className="text-xs text-slate-300">Flags tickets within 14 days of 90-day warranty expiry.</p>
               </div>
 
               <div className="flex items-center space-x-2">

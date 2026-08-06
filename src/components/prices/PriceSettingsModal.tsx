@@ -740,9 +740,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                       <Tag className="w-4 h-4 text-brand" />
                       <span>Global Repair Service Category Customizer</span>
                     </h3>
-                    <p className="text-xs text-muted mt-0.5">
-                      Rename repair category labels or add new custom repair service definitions globally across all device price lists.
-                    </p>
+                    <p className="text-xs text-muted mt-0.5">Rename categories or add custom repair services.</p>
                   </div>
                 </div>
 
@@ -1189,9 +1187,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                   <DollarSign className="w-4 h-4 text-brand" />
                   <span>Currency Display Preferences</span>
                 </h3>
-                <p className="text-xs text-muted">
-                  Choose the currency unit prefix displayed across all repair price tags, quotes, and customer estimates.
-                </p>
+                <p className="text-xs text-muted">Currency prefix for all price tags and quotes.</p>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {[
@@ -1234,9 +1230,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                   <AlertCircle className="w-4 h-4 text-[#FF9500]" />
                   <span>Price Storage & Sync Notice</span>
                 </h3>
-                <p className="text-xs text-muted leading-relaxed">
-                  All price modifications, custom models, category names, folder visibility choices, and global rules updated here are saved live to your real-time Firestore database. All team members see updates instantly across devices.
-                </p>
+                <p className="text-xs text-muted leading-relaxed">All price changes and rules update instantly.</p>
               </div>
             </div>
           )}

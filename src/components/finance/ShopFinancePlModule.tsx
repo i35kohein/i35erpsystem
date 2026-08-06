@@ -465,8 +465,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
               <div>
                 <h2 className="font-extrabold text-ink text-sm">Mobile Repair Shop Margin Benchmark (50% – 70% Target)</h2>
                 <p className="text-ink/70 font-medium mt-0.5">
-                  Your current Gross Margin is <strong className="text-[#166534]">{financialSummary.grossMarginPercent}%</strong>. Healthy mobile repair labs maintain a 50%–70% combined gross margin across parts and technician labor.
-                </p>
+                  Your current Gross Margin is <strong className="text-[#166534]">{financialSummary.grossMarginPercent}%</strong>. Healthy labs target 50–70% combined margin.</p>
               </div>
             </div>
             <div className="shrink-0 bg-white border border-emerald-300 px-3 py-1.5 rounded-xl font-mono font-black text-xs text-success-deep">

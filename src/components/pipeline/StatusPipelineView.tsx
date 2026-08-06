@@ -1277,9 +1277,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
                   <span>Intake Inspection Notice:</span>
                 </span>
-                <p className="leading-relaxed text-amber-900">
-                  Initial 21-point diagnostic inspection has not been recorded for this device. Completing initial diagnostics before starting repair ensures hardware state is documented.
-                </p>
+                <p className="leading-relaxed text-amber-900">Initial 21-point diagnostic not recorded yet.</p>
               </div>
             </div>
 
@@ -1369,9 +1367,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
                   <span>Finished Device Protocol Notice:</span>
                 </span>
-                <p className="leading-relaxed text-rose-900">
-                  This device is being marked as Finished, but the 21-point initial or post-repair diagnostic checklist has not been completed. Completing diagnostic checks ensures device functionality is fully verified before final customer delivery.
-                </p>
+                <p className="leading-relaxed text-rose-900">Marking Finished without a completed 21-point diagnostic.</p>
               </div>
             </div>
 
