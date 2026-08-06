@@ -28,6 +28,16 @@ body {
   --color-muted: #86868B;        /* secondary text */
   --color-faint: #6E6E73;        /* tertiary text */
   --color-line: #E5E5EA;         /* hairline border */
+
+  /* Radius scale (P3 2026-08-06) — semantic usage:
+       rounded-md    6px   tags / chips / badges
+       rounded-lg    8px   inputs, selects, compact controls
+       rounded-xl   12px   buttons, cards (DEFAULT)
+       rounded-2xl  16px   panels, modals, big cards
+       rounded-full  ∞     pills, avatars, icons
+     Surface scale:
+       bg-surface (#F8F9FA) = inset panels / wells
+       bg-white   (#FFFFFF) = elevated cards on the surface */
   --color-line-strong: #D2D2D7;  /* stronger border */
   --color-surface: #F5F5F7;      /* subtle panel bg */
   --color-success: #34C759;      /* positive/green */
