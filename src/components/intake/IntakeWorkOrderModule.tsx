@@ -656,7 +656,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                   onClick={() => onSelectPrintTag(selectedWorkOrder)}
                   aria-label="Print ticket sticker"
                   title="Print sticker"
-                  className="group relative flex h-9 w-9 items-center justify-center rounded-lg border border-transparent text-[var(--text-muted)] transition-colors hover:border-[var(--border)] hover:bg-[var(--bg)] hover:text-[var(--primary)] cursor-pointer"
+                  className="group relative flex h-10 w-10 items-center justify-center rounded-lg border border-transparent text-[var(--text-muted)] transition-colors hover:border-[var(--border)] hover:bg-[var(--bg)] hover:text-[var(--primary)] cursor-pointer"
                 >
                   <Printer className="h-4 w-4" />
                   <span className="pointer-events-none absolute right-0 top-full z-20 mt-2 hidden whitespace-nowrap rounded-md bg-[var(--text-main)] px-2 py-1 text-[10px] font-bold text-[var(--card-bg)] shadow-md group-hover:block">

@@ -851,11 +851,11 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
           {/* Header Action Buttons (Aligned to same height and size) */}
           <div className="flex flex-wrap items-center gap-2">
             {/* Paper Format Segment */}
-            <div className="flex items-center bg-surface p-1 rounded-xl border border-line h-9">
+            <div className="flex items-center bg-surface p-1 rounded-xl border border-line h-10">
               <button
                 type="button"
                 onClick={() => setPaperSize('a4_voucher')}
-                className={`h-7 flex items-center space-x-1.5 px-3 rounded-lg font-bold text-xs transition-all ${
+                className={`h-8 flex items-center space-x-1.5 px-3 rounded-lg font-bold text-xs transition-all ${
                   paperSize === 'a4_voucher' ? 'bg-brand text-white shadow-xs' : 'text-muted hover:text-ink'
                 }`}
               >
@@ -866,7 +866,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
               <button
                 type="button"
                 onClick={() => setPaperSize('3x2_tag')}
-                className={`h-7 flex items-center space-x-1.5 px-3 rounded-lg font-bold text-xs transition-all ${
+                className={`h-8 flex items-center space-x-1.5 px-3 rounded-lg font-bold text-xs transition-all ${
                   paperSize === '3x2_tag' ? 'bg-brand text-white shadow-xs' : 'text-muted hover:text-ink'
                 }`}
               >
@@ -878,7 +878,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="h-9 w-9 flex items-center justify-center text-muted hover:text-ink rounded-xl hover:bg-surface transition-colors border border-transparent hover:border-line"
+              className="h-10 w-10 flex items-center justify-center text-muted hover:text-ink rounded-xl hover:bg-surface transition-colors border border-transparent hover:border-line"
             >
               <X className="w-5 h-5" />
             </button>
@@ -987,14 +987,14 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-white border border-line text-ink font-semibold rounded-xl hover:bg-slate-50 transition-colors"
+              className="h-10 px-4 bg-white border border-line text-ink font-semibold rounded-xl hover:bg-slate-50 transition-colors"
             >
               Close
             </button>
             <button
               type="button"
               onClick={handlePrint}
-              className={`px-5 py-2 font-bold text-white rounded-xl flex items-center space-x-1.5 shadow-xs transition-all active:scale-95 cursor-pointer ${
+              className={`h-10 px-5 font-bold text-white rounded-xl flex items-center space-x-1.5 shadow-xs transition-all active:scale-95 cursor-pointer ${
                 a4ColorMode === 'monochrome' ? 'bg-black hover:bg-slate-800' : 'bg-brand hover:bg-[#0077ED]'
               }`}
             >

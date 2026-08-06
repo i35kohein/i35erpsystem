@@ -152,7 +152,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                 onClick={() => onEdit(workOrder)}
                 aria-label="Edit ticket"
                 title="Edit ticket"
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-muted)] transition-colors hover:bg-[var(--bg)] hover:text-[var(--primary)]"
+                className="flex h-10 w-10 items-center justify-center rounded-lg text-[var(--text-muted)] transition-colors hover:bg-[var(--bg)] hover:text-[var(--primary)]"
               >
                 <PencilLine className="h-4 w-4" />
               </button>

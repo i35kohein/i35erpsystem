@@ -1013,6 +1013,8 @@ html[data-theme] :is(
   .text-\[9px\] { font-size: 12px !important; line-height: 1.35 !important; }
   .text-\[10px\] { font-size: 12px !important; line-height: 1.4 !important; }
   .text-\[11px\] { font-size: 12px !important; line-height: 1.4 !important; }
+.text-\[7\.5px\] { font-size: 12px !important; line-height: 1.4 !important; }
+.text-\[9\.5px\] { font-size: 12px !important; line-height: 1.4 !important; }
   /* Important variants must obey the same floor (e.g. !text-[10px] dropdown triggers).
      Must live in @layer base: layered !important beats unlayered !important, and the
      Tailwind utility class is itself important — so it wins over an unlayered rule. */
