@@ -2,7 +2,6 @@ import React, { useRef, useState } from 'react';
 import {
   ChevronsRight,
   Eye,
-  EyeOff, 
   ChevronRight, 
   ChevronLeft, 
   MessageSquare, 
@@ -513,78 +512,9 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
         <div className="flex min-w-0 items-center gap-1.5">
           <span className="whitespace-nowrap font-extrabold text-ink">Active Pipeline Overview</span>
           <span className="truncate text-[10px] font-medium text-muted">({filteredWorkOrders.length} tickets matching filters)</span>
-          {hasActiveFilters && (
-            <button
-              type="button"
-              onClick={() => {
-                handleResetFilters();
-                setShowNeedsDiagOnly(false);
-                setShowBeforeNeedsDiagOnly(false);
-              }}
-              className="px-2 py-0.5 text-[10px] bg-slate-100 hover:bg-slate-200 text-brand font-bold rounded-lg transition-all cursor-pointer border border-slate-200"
-            >
-              Reset Filters ↺
-            </button>
-          )}
         </div>
 
-        <div className="hidden lg:grid lg:grid-cols-2 xl:flex xl:flex-wrap xl:items-center xl:justify-end gap-1.5">
-          <button
-            type="button"
-            onClick={() => setShowAllStages((v) => !v)}
-            className={`inline-flex w-full sm:w-auto h-8 sm:h-7 items-center justify-center gap-1 rounded-md border px-2 text-[10px] font-bold transition-colors cursor-pointer ${
-              showAllStages
-                ? 'bg-ink text-white border-ink shadow-2xs'
-                : 'bg-white text-ink border-line hover:bg-slate-100'
-            }`}
-            title={showAllStages ? 'Hide the exception columns again' : 'Show Cant Repair and Customer Not Repair columns'}
-          >
-            {showAllStages ? (
-              <><EyeOff className="w-3 h-3 shrink-0" /><span>Hide Exceptions</span></>
-            ) : (
-              <><Eye className="w-3 h-3 shrink-0" /><span>Show All{hiddenStageCounts.some((h) => h.count > 0) ? ` (${hiddenStageCounts.filter((h) => h.count > 0).map((h) => `${h.id.split(' ')[0]}:${h.count}`).join(' ')})` : ''}</span></>
-            )}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setShowBeforeNeedsDiagOnly(!showBeforeNeedsDiagOnly);
-              setShowNeedsDiagOnly(false);
-            }}
-                className={`inline-flex w-full sm:w-auto h-8 sm:h-7 items-center justify-center gap-1 rounded-md border px-2 text-[10px] font-bold transition-colors cursor-pointer ${
-                  showBeforeNeedsDiagOnly
-                    ? 'bg-blue-600 text-white border-blue-700 shadow-2xs'
-                    : 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100'
-                }`}
-          >
-            <Stethoscope className="h-3 w-3 shrink-0" />
-            <span>Before-Diag Pending ({beforeNeedsDiagTotalCount})</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setShowNeedsDiagOnly(!showNeedsDiagOnly);
-              setShowBeforeNeedsDiagOnly(false);
-            }}
-              className={`inline-flex w-full sm:w-auto h-8 sm:h-7 items-center justify-center gap-1 rounded-md border px-2 text-[10px] font-bold transition-colors cursor-pointer ${
-                showNeedsDiagOnly
-                  ? 'bg-purple-600 text-white border-purple-700 shadow-2xs'
-                  : 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100'
-              }`}
-          >
-            <ShieldCheck className="h-3 w-3 shrink-0" />
-            <span>After-Diag Pending ({afterNeedsDiagTotalCount})</span>
-          </button>
-
-          {showBottlenecksOnly && (
-            <span className="inline-flex h-7 items-center gap-1 rounded-md border border-red-600 bg-red-500 px-2 text-[10px] font-bold text-white shadow-2xs">
-              <Timer className="h-3 w-3 shrink-0" />
-              <span>Filtering Bottlenecks (&gt;48h)</span>
-            </span>
-          )}
-
+        <div className="flex items-center justify-end gap-1.5">
           {onClearAllWorkOrders && workOrders.length > 0 && (
             <button
               type="button"
@@ -602,33 +532,6 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
           )}
 
         </div>
-      </div>
-
-      {/* Mobile stage toggles (lg:hidden) — Show All lives in the drawer too, but the
-          exception columns are the workflow's far-right stages, so a one-tap inline
-          toggle keeps them reachable without hunting the filter drawer. */}
-      <div className="lg:hidden flex items-center gap-1.5 overflow-x-auto no-scrollbar -mx-0.5 px-0.5">
-        <button
-          type="button"
-          onClick={() => setShowAllStages((v) => !v)}
-          className={`inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-xl border px-3 text-[11px] font-bold transition-colors cursor-pointer active:scale-95 ${
-            showAllStages
-              ? 'bg-ink text-white border-ink shadow-2xs'
-              : 'bg-white text-ink border-line-strong hover:bg-slate-100'
-          }`}
-          aria-pressed={showAllStages}
-        >
-          {showAllStages ? <EyeOff className="w-3.5 h-3.5 shrink-0" /> : <Eye className="w-3.5 h-3.5 shrink-0 text-brand" />}
-          <span>{showAllStages ? 'Hide Exception Stages' : 'Show Exception Stages'}</span>
-          {hiddenStageCounts.some((h) => h.count > 0) && (
-            <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-black ${showAllStages ? 'bg-white/20 text-white' : 'bg-rose-100 text-rose-700'}`}>
-              {hiddenStageCounts.filter((h) => h.count > 0).reduce((acc, h) => acc + h.count, 0)}
-            </span>
-          )}
-        </button>
-        {!showAllStages && (
-          <p className="shrink-0 text-[10px] font-medium text-muted">Cant Repair · Customer Not Repair</p>
-        )}
       </div>
 
       {/* Active filter summary chips — one-tap clear (all viewports; wraps on mobile) */}
