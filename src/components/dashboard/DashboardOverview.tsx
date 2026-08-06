@@ -806,7 +806,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           aria-selected={activeDashboardSubTab === 'status-queue'}
           onClick={() => setActiveDashboardSubTab('status-queue')}
           onKeyDown={(e) => handleDashboardTabKeyDown(e, 'status-queue')}
-          className={`px-3.5 h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
+          className={`px-3.5 h-10 lg:h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'status-queue'
               ? 'bg-brand text-white border-brand shadow-xs'
               : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
@@ -832,7 +832,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           aria-selected={activeDashboardSubTab === 'repair-data'}
           onClick={() => setActiveDashboardSubTab('repair-data')}
           onKeyDown={(e) => handleDashboardTabKeyDown(e, 'repair-data')}
-          className={`px-3.5 h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
+          className={`px-3.5 h-10 lg:h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'repair-data'
               ? 'bg-brand text-white border-brand shadow-xs'
               : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
@@ -858,7 +858,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           aria-selected={activeDashboardSubTab === 'tech-kpi'}
           onClick={() => setActiveDashboardSubTab('tech-kpi')}
           onKeyDown={(e) => handleDashboardTabKeyDown(e, 'tech-kpi')}
-          className={`px-3.5 h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
+          className={`px-3.5 h-10 lg:h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'tech-kpi'
               ? 'bg-brand text-white border-brand shadow-xs'
               : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
@@ -884,7 +884,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           aria-selected={activeDashboardSubTab === 'inventory'}
           onClick={() => setActiveDashboardSubTab('inventory')}
           onKeyDown={(e) => handleDashboardTabKeyDown(e, 'inventory')}
-          className={`px-3.5 h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
+          className={`px-3.5 h-10 lg:h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'inventory'
               ? 'bg-brand text-white border-brand shadow-xs'
               : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
@@ -920,7 +920,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           aria-selected={activeDashboardSubTab === 'finance'}
           onClick={() => setActiveDashboardSubTab('finance')}
           onKeyDown={(e) => handleDashboardTabKeyDown(e, 'finance')}
-          className={`px-3.5 h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
+          className={`px-3.5 h-10 lg:h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'finance'
               ? 'bg-brand text-white border-brand shadow-xs'
               : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
@@ -947,7 +947,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           aria-selected={activeDashboardSubTab === 'warranty-watch'}
           onClick={() => setActiveDashboardSubTab('warranty-watch')}
           onKeyDown={(e) => handleDashboardTabKeyDown(e, 'warranty-watch')}
-          className={`px-3.5 h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
+          className={`px-3.5 h-10 lg:h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'warranty-watch'
               ? 'bg-brand text-white border-brand shadow-xs'
               : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
