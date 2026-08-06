@@ -622,6 +622,16 @@ html[data-theme="dark-slate"] textarea::placeholder {
   color: #94A3B8 !important;
 }
 
+/* Invalid-input borders must stay red even in dark mode (Input invalid prop).
+   MUST live in @layer base: the dark-slate input rule above is also in a layer,
+   and layered !important beats unlayered !important regardless of specificity. */
+@layer base {
+  html[data-theme="dark-slate"] input.border-rose-500,
+  html[data-theme="dark-slate"] input[aria-invalid="true"] {
+    border-color: #F87171 !important;
+  }
+}
+
 html[data-theme="dark-slate"] .bg-gray-50,
 html[data-theme="dark-slate"] .bg-slate-50,
 html[data-theme="dark-slate"] [class~="bg-[#F5F5F7]"],

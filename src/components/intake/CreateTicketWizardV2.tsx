@@ -511,7 +511,7 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
                 No repair items found for this model.
               </div>
             ) : (
-              <div className="space-y-1.5 max-h-[300px] overflow-y-auto pr-2">
+              <div className="space-y-1.5 max-h-[300px] overflow-y-auto pr-2 pb-1">
                 {filteredCatalog.map((item) => {
                   const selected = selectedRepairs.find((r) => r.id === item.id);
                   return (
@@ -570,8 +570,8 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
         {step === 3 && (
           <div className="space-y-4 animate-fade-in">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="text-sm font-extrabold text-ink">Diagnostics &amp; Notes</h3>
-              <div className="flex items-center gap-1.5 text-xs font-bold">
+              <h3 className="text-sm font-extrabold text-ink leading-6">Diagnostics &amp; Notes</h3>
+              <div className="flex items-center gap-1.5 text-xs font-bold leading-6">
                 <span className="px-2 py-0.5 rounded-full bg-success/10 text-success-deep">{diagPassCount} Pass</span>
                 <span className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-600">{diagFailCount} Fail</span>
               </div>
@@ -638,7 +638,7 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
                 <span className="font-mono font-black text-brand text-base">{finalEstimate.toLocaleString()} MMK</span>
               </div>
             </div>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-1.5 justify-end">
               {selectedRepairs.map((r) => (
                 <span key={r.id} className="inline-flex items-center gap-1 rounded-full bg-brand-soft text-brand px-2.5 py-1 text-xs font-bold border border-brand/20">
                   <Wrench className="w-3 h-3" /> {r.name}
