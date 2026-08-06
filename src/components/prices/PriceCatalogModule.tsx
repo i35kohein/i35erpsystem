@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useIsIpad } from '../../hooks/useIsIpad';
 import { motion } from 'motion/react';
 import { 
   Search, 
@@ -152,6 +153,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 }) => {
   // State
   const [selectedDevice, setSelectedDevice] = useState<string>(catalog[0]?.model || 'iPhone 15 Pro Max');
+  const isIpad = useIsIpad();
   const [viewMode, setViewMode] = useState<'pos' | 'matrix' | 'cards'>('pos');
   
   // Controlled / Uncontrolled state synchronization
@@ -566,7 +568,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                               <button
                                 type="button"
                                 onClick={() => setDiscountMenuOpenFor(discountMenuOpenFor === item.categoryKey ? null : item.categoryKey)}
-                                className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-extrabold transition-all cursor-pointer active:scale-95 ${
+                                className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg border text-[10px] font-extrabold transition-all cursor-pointer active:scale-95 ${
                                   discountMenuOpenFor === item.categoryKey
                                     ? 'bg-[#F0F7FF] text-brand border-brand/40'
                                     : item.discountPercent > 0
@@ -574,7 +576,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                       : 'bg-surface text-ink border-line hover:border-brand/50'
                                 }`}
                               >
-                                <Tag className="w-3.5 h-3.5 shrink-0" />
+                                <Tag className="w-3 h-3 shrink-0" />
                                 <span>Discount</span>
                                 {item.discountPercent > 0 && (
                                   <span className="font-mono">{item.discountPercent}%</span>
@@ -957,7 +959,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
           8/4 split with internal scrolling, unchanged. */}
       <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto pb-16 lg:pb-0 lg:grid lg:grid-cols-12 lg:overflow-hidden [scrollbar-gutter:stable]">
         {/* Main POS Catalog & Grid Section (8 Cols on Desktop) - Dedicated Scroll Container */}
-        <div className="shrink-0 space-y-4 overflow-visible p-2 sm:p-2.5 lg:min-h-0 lg:col-span-8 lg:overflow-y-auto scrollbar-thin [scrollbar-gutter:stable]">
+        <div className={`shrink-0 space-y-4 overflow-visible p-2 sm:p-2.5 lg:min-h-0 ${isIpad ? 'lg:col-span-5' : 'lg:col-span-8'} lg:overflow-y-auto scrollbar-thin [scrollbar-gutter:stable]`}>
 
           {/* Repair category quick-filter chips — mobile + desktop */}
           <div className="-mx-1 px-1 overflow-x-auto no-scrollbar flex items-center gap-1.5 pb-0.5">
@@ -989,7 +991,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
           </div>
 
           {/* Service Grid - Fixed Height Non-shifting Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-3.5 pb-8 pt-0.5 px-0.5">
+          <div className={`grid gap-3.5 pb-8 pt-0.5 px-0.5 ${isIpad ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5'}`}>
             {filteredItems.length === 0 ? (
               <div className="col-span-full bg-white border border-line rounded-2xl p-10 text-center text-muted">
                 <ListChecks className="w-8 h-8 mx-auto mb-2 opacity-40 text-brand" />
@@ -1089,7 +1091,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
         </div>
 
         {/* Right Side Cart & Invoice Summary Panel (4 Cols Desktop, lg+) — on mobile the cart opens as a bottom sheet */}
-        <div className="hidden lg:flex flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-2xs lg:col-span-4 lg:h-full lg:min-h-0">
+        <div className={`hidden lg:flex flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-2xs ${isIpad ? 'lg:col-span-7' : 'lg:col-span-4'} lg:h-full lg:min-h-0`}>
           {/* Cart Header */}
           <div className="p-3.5 sm:p-4 border-b border-line flex items-center justify-between bg-surface/80 h-[56px] shrink-0">
             <div className="flex items-center space-x-2.5 min-w-0">
