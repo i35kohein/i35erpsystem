@@ -99,6 +99,7 @@ import { RecycleBinModal } from './components/common/RecycleBinModal';
 import { CompletedDeviceFollowUpModule } from './components/followup/CompletedDeviceFollowUpModule';
 import { ShopFinancePlModule } from './components/finance/ShopFinancePlModule';
 import { usePriceCatalog } from './hooks/usePriceCatalog';
+import { useIsIpad } from './hooks/useIsIpad';
 import { OfflineSyncStatusBadge } from './components/common/OfflineSyncStatusBadge';
 import { GlobalSearchModal } from './components/common/GlobalSearchModal';
 import { HoverTooltip } from './components/common/HoverTooltip';
@@ -234,6 +235,8 @@ export default function App() {
   const priceCatalog = usePriceCatalog(systemSettings.currencySymbol, (newSymbol) => {
     handleUpdateSettings({ ...systemSettings, currencySymbol: newSymbol });
   });
+  // iPad gets the clean UI (filters in drawer, minimal toolbars); desktops keep the original layout.
+  const isIpad = useIsIpad();
 
   // Inventory Categories are independent from the Price List categories.
   const inventoryCategories = systemSettings.inventoryCategories || [];
@@ -1792,7 +1795,7 @@ export default function App() {
             {/* Dynamic Filters depending on Active Tab */}
             {activeTab === 'intake' && (
               <>
-                <div className="hidden">
+                <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
                 {/* Status Dropdown */}
                 <CustomDropdownMenu
                   value={statusFilter}
@@ -1821,7 +1824,7 @@ export default function App() {
                 ref={filtersTriggerRef}
                 type="button"
                 onClick={() => setIsFilterDrawerOpen(true)}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand transition-all cursor-pointer relative shrink-0"
+                className={`${isIpad ? 'inline-flex h-10 w-10' : 'lg:hidden inline-flex h-8 w-8'} items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand transition-all cursor-pointer relative shrink-0`}
                 title="Open filters"
                 aria-label="Open filters"
               >
@@ -1836,7 +1839,7 @@ export default function App() {
 
             {activeTab === 'pipeline' && (
               <>
-                <div className="hidden">
+                <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
                 <button
                   type="button"
                   onClick={() => setShowBottlenecksOnly(!showBottlenecksOnly)}
@@ -1901,7 +1904,8 @@ export default function App() {
 
             {activeTab === 'dashboard' && (
               <>
-                <div className="hidden lg:flex items-center gap-2">
+                <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
+                {!isIpad && <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />}
                 <button
                   type="button"
                   onClick={() => setIsAiAssistantOpen(true)}
@@ -1917,7 +1921,7 @@ export default function App() {
 
             {activeTab === 'inventory' && (
               <>
-                <div className="hidden">
+                <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
                 <CustomDropdownMenu
                   value={categoryFilter}
                   onChange={(val) => setCategoryFilter(val)}
@@ -1951,7 +1955,7 @@ export default function App() {
 
             {activeTab === 'pos' && (
               <>
-                <div className="hidden">
+                <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
                 <CustomDropdownMenu
                   value={statusFilter}
                   onChange={(val) => setStatusFilter(val)}
@@ -1970,7 +1974,7 @@ export default function App() {
 
             {activeTab === 'crm' && (
               <>
-                <div className="hidden">
+                <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
                 <CustomDropdownMenu
                   value={customerTypeFilter}
                   onChange={(val) => setCustomerTypeFilter(val)}
@@ -1990,7 +1994,7 @@ export default function App() {
 
             {activeTab === 'suppliers' && (
               <>
-                <div className="hidden">
+                <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
                 <CustomDropdownMenu
                   value={statusFilter}
                   onChange={(val) => setStatusFilter(val)}
@@ -2011,7 +2015,7 @@ export default function App() {
 
             {activeTab === 'qa' && (
               <>
-                <div className="hidden">
+                <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
                 <CustomDropdownMenu
                   value={statusFilter}
                   onChange={(val) => setStatusFilter(val)}
@@ -2028,14 +2032,16 @@ export default function App() {
             )}
 
             {activeTab === 'finance' && (
-              <div className="hidden" />
+              <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
+                <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
+              </div>
             )}
 
             {/* Quick Access Recycle Bin Button (Only shown in Work Intake & Status Pipeline) */}
             {(activeTab === 'intake' || activeTab === 'pipeline') && (
               <button
                 onClick={() => setIsRecycleBinOpen(true)}
-                className={`hidden items-center space-x-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all active:scale-95 cursor-pointer shrink-0 ${
+                className={`${isIpad ? 'hidden' : 'hidden lg:flex'} items-center space-x-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all active:scale-95 cursor-pointer shrink-0 ${
                   archivedWorkOrders.length > 0
                     ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200 shadow-2xs'
                     : 'bg-surface hover:bg-line text-ink border-line'
@@ -2071,8 +2077,8 @@ export default function App() {
               </button>
             ) : null}
 
-            {/* Live Supabase connection indicator */}
-            <OfflineSyncStatusBadge />
+            {/* Live Supabase connection indicator — desktop only; hidden on iPad (declutter) */}
+            {!isIpad && <OfflineSyncStatusBadge />}
           </div>
         </header>
 
@@ -2461,6 +2467,7 @@ export default function App() {
           setShowNeedsDiagOnly(false);
         }}
         resetDisabled={getActiveFilterCount(activeTab) === 0}
+        alwaysVisible={isIpad}
         title={`${activeTab === 'pipeline' ? 'Pipeline' : activeTab === 'pos' ? 'POS' : activeTab === 'crm' ? 'CRM' : activeTab === 'inventory' ? 'Inventory' : activeTab === 'suppliers' ? 'Suppliers' : activeTab === 'qa' ? 'QA' : activeTab === 'finance' ? 'Finance' : activeTab === 'dashboard' ? 'Dashboard' : 'Intake'} Filters`}
       >
         {renderMobileFilters(activeTab)}

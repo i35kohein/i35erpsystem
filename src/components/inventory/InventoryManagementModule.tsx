@@ -49,6 +49,7 @@ import { PartItem, PartQualityTier, Supplier, SystemSettings, RmaItem } from '..
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
 import { getAvailableColorsForModel, getRealisticColorStyle } from '../intake/deviceData';
+import { useIsIpad } from '../../hooks/useIsIpad';
 import { toast } from '../../lib/toast';
 import { sortModelsNewestFirst, compareModelsNewestFirst } from '../../utils/modelSort';
 import JsBarcode from 'jsbarcode';
@@ -169,6 +170,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   setShowAddModal: propSetShowAddModal,
 }) => {
   const [localQuality, setLocalQuality] = useState<string>('ALL');
+  const isIpad = useIsIpad();
   const [localCategory, setLocalCategory] = useState<string>('ALL');
   const [localModelFilter, setLocalModelFilter] = useState<string>('ALL');
   // Controlled by App (filter drawer) when provided; falls back to local state.
@@ -1024,8 +1026,21 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
   return (
     <div className="space-y-3">
-      {/* Module Toolbar — title removed (topbar covers it); filters live in the drawer */}
+      {/* Module Toolbar — iPad: title hidden (topbar covers it) + filters in drawer.
+          Desktop: original layout (title + inline filter dropdowns). */}
       <div className="module-toolbar overflow-visible bg-white p-3 rounded-xl border border-line shadow-xs flex flex-col lg:flex-row lg:items-center gap-2">
+        {!isIpad && (
+          <div className="module-subheader lg:shrink-0">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 rounded-lg bg-brand text-white flex items-center justify-center font-bold shadow-2xs">
+                <Boxes className="w-4 h-4" />
+              </div>
+              <div>
+                <h1 className="text-base font-black text-ink tracking-tight">Parts Inventory</h1>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Right cluster — one line on md+ */}
         <div className="flex flex-col md:flex-row md:items-center gap-2 w-full lg:w-auto lg:ml-auto min-w-0">
@@ -1069,6 +1084,61 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             </button>
           </div>
 
+          {/* Filters — desktop only (iPad: side drawer) */}
+          {!isIpad && (
+            <div className="hidden md:flex items-stretch md:items-center gap-1.5 md:shrink-0">
+              <div className="flex h-9 lg:h-8 items-center gap-1 rounded-lg bg-surface p-1 flex-1 min-w-0 md:flex-none">
+                <div className="flex items-center gap-1 w-full">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white text-brand">
+                    <Smartphone className="h-3 w-3" />
+                  </span>
+                  <CustomDropdownMenu
+                    value={selectedModelFilter}
+                    onChange={setSelectedModelFilter}
+                    options={modelFilterOptions}
+                    className="min-w-0"
+                    buttonClassName="min-w-[110px] lg:min-w-[130px] border-0 bg-transparent hover:bg-white"
+                    size="sm"
+                    menuAlign="group-left"
+                  />
+                </div>
+              </div>
+
+              <div className="flex h-9 lg:h-8 items-center gap-1 rounded-lg bg-surface p-1 flex-1 min-w-0 md:flex-none">
+                <div className="flex items-center gap-1 w-full">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white text-brand">
+                    <Layers className="h-3 w-3" />
+                  </span>
+                  <CustomDropdownMenu
+                    value={selectedCategory}
+                    onChange={setSelectedCategory}
+                    options={categoryFilterOptions}
+                    className="min-w-0"
+                    buttonClassName="min-w-[110px] lg:min-w-[130px] border-0 bg-transparent hover:bg-white"
+                    size="sm"
+                    menuAlign="group-left"
+                  />
+                </div>
+              </div>
+
+              <div className="flex h-9 lg:h-8 items-center gap-1 rounded-lg bg-surface p-1 flex-1 min-w-0 md:flex-none">
+                <div className="flex items-center gap-1 w-full">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white text-brand">
+                    <Filter className="h-3 w-3" />
+                  </span>
+                  <CustomDropdownMenu
+                    value={selectedQuality}
+                    onChange={setSelectedQuality}
+                    options={tierFilterOptions}
+                    className="min-w-0"
+                    buttonClassName="min-w-[110px] lg:min-w-[120px] border-0 bg-transparent hover:bg-white"
+                    size="sm"
+                    menuAlign="group-left"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
           {viewMode === 'stock' && (
             <div className={`grid items-center gap-1 w-full md:flex md:w-auto md:ml-auto md:shrink-0 md:pl-1 ${inlineEditMode ? 'grid-cols-3' : 'grid-cols-5'}`}>

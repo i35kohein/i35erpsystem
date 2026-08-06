@@ -12,6 +12,8 @@ interface RightFilterDrawerProps {
   resetDisabled?: boolean;
   /** Button that opened the drawer — focus returns here on close */
   triggerRef?: React.RefObject<HTMLElement | null>;
+  /** iPad: the drawer is the only filter surface, so it must open at desktop widths too */
+  alwaysVisible?: boolean;
 }
 
 /**
@@ -27,6 +29,7 @@ export const RightFilterDrawer: React.FC<RightFilterDrawerProps> = ({
   onReset,
   resetDisabled,
   triggerRef,
+  alwaysVisible = false,
 }) => {
   const panelRef = useRef<HTMLDivElement | null>(null);
   const titleId = useRef(`filter-drawer-title-${Math.random().toString(36).slice(2, 8)}`);
@@ -75,7 +78,7 @@ export const RightFilterDrawer: React.FC<RightFilterDrawerProps> = ({
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-[80] ${open ? '' : 'pointer-events-none invisible'}`}
+      className={`fixed inset-0 z-[80] ${alwaysVisible ? '' : 'lg:hidden'} ${open ? '' : 'pointer-events-none invisible'}`}
       aria-hidden={!open}
     >
       {/* Backdrop */}
