@@ -129,7 +129,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
             </span>
             <h2 className="whitespace-nowrap text-sm font-black text-[var(--text-main)]">Ticket Details</h2>
             <span className="h-4 w-px bg-[var(--border)]" />
-            <span className="inline-flex min-w-0 items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--bg)] px-2.5 py-1 font-mono text-[11px] font-black text-[var(--primary)]">
+            <span className="inline-flex min-w-0 items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--bg)] px-2.5 py-1 font-mono text-xs font-black text-[var(--primary)]">
               <Hash className="h-3 w-3 shrink-0" />
               <span className="truncate">{workOrder.orderNumber}</span>
             </span>
@@ -211,7 +211,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
           <button
             type="button"
             onClick={() => setActiveTab('details')}
-            className={`inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-[11px] font-extrabold transition-colors ${
+            className={`inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-xs font-extrabold transition-colors ${
               activeTab === 'details'
                 ? 'bg-[var(--card-bg)] text-[var(--primary)] shadow-sm ring-1 ring-[var(--border)]'
                 : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
@@ -223,7 +223,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
           <button
             type="button"
             onClick={() => setActiveTab('log')}
-            className={`inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-[11px] font-extrabold transition-colors ${
+            className={`inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-xs font-extrabold transition-colors ${
               activeTab === 'log'
                 ? 'bg-[var(--card-bg)] text-[var(--primary)] shadow-sm ring-1 ring-[var(--border)]'
                 : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
@@ -251,7 +251,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                 </div>
                 <div className="mt-2 rounded-md border border-[var(--border)] bg-[var(--card-bg)] px-2.5 py-2">
                   <p className="text-[9px] font-black uppercase tracking-wider text-[var(--text-muted)]">Repair Category</p>
-                  <p className="mt-0.5 text-[11px] font-bold leading-snug text-[var(--text-main)]">
+                  <p className="mt-0.5 text-xs font-bold leading-snug text-[var(--text-main)]">
                     {repairCategoryLabel}
                   </p>
                 </div>
@@ -260,7 +260,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                   style={{ background: deviceColor.gradient }}
                   aria-label={`${workOrder.deviceColor || 'Standard'} device color`}
                 />
-                <div className="mt-1.5 flex items-center gap-1.5 text-[10px] font-bold text-[var(--text-muted)]">
+                <div className="mt-1.5 flex items-center gap-1.5 text-xs font-bold text-[var(--text-muted)]">
                   <span
                     className={`h-2 w-2 shrink-0 rounded-sm border border-white shadow-sm ${deviceColor.border}`}
                     style={{ background: deviceColor.gradient }}
@@ -323,7 +323,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
             <section className="rounded-lg border border-[var(--border)] bg-[var(--bg)] p-4">
               <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)] pb-2.5">
                 <span className="text-xs font-black text-[var(--text-main)]">21-Point Hardware Diagnostic Comparison</span>
-                <span className="rounded-md border border-[var(--border)] bg-[var(--card-bg)] px-2 py-0.5 text-[10px] font-extrabold text-[var(--text-muted)]">
+                <span className="rounded-md border border-[var(--border)] bg-[var(--card-bg)] px-2 py-0.5 text-xs font-extrabold text-[var(--text-muted)]">
                   {diagnosticRows.length} checks
                 </span>
               </div>
@@ -348,19 +348,19 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                         key={beforeItem.id || beforeItem.name}
                         className={`grid grid-cols-[24px_minmax(0,1fr)_auto_auto] items-baseline gap-x-3 px-3 py-1.5 ${hasFail ? 'bg-rose-50/50' : ''}`}
                       >
-                        <span className="font-mono text-[10px] text-[var(--text-muted)]">{index + 1}</span>
+                        <span className="font-mono text-xs text-[var(--text-muted)]">{index + 1}</span>
                         <span className="min-w-0 text-xs font-semibold text-[var(--text-main)]">
                           {beforeItem.name}
                           {(afterItem.note || beforeItem.note) && (
-                            <span className="ml-1.5 text-[10px] font-normal italic text-[var(--text-muted)]">
+                            <span className="ml-1.5 text-xs font-normal italic text-[var(--text-muted)]">
                               — {afterItem.note || beforeItem.note}
                             </span>
                           )}
                         </span>
-                        <span className={`w-14 text-right text-[11px] font-bold uppercase ${statusText(beforeItem.status)}`}>
+                        <span className={`w-14 text-right text-xs font-bold uppercase ${statusText(beforeItem.status)}`}>
                           {beforeItem.status}
                         </span>
-                        <span className={`w-14 text-right text-[11px] font-bold uppercase ${statusText(afterItem.status)}`}>
+                        <span className={`w-14 text-right text-xs font-bold uppercase ${statusText(afterItem.status)}`}>
                           {afterItem.status}
                         </span>
                       </div>
@@ -380,11 +380,11 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
               <div className="flex items-center justify-between gap-3 border-b border-[var(--border)] px-4 py-3">
                 <div>
                   <h3 className="text-sm font-black text-[var(--text-main)]">Repair Activity Log</h3>
-                  <p className="mt-0.5 text-[10px] font-medium text-[var(--text-muted)]">
+                  <p className="mt-0.5 text-xs font-medium text-[var(--text-muted)]">
                     Status changes and updates recorded from the repair pipeline.
                   </p>
                 </div>
-                <span className="shrink-0 text-[10px] font-extrabold text-[var(--text-muted)]">
+                <span className="shrink-0 text-xs font-extrabold text-[var(--text-muted)]">
                   {repairLogs.length} {repairLogs.length === 1 ? 'event' : 'events'}
                 </span>
               </div>
@@ -409,7 +409,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                               {log.statusChange}
                             </span>
                           )}
-                          <time className="ml-auto text-[10px] font-semibold text-[var(--text-muted)]">{log.timestamp}</time>
+                          <time className="ml-auto text-xs font-semibold text-[var(--text-muted)]">{log.timestamp}</time>
                         </div>
                         <p className="mt-1.5 whitespace-pre-wrap text-xs font-medium leading-relaxed text-[var(--text-secondary)]">
                           {log.note}

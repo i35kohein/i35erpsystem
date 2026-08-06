@@ -19,7 +19,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         <button
           type="button"
           onClick={() => setLanguage('en')}
-          className={`px-2 py-1 rounded-lg text-[11px] font-extrabold transition-all cursor-pointer ${
+          className={`px-2 py-1 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
             language === 'en'
               ? 'bg-brand text-white shadow-xs'
               : 'text-ink hover:bg-slate-200/60'
@@ -31,7 +31,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         <button
           type="button"
           onClick={() => setLanguage('mm')}
-          className={`px-2 py-1 rounded-lg text-[11px] font-extrabold transition-all cursor-pointer ${
+          className={`px-2 py-1 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
             language === 'mm'
               ? 'bg-brand text-white shadow-xs'
               : 'text-ink hover:bg-slate-200/60'
@@ -46,7 +46,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 
   return (
     <div className={`flex items-center space-x-1 bg-slate-100 p-1 rounded-xl border border-slate-200/80 ${className}`}>
-      <div className="flex items-center px-2 py-0.5 text-slate-500 font-bold text-[10px] space-x-1">
+      <div className="flex items-center px-2 py-0.5 text-slate-500 font-bold text-xs space-x-1">
         <Languages className="w-3.5 h-3.5 text-brand" />
       </div>
       <button

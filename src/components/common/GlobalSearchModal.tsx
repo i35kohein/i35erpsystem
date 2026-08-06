@@ -138,7 +138,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
           )}
           {grouped.map((g) => (
             <div key={g.kind} className="mb-1">
-              <div className="px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-muted">
+              <div className="px-3 py-1.5 text-xs font-black uppercase tracking-wider text-muted">
                 {g.meta.label} · {g.items.length}
               </div>
               {g.items.map((item) => {
@@ -158,7 +158,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-xs font-bold text-ink">{item.label}</span>
-                      <span className="block truncate text-[10px] text-muted">{item.sub}</span>
+                      <span className="block truncate text-xs text-muted">{item.sub}</span>
                     </span>
                     {active && <CornerDownLeft className="h-3.5 w-3.5 shrink-0 text-brand" />}
                   </button>

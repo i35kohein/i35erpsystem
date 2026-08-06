@@ -572,7 +572,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                               setIsRenamingModel(true);
                               setRenameModelInput(selectedModel);
                             }}
-                            className="text-[11px] font-bold text-brand hover:underline flex items-center space-x-1"
+                            className="text-xs font-bold text-brand hover:underline flex items-center space-x-1"
                           >
                             <Edit3 className="w-3 h-3" />
                             <span>Rename Model</span>
@@ -582,7 +582,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                           <button
                             type="button"
                             onClick={handleDeleteModelClick}
-                            className="text-[11px] font-bold text-red-600 hover:underline flex items-center space-x-1"
+                            className="text-xs font-bold text-red-600 hover:underline flex items-center space-x-1"
                           >
                             <Trash2 className="w-3 h-3" />
                             <span>Delete</span>
@@ -634,7 +634,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
 
                   {/* Add Model Button / Quick Switch */}
                   <div className="text-right">
-                    <span className="text-[11px] font-bold text-muted block mb-1">
+                    <span className="text-xs font-bold text-muted block mb-1">
                       Current Folder: <span className="text-ink font-extrabold">{folders.find((f) => f.id === getModelFolderId(selectedModel))?.name || 'General'}</span>
                     </span>
                   </div>
@@ -644,7 +644,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                 <div className="pt-3 border-t border-line">
                   <form onSubmit={handleAddNewModel} className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 items-end">
                     <div>
-                      <label className="text-[11px] font-extrabold text-ink block mb-1">New Model Name</label>
+                      <label className="text-xs font-extrabold text-ink block mb-1">New Model Name</label>
                       <input
                         type="text"
                         placeholder="e.g. iPhone 16 Pro, iPad Air 6"
@@ -655,7 +655,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                     </div>
 
                     <div>
-                      <label className="text-[11px] font-extrabold text-ink block mb-1">Copy Prices From (Optional)</label>
+                      <label className="text-xs font-extrabold text-ink block mb-1">Copy Prices From (Optional)</label>
                       <select
                         value={cloneModelSource}
                         onChange={(e) => setCloneModelSource(e.target.value)}
@@ -688,7 +688,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
               <div className="border border-line rounded-xl overflow-hidden bg-white shadow-2xs">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-surface border-b border-line text-[11px] font-extrabold text-muted uppercase tracking-wider">
+                    <tr className="bg-surface border-b border-line text-xs font-extrabold text-muted uppercase tracking-wider">
                       <th className="py-3 px-4 w-1/3">Repair Category / Component</th>
                       <th className="py-3 px-4 w-1/3">Price ({currencySymbol})</th>
                       <th className="py-3 px-4 w-1/3">Warranty Term</th>
@@ -706,7 +706,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                               <span className="w-2 h-2 rounded-full bg-brand" />
                               <span>{cat.label}</span>
                             </div>
-                            <span className="text-[10px] text-muted font-mono block pl-4">
+                            <span className="text-xs text-muted font-mono block pl-4">
                               {cat.group} • Key: {cat.key}
                             </span>
                           </td>
@@ -761,7 +761,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                 {/* Add New Custom Category Form */}
                 <form onSubmit={handleAddCategorySubmit} className="pt-3 border-t border-line grid grid-cols-1 sm:grid-cols-4 gap-2.5 items-end">
                   <div>
-                    <label className="text-[11px] font-extrabold text-ink block mb-1">Category Key (ID)</label>
+                    <label className="text-xs font-extrabold text-ink block mb-1">Category Key (ID)</label>
                     <input
                       type="text"
                       placeholder="e.g. Camera_Lens_Glass"
@@ -771,7 +771,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-extrabold text-ink block mb-1">Display Name / Label</label>
+                    <label className="text-xs font-extrabold text-ink block mb-1">Display Name / Label</label>
                     <input
                       type="text"
                       placeholder="e.g. Rear Camera Lens Glass"
@@ -781,7 +781,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-extrabold text-ink block mb-1">Group</label>
+                    <label className="text-xs font-extrabold text-ink block mb-1">Group</label>
                     <select
                       value={newCategoryGroup}
                       onChange={(e) => setNewCategoryGroup(e.target.value as any)}
@@ -809,7 +809,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
               <div className="border border-line rounded-xl overflow-hidden bg-white shadow-2xs">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-surface border-b border-line text-[11px] font-extrabold text-muted uppercase tracking-wider">
+                    <tr className="bg-surface border-b border-line text-xs font-extrabold text-muted uppercase tracking-wider">
                       <th className="py-3 px-4 w-1/4">Internal Key</th>
                       <th className="py-3 px-4 w-2/5">Global Display Label (Name)</th>
                       <th className="py-3 px-4 w-1/5">Group</th>
@@ -854,7 +854,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                             )}
                           </td>
                           <td className="py-2.5 px-4">
-                            <span className="px-2 py-0.5 rounded-full bg-surface text-muted border border-line font-semibold text-[10px]">
+                            <span className="px-2 py-0.5 rounded-full bg-surface text-muted border border-line font-semibold text-xs">
                               {cat.group}
                             </span>
                           </td>
@@ -932,7 +932,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                 {addFolder && (
                   <form onSubmit={handleAddFolderSubmit} className="pt-3 border-t border-line grid grid-cols-1 sm:grid-cols-3 gap-2.5 items-end">
                     <div>
-                      <label className="text-[11px] font-extrabold text-ink block mb-1">New Folder Name</label>
+                      <label className="text-xs font-extrabold text-ink block mb-1">New Folder Name</label>
                       <input
                         type="text"
                         placeholder="e.g. Google Pixel Series, Samsung Galaxy"
@@ -942,7 +942,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                       />
                     </div>
                     <div>
-                      <label className="text-[11px] font-extrabold text-ink block mb-1">Device Family</label>
+                      <label className="text-xs font-extrabold text-ink block mb-1">Device Family</label>
                       <select
                         value={newFolderFamily}
                         onChange={(e) => setNewFolderFamily(e.target.value as any)}
@@ -1025,12 +1025,12 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                                   <Edit3 className="w-3 h-3" />
                                 </button>
                               )}
-                              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-surface text-muted border border-line">
+                              <span className="text-xs font-extrabold px-2 py-0.5 rounded-full bg-surface text-muted border border-line">
                                 {modelCount} models
                               </span>
                             </div>
                           )}
-                          <span className="text-[10px] font-bold text-muted uppercase block mt-0.5">
+                          <span className="text-xs font-bold text-muted uppercase block mt-0.5">
                             Category: {folder.family}
                           </span>
                         </div>
@@ -1075,7 +1075,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                     <TrendingUp className="w-4 h-4 text-brand" />
                     <span>Global Bulk Price Markup & Adjustment Tool</span>
                   </h3>
-                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-brand border border-blue-200">
+                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-brand border border-blue-200">
                     Apply to All or Selected Folder
                   </span>
                 </div>
@@ -1223,7 +1223,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                       }`}
                     >
                       <div className="text-base font-black font-mono">{curr.sym}</div>
-                      <div className="text-[11px]">{curr.label}</div>
+                      <div className="text-xs">{curr.label}</div>
                     </button>
                   ))}
                 </div>

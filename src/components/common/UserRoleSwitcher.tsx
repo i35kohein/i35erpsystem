@@ -100,10 +100,10 @@ export const UserRoleSwitcher: React.FC<UserRoleSwitcherProps> = ({
             compact ? 'left-full bottom-0 ml-2' : 'left-0 bottom-full mb-2'
           }`}>
             <div className="px-3 py-2 border-b border-line">
-              <span className="text-[10px] font-extrabold text-muted uppercase tracking-wider block">
+              <span className="text-xs font-extrabold text-muted uppercase tracking-wider block">
                 Switch User / Operating Role
               </span>
-              <p className="text-[11px] text-ink font-medium mt-0.5">
+              <p className="text-xs text-ink font-medium mt-0.5">
                 Current: <strong className="text-brand">{currentUser.name}</strong> ({currentUser.role})
               </p>
             </div>
@@ -139,7 +139,7 @@ export const UserRoleSwitcher: React.FC<UserRoleSwitcherProps> = ({
                             {usr.role}
                           </span>
                           {usr.role === 'Technician' && usr.technicianName && (
-                            <span className="text-[10px] text-muted truncate">
+                            <span className="text-xs text-muted truncate">
                               • {usr.technicianName}
                             </span>
                           )}

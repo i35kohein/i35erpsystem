@@ -182,7 +182,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
                   </div>
 
                   {wo.archivedAt && (
-                    <div className="text-[11px] text-rose-500 font-medium">
+                    <div className="text-xs text-rose-500 font-medium">
                       Archived on {new Date(wo.archivedAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
                     </div>
                   )}

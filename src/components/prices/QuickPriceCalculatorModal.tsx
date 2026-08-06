@@ -304,7 +304,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                   <h2 className="font-extrabold text-base sm:text-lg text-ink">
                     Quick Price Calculator & Estimate Generator
                   </h2>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                  <span className="px-2 py-0.5 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">
                     On-the-Spot Customer Quote
                   </span>
                 </div>
@@ -394,7 +394,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                   <ListChecks className="w-3.5 h-3.5 text-brand" />
                   <span>Available Repair Services for {selectedDevice}</span>
                 </h3>
-                <span className="text-[11px] font-bold text-muted">
+                <span className="text-xs font-bold text-muted">
                   {filteredServices.length} priced services
                 </span>
               </div>
@@ -403,7 +403,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                 <div className="py-12 text-center bg-surface rounded-2xl border border-line space-y-2">
                   <ListChecks className="w-8 h-8 text-muted mx-auto opacity-40" />
                   <p className="text-xs font-bold text-ink">No priced services match filter</p>
-                  <p className="text-[11px] text-muted">
+                  <p className="text-xs text-muted">
                     Try clearing search or picking another device model.
                   </p>
                 </div>
@@ -492,7 +492,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                     <div className="py-6 text-center text-muted space-y-1">
                       <Calculator className="w-7 h-7 mx-auto opacity-30 text-brand" />
                       <p className="text-xs font-bold">No services selected yet</p>
-                      <p className="text-[11px]">Click service cards on the left to add to estimate</p>
+                      <p className="text-xs">Click service cards on the left to add to estimate</p>
                     </div>
                   ) : (
                     selectedList.map((item) => (
@@ -501,7 +501,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                         className="bg-white px-2.5 py-1.5 rounded-xl border border-line flex items-center justify-between text-xs shadow-2xs group hover:border-brand/40 transition-all"
                       >
                         <div className="min-w-0 pr-2 flex items-center space-x-1.5">
-                          <span className="font-extrabold text-[11px] text-ink truncate leading-tight min-w-0">
+                          <span className="font-extrabold text-xs text-ink truncate leading-tight min-w-0">
                             {item.label}
                           </span>
                           <span className="text-[9px] font-extrabold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-200 flex items-center space-x-0.5 shrink-0">
@@ -510,7 +510,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                           </span>
                         </div>
                         <div className="flex items-center space-x-2 shrink-0">
-                          <span className="font-black font-mono text-[11px] text-brand">
+                          <span className="font-black font-mono text-xs text-brand">
                             {formatPrice(item.price)}
                           </span>
                           <button
@@ -531,7 +531,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
 
                 {/* Quick Bundle Discount Buttons */}
                 <div className="space-y-1.5 pt-2 border-t border-line">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted block">
+                  <span className="text-xs font-extrabold uppercase tracking-wider text-muted block">
                     Quick Bundle Discounts
                   </span>
                   <div className="grid grid-cols-3 gap-1.5 text-xs">
@@ -558,7 +558,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                             setGlobalDiscountPct(disc.pct);
                             setFlatDiscountAmount(disc.flat);
                           }}
-                          className={`py-1.5 px-2 rounded-xl font-bold text-[11px] transition-all cursor-pointer border ${
+                          className={`py-1.5 px-2 rounded-xl font-bold text-xs transition-all cursor-pointer border ${
                             isSelected
                               ? 'bg-brand text-white border-brand shadow-2xs'
                               : 'bg-white text-ink border-line hover:border-brand'
@@ -585,7 +585,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
 
                   <div className="flex items-center space-x-1 text-muted">
                     <Clock className="w-3.5 h-3.5 text-brand" />
-                    <span className="font-extrabold text-[11px]">Est. ~{estimatedTime}</span>
+                    <span className="font-extrabold text-xs">Est. ~{estimatedTime}</span>
                   </div>
                 </div>
 
@@ -603,7 +603,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                         -{formatPrice(totalDiscount)}
                       </span>
                     ) : (
-                      <span className="font-mono text-muted text-[11px]">0 MMK</span>
+                      <span className="font-mono text-muted text-xs">0 MMK</span>
                     )}
                   </div>
 
@@ -619,7 +619,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                       <span className="text-xs font-black uppercase tracking-wider text-ink block">
                         Grand Total
                       </span>
-                      <span className="text-[10px] text-muted block">
+                      <span className="text-xs text-muted block">
                         Required 50% Deposit: {formatPrice(requiredDeposit)}
                       </span>
                     </div>

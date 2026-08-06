@@ -659,7 +659,7 @@ export default function App() {
         ].filter(Boolean) as Array<{ key: string; label: string; onClear: () => void }>)
       : [];
     const selectCls = "w-full rounded-xl border border-line bg-white px-3 py-2.5 text-xs font-extrabold text-ink focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none";
-    const labelCls = "mb-1 block text-[10px] font-extrabold uppercase tracking-wider text-muted";
+    const labelCls = "mb-1 block text-xs font-extrabold uppercase tracking-wider text-muted";
     const rowCls = "flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-xs font-extrabold transition-colors cursor-pointer";
     return (
       <div className="space-y-3">
@@ -669,7 +669,7 @@ export default function App() {
             <ActiveFilterChips chips={drawerChips} />
           </div>
         ) : (
-          <p className="rounded-xl border border-dashed border-line bg-surface px-3 py-2 text-center text-[10px] font-bold text-muted">
+          <p className="rounded-xl border border-dashed border-line bg-surface px-3 py-2 text-center text-xs font-bold text-muted">
             No active filters — pick options below to filter the list
           </p>
         )}
@@ -684,7 +684,7 @@ export default function App() {
               <Timer className={`w-4 h-4 ${showBottlenecksOnly ? 'text-white' : 'text-red-600'}`} />
               Bottlenecks (&gt;48h)
             </span>
-            <span className={`text-[10px] ${showBottlenecksOnly ? 'text-white/80' : 'text-muted'}`}>{showBottlenecksOnly ? 'On' : 'Off'}</span>
+            <span className={`text-xs ${showBottlenecksOnly ? 'text-white/80' : 'text-muted'}`}>{showBottlenecksOnly ? 'On' : 'Off'}</span>
           </button>
 
           <button
@@ -701,7 +701,7 @@ export default function App() {
                 </span>
               )}
             </span>
-            <span className={`text-[10px] ${showAllStages ? 'text-white/80' : 'text-muted'}`}>{showAllStages ? 'On' : 'Off'}</span>
+            <span className={`text-xs ${showAllStages ? 'text-white/80' : 'text-muted'}`}>{showAllStages ? 'On' : 'Off'}</span>
           </button>
 
           <button
@@ -718,7 +718,7 @@ export default function App() {
                 </span>
               )}
             </span>
-            <span className={`text-[10px] ${showBeforeNeedsDiagOnly ? 'text-white/80' : 'text-muted'}`}>{showBeforeNeedsDiagOnly ? 'On' : 'Off'}</span>
+            <span className={`text-xs ${showBeforeNeedsDiagOnly ? 'text-white/80' : 'text-muted'}`}>{showBeforeNeedsDiagOnly ? 'On' : 'Off'}</span>
           </button>
 
           <button
@@ -735,7 +735,7 @@ export default function App() {
                 </span>
               )}
             </span>
-            <span className={`text-[10px] ${showNeedsDiagOnly ? 'text-white/80' : 'text-muted'}`}>{showNeedsDiagOnly ? 'On' : 'Off'}</span>
+            <span className={`text-xs ${showNeedsDiagOnly ? 'text-white/80' : 'text-muted'}`}>{showNeedsDiagOnly ? 'On' : 'Off'}</span>
           </button>
           </>
         )}
@@ -836,7 +836,7 @@ export default function App() {
                   <Edit2 className={`w-4 h-4 ${inventoryEditMode ? 'text-white' : 'text-amber-600'}`} />
                   Edit Rows
                 </span>
-                <span className={`text-[10px] ${inventoryEditMode ? 'text-white/80' : 'text-muted'}`}>{inventoryEditMode ? 'On' : 'Off'}</span>
+                <span className={`text-xs ${inventoryEditMode ? 'text-white/80' : 'text-muted'}`}>{inventoryEditMode ? 'On' : 'Off'}</span>
               </button>
             </div>
             <div>
@@ -943,7 +943,7 @@ export default function App() {
               Recycle Bin
             </span>
             {archivedWorkOrders.length > 0 && (
-              <span className="rounded-full bg-rose-600 px-2 py-0.5 text-[10px] font-black text-white">{archivedWorkOrders.length}</span>
+              <span className="rounded-full bg-rose-600 px-2 py-0.5 text-xs font-black text-white">{archivedWorkOrders.length}</span>
             )}
           </button>
         )}
@@ -1695,7 +1695,7 @@ export default function App() {
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted hover:text-ink"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-muted hover:text-ink"
                     >
                       ×
                     </button>
@@ -1844,7 +1844,7 @@ export default function App() {
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted hover:text-ink"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-muted hover:text-ink"
                   >
                     ×
                   </button>
@@ -2112,7 +2112,7 @@ export default function App() {
                 <Trash2 className={`w-3.5 h-3.5 ${archivedWorkOrders.length > 0 ? 'text-rose-600' : 'text-muted'}`} />
                 <span className="hidden sm:inline">{t('recycleBin')}</span>
                 {archivedWorkOrders.length > 0 && (
-                  <span className="px-1.5 py-0.2 rounded-full bg-rose-600 text-white text-[10px] font-bold">
+                  <span className="px-1.5 py-0.2 rounded-full bg-rose-600 text-white text-xs font-bold">
                     {archivedWorkOrders.length}
                   </span>
                 )}
@@ -2147,7 +2147,7 @@ export default function App() {
                   <button
                     type="button"
                     onClick={() => inventoryScanSubmitRef.current?.()}
-                    className="h-10 rounded-lg bg-brand px-2.5 text-[11px] font-extrabold text-white transition hover:bg-brand-deep shrink-0"
+                    className="h-10 rounded-lg bg-brand px-2.5 text-xs font-extrabold text-white transition hover:bg-brand-deep shrink-0"
                   >
                     Lookup
                   </button>
@@ -2676,9 +2676,9 @@ export default function App() {
               </div>
               <div className="flex-1 pr-2">
                 {toast.title && <div className="font-bold text-sm leading-tight mb-0.5">{toast.title}</div>}
-                <div className="text-[11px] text-slate-300 leading-snug">{toast.message}</div>
+                <div className="text-xs text-slate-300 leading-snug">{toast.message}</div>
                 {toast.persistent && (
-                  <div className="mt-2 flex items-center gap-1.5 text-[10px] text-rose-300 font-extrabold bg-rose-950/70 px-2 py-1 rounded-lg border border-rose-500/40">
+                  <div className="mt-2 flex items-center gap-1.5 text-xs text-rose-300 font-extrabold bg-rose-950/70 px-2 py-1 rounded-lg border border-rose-500/40">
                     <AlertTriangle className="w-3.5 h-3.5 text-rose-400 shrink-0 animate-pulse" />
                     <span>Persistent Notice • Non-dismissible until inspection complete</span>
                   </div>

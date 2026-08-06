@@ -36,7 +36,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, settings, isSect
               <div>
                 <div className="flex items-center space-x-2">
                   <h3 className="text-base font-extrabold text-ink">POS & Document Print Layout Settings</h3>
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-brand text-white uppercase tracking-wider">
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-brand text-white uppercase tracking-wider">
                     A4 & 3"x2" Tag Ready
                   </span>
                 </div>
@@ -89,11 +89,11 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, settings, isSect
                 </div>
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Connected Store Branding</span>
+                    <span className="text-xs font-extrabold text-muted uppercase tracking-wider">Connected Store Branding</span>
                     <span className="rounded-full bg-emerald-50 px-1.5 py-0.5 text-[9px] font-extrabold text-emerald-700">Shop Settings source</span>
                   </div>
                   <p className="font-extrabold text-sm text-ink">{formData.shopName || 'AppleRepair Pro'}</p>
-                  <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] text-muted">
+                  <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1.5 text-xs text-muted">
                     {visibleStorePhones.length > 0 && (
                       <span className="inline-flex items-center gap-1">
                         <Phone className="h-3 w-3 shrink-0 text-brand" />
@@ -139,7 +139,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, settings, isSect
                   <FileText className="w-4 h-4 text-brand" />
                   <span>Primary Print Layout Standards</span>
                 </label>
-                <span className="text-[10px] font-bold text-muted">No thermal printer required</span>
+                <span className="text-xs font-bold text-muted">No thermal printer required</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
@@ -157,11 +157,11 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, settings, isSect
                   </div>
                   <div>
                     <span className="font-extrabold text-ink block text-xs">Standard A4 Workshop Sheet</span>
-                    <p className="text-[11px] text-[#526375] mt-1 leading-snug">
+                    <p className="text-xs text-[#526375] mt-1 leading-snug">
                       Itemized job sheets, diagnostic reports, and customer tax invoices on standard A4 paper.
                     </p>
                   </div>
-                  <div className="pt-1 flex items-center space-x-2 text-[10px] font-bold text-brand">
+                  <div className="pt-1 flex items-center space-x-2 text-xs font-bold text-brand">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     <span>Full 21-Point QA & Signatures</span>
                   </div>
@@ -182,11 +182,11 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, settings, isSect
                   </div>
                   <div>
                     <span className="font-extrabold text-ink block text-xs group-hover:text-brand transition-colors">3" × 2" Device Sticker Label</span>
-                    <p className="text-[11px] text-[#7F7F7F] mt-1 leading-snug">
+                    <p className="text-xs text-[#7F7F7F] mt-1 leading-snug">
                       Compact label sticker format with QR code and barcode for physical hardware tagging.
                     </p>
                   </div>
-                  <div className="pt-1 flex items-center space-x-2 text-[10px] font-bold text-slate-600 group-hover:text-brand">
+                  <div className="pt-1 flex items-center space-x-2 text-xs font-bold text-slate-600 group-hover:text-brand">
                     <QrCode className="w-3.5 h-3.5 text-emerald-600" />
                     <span>Scannable IMEI & QR Tracking</span>
                   </div>
@@ -199,7 +199,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, settings, isSect
               <h4 className="text-xs font-black text-ink uppercase tracking-wider">
                 Voucher Text & Disclaimer Customization
               </h4>
-              <p className="text-[11px] text-muted -mt-2">
+              <p className="text-xs text-muted -mt-2">
                 Used by POS receipts and every A4 Device Intake Print Voucher after you save all settings.
               </p>
 
@@ -228,7 +228,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, settings, isSect
                     className="w-full bg-surface text-ink font-bold px-3.5 py-2.5 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand transition-all"
                     placeholder="e.g. Thank you for choosing AppleRepair! All repairs covered by warranty under standard terms."
                   />
-                  <p className="text-[10px] text-muted">Plain text only. Select text in a line (or place the cursor there), then choose its alignment. Line breaks and text size are kept in the A4 print.</p>
+                  <p className="text-xs text-muted">Plain text only. Select text in a line (or place the cursor there), then choose its alignment. Line breaks and text size are kept in the A4 print.</p>
 
                   <div className="flex flex-col gap-1.5 rounded-lg border border-line bg-[#F8F9FA] p-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-1">
@@ -329,7 +329,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, settings, isSect
                 <Printer className="w-4 h-4 text-brand" />
                 <span>A4 Intake Print Voucher & Job Sheet Defaults</span>
               </h4>
-              <p className="text-[11px] text-muted mt-0.5">
+              <p className="text-xs text-muted mt-0.5">
                 Configure the saved defaults used by every Device Intake Print Voucher. Changes apply after you save all settings.
               </p>
             </div>
@@ -395,7 +395,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, settings, isSect
                 />
                 <div>
                   <span className="font-bold text-ink text-xs block">Include 21-Point Diagnostics</span>
-                  <span className="text-[10px] text-muted">Print pre-repair diagnostic inspection grid.</span>
+                  <span className="text-xs text-muted">Print pre-repair diagnostic inspection grid.</span>
                 </div>
               </label>
 
@@ -408,7 +408,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, settings, isSect
                 />
                 <div>
                   <span className="font-bold text-ink text-xs block">Include Service & Price Matrix</span>
-                  <span className="text-[10px] text-muted">Print requested repair charges & subtotal.</span>
+                  <span className="text-xs text-muted">Print requested repair charges & subtotal.</span>
                 </div>
               </label>
 
@@ -421,7 +421,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, settings, isSect
                 />
                 <div>
                   <span className="font-bold text-ink text-xs block">Include Terms & Signatures</span>
-                  <span className="text-[10px] text-muted">Print disclaimer and authorization lines.</span>
+                  <span className="text-xs text-muted">Print disclaimer and authorization lines.</span>
                 </div>
               </label>
             </div>

@@ -967,7 +967,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                           setSettingsDrilledIn(true);
                         }}
                         title={tab.label}
-                        className={`relative flex flex-row md:flex-col items-center justify-start md:justify-center gap-2.5 md:gap-2 px-3 py-2.5 md:px-2 md:py-4 w-full text-left md:text-center text-[11px] md:text-[11px] font-extrabold rounded-xl md:rounded-2xl transition-all cursor-pointer border select-none active:scale-95 shrink-0 ${
+                        className={`relative flex flex-row md:flex-col items-center justify-start md:justify-center gap-2.5 md:gap-2 px-3 py-2.5 md:px-2 md:py-4 w-full text-left md:text-center text-xs md:text-xs font-extrabold rounded-xl md:rounded-2xl transition-all cursor-pointer border select-none active:scale-95 shrink-0 ${
                           isActive
                             ? 'bg-brand text-white border-brand shadow-xs'
                             : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
@@ -1026,7 +1026,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             <span>Back to Settings Menu</span>
           </Button>
           {isDirty && (
-            <span className="flex items-center gap-1.5 text-[10px] font-extrabold text-amber-600">
+            <span className="flex items-center gap-1.5 text-xs font-extrabold text-amber-600">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
               Unsaved changes
             </span>
@@ -1099,7 +1099,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                   <h3 className="font-extrabold text-base text-ink">
                     {editingTech ? 'Edit Technician Record' : 'Add New Technical Staff'}
                   </h3>
-                  <p className="text-[11px] text-muted">
+                  <p className="text-xs text-muted">
                     {editingTech ? 'Update staff details and commission rates' : 'Register a new technician on the roster'}
                   </p>
                 </div>
@@ -1127,7 +1127,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               </div>
 
               <div className="space-y-1.5">
-                <p className="text-[10px] font-black text-muted uppercase tracking-wider">Contact Information</p>
+                <p className="text-xs font-black text-muted uppercase tracking-wider">Contact Information</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="font-bold text-ink block mb-1.5">Email Address</label>
@@ -1154,7 +1154,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               </div>
 
               <div className="space-y-1.5">
-                <p className="text-[10px] font-black text-muted uppercase tracking-wider">Role & Status</p>
+                <p className="text-xs font-black text-muted uppercase tracking-wider">Role & Status</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="font-bold text-ink block mb-1.5">Skill Tier Level</label>
@@ -1200,7 +1200,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               </div>
 
               <div className="space-y-1.5">
-                <p className="text-[10px] font-black text-muted uppercase tracking-wider">Commission Rates</p>
+                <p className="text-xs font-black text-muted uppercase tracking-wider">Commission Rates</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="bg-[#F8F9FA] border border-line rounded-xl p-3">
                     <label className="font-bold text-ink block mb-1.5">Spareparts Change (%)</label>
@@ -1212,7 +1212,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                       max="50"
                       className="w-full h-9 bg-white text-ink font-bold px-3 rounded-lg border border-line-strong focus:outline-none focus:border-brand"
                     />
-                    <p className="text-[10px] text-muted mt-1.5">Standard Modular (parts-swap) jobs</p>
+                    <p className="text-xs text-muted mt-1.5">Standard Modular (parts-swap) jobs</p>
                   </div>
 
                   <div className="bg-[#F8F9FA] border border-line rounded-xl p-3">
@@ -1225,7 +1225,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                       max="50"
                       className="w-full h-9 bg-white text-ink font-bold px-3 rounded-lg border border-line-strong focus:outline-none focus:border-brand"
                     />
-                    <p className="text-[10px] text-muted mt-1.5">Micro-Soldering (board-level) jobs</p>
+                    <p className="text-xs text-muted mt-1.5">Micro-Soldering (board-level) jobs</p>
                   </div>
                 </div>
               </div>

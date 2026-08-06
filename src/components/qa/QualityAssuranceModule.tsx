@@ -230,7 +230,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
         <div className={`space-y-2 rounded-xl border border-line bg-white p-3 md:col-span-3 ${isIpad ? 'md:flex md:flex-col md:min-h-0' : 'md:self-start'}`}>
           <div className="flex items-center justify-between gap-2 border-b border-line pb-2">
             <h2 className="min-w-0 truncate font-bold text-ink text-xs">QA Queue</h2>
-            <span className="shrink-0 text-[10px] font-mono font-bold bg-brand/10 text-brand px-2 py-0.5 rounded-full">
+            <span className="shrink-0 text-xs font-mono font-bold bg-brand/10 text-brand px-2 py-0.5 rounded-full">
               {filteredWorkOrders.length} Pending
             </span>
           </div>
@@ -240,7 +240,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
               <div className="flex flex-1 flex-col items-center justify-center p-6 text-center text-muted space-y-2">
                 <CheckCircle2 className="w-8 h-8 text-success mx-auto opacity-50" />
                 <p className="font-semibold text-xs">No Finished Devices Pending QA Control</p>
-                <p className="text-[11px]">Devices moved to 'Finished' status in the repair pipeline automatically flow into QA Control for final inspection.</p>
+                <p className="text-xs">Devices moved to 'Finished' status in the repair pipeline automatically flow into QA Control for final inspection.</p>
               </div>
             ) : (
               filteredWorkOrders.map((wo) => {
@@ -313,14 +313,14 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                       )}
                     </div>
 
-                    <div className="flex items-center justify-between gap-2 text-[11px] text-muted mt-1">
+                    <div className="flex items-center justify-between gap-2 text-xs text-muted mt-1">
                       <span className="truncate">
                         Cust: {wo.customerName}
                         {wo.depositAmount > 0 && (
                           <span className="text-brand font-bold"> · Deposit {wo.depositAmount.toLocaleString()} MMK</span>
                         )}
                       </span>
-                      <span className="font-mono text-[10px] shrink-0 truncate">
+                      <span className="font-mono text-xs shrink-0 truncate">
                         {(wo.imei || wo.serialNumber) && <>#{wo.imei || wo.serialNumber}</>}
                       </span>
                     </div>
@@ -352,7 +352,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                   <span className="font-mono text-brand font-bold">{selectedWo.orderNumber}</span>
                   <h2 className="text-base font-bold text-ink">{selectedWo.deviceModel} Post-Repair QA Verification</h2>
                   {repairCategorySummary && (
-                    <p className="mt-1 text-[11px] font-semibold text-muted">
+                    <p className="mt-1 text-xs font-semibold text-muted">
                       Repair Category: <span className="text-ink">{repairCategorySummary}</span>
                     </p>
                   )}
@@ -375,21 +375,21 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
               <div className="space-y-2.5 rounded-xl border border-line bg-surface p-3">
                 <div className="flex items-center justify-between border-b border-line pb-2">
                   <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand text-[10px] text-white">7</span>
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand text-xs text-white">7</span>
                     <span>21-Point Post-Repair Hardware Inspection</span>
                   </h3>
                   <div className="flex space-x-2">
                     <button
                       type="button"
                       onClick={handleMarkAllPass}
-                      className="rounded-full bg-success px-3 py-2 min-h-10 text-[11px] font-bold text-white shadow-xs transition-colors hover:bg-[#28A745]"
+                      className="rounded-full bg-success px-3 py-2 min-h-10 text-xs font-bold text-white shadow-xs transition-colors hover:bg-[#28A745]"
                     >
                       Mark All Pass
                     </button>
                     <button
                       type="button"
                       onClick={() => setQaDiagnostics((prev) => prev.map((diagnostic) => ({ ...diagnostic, status: 'N/A' })))}
-                      className="rounded-full border border-line-strong bg-surface px-3 py-2 min-h-10 text-[11px] font-bold text-ink shadow-xs transition-colors hover:bg-line"
+                      className="rounded-full border border-line-strong bg-surface px-3 py-2 min-h-10 text-xs font-bold text-ink shadow-xs transition-colors hover:bg-line"
                     >
                       Mark All N/A
                     </button>
@@ -407,10 +407,10 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                             <div className="w-5 h-5 rounded-md bg-surface text-brand flex items-center justify-center shrink-0">
                               <IconComp className="w-3.5 h-3.5" />
                             </div>
-                            <span className="text-[11px] font-extrabold truncate">{idx + 1}. {item.name}</span>
+                            <span className="text-xs font-extrabold truncate">{idx + 1}. {item.name}</span>
                           </div>
 
-                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-md tracking-wider uppercase shrink-0 shadow-2xs ${
+                          <span className={`text-xs font-black px-2 py-0.5 rounded-md tracking-wider uppercase shrink-0 shadow-2xs ${
                             item.status === 'Pass' ? 'bg-[#16A34A] text-white' :
                             item.status === 'Fail' ? 'bg-[#DC2626] text-white animate-pulse' : 'bg-[#475569] text-white'
                           }`}>
@@ -420,7 +420,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
 
                         {/* Status Toggle Buttons — min-h-10 so the highest-frequency
                             tap action in QA clears the 40px touch floor (audit 3.1) */}
-                        <div className="flex space-x-1 text-[11px]">
+                        <div className="flex space-x-1 text-xs">
                           <button
                             type="button"
                             onClick={() => handleDiagnosticStatusChange(item.id, 'Pass')}
@@ -457,7 +457,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                             value={item.note || ''}
                             onChange={(e) => handleDiagnosticNoteChange(item.id, e.target.value)}
                             placeholder={`Comment for ${item.name}...`}
-                            className="w-full bg-surface border border-line rounded-lg px-2.5 py-1 text-[11px] text-ink focus:bg-white focus:border-brand focus:outline-none"
+                            className="w-full bg-surface border border-line rounded-lg px-2.5 py-1 text-xs text-ink focus:bg-white focus:border-brand focus:outline-none"
                           />
                         </div>
                       </div>
@@ -503,7 +503,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
             <div className="flex min-h-0 flex-1 flex-col items-center justify-center p-12 text-center text-muted">
               <CheckCircle2 className="mb-2 h-10 w-10 text-line-strong" />
               <p className="text-xs font-extrabold text-ink">Select a work order</p>
-              <p className="mt-1 text-[11px]">Choose a device from the QA Queue to run the 21-point post-repair inspection.</p>
+              <p className="mt-1 text-xs">Choose a device from the QA Queue to run the 21-point post-repair inspection.</p>
             </div>
           )}
         </div>

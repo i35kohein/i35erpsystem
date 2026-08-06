@@ -59,7 +59,7 @@ export const TechnicianDetailModal: React.FC<TechnicianDetailModalProps> = ({
             <div className="min-w-0">
               <h3 className="font-extrabold text-base text-ink truncate">{tech.name}</h3>
               <div className="flex items-center space-x-2 mt-0.5 flex-wrap gap-y-1">
-                <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-lg border ${
+                <span className={`text-xs font-extrabold px-2 py-0.5 rounded-lg border ${
                   tech.level === 'Level 3 Master' ? 'bg-purple-50 text-[#AF52DE] border-purple-200' :
                   tech.level === 'Level 2 Spareparts + Hardware' ? 'bg-blue-50 text-brand border-blue-200' :
                   'bg-emerald-50 text-[#1E7E34] border-emerald-200'
@@ -67,12 +67,12 @@ export const TechnicianDetailModal: React.FC<TechnicianDetailModalProps> = ({
                   {tech.level}
                 </span>
                 {tech.specialty && (
-                  <span className="text-[10px] font-bold text-muted bg-surface px-2 py-0.5 rounded-lg border border-line">
+                  <span className="text-xs font-bold text-muted bg-surface px-2 py-0.5 rounded-lg border border-line">
                     {tech.specialty}
                   </span>
                 )}
                 {commissionRateParts > 0 || commissionRateHardware > 0 ? (
-                  <span className="text-[10px] font-bold text-brand bg-brand-soft px-2 py-0.5 rounded-lg border border-brand/20">
+                  <span className="text-xs font-bold text-brand bg-brand-soft px-2 py-0.5 rounded-lg border border-brand/20">
                     {commissionRateParts}% parts · {commissionRateHardware}% HW commission
                   </span>
                 ) : null}
@@ -92,58 +92,58 @@ export const TechnicianDetailModal: React.FC<TechnicianDetailModalProps> = ({
           {/* KPI Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <div className="p-3 bg-[#F8F9FA] border border-line rounded-xl">
-              <span className="text-[10px] font-bold text-muted uppercase flex items-center gap-1">
+              <span className="text-xs font-bold text-muted uppercase flex items-center gap-1">
                 <Scale className="w-3 h-3" /> Active Queue
               </span>
               <p className="text-xl font-extrabold text-ink mt-1">{activeCount}</p>
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border inline-block mt-1 ${loadBadge.color}`}>
+              <span className={`text-xs font-bold px-2 py-0.5 rounded-full border inline-block mt-1 ${loadBadge.color}`}>
                 {loadBadge.label}
               </span>
             </div>
             <div className="p-3 bg-[#F8F9FA] border border-line rounded-xl">
-              <span className="text-[10px] font-bold text-muted uppercase flex items-center gap-1">
+              <span className="text-xs font-bold text-muted uppercase flex items-center gap-1">
                 <CheckCircle2 className="w-3 h-3" /> Completed {periodLabel ? `(${periodLabel})` : ''}
               </span>
               <p className="text-xl font-extrabold text-ink mt-1">{liveCompleted}</p>
-              <span className="text-[10px] text-muted font-bold">Baseline {baselineMonthly}/mo</span>
+              <span className="text-xs text-muted font-bold">Baseline {baselineMonthly}/mo</span>
             </div>
             <div className="p-3 bg-[#F8F9FA] border border-line rounded-xl">
-              <span className="text-[10px] font-bold text-muted uppercase flex items-center gap-1">
+              <span className="text-xs font-bold text-muted uppercase flex items-center gap-1">
                 <Clock className="w-3 h-3" /> Avg Turnaround
               </span>
               <p className="text-xl font-extrabold text-ink mt-1">
                 {avgDurationHours !== null ? `${avgDurationHours}h` : '—'}
               </p>
-              <span className="text-[10px] text-muted font-bold">per completed job</span>
+              <span className="text-xs text-muted font-bold">per completed job</span>
             </div>
             <div className="p-3 bg-[#F8F9FA] border border-line rounded-xl">
-              <span className="text-[10px] font-bold text-muted uppercase flex items-center gap-1">
+              <span className="text-xs font-bold text-muted uppercase flex items-center gap-1">
                 <Award className="w-3 h-3" /> QA Pass Rate
               </span>
               <p className="text-xl font-extrabold text-[#1E7E34] mt-1">
                 {successRate !== null ? `${successRate}%` : '—'}
               </p>
-              <span className="text-[10px] text-muted font-bold">
+              <span className="text-xs text-muted font-bold">
                 {warrantyReturnCount === 0 ? '0 returns' : `${warrantyReturnCount} return${warrantyReturnCount > 1 ? 's' : ''}`}
               </span>
             </div>
             <div className="p-3 bg-[#F8F9FA] border border-line rounded-xl">
-              <span className="text-[10px] font-bold text-muted uppercase flex items-center gap-1">
+              <span className="text-xs font-bold text-muted uppercase flex items-center gap-1">
                 <DollarSign className="w-3 h-3" /> Labor Revenue
               </span>
               <p className="text-xl font-extrabold text-ink mt-1">
                 {laborRevenue > 0 ? `${laborRevenue.toLocaleString()} MMK` : '—'}
               </p>
-              <span className="text-[10px] text-muted font-bold">this period</span>
+              <span className="text-xs text-muted font-bold">this period</span>
             </div>
             <div className="p-3 bg-[#F8F9FA] border border-line rounded-xl">
-              <span className="text-[10px] font-bold text-muted uppercase flex items-center gap-1">
+              <span className="text-xs font-bold text-muted uppercase flex items-center gap-1">
                 <Percent className="w-3 h-3" /> Est. Commission
               </span>
               <p className="text-xl font-extrabold text-brand mt-1">
                 {estCommission !== null ? `${estCommission.toLocaleString()} MMK` : '—'}
               </p>
-              <span className="text-[10px] text-muted font-bold">
+              <span className="text-xs text-muted font-bold">
                 {commissionRateParts > 0 || commissionRateHardware > 0
                   ? `${commissionRateParts}% parts · ${commissionRateHardware}% HW of labor`
                   : 'no rates set'}
@@ -176,7 +176,7 @@ export const TechnicianDetailModal: React.FC<TechnicianDetailModalProps> = ({
               <h4 className="font-extrabold text-xs text-ink uppercase tracking-wider">Active Tickets ({activeOrders.length})</h4>
               <button
                 onClick={() => { onClose(); onNavigateToTab('pipeline'); }}
-                className="text-[11px] font-bold text-brand hover:underline cursor-pointer"
+                className="text-xs font-bold text-brand hover:underline cursor-pointer"
               >
                 Open Pipeline →
               </button>
@@ -194,8 +194,8 @@ export const TechnicianDetailModal: React.FC<TechnicianDetailModalProps> = ({
                     className="p-2.5 bg-[#F8F9FA] hover:bg-white border border-line hover:border-brand/40 rounded-lg flex items-center justify-between text-xs cursor-pointer transition-all"
                   >
                     <div className="min-w-0 pr-2">
-                      <p className="font-mono font-bold text-brand text-[11px] truncate">{wo.orderNumber}</p>
-                      <p className="text-[11px] text-ink font-semibold truncate">{wo.deviceModel}</p>
+                      <p className="font-mono font-bold text-brand text-xs truncate">{wo.orderNumber}</p>
+                      <p className="text-xs text-ink font-semibold truncate">{wo.deviceModel}</p>
                     </div>
                     <StatusBadge status={wo.status} size="xs" />
                   </div>
@@ -226,8 +226,8 @@ export const TechnicianDetailModal: React.FC<TechnicianDetailModalProps> = ({
                       className="p-2.5 bg-[#EAF8ED]/40 hover:bg-white border border-line hover:border-success/40 rounded-lg flex items-center justify-between text-xs cursor-pointer transition-all"
                     >
                       <div className="min-w-0 pr-2">
-                        <p className="font-mono font-bold text-[#1E7E34] text-[11px] truncate">{wo.orderNumber}</p>
-                        <p className="text-[11px] text-ink font-semibold truncate">{wo.deviceModel}</p>
+                        <p className="font-mono font-bold text-[#1E7E34] text-xs truncate">{wo.orderNumber}</p>
+                        <p className="text-xs text-ink font-semibold truncate">{wo.deviceModel}</p>
                       </div>
                       <div className="flex items-center space-x-2 shrink-0">
                         <span
@@ -242,9 +242,9 @@ export const TechnicianDetailModal: React.FC<TechnicianDetailModalProps> = ({
                           {source === 'AI' && <Sparkles className="w-2.5 h-2.5" />}
                         </span>
                         {hours !== null && (
-                          <span className="text-[10px] text-muted font-mono font-bold">{hours.toFixed(1)}h</span>
+                          <span className="text-xs text-muted font-mono font-bold">{hours.toFixed(1)}h</span>
                         )}
-                        <span className="font-extrabold text-ink text-[11px]">
+                        <span className="font-extrabold text-ink text-xs">
                           {(wo.subtotal || 0).toLocaleString()} MMK
                         </span>
                         <StatusBadge status={wo.status} size="xs" />
@@ -258,7 +258,7 @@ export const TechnicianDetailModal: React.FC<TechnicianDetailModalProps> = ({
 
           {/* Footer */}
           <div className="flex items-center justify-between pt-1 border-t border-line">
-            <p className="text-[10px] text-muted flex items-center gap-1">
+            <p className="text-xs text-muted flex items-center gap-1">
               <Wrench className="w-3 h-3" />
               Data source: work orders in the selected dashboard period
             </p>

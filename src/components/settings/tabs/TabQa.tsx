@@ -26,7 +26,7 @@ const QaTab: React.FC<QaTabProps> = ({ formData, setFormData }) => {
               />
               <div>
                 <span className="font-extrabold text-ink text-xs block">Mandatory QA Checklist Verification</span>
-                <span className="text-[11px] text-muted">Require a passing QA inspection before ticket status can be transitioned to "Ready for Pickup".</span>
+                <span className="text-xs text-muted">Require a passing QA inspection before ticket status can be transitioned to "Ready for Pickup".</span>
               </div>
             </label>
 
@@ -39,7 +39,7 @@ const QaTab: React.FC<QaTabProps> = ({ formData, setFormData }) => {
               />
               <div>
                 <span className="font-extrabold text-ink text-xs block">Require Diode/Thermal Log for Level 3 Board Repairs</span>
-                <span className="text-[11px] text-muted">Require multimeter diode readings and IC replacement logs for L3 micro-soldering work orders.</span>
+                <span className="text-xs text-muted">Require multimeter diode readings and IC replacement logs for L3 micro-soldering work orders.</span>
               </div>
             </label>
           </div>

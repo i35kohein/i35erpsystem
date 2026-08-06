@@ -66,7 +66,7 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
         <div className="space-y-3">
           {itemName && (
             <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
-              <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Selected Item</span>
+              <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">Selected Item</span>
               <span className="block font-black text-sm text-slate-800 break-words">{itemName}</span>
             </div>
           )}

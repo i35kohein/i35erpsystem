@@ -157,7 +157,7 @@ const TrendChart: React.FC<{
           )}
         </svg>
       </div>
-      <div className="flex items-center space-x-4 pt-2 text-[10px] font-bold text-muted">
+      <div className="flex items-center space-x-4 pt-2 text-xs font-bold text-muted">
         <span className="flex items-center space-x-1.5">
           <span className="inline-block h-2.5 w-2.5 rounded-sm bg-brand/85" />
           Revenue (MMK)
@@ -688,7 +688,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           className="group relative bg-white p-4 rounded-2xl border border-line shadow-2xs hover:shadow-md hover:border-brand/50 transition-all cursor-pointer overflow-hidden select-none"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-muted">
               Active Repairs
             </span>
             <div className="w-8 h-8 rounded-xl bg-brand-soft text-brand flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -699,11 +699,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <span className="text-2xl sm:text-3xl font-black text-ink tracking-tight">
               {activeRepairs.length}
             </span>
-            <span className="text-[10px] font-bold text-brand bg-brand-soft px-2 py-0.5 rounded-full border border-brand/20">
+            <span className="text-xs font-bold text-brand bg-brand-soft px-2 py-0.5 rounded-full border border-brand/20">
               {inRepair.length} In Progress / Received
             </span>
           </div>
-          <div className="mt-3 pt-2.5 border-t border-surface flex items-center justify-between text-[11px] text-muted">
+          <div className="mt-3 pt-2.5 border-t border-surface flex items-center justify-between text-xs text-muted">
             <span>In-shop workload</span>
             <span className="font-bold text-brand group-hover:underline flex items-center space-x-0.5">
               <span>View Queue</span>
@@ -725,7 +725,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           className="group relative bg-white p-4 rounded-2xl border border-line shadow-2xs hover:shadow-md hover:border-emerald-500/50 transition-all cursor-pointer overflow-hidden select-none"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-muted">
               Ready for Pickup
             </span>
             <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -736,11 +736,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <span className="text-2xl sm:text-3xl font-black text-ink tracking-tight">
               {readyForPickup.length}
             </span>
-            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+            <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
               Completed
             </span>
           </div>
-          <div className="mt-3 pt-2.5 border-t border-surface flex items-center justify-between text-[11px] text-muted">
+          <div className="mt-3 pt-2.5 border-t border-surface flex items-center justify-between text-xs text-muted">
             <span>Awaiting customer</span>
             <span className="font-bold text-emerald-600 group-hover:underline flex items-center space-x-0.5">
               <span>View Finished</span>
@@ -759,7 +759,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           className="group relative bg-white p-4 rounded-2xl border border-line shadow-2xs hover:shadow-md hover:border-indigo-500/50 transition-all cursor-pointer overflow-hidden select-none"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-muted">
               Total Revenue
             </span>
             <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -770,13 +770,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <span className="text-xl sm:text-2xl font-black text-ink tracking-tight truncate">
               {totalRevenue.toLocaleString()} <span className="text-xs font-bold text-muted">MMK</span>
             </span>
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ml-1 inline-flex items-center space-x-0.5 ${marginPercent < 0 ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-indigo-50 text-indigo-700 border-indigo-200'}`}
+            <span className={`text-xs font-bold px-2 py-0.5 rounded-full border shrink-0 ml-1 inline-flex items-center space-x-0.5 ${marginPercent < 0 ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-indigo-50 text-indigo-700 border-indigo-200'}`}
               title={marginPercent < 0 ? '⚠️ Negative margin — average costs exceed revenue' : 'Gross margin %'}>
               {marginPercent < 0 && <AlertTriangle className="w-2.5 h-2.5 shrink-0" />}
               <span>{marginPercent}% Margin</span>
             </span>
           </div>
-          <div className="mt-3 pt-2.5 border-t border-surface flex items-center justify-between text-[11px] text-muted">
+          <div className="mt-3 pt-2.5 border-t border-surface flex items-center justify-between text-xs text-muted">
             <span>Avg: {avgTicketValue.toLocaleString()} MMK</span>
             <span className="font-bold text-indigo-600 group-hover:underline flex items-center space-x-0.5">
               <span>Finance</span>
@@ -795,7 +795,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           className="group relative bg-white p-4 rounded-2xl border border-line shadow-2xs hover:shadow-md hover:border-teal-500/50 transition-all cursor-pointer overflow-hidden select-none"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-muted">
               Avg Turnaround
             </span>
             <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -810,11 +810,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   : `${avgTurnaroundHours}h`
                 : '—'}
             </span>
-            <span className="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200">
+            <span className="text-xs font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200">
               Intake → Ready
             </span>
           </div>
-          <div className="mt-3 pt-2.5 border-t border-surface flex items-center justify-between text-[11px] text-muted">
+          <div className="mt-3 pt-2.5 border-t border-surface flex items-center justify-between text-xs text-muted">
             <span>{completedWorkOrders.length} completed tickets</span>
             <span className="font-bold text-teal-600 group-hover:underline flex items-center space-x-0.5">
               <span>Tech KPIs</span>
@@ -844,7 +844,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         >
           <ListFilter className="w-4 h-4" />
           <span>Status Queue</span>
-          <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold ${
+          <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold ${
             activeDashboardSubTab === 'status-queue'
               ? 'bg-white/20 text-white'
               : 'bg-line text-ink'
@@ -870,7 +870,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         >
           <Activity className="w-4 h-4" />
           <span>Hardware Analytics</span>
-          <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold ${
+          <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold ${
             activeDashboardSubTab === 'repair-data'
               ? 'bg-white/20 text-white'
               : 'bg-line text-ink'
@@ -896,7 +896,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         >
           <Users className="w-4 h-4" />
           <span>Technicians</span>
-          <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold ${
+          <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold ${
             activeDashboardSubTab === 'tech-kpi'
               ? 'bg-white/20 text-white'
               : 'bg-line text-ink'
@@ -923,7 +923,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           <Boxes className="w-4 h-4" />
           <span>Inventory</span>
           {repairLowStockParts.length > 0 ? (
-            <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-extrabold ${
+            <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-extrabold ${
               activeDashboardSubTab === 'inventory'
                 ? 'bg-white/20 text-white'
                 : 'bg-amber-100 text-amber-800 border border-amber-200'
@@ -931,7 +931,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               {repairLowStockParts.length} Low
             </span>
           ) : (
-            <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold ${
+            <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold ${
               activeDashboardSubTab === 'inventory'
                 ? 'bg-white/20 text-white'
                 : 'bg-line text-ink'
@@ -958,7 +958,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         >
           <Coins className="w-4 h-4" />
           <span>Finance</span>
-          <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold inline-flex items-center space-x-0.5 ${
+          <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold inline-flex items-center space-x-0.5 ${
             activeDashboardSubTab === 'finance'
               ? marginPercent < 0 ? 'bg-white/25 text-white' : 'bg-white/20 text-white'
               : marginPercent < 0 ? 'bg-rose-100 text-rose-700' : 'bg-line text-ink'
@@ -986,7 +986,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           <ShieldAlert className="w-4 h-4" />
           <span>Warranty Watch</span>
           {expiringSoonWorkOrders.length > 0 ? (
-            <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold ${
+            <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold ${
               activeDashboardSubTab === 'warranty-watch'
                 ? 'bg-white/20 text-white'
                 : 'bg-rose-100 text-rose-800 border border-rose-200'
@@ -994,7 +994,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               {expiringSoonWorkOrders.length} Flagged
             </span>
           ) : (
-            <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold ${
+            <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold ${
               activeDashboardSubTab === 'warranty-watch'
                 ? 'bg-white/20 text-white'
                 : 'bg-line text-ink'
@@ -1019,7 +1019,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <div className="space-y-0.5">
                 <div className="flex items-center space-x-2">
                   <span className="font-black text-rose-950 text-sm">Background Warranty Monitor Flagged</span>
-                  <span className="text-[10px] font-mono font-bold bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full border border-rose-200">
+                  <span className="text-xs font-mono font-bold bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full border border-rose-200">
                     90-Day Standard Window
                   </span>
                 </div>
@@ -1041,17 +1041,17 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
           {/* Quick Preview Chips of Top Expiring Tickets */}
           <div className="flex items-center space-x-2 overflow-x-auto no-scrollbar pt-1 border-t border-rose-200/60">
-            <span className="text-[10px] font-bold text-rose-800 uppercase tracking-wider shrink-0">Expiring Soon:</span>
+            <span className="text-xs font-bold text-rose-800 uppercase tracking-wider shrink-0">Expiring Soon:</span>
             {expiringSoonWorkOrders.slice(0, 4).map((item) => (
               <div
                 key={item.wo.id}
                 onClick={() => setActiveDashboardSubTab('warranty-watch')}
-                className="bg-white/80 hover:bg-white border border-rose-200 px-2.5 py-1 rounded-lg text-[11px] flex items-center space-x-2 cursor-pointer shrink-0 shadow-2xs transition-all"
+                className="bg-white/80 hover:bg-white border border-rose-200 px-2.5 py-1 rounded-lg text-xs flex items-center space-x-2 cursor-pointer shrink-0 shadow-2xs transition-all"
               >
                 <span className="font-mono font-bold text-brand">{item.wo.orderNumber}</span>
                 <span className="font-bold text-ink">{item.wo.customerName}</span>
                 <span className="text-muted">({item.wo.deviceModel})</span>
-                <span className={`px-1.5 py-0.2 rounded font-extrabold text-[10px] ${
+                <span className={`px-1.5 py-0.2 rounded font-extrabold text-xs ${
                   item.remainingDays <= 3 ? 'bg-rose-600 text-white' : 'bg-amber-100 text-amber-800'
                 }`}>
                   ⏳ {item.remainingDays}d left
@@ -1072,7 +1072,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
                 <div>
                   <p className="font-bold text-amber-950">{stagnantWorkOrders.length} Repair Ticket(s) Bottlenecked (&gt;48h in Queue)</p>
-                  <p className="text-[11px] text-amber-800">These tickets have been inactive for over 48 hours. Consider reassigning technicians or updating customer status.</p>
+                  <p className="text-xs text-amber-800">These tickets have been inactive for over 48 hours. Consider reassigning technicians or updating customer status.</p>
                 </div>
               </div>
               <Button
@@ -1096,7 +1096,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     <span className="hidden sm:inline">Status Queue & Stage Distribution</span>
                     <span className="sm:hidden">Stage Distribution</span>
                   </h3>
-                  <span className="px-2.5 py-0.5 bg-brand/10 text-brand rounded-full text-[11px] font-mono font-bold whitespace-nowrap">
+                  <span className="px-2.5 py-0.5 bg-brand/10 text-brand rounded-full text-xs font-mono font-bold whitespace-nowrap">
                     {filteredWorkOrders.length} <span className="hidden md:inline">Total Work Orders</span><span className="md:hidden">Orders</span>
                   </span>
                 </div>
@@ -1136,7 +1136,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
                       <div className={`h-full ${item.color} rounded-full transition-all duration-500`} style={{ width: `${pct}%` }} />
                     </div>
-                    <div className="flex justify-between items-center text-[10px] text-slate-500">
+                    <div className="flex justify-between items-center text-xs text-slate-500">
                       <span>{pct}% of active queue</span>
                       <button
                         onClick={() => {
@@ -1162,11 +1162,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     <span className="hidden md:inline">Live Work Order Status Analytics Queue Roster</span>
                     <span className="md:hidden">Queue Roster</span>
                   </h3>
-                  <span className="px-2.5 py-0.5 bg-brand/10 text-brand rounded-full text-[11px] font-mono font-bold whitespace-nowrap">
+                  <span className="px-2.5 py-0.5 bg-brand/10 text-brand rounded-full text-xs font-mono font-bold whitespace-nowrap">
                     {statusQueueWorkOrders.length} <span className="hidden md:inline">{statusQueueWorkOrders.length === 1 ? 'Ticket' : 'Tickets'}</span>
                   </span>
                   {statusQueueFilter !== 'ALL' && (
-                    <span className="px-2.5 py-0.5 bg-indigo-100 text-indigo-800 rounded-full text-[11px] font-mono font-bold">
+                    <span className="px-2.5 py-0.5 bg-indigo-100 text-indigo-800 rounded-full text-xs font-mono font-bold">
                       {statusQueueFilter === 'PIPELINE' ? 'Pipeline Data Only' : `Stage: ${statusQueueFilter}`}
                     </span>
                   )}
@@ -1246,7 +1246,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <div className="p-8 text-center text-xs text-muted space-y-2 bg-[#F8F9FA] rounded-xl border border-dashed border-line-strong">
                 <Inbox className="w-8 h-8 text-muted mx-auto opacity-60" />
                 <p className="font-extrabold text-sm text-ink">No Work Orders in Queue Matching Selection</p>
-                <p className="text-[11px]">
+                <p className="text-xs">
                   {statusQueueFilter !== 'ALL'
                     ? `There are currently no tickets matching stage filter "${statusQueueFilter}".`
                     : 'Try adjusting your search query or reset status filters.'}
@@ -1268,7 +1268,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead className="sticky top-0 z-10">
-                    <tr className="border-b border-line text-muted font-bold text-[10px] uppercase tracking-wider bg-[#F8F9FA]">
+                    <tr className="border-b border-line text-muted font-bold text-xs uppercase tracking-wider bg-[#F8F9FA]">
                       <th className="py-2.5 px-3">Ticket # & Date</th>
                       <th className="py-2.5 px-3">Customer & Contact</th>
                       <th className="py-2.5 px-3">Device & Serial/IMEI</th>
@@ -1294,19 +1294,19 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                           {/* Ticket # & Date */}
                           <td className="py-3 px-3">
                             <p className="font-mono font-black text-brand text-xs">{wo.orderNumber || wo.id}</p>
-                            <span className="text-[10px] text-muted" title={createdDateFull}>{createdDate}</span>
+                            <span className="text-xs text-muted" title={createdDateFull}>{createdDate}</span>
                           </td>
 
                           {/* Customer */}
                           <td className="py-3 px-3">
                             <p className="font-bold text-ink truncate max-w-[140px]">{wo.customerName}</p>
-                            <p className="text-[10px] text-muted font-mono">{wo.customerPhone}</p>
+                            <p className="text-xs text-muted font-mono">{wo.customerPhone}</p>
                           </td>
 
                           {/* Device & Serial */}
                           <td className="py-3 px-3">
                             <p className="font-semibold text-ink truncate max-w-[150px]">{wo.deviceModel}</p>
-                            <p className="text-[10px] font-mono text-muted truncate max-w-[150px]">
+                            <p className="text-xs font-mono text-muted truncate max-w-[150px]">
                               {wo.serialNumber || wo.imei ? `SN: ${wo.serialNumber || wo.imei}` : 'No Serial'}
                             </p>
                           </td>
@@ -1321,7 +1321,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                           {/* Assigned Tech */}
                           <td className="py-3 px-3 hidden lg:table-cell">
                             <div className="flex items-center space-x-1.5">
-                              <div className="w-5 h-5 rounded-full bg-slate-200 text-slate-700 font-bold text-[10px] flex items-center justify-center shrink-0">
+                              <div className="w-5 h-5 rounded-full bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0">
                                 {(wo.assignedTechName || 'U').charAt(0)}
                               </div>
                               <span className="text-xs text-ink font-medium truncate max-w-[100px]">
@@ -1358,7 +1358,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                               <button
                                 type="button"
                                 onClick={() => setRosterTicket(wo)}
-                                className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--blue-tint)] px-2.5 text-[10px] font-extrabold text-[var(--primary)] transition-colors hover:bg-[var(--card-bg)]"
+                                className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--blue-tint)] px-2.5 text-xs font-extrabold text-[var(--primary)] transition-colors hover:bg-[var(--card-bg)]"
                                 title="View Ticket Status"
                                 aria-label={`View status for ${wo.orderNumber || wo.id}`}
                               >
@@ -1369,7 +1369,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                               <button
                                 type="button"
                                 onClick={() => onSelectPrintTag(wo)}
-                                className="p-1.5 bg-surface hover:bg-line text-ink rounded-lg border border-line transition-all cursor-pointer inline-flex items-center space-x-1 text-[10px] font-bold"
+                                className="p-1.5 bg-surface hover:bg-line text-ink rounded-lg border border-line transition-all cursor-pointer inline-flex items-center space-x-1 text-xs font-bold"
                                 title="Print Device Label Tag"
                               >
                                 <Printer className="w-3.5 h-3.5 text-brand" />
@@ -1427,7 +1427,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     <div key={dev.name} className="p-3 bg-[#F8F9FA] border border-line rounded-xl space-y-2">
                       <div className="flex items-center justify-between gap-2 text-xs">
                         <div className="flex items-center space-x-2 min-w-0">
-                          <span className={`w-6 h-6 rounded-full border flex items-center justify-center font-black text-[10px] shrink-0 ${medal}`}>
+                          <span className={`w-6 h-6 rounded-full border flex items-center justify-center font-black text-xs shrink-0 ${medal}`}>
                             {idx + 1}
                           </span>
                           <span className="font-extrabold text-ink truncate">{dev.name}</span>
@@ -1483,7 +1483,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                           </div>
                           <span className="font-extrabold text-ink">{cat.label}</span>
                         </div>
-                        <span className="text-[10px] font-bold text-muted bg-white border border-line px-2 py-0.5 rounded-full">{cat.count} Tickets</span>
+                        <span className="text-xs font-bold text-muted bg-white border border-line px-2 py-0.5 rounded-full">{cat.count} Tickets</span>
                       </div>
                       <div className="flex items-baseline justify-between">
                         <span className="font-mono font-black text-lg text-ink">{cat.revenue.toLocaleString()} MMK</span>
@@ -1511,7 +1511,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                 Queue imbalanced — reassign 1–2 tickets from {maxLoadTechs.map((t) => t.tech.name).join(' / ')} ({maxTechLoad}) to {minLoadTechs.map((t) => t.tech.name).join(' / ')} ({minTechLoad})
               </span>
-              <span className="text-amber-700/80 text-[10px] font-semibold shrink-0">Load gap: {maxTechLoad - minTechLoad} tickets</span>
+              <span className="text-amber-700/80 text-xs font-semibold shrink-0">Load gap: {maxTechLoad - minTechLoad} tickets</span>
             </div>
           )}
 
@@ -1542,19 +1542,19 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-1">
               <span className="text-xs font-bold text-muted uppercase">Total Parts Valuation</span>
               <p className="text-xl font-extrabold text-ink">{inventoryAnalytics.totalValuation.toLocaleString()} MMK</p>
-              <p className="text-[11px] text-success font-semibold">{inventoryAnalytics.totalItems} Total Replacement Items</p>
+              <p className="text-xs text-success font-semibold">{inventoryAnalytics.totalItems} Total Replacement Items</p>
             </div>
 
             <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-1">
               <span className="text-xs font-bold text-muted uppercase">Low Stock Repair Items</span>
               <p className="text-xl font-extrabold text-[#FF9500]">{repairLowStockParts.length} Repair Parts</p>
-              <p className="text-[11px] text-[#FF9500] font-semibold">Below reorder threshold</p>
+              <p className="text-xs text-[#FF9500] font-semibold">Below reorder threshold</p>
             </div>
 
             <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-1">
               <span className="text-xs font-bold text-muted uppercase">Pending Vendor RMAs</span>
               <p className="text-xl font-extrabold text-[#AF52DE]">{pendingRmas.length} Defective Returns</p>
-              <p className="text-[11px] text-[#AF52DE] font-semibold">Awaiting supplier credits</p>
+              <p className="text-xs text-[#AF52DE] font-semibold">Awaiting supplier credits</p>
             </div>
           </div>
 
@@ -1581,7 +1581,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </div>
 
             {/* Preview note — full module has stock/profit/matrix views */}
-            <p className="text-[10px] text-muted -mt-1">
+            <p className="text-xs text-muted -mt-1">
               Quick glance — full stock, profit & matrix views live in the Parts Inventory module.
             </p>
 
@@ -1598,14 +1598,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <p className="font-extrabold text-xs text-ink">{part.name}</p>
-                        <p className="text-[10px] text-muted">{part.category} · {part.qualityTier}</p>
+                        <p className="text-xs text-muted">{part.category} · {part.qualityTier}</p>
                       </div>
                       <span className="text-xs font-extrabold text-[#D97706] bg-amber-100 px-2 py-0.5 rounded-lg border border-amber-200 shrink-0">
                         {part.quantityInStock} Left
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between text-[10px] border-t border-[#FF9500]/20 pt-2 text-muted">
+                    <div className="flex items-center justify-between text-xs border-t border-[#FF9500]/20 pt-2 text-muted">
                       <span>Supplier: <strong className="text-ink">{part.supplierName}</strong></span>
                       <span className="font-mono font-bold text-brand">{part.costPrice.toLocaleString()} MMK Cost</span>
                     </div>
@@ -1625,7 +1625,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-1">
               <span className="text-xs font-bold text-muted uppercase">Total Revenue</span>
               <p className="text-2xl font-extrabold text-ink">{totalRevenue.toLocaleString()} MMK</p>
-              <p className={`text-[11px] font-semibold flex items-center space-x-1 ${marginPercent < 0 ? 'text-rose-600' : 'text-[#28A745]'}`}>
+              <p className={`text-xs font-semibold flex items-center space-x-1 ${marginPercent < 0 ? 'text-rose-600' : 'text-[#28A745]'}`}>
                 {marginPercent < 0 && <AlertTriangle className="w-3 h-3 shrink-0" />}
                 <span>{marginPercent}% Gross Profit Margin</span>
               </p>
@@ -1634,19 +1634,19 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-1">
               <span className="text-xs font-bold text-muted uppercase">Gross Profit (Margin)</span>
               <p className="text-2xl font-extrabold text-success">{totalMargin.toLocaleString()} MMK</p>
-              <p className="text-[11px] text-muted">Revenue minus parts cost</p>
+              <p className="text-xs text-muted">Revenue minus parts cost</p>
             </div>
 
             <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-1">
               <span className="text-xs font-bold text-muted uppercase">Total Collected (Paid)</span>
               <p className="text-2xl font-extrabold text-brand">{financialAnalytics.totalCollected.toLocaleString()} MMK</p>
-              <p className="text-[11px] text-brand font-semibold">{financialAnalytics.paidCount} Tickets Fully Settled</p>
+              <p className="text-xs text-brand font-semibold">{financialAnalytics.paidCount} Tickets Fully Settled</p>
             </div>
 
             <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-1">
               <span className="text-xs font-bold text-muted uppercase">Unpaid Pending Balance</span>
               <p className="text-2xl font-extrabold text-rose-600">{financialAnalytics.totalUnpaidBalance.toLocaleString()} MMK</p>
-              <p className="text-[11px] text-rose-600 font-semibold">{financialAnalytics.unpaidCount} Tickets Outstanding</p>
+              <p className="text-xs text-rose-600 font-semibold">{financialAnalytics.unpaidCount} Tickets Outstanding</p>
             </div>
           </div>
 
@@ -1664,19 +1664,19 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               </div>
               <div className="flex items-center space-x-2 flex-wrap gap-y-1.5">
                 {trendSeries.revenueDeltaPct !== null && (
-                  <span className={`px-2.5 py-1 rounded-full border flex items-center space-x-1 text-[10px] font-extrabold ${trendSeries.revenueDeltaPct >= 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}>
+                  <span className={`px-2.5 py-1 rounded-full border flex items-center space-x-1 text-xs font-extrabold ${trendSeries.revenueDeltaPct >= 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}>
                     <ArrowUpRight className={`w-3 h-3 ${trendSeries.revenueDeltaPct >= 0 ? '' : 'rotate-90'}`} />
                     <span>Revenue {trendSeries.revenueDeltaPct >= 0 ? '+' : ''}{trendSeries.revenueDeltaPct}% vs prev period</span>
                   </span>
                 )}
                 {trendSeries.repairsDeltaPct !== null && (
-                  <span className={`px-2.5 py-1 rounded-full border flex items-center space-x-1 text-[10px] font-extrabold ${trendSeries.repairsDeltaPct >= 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}>
+                  <span className={`px-2.5 py-1 rounded-full border flex items-center space-x-1 text-xs font-extrabold ${trendSeries.repairsDeltaPct >= 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}>
                     <ArrowUpRight className={`w-3 h-3 ${trendSeries.repairsDeltaPct >= 0 ? '' : 'rotate-90'}`} />
                     <span>Repairs {trendSeries.repairsDeltaPct >= 0 ? '+' : ''}{trendSeries.repairsDeltaPct}% vs prev period</span>
                   </span>
                 )}
                 {trendSeries.revenueDeltaPct === null && (
-                  <span className="px-2.5 py-1 rounded-full border border-line bg-surface text-muted text-[10px] font-bold">No previous-period data</span>
+                  <span className="px-2.5 py-1 rounded-full border border-line bg-surface text-muted text-xs font-bold">No previous-period data</span>
                 )}
               </div>
             </div>
@@ -1685,7 +1685,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <div className="p-8 text-center text-xs text-muted bg-[#F8F9FA] rounded-xl border border-dashed border-line-strong space-y-1">
                 <TrendingUp className="w-6 h-6 mx-auto opacity-50" />
                 <p className="font-extrabold text-sm text-ink">No completed repairs in this period</p>
-                <p className="text-[11px]">Completed (Finished / Taken Out) tickets will appear here.</p>
+                <p className="text-xs">Completed (Finished / Taken Out) tickets will appear here.</p>
               </div>
             ) : (
               <TrendChart
@@ -1731,7 +1731,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </div>
 
             {/* Preview note — full module has revenue/opex/commissions/parts asset */}
-            <p className="text-[10px] text-muted -mt-2">
+            <p className="text-xs text-muted -mt-2">
               Quick glance — full revenue, expenses, commissions & inventory fund details live in Shop Finance.
             </p>
 
@@ -1739,13 +1739,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <div className="p-4 bg-[#F8F9FA] border border-line rounded-xl space-y-1">
                 <p className="text-xs font-bold text-muted uppercase">Average Ticket Value (ATV)</p>
                 <p className="text-2xl font-extrabold text-ink">{avgTicketValue.toLocaleString()} MMK</p>
-                <p className="text-[11px] text-muted">Per repair work order</p>
+                <p className="text-xs text-muted">Per repair work order</p>
               </div>
 
               <div className="p-4 bg-[#F8F9FA] border border-line rounded-xl space-y-1">
                 <p className="text-xs font-bold text-muted uppercase">Total Parts Cost</p>
                 <p className="text-2xl font-extrabold text-ink">{totalPartsCost.toLocaleString()} MMK</p>
-                <p className="text-[11px] text-muted">Direct hardware component cost</p>
+                <p className="text-xs text-muted">Direct hardware component cost</p>
               </div>
             </div>
           </div>
@@ -1766,7 +1766,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   <h2 className="text-lg font-black tracking-tight text-white flex items-center space-x-2">
                     <span>90-Day Warranty Background Telemetry</span>
                   </h2>
-                  <span className="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono text-[10px] font-bold rounded-full flex items-center space-x-1">
+                  <span className="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono text-xs font-bold rounded-full flex items-center space-x-1">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block mr-1" />
                     <span>Background Scanner Active</span>
                   </span>
@@ -1790,33 +1790,33 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             {/* 5 Telemetry Stat Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 pt-2 border-t border-white/10 text-xs">
               <div className="p-3 bg-white/10 rounded-xl border border-white/10 space-y-0.5">
-                <span className="text-[10px] text-slate-300 font-bold uppercase">Scanned Tickets</span>
+                <span className="text-xs text-slate-300 font-bold uppercase">Scanned Tickets</span>
                 <p className="text-xl font-black text-white">{warrantyCheckData.length}</p>
-                <p className="text-[10px] text-slate-400">Total with warranty</p>
+                <p className="text-xs text-slate-400">Total with warranty</p>
               </div>
 
               <div className="p-3 bg-rose-500/20 border border-rose-500/40 rounded-xl space-y-0.5">
-                <span className="text-[10px] text-rose-200 font-bold uppercase">Nearing Expiry (&le;14d)</span>
+                <span className="text-xs text-rose-200 font-bold uppercase">Nearing Expiry (&le;14d)</span>
                 <p className="text-xl font-black text-rose-300">{expiringSoonWorkOrders.length}</p>
-                <p className="text-[10px] text-rose-200">Flagged by monitor</p>
+                <p className="text-xs text-rose-200">Flagged by monitor</p>
               </div>
 
               <div className="p-3 bg-rose-600/30 border border-rose-500/50 rounded-xl space-y-0.5">
-                <span className="text-[10px] text-rose-200 font-bold uppercase">Critical Window (&le;7d)</span>
+                <span className="text-xs text-rose-200 font-bold uppercase">Critical Window (&le;7d)</span>
                 <p className="text-xl font-black text-rose-200">{criticalWarrantyCount}</p>
-                <p className="text-[10px] text-rose-300">Requires attention</p>
+                <p className="text-xs text-rose-300">Requires attention</p>
               </div>
 
               <div className="p-3 bg-amber-500/20 border border-amber-500/40 rounded-xl space-y-0.5">
-                <span className="text-[10px] text-amber-200 font-bold uppercase">Warning Window (8-14d)</span>
+                <span className="text-xs text-amber-200 font-bold uppercase">Warning Window (8-14d)</span>
                 <p className="text-xl font-black text-amber-300">{warningWarrantyCount}</p>
-                <p className="text-[10px] text-amber-200">Nearing end period</p>
+                <p className="text-xs text-amber-200">Nearing end period</p>
               </div>
 
               <div className="p-3 bg-emerald-500/20 border border-emerald-500/40 rounded-xl space-y-0.5 col-span-2 lg:col-span-1">
-                <span className="text-[10px] text-emerald-200 font-bold uppercase">Active & Protected</span>
+                <span className="text-xs text-emerald-200 font-bold uppercase">Active & Protected</span>
                 <p className="text-xl font-black text-emerald-300">{activeWarrantyCount}</p>
-                <p className="text-[10px] text-emerald-200">&gt;14 days remaining</p>
+                <p className="text-xs text-emerald-200">&gt;14 days remaining</p>
               </div>
             </div>
           </div>
@@ -1936,7 +1936,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   <div className="p-10 text-center text-xs text-muted space-y-2 bg-[#F8F9FA] rounded-xl border border-dashed border-line-strong">
                     <ShieldCheck className="w-10 h-10 text-success mx-auto opacity-70" />
                     <p className="font-extrabold text-sm text-ink">No Work Orders Matching Warranty Criteria</p>
-                    <p className="text-[11px]">
+                    <p className="text-xs">
                       {warrantyFilterTab === 'ALL_EXPIRING'
                         ? 'No active work orders are currently nearing the end of their 90-day warranty window!'
                         : 'Try adjusting search keywords or selecting a different warranty filter tab.'}
@@ -1949,7 +1949,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="border-b border-line text-muted font-bold text-[10px] uppercase tracking-wider">
+                      <tr className="border-b border-line text-muted font-bold text-xs uppercase tracking-wider">
                         <th className="py-2.5 px-3">Ticket #</th>
                         <th className="py-2.5 px-3">Customer & Contact</th>
                         <th className="py-2.5 px-3">Device & Serial</th>
@@ -1966,27 +1966,27 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                           <tr key={item.wo.id} className={`hover:bg-[#F8F9FA] transition-colors ${item.isCritical ? 'bg-rose-50/40' : ''}`}>
                             <td className="py-3 px-3">
                               <p className="font-mono font-bold text-brand">{item.wo.orderNumber}</p>
-                              <span className="text-[10px] text-muted">{item.wo.status}</span>
+                              <span className="text-xs text-muted">{item.wo.status}</span>
                             </td>
 
                             <td className="py-3 px-3">
                               <p className="font-bold text-ink">{item.wo.customerName}</p>
-                              <p className="text-[10px] text-muted">{item.wo.customerPhone}</p>
+                              <p className="text-xs text-muted">{item.wo.customerPhone}</p>
                             </td>
 
                             <td className="py-3 px-3">
                               <p className="font-semibold text-ink">{item.wo.deviceModel}</p>
-                              <p className="text-[10px] font-mono text-muted">SN: {item.wo.serialNumber || 'N/A'}</p>
+                              <p className="text-xs font-mono text-muted">SN: {item.wo.serialNumber || 'N/A'}</p>
                             </td>
 
-                            <td className="py-3 px-3 text-[11px] hidden md:table-cell">
+                            <td className="py-3 px-3 text-xs hidden md:table-cell">
                               <p className="text-muted">Start: <strong className="text-ink">{item.startDateFormatted}</strong></p>
                               <p className="text-muted">Expires: <strong className="text-rose-700">{item.expiryDateFormatted}</strong></p>
                             </td>
 
                             <td className="py-3 px-3 w-36">
                               <div className="space-y-1">
-                                <div className="flex justify-between text-[10px] text-muted">
+                                <div className="flex justify-between text-xs text-muted">
                                   <span>{item.daysElapsed} days</span>
                                   <span>{item.percentElapsed}%</span>
                                 </div>
@@ -2007,24 +2007,24 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
                             <td className="py-3 px-3">
                               {item.isCritical && (
-                                <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-rose-600 text-white text-[10px] font-extrabold rounded-lg shadow-2xs">
+                                <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-rose-600 text-white text-xs font-extrabold rounded-lg shadow-2xs">
                                   <Clock className="w-3 h-3" />
                                   <span>Critical: {item.remainingDays}d Left</span>
                                 </span>
                               )}
                               {item.isWarning && (
-                                <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-bold rounded-lg">
+                                <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-amber-100 text-amber-800 border border-amber-300 text-xs font-bold rounded-lg">
                                   <Clock className="w-3 h-3 text-amber-600" />
                                   <span>Nearing Expiry: {item.remainingDays}d Left</span>
                                 </span>
                               )}
                               {item.isExpired && (
-                                <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-slate-200 text-slate-700 text-[10px] font-bold rounded-lg">
+                                <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-slate-200 text-slate-700 text-xs font-bold rounded-lg">
                                   <span>Expired ({Math.abs(item.remainingDays)}d ago)</span>
                                 </span>
                               )}
                               {item.isActive && (
-                                <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold rounded-lg">
+                                <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold rounded-lg">
                                   <ShieldCheck className="w-3 h-3 text-emerald-600" />
                                   <span>Protected ({item.remainingDays}d Left)</span>
                                 </span>
@@ -2036,7 +2036,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                                 <button
                                   type="button"
                                   onClick={() => handleCopyWarrantyCourtesyMessage(item)}
-                                  className={`px-2.5 py-1.5 font-bold text-[10px] rounded-lg border transition-all flex items-center space-x-1 cursor-pointer active:scale-95 ${
+                                  className={`px-2.5 py-1.5 font-bold text-xs rounded-lg border transition-all flex items-center space-x-1 cursor-pointer active:scale-95 ${
                                     isCopied
                                       ? 'bg-emerald-600 text-white border-emerald-600'
                                       : 'bg-surface hover:bg-line text-brand border-line'

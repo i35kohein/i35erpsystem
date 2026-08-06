@@ -225,13 +225,13 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
                 )}
                 <div>
                   <h1 className="font-black text-lg text-ink tracking-tight">{shopName}</h1>
-                  <p className="text-[11px] text-muted">
+                  <p className="text-xs text-muted">
                     {systemSettings?.shopInfo || 'ACM Certified Hardware Repair & Component Service'}
                   </p>
                 </div>
               </div>
 
-              <div className="mt-3 space-y-0.5 text-muted text-[11px]">
+              <div className="mt-3 space-y-0.5 text-muted text-xs">
                 <p className="flex items-center space-x-1">
                   <span>{shopAddress}</span>
                 </p>
@@ -245,23 +245,23 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
 
             <div className="sm:text-right space-y-1">
               <div className="inline-block px-3 py-1 bg-surface border border-line rounded-lg text-right">
-                <p className="text-[10px] uppercase font-bold text-muted tracking-wider">TAX INVOICE / SERVICE VOUCHER</p>
+                <p className="text-xs uppercase font-bold text-muted tracking-wider">TAX INVOICE / SERVICE VOUCHER</p>
                 <p className="font-mono font-black text-base text-brand">{workOrder.orderNumber}</p>
               </div>
 
-              <div className="text-[11px] space-y-0.5 pt-1">
+              <div className="text-xs space-y-0.5 pt-1">
                 <p><span className="text-muted">Date Issued:</span> <strong>{formattedDate}</strong></p>
                 <p><span className="text-muted">Service Type:</span> <strong>{workOrder.serviceType || 'Standard Modular'}</strong></p>
                 
                 {/* Payment Status Badge */}
                 <div className="pt-1.5">
                   {workOrder.isPaid ? (
-                    <span className="inline-flex items-center space-x-1 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-extrabold text-[11px]">
+                    <span className="inline-flex items-center space-x-1 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-extrabold text-xs">
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       <span>PAID FULLY ({workOrder.paymentMethod || 'Settled'})</span>
                     </span>
                   ) : (
-                    <span className="inline-flex items-center space-x-1 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 font-extrabold text-[11px]">
+                    <span className="inline-flex items-center space-x-1 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 font-extrabold text-xs">
                       <Clock className="w-3.5 h-3.5" />
                       <span>UNPAID / BALANCE DUE</span>
                     </span>
@@ -275,7 +275,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-surface p-4 rounded-xl border border-line">
             {/* Bill To Customer */}
             <div className="space-y-1.5 border-b sm:border-b-0 sm:border-r border-line pb-3 sm:pb-0 sm:pr-4">
-              <div className="flex items-center space-x-1.5 text-brand font-extrabold text-[11px] uppercase tracking-wider">
+              <div className="flex items-center space-x-1.5 text-brand font-extrabold text-xs uppercase tracking-wider">
                 <User className="w-3.5 h-3.5" />
                 <span>CUSTOMER / BILL TO</span>
               </div>
@@ -285,7 +285,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
               <p className="text-muted">Phone: <strong className="text-ink">{workOrder.customerPhone}</strong></p>
               {workOrder.customerEmail && <p className="text-muted">Email: <strong className="text-ink">{workOrder.customerEmail}</strong></p>}
               <div className="pt-1">
-                <span className="inline-block px-2 py-0.5 text-[10px] font-bold rounded bg-white border border-line-strong text-ink">
+                <span className="inline-block px-2 py-0.5 text-xs font-bold rounded bg-white border border-line-strong text-ink">
                   Account: {workOrder.customerType || 'Retail'}
                 </span>
               </div>
@@ -293,7 +293,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
 
             {/* Device Dossier */}
             <div className="space-y-1.5 sm:pl-2">
-              <div className="flex items-center space-x-1.5 text-brand font-extrabold text-[11px] uppercase tracking-wider">
+              <div className="flex items-center space-x-1.5 text-brand font-extrabold text-xs uppercase tracking-wider">
                 <Smartphone className="w-3.5 h-3.5" />
                 <span>DEVICE & REPAIR SUMMARY</span>
               </div>
@@ -310,11 +310,11 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
           {/* Reported Problem Note */}
           {workOrder.symptomsReported && (
             <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
-              <span className="font-extrabold text-[10px] uppercase text-slate-500 tracking-wider flex items-center space-x-1">
+              <span className="font-extrabold text-xs uppercase text-slate-500 tracking-wider flex items-center space-x-1">
                 <FileText className="w-3 h-3 text-brand" />
                 <span>Reported Symptoms & Repair Scope</span>
               </span>
-              <p className="text-[11px] text-ink italic">{workOrder.symptomsReported}</p>
+              <p className="text-xs text-ink italic">{workOrder.symptomsReported}</p>
             </div>
           )}
 
@@ -327,7 +327,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
 
             <div className="border border-line rounded-xl overflow-hidden">
               <table className="w-full text-left border-collapse">
-                <thead className="bg-surface text-muted text-[10px] font-mono uppercase border-b border-line">
+                <thead className="bg-surface text-muted text-xs font-mono uppercase border-b border-line">
                   <tr>
                     <th className="p-3">Item Description</th>
                     <th className="p-3">Type</th>
@@ -343,7 +343,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
                         <td className="p-3">
                           <p className="font-bold text-ink">{item.description}</p>
                           {item.partQuality && (
-                            <span className="text-[10px] text-muted">{item.partQuality}</span>
+                            <span className="text-xs text-muted">{item.partQuality}</span>
                           )}
                         </td>
                         <td className="p-3">
@@ -385,15 +385,15 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
           <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pt-2">
             {/* Payment & Warranty Terms Box */}
             <div className="sm:w-1/2 p-4 bg-surface rounded-xl border border-line space-y-2">
-              <span className="font-extrabold text-[10px] uppercase text-ink tracking-wider flex items-center space-x-1">
+              <span className="font-extrabold text-xs uppercase text-ink tracking-wider flex items-center space-x-1">
                 <ShieldCheck className="w-3.5 h-3.5 text-success" />
                 <span>Warranty & Policy Guarantee</span>
               </span>
-              <p className="text-[10px] text-muted leading-relaxed">
+              <p className="text-xs text-muted leading-relaxed">
                 All installed hardware parts and labor services carry an official <strong>{workOrder.warrantyDays || 90}-day limited warranty</strong> from the completion date. Physical, liquid, or unauthorized third-party tampering post-repair voids warranty coverage.
               </p>
               {workOrder.isPaid && workOrder.paymentMethod && (
-                <div className="pt-2 border-t border-line text-[11px] text-[#28A745] font-bold">
+                <div className="pt-2 border-t border-line text-xs text-[#28A745] font-bold">
                   ✓ Payment Processed via {workOrder.paymentMethod}
                 </div>
               )}
@@ -453,7 +453,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
           </div>
 
           {/* Authorization & Signatures */}
-          <div className="pt-6 border-t border-line grid grid-cols-2 gap-8 text-[11px] text-muted">
+          <div className="pt-6 border-t border-line grid grid-cols-2 gap-8 text-xs text-muted">
             <div className="space-y-8">
               <p>Customer Authorization Signature:</p>
               {workOrder.customerSignatureUrl ? (
@@ -461,25 +461,25 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
               ) : (
                 <div className="border-b border-line-strong h-8 w-4/5"></div>
               )}
-              <p className="text-[10px]">Date: ________________________</p>
+              <p className="text-xs">Date: ________________________</p>
             </div>
 
             <div className="space-y-8 text-right">
               <p>ACMT Service Technician Stamp / Sign:</p>
               <div className="border-b border-line-strong h-8 w-4/5 ml-auto"></div>
-              <p className="text-[10px]">Authorized Signature</p>
+              <p className="text-xs">Authorized Signature</p>
             </div>
           </div>
 
           {/* Footer Note */}
-          <div className="pt-4 text-center text-[10px] text-muted italic">
+          <div className="pt-4 text-center text-xs text-muted italic">
             Thank you for choosing {shopName}! For service inquiries or warranty support, call {shopPhone}.
           </div>
         </div>
 
         {/* Modal Action Footer (Hidden in Print) */}
         <div className="no-print bg-surface px-6 py-3 border-t border-line flex justify-between items-center shrink-0">
-          <span className="text-[11px] text-muted">
+          <span className="text-xs text-muted">
             Invoice ready for printing or digital distribution.
           </span>
           <div className="flex items-center space-x-2">

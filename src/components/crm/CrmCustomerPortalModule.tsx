@@ -284,7 +284,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
             <div className="flex flex-wrap justify-between items-center border-b border-line pb-2 gap-x-2 gap-y-1">
               <h2 className="font-bold text-ink text-xs">Customer Account Roster</h2>
               <div className="flex items-center gap-2 min-w-0">
-                <span className="text-[10px] font-semibold text-muted shrink-0">{filteredCustomers.length} accounts</span>
+                <span className="text-xs font-semibold text-muted shrink-0">{filteredCustomers.length} accounts</span>
                 <Button
                   type="button"
                   onClick={() => setIsAddCustomerModalOpen(true)}
@@ -302,7 +302,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                 <div className="flex h-full min-h-[260px] flex-col items-center justify-center rounded-xl border border-dashed border-line bg-[#F8F9FA] px-5 text-center text-muted">
                   <Users className="mb-2 h-7 w-7 text-muted/50" />
                   <p className="font-semibold">No customer accounts found</p>
-                  <p className="mt-1 text-[11px]">Customers from new intake tickets will appear here.</p>
+                  <p className="mt-1 text-xs">Customers from new intake tickets will appear here.</p>
                 </div>
               )}
               {filteredCustomers.map((cust) => {
@@ -333,7 +333,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                         <span>{cust.name}</span>
                         <ExternalLink className="w-3 h-3 text-brand opacity-70 group-hover:opacity-100 transition-opacity" />
                       </button>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${
                         cust.type === 'B2B Corporate' ? 'bg-purple-50 text-purple-700 border-purple-200' :
                         cust.type === 'Wholesale Mail-In' ? 'bg-brand-soft text-brand border-brand/20' :
                         'bg-white text-ink border-line'
@@ -342,9 +342,9 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                       </span>
                     </div>
 
-                    {cust.company && <p className="text-[11px] text-muted">{cust.company}</p>}
+                    {cust.company && <p className="text-xs text-muted">{cust.company}</p>}
 
-                    <div className="flex justify-between items-center text-[11px] text-muted mt-1.5">
+                    <div className="flex justify-between items-center text-xs text-muted mt-1.5">
                       <span>{cust.phone}</span>
                       <span className="font-bold text-[#28A745]">{cust.totalSpent.toLocaleString()} {systemSettings.currencySymbol} Spent</span>
                     </div>
@@ -354,7 +354,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                       <button
                         type="button"
                         onClick={(e) => toggleExpandCustomer(cust.id, e)}
-                        className="flex items-center space-x-1 text-[11px] font-bold text-brand hover:text-brand-deep transition-colors py-0.5 px-1.5 rounded-md hover:bg-blue-100/50 cursor-pointer"
+                        className="flex items-center space-x-1 text-xs font-bold text-brand hover:text-brand-deep transition-colors py-0.5 px-1.5 rounded-md hover:bg-blue-100/50 cursor-pointer"
                       >
                         {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                         <span>
@@ -369,7 +369,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                             e.stopPropagation();
                             handleOpenHistoryModal(cust);
                           }}
-                          className="px-2 py-0.5 bg-blue-50 text-brand hover:bg-blue-100 font-bold text-[10px] rounded-md transition-colors flex items-center space-x-1 cursor-pointer"
+                          className="px-2 py-0.5 bg-blue-50 text-brand hover:bg-blue-100 font-bold text-xs rounded-md transition-colors flex items-center space-x-1 cursor-pointer"
                           title="Open Full Repair History Modal"
                         >
                           <FileText className="w-2.5 h-2.5" />
@@ -383,7 +383,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                               e.stopPropagation();
                               openEditCustomerModal(cust);
                             }}
-                            className="p-1 bg-blue-50 text-brand hover:bg-blue-100 font-bold text-[10px] rounded-md transition-colors cursor-pointer"
+                            className="p-1 bg-blue-50 text-brand hover:bg-blue-100 font-bold text-xs rounded-md transition-colors cursor-pointer"
                             title="Edit Customer Account"
                           >
                             <Edit2 className="w-3 h-3" />
@@ -398,7 +398,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                               if (onDeleteCustomer) onDeleteCustomer(cust.id);
                             }
                           }}
-                          className="p-1 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white font-bold text-[10px] rounded-md transition-colors cursor-pointer"
+                          className="p-1 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white font-bold text-xs rounded-md transition-colors cursor-pointer"
                           title="Delete Customer Account"
                         >
                           <Trash2 className="w-3 h-3" />
@@ -417,7 +417,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                     {/* Expandable Inline Repair History */}
                     {isExpanded && (
                       <div className="mt-2.5 pt-2 border-t border-blue-100 bg-white p-2.5 rounded-xl border space-y-2 shadow-2xs">
-                        <div className="flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wider text-ink">
+                        <div className="flex items-center justify-between text-xs font-extrabold uppercase tracking-wider text-ink">
                           <span className="flex items-center space-x-1">
                             <History className="w-3 h-3 text-brand" />
                             <span>Repair History ({custOrders.length})</span>
@@ -429,7 +429,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                             {custOrders.map((wo) => (
                               <div
                                 key={wo.id}
-                                className="p-2 rounded-lg bg-[#F8F9FA] border border-line hover:border-brand transition-all text-[11px] space-y-1"
+                                className="p-2 rounded-lg bg-[#F8F9FA] border border-line hover:border-brand transition-all text-xs space-y-1"
                               >
                                 <div className="flex items-center justify-between">
                                   <span className="font-mono font-bold text-ink">{wo.orderNumber || wo.id}</span>
@@ -457,7 +457,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                                   <span className="font-bold text-[#28A745]">{wo.totalAmount?.toLocaleString() || 0} {systemSettings.currencySymbol}</span>
                                 </div>
                                 {wo.symptomsReported && (
-                                  <p className="text-[10px] text-muted line-clamp-1 italic">
+                                  <p className="text-xs text-muted line-clamp-1 italic">
                                     "{wo.symptomsReported}"
                                   </p>
                                 )}
@@ -469,7 +469,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                             ))}
                           </div>
                         ) : (
-                          <p className="text-[11px] text-muted italic py-1 text-center">No repair history recorded for this customer.</p>
+                          <p className="text-xs text-muted italic py-1 text-center">No repair history recorded for this customer.</p>
                         )}
                       </div>
                     )}

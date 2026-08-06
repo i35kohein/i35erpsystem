@@ -18,7 +18,7 @@ export const DrawerSelect: React.FC<DrawerSelectProps> = ({ label, value, onChan
 
   return (
     <div className="relative">
-      <label className="mb-1 block text-[10px] font-extrabold uppercase tracking-wider text-muted">{label}</label>
+      <label className="mb-1 block text-xs font-extrabold uppercase tracking-wider text-muted">{label}</label>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}

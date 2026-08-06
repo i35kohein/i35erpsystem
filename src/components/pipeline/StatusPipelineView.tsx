@@ -514,10 +514,10 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
           iPad uses the clean layout: everything lives in the filter drawer instead. */}
       {!isIpad && (
         <>
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line-strong bg-white px-2.5 py-2 text-[11px] shadow-2xs">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line-strong bg-white px-2.5 py-2 text-xs shadow-2xs">
         <div className="flex min-w-0 items-center gap-1.5">
           <span className="whitespace-nowrap font-extrabold text-ink">Active Pipeline Overview</span>
-          <span className="truncate text-[10px] font-medium text-muted">({filteredWorkOrders.length} tickets matching filters)</span>
+          <span className="truncate text-xs font-medium text-muted">({filteredWorkOrders.length} tickets matching filters)</span>
           {hasActiveFilters && (
             <button
               type="button"
@@ -526,7 +526,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                 setShowNeedsDiagOnly(false);
                 setShowBeforeNeedsDiagOnly(false);
               }}
-              className="px-2 py-0.5 text-[10px] bg-slate-100 hover:bg-slate-200 text-brand font-bold rounded-lg transition-all cursor-pointer border border-slate-200"
+              className="px-2 py-0.5 text-xs bg-slate-100 hover:bg-slate-200 text-brand font-bold rounded-lg transition-all cursor-pointer border border-slate-200"
             >
               Reset Filters ↺
             </button>
@@ -537,7 +537,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
           <button
             type="button"
             onClick={() => setShowAllStages((v) => !v)}
-            className={`inline-flex w-full sm:w-auto h-8 sm:h-7 items-center justify-center gap-1 rounded-md border px-2 text-[10px] font-bold transition-colors cursor-pointer ${
+            className={`inline-flex w-full sm:w-auto h-8 sm:h-7 items-center justify-center gap-1 rounded-md border px-2 text-xs font-bold transition-colors cursor-pointer ${
               showAllStages
                 ? 'bg-ink text-white border-ink shadow-2xs'
                 : 'bg-white text-ink border-line hover:bg-slate-100'
@@ -557,7 +557,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
               setShowBeforeNeedsDiagOnly(!showBeforeNeedsDiagOnly);
               setShowNeedsDiagOnly(false);
             }}
-                className={`inline-flex w-full sm:w-auto h-8 sm:h-7 items-center justify-center gap-1 rounded-md border px-2 text-[10px] font-bold transition-colors cursor-pointer ${
+                className={`inline-flex w-full sm:w-auto h-8 sm:h-7 items-center justify-center gap-1 rounded-md border px-2 text-xs font-bold transition-colors cursor-pointer ${
                   showBeforeNeedsDiagOnly
                     ? 'bg-blue-600 text-white border-blue-700 shadow-2xs'
                     : 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100'
@@ -573,7 +573,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
               setShowNeedsDiagOnly(!showNeedsDiagOnly);
               setShowBeforeNeedsDiagOnly(false);
             }}
-              className={`inline-flex w-full sm:w-auto h-8 sm:h-7 items-center justify-center gap-1 rounded-md border px-2 text-[10px] font-bold transition-colors cursor-pointer ${
+              className={`inline-flex w-full sm:w-auto h-8 sm:h-7 items-center justify-center gap-1 rounded-md border px-2 text-xs font-bold transition-colors cursor-pointer ${
                 showNeedsDiagOnly
                   ? 'bg-purple-600 text-white border-purple-700 shadow-2xs'
                   : 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100'
@@ -584,7 +584,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
           </button>
 
           {showBottlenecksOnly && (
-            <span className="inline-flex h-7 items-center gap-1 rounded-md border border-red-600 bg-red-500 px-2 text-[10px] font-bold text-white shadow-2xs">
+            <span className="inline-flex h-7 items-center gap-1 rounded-md border border-red-600 bg-red-500 px-2 text-xs font-bold text-white shadow-2xs">
               <Timer className="h-3 w-3 shrink-0" />
               <span>Filtering Bottlenecks (&gt;48h)</span>
             </span>
@@ -598,7 +598,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   onClearAllWorkOrders();
                 }
               }}
-              className="inline-flex h-7 items-center gap-1 rounded-md border border-rose-200 bg-rose-50 px-2 text-[10px] font-bold text-rose-700 shadow-2xs transition-colors hover:bg-rose-100"
+              className="inline-flex h-7 items-center gap-1 rounded-md border border-rose-200 bg-rose-50 px-2 text-xs font-bold text-rose-700 shadow-2xs transition-colors hover:bg-rose-100"
               title="⚠️ Permanently delete ALL tickets from the system (Admin only)"
             >
               <Trash2 className="h-3 w-3 shrink-0 text-rose-600" />
@@ -613,7 +613,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
         <button
           type="button"
           onClick={() => setShowAllStages((v) => !v)}
-          className={`inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-xl border px-3 text-[11px] font-bold transition-colors cursor-pointer active:scale-95 ${
+          className={`inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-xl border px-3 text-xs font-bold transition-colors cursor-pointer active:scale-95 ${
             showAllStages
               ? 'bg-ink text-white border-ink shadow-2xs'
               : 'bg-white text-ink border-line-strong hover:bg-slate-100'
@@ -623,13 +623,13 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
           {showAllStages ? <EyeOff className="w-3.5 h-3.5 shrink-0" /> : <Eye className="w-3.5 h-3.5 shrink-0 text-brand" />}
           <span>{showAllStages ? 'Hide Exception Stages' : 'Show Exception Stages'}</span>
           {hiddenStageCounts.some((h) => h.count > 0) && (
-            <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-black ${showAllStages ? 'bg-white/20 text-white' : 'bg-rose-100 text-rose-700'}`}>
+            <span className={`rounded-full px-1.5 py-0.5 text-xs font-black ${showAllStages ? 'bg-white/20 text-white' : 'bg-rose-100 text-rose-700'}`}>
               {hiddenStageCounts.filter((h) => h.count > 0).reduce((acc, h) => acc + h.count, 0)}
             </span>
           )}
         </button>
         {!showAllStages && (
-          <p className="shrink-0 text-[10px] font-medium text-muted">Cant Repair · Customer Not Repair</p>
+          <p className="shrink-0 text-xs font-medium text-muted">Cant Repair · Customer Not Repair</p>
         )}
       </div>
         </>
@@ -700,7 +700,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   className="flex flex-col items-center justify-center gap-2 py-3"
                   title={`${stage.title} — no tickets. Drag a ticket here to move it.`}
                 >
-                  <h3 className="[writing-mode:vertical-rl] rotate-180 text-[10px] font-extrabold text-muted tracking-wide whitespace-nowrap">
+                  <h3 className="[writing-mode:vertical-rl] rotate-180 text-xs font-extrabold text-muted tracking-wide whitespace-nowrap">
                     {stage.id === 'Receive' ? t('statusReceive') :
                      stage.id === 'In Progress' ? t('statusInProgress') :
                      stage.id === 'Pending' ? t('statusPending') :
@@ -723,7 +723,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                        stage.id === 'Cant Repair' ? t('statusCantRepair') :
                        stage.id === 'Customer Not Repair' ? t('statusCustomerNotRepair') : stage.title}
                     </h3>
-                    <p className="text-[10px] text-muted font-medium">{stage.subtitle}</p>
+                    <p className="text-xs text-muted font-medium">{stage.subtitle}</p>
                   </div>
                   <div className="flex items-center space-x-1">
                     {stageStagnantOrders.length > 0 && (
@@ -735,7 +735,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         <span>{stageStagnantOrders.length}</span>
                       </span>
                     )}
-                    <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow-2xs ${stage.badgeColor}`}>
+                    <span className={`text-xs font-extrabold px-2.5 py-0.5 rounded-full shadow-2xs ${stage.badgeColor}`}>
                       {stageOrders.length}
                     </span>
                   </div>
@@ -810,7 +810,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
 
                         {/* Stagnant Bottleneck Alert Banner / Age Chip (amber ≥24h, red ≥48h) */}
                         {isStagnant ? (
-                          <div className="flex items-center justify-between px-2 py-1 rounded-lg bg-red-50 border border-red-200 text-red-800 text-[10px] font-extrabold">
+                          <div className="flex items-center justify-between px-2 py-1 rounded-lg bg-red-50 border border-red-200 text-red-800 text-xs font-extrabold">
                             <span className="flex items-center space-x-1">
                               <Timer className="w-3.5 h-3.5 text-red-600 animate-pulse shrink-0" />
                               <span>Bottleneck (&gt;48h)</span>
@@ -818,7 +818,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                             <span className="font-mono bg-red-100 px-1.5 py-0.5 rounded text-red-800">{hoursInStatus}h</span>
                           </div>
                         ) : (
-                          <div className={`flex items-center space-x-1 text-[10px] ${ageChipClass}`}>
+                          <div className={`flex items-center space-x-1 text-xs ${ageChipClass}`}>
                             <Clock className={`w-3 h-3 shrink-0 ${ageChipIconClass}`} />
                             <span>In stage: <strong className="text-ink">{hoursInStatus < 1 ? '< 1h' : `${hoursInStatus}h`}</strong></span>
                           </div>
@@ -827,10 +827,10 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         {/* Model & Customer & Repair Issue */}
                         <div className="cursor-pointer space-y-1" title={`Open detail — ${wo.deviceModel || wo.orderNumber || wo.id}`}>
                           <p className="font-extrabold text-ink text-xs line-clamp-1 hover:text-brand transition-colors">{wo.deviceModel}</p>
-                          <p className="text-[10px] text-slate-500 truncate" title={`${wo.customerName} • ${wo.customerPhone}`}>{wo.customerName} • {wo.customerPhone}</p>
+                          <p className="text-xs text-slate-500 truncate" title={`${wo.customerName} • ${wo.customerPhone}`}>{wo.customerName} • {wo.customerPhone}</p>
                           
                           {/* What to repair under Customer info */}
-                          <div className="flex items-start space-x-1.5 pt-1 mt-1 border-t border-slate-100 text-[11px] text-ink">
+                          <div className="flex items-start space-x-1.5 pt-1 mt-1 border-t border-slate-100 text-xs text-ink">
                             <ClipboardCheck className="w-3.5 h-3.5 text-brand shrink-0 mt-0.5" />
                             <span className="font-semibold text-slate-700 line-clamp-2 leading-tight">
                               {getRepairSummary(wo)}
@@ -839,7 +839,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         </div>
 
                         {/* Tech Tag — one-tap quick assign (dropdown for managers, self-assign for techs) */}
-                        <div className="flex items-center justify-between text-[10px] pt-1 border-t border-slate-100 text-slate-500" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-100 text-slate-500" onClick={(e) => e.stopPropagation()}>
                           <span>Tech: <strong className="text-ink">{tech?.name?.split(' ')[0] || 'Unassigned'}</strong></span>
                           {isTechnicianUser && myTechId ? (
                             <button
@@ -858,7 +858,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                               ariaLabel={`Assign technician for ${wo.orderNumber}`}
                               placeholder="Assign"
                               menuAlign="right"
-                              buttonClassName="!h-8 !min-w-0 !px-2 !border-0 !bg-transparent !text-brand hover:!bg-transparent !shadow-none !text-[10px]"
+                              buttonClassName="!h-8 !min-w-0 !px-2 !border-0 !bg-transparent !text-brand hover:!bg-transparent !shadow-none !text-xs"
                               options={[
                                 { value: 'unassigned', label: 'Unassigned' },
                                 ...technicians.map((t) => ({
@@ -873,7 +873,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         </div>
 
                         {/* Primary Card Action + ⋯ More menu (Detail/Log/Notify stay one tap away) */}
-                        <div className="flex items-stretch gap-1 pt-1 border-t border-slate-100 text-[10px]" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-stretch gap-1 pt-1 border-t border-slate-100 text-xs" onClick={(e) => e.stopPropagation()}>
                           {stage.id === 'Finished' ? (
                             <button
                               type="button"
@@ -952,7 +952,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   key={s.id}
                   type="button"
                   onClick={() => scrollToStage(s.id)}
-                  className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[10px] font-extrabold transition-colors cursor-pointer active:scale-95 ${
+                  className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-3 text-xs font-extrabold transition-colors cursor-pointer active:scale-95 ${
                     count > 0 ? 'bg-white text-ink border-line-strong hover:bg-slate-100' : 'bg-transparent text-muted border-dashed border-line'
                   }`}
                   title={`Scroll to ${s.title} column`}
@@ -1039,9 +1039,9 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                 >
                   <div>
                     <p className="font-bold text-xs">{t.name}</p>
-                    <p className="text-[10px] opacity-70">{t.level}</p>
+                    <p className="text-xs opacity-70">{t.level}</p>
                   </div>
-                  <span className="text-[10px] bg-slate-100 text-ink px-2 py-0.5 rounded-full font-bold">
+                  <span className="text-xs bg-slate-100 text-ink px-2 py-0.5 rounded-full font-bold">
                     {t.activeJobsCount} Active Jobs
                   </span>
                 </button>
@@ -1060,7 +1060,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
           <button
             type="button"
             onClick={() => setShowAllStages(true)}
-            className="flex w-full items-center justify-center gap-1.5 rounded-full border border-dashed border-rose-300 bg-rose-50 px-3 py-2.5 text-[11px] font-extrabold text-rose-700 transition-colors cursor-pointer active:scale-[0.99]"
+            className="flex w-full items-center justify-center gap-1.5 rounded-full border border-dashed border-rose-300 bg-rose-50 px-3 py-2.5 text-xs font-extrabold text-rose-700 transition-colors cursor-pointer active:scale-[0.99]"
           >
             <Eye className="w-3.5 h-3.5 text-rose-600 shrink-0" />
             <span>
@@ -1069,7 +1069,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
           </button>
         </div>
       ) : !kanbanAtEnd ? (
-        <div className="flex items-center justify-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5 text-[10px] font-extrabold text-muted md:hidden animate-fade-in">
+        <div className="flex items-center justify-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-extrabold text-muted md:hidden animate-fade-in">
           <ChevronsRight className="w-3.5 h-3.5 text-brand" />
           <span>Scroll for Cant Repair / Customer Not Repair</span>
           <ChevronsRight className="w-3.5 h-3.5 text-brand" />
@@ -1154,13 +1154,13 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
             {/* Quick Actions & Pass/Fail Counts */}
             <div className="flex items-center justify-between p-2.5 bg-purple-50/60 rounded-xl border border-purple-200 text-xs">
               <div className="flex items-center space-x-2 font-bold text-ink">
-                <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[11px]">
+                <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-xs">
                   Pass: {afterDiagnostics.filter(d => d.status === 'Pass').length}
                 </span>
-                <span className="px-2 py-0.5 rounded bg-rose-100 text-rose-800 text-[11px]">
+                <span className="px-2 py-0.5 rounded bg-rose-100 text-rose-800 text-xs">
                   Fail: {afterDiagnostics.filter(d => d.status === 'Fail').length}
                 </span>
-                <span className="px-2 py-0.5 rounded bg-slate-200 text-slate-700 text-[11px]">
+                <span className="px-2 py-0.5 rounded bg-slate-200 text-slate-700 text-xs">
                   N/A: {afterDiagnostics.filter(d => d.status === 'N/A').length}
                 </span>
               </div>
@@ -1171,7 +1171,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   onClick={() => {
                     setAfterDiagnostics(afterDiagnostics.map(d => ({ ...d, status: 'Pass', note: d.note || 'QA Passed' })));
                   }}
-                  className="px-2.5 py-1 bg-success text-white font-extrabold rounded-lg text-[10px] hover:bg-success/90 shadow-2xs"
+                  className="px-2.5 py-1 bg-success text-white font-extrabold rounded-lg text-xs hover:bg-success/90 shadow-2xs"
                 >
                   Mark All Pass
                 </button>
@@ -1182,9 +1182,9 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-72 overflow-y-auto pr-1">
               {afterDiagnostics.map((item, idx) => (
                 <div key={item.id || item.name} className="p-2 bg-[#F8F9FA] border border-line rounded-xl space-y-1.5">
-                  <div className="flex justify-between items-center text-[11px] font-bold text-ink">
+                  <div className="flex justify-between items-center text-xs font-bold text-ink">
                     <span className="truncate pr-1">{idx + 1}. {item.name}</span>
-                    <span className={`text-[10px] font-extrabold px-1.5 py-0.2 rounded ${
+                    <span className={`text-xs font-extrabold px-1.5 py-0.2 rounded ${
                       item.status === 'Pass' ? 'bg-emerald-100 text-emerald-800' :
                       item.status === 'Fail' ? 'bg-rose-100 text-rose-800' : 'bg-slate-200 text-slate-600'
                     }`}>
@@ -1192,7 +1192,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                     </span>
                   </div>
 
-                  <div className="flex space-x-1 text-[10px]">
+                  <div className="flex space-x-1 text-xs">
                     <button
                       type="button"
                       onClick={() => {
@@ -1237,7 +1237,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                       setAfterDiagnostics(copy);
                     }}
                     placeholder="Note e.g. TrueTone OK"
-                    className="w-full bg-white border border-line rounded-md px-2 py-0.5 text-[10px] text-ink"
+                    className="w-full bg-white border border-line rounded-md px-2 py-0.5 text-xs text-ink"
                   />
                 </div>
               ))}
@@ -1293,7 +1293,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
               </div>
               <div>
                 <h3 className="font-black text-sm text-amber-950 uppercase tracking-tight">Initial Diagnostic Alert</h3>
-                <p className="text-[11px] text-amber-800 font-bold">Mandatory Intake Inspection Pending</p>
+                <p className="text-xs text-amber-800 font-bold">Mandatory Intake Inspection Pending</p>
               </div>
             </div>
 
@@ -1306,7 +1306,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                 ({pendingBeforeDiagAlertWo.wo.deviceModel}) to <strong className="text-amber-800 font-bold">"{pendingBeforeDiagAlertWo.newStatus}"</strong>.
               </p>
 
-              <div className="p-3.5 bg-amber-50/90 border border-amber-300 rounded-xl text-amber-950 text-[11px] space-y-1.5">
+              <div className="p-3.5 bg-amber-50/90 border border-amber-300 rounded-xl text-amber-950 text-xs space-y-1.5">
                 <span className="font-black flex items-center space-x-1.5 text-amber-900">
                   <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
                   <span>Intake Inspection Notice:</span>
@@ -1385,7 +1385,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
               </div>
               <div>
                 <h3 className="font-black text-sm text-rose-950 uppercase tracking-tight">Finished Device Diagnostic Alert</h3>
-                <p className="text-[11px] text-rose-700 font-bold">Mandatory Diagnostic Checklist Pending</p>
+                <p className="text-xs text-rose-700 font-bold">Mandatory Diagnostic Checklist Pending</p>
               </div>
             </div>
 
@@ -1398,7 +1398,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                 ({pendingDiagAlertWo.wo.deviceModel}) to <strong className="text-emerald-700 font-bold">"Finished"</strong>.
               </p>
 
-              <div className="p-3.5 bg-rose-50/90 border border-rose-300 rounded-xl text-rose-950 text-[11px] space-y-1.5">
+              <div className="p-3.5 bg-rose-50/90 border border-rose-300 rounded-xl text-rose-950 text-xs space-y-1.5">
                 <span className="font-black flex items-center space-x-1.5 text-rose-900">
                   <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
                   <span>Finished Device Protocol Notice:</span>

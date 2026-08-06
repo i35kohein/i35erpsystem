@@ -43,7 +43,7 @@ export const TechnicianLeaderboardView: React.FC<TechnicianLeaderboardViewProps>
               <h2 className="text-lg font-black text-ink tracking-tight">
                 Technician Repair Leaderboard
               </h2>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-300 shrink-0">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 border border-amber-300 shrink-0">
                 {periodLabel || 'This period'}
               </span>
             </div>
@@ -93,7 +93,7 @@ export const TechnicianLeaderboardView: React.FC<TechnicianLeaderboardViewProps>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-ink">
               <thead>
-                <tr className="border-b border-line text-muted font-bold text-[10px] uppercase tracking-wider bg-[#F8F9FA]">
+                <tr className="border-b border-line text-muted font-bold text-xs uppercase tracking-wider bg-[#F8F9FA]">
                   <th className="py-2.5 px-3 rounded-l-xl">Rank</th>
                   <th className="py-2.5 px-3">Technician</th>
                   <th className="py-2.5 px-3 text-center">Completed (Period)</th>
@@ -138,18 +138,18 @@ export const TechnicianLeaderboardView: React.FC<TechnicianLeaderboardViewProps>
                               <span>{item.tech.name}</span>
                               {rank === 1 && <Crown className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />}
                             </p>
-                            <p className="text-[10px] text-brand font-bold hidden md:block">{item.tech.level}</p>
+                            <p className="text-xs text-brand font-bold hidden md:block">{item.tech.level}</p>
                           </div>
                         </div>
                       </td>
 
                       <td className="py-3 px-3 text-center">
                         <span className="font-black text-ink text-sm">{item.liveCompleted}</span>
-                        <span className="text-[10px] text-emerald-600 font-bold block">completed</span>
+                        <span className="text-xs text-emerald-600 font-bold block">completed</span>
                       </td>
 
                       <td className="py-3 px-3 text-center hidden sm:table-cell">
-                        <span className="text-[10px] font-bold text-muted bg-surface px-2 py-0.5 rounded-full border border-line">
+                        <span className="text-xs font-bold text-muted bg-surface px-2 py-0.5 rounded-full border border-line">
                           {item.baselineMonthly}/mo
                         </span>
                       </td>
@@ -159,7 +159,7 @@ export const TechnicianLeaderboardView: React.FC<TechnicianLeaderboardViewProps>
                           <span className="font-extrabold text-ink">
                             {item.laborRevenue > 0 ? `${item.laborRevenue.toLocaleString()} MMK` : '—'}
                           </span>
-                          <span className="text-[10px] text-muted font-medium block">labor only</span>
+                          <span className="text-xs text-muted font-medium block">labor only</span>
                         </div>
                       </td>
 
@@ -169,12 +169,12 @@ export const TechnicianLeaderboardView: React.FC<TechnicianLeaderboardViewProps>
                             <span className="font-bold text-ink">
                               {item.estCommission !== null ? `${item.estCommission.toLocaleString()} MMK` : '—'}
                             </span>
-                            <span className="text-[10px] text-brand font-bold block">
+                            <span className="text-xs text-brand font-bold block">
                               {item.commissionRateParts}% parts · {item.commissionRateHardware}% HW
                             </span>
                           </div>
                         ) : (
-                          <span className="text-[10px] text-muted font-medium">— no rate</span>
+                          <span className="text-xs text-muted font-medium">— no rate</span>
                         )}
                       </td>
 
@@ -188,13 +188,13 @@ export const TechnicianLeaderboardView: React.FC<TechnicianLeaderboardViewProps>
                         ) : (
                           <span className="text-muted font-medium">—</span>
                         )}
-                        <span className="text-[10px] text-muted font-medium block">
+                        <span className="text-xs text-muted font-medium block">
                           {item.warrantyReturnCount === 0 ? '0 returns' : `${item.warrantyReturnCount} return${item.warrantyReturnCount > 1 ? 's' : ''}`}
                         </span>
                       </td>
 
                       <td className="py-3 px-3 text-center hidden sm:table-cell font-bold">
-                        <span className="px-2 py-0.5 rounded-full bg-surface text-ink border border-line-strong text-[10px]">
+                        <span className="px-2 py-0.5 rounded-full bg-surface text-ink border border-line-strong text-xs">
                           {item.activeCount} active
                         </span>
                       </td>
@@ -208,7 +208,7 @@ export const TechnicianLeaderboardView: React.FC<TechnicianLeaderboardViewProps>
       </div>
 
       {topLeader && (
-        <p className="text-[10px] text-muted text-center">
+        <p className="text-xs text-muted text-center">
           Champion: <span className="font-bold text-ink">{topLeader.tech.name}</span> · click any row for the full drill-down.
         </p>
       )}

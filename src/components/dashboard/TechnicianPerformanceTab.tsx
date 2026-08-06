@@ -94,12 +94,12 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
           {/* Total Successful Repairs */}
           <div className="bg-gradient-to-br from-[#EAF8ED]/50 to-[#EAF8ED]/20 border border-success/30 p-4 rounded-xl flex items-center justify-between shadow-2xs">
             <div className="space-y-1">
-              <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Total Successful Repairs</span>
+              <span className="text-xs font-bold text-muted uppercase tracking-wider">Total Successful Repairs</span>
               <div className="flex items-baseline space-x-2">
                 <span className="text-2xl font-extrabold text-ink">{totalShopLiveCompleted}</span>
                 <span className="text-xs text-[#28A745] font-bold">Completed This Period</span>
               </div>
-              <p className="text-[11px] text-[#1E7E34] font-medium flex items-center gap-1">
+              <p className="text-xs text-[#1E7E34] font-medium flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5 text-success" />
                 {shopSuccessRate !== null ? `${shopSuccessRate}% QA Pass Rate` : '— Awaiting completed repairs'}
               </p>
@@ -112,14 +112,14 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
           {/* Avg Turnaround Time */}
           <div className="bg-gradient-to-br from-brand-soft/50 to-brand-soft/20 border border-brand/30 p-4 rounded-xl flex items-center justify-between shadow-2xs">
             <div className="space-y-1">
-              <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Average Repair Duration</span>
+              <span className="text-xs font-bold text-muted uppercase tracking-wider">Average Repair Duration</span>
               <div className="flex items-baseline space-x-2">
                 <span className="text-2xl font-extrabold text-ink">
                   {avgShopDurationHours !== null ? avgShopDurationHours : '—'}
                 </span>
                 <span className="text-xs text-brand font-bold">Hours / Job</span>
               </div>
-              <p className="text-[11px] text-brand font-medium flex items-center gap-1">
+              <p className="text-xs text-brand font-medium flex items-center gap-1">
                 <Zap className="w-3.5 h-3.5 text-brand" />
                 Based on completion timestamps
               </p>
@@ -132,12 +132,12 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
           {/* Shop Capacity & Active Load */}
           <div className="bg-gradient-to-br from-purple-50/50 to-purple-50/20 border border-purple-300/40 p-4 rounded-xl flex items-center justify-between shadow-2xs">
             <div className="space-y-1">
-              <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Active Queue Capacity</span>
+              <span className="text-xs font-bold text-muted uppercase tracking-wider">Active Queue Capacity</span>
               <div className="flex items-baseline space-x-2">
                 <span className="text-2xl font-extrabold text-ink">{totalActiveQueue}</span>
                 <span className="text-xs text-[#AF52DE] font-bold">In-Queue Jobs</span>
               </div>
-              <p className="text-[11px] text-[#AF52DE] font-medium flex items-center gap-1">
+              <p className="text-xs text-[#AF52DE] font-medium flex items-center gap-1">
                 <Scale className="w-3.5 h-3.5 text-[#AF52DE]" />
                 Across {technicians.length} staff · {totalShopBaseline} baseline/mo
               </p>
@@ -180,7 +180,7 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
                     </div>
                   </div>
 
-                  <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-lg border shadow-2xs shrink-0 ${
+                  <span className={`text-xs font-extrabold px-2.5 py-1 rounded-lg border shadow-2xs shrink-0 ${
                     tech.level === 'Level 3 Master' ? 'bg-purple-50 text-[#AF52DE] border-purple-200' :
                     tech.level === 'Level 2 Spareparts + Hardware' ? 'bg-blue-50 text-brand border-blue-200' :
                     'bg-emerald-50 text-[#1E7E34] border-emerald-200'
@@ -194,7 +194,7 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
                   <span className="text-muted font-semibold">Active Queue Load:</span>
                   <div className="flex items-center space-x-2">
                     <span className="font-extrabold text-ink">{activeCount} active tickets</span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${loadBadge.color}`}>
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${loadBadge.color}`}>
                       {loadBadge.label}
                     </span>
                   </div>
@@ -205,27 +205,27 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
               <div className="grid grid-cols-3 gap-2 py-1 text-center bg-[#F8F9FA] p-3 rounded-xl border border-line">
                 {/* 1. Throughput */}
                 <div className="space-y-0.5">
-                  <span className="block text-[10px] font-bold text-muted uppercase">Throughput</span>
+                  <span className="block text-xs font-bold text-muted uppercase">Throughput</span>
                   <span className="block text-lg font-extrabold text-ink">{liveCompleted}</span>
-                  <span className="block text-[10px] text-muted font-bold">Baseline {baselineMonthly}/mo</span>
+                  <span className="block text-xs text-muted font-bold">Baseline {baselineMonthly}/mo</span>
                 </div>
 
                 {/* 2. Avg Repair Duration */}
                 <div className="space-y-0.5 border-x border-line px-1">
-                  <span className="block text-[10px] font-bold text-muted uppercase">Avg Duration</span>
+                  <span className="block text-xs font-bold text-muted uppercase">Avg Duration</span>
                   <span className="block text-lg font-extrabold text-ink">
                     {avgDurationHours !== null ? `${avgDurationHours}h` : '—'}
                   </span>
-                  <span className="block text-[10px] text-purple-600 font-bold">Turnaround</span>
+                  <span className="block text-xs text-purple-600 font-bold">Turnaround</span>
                 </div>
 
                 {/* 3. Successful Repairs */}
                 <div className="space-y-0.5">
-                  <span className="block text-[10px] font-bold text-muted uppercase">Success Rate</span>
+                  <span className="block text-xs font-bold text-muted uppercase">Success Rate</span>
                   <span className="block text-lg font-extrabold text-[#1E7E34]">
                     {successRate !== null ? `${successRate}%` : '—'}
                   </span>
-                  <span className="block text-[10px] text-muted font-medium">
+                  <span className="block text-xs text-muted font-medium">
                     {warrantyReturnCount === 0 ? '0 Returns' : `${warrantyReturnCount} Return${warrantyReturnCount > 1 ? 's' : ''}`}
                   </span>
                 </div>
@@ -252,7 +252,7 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
                 </div>
               ) : (
                 <div className="space-y-1.5">
-                  <span className="text-[10px] text-muted font-bold uppercase tracking-wider flex items-center gap-1">
+                  <span className="text-xs text-muted font-bold uppercase tracking-wider flex items-center gap-1">
                     <TrendingUp className="w-3.5 h-3.5 text-brand" />
                     This Period Completions
                   </span>
@@ -263,8 +263,8 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
               {/* Assigned Active Work Orders Sub-List */}
               <div className="space-y-2 pt-2 border-t border-line">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="font-bold text-muted uppercase text-[10px] tracking-wider">Assigned Active Tickets</span>
-                  <span className="text-[10px] font-mono text-brand font-bold">{activeOrders.length} In-Queue</span>
+                  <span className="font-bold text-muted uppercase text-xs tracking-wider">Assigned Active Tickets</span>
+                  <span className="text-xs font-mono text-brand font-bold">{activeOrders.length} In-Queue</span>
                 </div>
 
                 {activeOrders.length === 0 ? (
@@ -283,16 +283,16 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
                         className="p-2 bg-[#F8F9FA] hover:bg-white border border-line hover:border-brand/40 rounded-lg flex items-center justify-between text-xs cursor-pointer transition-all group/ticket"
                       >
                         <div className="min-w-0 pr-2">
-                          <p className="font-mono font-bold text-brand group-hover/ticket:underline text-[11px] truncate">
+                          <p className="font-mono font-bold text-brand group-hover/ticket:underline text-xs truncate">
                             {wo.orderNumber}
                           </p>
-                          <p className="text-[11px] text-ink font-semibold truncate">{wo.deviceModel}</p>
+                          <p className="text-xs text-ink font-semibold truncate">{wo.deviceModel}</p>
                         </div>
                         <StatusBadge status={wo.status} size="xs" />
                       </div>
                     ))}
                     {activeOrders.length > 3 && (
-                      <p className="text-[10px] text-center text-muted font-medium pt-1">
+                      <p className="text-xs text-center text-muted font-medium pt-1">
                         + {activeOrders.length - 3} more tickets assigned
                       </p>
                     )}
@@ -325,7 +325,7 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
       )}
 
       {/* Note: full comparison roster moved to the Leaderboard section below (single table). */}
-      <p className="text-[10px] text-muted text-center">
+      <p className="text-xs text-muted text-center">
         Click any technician card for the full drill-down (tickets, earnings, commission).
       </p>
     </div>

@@ -21,7 +21,7 @@ export const PriorityBadge: React.FC<PriorityBadgeProps> = ({
 
   const sizeClasses = {
     xs: 'text-[9px] px-2 rounded-md font-extrabold uppercase tracking-wider h-[20px] inline-flex items-center justify-center leading-none',
-    sm: 'text-[10px] px-2.5 rounded-lg font-extrabold uppercase tracking-wider h-[22px] inline-flex items-center justify-center leading-none',
+    sm: 'text-xs px-2.5 rounded-lg font-extrabold uppercase tracking-wider h-[22px] inline-flex items-center justify-center leading-none',
     md: 'text-xs px-2.5 rounded-lg font-extrabold uppercase tracking-wider h-[26px] inline-flex items-center justify-center leading-none',
     lg: 'text-sm px-3 rounded-xl font-extrabold uppercase tracking-wider h-[30px] inline-flex items-center justify-center leading-none',
   }[size];

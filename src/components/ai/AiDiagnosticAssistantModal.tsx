@@ -461,7 +461,7 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
             <div className="w-8 h-8 bg-[var(--primary)] text-white flex items-center justify-center rounded-lg"><Bot className="w-4 h-4" /></div>
             <div className="min-w-0">
               <h2 className="text-sm font-extrabold text-[var(--text-main)]">Operations Copilot</h2>
-              <p className="text-[10px] text-[var(--text-muted)] truncate flex items-center gap-1"><span className={`w-1.5 h-1.5 rounded-full ${isExternalAi ? 'bg-emerald-500' : 'bg-[var(--primary)]'}`} />{providerLabel}</p>
+              <p className="text-xs text-[var(--text-muted)] truncate flex items-center gap-1"><span className={`w-1.5 h-1.5 rounded-full ${isExternalAi ? 'bg-emerald-500' : 'bg-[var(--primary)]'}`} />{providerLabel}</p>
             </div>
           </div>
           <div className="flex items-center gap-1">
@@ -472,13 +472,13 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
         </div>
 
         <div className="px-4 py-2.5 border-b border-[var(--border)] shrink-0">
-          <div className="flex items-center gap-1.5 text-[10px] text-[var(--text-muted)] mb-2">
+          <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] mb-2">
             <Database className="w-3.5 h-3.5 text-[var(--primary)]" />
             <span>Live context: <strong className="text-[var(--text-main)]">{context.summary.activeTickets} active</strong> · <strong className="text-[var(--text-main)]">{context.lowStockParts.length} low stock</strong> · <strong className="text-[var(--text-main)]">{context.followUps.length} follow-ups</strong></span>
           </div>
           <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
           {QUICK_PROMPTS.map(({ label, prompt, icon: Icon }) => (
-            <button key={label} type="button" disabled={isLoading} onClick={() => sendMessage(prompt)} className="px-2.5 py-1.5 bg-[var(--bg)] border border-[var(--border)] text-[var(--text-main)] rounded-lg text-[10px] font-bold flex items-center gap-1.5 shrink-0 hover:border-[var(--primary)] hover:bg-[var(--blue-tint)] disabled:opacity-50">
+            <button key={label} type="button" disabled={isLoading} onClick={() => sendMessage(prompt)} className="px-2.5 py-1.5 bg-[var(--bg)] border border-[var(--border)] text-[var(--text-main)] rounded-lg text-xs font-bold flex items-center gap-1.5 shrink-0 hover:border-[var(--primary)] hover:bg-[var(--blue-tint)] disabled:opacity-50">
               <Icon className="w-3.5 h-3.5 text-[var(--primary)]" /> {label}
             </button>
           ))}
@@ -488,7 +488,7 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-[var(--bg)] [scrollbar-gutter:stable]">
           {messages.map((message) => (
             message.role === 'system' ? (
-              <div key={message.id} className="mx-auto max-w-[92%] px-2.5 py-1.5 text-[10px] text-amber-800 bg-amber-50 border border-amber-200 rounded-lg text-center">{message.content}</div>
+              <div key={message.id} className="mx-auto max-w-[92%] px-2.5 py-1.5 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg text-center">{message.content}</div>
             ) : (
             <div key={message.id} className={`group flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`relative max-w-[90%] px-3 py-2.5 text-xs leading-relaxed whitespace-pre-wrap border ${

@@ -161,7 +161,7 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
                 <span className="truncate">{option.label}</span>
                 <div className="flex items-center space-x-1.5">
                   {option.badge !== undefined && (
-                    <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                    <span className={`px-1.5 py-0.5 rounded-full text-xs font-bold ${
                       isSelected ? 'bg-white/20 text-white' : 'bg-[var(--border-subtle)] text-[var(--text-secondary)]'
                     }`}>
                       {option.badge}

@@ -118,7 +118,7 @@ const TechniciansTab: React.FC<TechniciansTabProps> = ({ formData, setFormData, 
                               </span>
                             )}
                           </h4>
-                          <p className="text-[11px] text-muted flex items-center space-x-1 mt-0.5">
+                          <p className="text-xs text-muted flex items-center space-x-1 mt-0.5">
                             <Award className="w-3 h-3 text-brand shrink-0" />
                             <span className="font-semibold text-brand truncate">{tech.level}</span>
                           </p>
@@ -148,11 +148,11 @@ const TechniciansTab: React.FC<TechniciansTabProps> = ({ formData, setFormData, 
                     {/* Specialty / Status */}
                     <div className="space-y-1.5 text-xs border-t border-line pt-2.5">
                       {tech.specialty && (
-                        <p className="text-[11px] text-ink font-medium truncate">
+                        <p className="text-xs text-ink font-medium truncate">
                           <span className="text-muted">Specialty:</span> {tech.specialty}
                         </p>
                       )}
-                      <div className="flex items-center justify-between text-[11px]">
+                      <div className="flex items-center justify-between text-xs">
                         <span className="text-muted flex items-center space-x-1 truncate max-w-[160px]">
                           <Mail className="w-3 h-3 text-muted shrink-0" />
                           <span className="truncate">{tech.email}</span>
@@ -162,7 +162,7 @@ const TechniciansTab: React.FC<TechniciansTabProps> = ({ formData, setFormData, 
                         </span>
                       </div>
                       {tech.phone && (
-                        <div className="text-[11px] text-muted flex items-center space-x-1">
+                        <div className="text-xs text-muted flex items-center space-x-1">
                           <Phone className="w-3 h-3 text-muted shrink-0" />
                           <span>{tech.phone}</span>
                         </div>
@@ -170,7 +170,7 @@ const TechniciansTab: React.FC<TechniciansTabProps> = ({ formData, setFormData, 
                     </div>
 
                     {/* Stats Bar */}
-                    <div className="grid grid-cols-3 gap-1 pt-2 bg-white p-2 rounded-xl border border-line text-center text-[10px]">
+                    <div className="grid grid-cols-3 gap-1 pt-2 bg-white p-2 rounded-xl border border-line text-center text-xs">
                       <div>
                         <p className="text-muted font-semibold">Active Jobs</p>
                         <p className="font-extrabold text-brand text-xs">{tech.activeJobsCount || 0}</p>

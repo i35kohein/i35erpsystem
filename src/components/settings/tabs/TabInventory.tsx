@@ -82,9 +82,9 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h4 className="text-xs font-extrabold text-ink">Inventory Categories</h4>
-                <p className="text-[11px] text-muted">For stock parts only. Price List repair services stay separate.</p>
+                <p className="text-xs text-muted">For stock parts only. Price List repair services stay separate.</p>
               </div>
-              <span className="rounded-full bg-brand/10 px-2 py-0.5 font-mono text-[10px] font-bold text-brand">
+              <span className="rounded-full bg-brand/10 px-2 py-0.5 font-mono text-xs font-bold text-brand">
                 {inventoryCategories.length} categories
               </span>
             </div>
@@ -123,14 +123,14 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                     <span className="min-w-0 flex-1 truncate text-xs font-semibold text-ink">{category}</span>
                   )}
                   {editingCategoryKey === category ? (
-                    <button type="button" onClick={() => handleSaveInventoryCategory(category)} className="text-[11px] font-extrabold text-brand">Save</button>
+                    <button type="button" onClick={() => handleSaveInventoryCategory(category)} className="text-xs font-extrabold text-brand">Save</button>
                   ) : (
-                    <button type="button" onClick={() => { setEditingCategoryKey(category); setEditingCategoryLabel(category); }} className="text-[11px] font-extrabold text-brand">Edit</button>
+                    <button type="button" onClick={() => { setEditingCategoryKey(category); setEditingCategoryLabel(category); }} className="text-xs font-extrabold text-brand">Edit</button>
                   )}
                   <button
                     type="button"
                     onClick={() => { if (window.confirm(`Delete category “${category}”? It will no longer appear for new inventory parts.`)) { const nextCategories = inventoryCategories.filter((item) => item !== category); onUpdateInventoryCategories?.(nextCategories); setFormData((current) => ({ ...current, inventoryCategories: nextCategories })); } }}
-                    className="text-[11px] font-extrabold text-rose-600"
+                    className="text-xs font-extrabold text-rose-600"
                   >
                     Delete
                   </button>
@@ -143,9 +143,9 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h4 className="text-xs font-extrabold text-ink">Supplier Name Data</h4>
-                <p className="text-[11px] text-muted">Supplier records used when registering stock parts and RMA claims.</p>
+                <p className="text-xs text-muted">Supplier records used when registering stock parts and RMA claims.</p>
               </div>
-              <span className="rounded-full bg-brand/10 px-2 py-0.5 font-mono text-[10px] font-bold text-brand">{suppliers.length} suppliers</span>
+              <span className="rounded-full bg-brand/10 px-2 py-0.5 font-mono text-xs font-bold text-brand">{suppliers.length} suppliers</span>
             </div>
 
             <form onSubmit={handleAddInventorySupplier} className="grid grid-cols-1 gap-2 rounded-xl border border-line bg-[#F8F9FA] p-3 sm:grid-cols-2 lg:grid-cols-5">
@@ -171,10 +171,10 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                 <div key={supplier.id} className="flex items-center gap-3 px-3 py-2.5 text-xs">
                   <Truck className="h-4 w-4 shrink-0 text-brand" />
                   <span className="min-w-0 flex-1 truncate font-extrabold text-ink">{supplier.name}</span>
-                  <span className="font-mono text-[10px] text-muted">{supplier.code}</span>
-                  <span className="hidden text-[10px] text-muted sm:inline">{supplier.avgRmaTurnaroundDays} days</span>
-                  <button type="button" onClick={() => setEditingInventorySupplier(supplier)} className="text-[11px] font-extrabold text-brand">Edit</button>
-                  <button type="button" onClick={() => { if (window.confirm(`Delete supplier “${supplier.name}”?`)) onDeleteSupplier?.(supplier.id); }} className="text-[11px] font-extrabold text-rose-600">Delete</button>
+                  <span className="font-mono text-xs text-muted">{supplier.code}</span>
+                  <span className="hidden text-xs text-muted sm:inline">{supplier.avgRmaTurnaroundDays} days</span>
+                  <button type="button" onClick={() => setEditingInventorySupplier(supplier)} className="text-xs font-extrabold text-brand">Edit</button>
+                  <button type="button" onClick={() => { if (window.confirm(`Delete supplier “${supplier.name}”?`)) onDeleteSupplier?.(supplier.id); }} className="text-xs font-extrabold text-rose-600">Delete</button>
                 </div>
               )) : <p className="px-3 py-4 text-center text-xs text-muted">No suppliers yet.</p>}
             </div>
@@ -184,9 +184,9 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h4 className="text-xs font-extrabold text-ink">Quality Tiers</h4>
-                <p className="text-[11px] text-muted">Shared quality options for every physical inventory part.</p>
+                <p className="text-xs text-muted">Shared quality options for every physical inventory part.</p>
               </div>
-              <span className="rounded-full bg-purple-100 px-2 py-0.5 font-mono text-[10px] font-bold text-purple-700">{inventoryQualityTiers.length} tiers</span>
+              <span className="rounded-full bg-purple-100 px-2 py-0.5 font-mono text-xs font-bold text-purple-700">{inventoryQualityTiers.length} tiers</span>
             </div>
             <div className="flex gap-2">
               <input value={qualityTierDraft} onChange={(event) => setQualityTierDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleAddInventoryQualityTier(); } }} placeholder="New quality tier" className="h-9 min-w-0 flex-1 rounded-lg border border-line-strong bg-surface px-3 text-xs font-medium outline-none focus:border-brand focus:bg-white" />
@@ -197,9 +197,9 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                 <div key={tier} className="flex items-center gap-2 px-3 py-2">
                   <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-purple-600" />
                   {editingQualityTier === tier ? <input autoFocus value={editingQualityTierLabel} onChange={(event) => setEditingQualityTierLabel(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') handleSaveInventoryQualityTier(tier); if (event.key === 'Escape') setEditingQualityTier(null); }} className="h-7 min-w-0 flex-1 rounded-lg border border-purple-300 bg-white px-2 text-xs font-semibold outline-none" /> : <span className="min-w-0 flex-1 truncate text-xs font-semibold text-ink">{tier}</span>}
-                  <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-muted">{parts.filter((part) => part.qualityTier === tier).length} parts</span>
-                  {editingQualityTier === tier ? <button type="button" onClick={() => handleSaveInventoryQualityTier(tier)} className="text-[11px] font-extrabold text-purple-700">Save</button> : <button type="button" onClick={() => { setEditingQualityTier(tier); setEditingQualityTierLabel(tier); }} className="text-[11px] font-extrabold text-brand">Edit</button>}
-                  <button type="button" onClick={() => handleDeleteInventoryQualityTier(tier)} className="text-[11px] font-extrabold text-rose-600">Delete</button>
+                  <span className="rounded-full bg-white px-2 py-0.5 text-xs font-bold text-muted">{parts.filter((part) => part.qualityTier === tier).length} parts</span>
+                  {editingQualityTier === tier ? <button type="button" onClick={() => handleSaveInventoryQualityTier(tier)} className="text-xs font-extrabold text-purple-700">Save</button> : <button type="button" onClick={() => { setEditingQualityTier(tier); setEditingQualityTierLabel(tier); }} className="text-xs font-extrabold text-brand">Edit</button>}
+                  <button type="button" onClick={() => handleDeleteInventoryQualityTier(tier)} className="text-xs font-extrabold text-rose-600">Delete</button>
                 </div>
               ))}
             </div>
@@ -207,8 +207,8 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
 
           <section className={`${inventoryDataTab === 'bins' ? 'space-y-3' : 'hidden'} border-b border-line pb-5`}>
             <div className="flex items-center justify-between gap-2">
-              <div><h4 className="text-xs font-extrabold text-ink">Storage Bin Names</h4><p className="text-[11px] text-muted">Saved bin names appear when registering or editing inventory parts.</p></div>
-              <span className="rounded-full bg-brand/10 px-2 py-0.5 text-[10px] font-bold text-brand">{inventoryBinNames.length} bins</span>
+              <div><h4 className="text-xs font-extrabold text-ink">Storage Bin Names</h4><p className="text-xs text-muted">Saved bin names appear when registering or editing inventory parts.</p></div>
+              <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-bold text-brand">{inventoryBinNames.length} bins</span>
             </div>
             <div className="flex gap-2"><input value={binDraft} onChange={(event) => setBinDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleAddInventoryBin(); } }} placeholder="e.g. BIN-A01" className="h-9 min-w-0 flex-1 rounded-lg border border-line-strong bg-surface px-3 text-xs font-mono font-bold outline-none focus:border-brand focus:bg-white" /><button type="button" onClick={handleAddInventoryBin} disabled={!binDraft.trim()} className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-brand px-3 text-xs font-extrabold text-white hover:bg-brand-deep disabled:opacity-45"><Plus className="h-3.5 w-3.5" /> Add bin</button></div>
             <div className="space-y-2 rounded-xl border border-line bg-[#F8F9FA] p-3">
@@ -227,7 +227,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                       >
                         <MapPin className="h-3.5 w-3.5 shrink-0 text-brand" />
                         <span className="truncate font-mono text-xs font-bold text-ink">{bin}</span>
-                        <span className="rounded-full bg-surface px-2 py-0.5 text-[10px] font-bold text-muted">{binParts.length} parts</span>
+                        <span className="rounded-full bg-surface px-2 py-0.5 text-xs font-bold text-muted">{binParts.length} parts</span>
                       </button>
                       <div className="flex items-center gap-2">
                         <button type="button" onClick={() => setExpandedBinName((current) => current === bin ? null : bin)} className="rounded-lg p-1 text-muted hover:bg-surface" aria-label={isOpen ? `Collapse ${bin}` : `Expand ${bin}`}>
@@ -241,17 +241,17 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                         {binParts.length ? (
                           <div className="space-y-1.5">
                             {binParts.map((part) => (
-                              <div key={part.id} className="flex items-center justify-between gap-2 rounded-md bg-white px-2.5 py-1.5 text-[11px] text-ink shadow-sm">
+                              <div key={part.id} className="flex items-center justify-between gap-2 rounded-md bg-white px-2.5 py-1.5 text-xs text-ink shadow-sm">
                                 <div className="min-w-0">
                                   <p className="truncate font-bold">{part.name}</p>
-                                  <p className="truncate font-mono text-[10px] text-muted">{part.sku}</p>
+                                  <p className="truncate font-mono text-xs text-muted">{part.sku}</p>
                                 </div>
-                                <span className="rounded-full bg-brand/10 px-2 py-0.5 text-[10px] font-bold text-brand">{part.quantityInStock} stock</span>
+                                <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-bold text-brand">{part.quantityInStock} stock</span>
                               </div>
                             ))}
                           </div>
                         ) : (
-                          <p className="text-[11px] text-muted">No parts are assigned to this bin yet.</p>
+                          <p className="text-xs text-muted">No parts are assigned to this bin yet.</p>
                         )}
                       </div>
                     )}
@@ -275,7 +275,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                 max="20"
                 className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand"
               />
-              <p className="text-[11px] text-muted">
+              <p className="text-xs text-muted">
                 Parts with quantity equal to or below this count will trigger amber warning badges across the inventory matrix.
               </p>
             </div>
@@ -305,7 +305,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                 />
                 <div>
                   <span className="font-extrabold text-ink text-xs block">Auto-Reserve Parts on Ticket Assignment</span>
-                  <span className="text-[11px] text-muted">Automatically increment reserved part quantities when added to active work orders.</span>
+                  <span className="text-xs text-muted">Automatically increment reserved part quantities when added to active work orders.</span>
                 </div>
               </label>
             </div>

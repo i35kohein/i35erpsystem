@@ -145,7 +145,7 @@ const UsersTab: React.FC<UsersTabProps> = ({ formData, setFormData, users, curre
                       </div>
 
                       <div className="pt-2 border-t border-line/80 flex flex-wrap items-center justify-between text-xs gap-2">
-                        <span className={`px-2 py-0.5 rounded-lg text-[10px] font-extrabold border ${
+                        <span className={`px-2 py-0.5 rounded-lg text-xs font-extrabold border ${
                           isAdmin
                             ? 'bg-purple-50 text-purple-700 border-purple-200'
                             : isTech
@@ -156,14 +156,14 @@ const UsersTab: React.FC<UsersTabProps> = ({ formData, setFormData, users, curre
                         </span>
 
                         {usr.phone && (
-                          <span className="text-[11px] text-faint font-medium">
+                          <span className="text-xs text-faint font-medium">
                             📞 {usr.phone}
                           </span>
                         )}
                       </div>
 
                       {/* Permissions Tags */}
-                      <div className="bg-surface p-2 rounded-xl text-[10px] text-faint space-y-1">
+                      <div className="bg-surface p-2 rounded-xl text-xs text-faint space-y-1">
                         <div className="font-extrabold text-ink flex items-center justify-between">
                           <span>Key Permissions:</span>
                           <span className={usr.permissions?.canDeleteWorkOrders ? 'text-emerald-600 font-bold' : 'text-slate-400'}>

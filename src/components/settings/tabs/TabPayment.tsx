@@ -112,7 +112,7 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ formData, setFormData, currentP
                       <h4 className="text-xs font-extrabold text-ink uppercase tracking-wider">
                         {categoryTitles[cat]?.title || cat}
                       </h4>
-                      <p className="text-[11px] text-muted">
+                      <p className="text-xs text-muted">
                         {categoryTitles[cat]?.desc}
                       </p>
                     </div>
@@ -133,7 +133,7 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ formData, setFormData, currentP
                             <div className="flex items-center space-x-1.5">
                               <span className="font-extrabold text-xs text-ink block">{method.name}</span>
                             </div>
-                            <span className={`text-[10px] font-extrabold uppercase px-1.5 py-0.2 rounded-md ${
+                            <span className={`text-xs font-extrabold uppercase px-1.5 py-0.2 rounded-md ${
                               method.enabled ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500'
                             }`}>
                               {method.enabled ? 'ENABLED globally' : 'DISABLED'}
@@ -162,7 +162,7 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ formData, setFormData, currentP
                             <button
                               type="button"
                               onClick={() => handleTogglePaymentMethod(method.id)}
-                              className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
+                              className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                                 method.enabled
                                   ? 'bg-rose-50 text-rose-600 hover:bg-rose-100'
                                   : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
@@ -177,7 +177,7 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ formData, setFormData, currentP
                         <div className="mt-3 space-y-2 text-xs">
                           <div className="grid grid-cols-2 gap-2">
                             <div>
-                              <label className="text-[10px] font-bold text-muted block mb-0.5">Gateway / Bank Name</label>
+                              <label className="text-xs font-bold text-muted block mb-0.5">Gateway / Bank Name</label>
                               <input
                                 type="text"
                                 value={method.name}
@@ -186,7 +186,7 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ formData, setFormData, currentP
                               />
                             </div>
                             <div>
-                              <label className="text-[10px] font-bold text-muted block mb-0.5">Account / Phone No.</label>
+                              <label className="text-xs font-bold text-muted block mb-0.5">Account / Phone No.</label>
                               <input
                                 type="text"
                                 value={method.accountNumber || ''}
@@ -200,7 +200,7 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ formData, setFormData, currentP
                           {method.category !== 'Cash' && method.category !== 'Card & Digital' && (
                             <div className="grid grid-cols-2 gap-2">
                               <div>
-                                <label className="text-[10px] font-bold text-muted block mb-0.5">Account Beneficiary Name</label>
+                                <label className="text-xs font-bold text-muted block mb-0.5">Account Beneficiary Name</label>
                                 <input
                                   type="text"
                                   value={method.accountName || ''}
@@ -210,7 +210,7 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ formData, setFormData, currentP
                                 />
                               </div>
                               <div>
-                                <label className="text-[10px] font-bold text-muted block mb-0.5">Receipt / Note Reference</label>
+                                <label className="text-xs font-bold text-muted block mb-0.5">Receipt / Note Reference</label>
                                 <input
                                   type="text"
                                   value={method.notes || ''}

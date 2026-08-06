@@ -413,7 +413,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
         <div className={`md:col-span-5 bg-white border border-line rounded-2xl p-4 space-y-3 shadow-xs ${isIpad ? 'md:flex md:flex-col md:min-h-0' : 'md:self-start'}`}>
           <div className="flex justify-between items-center border-b border-line pb-2">
             <h2 className="font-bold text-ink text-xs">Diagnostic Completed Devices ({filteredWorkOrders.length})</h2>
-            <span className="text-[10px] font-mono font-bold bg-success/10 text-[#28A745] px-2 py-0.5 rounded-full border border-success/20">
+            <span className="text-xs font-mono font-bold bg-success/10 text-[#28A745] px-2 py-0.5 rounded-full border border-success/20">
               Diag Finished
             </span>
           </div>
@@ -423,7 +423,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               <div className="flex min-h-0 flex-1 flex-col items-center justify-center p-8 text-center text-muted space-y-2 bg-surface rounded-xl border border-dashed border-line-strong my-4">
                 <CheckCircle2 className="w-8 h-8 mx-auto text-emerald-500 opacity-70" />
                 <p className="font-extrabold text-ink text-xs">No Devices with Finished Diagnostics</p>
-                <p className="text-[11px] text-muted">
+                <p className="text-xs text-muted">
                   New intakes pending diagnostic inspection are hidden. Work orders automatically appear here in POS after diagnostic testing is completed.
                 </p>
               </div>
@@ -497,7 +497,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       )}
                     </div>
 
-                    <div className="flex items-center justify-between gap-2 text-[11px] text-muted mt-1">
+                    <div className="flex items-center justify-between gap-2 text-xs text-muted mt-1">
                       <span className="truncate">
                         Cust: {wo.customerName}
                         {wo.depositAmount > 0 && (
@@ -514,7 +514,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           }}
                           title="Copy IMEI"
                           aria-label={`Copy IMEI ${wo.imei || wo.serialNumber}`}
-                          className="font-mono text-[10px] shrink-0 truncate text-muted hover:text-brand transition-colors"
+                          className="font-mono text-xs shrink-0 truncate text-muted hover:text-brand transition-colors"
                         >
                           #{formatSerialGrouped(wo.imei || wo.serialNumber)}
                         </button>
@@ -525,7 +525,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               })
             )}
             {filteredWorkOrders.length > 0 && (
-              <p className="text-center text-[10px] font-mono font-bold text-[#C7C7CC] pt-2 pb-1 tracking-widest select-none">
+              <p className="text-center text-xs font-mono font-bold text-[#C7C7CC] pt-2 pb-1 tracking-widest select-none">
                 — End of queue —
               </p>
             )}
@@ -562,7 +562,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 <div className="flex items-end justify-between gap-3">
                   <h2 className="text-base font-bold text-ink truncate">{selectedWo.deviceModel}</h2>
                   <div className="text-right shrink-0">
-                    <span className="text-muted text-[10px]">Customer:</span>
+                    <span className="text-muted text-xs">Customer:</span>
                     <p className="font-bold text-ink text-xs">{selectedWo.customerName}</p>
                   </div>
                 </div>
@@ -578,7 +578,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         <span className="font-extrabold text-rose-900 text-xs block">
                           {selectedWo.status === 'Cant Repair' ? "Unrepairable Device" : "Customer Cancelled"}
                         </span>
-                        <span className="text-[11px] text-rose-700">
+                        <span className="text-xs text-rose-700">
                           Option to charge Diagnostic / Inspection fee only before handing back device.
                         </span>
                       </div>
@@ -586,13 +586,13 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   </div>
 
                   <div className="flex items-center justify-between pt-1 border-t border-rose-200">
-                    <span className="text-[11px] font-extrabold text-rose-950">
+                    <span className="text-xs font-extrabold text-rose-950">
                       Standard Diagnostic Fee: 5,000 MMK
                     </span>
                     <button
                       type="button"
                       onClick={handleApplyDiagnosticFeeOnly}
-                      className="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-[11px] rounded-xl transition-all shadow-2xs cursor-pointer active:scale-95"
+                      className="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs rounded-xl transition-all shadow-2xs cursor-pointer active:scale-95"
                     >
                       Apply Diagnostic Fee Only (စက်စစ်ခ သာကောက်မည်)
                     </button>
@@ -611,7 +611,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 <div className="relative">
                 <div className="border border-line rounded-xl overflow-x-auto bg-surface/80">
                   <table className="w-full text-left min-w-[520px]">
-                    <thead className="sticky top-0 z-10 bg-surface text-muted text-[10px] uppercase font-mono border-b border-line">
+                    <thead className="sticky top-0 z-10 bg-surface text-muted text-xs uppercase font-mono border-b border-line">
                       <tr>
                         <th className="p-2.5">Item</th>
                         <th className="p-2.5 text-right">Qty</th>
@@ -651,7 +651,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                               <span className="text-right">
                                 {hasDiscount && (
                                   <>
-                                    <span className="mr-1.5 text-[10px] text-[#A5A5AA] line-through">
+                                    <span className="mr-1.5 text-xs text-[#A5A5AA] line-through">
                                       {originalPrice.toLocaleString()} MMK
                                     </span>
                                     <span className="text-[#28A745] font-black">
@@ -693,7 +693,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   >
                     <span>
                       <h4 className="text-xs font-extrabold text-ink">Add Inventory Part Used</h4>
-                      <p className="text-[10px] text-muted">Pick the stock part used on this ticket before payment.</p>
+                      <p className="text-xs text-muted">Pick the stock part used on this ticket before payment.</p>
                     </span>
                     <ChevronDown className={`w-4 h-4 text-muted shrink-0 transition-transform ${isAddPartOpen ? 'rotate-180' : ''}`} />
                   </button>
@@ -701,12 +701,12 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   {isAddPartOpen && (
                   <div className="flex items-end gap-2 pt-1">
                     <label className="block min-w-0 flex-1">
-                      <span className="block text-[10px] font-bold text-muted mb-1">Inventory part</span>
+                      <span className="block text-xs font-bold text-muted mb-1">Inventory part</span>
                       <div className="flex items-center gap-2">
                         <select
                           value={inventoryPartId || (selectedInventoryPart ? selectedInventoryPart.id : '')}
                           onChange={(e) => setInventoryPartId(e.target.value)}
-                          className="min-w-0 flex-1 truncate rounded-lg border border-line bg-surface px-2.5 py-2 text-[11px] font-semibold text-ink outline-none focus:border-brand focus:ring-1 focus:ring-brand/20"
+                          className="min-w-0 flex-1 truncate rounded-lg border border-line bg-surface px-2.5 py-2 text-xs font-semibold text-ink outline-none focus:border-brand focus:ring-1 focus:ring-brand/20"
                         >
                           {filteredInventoryParts
                             .filter((part) => part.quantityInStock > 0)
@@ -720,7 +720,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           )}
                         </select>
                         {selectedInventoryPart && selectedInventoryPart.quantityInStock > 0 && (
-                          <span className={`inline-flex shrink-0 items-center gap-1 text-[10px] font-bold ${
+                          <span className={`inline-flex shrink-0 items-center gap-1 text-xs font-bold ${
                             selectedInventoryPart.quantityInStock <= selectedInventoryPart.reorderPoint
                               ? 'text-amber-600'
                               : 'text-success'
@@ -740,14 +740,14 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     </label>
 
                     <label className="block shrink-0">
-                      <span className="block text-[10px] font-bold text-muted mb-1">Qty</span>
+                      <span className="block text-xs font-bold text-muted mb-1">Qty</span>
                       <input
                         type="number"
                         min={1}
                         max={selectedInventoryPart?.quantityInStock || 99}
                         value={inventoryPartQty || ''}
                         onChange={(e) => setInventoryPartQty(Math.max(1, Math.floor(Number(e.target.value) || 1)))}
-                        className="w-16 rounded-lg border border-line bg-surface px-2 py-2 text-[11px] font-mono font-bold text-ink outline-none focus:border-brand focus:ring-1 focus:ring-brand/20"
+                        className="w-16 rounded-lg border border-line bg-surface px-2 py-2 text-xs font-mono font-bold text-ink outline-none focus:border-brand focus:ring-1 focus:ring-brand/20"
                       />
                     </label>
 
@@ -755,7 +755,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       type="button"
                       onClick={handleAddInventoryPartToWorkOrder}
                       disabled={!selectedInventoryPart}
-                      className="inline-flex h-9 shrink-0 items-center justify-center rounded-lg bg-brand px-3.5 py-2 text-[11px] font-extrabold text-white transition-all hover:bg-[#005BBB] disabled:cursor-not-allowed disabled:opacity-40"
+                      className="inline-flex h-9 shrink-0 items-center justify-center rounded-lg bg-brand px-3.5 py-2 text-xs font-extrabold text-white transition-all hover:bg-[#005BBB] disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       Add Part
                     </button>
@@ -792,7 +792,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     </span>
                   </div>
                   {selectedWo.inventoryConsumptionAmount > 0 && selectedWo.inventorySettlementStatus !== 'settled' && (
-                    <div className="rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 flex items-center justify-between text-[10px]">
+                    <div className="rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 flex items-center justify-between text-xs">
                       <span className="font-bold text-amber-800 flex items-center gap-1">
                         <Coins className="w-3 h-3 text-amber-600 shrink-0" />
                         Parts cost used from stock — settle Inventory Fund
@@ -812,7 +812,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     <CreditCard className="w-3.5 h-3.5" />
                     <span>Payment Method Selection ({activePaymentMethods.length} Enabled)</span>
                   </h3>
-                  <button type="button" onClick={onOpenSettings} className="text-[10px] text-brand hover:underline font-semibold cursor-pointer" title="Open Settings → Payment Methods">Configured in Settings → Payment Methods</button>
+                  <button type="button" onClick={onOpenSettings} className="text-xs text-brand hover:underline font-semibold cursor-pointer" title="Open Settings → Payment Methods">Configured in Settings → Payment Methods</button>
                 </div>
 
                 {activePaymentMethods.length === 0 ? (
@@ -843,7 +843,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         </span>
                         <div className="min-w-0 flex-1">
                           <div className={`leading-tight font-extrabold ${isSelected ? 'text-blue-100' : 'text-ink'}`}>{m.name}</div>
-                          <div className={`text-[10px] font-normal leading-tight ${isSelected ? 'text-blue-100' : 'text-muted'}`}>
+                          <div className={`text-xs font-normal leading-tight ${isSelected ? 'text-blue-100' : 'text-muted'}`}>
                             {m.category}
                           </div>
                         </div>
@@ -875,7 +875,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     </span>
                     <div className="min-w-0 flex-1">
                       <div className={`leading-tight font-extrabold ${paymentMethod === 'Split Payment' ? 'text-purple-100' : 'text-ink'}`}>Split Payment</div>
-                      <div className={`text-[10px] font-normal leading-tight ${paymentMethod === 'Split Payment' ? 'text-purple-100' : 'text-muted'}`}>
+                      <div className={`text-xs font-normal leading-tight ${paymentMethod === 'Split Payment' ? 'text-purple-100' : 'text-muted'}`}>
                         Multi-Method
                       </div>
                     </div>
@@ -891,7 +891,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         <Split className="w-4 h-4 text-[#7360F2]" />
                         <span>Split Payment Breakdown (အကွဲပေးချေမှု)</span>
                       </span>
-                      <span className="text-[10px] font-mono font-bold bg-[#7360F2]/10 text-[#7360F2] px-2 py-0.5 rounded-full border border-[#7360F2]/20">
+                      <span className="text-xs font-mono font-bold bg-[#7360F2]/10 text-[#7360F2] px-2 py-0.5 rounded-full border border-[#7360F2]/20">
                         Due: {selectedWo.totalAmount.toLocaleString()} MMK
                       </span>
                     </div>
@@ -903,7 +903,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
                         return (
                           <div key={idx} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-white p-2.5 rounded-xl border border-purple-100 shadow-2xs">
-                            <span className="font-mono text-[10px] text-[#7360F2] font-extrabold px-1.5 py-0.5 bg-purple-100/70 rounded shrink-0 self-start sm:self-auto">
+                            <span className="font-mono text-xs text-[#7360F2] font-extrabold px-1.5 py-0.5 bg-purple-100/70 rounded shrink-0 self-start sm:self-auto">
                               #{idx + 1}
                             </span>
 
@@ -944,7 +944,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                   updated[idx].amount = remForThis;
                                   setSplitPayments(updated);
                                 }}
-                                className="px-2 py-1.5 bg-purple-100 hover:bg-purple-200 text-[#7360F2] font-bold text-[10px] rounded-lg border border-purple-200 shrink-0 cursor-pointer transition-all active:scale-95"
+                                className="px-2 py-1.5 bg-purple-100 hover:bg-purple-200 text-[#7360F2] font-bold text-xs rounded-lg border border-purple-200 shrink-0 cursor-pointer transition-all active:scale-95"
                                 title="Auto-fill remaining amount"
                               >
                                 Auto-Fill
@@ -978,16 +978,16 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                               Paid Total: <strong className="font-mono text-ink">{currentTotalPaid.toLocaleString()} MMK</strong>
                             </span>
                             {diff === 0 ? (
-                              <span className="text-emerald-700 font-extrabold text-[11px] flex items-center space-x-1 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                              <span className="text-emerald-700 font-extrabold text-xs flex items-center space-x-1 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
                                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                                 <span>Balanced</span>
                               </span>
                             ) : diff > 0 ? (
-                              <span className="text-emerald-700 font-bold text-[11px]">
+                              <span className="text-emerald-700 font-bold text-xs">
                                 Change: +{diff.toLocaleString()} MMK
                               </span>
                             ) : (
-                              <span className="text-rose-600 font-bold text-[11px]">
+                              <span className="text-rose-600 font-bold text-xs">
                                 Short: {Math.abs(diff).toLocaleString()} MMK
                               </span>
                             )}
@@ -1005,7 +1005,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                   'Cash';
                                 setSplitPayments([...splitPayments, { method: unusedMethod, amount: remaining }]);
                               }}
-                              className="px-2.5 py-1 bg-white hover:bg-purple-100 text-[#7360F2] font-bold text-[11px] rounded-lg border border-purple-200 transition-all flex items-center space-x-1 cursor-pointer shrink-0 active:scale-95"
+                              className="px-2.5 py-1 bg-white hover:bg-purple-100 text-[#7360F2] font-bold text-xs rounded-lg border border-purple-200 transition-all flex items-center space-x-1 cursor-pointer shrink-0 active:scale-95"
                             >
                               <Plus className="w-3.5 h-3.5" />
                               <span>Add Split Method</span>
@@ -1038,34 +1038,34 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           {copiedAccount ? (
                             <>
                               <Check className="w-3 h-3 text-emerald-600" />
-                              <span className="text-[10px] text-emerald-700">Copied!</span>
+                              <span className="text-xs text-emerald-700">Copied!</span>
                             </>
                           ) : (
                             <>
                               <Copy className="w-3 h-3" />
-                              <span className="text-[10px]">Copy Number</span>
+                              <span className="text-xs">Copy Number</span>
                             </>
                           )}
                         </button>
                       )}
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 pt-1 text-[11px]">
+                    <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
                       {selectedMethodConfig.accountNumber && (
                         <div>
-                          <span className="text-muted block text-[10px]">Account / Phone No:</span>
+                          <span className="text-muted block text-xs">Account / Phone No:</span>
                           <span className="font-mono font-extrabold text-brand">{selectedMethodConfig.accountNumber}</span>
                         </div>
                       )}
                       {selectedMethodConfig.accountName && (
                         <div>
-                          <span className="text-muted block text-[10px]">Beneficiary Name:</span>
+                          <span className="text-muted block text-xs">Beneficiary Name:</span>
                           <span className="font-bold text-ink">{selectedMethodConfig.accountName}</span>
                         </div>
                       )}
                       {selectedMethodConfig.notes && (
                         <div className="col-span-2">
-                          <span className="text-muted block text-[10px]">Reference / Instructions:</span>
+                          <span className="text-muted block text-xs">Reference / Instructions:</span>
                           <span className="text-ink italic">{selectedMethodConfig.notes}</span>
                         </div>
                       )}
@@ -1085,7 +1085,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                               key={amt}
                               type="button"
                               onClick={() => setCashTendered(amt)}
-                              className={`h-10 px-2 rounded-lg border text-[10px] font-extrabold transition-all cursor-pointer ${
+                              className={`h-10 px-2 rounded-lg border text-xs font-extrabold transition-all cursor-pointer ${
                                 cashTendered === amt
                                   ? 'bg-brand text-white border-brand'
                                   : 'bg-white text-ink border-line hover:bg-brand-soft'
@@ -1144,11 +1144,11 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               {/* Receipt preview — what Pay & Print will produce */}
               <div className="rounded-xl border border-line bg-[#FBFBFD]">
                 <div className="flex items-center justify-between px-3 pt-2.5 pb-1.5">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wide text-muted">Receipt Preview</span>
+                  <span className="text-xs font-extrabold uppercase tracking-wide text-muted">Receipt Preview</span>
                   <FileText className="w-3.5 h-3.5 text-[#C7C7CC]" />
                 </div>
                 <div className="mx-3 mb-3 rounded-lg border border-dashed border-line-strong bg-white px-3 py-2.5 font-mono text-[9px] leading-relaxed text-ink">
-                  <div className="text-center font-black uppercase tracking-widest text-[10px]">i35 Apple Service</div>
+                  <div className="text-center font-black uppercase tracking-widest text-xs">i35 Apple Service</div>
                   <div className="text-center text-muted">No 1031, Pyi Htaung Su Main Rd, North Dagon</div>
                   <div className="my-1.5 border-t border-dashed border-line-strong" />
                   <div className="flex justify-between"><span className="text-muted">Invoice</span><span className="font-bold">{selectedWo.orderNumber}</span></div>
@@ -1165,7 +1165,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   )}
                   <div className="my-1.5 border-t border-dashed border-line-strong" />
                   <div className="flex justify-between"><span className="text-muted">Discount</span><span>-{(selectedWo.discountAmount || 0).toLocaleString()}</span></div>
-                  <div className="flex justify-between font-black text-[11px]"><span>TOTAL</span><span>{selectedWo.totalAmount.toLocaleString()} MMK</span></div>
+                  <div className="flex justify-between font-black text-xs"><span>TOTAL</span><span>{selectedWo.totalAmount.toLocaleString()} MMK</span></div>
                   <div className="text-center text-muted mt-1">Thank you for your business!</div>
                 </div>
               </div>
@@ -1230,10 +1230,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/95 backdrop-blur-sm px-4 pt-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] md:hidden shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 shrink-0">
-              <p className="text-[10px] font-bold text-muted uppercase tracking-wide">Amount Due</p>
+              <p className="text-xs font-bold text-muted uppercase tracking-wide">Amount Due</p>
               <p className="font-mono font-black text-brand text-base leading-tight">{selectedWo.totalAmount.toLocaleString()} MMK</p>
               {paymentMethod === 'Cash' && cashTendered >= selectedWo.totalAmount && (
-                <p className="text-[10px] font-extrabold text-[#28A745] leading-tight">
+                <p className="text-xs font-extrabold text-[#28A745] leading-tight">
                   Change: {(cashTendered - selectedWo.totalAmount).toLocaleString()} MMK
                 </p>
               )}
@@ -1396,11 +1396,11 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               <h2 className="font-extrabold text-lg text-ink">
                 {systemSettings?.shopName || 'AppleRepair Pro'}
               </h2>
-              <p className="text-muted text-[10px]">
+              <p className="text-muted text-xs">
                 {systemSettings?.receiptHeaderTitle || 'Official ACMT Certified Service Voucher'}
               </p>
               {systemSettings?.shopPhone && (
-                <p className="text-[10px] text-muted font-mono">
+                <p className="text-xs text-muted font-mono">
                   Tel: {systemSettings.shopPhone}
                 </p>
               )}
@@ -1431,7 +1431,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               </div>
             </div>
 
-            <div className="p-2 bg-[#F8F9FA] rounded-xl border border-line text-[10px] text-muted text-center italic">
+            <div className="p-2 bg-[#F8F9FA] rounded-xl border border-line text-xs text-muted text-center italic">
               {systemSettings?.receiptFooterNote || 'Thank you for choosing AppleRepair! All repairs covered by warranty.'}
             </div>
 

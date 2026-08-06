@@ -124,16 +124,16 @@ export const MicroSolderingModule: React.FC<MicroSolderingModuleProps> = ({
                 >
                   <div className="flex justify-between items-center">
                     <span className="font-mono font-bold text-[#AF52DE]">{wo.orderNumber}</span>
-                    <span className="bg-white text-ink text-[10px] px-2 py-0.5 rounded-md border border-line font-semibold">
+                    <span className="bg-white text-ink text-xs px-2 py-0.5 rounded-md border border-line font-semibold">
                       {wo.serviceType}
                     </span>
                   </div>
 
                   <p className="font-bold text-ink mt-1">{wo.deviceModel}</p>
-                  <p className="text-[11px] text-muted">Cust: {wo.customerName}</p>
+                  <p className="text-xs text-muted">Cust: {wo.customerName}</p>
 
                   {wo.microSolderingLog?.multimeterDiodeShortFound && (
-                    <span className="inline-block mt-2 text-[10px] bg-danger/10 text-danger font-bold px-2 py-0.5 rounded border border-danger/20">
+                    <span className="inline-block mt-2 text-xs bg-danger/10 text-danger font-bold px-2 py-0.5 rounded border border-danger/20">
                       ⚠ Board Short Circuit Logged
                     </span>
                   )}
@@ -216,7 +216,7 @@ export const MicroSolderingModule: React.FC<MicroSolderingModuleProps> = ({
 
                 <div className="border border-line rounded-lg overflow-hidden bg-white">
                   <table className="w-full text-left">
-                    <thead className="bg-surface text-muted text-[10px] uppercase font-mono border-b border-line">
+                    <thead className="bg-surface text-muted text-xs uppercase font-mono border-b border-line">
                       <tr>
                         <th className="p-2">Power Line</th>
                         <th className="p-2">Expected Diode</th>
@@ -231,7 +231,7 @@ export const MicroSolderingModule: React.FC<MicroSolderingModuleProps> = ({
                           <td className="p-2 text-muted">{r.expectedValue}</td>
                           <td className="p-2 text-ink">{r.actualValue}</td>
                           <td className="p-2">
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                            <span className={`px-2 py-0.5 rounded text-xs font-bold border ${
                               r.status === 'PASS' ? 'bg-[#EAF8ED] text-[#28A745] border-success/20' : 'bg-[#FFF0F0] text-danger border-danger/30 animate-pulse'
                             }`}>
                               {r.status}

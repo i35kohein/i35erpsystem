@@ -17,7 +17,7 @@ export const ActiveFilterChips: React.FC<{ chips: ActiveFilterChip[] }> = ({ chi
           key={chip.key}
           type="button"
           onClick={chip.onClear}
-          className="inline-flex items-center gap-1 rounded-full border border-brand/25 bg-brand-soft px-2.5 py-1 text-[10px] font-extrabold text-brand hover:bg-brand hover:text-white transition-colors cursor-pointer active:scale-95"
+          className="inline-flex items-center gap-1 rounded-full border border-brand/25 bg-brand-soft px-2.5 py-1 text-xs font-extrabold text-brand hover:bg-brand hover:text-white transition-colors cursor-pointer active:scale-95"
           title={`Clear ${chip.label}`}
         >
           {chip.label}

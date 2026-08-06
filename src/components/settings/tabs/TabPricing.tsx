@@ -81,7 +81,7 @@ const PricingTab: React.FC<PricingTabProps> = ({ formData, setFormData, setActiv
               </span>
               <div>
                 <h4 className="font-extrabold text-xs text-ink">Manage Active Payment Gateways & Myanmar Banks</h4>
-                <p className="text-[11px] text-muted">Enable or disable Cash, KBZ Pay, UAB Pay, AYA Pay, MMQR, CB Bank, Yoma Bank, Wave Money, etc.</p>
+                <p className="text-xs text-muted">Enable or disable Cash, KBZ Pay, UAB Pay, AYA Pay, MMQR, CB Bank, Yoma Bank, Wave Money, etc.</p>
               </div>
             </div>
             <Button

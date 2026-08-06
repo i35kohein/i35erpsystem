@@ -60,7 +60,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
             </div>
             <div className="min-w-0">
               <h2 className="font-extrabold text-sm text-ink truncate">Select Device Model</h2>
-              <p className="text-[10px] text-muted truncate">Choose a model for this repair ticket</p>
+              <p className="text-xs text-muted truncate">Choose a model for this repair ticket</p>
             </div>
           </div>
 
@@ -72,7 +72,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                   onClose();
                   onOpenSettings();
                 }}
-                className="px-2.5 py-1.5 rounded-lg bg-white hover:bg-line text-brand font-extrabold text-[11px] border border-line transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                className="px-2.5 py-1.5 rounded-lg bg-white hover:bg-line text-brand font-extrabold text-xs border border-line transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
               >
                 <Settings className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Folder Settings</span>
@@ -116,7 +116,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                   disabled={count === 0 && fam.key !== 'All'}
                   title={count === 0 && fam.key !== 'All' ? 'No models available yet' : undefined}
                   aria-disabled={count === 0 && fam.key !== 'All'}
-                  className={`px-2.5 py-1.5 text-[11px] font-extrabold rounded-lg transition-all flex items-center gap-1.5 shrink-0 border select-none active:scale-95 ${
+                  className={`px-2.5 py-1.5 text-xs font-extrabold rounded-lg transition-all flex items-center gap-1.5 shrink-0 border select-none active:scale-95 ${
                     isActive
                       ? 'bg-brand text-white border-brand shadow-xs'
                       : count === 0 && fam.key !== 'All'
@@ -146,7 +146,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
               placeholder="Type model name (e.g. 15 Pro, M2, Series 9)..."
               value={deviceSearchQuery}
               onChange={(e) => setDeviceSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-surface border border-line rounded-lg text-[11px] font-bold text-ink focus:outline-none focus:ring-2 focus:ring-brand"
+              className="w-full pl-9 pr-4 py-2 bg-surface border border-line rounded-lg text-xs font-bold text-ink focus:outline-none focus:ring-2 focus:ring-brand"
             />
             {deviceSearchQuery && (
               <button
@@ -185,10 +185,10 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                   <div className="flex items-center justify-between border-b border-line pb-2">
                     <div className="flex items-center gap-1.5">
                       <Folder className="w-3.5 h-3.5 text-brand" />
-                      <h3 className="text-[11px] font-black uppercase tracking-wider text-ink">
+                      <h3 className="text-xs font-black uppercase tracking-wider text-ink">
                         {folder.name}
                       </h3>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface text-muted border border-line">
+                      <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-surface text-muted border border-line">
                         {filteredModels.length}
                       </span>
                     </div>
@@ -208,7 +208,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                             onSelectDevice(item.model);
                             onClose();
                           }}
-                            className={`p-2.5 rounded-lg text-[11px] font-extrabold flex items-center justify-between border transition-all cursor-pointer text-left ${
+                            className={`p-2.5 rounded-lg text-xs font-extrabold flex items-center justify-between border transition-all cursor-pointer text-left ${
                             isSelected
                               ? 'bg-brand text-white border-brand shadow-xs'
                               : 'bg-surface text-ink border-line hover:border-brand hover:text-brand'
@@ -250,11 +250,11 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
         </div>
 
         {/* Modal Footer */}
-        <div className="px-3.5 py-2 bg-surface border-t border-line flex items-center justify-between text-[11px]">
+        <div className="px-3.5 py-2 bg-surface border-t border-line flex items-center justify-between text-xs">
           <span className="font-bold text-muted">
             Selected: <span className="text-brand font-black">{selectedDevice || 'None'}</span>
           </span>
-          <span className="text-[10px] text-muted font-medium">{enabledFolders.length} folders available</span>
+          <span className="text-xs text-muted font-medium">{enabledFolders.length} folders available</span>
         </div>
       </div>
   );

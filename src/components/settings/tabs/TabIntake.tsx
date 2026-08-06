@@ -31,7 +31,7 @@ const IntakeTab: React.FC<IntakeTabProps> = ({ formData, setFormData }) => {
                 placeholder="WO-"
                 className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand"
               />
-              <p className="text-[11px] text-muted">e.g. WO- generates vouchers like WO-2026-1001.</p>
+              <p className="text-xs text-muted">e.g. WO- generates vouchers like WO-2026-1001.</p>
             </div>
 
             {/* Default Warranty */}
@@ -64,7 +64,7 @@ const IntakeTab: React.FC<IntakeTabProps> = ({ formData, setFormData }) => {
                 />
                 <div>
                   <span className="font-extrabold text-ink text-xs block">Require Device Passcode / PIN at Intake</span>
-                  <span className="text-[11px] text-muted">Prompt technicians to record screen passcodes for post-repair diagnostic testing.</span>
+                  <span className="text-xs text-muted">Prompt technicians to record screen passcodes for post-repair diagnostic testing.</span>
                 </div>
               </label>
 
@@ -77,7 +77,7 @@ const IntakeTab: React.FC<IntakeTabProps> = ({ formData, setFormData }) => {
                 />
                 <div>
                   <span className="font-extrabold text-ink text-xs block">Mandatory Find My / iCloud Lock Check</span>
-                  <span className="text-[11px] text-muted">Verify that Find My iPhone / Mac activation lock status is checked during work order creation.</span>
+                  <span className="text-xs text-muted">Verify that Find My iPhone / Mac activation lock status is checked during work order creation.</span>
                 </div>
               </label>
             </div>

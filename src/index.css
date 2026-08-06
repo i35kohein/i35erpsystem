@@ -29,6 +29,11 @@ body {
   --color-faint: #6E6E73;        /* tertiary text */
   --color-line: #E5E5EA;         /* hairline border */
 
+  /* P0 font + button-height scale (2026-08-06) — floor raised 10/11px → 12px text-xs:
+       text-xs 12px = meta/badges (FLOOR) · text-sm 14px = body · text-base 16px = emphasis
+       Button heights (desktop): sm 32 (h-8) / md 36 (h-9) / lg 40 (h-10) — see ui/button.tsx */
+  --text-floor: 0.75rem;      /* 12px — nothing smaller, ever */
+
   /* Radius scale (P3 2026-08-06) — semantic usage:
        rounded-md    6px   tags / chips / badges
        rounded-lg    8px   inputs, selects, compact controls
@@ -1015,7 +1020,7 @@ html[data-theme] :is(
   .text-\[11px\] { font-size: 12px !important; line-height: 1.4 !important; }
 .text-\[7\.5px\] { font-size: 12px !important; line-height: 1.4 !important; }
 .text-\[9\.5px\] { font-size: 12px !important; line-height: 1.4 !important; }
-  /* Important variants must obey the same floor (e.g. !text-[10px] dropdown triggers).
+  /* Important variants must obey the same floor (e.g. !text-xs dropdown triggers).
      Must live in @layer base: layered !important beats unlayered !important, and the
      Tailwind utility class is itself important — so it wins over an unlayered rule. */
   @layer base {

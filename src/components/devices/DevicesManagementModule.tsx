@@ -243,7 +243,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
       <div className="module-subheader flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-line shadow-xs">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="bg-brand-soft text-brand font-extrabold text-[10px] px-2.5 py-0.5 rounded-full border border-brand/20">
+            <span className="bg-brand-soft text-brand font-extrabold text-xs px-2.5 py-0.5 rounded-full border border-brand/20">
               Hardware Directory Matrix
             </span>
             <span className="text-muted font-medium">Apple Serial & IMEI Telemetry</span>
@@ -265,7 +265,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
             <Smartphone className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-muted uppercase">Registered Devices</p>
+            <p className="text-xs font-bold text-muted uppercase">Registered Devices</p>
             <p className="text-xl font-extrabold text-ink">{allDevices.length}</p>
           </div>
         </div>
@@ -275,7 +275,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
             <CircleDot className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-muted uppercase">Total Repairs</p>
+            <p className="text-xs font-bold text-muted uppercase">Total Repairs</p>
             <p className="text-xl font-extrabold text-ink">{workOrders.length}</p>
           </div>
         </div>
@@ -285,7 +285,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
             <AlertTriangle className="w-5 h-5 animate-pulse" />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-muted uppercase">Initial Diag Pending</p>
+            <p className="text-xs font-bold text-muted uppercase">Initial Diag Pending</p>
             <p className="text-xl font-extrabold text-amber-600">
               {allDevices.filter(d => {
                 const wo = d.workOrders[0];
@@ -301,7 +301,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
             <AlertCircle className="w-5 h-5 animate-pulse" />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-muted uppercase">Finished Needs Diag</p>
+            <p className="text-xs font-bold text-muted uppercase">Finished Needs Diag</p>
             <p className="text-xl font-extrabold text-rose-600">
               {allDevices.filter(d => {
                 const wo = d.workOrders[0];
@@ -317,7 +317,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
             <ShieldCheck className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-muted uppercase">Find My OFF</p>
+            <p className="text-xs font-bold text-muted uppercase">Find My OFF</p>
             <p className="text-xl font-extrabold text-ink">
               {allDevices.filter(d => d.findMyStatus === 'OFF').length}
             </p>
@@ -329,7 +329,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
             <ShieldAlert className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-muted uppercase">Find My ON</p>
+            <p className="text-xs font-bold text-muted uppercase">Find My ON</p>
             <p className="text-xl font-extrabold text-ink">
               {allDevices.filter(d => d.findMyStatus === 'ON').length}
             </p>
@@ -360,7 +360,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
 
           {/* Find My Filter Dropdown */}
           <div className="flex items-center space-x-2">
-            <span className="text-[10px] font-extrabold text-muted uppercase flex items-center gap-1">
+            <span className="text-xs font-extrabold text-muted uppercase flex items-center gap-1">
               <Filter className="w-3 h-3 text-brand" />
               Find My:
             </span>
@@ -390,7 +390,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted hover:text-ink"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-muted hover:text-ink"
               >
                 ×
               </button>
@@ -404,7 +404,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-[#F9F9FB] border-b border-line text-[10px] font-extrabold text-muted uppercase">
+              <tr className="bg-[#F9F9FB] border-b border-line text-xs font-extrabold text-muted uppercase">
                 <th className="p-3.5">Device & Model</th>
                 <th className="p-3.5">Serial / IMEI</th>
                 <th className="p-3.5 hidden md:table-cell">Color & Lock</th>
@@ -434,7 +434,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
                           <div>
                             <p className="font-extrabold text-ink">{device.deviceModel}</p>
                             <div className="flex items-center space-x-1 mt-0.5">
-                              <span className="text-[10px] text-brand font-bold bg-brand-soft px-1.5 py-0.2 rounded border border-brand/20">
+                              <span className="text-xs text-brand font-bold bg-brand-soft px-1.5 py-0.2 rounded border border-brand/20">
                                 {device.deviceCategory}
                               </span>
                               {!isLatestDiagDone && (
@@ -451,7 +451,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
                       {/* Serial / IMEI */}
                       <td className="p-3.5 font-mono">
                         <p className="font-bold text-ink">{device.serialNumber}</p>
-                        {device.imei && <p className="text-[10px] text-muted">IMEI: {device.imei}</p>}
+                        {device.imei && <p className="text-xs text-muted">IMEI: {device.imei}</p>}
                       </td>
 
                       {/* Color & Lock Status */}
@@ -478,17 +478,17 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
                       <td className="p-3.5">
                         <div>
                           <p className="font-bold text-ink">{device.customerName}</p>
-                          <p className="text-[10px] text-muted">{device.customerPhone}</p>
+                          <p className="text-xs text-muted">{device.customerPhone}</p>
                         </div>
                       </td>
 
                       {/* Service History Stats */}
                       <td className="p-3.5 text-center hidden lg:table-cell">
                         <div className="inline-flex flex-col items-center">
-                          <span className="px-2 py-0.5 bg-blue-50 text-brand font-extrabold rounded-full border border-blue-200 text-[10px]">
+                          <span className="px-2 py-0.5 bg-blue-50 text-brand font-extrabold rounded-full border border-blue-200 text-xs">
                             {device.workOrders.length} Repair Ticket{device.workOrders.length > 1 ? 's' : ''}
                           </span>
-                          <span className="text-[10px] text-emerald-600 font-bold mt-1">
+                          <span className="text-xs text-emerald-600 font-bold mt-1">
                             {totalSpentOnDevice.toLocaleString()} MMK
                           </span>
                         </div>
@@ -526,7 +526,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
                   <td colSpan={6} className="p-12 text-center text-muted">
                     <Smartphone className="w-8 h-8 text-brand mx-auto opacity-40 mb-2" />
                     <p className="font-bold text-ink">No matching hardware devices found</p>
-                    <p className="text-[11px] mt-1">Try resetting the search query or date filters</p>
+                    <p className="text-xs mt-1">Try resetting the search query or date filters</p>
                   </td>
                 </tr>
               )}
@@ -549,7 +549,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
                   <h2 className="font-extrabold text-base text-ink">
                     {selectedDevice.deviceModel}
                   </h2>
-                  <p className="text-[10px] text-muted font-mono">
+                  <p className="text-xs text-muted font-mono">
                     SN: {selectedDevice.serialNumber} {selectedDevice.imei ? `| IMEI: ${selectedDevice.imei}` : ''}
                   </p>
                 </div>
@@ -568,24 +568,24 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
               {/* Quick Specs Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-surface p-3 rounded-xl border border-line">
                 <div>
-                  <p className="text-[10px] text-muted font-bold uppercase">Color</p>
+                  <p className="text-xs text-muted font-bold uppercase">Color</p>
                   <p className="font-extrabold text-ink">{selectedDevice.deviceColor}</p>
                 </div>
 
                 <div>
-                  <p className="text-[10px] text-muted font-bold uppercase">Passcode</p>
+                  <p className="text-xs text-muted font-bold uppercase">Passcode</p>
                   <p className="font-mono font-bold text-ink">{selectedDevice.passcode}</p>
                 </div>
 
                 <div>
-                  <p className="text-[10px] text-muted font-bold uppercase">Find My Status</p>
+                  <p className="text-xs text-muted font-bold uppercase">Find My Status</p>
                   <p className={`font-bold ${selectedDevice.findMyStatus === 'OFF' ? 'text-emerald-600' : 'text-amber-600'}`}>
                     {selectedDevice.findMyStatus}
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-[10px] text-muted font-bold uppercase">Owner</p>
+                  <p className="text-xs text-muted font-bold uppercase">Owner</p>
                   <p className="font-extrabold text-ink">{selectedDevice.customerName}</p>
                 </div>
               </div>
@@ -600,7 +600,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
                       if (latestWo) onOpenNewWorkOrder(latestWo);
                       setSelectedDevice(null);
                     }}
-                    className="text-[11px] font-bold text-brand hover:underline flex items-center space-x-1"
+                    className="text-xs font-bold text-brand hover:underline flex items-center space-x-1"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>+ New Ticket for Device</span>
@@ -613,7 +613,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <span className="font-extrabold text-brand font-mono">{wo.orderNumber}</span>
-                          <span className="text-[10px] text-muted">{new Date(wo.createdAt).toLocaleDateString()}</span>
+                          <span className="text-xs text-muted">{new Date(wo.createdAt).toLocaleDateString()}</span>
                         </div>
                         <div className="flex items-center space-x-1.5">
                           <StatusBadge status={wo.status} size="xs" />
@@ -624,7 +624,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
                       <p className="text-xs text-ink font-medium">{wo.symptomsReported}</p>
 
                       {wo.lineItems.length > 0 && (
-                        <div className="bg-[#F9F9FB] p-2 rounded-lg text-[11px] space-y-1">
+                        <div className="bg-[#F9F9FB] p-2 rounded-lg text-xs space-y-1">
                           <p className="font-bold text-muted text-[9px] uppercase">Replaced Components & Labor:</p>
                           {wo.lineItems.map((li) => (
                             <div key={li.id} className="flex justify-between text-ink">
@@ -635,7 +635,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
                         </div>
                       )}
 
-                      <div className="flex items-center justify-between text-[11px] pt-1 text-muted">
+                      <div className="flex items-center justify-between text-xs pt-1 text-muted">
                         <span>Tech: {wo.assignedTechName || 'Assigned'}</span>
                         <span className="font-extrabold text-[#28A745]">Total: {wo.subtotal.toLocaleString()} MMK</span>
                       </div>
@@ -667,7 +667,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
 
             <form onSubmit={handleRegisterDevice} className="p-4 space-y-3">
               <div>
-                <label className="block text-[10px] font-bold text-muted uppercase mb-1">Owner / Customer</label>
+                <label className="block text-xs font-bold text-muted uppercase mb-1">Owner / Customer</label>
                 <select
                   value={newCustomerId}
                   onChange={(e) => setNewCustomerId(e.target.value)}
@@ -681,7 +681,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-[10px] font-bold text-muted uppercase mb-1">Category</label>
+                  <label className="block text-xs font-bold text-muted uppercase mb-1">Category</label>
                   <select
                     value={newCategory}
                     onChange={(e) => setNewCategory(e.target.value as AppleDeviceCategory)}
@@ -696,7 +696,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-muted uppercase mb-1">Device Model</label>
+                  <label className="block text-xs font-bold text-muted uppercase mb-1">Device Model</label>
                   <input
                     type="text"
                     required
@@ -710,7 +710,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-[10px] font-bold text-muted uppercase mb-1">Serial Number</label>
+                  <label className="block text-xs font-bold text-muted uppercase mb-1">Serial Number</label>
                   <input
                     type="text"
                     required
@@ -722,7 +722,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-muted uppercase mb-1">IMEI (Optional)</label>
+                  <label className="block text-xs font-bold text-muted uppercase mb-1">IMEI (Optional)</label>
                   <input
                     type="text"
                     placeholder="358921102..."
@@ -735,7 +735,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
 
               <div className="grid grid-cols-3 gap-2">
                 <div>
-                  <label className="block text-[10px] font-bold text-muted uppercase mb-1">Color</label>
+                  <label className="block text-xs font-bold text-muted uppercase mb-1">Color</label>
                   <input
                     type="text"
                     placeholder="Deep Purple"
@@ -746,7 +746,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-muted uppercase mb-1">Passcode</label>
+                  <label className="block text-xs font-bold text-muted uppercase mb-1">Passcode</label>
                   <input
                     type="text"
                     placeholder="123456"
@@ -757,7 +757,7 @@ export const DevicesManagementModule: React.FC<DevicesManagementModuleProps> = (
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-muted uppercase mb-1">Find My</label>
+                  <label className="block text-xs font-bold text-muted uppercase mb-1">Find My</label>
                   <select
                     value={newFindMy}
                     onChange={(e) => setNewFindMy(e.target.value as 'ON' | 'OFF')}

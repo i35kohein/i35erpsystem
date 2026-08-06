@@ -25,8 +25,8 @@ export const StatusChip: React.FC<{ status: WorkOrderStatus; size?: 'xs' | 'sm' 
   const s = String(status || '');
   const base =
     size === 'sm'
-      ? 'px-2.5 py-1 text-[11px] rounded-lg'
-      : 'px-2 py-0.5 text-[10px] rounded-md';
+      ? 'px-2.5 py-1 text-xs rounded-lg'
+      : 'px-2 py-0.5 text-xs rounded-md';
   const tone = (() => {
     if (/finished|taken out|completed|done/i.test(s)) {
       return /taken out/i.test(s)

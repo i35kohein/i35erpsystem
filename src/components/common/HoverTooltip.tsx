@@ -124,7 +124,7 @@ export const HoverTooltip: React.FC = () => {
   return (
     <div
       role="tooltip"
-      className="fixed z-[1000] pointer-events-none max-w-64 px-2.5 py-1.5 bg-ink text-white text-[11px] font-semibold leading-tight text-center rounded-lg shadow-lg"
+      className="fixed z-[1000] pointer-events-none max-w-64 px-2.5 py-1.5 bg-ink text-white text-xs font-semibold leading-tight text-center rounded-lg shadow-lg"
       style={{
         left: tooltip.left,
         top: tooltip.top,

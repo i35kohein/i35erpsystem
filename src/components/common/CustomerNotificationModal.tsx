@@ -118,7 +118,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
             </div>
             <div>
               <h2 className="text-base font-extrabold tracking-tight">Customer Notification Alert</h2>
-              <p className="text-[11px] text-slate-300">
+              <p className="text-xs text-slate-300">
                 Ticket <span className="font-mono text-blue-300 font-bold">{workOrder.orderNumber}</span> • {workOrder.customerName} ({workOrder.customerPhone})
               </p>
             </div>
@@ -135,7 +135,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
         <div className="p-6 space-y-5">
           {/* Channel Selector Buttons */}
           <div>
-            <label className="block text-[11px] font-extrabold text-muted uppercase tracking-wider mb-2">
+            <label className="block text-xs font-extrabold text-muted uppercase tracking-wider mb-2">
               Select Notification Channel
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -182,7 +182,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
 
           {/* Configured Notification Templates */}
           <div>
-            <label className="block text-[11px] font-extrabold text-muted uppercase tracking-wider mb-2">
+            <label className="block text-xs font-extrabold text-muted uppercase tracking-wider mb-2">
               Notification Message Templates (မြန်မာဘာသာ)
             </label>
             <div className="flex flex-wrap gap-1.5">
@@ -209,8 +209,8 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
           {/* Message Text Area */}
           <div>
             <div className="flex justify-between items-center mb-1">
-              <span className="text-[11px] font-bold text-muted">Message Preview:</span>
-              <span className="text-[10px] text-brand font-bold">{messageText.length} characters</span>
+              <span className="text-xs font-bold text-muted">Message Preview:</span>
+              <span className="text-xs text-brand font-bold">{messageText.length} characters</span>
             </div>
             <textarea
               rows={4}
@@ -223,11 +223,11 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
           {/* Recipient summary info badge */}
           <div className="bg-blue-50 border border-blue-200 p-3 rounded-2xl flex items-center justify-between text-xs text-ink">
             <div>
-              <span className="text-[10px] text-muted block">Recipient Phone:</span>
+              <span className="text-xs text-muted block">Recipient Phone:</span>
               <span className="font-mono font-extrabold text-brand">{workOrder.customerPhone || 'N/A'}</span>
             </div>
             <div className="text-right">
-              <span className="text-[10px] text-muted block">Device / Total:</span>
+              <span className="text-xs text-muted block">Device / Total:</span>
               <span className="font-bold">{workOrder.deviceModel} • {workOrder.totalAmount.toLocaleString()} MMK</span>
             </div>
           </div>

@@ -336,7 +336,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                     : `${st.bg} ${st.border} hover:border-[#136F9A]/45`
                 }`}
               >
-                <span className="text-[10px] font-bold text-[#526375] uppercase tracking-[0.06em] block leading-4">
+                <span className="text-xs font-bold text-[#526375] uppercase tracking-[0.06em] block leading-4">
                   {st.label}
                 </span>
                 <span className={`text-xl font-extrabold mt-2 leading-none ${st.color}`}>
@@ -367,7 +367,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                 <button
                   type="button"
                   onClick={() => setFilterStatus('ALL')}
-                  className="text-[10px] font-bold underline hover:opacity-80 cursor-pointer ml-1"
+                  className="text-xs font-bold underline hover:opacity-80 cursor-pointer ml-1"
                 >
                   Clear
                 </button>
@@ -429,7 +429,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           /* TABLE VIEW */
           <div className="workspace-panel__scroll rounded-xl">
             <table className="w-full text-left border-collapse">
-              <thead className="sticky top-0 z-20 border-b border-line bg-surface font-mono text-[10px] uppercase text-muted shadow-2xs">
+              <thead className="sticky top-0 z-20 border-b border-line bg-surface font-mono text-xs uppercase text-muted shadow-2xs">
                 <tr>
                   <th className="w-[92px] xl:w-[132px] px-2 py-2 bg-surface">Ticket # & Date</th>
                   <th className="w-[148px] px-2 py-2 bg-surface">Customer & Contact</th>
@@ -479,7 +479,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                             <Ticket className="h-3 w-3" />
                           </div>
                           <div className="min-w-0">
-                            <p className="font-mono text-[11px] font-extrabold leading-snug text-brand">{wo.orderNumber || wo.id}</p>
+                            <p className="font-mono text-xs font-extrabold leading-snug text-brand">{wo.orderNumber || wo.id}</p>
                             <p className="mt-0.5 text-[9px] font-medium text-muted hidden xl:block" title={createdDateFull}>{createdDate}</p>
                           </div>
                         </div>
@@ -488,7 +488,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                       {/* Customer & Contact */}
                       <td className="px-2 py-2 text-ink">
                         <div className="space-y-0.5">
-                          <span className="block max-w-[140px] truncate text-[11px] font-extrabold leading-snug">{wo.customerName}</span>
+                          <span className="block max-w-[140px] truncate text-xs font-extrabold leading-snug">{wo.customerName}</span>
                           <span className="block font-mono text-[9px] font-medium text-muted">{wo.customerPhone}</span>
                         </div>
                       </td>
@@ -496,7 +496,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                       {/* Device & Serial */}
                       <td className="px-2 py-2 text-ink">
                         <div className="space-y-0.5">
-                          <span className="block max-w-[150px] truncate text-[11px] font-extrabold leading-snug">{wo.deviceModel}</span>
+                          <span className="block max-w-[150px] truncate text-xs font-extrabold leading-snug">{wo.deviceModel}</span>
                           <span className="block max-w-[150px] truncate font-mono text-[9px] font-medium text-muted">
                             {wo.serialNumber || wo.imei ? `SN: ${wo.serialNumber || wo.imei}` : 'No Serial'}
                           </span>
@@ -505,7 +505,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
 
                       {/* Symptoms / Service */}
                       <td className="px-2 py-2 text-ink hidden lg:table-cell">
-                        <p className="line-clamp-1 max-w-[180px] text-[11px] font-semibold" title={wo.symptomsReported || wo.serviceType}>
+                        <p className="line-clamp-1 max-w-[180px] text-xs font-semibold" title={wo.symptomsReported || wo.serviceType}>
                           {wo.symptomsReported || wo.serviceType || 'General Repair'}
                         </p>
                       </td>
@@ -513,10 +513,10 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                       {/* Assigned Tech */}
                       <td className="px-2 py-2 text-ink hidden lg:table-cell">
                         <div className="flex items-center space-x-1.5">
-                          <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-200 text-[10px] font-bold text-slate-700">
+                          <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-200 text-xs font-bold text-slate-700">
                             {(wo.assignedTechName || 'U').charAt(0)}
                           </div>
-                          <span className="max-w-[100px] truncate text-[11px] font-semibold">{wo.assignedTechName || 'Unassigned'}</span>
+                          <span className="max-w-[100px] truncate text-xs font-semibold">{wo.assignedTechName || 'Unassigned'}</span>
                         </div>
                       </td>
 
@@ -612,7 +612,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
 
                   <div className="flex justify-between items-center pt-2 border-t border-line">
                     <div>
-                      <span className="block text-[10px] text-[#7F7F7F] uppercase font-bold">Total Estimate</span>
+                      <span className="block text-xs text-[#7F7F7F] uppercase font-bold">Total Estimate</span>
                       <span className="font-mono font-black text-sm text-[#136F9A]">
                         {(wo.totalAmount || wo.subtotal || 0).toLocaleString()} MMK
                       </span>
@@ -645,7 +645,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
             <div className="px-4 sm:px-5 py-3 border-b border-[var(--border)] bg-[var(--card-bg)] flex items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">
                 <h2 className="text-sm font-black text-[var(--text-main)]">Ticket details</h2>
-                <span className="font-mono text-[11px] font-bold text-[var(--text-muted)] whitespace-nowrap">
+                <span className="font-mono text-xs font-bold text-[var(--text-muted)] whitespace-nowrap">
                   {selectedWorkOrder.orderNumber}
                 </span>
               </div>
@@ -659,7 +659,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                   className="group relative flex h-10 w-10 items-center justify-center rounded-lg border border-transparent text-[var(--text-muted)] transition-colors hover:border-[var(--border)] hover:bg-[var(--bg)] hover:text-[var(--primary)] cursor-pointer"
                 >
                   <Printer className="h-4 w-4" />
-                  <span className="pointer-events-none absolute right-0 top-full z-20 mt-2 hidden whitespace-nowrap rounded-md bg-[var(--text-main)] px-2 py-1 text-[10px] font-bold text-[var(--card-bg)] shadow-md group-hover:block">
+                  <span className="pointer-events-none absolute right-0 top-full z-20 mt-2 hidden whitespace-nowrap rounded-md bg-[var(--text-main)] px-2 py-1 text-xs font-bold text-[var(--card-bg)] shadow-md group-hover:block">
                     Print sticker
                   </span>
                 </button>
@@ -679,7 +679,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                     className="group relative flex h-9 w-9 items-center justify-center rounded-lg border border-transparent text-[var(--text-muted)] transition-colors hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 cursor-pointer"
                   >
                     <Trash2 className="h-4 w-4" />
-                    <span className="pointer-events-none absolute right-0 top-full z-20 mt-2 hidden whitespace-nowrap rounded-md bg-[var(--text-main)] px-2 py-1 text-[10px] font-bold text-[var(--card-bg)] shadow-md group-hover:block">
+                    <span className="pointer-events-none absolute right-0 top-full z-20 mt-2 hidden whitespace-nowrap rounded-md bg-[var(--text-main)] px-2 py-1 text-xs font-bold text-[var(--card-bg)] shadow-md group-hover:block">
                       Delete ticket
                     </span>
                   </button>
@@ -690,7 +690,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                     className="group relative flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-muted)] opacity-50 cursor-not-allowed"
                   >
                     <Lock className="h-4 w-4" />
-                    <span className="pointer-events-none absolute right-0 top-full z-20 mt-2 hidden whitespace-nowrap rounded-md bg-[var(--text-main)] px-2 py-1 text-[10px] font-bold text-[var(--card-bg)] shadow-md group-hover:block">
+                    <span className="pointer-events-none absolute right-0 top-full z-20 mt-2 hidden whitespace-nowrap rounded-md bg-[var(--text-main)] px-2 py-1 text-xs font-bold text-[var(--card-bg)] shadow-md group-hover:block">
                       Delete locked
                     </span>
                   </span>
@@ -728,38 +728,38 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                     <h3 className="text-lg font-black leading-6 text-[var(--text-main)]">{selectedWorkOrder.deviceModel}</h3>
                     <p className="mt-1 text-xs font-bold text-[var(--text-main)]">{selectedWorkOrder.customerName}</p>
                     {selectedWorkOrder.customerAddress && (
-                      <p className="mt-0.5 text-[11px] leading-4 text-[var(--text-muted)]">{selectedWorkOrder.customerAddress}</p>
+                      <p className="mt-0.5 text-xs leading-4 text-[var(--text-muted)]">{selectedWorkOrder.customerAddress}</p>
                     )}
                   </div>
 
               {/* Spec Matrix Grid */}
               <dl className="divide-y divide-[var(--border)] border-y border-[var(--border)] text-xs">
                 <div className="py-2.5">
-                  <span className="block text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-wider">Contact</span>
+                  <span className="block text-xs font-extrabold text-[var(--text-muted)] uppercase tracking-wider">Contact</span>
                   <span className="font-bold text-[var(--primary)] block mt-1 truncate">
                     {selectedWorkOrder.customerPhone || 'No phone'}
                   </span>
                 </div>
                 <div className="py-2.5">
-                  <span className="block text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-wider">Serial / IMEI</span>
+                  <span className="block text-xs font-extrabold text-[var(--text-muted)] uppercase tracking-wider">Serial / IMEI</span>
                   <span className="font-mono text-xs font-bold text-[var(--text-main)] block mt-1 truncate">
                     {selectedWorkOrder.serialNumber || selectedWorkOrder.imei || 'N/A'}
                   </span>
                 </div>
                 <div className="py-2.5">
-                  <span className="block text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-wider">Technician</span>
+                  <span className="block text-xs font-extrabold text-[var(--text-muted)] uppercase tracking-wider">Technician</span>
                   <span className="font-bold text-[var(--text-main)] block mt-1 truncate">
                     {selectedWorkOrder.assignedTechName || 'Unassigned'}
                   </span>
                 </div>
                 <div className="py-2.5">
-                  <span className="block text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-wider">Intake Date</span>
+                  <span className="block text-xs font-extrabold text-[var(--text-muted)] uppercase tracking-wider">Intake Date</span>
                   <span className="font-bold text-[var(--text-main)] block mt-1 truncate">
                     {new Date(selectedWorkOrder.createdAt).toLocaleDateString()}
                   </span>
                 </div>
                 <div className="py-2.5">
-                  <span className="block text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-wider">Total Estimate</span>
+                  <span className="block text-xs font-extrabold text-[var(--text-muted)] uppercase tracking-wider">Total Estimate</span>
                   <span className="font-mono font-black text-base text-[var(--primary)] block mt-0.5">
                     {(selectedWorkOrder.totalAmount || selectedWorkOrder.subtotal || 0).toLocaleString()} MMK
                   </span>
@@ -842,7 +842,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                           >
                             <div className="min-w-0">
                               <p className="truncate text-xs font-extrabold text-[var(--text-main)]">
-                                <span className="mr-2 font-mono text-[10px] text-[var(--text-muted)]">
+                                <span className="mr-2 font-mono text-xs text-[var(--text-muted)]">
                                   {index + 1}.
                                 </span>
                                 {beforeItem.name}

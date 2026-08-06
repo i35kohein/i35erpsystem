@@ -112,7 +112,7 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
             <div>
               <div className="flex items-center space-x-2">
                 <h2 className="text-lg font-black text-ink">{customer.name}</h2>
-                <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
                   customer.type === 'B2B Corporate' ? 'bg-purple-50 text-purple-700 border-purple-200' :
                   customer.type === 'Wholesale Mail-In' ? 'bg-brand-soft text-brand border-brand/20' :
                   'bg-white text-ink border-line'
@@ -139,7 +139,7 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
             <div className="flex items-center space-x-2">
               <Phone className="w-4 h-4 text-muted" />
               <div>
-                <span className="block text-[10px] text-muted font-bold uppercase">Phone</span>
+                <span className="block text-xs text-muted font-bold uppercase">Phone</span>
                 <span className="font-mono font-bold text-ink">{customer.phone || 'N/A'}</span>
               </div>
             </div>
@@ -147,7 +147,7 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
             <div className="flex items-center space-x-2">
               <Mail className="w-4 h-4 text-muted" />
               <div className="min-w-0">
-                <span className="block text-[10px] text-muted font-bold uppercase">Email</span>
+                <span className="block text-xs text-muted font-bold uppercase">Email</span>
                 <span className="font-semibold text-ink truncate block">{customer.email || 'N/A'}</span>
               </div>
             </div>
@@ -156,7 +156,7 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
               <div className="flex items-center space-x-2">
                 <Building className="w-4 h-4 text-muted" />
                 <div className="min-w-0">
-                  <span className="block text-[10px] text-muted font-bold uppercase">Company</span>
+                  <span className="block text-xs text-muted font-bold uppercase">Company</span>
                   <span className="font-semibold text-ink truncate block">{customer.company}</span>
                 </div>
               </div>
@@ -165,7 +165,7 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
             <div className="flex items-center space-x-2">
               <Tag className="w-4 h-4 text-brand" />
               <div>
-                <span className="block text-[10px] text-muted font-bold uppercase">Account Tier</span>
+                <span className="block text-xs text-muted font-bold uppercase">Account Tier</span>
                 <span className="font-bold text-brand">{customer.discountPercentage}% Discount Tier</span>
               </div>
             </div>
@@ -174,7 +174,7 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
           {/* Quick Metrics Bar */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="bg-white p-3.5 rounded-2xl border border-line shadow-2xs">
-              <span className="text-[10px] font-bold text-muted uppercase">Total Repairs</span>
+              <span className="text-xs font-bold text-muted uppercase">Total Repairs</span>
               <div className="text-lg font-black text-ink mt-0.5 flex items-center justify-between">
                 <span>{customerOrders.length}</span>
                 <History className="w-5 h-5 text-brand" />
@@ -182,7 +182,7 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
             </div>
 
             <div className="bg-white p-3.5 rounded-2xl border border-line shadow-2xs">
-              <span className="text-[10px] font-bold text-muted uppercase">Completed</span>
+              <span className="text-xs font-bold text-muted uppercase">Completed</span>
               <div className="text-lg font-black text-emerald-600 mt-0.5 flex items-center justify-between">
                 <span>{completedCount}</span>
                 <CheckCircle2 className="w-5 h-5 text-emerald-500" />
@@ -190,7 +190,7 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
             </div>
 
             <div className="bg-white p-3.5 rounded-2xl border border-line shadow-2xs">
-              <span className="text-[10px] font-bold text-muted uppercase">Active Repairs</span>
+              <span className="text-xs font-bold text-muted uppercase">Active Repairs</span>
               <div className="text-lg font-black text-amber-600 mt-0.5 flex items-center justify-between">
                 <span>{inProgressCount}</span>
                 <Clock className="w-5 h-5 text-amber-500" />
@@ -198,7 +198,7 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
             </div>
 
             <div className="bg-white p-3.5 rounded-2xl border border-line shadow-2xs">
-              <span className="text-[10px] font-bold text-muted uppercase">Total Expenditure</span>
+              <span className="text-xs font-bold text-muted uppercase">Total Expenditure</span>
               <div className="text-lg font-black text-[#28A745] mt-0.5 flex items-center justify-between">
                 <span>{totalSpent.toLocaleString()} {systemSettings.currencySymbol}</span>
                 <TrendingUp className="w-5 h-5 text-[#28A745]" />
@@ -211,7 +211,7 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
             <h3 className="font-extrabold text-ink text-xs flex items-center justify-between">
               <span>Chronological Repair History & Outcomes ({customerOrders.length})</span>
               {customerOrders.length > 0 && (
-                <span className="text-muted text-[11px] font-medium">Average Ticket Value: {avgCost.toLocaleString()} {systemSettings.currencySymbol}</span>
+                <span className="text-muted text-xs font-medium">Average Ticket Value: {avgCost.toLocaleString()} {systemSettings.currencySymbol}</span>
               )}
             </h3>
 

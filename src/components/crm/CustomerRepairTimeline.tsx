@@ -169,7 +169,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
       <div className={`flex min-h-[260px] flex-col items-center justify-center rounded-2xl border border-dashed border-line bg-[#F8F9FA] p-8 text-center text-muted ${emptyClassName}`}>
         <Clock className="w-8 h-8 text-muted/50 mx-auto mb-2" />
         <p className="font-semibold text-xs">No repair history recorded for this customer account.</p>
-        <p className="text-[11px] text-muted mt-0.5">When work orders are intaken, they will appear chronologically here.</p>
+        <p className="text-xs text-muted mt-0.5">When work orders are intaken, they will appear chronologically here.</p>
       </div>
     );
   }
@@ -199,7 +199,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="bg-transparent text-[11px] font-bold text-ink focus:outline-none cursor-pointer"
+                  className="bg-transparent text-xs font-bold text-ink focus:outline-none cursor-pointer"
                 >
                   <option value="ALL">All Outcomes ({workOrders.length})</option>
                   <option value="Finished">Finished</option>
@@ -217,7 +217,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                   <select
                     value={deviceFilter}
                     onChange={(e) => setDeviceFilter(e.target.value)}
-                    className="bg-transparent text-[11px] font-bold text-ink focus:outline-none cursor-pointer"
+                    className="bg-transparent text-xs font-bold text-ink focus:outline-none cursor-pointer"
                   >
                     <option value="ALL">All Devices</option>
                     {availableCategories.map((cat) => (
@@ -231,7 +231,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
               <button
                 type="button"
                 onClick={() => setSortOrder(prev => prev === 'NEWEST' ? 'OLDEST' : 'NEWEST')}
-                className="px-2.5 py-1 bg-white border border-line hover:border-brand text-ink font-bold text-[11px] rounded-xl flex items-center space-x-1 cursor-pointer transition-all shadow-2xs"
+                className="px-2.5 py-1 bg-white border border-line hover:border-brand text-ink font-bold text-xs rounded-xl flex items-center space-x-1 cursor-pointer transition-all shadow-2xs"
                 title="Toggle Chronological Order"
               >
                 <ArrowUpDown className="w-3 h-3 text-brand" />
@@ -284,24 +284,24 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                         {wo.orderNumber || wo.id}
                       </span>
 
-                      <span className={`px-2.5 py-0.5 text-[10px] font-extrabold rounded-full border ${outcomeMeta.badgeClass}`}>
+                      <span className={`px-2.5 py-0.5 text-xs font-extrabold rounded-full border ${outcomeMeta.badgeClass}`}>
                         {outcomeMeta.label}
                       </span>
 
                       {wo.serviceType && (
-                        <span className="px-2 py-0.5 text-[10px] font-bold bg-surface text-ink border border-line rounded-md">
+                        <span className="px-2 py-0.5 text-xs font-bold bg-surface text-ink border border-line rounded-md">
                           {wo.serviceType}
                         </span>
                       )}
 
                       {wo.priority && wo.priority !== 'Normal' && (
-                        <span className="px-2 py-0.5 text-[10px] font-extrabold bg-rose-100 text-rose-800 rounded-md">
+                        <span className="px-2 py-0.5 text-xs font-extrabold bg-rose-100 text-rose-800 rounded-md">
                           ⚡ {wo.priority}
                         </span>
                       )}
                     </div>
 
-                    <div className="flex items-center space-x-2 text-[11px] text-muted">
+                    <div className="flex items-center space-x-2 text-xs text-muted">
                       <Calendar className="w-3.5 h-3.5 text-brand" />
                       <span className="font-semibold text-ink">{formattedDate}</span>
                       <span className="text-muted">at {formattedTime}</span>
@@ -311,7 +311,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                   {/* Device Specification & Serial Section */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#F9F9FB] p-3 rounded-xl border border-line/80">
                     <div>
-                      <span className="text-[10px] font-bold text-muted uppercase tracking-wider block mb-0.5">
+                      <span className="text-xs font-bold text-muted uppercase tracking-wider block mb-0.5">
                         Device Specification
                       </span>
                       <div className="flex items-center space-x-1.5">
@@ -320,7 +320,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                           {wo.deviceCategory} {wo.deviceModel}
                         </span>
                       </div>
-                      <div className="flex flex-wrap items-center gap-2 text-[10px] text-muted mt-1">
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-muted mt-1">
                         {wo.deviceColor && (
                           <span className="px-1.5 py-0.5 bg-white rounded border border-line font-medium">
                             Color: {wo.deviceColor}
@@ -335,10 +335,10 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                     </div>
 
                     <div>
-                      <span className="text-[10px] font-bold text-muted uppercase tracking-wider block mb-0.5">
+                      <span className="text-xs font-bold text-muted uppercase tracking-wider block mb-0.5">
                         Security & Passcode Status
                       </span>
-                      <div className="flex items-center space-x-3 text-[11px] pt-0.5">
+                      <div className="flex items-center space-x-3 text-xs pt-0.5">
                         <div>
                           <span className="text-muted">Passcode: </span>
                           <span className="font-mono font-bold text-ink">
@@ -347,7 +347,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                         </div>
                         <div>
                           <span className="text-muted">Find My: </span>
-                          <span className={`font-bold px-1.5 py-0.5 rounded text-[10px] ${
+                          <span className={`font-bold px-1.5 py-0.5 rounded text-xs ${
                             wo.findMyStatus === 'OFF' 
                               ? 'bg-emerald-100 text-emerald-800' 
                               : wo.findMyStatus === 'ON' 
@@ -365,7 +365,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                   <div className="space-y-2">
                     <div className="bg-brand-soft p-3 rounded-xl border border-brand/20 space-y-1.5">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-black uppercase text-brand tracking-wider flex items-center space-x-1">
+                        <span className="text-xs font-black uppercase text-brand tracking-wider flex items-center space-x-1">
                           <Activity className="w-3 h-3 text-brand" />
                           <span>Repair Outcome Summary & Diagnosis</span>
                         </span>
@@ -384,9 +384,9 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                       {/* Line Items / Selected Repairs List */}
                       {wo.selectedRepairs && wo.selectedRepairs.length > 0 && (
                         <div className="pt-1.5 border-t border-brand/15 flex flex-wrap gap-1.5">
-                          <span className="text-[10px] font-bold text-muted py-0.5">Services:</span>
+                          <span className="text-xs font-bold text-muted py-0.5">Services:</span>
                           {wo.selectedRepairs.map((item, i) => (
-                            <span key={i} className="px-2 py-0.5 bg-white text-ink border border-brand/20 text-[10px] font-bold rounded-md">
+                            <span key={i} className="px-2 py-0.5 bg-white text-ink border border-brand/20 text-xs font-bold rounded-md">
                               {item.name} ({item.finalPrice?.toLocaleString()} {systemSettings.currencySymbol})
                             </span>
                           ))}
@@ -396,7 +396,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                   </div>
 
                   {/* Footer Stats: Tech, Financials, Warranty & Printable Invoice */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-line text-[11px]">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-line text-xs">
                     <div className="flex flex-wrap items-center gap-3 text-muted">
                       <span>
                         <strong>Assigned Tech:</strong>{' '}
@@ -410,7 +410,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
 
                     <div className="flex items-center space-x-3">
                       <div className="text-right">
-                        <span className="text-[10px] text-muted uppercase font-bold block leading-none">Total Cost</span>
+                        <span className="text-xs text-muted uppercase font-bold block leading-none">Total Cost</span>
                         <span className="text-sm font-extrabold text-[#28A745]">
                           {wo.totalAmount?.toLocaleString() || 0} {systemSettings.currencySymbol}
                         </span>

@@ -198,35 +198,35 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
     switch (status) {
       case 'Satisfied':
         return (
-          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center space-x-1 w-max">
+          <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center space-x-1 w-max">
             <CheckCircle2 className="w-3 h-3 text-emerald-600" />
             <span>Satisfied Customer</span>
           </span>
         );
       case 'Issue Reported':
         return (
-          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 flex items-center space-x-1 w-max">
+          <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200 flex items-center space-x-1 w-max">
             <AlertTriangle className="w-3 h-3 text-rose-600" />
             <span>Issue Reported</span>
           </span>
         );
       case 'No Answer':
         return (
-          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 flex items-center space-x-1 w-max">
+          <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 flex items-center space-x-1 w-max">
             <PhoneCall className="w-3 h-3 text-amber-600" />
             <span>No Answer / Left Msg</span>
           </span>
         );
       case 'Callback Scheduled':
         return (
-          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 flex items-center space-x-1 w-max">
+          <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 flex items-center space-x-1 w-max">
             <Clock className="w-3 h-3 text-blue-600" />
             <span>Callback Scheduled</span>
           </span>
         );
       case 'Closed':
         return (
-          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 flex items-center space-x-1 w-max">
+          <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200 flex items-center space-x-1 w-max">
             <Check className="w-3 h-3 text-slate-500" />
             <span>Follow-up Closed</span>
           </span>
@@ -234,7 +234,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
       case 'Pending Call':
       default:
         return (
-          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200 flex items-center space-x-1 w-max">
+          <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200 flex items-center space-x-1 w-max">
             <Clock className="w-3 h-3 text-sky-600" />
             <span>Pending Follow-up</span>
           </span>
@@ -289,44 +289,44 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
         {/* Analytics Key Cards */}
         <div className="grid grid-cols-2 md:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10 gap-2.5 pt-2">
           <div className="bg-surface border border-line rounded-xl p-3 space-y-1">
-            <span className="text-[11px] font-semibold text-muted">Total Completed</span>
+            <span className="text-xs font-semibold text-muted">Total Completed</span>
             <div className="text-xl font-extrabold text-ink">{totalCompleted}</div>
-            <p className="text-[10px] text-muted">Finished & Picked Up</p>
+            <p className="text-xs text-muted">Finished & Picked Up</p>
           </div>
 
           <div className="bg-indigo-50/70 border border-indigo-200 rounded-xl p-3 space-y-1">
-            <span className="text-[11px] font-bold text-indigo-900">7-Day Check</span>
+            <span className="text-xs font-bold text-indigo-900">7-Day Check</span>
             <div className="text-xl font-extrabold text-indigo-800">{count7Days}</div>
-            <p className="text-[10px] text-indigo-700 font-medium">≥ 7 days post-repair</p>
+            <p className="text-xs text-indigo-700 font-medium">≥ 7 days post-repair</p>
           </div>
 
           <div className="bg-purple-50/70 border border-purple-200 rounded-xl p-3 space-y-1">
-            <span className="text-[11px] font-bold text-purple-900">1-Month Check</span>
+            <span className="text-xs font-bold text-purple-900">1-Month Check</span>
             <div className="text-xl font-extrabold text-purple-800">{count30Days}</div>
-            <p className="text-[10px] text-purple-700 font-medium">≥ 30 days post-repair</p>
+            <p className="text-xs text-purple-700 font-medium">≥ 30 days post-repair</p>
           </div>
 
           <div className="bg-violet-50/80 border border-violet-200 rounded-xl p-3 space-y-1">
-            <span className="text-[11px] font-bold text-violet-900">2-Month Check</span>
+            <span className="text-xs font-bold text-violet-900">2-Month Check</span>
             <div className="text-xl font-extrabold text-violet-800">{count60Days}</div>
-            <p className="text-[10px] text-violet-700 font-medium">≥ 60 days post-repair</p>
+            <p className="text-xs text-violet-700 font-medium">≥ 60 days post-repair</p>
           </div>
 
           <div className="bg-emerald-50/50 border border-emerald-200 rounded-xl p-3 space-y-1">
-            <span className="text-[11px] font-semibold text-emerald-800">Satisfied</span>
+            <span className="text-xs font-semibold text-emerald-800">Satisfied</span>
             <div className="text-xl font-extrabold text-emerald-900">{satisfiedCount}</div>
-            <p className="text-[10px] text-emerald-700">Positive feedback</p>
+            <p className="text-xs text-emerald-700">Positive feedback</p>
           </div>
 
           <div className="bg-amber-50/50 border border-amber-200 rounded-xl p-3 space-y-1 col-span-2 md:col-span-1">
-            <span className="text-[11px] font-semibold text-amber-800">Avg Rating</span>
+            <span className="text-xs font-semibold text-amber-800">Avg Rating</span>
             <div className="flex items-center space-x-1.5">
               <span className="text-xl font-extrabold text-amber-900">{avgRating}</span>
               <div className="flex items-center text-amber-500">
                 <Star className="w-4 h-4 fill-amber-400 text-amber-500" />
               </div>
             </div>
-            <p className="text-[10px] text-amber-700">Out of 5.0 rating</p>
+            <p className="text-xs text-amber-700">Out of 5.0 rating</p>
           </div>
         </div>
       </div>
@@ -379,7 +379,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
           <h3 className="text-xs font-extrabold text-ink uppercase tracking-wider">
             Devices Due for Follow-Up ({filteredWorkOrders.length})
           </h3>
-          <span className="text-[11px] text-muted font-semibold">
+          <span className="text-xs text-muted font-semibold">
             Click 'Log Follow-Up' to record customer status
           </span>
         </div>
@@ -476,7 +476,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                           <History className="w-3.5 h-3.5 text-[#136F9A]" />
                           <span>Repaired Services & Replaced Components:</span>
                         </span>
-                        <span className="text-[11px] font-extrabold text-[#136F9A] bg-[#E5F1FF] px-2 py-0.5 rounded-md border border-[#BCE0FD]">
+                        <span className="text-xs font-extrabold text-[#136F9A] bg-[#E5F1FF] px-2 py-0.5 rounded-md border border-[#BCE0FD]">
                           {systemSettings.currencySymbol}{wo.totalAmount || 0}
                         </span>
                       </div>
@@ -484,27 +484,27 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                       <div className="flex flex-wrap gap-1.5 pt-0.5">
                         {wo.selectedRepairs && wo.selectedRepairs.length > 0 ? (
                           wo.selectedRepairs.map((rep, idx) => (
-                            <span key={idx} className="px-2.5 py-1 bg-white border border-[#D8E5ED] text-[#2C3E50] font-extrabold text-[11px] rounded-lg shadow-2xs flex items-center space-x-1">
+                            <span key={idx} className="px-2.5 py-1 bg-white border border-[#D8E5ED] text-[#2C3E50] font-extrabold text-xs rounded-lg shadow-2xs flex items-center space-x-1">
                               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                               <span>{rep.name}</span>
                             </span>
                           ))
                         ) : wo.lineItems && wo.lineItems.length > 0 ? (
                           wo.lineItems.map((item, idx) => (
-                            <span key={idx} className="px-2.5 py-1 bg-white border border-[#D8E5ED] text-[#2C3E50] font-extrabold text-[11px] rounded-lg shadow-2xs flex items-center space-x-1">
+                            <span key={idx} className="px-2.5 py-1 bg-white border border-[#D8E5ED] text-[#2C3E50] font-extrabold text-xs rounded-lg shadow-2xs flex items-center space-x-1">
                               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                               <span>{item.description || item.partName}</span>
                             </span>
                           ))
                         ) : (
-                          <span className="px-2.5 py-1 bg-white border border-[#D8E5ED] text-[#2C3E50] font-extrabold text-[11px] rounded-lg flex items-center space-x-1">
+                          <span className="px-2.5 py-1 bg-white border border-[#D8E5ED] text-[#2C3E50] font-extrabold text-xs rounded-lg flex items-center space-x-1">
                             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                             <span>{wo.symptomsReported || 'Standard Repair & Servicing'}</span>
                           </span>
                         )}
 
                         {wo.microSolderingLog?.icReplaced && wo.microSolderingLog.icReplaced.length > 0 && (
-                          <span className="px-2.5 py-1 bg-purple-50 border border-purple-200 text-purple-900 font-extrabold text-[11px] rounded-lg flex items-center space-x-1">
+                          <span className="px-2.5 py-1 bg-purple-50 border border-purple-200 text-purple-900 font-extrabold text-xs rounded-lg flex items-center space-x-1">
                             <Cpu className="w-3.5 h-3.5 text-purple-600 shrink-0" />
                             <span>IC Replaced: {wo.microSolderingLog.icReplaced.join(', ')}</span>
                           </span>
@@ -512,7 +512,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                       </div>
 
                       {(wo.afterRepairSummary || wo.symptomsReported || wo.diagnosticResult) && (
-                        <div className="text-[11px] text-[#526375] space-y-1 pt-1 border-t border-[#EBF3F8]">
+                        <div className="text-xs text-[#526375] space-y-1 pt-1 border-t border-[#EBF3F8]">
                           {wo.afterRepairSummary && (
                             <p><strong className="text-[#2C3E50]">Tech Repair Notes:</strong> {wo.afterRepairSummary}</p>
                           )}
@@ -526,7 +526,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                     {/* Last Log preview */}
                     {lastRecord && (
                       <div className="bg-surface border border-line rounded-xl p-2.5 text-xs text-ink space-y-1 mt-1">
-                        <div className="flex items-center justify-between text-[11px] text-muted">
+                        <div className="flex items-center justify-between text-xs text-muted">
                           <span className="font-bold text-ink flex items-center space-x-1">
                             <span>Last Logged by {lastRecord.author}</span>
                             {lastRecord.satisfactionRating && (
@@ -626,27 +626,27 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                   <div className="flex flex-wrap gap-1">
                     {selectedWo.selectedRepairs && selectedWo.selectedRepairs.length > 0 ? (
                       selectedWo.selectedRepairs.map((rep, idx) => (
-                        <span key={idx} className="px-2 py-0.5 bg-white border border-[#D8E5ED] text-[#2C3E50] font-bold text-[11px] rounded-md flex items-center space-x-1">
+                        <span key={idx} className="px-2 py-0.5 bg-white border border-[#D8E5ED] text-[#2C3E50] font-bold text-xs rounded-md flex items-center space-x-1">
                           <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                           <span>{rep.name}</span>
                         </span>
                       ))
                     ) : selectedWo.lineItems && selectedWo.lineItems.length > 0 ? (
                       selectedWo.lineItems.map((item, idx) => (
-                        <span key={idx} className="px-2 py-0.5 bg-white border border-[#D8E5ED] text-[#2C3E50] font-bold text-[11px] rounded-md flex items-center space-x-1">
+                        <span key={idx} className="px-2 py-0.5 bg-white border border-[#D8E5ED] text-[#2C3E50] font-bold text-xs rounded-md flex items-center space-x-1">
                           <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                           <span>{item.description || item.partName}</span>
                         </span>
                       ))
                     ) : (
-                      <span className="px-2 py-0.5 bg-white border border-[#D8E5ED] text-[#2C3E50] font-bold text-[11px] rounded-md flex items-center space-x-1">
+                      <span className="px-2 py-0.5 bg-white border border-[#D8E5ED] text-[#2C3E50] font-bold text-xs rounded-md flex items-center space-x-1">
                         <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                         <span>{selectedWo.symptomsReported || 'Standard Repair Service'}</span>
                       </span>
                     )}
 
                     {selectedWo.microSolderingLog?.icReplaced && selectedWo.microSolderingLog.icReplaced.length > 0 && (
-                      <span className="px-2 py-0.5 bg-purple-50 border border-purple-200 text-purple-900 font-bold text-[11px] rounded-md flex items-center space-x-1">
+                      <span className="px-2 py-0.5 bg-purple-50 border border-purple-200 text-purple-900 font-bold text-xs rounded-md flex items-center space-x-1">
                         <Cpu className="w-3 h-3 text-purple-600" />
                         <span>IC Replaced: {selectedWo.microSolderingLog.icReplaced.join(', ')}</span>
                       </span>
@@ -654,12 +654,12 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                   </div>
 
                   {selectedWo.afterRepairSummary && (
-                    <p className="text-[11px] text-[#526375] pt-0.5">
+                    <p className="text-xs text-[#526375] pt-0.5">
                       <strong className="text-[#2C3E50]">Tech Summary:</strong> {selectedWo.afterRepairSummary}
                     </p>
                   )}
 
-                  <div className="flex items-center justify-between text-[11px] text-[#526375] pt-1 border-t border-[#EBF3F8]">
+                  <div className="flex items-center justify-between text-xs text-[#526375] pt-1 border-t border-[#EBF3F8]">
                     <span>Assigned Tech: <strong className="text-[#2C3E50]">{selectedWo.assignedTechName || 'Shop Technician'}</strong></span>
                     <span>Warranty: <strong className="text-[#2C3E50]">{selectedWo.warrantyDays || 30} Days</strong></span>
                   </div>
@@ -736,7 +736,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className="font-bold text-ink">Call Notes & Feedback Details</label>
-                  <span className="text-[10px] text-muted">Quick click templates below</span>
+                  <span className="text-xs text-muted">Quick click templates below</span>
                 </div>
 
                 <div className="flex flex-wrap gap-1.5 pb-1">
@@ -745,7 +745,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                       key={idx}
                       type="button"
                       onClick={() => setFormNotes(tmpl)}
-                      className="px-2 py-1 bg-surface hover:bg-line text-ink border border-line rounded-lg text-[10px] font-semibold transition-all text-left cursor-pointer"
+                      className="px-2 py-1 bg-surface hover:bg-line text-ink border border-line rounded-lg text-xs font-semibold transition-all text-left cursor-pointer"
                     >
                       + {tmpl.slice(0, 32)}...
                     </button>
@@ -832,18 +832,18 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                 <div className="flex flex-wrap gap-1">
                   {historyModalWo.selectedRepairs && historyModalWo.selectedRepairs.length > 0 ? (
                     historyModalWo.selectedRepairs.map((rep, idx) => (
-                      <span key={idx} className="px-2 py-0.5 bg-white border border-[#D8E5ED] text-[#2C3E50] font-bold text-[10px] rounded">
+                      <span key={idx} className="px-2 py-0.5 bg-white border border-[#D8E5ED] text-[#2C3E50] font-bold text-xs rounded">
                         ✓ {rep.name}
                       </span>
                     ))
                   ) : historyModalWo.lineItems && historyModalWo.lineItems.length > 0 ? (
                     historyModalWo.lineItems.map((item, idx) => (
-                      <span key={idx} className="px-2 py-0.5 bg-white border border-[#D8E5ED] text-[#2C3E50] font-bold text-[10px] rounded">
+                      <span key={idx} className="px-2 py-0.5 bg-white border border-[#D8E5ED] text-[#2C3E50] font-bold text-xs rounded">
                         ✓ {item.description || item.partName}
                       </span>
                     ))
                   ) : (
-                    <span className="px-2 py-0.5 bg-white border border-[#D8E5ED] text-[#2C3E50] font-bold text-[10px] rounded">
+                    <span className="px-2 py-0.5 bg-white border border-[#D8E5ED] text-[#2C3E50] font-bold text-xs rounded">
                       ✓ {historyModalWo.symptomsReported || 'Standard Repair'}
                     </span>
                   )}
@@ -857,7 +857,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-ink">{rec.author}</span>
-                    <span className="text-[10px] text-muted">
+                    <span className="text-xs text-muted">
                       {new Date(rec.timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
                     </span>
                   </div>
@@ -871,7 +871,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                   </div>
                   <p className="text-ink">{rec.notes}</p>
                   {rec.nextFollowUpDate && (
-                    <div className="text-[10px] text-brand font-semibold">
+                    <div className="text-xs text-brand font-semibold">
                       Next Callback: {rec.nextFollowUpDate}
                     </div>
                   )}

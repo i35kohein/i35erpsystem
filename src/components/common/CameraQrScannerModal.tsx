@@ -344,7 +344,7 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
                       {/* Laser beam */}
                       <div className="w-full h-0.5 bg-rose-500 shadow-[0_0_8px_#f43f5e] animate-pulse absolute top-1/2" />
                     </div>
-                    <span className="mt-3 text-[11px] font-bold text-white/90 bg-black/60 px-3 py-1 rounded-full backdrop-blur-xs">
+                    <span className="mt-3 text-xs font-bold text-white/90 bg-black/60 px-3 py-1 rounded-full backdrop-blur-xs">
                       Align Barcode or QR Code within Frame
                     </span>
                   </div>
@@ -411,9 +411,9 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
                     onClick={() => handleScanFound(sample.value)}
                     className="p-3 bg-[#F8FBFD] hover:bg-brand/10 border border-line hover:border-brand rounded-2xl text-left transition-all cursor-pointer group"
                   >
-                    <span className="block text-[10px] font-bold text-brand uppercase">{sample.type}</span>
+                    <span className="block text-xs font-bold text-brand uppercase">{sample.type}</span>
                     <span className="font-extrabold text-xs text-ink block mt-0.5">{sample.label}</span>
-                    <span className="font-mono text-[11px] text-muted block mt-0.5 group-hover:text-brand">
+                    <span className="font-mono text-xs text-muted block mt-0.5 group-hover:text-brand">
                       {sample.value}
                     </span>
                   </button>
@@ -432,7 +432,7 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
                   </div>
                   <div>
                     <h4 className="text-xs font-black text-ink">Barcode Decoded Successfully</h4>
-                    <p className="text-[10px] text-emerald-800 font-bold">Ready to auto-fill into Intake / Lookup</p>
+                    <p className="text-xs text-emerald-800 font-bold">Ready to auto-fill into Intake / Lookup</p>
                   </div>
                 </div>
 
@@ -464,7 +464,7 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
 
         {/* Modal Footer */}
         <div className="px-6 py-3 border-t border-line bg-[#F8FBFD] flex items-center justify-between">
-          <span className="text-[11px] text-muted font-semibold">
+          <span className="text-xs text-muted font-semibold">
             Formats: QR Code, Code 128, Code 39, EAN, UPC, DataMatrix
           </span>
 

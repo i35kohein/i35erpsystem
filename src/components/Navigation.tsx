@@ -302,7 +302,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                       {systemSettings?.shopName || 'i35 ERP'}
                     </span>
                   </div>
-                  <p className="text-[10px] text-muted truncate font-medium">Repair operations</p>
+                  <p className="text-xs text-muted truncate font-medium">Repair operations</p>
                 </div>
               </div>
 
@@ -459,7 +459,7 @@ export const Navigation: React.FC<NavigationProps> = ({
               aria-label="Logout"
               variant="outline"
               size="sm"
-              className="w-full justify-center gap-2 py-2 text-[11px] hover:bg-danger/5 hover:text-danger"
+              className="w-full justify-center gap-2 py-2 text-xs hover:bg-danger/5 hover:text-danger"
             >
               <LogOut className="h-3.5 w-3.5" />
               {!effectiveCollapsed && <span>Logout</span>}
@@ -468,7 +468,7 @@ export const Navigation: React.FC<NavigationProps> = ({
 
           {/* System Online Status Pill */}
           {!effectiveCollapsed && (
-            <div className="pt-1 px-1 flex items-center justify-between text-[10px] text-muted">
+            <div className="pt-1 px-1 flex items-center justify-between text-xs text-muted">
               <span className="flex items-center space-x-1.5">
                 <span className="w-2 h-2 rounded-full bg-[#2E7D32]" />
                 <span className="font-medium">System online</span>

@@ -299,7 +299,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
                 {t('timelineTitle')}
               </h3>
             </div>
-            <p className="text-[11px] text-slate-300">
+            <p className="text-xs text-slate-300">
               {workOrder.deviceCategory} {workOrder.deviceModel} • {t('assignedTech')}:{' '}
               <strong className="text-white">{workOrder.assignedTechName || 'Unassigned'}</strong>
             </p>
@@ -365,7 +365,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
                     )}
                   </div>
 
-                  <p className="text-[10px] text-slate-300 line-clamp-1 leading-tight">{stage.desc}</p>
+                  <p className="text-xs text-slate-300 line-clamp-1 leading-tight">{stage.desc}</p>
 
                   <div className="flex justify-between items-center mt-2 pt-1 border-t border-white/10 text-[9px] text-slate-400">
                     <span>{isCurrent ? 'Current Stage' : isPassed ? 'Completed' : 'Upcoming'}</span>
@@ -387,7 +387,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
                 <AlertCircle className="w-4 h-4 text-rose-400" />
                 <span>Ticket Outcome: {workOrder.status === 'Cant Repair' ? "Unrepairable / Can't Repair" : 'Cancelled / Customer Not Repair'}</span>
               </div>
-              <span className="text-[10px] font-mono bg-rose-900/60 text-rose-100 px-2 py-0.5 rounded-md">
+              <span className="text-xs font-mono bg-rose-900/60 text-rose-100 px-2 py-0.5 rounded-md">
                 Terminal Exception Stage
               </span>
             </div>
@@ -429,12 +429,12 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
                 <option value="Customer Not Repair">Customer Not Repair (Declined)</option>
               </select>
               {targetStatus !== workOrder.status && (
-                <p className="text-[10px] text-brand font-bold mt-1">
+                <p className="text-xs text-brand font-bold mt-1">
                   ⚡ Status will update from <span className="underline">{workOrder.status}</span> ➔ <span className="underline">{targetStatus}</span>
                 </p>
               )}
               {['Receive', 'In Progress', 'Pending'].includes(targetStatus) && !checkIsBeforeDiagnosticCompleted(workOrder) && (
-                <div className="p-2.5 bg-amber-50 border border-amber-300 rounded-xl text-amber-900 text-[11px] space-y-1 mt-2">
+                <div className="p-2.5 bg-amber-50 border border-amber-300 rounded-xl text-amber-900 text-xs space-y-1 mt-2">
                   <div className="flex items-center space-x-1.5 font-extrabold text-amber-950">
                     <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 animate-pulse" />
                     <span>Initial Diagnostic Alert:</span>
@@ -445,7 +445,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
                 </div>
               )}
               {targetStatus === 'Finished' && !checkIsAfterDiagnosticCompleted(workOrder) && (
-                <div className="p-2.5 bg-rose-50 border border-rose-300 rounded-xl text-rose-900 text-[11px] space-y-1 mt-2">
+                <div className="p-2.5 bg-rose-50 border border-rose-300 rounded-xl text-rose-900 text-xs space-y-1 mt-2">
                   <div className="flex items-center space-x-1.5 font-extrabold text-rose-950">
                     <AlertCircle className="w-3.5 h-3.5 text-rose-600 shrink-0 animate-pulse" />
                     <span>Finished Device Diagnostic Alert:</span>
@@ -456,7 +456,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
                 </div>
               )}
               {targetStatus === 'Taken Out' && (
-                <div className="p-2.5 bg-purple-50 border border-purple-300 rounded-xl text-purple-950 text-[11px] space-y-1 mt-2">
+                <div className="p-2.5 bg-purple-50 border border-purple-300 rounded-xl text-purple-950 text-xs space-y-1 mt-2">
                   <div className="flex items-center space-x-1.5 font-extrabold text-purple-950">
                     <AlertCircle className="w-3.5 h-3.5 text-purple-600 shrink-0 animate-pulse" />
                     <span>POS Cashout Required for Taken Out:</span>
@@ -528,11 +528,11 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
 
           {/* Filter Pills */}
           <div className="flex items-center space-x-1 overflow-x-auto no-scrollbar w-full sm:w-auto">
-            <span className="text-[10px] font-bold text-muted uppercase tracking-wider pr-1">Filter:</span>
+            <span className="text-xs font-bold text-muted uppercase tracking-wider pr-1">Filter:</span>
             <button
               type="button"
               onClick={() => setFilterType('ALL')}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 filterType === 'ALL' ? 'bg-brand text-white' : 'bg-white text-ink hover:bg-slate-200'
               }`}
             >
@@ -541,7 +541,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
             <button
               type="button"
               onClick={() => setFilterType('TRANSITION')}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 filterType === 'TRANSITION' ? 'bg-brand text-white' : 'bg-white text-ink hover:bg-slate-200'
               }`}
             >
@@ -550,7 +550,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
             <button
               type="button"
               onClick={() => setFilterType('NOTES')}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 filterType === 'NOTES' ? 'bg-brand text-white' : 'bg-white text-ink hover:bg-slate-200'
               }`}
             >
@@ -559,7 +559,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
             <button
               type="button"
               onClick={() => setFilterType('QA')}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 filterType === 'QA' ? 'bg-brand text-white' : 'bg-white text-ink hover:bg-slate-200'
               }`}
             >
@@ -620,13 +620,13 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
                   {/* Card Header */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 border-b border-line pb-2">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className={`px-2 py-0.5 text-[10px] font-extrabold rounded-full border ${categoryBadge}`}>
+                      <span className={`px-2 py-0.5 text-xs font-extrabold rounded-full border ${categoryBadge}`}>
                         {categoryLabel}
                       </span>
 
                       {/* Display Status Transition Pair if present */}
                       {item.fromStatus && item.toStatus && (
-                        <div className="flex items-center space-x-1.5 font-mono text-[11px] font-extrabold bg-surface px-2.5 py-0.5 rounded-lg border border-line">
+                        <div className="flex items-center space-x-1.5 font-mono text-xs font-extrabold bg-surface px-2.5 py-0.5 rounded-lg border border-line">
                           <span className="text-muted">{item.fromStatus}</span>
                           <ArrowRight className="w-3 h-3 text-brand" />
                           <span className="text-brand underline">{item.toStatus}</span>
@@ -634,7 +634,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
                       )}
                     </div>
 
-                    <div className="flex items-center space-x-2 text-[10px] text-muted">
+                    <div className="flex items-center space-x-2 text-xs text-muted">
                       {item.timeDelta && (
                         <span className="bg-slate-100 text-slate-700 font-mono font-bold px-1.5 py-0.5 rounded inline-flex items-center">
                           <Clock className="w-3 h-3 text-slate-500 shrink-0 mr-1" />
@@ -652,13 +652,13 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
                       {item.note}
                     </p>
 
-                    <div className="flex items-center justify-between pt-1 text-[10px] text-muted">
+                    <div className="flex items-center justify-between pt-1 text-xs text-muted">
                       <span>
                         Logged by: <strong className="text-ink font-bold">{item.author}</strong>
                       </span>
 
                       {item.isInitialIntake && (
-                        <span className="text-[10px] font-mono font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+                        <span className="text-xs font-mono font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
                           Intake Baseline Timestamp
                         </span>
                       )}
@@ -673,7 +673,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
         <div className="p-8 text-center text-muted bg-[#F8F9FA] rounded-2xl border border-dashed border-line">
           <Search className="w-8 h-8 text-muted/40 mx-auto mb-2" />
           <p className="font-extrabold text-xs text-ink">No Status Transition Events Found</p>
-          <p className="text-[11px] text-muted mt-0.5">
+          <p className="text-xs text-muted mt-0.5">
             Try adjusting search keywords or selecting a different filter option above.
           </p>
         </div>

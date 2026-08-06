@@ -41,7 +41,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                     ) : (
                       <div className="flex flex-col items-center justify-center text-muted space-y-1">
                         <ImageIcon className="w-8 h-8 text-brand/60" />
-                        <span className="text-[10px] font-bold">No Logo Set</span>
+                        <span className="text-xs font-bold">No Logo Set</span>
                       </div>
                     )}
                   </div>
@@ -50,7 +50,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, shopLogoUrl: '' })}
-                      className="text-[11px] font-bold text-red-500 hover:text-red-700 flex items-center space-x-1 cursor-pointer"
+                      className="text-xs font-bold text-red-500 hover:text-red-700 flex items-center space-x-1 cursor-pointer"
                     >
                       <Trash2 className="w-3 h-3" />
                       <span>Remove Logo</span>
@@ -79,7 +79,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                       }}
                     />
                   </label>
-                  <p className="text-[10px] text-muted">PNG, JPG, SVG or WEBP up to 2MB</p>
+                  <p className="text-xs text-muted">PNG, JPG, SVG or WEBP up to 2MB</p>
                 </div>
               </div>
 
@@ -96,7 +96,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                     placeholder="e.g. AppleRepair Pro Lab"
                     className="w-full p-2.5 bg-white border border-line rounded-xl text-xs font-bold text-ink focus:outline-none focus:border-brand"
                   />
-                  <p className="text-[10px] text-muted mt-1">
+                  <p className="text-xs text-muted mt-1">
                     Appears in top sidebar brand header, repair tickets, and customer documents.
                   </p>
                 </div>
@@ -116,7 +116,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
 
                 {/* Quick Preset Logos */}
                 <div className="space-y-1.5">
-                  <label className="block text-[11px] font-bold text-[#526375]">
+                  <label className="block text-xs font-bold text-[#526375]">
                     Quick Preset Icons / Badges:
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -126,7 +126,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                         ...formData, 
                         shopLogoUrl: 'https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=120&auto=format&fit=crop&q=80' 
                       })}
-                      className="px-2.5 py-1 bg-surface hover:bg-line border border-line-strong rounded-lg text-[11px] font-bold text-ink transition-all flex items-center space-x-1.5 cursor-pointer"
+                      className="px-2.5 py-1 bg-surface hover:bg-line border border-line-strong rounded-lg text-xs font-bold text-ink transition-all flex items-center space-x-1.5 cursor-pointer"
                     >
                       <span> Apple Metallic Badge</span>
                     </button>
@@ -136,7 +136,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                         ...formData, 
                         shopLogoUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=120&auto=format&fit=crop&q=80' 
                       })}
-                      className="px-2.5 py-1 bg-surface hover:bg-line border border-line-strong rounded-lg text-[11px] font-bold text-ink transition-all flex items-center space-x-1.5 cursor-pointer"
+                      className="px-2.5 py-1 bg-surface hover:bg-line border border-line-strong rounded-lg text-xs font-bold text-ink transition-all flex items-center space-x-1.5 cursor-pointer"
                     >
                       <span>⚡ Tech Circuit Chip</span>
                     </button>
@@ -146,7 +146,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                         ...formData, 
                         shopLogoUrl: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=120&auto=format&fit=crop&q=80' 
                       })}
-                      className="px-2.5 py-1 bg-surface hover:bg-line border border-line-strong rounded-lg text-[11px] font-bold text-ink transition-all flex items-center space-x-1.5 cursor-pointer"
+                      className="px-2.5 py-1 bg-surface hover:bg-line border border-line-strong rounded-lg text-xs font-bold text-ink transition-all flex items-center space-x-1.5 cursor-pointer"
                     >
                       <span>🛡️ Cyber Lab Shield</span>
                     </button>
@@ -189,7 +189,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                         shopPhone: updated[0] || '',
                       });
                     }}
-                    className="px-2.5 py-1 bg-brand hover:bg-brand-deep text-white font-extrabold text-[11px] rounded-lg transition-all flex items-center space-x-1 cursor-pointer shrink-0"
+                    className="px-2.5 py-1 bg-brand hover:bg-brand-deep text-white font-extrabold text-xs rounded-lg transition-all flex items-center space-x-1 cursor-pointer shrink-0"
                   >
                     <Plus className="w-3 h-3" />
                     <span>Add Contact Phone Number</span>
@@ -202,7 +202,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                     : [formData.shopPhone || '']
                   ).map((phoneNum, idx) => (
                     <div key={idx} className="flex items-center space-x-2">
-                      <span className="text-[10px] font-extrabold font-mono text-muted w-20 shrink-0">
+                      <span className="text-xs font-extrabold font-mono text-muted w-20 shrink-0">
                         {idx === 0 ? 'Primary Line:' : `Line #${idx + 1}:`}
                       </span>
                       <input
@@ -245,7 +245,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                     </div>
                   ))}
                 </div>
-                <p className="text-[10px] text-muted">
+                <p className="text-xs text-muted">
                   Primary phone is used as main contact line. Additional lines appear on job vouchers, sticker tags, receipts, and invoices.
                 </p>
               </div>
@@ -328,7 +328,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                 <CheckCircle2 className="w-4 h-4 text-success" />
                 <span>Live Navigation & Header Preview</span>
               </span>
-              <span className="text-[10px] font-bold text-muted">Synced with active settings</span>
+              <span className="text-xs font-bold text-muted">Synced with active settings</span>
             </div>
 
             <div className="p-4 bg-white rounded-xl border border-line flex items-center justify-between">
@@ -348,7 +348,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                   <h4 className="font-extrabold text-sm text-ink">
                     {formData.shopName || 'AppleRepair Pro'}
                   </h4>
-                  <p className="text-[10px] text-muted font-medium">
+                  <p className="text-xs text-muted font-medium">
                     {formData.shopPhone} • {formData.shopAddress}
                   </p>
                 </div>

@@ -94,7 +94,7 @@ const AiTab: React.FC<AiTabProps> = ({ formData, setFormData, aiRescanning, aiRe
                       type="button"
                       onClick={() => setFormData({ ...formData, aiModel: m.id })}
                       title={m.id}
-                      className={`px-2.5 py-1 rounded-full text-[10px] font-bold border transition-all cursor-pointer ${
+                      className={`px-2.5 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer ${
                         formData.aiModel === m.id
                           ? 'bg-brand text-white border-brand'
                           : 'bg-surface text-[#51525C] border-line hover:border-brand hover:text-brand'
@@ -148,7 +148,7 @@ const AiTab: React.FC<AiTabProps> = ({ formData, setFormData, aiRescanning, aiRe
                   <Sparkles className="w-3.5 h-3.5 text-brand" />
                   AI Repair-Type Classification
                 </p>
-                <p className="text-[11px] text-muted">
+                <p className="text-xs text-muted">
                   Finished tickets are auto-classified as Spareparts Change or Hardware Repair. Re-scan applies AI to every finished ticket without a verdict (including previously failed ones).
                 </p>
               </div>
@@ -163,7 +163,7 @@ const AiTab: React.FC<AiTabProps> = ({ formData, setFormData, aiRescanning, aiRe
               </Button>
             </div>
             {aiRescanResult && (
-              <p className="text-[11px] font-bold text-brand bg-white/80 border border-brand/20 rounded-lg px-3 py-2">
+              <p className="text-xs font-bold text-brand bg-white/80 border border-brand/20 rounded-lg px-3 py-2">
                 {aiRescanResult}
               </p>
             )}
@@ -179,7 +179,7 @@ const AiTab: React.FC<AiTabProps> = ({ formData, setFormData, aiRescanning, aiRe
             />
           </label>
 
-          <div className="p-3 bg-surface border border-line rounded-xl text-[11px] text-muted">
+          <div className="p-3 bg-surface border border-line rounded-xl text-xs text-muted">
             The assistant sends a compact live operational summary to the selected provider. API credentials are used only for requests initiated from this ERP assistant. For shared production use, keep keys in server-side secrets instead of browser-synced settings.
           </div>
         </div>

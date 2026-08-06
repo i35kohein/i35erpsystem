@@ -94,7 +94,7 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
                   />
                   <div>
                     <span className="font-extrabold text-ink text-xs block">Auto-Prompt Notification Window on Status Change</span>
-                    <span className="text-[11px] text-muted">Automatically open dispatch dialog when ticket moves to Finished, Ready, or Pending Parts.</span>
+                    <span className="text-xs text-muted">Automatically open dispatch dialog when ticket moves to Finished, Ready, or Pending Parts.</span>
                   </div>
                 </label>
               </div>
@@ -108,7 +108,7 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                 <div>
-                  <label className="block text-[11px] font-bold text-muted mb-1">Telegram Bot Token</label>
+                  <label className="block text-xs font-bold text-muted mb-1">Telegram Bot Token</label>
                   <input
                     type="text"
                     placeholder="e.g. 7890123456:AAFx..."
@@ -118,7 +118,7 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-muted mb-1">Telegram Admin Chat ID / Channel ID</label>
+                  <label className="block text-xs font-bold text-muted mb-1">Telegram Admin Chat ID / Channel ID</label>
                   <input
                     type="text"
                     placeholder="e.g. @applerepair_updates or -100123456789"
@@ -151,7 +151,7 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
               <h4 className="text-xs font-extrabold text-muted uppercase tracking-wider">
                 Configured Message Templates ({currentNotificationTemplates.length})
               </h4>
-              <span className="text-[11px] text-brand font-bold">
+              <span className="text-xs text-brand font-bold">
                 Click variable buttons to insert tags into text
               </span>
             </div>
@@ -191,13 +191,13 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
                             className="font-extrabold text-sm text-ink bg-transparent border-b border-transparent hover:border-line-strong focus:border-brand focus:outline-none px-1"
                           />
                           {tmpl.description && (
-                            <p className="text-[11px] text-muted px-1">{tmpl.description}</p>
+                            <p className="text-xs text-muted px-1">{tmpl.description}</p>
                           )}
                         </div>
                       </div>
 
                       <div className="flex items-center space-x-2">
-                        <span className="px-2.5 py-1 bg-blue-50 text-brand font-mono text-[10px] font-bold rounded-lg border border-blue-200">
+                        <span className="px-2.5 py-1 bg-blue-50 text-brand font-mono text-xs font-bold rounded-lg border border-blue-200">
                           Key: {tmpl.key}
                         </span>
                         <button
@@ -213,10 +213,10 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
 
                     {/* Variable Shortcut Insert Pills */}
                     <div>
-                      <span className="text-[10px] font-extrabold text-muted uppercase tracking-wider block mb-1.5">
+                      <span className="text-xs font-extrabold text-muted uppercase tracking-wider block mb-1.5">
                         Insert Dynamic Tag Shortcut:
                       </span>
-                      <div className="flex flex-wrap gap-1.5 text-[11px]">
+                      <div className="flex flex-wrap gap-1.5 text-xs">
                         {[
                           { tag: '{customerName}', label: 'Customer Name' },
                           { tag: '{deviceModel}', label: 'Device Model' },
@@ -229,7 +229,7 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
                             key={v.tag}
                             type="button"
                             onClick={() => handleInsertVariable(tmpl.id, v.tag)}
-                            className="px-2.5 py-1 bg-surface hover:bg-blue-50 text-ink hover:text-brand font-mono font-bold text-[11px] rounded-lg border border-line transition-all cursor-pointer flex items-center space-x-1"
+                            className="px-2.5 py-1 bg-surface hover:bg-blue-50 text-ink hover:text-brand font-mono font-bold text-xs rounded-lg border border-line transition-all cursor-pointer flex items-center space-x-1"
                           >
                             <Plus className="w-3 h-3 text-brand" />
                             <span>{v.tag}</span>
@@ -240,7 +240,7 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
 
                     {/* Template Textarea */}
                     <div>
-                      <label className="block text-[11px] font-bold text-muted mb-1">
+                      <label className="block text-xs font-bold text-muted mb-1">
                         Template Message Text (မြန်မာဘာသာ / English):
                       </label>
                       <textarea
@@ -253,7 +253,7 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
 
                     {/* Real-time Render Preview Box */}
                     <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1">
-                      <div className="flex items-center justify-between text-[10px] font-bold text-muted">
+                      <div className="flex items-center justify-between text-xs font-bold text-muted">
                         <span className="flex items-center space-x-1">
                           <Sparkles className="w-3 h-3 text-amber-500" />
                           <span>Live Customer Preview (Daw Khin Than • iPhone 15 Pro):</span>

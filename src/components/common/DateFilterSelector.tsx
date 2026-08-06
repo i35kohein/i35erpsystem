@@ -310,7 +310,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
           </div>
 
           {/* Days of Week */}
-          <div className="grid grid-cols-7 text-center text-[10px] font-bold text-muted mb-2 uppercase">
+          <div className="grid grid-cols-7 text-center text-xs font-bold text-muted mb-2 uppercase">
             <span>Su</span>
             <span>Mo</span>
             <span>Tu</span>
@@ -352,7 +352,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
 
           {/* Range Selection Status */}
           <div className="bg-surface p-2.5 rounded-xl border border-line text-xs mb-3 flex items-center justify-between">
-            <div className="text-[11px] text-faint">
+            <div className="text-xs text-faint">
               {tempStartDate ? (
                 <span>
                   <strong className="text-ink">{tempStartDate}</strong>
@@ -373,7 +373,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
                   setTempStartDate(undefined);
                   setTempEndDate(undefined);
                 }}
-                className="text-[10px] text-brand font-bold hover:underline cursor-pointer ml-2"
+                className="text-xs text-brand font-bold hover:underline cursor-pointer ml-2"
               >
                 Clear
               </button>
@@ -382,7 +382,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
 
           {/* Direct Input Fallback & Action buttons */}
           <div className="space-y-2">
-            <div className="grid grid-cols-2 gap-2 text-[11px]">
+            <div className="grid grid-cols-2 gap-2 text-xs">
               <div>
                 <label className="block text-muted font-semibold mb-0.5">Start Date</label>
                 <input

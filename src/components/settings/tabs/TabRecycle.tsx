@@ -39,13 +39,13 @@ const RecycleTab: React.FC<RecycleTabProps> = ({ formData, setFormData, onOpenRe
             <div className="p-4 bg-surface rounded-xl border border-line space-y-1">
               <span className="text-xs text-muted font-bold block">Archived Work Orders</span>
               <span className="text-2xl font-black text-ink">{archivedCount}</span>
-              <p className="text-[11px] text-muted">Tickets currently held in the trash vault.</p>
+              <p className="text-xs text-muted">Tickets currently held in the trash vault.</p>
             </div>
 
             <div className="p-4 bg-surface rounded-xl border border-line space-y-1">
               <span className="text-xs text-muted font-bold block">Restoration Policy</span>
               <span className="text-sm font-extrabold text-success">Instant Recovery</span>
-              <p className="text-[11px] text-muted">Restored tickets return seamlessly to their active pipeline stage.</p>
+              <p className="text-xs text-muted">Restored tickets return seamlessly to their active pipeline stage.</p>
             </div>
 
             <div className="p-4 bg-surface rounded-xl border border-line space-y-1">

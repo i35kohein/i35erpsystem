@@ -241,7 +241,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             </div>
             <div>
               <h1 className="font-extrabold text-sm text-ink tracking-tight">{systemSettings.shopName}</h1>
-              <p className="text-[10px] text-muted font-medium">Customer Repair Status Portal</p>
+              <p className="text-xs text-muted font-medium">Customer Repair Status Portal</p>
             </div>
           </div>
 
@@ -307,7 +307,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
         </main>
 
         {/* Footer */}
-        <footer className="text-center py-4 text-muted text-[11px] space-y-1">
+        <footer className="text-center py-4 text-muted text-xs space-y-1">
           <p>© {new Date().getFullYear()} {systemSettings.shopName}. All rights reserved.</p>
           <p>Need support? Call <a href={`tel:${systemSettings.shopPhone}`} className="text-brand underline">{systemSettings.shopPhone}</a> or visit {systemSettings.shopAddress}</p>
         </footer>
@@ -333,7 +333,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   LIVE PORTAL
                 </span>
               </div>
-              <p className="text-[10px] text-muted">Logged in: <strong className="text-ink">{currentWorkOrder.customerName}</strong> ({currentWorkOrder.customerPhone || currentWorkOrder.customerEmail})</p>
+              <p className="text-xs text-muted">Logged in: <strong className="text-ink">{currentWorkOrder.customerName}</strong> ({currentWorkOrder.customerPhone || currentWorkOrder.customerEmail})</p>
             </div>
           </div>
 
@@ -341,7 +341,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             {/* Ticket Selector Dropdown if customer has multiple tickets */}
             {matchingWorkOrders.length > 1 && (
               <div className="flex items-center space-x-1.5 bg-surface px-2.5 py-1.5 rounded-xl border border-line">
-                <label className="text-[10px] text-muted font-bold">Select Device:</label>
+                <label className="text-xs text-muted font-bold">Select Device:</label>
                 <select
                   value={currentWorkOrder.id}
                   onChange={(e) => setSelectedWorkOrderId(e.target.value)}
@@ -442,7 +442,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   Status: {currentWorkOrder.status}
                 </span>
                 {currentWorkOrder.priority === 'Rush' && (
-                  <span className="bg-danger/10 text-danger text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-danger/30">
+                  <span className="bg-danger/10 text-danger text-xs font-extrabold px-2 py-0.5 rounded-full border border-danger/30">
                     RUSH SERVICE
                   </span>
                 )}
@@ -458,7 +458,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
 
             <div className="flex items-center gap-3 bg-surface p-3 rounded-2xl border border-line">
               <div className="text-right">
-                <p className="text-[10px] text-muted font-bold uppercase tracking-wider">Estimated Completion</p>
+                <p className="text-xs text-muted font-bold uppercase tracking-wider">Estimated Completion</p>
                 <p className="text-sm font-extrabold text-brand font-mono">
                   {currentWorkOrder.estimatedCompletion ? new Date(currentWorkOrder.estimatedCompletion).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Pending Bench Test'}
                 </p>
@@ -477,7 +477,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
 
           {/* 5-Stage Visual Progress Bar */}
           <div className="space-y-3 pt-2">
-            <p className="text-[11px] font-bold text-muted uppercase tracking-wider">Live Repair Progress Timeline</p>
+            <p className="text-xs font-bold text-muted uppercase tracking-wider">Live Repair Progress Timeline</p>
 
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 relative">
               {/* Stage 1: Intake Received */}
@@ -487,11 +487,11 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   : 'bg-surface border-line text-muted'
               }`}>
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-extrabold uppercase">1. Received</span>
+                  <span className="text-xs font-extrabold uppercase">1. Received</span>
                   {currentStage >= 1 && <CheckCircle2 className="w-4 h-4 text-brand" />}
                 </div>
                 <p className="font-bold text-xs text-ink">Ticket Intake</p>
-                <p className="text-[10px] text-muted">Checked in at shop</p>
+                <p className="text-xs text-muted">Checked in at shop</p>
               </div>
 
               {/* Stage 2: Diagnostics */}
@@ -503,11 +503,11 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   : 'bg-surface border-line text-muted'
               }`}>
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-extrabold uppercase">2. Diagnostics</span>
+                  <span className="text-xs font-extrabold uppercase">2. Diagnostics</span>
                   {currentStage >= 2 ? <CheckCircle2 className="w-4 h-4 text-brand" /> : currentStage === 1 ? <Clock className="w-4 h-4 animate-spin text-amber-600" /> : null}
                 </div>
                 <p className="font-bold text-xs text-ink">Testing & Quote</p>
-                <p className="text-[10px] text-muted">Inspection complete</p>
+                <p className="text-xs text-muted">Inspection complete</p>
               </div>
 
               {/* Stage 3: In Repair */}
@@ -517,11 +517,11 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   : 'bg-surface border-line text-muted'
               }`}>
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-extrabold uppercase">3. In Repair</span>
+                  <span className="text-xs font-extrabold uppercase">3. In Repair</span>
                   {currentStage >= 3 && <CheckCircle2 className="w-4 h-4 text-brand" />}
                 </div>
                 <p className="font-bold text-xs text-ink">Bench Service</p>
-                <p className="text-[10px] text-muted">Parts & Assembly</p>
+                <p className="text-xs text-muted">Parts & Assembly</p>
               </div>
 
               {/* Stage 4: QA Verified */}
@@ -531,11 +531,11 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   : 'bg-surface border-line text-muted'
               }`}>
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-extrabold uppercase">4. QA Passed</span>
+                  <span className="text-xs font-extrabold uppercase">4. QA Passed</span>
                   {currentStage >= 4 && <CheckCircle2 className="w-4 h-4 text-success" />}
                 </div>
                 <p className="font-bold text-xs text-ink">Quality Check</p>
-                <p className="text-[10px] text-muted">21-Point Verified</p>
+                <p className="text-xs text-muted">21-Point Verified</p>
               </div>
 
               {/* Stage 5: Ready for Collection */}
@@ -545,11 +545,11 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   : 'bg-surface border-line text-muted'
               }`}>
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-extrabold uppercase">5. Complete</span>
+                  <span className="text-xs font-extrabold uppercase">5. Complete</span>
                   {currentStage >= 5 && <CheckCircle2 className="w-4 h-4 text-success" />}
                 </div>
                 <p className="font-bold text-xs text-ink">Ready Pickup</p>
-                <p className="text-[10px] text-muted">Completed</p>
+                <p className="text-xs text-muted">Completed</p>
               </div>
             </div>
           </div>
@@ -627,13 +627,13 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 </h3>
 
                 <div className="p-3.5 bg-surface rounded-2xl border border-line space-y-1">
-                  <span className="text-[10px] font-bold text-muted uppercase">Symptoms Reported at Intake</span>
+                  <span className="text-xs font-bold text-muted uppercase">Symptoms Reported at Intake</span>
                   <p className="text-xs text-ink font-medium">{currentWorkOrder.symptomsReported || 'None specified at check-in'}</p>
                 </div>
 
                 {currentWorkOrder.diagnosticResult && (
                   <div className="p-3.5 bg-brand-soft rounded-2xl border border-brand/20 space-y-1">
-                    <span className="text-[10px] font-bold text-brand uppercase">Technician Diagnostic Findings</span>
+                    <span className="text-xs font-bold text-brand uppercase">Technician Diagnostic Findings</span>
                     <p className="text-xs text-ink font-medium">{currentWorkOrder.diagnosticResult}</p>
                   </div>
                 )}
@@ -645,7 +645,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                     </div>
                     <div>
                       <p className="font-bold text-ink text-xs">Assigned Technician: {currentWorkOrder.assignedTechName}</p>
-                      <p className="text-[10px] text-muted">Specialized Apple Master Technician</p>
+                      <p className="text-xs text-muted">Specialized Apple Master Technician</p>
                     </div>
                   </div>
                 )}
@@ -662,7 +662,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   {currentWorkOrder.repairLogs && currentWorkOrder.repairLogs.length > 0 ? (
                     currentWorkOrder.repairLogs.map((log) => (
                       <div key={log.id} className="p-3 bg-surface rounded-xl border border-line space-y-1">
-                        <div className="flex justify-between items-center text-[10px] text-muted">
+                        <div className="flex justify-between items-center text-xs text-muted">
                           <span className="font-bold text-ink">{log.author || 'Shop Tech'}</span>
                           <span>{log.timestamp}</span>
                         </div>
@@ -768,7 +768,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
 
             {/* Line Items Table */}
             <div className="border border-line rounded-2xl overflow-hidden divide-y divide-line">
-              <div className="bg-surface px-4 py-2.5 grid grid-cols-12 font-bold text-muted text-[10px] uppercase tracking-wider">
+              <div className="bg-surface px-4 py-2.5 grid grid-cols-12 font-bold text-muted text-xs uppercase tracking-wider">
                 <div className="col-span-6">Description / Component</div>
                 <div className="col-span-2 text-center">Type</div>
                 <div className="col-span-2 text-center">Qty</div>
@@ -780,11 +780,11 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   <div className="col-span-6 font-semibold text-ink">
                     {li.description}
                     {li.partQuality && (
-                      <span className="block text-[10px] text-brand font-normal">{li.partQuality}</span>
+                      <span className="block text-xs text-brand font-normal">{li.partQuality}</span>
                     )}
                   </div>
                   <div className="col-span-2 text-center">
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                       li.isLabor ? 'bg-purple-50 text-purple-700' : 'bg-brand-soft text-brand'
                     }`}>
                       {li.isLabor ? 'Labor' : 'Part'}
@@ -849,7 +849,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   <CheckCircle2 className="w-5 h-5" />
                   <div>
                     <p className="font-extrabold text-xs">Estimate Approved & Authorized</p>
-                    <p className="text-[10px] opacity-90">Approved online on {currentWorkOrder.estimateApprovedAt ? new Date(currentWorkOrder.estimateApprovedAt).toLocaleString() : 'Record'}</p>
+                    <p className="text-xs opacity-90">Approved online on {currentWorkOrder.estimateApprovedAt ? new Date(currentWorkOrder.estimateApprovedAt).toLocaleString() : 'Record'}</p>
                   </div>
                 </div>
                 <span className="font-mono font-bold text-xs">{currentWorkOrder.totalAmount.toLocaleString()} {systemSettings.currencySymbol}</span>
@@ -878,7 +878,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                     }`}
                   >
                     <span className="font-bold text-xs">{item.name}</span>
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-extrabold ${
                       item.status === 'Pass' ? 'bg-success text-white' :
                       item.status === 'Fail' ? 'bg-danger text-white' :
                       'bg-muted text-white'
@@ -1008,7 +1008,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   onChange={(e) => setAgreedToTerms(e.target.checked)}
                   className="mt-0.5 rounded text-brand"
                 />
-                <span className="text-[11px] text-muted">
+                <span className="text-xs text-muted">
                   I authorize the shop to install required components and confirm that all estimates are understood and agreed upon.
                 </span>
               </label>
@@ -1179,31 +1179,31 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   </div>
                 )}
                 <h2 className="font-black text-base uppercase tracking-tight">{systemSettings.shopName}</h2>
-                <p className="text-[10px] text-muted">{systemSettings.shopAddress} • Tel: {systemSettings.shopPhone}</p>
-                <p className="text-[10px] text-muted">Tax ID: {systemSettings.taxId}</p>
+                <p className="text-xs text-muted">{systemSettings.shopAddress} • Tel: {systemSettings.shopPhone}</p>
+                <p className="text-xs text-muted">Tax ID: {systemSettings.taxId}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3 bg-surface p-3.5 rounded-2xl border border-line">
                 <div>
-                  <span className="text-[10px] font-bold text-muted uppercase">Voucher Number</span>
+                  <span className="text-xs font-bold text-muted uppercase">Voucher Number</span>
                   <p className="font-mono font-bold text-brand text-sm">{currentWorkOrder.orderNumber}</p>
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold text-muted uppercase">Customer Name</span>
+                  <span className="text-xs font-bold text-muted uppercase">Customer Name</span>
                   <p className="font-bold text-ink">{currentWorkOrder.customerName}</p>
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold text-muted uppercase">Device Model</span>
+                  <span className="text-xs font-bold text-muted uppercase">Device Model</span>
                   <p className="font-bold text-ink">{currentWorkOrder.deviceModel}</p>
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold text-muted uppercase">Serial / IMEI</span>
+                  <span className="text-xs font-bold text-muted uppercase">Serial / IMEI</span>
                   <p className="font-mono font-bold text-ink">{currentWorkOrder.serialNumber || currentWorkOrder.imei || 'N/A'}</p>
                 </div>
               </div>
 
               <div className="border border-line rounded-xl overflow-hidden divide-y divide-line">
-                <div className="bg-surface px-3 py-1.5 font-bold text-muted text-[10px] flex justify-between uppercase">
+                <div className="bg-surface px-3 py-1.5 font-bold text-muted text-xs flex justify-between uppercase">
                   <span>Item Description</span>
                   <span>Amount</span>
                 </div>
@@ -1220,7 +1220,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 <p className="text-sm font-black text-brand">Total: {currentWorkOrder.totalAmount.toLocaleString()} {systemSettings.currencySymbol}</p>
               </div>
 
-              <p className="text-[10px] text-center text-muted pt-3 border-t border-line">
+              <p className="text-xs text-center text-muted pt-3 border-t border-line">
                 {systemSettings.receiptFooterNote}
               </p>
             </div>

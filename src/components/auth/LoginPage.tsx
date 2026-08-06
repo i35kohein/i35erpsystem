@@ -104,7 +104,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             </button>
           </form>
 
-          <p className="mt-6 text-center text-[10px] font-semibold text-muted">
+          <p className="mt-6 text-center text-xs font-semibold text-muted">
             i35 Apple Service · v2.4.0 · Authorized staff only
           </p>
         </div>
