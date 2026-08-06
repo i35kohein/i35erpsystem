@@ -422,7 +422,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                 </span>
                 <span className={`text-xs font-black px-2 py-0.5 rounded-full ${
                   financialSummary.grossMarginPercent >= 50
-                    ? 'bg-emerald-100 text-[#16A34A]'
+                    ? 'bg-emerald-50 text-success-deep'
                     : 'bg-amber-100 text-amber-800'
                 }`}>
                   {financialSummary.grossMarginPercent}% Gross
@@ -485,11 +485,11 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
               <div>
                 <h4 className="font-extrabold text-ink text-sm">Mobile Repair Shop Margin Benchmark (50% – 70% Target)</h4>
                 <p className="text-muted font-medium mt-0.5">
-                  Your current Gross Margin is <strong className="text-[#16A34A]">{financialSummary.grossMarginPercent}%</strong>. Healthy mobile repair labs maintain a 50%–70% combined gross margin across parts and technician labor.
+                  Your current Gross Margin is <strong className="text-success-deep">{financialSummary.grossMarginPercent}%</strong>. Healthy mobile repair labs maintain a 50%–70% combined gross margin across parts and technician labor.
                 </p>
               </div>
             </div>
-            <div className="shrink-0 bg-white border border-emerald-300 px-3 py-1.5 rounded-xl font-mono font-black text-xs text-[#16A34A]">
+            <div className="shrink-0 bg-white border border-emerald-300 px-3 py-1.5 rounded-xl font-mono font-black text-xs text-success-deep">
               {financialSummary.grossMarginPercent >= 50 ? '✓ TARGET ACHIEVED' : '⚠️ BELOW BENCHMARK'}
             </div>
           </div>

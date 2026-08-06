@@ -467,7 +467,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       <div className="flex items-center space-x-1 shrink-0">
                         <StatusChip status={wo.status} />
                         <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded-md border ${
-                          wo.isPaid ? 'bg-[#EAF8ED] text-[#28A745] border-success/20' : 'bg-[#FFF4E5] text-[#D97706] border-[#FF9F0A]/20'
+                          wo.isPaid ? 'bg-[#EAF8ED] text-[#28A745] border-success/20' : 'bg-[#FFF4E5] text-[#B45309] border-[#FF9F0A]/20'
                         }`}>
                           {wo.isPaid ? 'PAID' : 'UNPAID'}
                         </span>

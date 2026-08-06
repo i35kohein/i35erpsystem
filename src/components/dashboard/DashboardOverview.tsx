@@ -1079,7 +1079,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 type="button"
                 onClick={() => onNavigateToTab('pipeline')}
                 size="sm"
-                className="min-h-10 bg-amber-600 hover:bg-amber-700 text-white shrink-0"
+                className="min-h-10 bg-amber-700 hover:bg-amber-800 text-white shrink-0"
               >
                 Inspect Bottlenecks
               </Button>
