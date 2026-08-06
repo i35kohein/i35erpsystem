@@ -305,7 +305,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                     }`}
                   >
                     <div className="flex justify-between items-center">
-                      <button
+                      <Button
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -316,7 +316,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                       >
                         <span>{cust.name}</span>
                         <ExternalLink className="w-3 h-3 text-brand opacity-70 group-hover:opacity-100 transition-opacity" />
-                      </button>
+                      </Button>
                       <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${
                         cust.type === 'B2B Corporate' ? 'bg-purple-50 text-purple-700 border-purple-200' :
                         cust.type === 'Wholesale Mail-In' ? 'bg-brand-soft text-brand border-brand/20' :
@@ -335,7 +335,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
 
                     {/* Expandable Row Toggle Bar */}
                     <div className="flex justify-between items-center mt-1.5 pt-1.5 border-t border-line/70">
-                      <button
+                      <Button
                         type="button"
                         onClick={(e) => toggleExpandCustomer(cust.id, e)}
                         className={`flex items-center space-x-1 text-xs font-bold text-brand hover:text-brand-deep transition-colors py-0.5 px-1.5 rounded-md hover:bg-blue-100/50 cursor-pointer ${FOCUS}`}
@@ -344,10 +344,10 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                         <span>
                           {custOrders.length} Repair{custOrders.length === 1 ? '' : 's'}
                         </span>
-                      </button>
+                      </Button>
 
                       <div className="flex items-center space-x-1.5">
-                        <button
+                        <Button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -358,7 +358,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                         >
                           <FileText className="w-2.5 h-2.5" />
                           <span>Full History</span>
-                        </button>
+                        </Button>
 
                         {(cloudCustomerIds?.has(cust.id) ?? true) && (
                           <Button
@@ -471,21 +471,21 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                 <span className="h-1 w-8 shrink-0 rounded-full bg-line-strong" />
                 <p className="truncate text-xs font-extrabold text-ink">{selectedCustomer?.name || 'Customer Details'}</p>
               </div>
-              <button
+              <Button
                 type="button"
                 onClick={() => setIsMobileDetailOpen(false)}
                 aria-label="Close customer details"
                 className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted hover:bg-surface hover:text-ink transition-colors cursor-pointer ${FOCUS}`}
               >
                 <X className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
             {selectedCustomer ? (
               <div className="flex min-h-0 flex-1 flex-col gap-5">
                 <div className="border-b border-line pb-3">
                   <div className="flex justify-between items-start">
                     <div>
-                      <button
+                      <Button
                         type="button"
                         onClick={() => handleOpenHistoryModal(selectedCustomer)}
                         className={`text-base font-black text-ink hover:text-brand hover:underline flex items-center space-x-2 cursor-pointer text-left group ${FOCUS}`}
@@ -493,11 +493,11 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                       >
                         <span>{selectedCustomer.name}</span>
                         <ExternalLink className="w-4 h-4 text-brand opacity-80 group-hover:opacity-100 transition-opacity" />
-                      </button>
+                      </Button>
                       {selectedCustomer.company && <p className="text-muted text-xs font-medium">{selectedCustomer.company}</p>}
                     </div>
 
-                    <button
+                    <Button
                       type="button"
                       onClick={() => handleOpenHistoryModal(selectedCustomer)}
                       className={`bg-brand/10 hover:bg-brand text-brand-deep hover:text-white border border-brand/30 rounded-lg px-3 py-1.5 text-xs font-bold transition-colors cursor-pointer ${FOCUS}`}
@@ -505,7 +505,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                       <FileText className="w-3.5 h-3.5" />
                       <span className="hidden sm:inline">Full History</span>
                       <span className="sm:hidden">History</span>
-                    </button>
+                    </Button>
                   </div>
                 </div>
 

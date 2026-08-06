@@ -496,7 +496,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         )}
                       </span>
                       {(wo.imei || wo.serialNumber) && (
-                        <button
+                        <Button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -508,7 +508,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           className={`font-mono text-xs shrink-0 truncate text-muted hover:text-brand transition-colors ${FOCUS}`}
                         >
                           #{formatSerialGrouped(wo.imei || wo.serialNumber)}
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </div>
