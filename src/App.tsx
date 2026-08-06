@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo, lazy, Suspense } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Sparkles, Plus, CircleDot, Search, Filter, Calculator, Folder, Settings, Download, Database, ExternalLink, ClipboardList, Kanban, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, ChevronDown, PhoneCall, Truck, Boxes, CreditCard, Users, DollarSign, LayoutDashboard, Timer, MoreHorizontal, SlidersHorizontal, Eye, Stethoscope, Edit2 } from 'lucide-react';
+import { Sparkles, Plus, CircleDot, Search, Filter, Calculator, Folder, Settings, Download, Database, ExternalLink, ClipboardList, Kanban, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, ChevronDown, PhoneCall, Truck, Boxes, CreditCard, Users, DollarSign, LayoutDashboard, Timer, MoreHorizontal, SlidersHorizontal, Eye, Stethoscope, Edit2, List, LayoutGrid, Printer } from 'lucide-react';
 import { subscribeToCollection, fetchCloudCollection, saveDocument, saveBatchDocuments, deleteDocument, clearCollection } from './lib/supabase';
 import { setActiveUserId, notifyAccountChanged } from './utils/accountSettings';
 
@@ -135,6 +135,8 @@ export default function App() {
   // Inventory view/edit — drawer controls these on iPad (module toolbar keeps them on desktop)
   const [inventoryViewMode, setInventoryViewMode] = useState<'stock' | 'profit' | 'matrix'>('stock');
   const [inventoryEditMode, setInventoryEditMode] = useState(false);
+  const [inventoryStockView, setInventoryStockView] = useState<'table' | 'cards'>('table');
+  const [inventoryTagsPrintOpen, setInventoryTagsPrintOpen] = useState(false);
   const [customerTypeFilter, setCustomerTypeFilter] = useState<string>('ALL');
   const [dateFilter, setDateFilter] = useState<DateFilterState>({ preset: 'all' });
   const [showBottlenecksOnly, setShowBottlenecksOnly] = useState<boolean>(false);
@@ -833,6 +835,19 @@ export default function App() {
                   Edit Rows
                 </span>
                 <span className={`text-[10px] ${inventoryEditMode ? 'text-white/80' : 'text-muted'}`}>{inventoryEditMode ? 'On' : 'Off'}</span>
+              </button>
+            </div>
+            <div>
+              <label className={labelCls}>Actions</label>
+              <button
+                type="button"
+                onClick={() => setInventoryTagsPrintOpen(true)}
+                className={`${rowCls} bg-white text-ink border-line hover:bg-slate-100`}
+              >
+                <span className="flex items-center gap-2">
+                  <Printer className="w-4 h-4 text-brand" />
+                  Print Spare-Parts Tags (A4)
+                </span>
               </button>
             </div>
             <div>
@@ -2101,6 +2116,34 @@ export default function App() {
 
             {/* Contextual Action Button */}
             {activeTab === 'inventory' ? (
+              <>
+              {/* Table/Card view toggle — iPad only (toolbar moves here) */}
+              {isIpad && (
+                <div className="flex items-center rounded-lg border border-line bg-surface p-0.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setInventoryStockView('table')}
+                    title="Table view"
+                    aria-label="Stock table view"
+                    className={`h-9 w-9 flex items-center justify-center rounded-md transition-colors cursor-pointer ${
+                      inventoryStockView === 'table' ? 'bg-brand text-white shadow-2xs' : 'text-muted hover:text-ink'
+                    }`}
+                  >
+                    <List className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setInventoryStockView('cards')}
+                    title="Card view"
+                    aria-label="Stock card view"
+                    className={`h-9 w-9 flex items-center justify-center rounded-md transition-colors cursor-pointer ${
+                      inventoryStockView === 'cards' ? 'bg-brand text-white shadow-2xs' : 'text-muted hover:text-ink'
+                    }`}
+                  >
+                    <LayoutGrid className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
               <button
                 onClick={() => setInventoryAddModalOpen(true)}
                 className="flex items-center space-x-1.5 px-3.5 py-1.5 bg-brand hover:bg-brand-deep text-white text-xs font-bold rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
@@ -2108,6 +2151,7 @@ export default function App() {
                 <Plus className="w-3.5 h-3.5" />
                 <span>{t('addPart')}</span>
               </button>
+              </>
             ) : activeTab === 'suppliers' ? (
               <button
                 onClick={() => setRmaModalOpen(true)}
@@ -2241,6 +2285,10 @@ export default function App() {
                   setViewMode={setInventoryViewMode}
                   inlineEditMode={inventoryEditMode}
                   setInlineEditMode={setInventoryEditMode}
+                  stockView={inventoryStockView}
+                  setStockView={setInventoryStockView}
+                  isTagsPrintOpen={inventoryTagsPrintOpen}
+                  setIsTagsPrintOpen={setInventoryTagsPrintOpen}
                   showAddModal={inventoryAddModalOpen}
                   setShowAddModal={setInventoryAddModalOpen}
                 />

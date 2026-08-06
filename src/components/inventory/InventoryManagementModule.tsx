@@ -113,6 +113,10 @@ interface InventoryManagementModuleProps {
   setViewMode?: (v: 'stock' | 'profit' | 'matrix') => void;
   inlineEditMode?: boolean;
   setInlineEditMode?: (v: boolean | ((prev: boolean) => boolean)) => void;
+  stockView?: 'table' | 'cards';
+  setStockView?: (v: 'table' | 'cards') => void;
+  isTagsPrintOpen?: boolean;
+  setIsTagsPrintOpen?: (v: boolean) => void;
   showAddModal?: boolean;
   setShowAddModal?: (s: boolean) => void;
 }
@@ -174,6 +178,10 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   setViewMode: propSetViewMode,
   inlineEditMode: propInlineEditMode,
   setInlineEditMode: propSetInlineEditMode,
+  stockView: propStockView,
+  setStockView: propSetStockView,
+  isTagsPrintOpen: propIsTagsPrintOpen,
+  setIsTagsPrintOpen: propSetIsTagsPrintOpen,
   showAddModal: propShowAddModal,
   setShowAddModal: propSetShowAddModal,
 }) => {
@@ -202,13 +210,17 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const viewMode = propViewMode !== undefined ? propViewMode : localViewMode;
   const setViewMode = propSetViewMode || setLocalViewMode;
   const [isMatrixPrintOpen, setIsMatrixPrintOpen] = useState(false);
-  const [isTagsPrintOpen, setIsTagsPrintOpen] = useState(false);
+  const [localIsTagsPrintOpen, setIsTagsPrintOpenLocal] = useState(false);
+  const isTagsPrintOpen = propIsTagsPrintOpen !== undefined ? propIsTagsPrintOpen : localIsTagsPrintOpen;
+  const setIsTagsPrintOpen = propSetIsTagsPrintOpen || setIsTagsPrintOpenLocal;
   const [selectedTagIds, setSelectedTagIds] = useState<Set<string>>(new Set());
   const [localInlineEditMode, setLocalInlineEditMode] = useState(false);
   const inlineEditMode = propInlineEditMode !== undefined ? propInlineEditMode : localInlineEditMode;
   const setInlineEditMode = propSetInlineEditMode || setLocalInlineEditMode;
   // Phones default to the card grid — the stock table is unusable below md.
-  const [stockView, setStockView] = useState<'table' | 'cards'>('table');
+  const [localStockView, setStockViewLocal] = useState<'table' | 'cards'>('table');
+  const stockView = propStockView !== undefined ? propStockView : localStockView;
+  const setStockView = propSetStockView || setStockViewLocal;
   const [inlineDrafts, setInlineDrafts] = useState<Record<string, InlineDraft>>({});
   const [showInlineSaveConfirm, setShowInlineSaveConfirm] = useState(false);
   const [isInlineSaving, setIsInlineSaving] = useState(false);
@@ -1040,8 +1052,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   return (
     <div className="space-y-3">
       {/* Module Toolbar — iPad: title hidden (topbar covers it) + filters in drawer.
-          Desktop: original layout (title + inline filter dropdowns). */}
-      <div className="module-toolbar overflow-visible bg-white p-3 rounded-xl border border-line shadow-xs flex flex-col lg:flex-row lg:items-center gap-2">
+          Desktop: original layout (title + inline filter dropdowns).
+          iPad hides the whole bar unless inline-edit is active (Save needs a home). */}
+      <div className={`module-toolbar overflow-visible bg-white p-3 rounded-xl border border-line shadow-xs flex flex-col lg:flex-row lg:items-center gap-2 ${isIpad && !inlineEditMode ? 'hidden' : ''}`}>
         {!isIpad && (
           <div className="module-subheader lg:shrink-0">
             <div className="flex items-center space-x-2">
@@ -1157,8 +1170,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
           {viewMode === 'stock' && (
             <div className={`grid items-center gap-1 w-full md:flex md:w-auto md:ml-auto md:shrink-0 md:pl-1 ${inlineEditMode ? 'grid-cols-3' : 'grid-cols-5'}`}>
-              {/* Quick Add Part — opens the add-part modal directly */}
-              {!inlineEditMode && (
+              {/* Quick Add Part — desktop toolbar; iPad: navbar has Add Part */}
+              {!isIpad && !inlineEditMode && (
                 <button
                   type="button"
                   onClick={() => setShowAddModal(true)}
@@ -1170,8 +1183,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 </button>
               )}
 
-              {/* Table view — left, joined pair with Card */}
-              {!inlineEditMode && (
+              {/* Table view — desktop toolbar; iPad: navbar toggle */}
+              {!isIpad && !inlineEditMode && (
                 <button
                   type="button"
                   onClick={() => setStockView('table')}
@@ -1186,8 +1199,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   <List className="h-3.5 w-3.5" />
                 </button>
               )}
-              {/* Card view — joined pair with Table */}
-              {!inlineEditMode && (
+              {/* Card view — joined pair with Table (desktop toolbar; iPad: navbar toggle) */}
+              {!isIpad && !inlineEditMode && (
                 <button
                   type="button"
                   onClick={() => setStockView('cards')}
@@ -1203,6 +1216,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 </button>
               )}
 
+              {/* Print Tags — desktop toolbar; iPad: right drawer action */}
+              {!isIpad && (
               <button
                 type="button"
                 onClick={() => { setIsTagsPrintOpen(true); setSelectedTagIds(new Set()); }}
@@ -1212,6 +1227,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 <Printer className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Print Tags</span>
               </button>
+              )}
 
               {/* Edit / Done toggle — desktop toolbar; iPad: lives in the filter drawer */}
               {!isIpad && (
