@@ -630,6 +630,18 @@ html[data-theme="dark-slate"] textarea::placeholder {
   html[data-theme="dark-slate"] input[aria-invalid="true"] {
     border-color: #F87171 !important;
   }
+
+  /* Wizard V2: inputs slightly LIGHTER than the modal card (#131B2E) so fields
+     read as interactive in dark mode (Carbon filled-input feel). */
+  html[data-theme="dark-slate"] .create-ticket-wizard input,
+  html[data-theme="dark-slate"] .create-ticket-wizard select,
+  html[data-theme="dark-slate"] .create-ticket-wizard textarea {
+    background-color: #1C2740 !important;
+  }
+  html[data-theme="dark-slate"] .create-ticket-wizard input::placeholder,
+  html[data-theme="dark-slate"] .create-ticket-wizard textarea::placeholder {
+    color: #8FA3C8 !important;
+  }
 }
 
 html[data-theme="dark-slate"] .bg-gray-50,

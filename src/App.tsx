@@ -2252,7 +2252,7 @@ export default function App() {
                       setActiveTab('intake');
                     }}
                   />
-                  <div className="relative w-full max-w-2xl xl:max-w-3xl max-h-[92vh] bg-white rounded-2xl shadow-2xl overflow-y-auto">
+                  <div className="relative w-full max-w-2xl xl:max-w-3xl max-h-[92vh] bg-white rounded-2xl shadow-2xl border border-line overflow-y-auto">
                     {ticketUiV2 ? (
                       <CreateTicketWizardV2
                         workOrders={workOrders}

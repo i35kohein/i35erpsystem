@@ -272,7 +272,7 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
 
   /* ---------------- Wizard ---------------- */
   return (
-    <div className="w-full space-y-5">
+    <div className="w-full space-y-5 create-ticket-wizard">
       {/* Header — single compact row */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
@@ -324,7 +324,7 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
       </div>
 
       {/* Step content */}
-      <div className="min-h-[320px]">
+      <div className="min-h-[280px] pt-0.5">
         {/* STEP 1 — CUSTOMER */}
         {step === 0 && (
           <div className="space-y-4 animate-fade-in">
@@ -340,7 +340,7 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
                   onChange={(e) => setCustomerPhone(e.target.value)}
                   placeholder="09 123 456 789"
                 />
-                {phoneError && <p className="mt-1 text-xs font-semibold text-rose-600 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> Phone number is required (min 7 digits)</p>}
+                {phoneError && <p className="mt-2 text-xs font-semibold text-rose-600 bg-rose-500/10 rounded-lg px-2 py-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> Phone number is required (min 7 digits)</p>}
               </div>
               <div className="sm:col-span-2">
                 <label className="block text-xs font-semibold text-ink mb-1.5">Customer Name *</label>
@@ -350,7 +350,7 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
                   onChange={(e) => setCustomerName(e.target.value)}
                   placeholder="Mg Mg"
                 />
-                {nameError && <p className="mt-1 text-xs font-semibold text-rose-600 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> Customer name is required</p>}
+                {nameError && <p className="mt-2 text-xs font-semibold text-rose-600 bg-rose-500/10 rounded-lg px-2 py-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> Customer name is required</p>}
               </div>
               <div>
                 <label className="block text-xs font-semibold text-ink mb-1.5">Town / City</label>
@@ -373,7 +373,7 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
                 />
               </div>
             </div>
-            <p className="text-xs text-muted flex items-center gap-1.5">
+            <p className="text-xs text-slate-400 flex items-center gap-1.5 pl-0.5">
               <AlertCircle className="w-3.5 h-3.5 text-brand shrink-0" />
               {matchedCustomerHint(customers, customerPhone)}
             </p>
@@ -404,7 +404,7 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
                 </span>
                 <ChevronDown className="w-4 h-4 text-muted shrink-0" />
               </Button>
-              {modelError && <p className="mt-1 text-xs font-semibold text-rose-600 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> Select a device model to continue</p>}
+              {modelError && <p className="mt-2 text-xs font-semibold text-rose-600 bg-rose-500/10 rounded-lg px-2 py-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> Select a device model to continue</p>}
             </div>
 
             {deviceModel && (
@@ -424,7 +424,7 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
                         className={selected ? 'border-brand text-brand' : ''}
                       >
                         <span className="w-3 h-3 rounded-full border border-line" style={{ background: style.gradient }} />
-                        <span className="truncate max-w-[90px]">{c}</span>
+                        <span>{c}</span>
                       </Button>
                     );
                   })}
@@ -487,7 +487,7 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
           <div className="space-y-4 animate-fade-in">
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-sm font-extrabold text-ink">Repairs &amp; Estimate</h3>
-              <span className="font-mono font-black text-brand text-sm">{finalEstimate.toLocaleString()} MMK</span>
+              <span className="font-mono font-black text-brand text-base">{finalEstimate.toLocaleString()} MMK</span>
             </div>
 
             <div className="relative">
@@ -521,12 +521,14 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
                       variant={selected ? 'secondary' : 'outline'}
                       onClick={() => toggleRepair(item)}
                       className={`w-full min-h-12 justify-between gap-3 px-3.5 text-left ${
-                        selected ? 'border-brand bg-brand-soft' : 'border-line bg-white'
+                        selected ? 'border-brand bg-brand-soft' : 'border-line bg-white hover:bg-surface'
                       }`}
                     >
                       <span className="min-w-0">
-                        <span className="block text-xs font-bold text-ink truncate">{item.name}</span>
-                        <span className="block text-xs text-muted">{item.group || 'Repair'}</span>
+                        <span className="block text-xs font-bold text-ink">{item.name}</span>
+                        {item.group && item.group !== item.name && (
+                          <span className="block text-xs text-muted">{item.group}</span>
+                        )}
                       </span>
                       <span className="flex items-center gap-2 shrink-0">
                         <span className="font-mono text-xs font-bold text-ink">{item.price.toLocaleString()} MMK</span>
@@ -541,7 +543,7 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
             )}
 
             {repairsError && (
-              <p className="text-xs font-semibold text-rose-600 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> Add at least one repair to continue</p>
+              <p className="text-xs font-semibold text-rose-600 bg-rose-500/10 rounded-lg px-2 py-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> Add at least one repair to continue</p>
             )}
 
             {selectedRepairs.length > 0 && (
@@ -552,14 +554,14 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
                     <div className="flex items-center gap-2 shrink-0">
                       <span className="font-mono text-muted">{Math.round(r.basePrice * (1 - r.discountPercent / 100)).toLocaleString()} MMK</span>
                       <Button type="button" variant="iconGhost" size="iconSm" onClick={() => toggleRepair({ id: r.id, name: r.name, price: r.basePrice } as ModelRepairCatalogItem)} aria-label={`Remove ${r.name}`}>
-                        <X className="w-3.5 h-3.5 text-rose-500" />
+                        <X className="w-3.5 h-3.5 text-muted" />
                       </Button>
                     </div>
                   </div>
                 ))}
-                <div className="border-t border-line pt-1.5 flex justify-between text-xs font-extrabold text-ink">
-                  <span>Estimate</span>
-                  <span className="font-mono text-brand">{finalEstimate.toLocaleString()} MMK</span>
+                <div className="border-t border-line pt-2 flex justify-between items-center">
+                  <span className="text-xs font-extrabold text-ink">Estimate</span>
+                  <span className="font-mono font-black text-brand text-sm">{finalEstimate.toLocaleString()} MMK</span>
                 </div>
               </div>
             )}
