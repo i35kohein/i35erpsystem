@@ -767,8 +767,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <span className="text-xl sm:text-2xl font-black text-ink tracking-tight truncate">
               {totalRevenue.toLocaleString()} <span className="text-xs font-bold text-muted">MMK</span>
             </span>
-            <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200 shrink-0 ml-1">
-              {marginPercent}% Margin
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ml-1 inline-flex items-center space-x-0.5 ${marginPercent < 0 ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-indigo-50 text-indigo-700 border-indigo-200'}`}
+              title={marginPercent < 0 ? '⚠️ Negative margin — average costs exceed revenue' : 'Gross margin %'}>
+              {marginPercent < 0 && <AlertTriangle className="w-2.5 h-2.5 shrink-0" />}
+              <span>{marginPercent}% Margin</span>
             </span>
           </div>
           <div className="mt-3 pt-2.5 border-t border-surface flex items-center justify-between text-[11px] text-muted">
@@ -952,12 +954,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         >
           <Coins className="w-4 h-4" />
           <span>Finance</span>
-          <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold ${
+          <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold inline-flex items-center space-x-0.5 ${
             activeDashboardSubTab === 'finance'
-              ? 'bg-white/20 text-white'
-              : 'bg-line text-ink'
+              ? marginPercent < 0 ? 'bg-white/25 text-white' : 'bg-white/20 text-white'
+              : marginPercent < 0 ? 'bg-rose-100 text-rose-700' : 'bg-line text-ink'
           }`}>
-            {marginPercent}% Margin
+            {marginPercent < 0 && !(activeDashboardSubTab === 'finance') && <AlertTriangle className="w-2.5 h-2.5 shrink-0" />}
+            <span>{marginPercent}% Margin</span>
           </span>
         </button>
 
@@ -1611,7 +1614,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-1">
               <span className="text-xs font-bold text-muted uppercase">Total Revenue</span>
               <p className="text-2xl font-extrabold text-ink">{totalRevenue.toLocaleString()} MMK</p>
-              <p className="text-[11px] text-[#28A745] font-semibold">{marginPercent}% Gross Profit Margin</p>
+              <p className={`text-[11px] font-semibold flex items-center space-x-1 ${marginPercent < 0 ? 'text-rose-600' : 'text-[#28A745]'}`}>
+                {marginPercent < 0 && <AlertTriangle className="w-3 h-3 shrink-0" />}
+                <span>{marginPercent}% Gross Profit Margin</span>
+              </p>
             </div>
 
             <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-1">

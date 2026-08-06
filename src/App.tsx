@@ -668,7 +668,7 @@ export default function App() {
           >
             <span className="flex items-center gap-2">
               <Stethoscope className={`w-4 h-4 ${showBeforeNeedsDiagOnly ? 'text-white' : 'text-blue-600'}`} />
-              Before Diag Pending
+              Before-Diag Pending
               {pipelineDiagCounts.before > 0 && (
                 <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-black ${showBeforeNeedsDiagOnly ? 'bg-white/20' : 'bg-blue-100 text-blue-700'}`}>
                   {pipelineDiagCounts.before}
@@ -685,7 +685,7 @@ export default function App() {
           >
             <span className="flex items-center gap-2">
               <ShieldCheck className={`w-4 h-4 ${showNeedsDiagOnly ? 'text-white' : 'text-purple-600'}`} />
-              Finished Needs Diag
+              After-Diag Pending
               {pipelineDiagCounts.after > 0 && (
                 <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-black ${showNeedsDiagOnly ? 'bg-white/20' : 'bg-purple-100 text-purple-700'}`}>
                   {pipelineDiagCounts.after}
@@ -1795,7 +1795,7 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setShowBottlenecksOnly(!showBottlenecksOnly)}
-                  className={`py-1.5 px-3 rounded-xl border text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 ${
+                  className={`py-1.5 px-3 min-h-10 rounded-xl border text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 ${
                     showBottlenecksOnly
                       ? 'bg-red-500 text-white border-red-600 shadow-2xs'
                       : 'bg-red-50 hover:bg-red-100 text-red-800 border-red-200'
@@ -1825,7 +1825,7 @@ export default function App() {
                 <CustomDropdownMenu
                   value={statusFilter}
                   onChange={(val) => setStatusFilter(val)}
-                  buttonClassName="!px-2.5 !py-1.5 text-xs"
+                  buttonClassName="!px-2.5 !py-1.5 !min-h-10 text-xs"
                   options={[
                     { value: 'ALL', label: 'All Stages' },
                     { value: 'Receive', label: 'Receive' },
@@ -1841,7 +1841,7 @@ export default function App() {
                 <CustomDropdownMenu
                   value={techFilter}
                   onChange={(val) => setTechFilter(val)}
-                  buttonClassName="!px-2.5 !py-1.5 text-xs"
+                  buttonClassName="!px-2.5 !py-1.5 !min-h-10 text-xs"
                   options={[
                     { value: 'ALL', label: 'All Techs' },
                     { value: 'unassigned', label: 'Unassigned' },

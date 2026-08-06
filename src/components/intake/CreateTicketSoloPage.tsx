@@ -372,6 +372,24 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       toast.error(Object.values(errs)[0], 'Please Complete the Form');
       return;
     }
+    // Duplicate-device guard: warn if this IMEI/serial already has an open ticket
+    const openTickets = workOrders.filter(
+      (w) => !w.isArchived && ['Receive', 'In Progress', 'Pending'].includes(w.status) && w.id !== editWorkOrder?.id
+    );
+    const dupImei = imei.trim() ? openTickets.find((w) => (w.imei || '').trim() === imei.trim()) : null;
+    const dupSerial = serialNumber.trim() ? openTickets.find((w) => (w.serialNumber || '').trim() === serialNumber.trim()) : null;
+    const dupTicket = dupImei || dupSerial;
+    if (dupTicket) {
+      const dupKey = dupImei ? `IMEI ${imei.trim()}` : `serial ${serialNumber.trim()}`;
+      const proceed = window.confirm(
+        `⚠️ Duplicate device detected!\n\n${dupKey} already has an open ticket:\n  ${dupTicket.orderNumber} — ${dupTicket.deviceModel} (${dupTicket.customerName})\n\nCreate this new intake anyway?`
+      );
+      if (!proceed) {
+        setIsRegistering(false);
+        return;
+      }
+    }
+
     setIsRegistering(true);
 
     const prefix = systemSettings?.ticketPrefix || 'WO-';

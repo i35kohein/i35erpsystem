@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   ChevronsRight,
   Eye,
@@ -36,7 +36,8 @@ import {
   Palette,
   Minus,
   XCircle,
-  MapPin
+  MapPin,
+  MoreHorizontal
 } from 'lucide-react';
 import { 
   WorkOrder, 
@@ -200,6 +201,8 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
 
   // Drag & Drop State
   const [draggedWoId, setDraggedWoId] = useState<string | null>(null);
+  // Kanban board container ref — used by the mobile stage-jump strip to scroll to a column
+  const boardRef = useRef<HTMLDivElement | null>(null);
 
   // Bottleneck Helper Functions
   const getHoursInStatus = (wo: WorkOrder) => {
@@ -247,6 +250,68 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
       default:
         return 'bg-white border border-line shadow-2xs hover:border-slate-400 hover:ring-2 hover:ring-slate-400/20 transition-all duration-200';
     }
+  };
+
+  // Quick-assign: one-tap from the card (dropdown for managers, self-assign for techs)
+  const handleQuickAssign = (wo: WorkOrder, techId: string) => {
+    const normalizedId = techId === 'unassigned' ? '' : techId;
+    const tech = technicians.find((t) => t.id === normalizedId);
+    const formattedDate = new Date().toLocaleString('en-US', {
+      month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true
+    });
+    const newLog: RepairLogEntry = {
+      id: `log-${Date.now()}`,
+      timestamp: formattedDate,
+      author: 'System Assignment',
+      note: `Assigned technician updated to ${tech?.name || 'Unassigned'}.`,
+    };
+    const updatedWo: WorkOrder = {
+      ...wo,
+      assignedTechId: normalizedId,
+      assignedTechName: tech?.name,
+      repairLogs: [newLog, ...(wo.repairLogs || [])],
+      updatedAt: new Date().toISOString()
+    };
+    if (onSaveWorkOrder) onSaveWorkOrder(updatedWo);
+    toast.success(tech ? `Ticket assigned to ${tech.name}.` : 'Ticket marked Unassigned.', 'Technician Updated');
+  };
+
+  const openCheckoutModal = (wo: WorkOrder) => {
+    setCheckoutModalWo(wo);
+    setPaidAmountInput(wo.totalAmount ? String(wo.totalAmount) : '0');
+  };
+
+  const openAfterDiagModal = (wo: WorkOrder) => {
+    setAfterDiagModalWo(wo);
+    setAfterSummaryNote(wo.afterRepairSummary || '');
+    if (wo.afterDiagnostics && wo.afterDiagnostics.length > 0) {
+      setAfterDiagnostics(JSON.parse(JSON.stringify(wo.afterDiagnostics)));
+    } else {
+      const base21 = get21Diagnostics(wo.beforeDiagnostics, wo.symptomsReported, wo.intakeChecklist);
+      setAfterDiagnostics(
+        base21.map((d, i) => ({
+          id: d.id || `after-diag-${i}`,
+          name: d.name,
+          status: 'Pass' as const,
+          note: d.status === 'Fail' ? 'Repaired & Verified' : d.note || '',
+        }))
+      );
+    }
+  };
+
+  // Card "⋯ More" menu actions (Detail / Log / Notify / After Diag)
+  const handleCardMenuAction = (action: string, wo: WorkOrder) => {
+    if (action === 'detail') setDetailModalWo(wo);
+    else if (action === 'log') setAddLogModalWo(wo);
+    else if (action === 'notify') {
+      setNotifWo(wo);
+      setIsNotifModalOpen(true);
+    } else if (action === 'after-diag') openAfterDiagModal(wo);
+  };
+
+  const scrollToStage = (stageId: string) => {
+    const col = boardRef.current?.querySelector(`[data-stage-id="${stageId}"]`);
+    col?.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
   };
 
   // Handlers
@@ -494,7 +559,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                 }`}
           >
             <Stethoscope className="h-3 w-3 shrink-0" />
-            <span>Before Diag Pending ({beforeNeedsDiagTotalCount})</span>
+            <span>Before-Diag Pending ({beforeNeedsDiagTotalCount})</span>
           </button>
 
           <button
@@ -510,7 +575,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
               }`}
           >
             <ShieldCheck className="h-3 w-3 shrink-0" />
-            <span>Finished Needs Diag ({afterNeedsDiagTotalCount})</span>
+            <span>After-Diag Pending ({afterNeedsDiagTotalCount})</span>
           </button>
 
           {showBottlenecksOnly && (
@@ -529,10 +594,10 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                 }
               }}
               className="inline-flex h-7 items-center gap-1 rounded-md border border-rose-200 bg-rose-50 px-2 text-[10px] font-bold text-rose-700 shadow-2xs transition-colors hover:bg-rose-100"
-              title="Clear all tickets to reset workflow testing state"
+              title="⚠️ Permanently delete ALL tickets from the system (Admin only)"
             >
               <Trash2 className="h-3 w-3 shrink-0 text-rose-600" />
-              <span>Clear All ({workOrders.length})</span>
+              <span>Delete All Tickets ({workOrders.length})</span>
             </button>
           )}
 
@@ -566,14 +631,18 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
         )}
       </div>
 
-      {/* Active filter summary chips (desktop) */}
-      <div className="hidden lg:block">
+      {/* Active filter summary chips — one-tap clear (all viewports; wraps on mobile) */}
+      <div className="block">
         <ActiveFilterChips chips={activeFilterChips} />
       </div>
 
-      {/* Horizontal Scrollable 6 Kanban Columns */}
+      {/* Horizontal Scrollable Kanban Columns (scrolls below xl; fits on desktop) */}
+      <div className="relative">
       <div
-        className="kanban-scroll flex min-h-[calc(100dvh-14rem)] space-x-3 overflow-x-auto pb-4 pt-1 snap-x touch-pan-x no-scrollbar md:grid md:grid-cols-3 md:gap-3 md:space-x-0 md:overflow-visible md:snap-none lg:flex lg:space-x-3 lg:overflow-x-auto lg:snap-x lg:grid-cols-none"
+        ref={boardRef}
+        role="group"
+        aria-label="Active pipeline kanban board — scroll horizontally to see all stages"
+        className="kanban-scroll flex min-h-[calc(100dvh-14rem)] gap-3 overflow-x-auto pb-4 pt-1 snap-x snap-mandatory touch-pan-x no-scrollbar xl:snap-none"
         onScroll={(e) => {
           const el = e.currentTarget;
           setKanbanAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 12);
@@ -586,6 +655,8 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
           return (
             <div
               key={stage.id}
+              data-stage-id={stage.id}
+              aria-label={`${stage.title} column — ${stageOrders.length} tickets`}
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => {
                 e.preventDefault();
@@ -611,12 +682,19 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   setDraggedWoId(null);
                 }
               }}
-              className={`rounded-2xl border ${stage.color} bg-white/50 backdrop-blur-xs p-3 flex flex-col min-w-[260px] md:min-w-0 flex-1 max-w-none shadow-2xs snap-start transition-all`}
+              className={`rounded-2xl border ${stage.color} bg-white/50 backdrop-blur-xs p-3 flex flex-col shadow-2xs transition-all snap-start ${
+                stageOrders.length === 0
+                  ? 'w-[52px] min-w-[52px] items-center xl:w-[64px] xl:min-w-[64px]'
+                  : 'w-[260px] min-w-[260px] xl:w-auto xl:min-w-[240px] xl:flex-1 xl:max-w-none'
+              }`}
             >
-              {/* Column Header */}
-              <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-line">
-                <div>
-                  <h3 className="text-xs font-extrabold text-ink tracking-tight">
+              {/* Column Header — slim vertical strip when empty, full header otherwise */}
+              {stageOrders.length === 0 ? (
+                <div
+                  className="flex flex-col items-center justify-center gap-2 py-3"
+                  title={`${stage.title} — no tickets. Drag a ticket here to move it.`}
+                >
+                  <h3 className="[writing-mode:vertical-rl] rotate-180 text-[10px] font-extrabold text-muted tracking-wide whitespace-nowrap">
                     {stage.id === 'Receive' ? t('statusReceive') :
                      stage.id === 'In Progress' ? t('statusInProgress') :
                      stage.id === 'Pending' ? t('statusPending') :
@@ -625,31 +703,42 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                      stage.id === 'Cant Repair' ? t('statusCantRepair') :
                      stage.id === 'Customer Not Repair' ? t('statusCustomerNotRepair') : stage.title}
                   </h3>
-                  <p className="text-[10px] text-muted font-medium">{stage.subtitle}</p>
+                  <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-full shadow-2xs ${stage.badgeColor}`}>0</span>
                 </div>
-                <div className="flex items-center space-x-1">
-                  {stageStagnantOrders.length > 0 && (
-                    <span
-                      className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300/80 flex items-center space-x-0.5"
-                      title={`${stageStagnantOrders.length} ticket(s) stationary >48h in this stage`}
-                    >
-                      <AlertTriangle className="w-2.5 h-2.5 text-amber-600 shrink-0" />
-                      <span>{stageStagnantOrders.length}</span>
+              ) : (
+                <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-line">
+                  <div>
+                    <h3 className="text-xs font-extrabold text-ink tracking-tight">
+                      {stage.id === 'Receive' ? t('statusReceive') :
+                       stage.id === 'In Progress' ? t('statusInProgress') :
+                       stage.id === 'Pending' ? t('statusPending') :
+                       stage.id === 'Finished' ? t('statusFinished') :
+                       stage.id === 'Taken Out' ? t('statusTakenOut') :
+                       stage.id === 'Cant Repair' ? t('statusCantRepair') :
+                       stage.id === 'Customer Not Repair' ? t('statusCustomerNotRepair') : stage.title}
+                    </h3>
+                    <p className="text-[10px] text-muted font-medium">{stage.subtitle}</p>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    {stageStagnantOrders.length > 0 && (
+                      <span
+                        className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300/80 flex items-center space-x-0.5"
+                        title={`${stageStagnantOrders.length} ticket(s) stationary >48h in this stage`}
+                      >
+                        <AlertTriangle className="w-2.5 h-2.5 text-amber-600 shrink-0" />
+                        <span>{stageStagnantOrders.length}</span>
+                      </span>
+                    )}
+                    <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow-2xs ${stage.badgeColor}`}>
+                      {stageOrders.length}
                     </span>
-                  )}
-                  <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow-2xs ${stage.badgeColor}`}>
-                    {stageOrders.length}
-                  </span>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Cards Container */}
-              <div className="flex-1 space-y-3 overflow-y-auto pr-0.5 max-h-[680px]">
-                {stageOrders.length === 0 ? (
-                  <div className="text-[11px] text-muted font-medium text-center py-12 border-2 border-dashed border-line rounded-xl bg-white/40">
-                    No tickets in {stage.title}
-                  </div>
-                ) : (
+              <div className={`flex-1 ${stageOrders.length === 0 ? 'min-h-[90px]' : 'space-y-3 overflow-y-auto pr-0.5 max-h-[680px]'}`}>
+                {stageOrders.length === 0 ? null : (
                   stageOrders.map((wo) => {
                     const tech = technicians.find((t) => t.id === wo.assignedTechId);
                     const currentIdx = KANBAN_STAGES.findIndex((s) => s.id === wo.status);
@@ -658,6 +747,14 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                     const failCount = diag21.filter((d) => d.status === 'Fail').length;
                     const hoursInStatus = getHoursInStatus(wo);
                     const isStagnant = getIsStagnant(wo);
+                    // Age chip: neutral <24h · amber 24–48h · red ≥48h (red only matters for
+                    // terminal stages — active stages already get the red Bottleneck banner)
+                    const ageChipClass = hoursInStatus >= 48
+                      ? 'text-red-700 bg-red-50 border border-red-200 rounded-md px-1.5 py-0.5'
+                      : hoursInStatus >= 24
+                      ? 'text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-1.5 py-0.5'
+                      : 'text-muted';
+                    const ageChipIconClass = hoursInStatus >= 24 ? 'text-amber-600' : 'text-brand';
 
                     const isBeforeDiagNeeded = checkIsBeforeDiagnosticNeeded(wo);
                     const isAfterDiagNeeded = checkIsAfterDiagnosticNeeded(wo);
@@ -704,7 +801,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                           </div>
                         </div>
 
-                        {/* Stagnant Bottleneck Alert Banner / Age Chip */}
+                        {/* Stagnant Bottleneck Alert Banner / Age Chip (amber ≥24h, red ≥48h) */}
                         {isStagnant ? (
                           <div className="flex items-center justify-between px-2 py-1 rounded-lg bg-red-50 border border-red-200 text-red-800 text-[10px] font-extrabold">
                             <span className="flex items-center space-x-1">
@@ -714,8 +811,8 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                             <span className="font-mono bg-red-100 px-1.5 py-0.5 rounded text-red-800">{hoursInStatus}h</span>
                           </div>
                         ) : (
-                          <div className="flex items-center space-x-1 text-[10px] text-muted">
-                            <Clock className="w-3 h-3 text-brand shrink-0" />
+                          <div className={`flex items-center space-x-1 text-[10px] ${ageChipClass}`}>
+                            <Clock className={`w-3 h-3 shrink-0 ${ageChipIconClass}`} />
                             <span>In stage: <strong className="text-ink">{hoursInStatus < 1 ? '&lt; 1h' : `${hoursInStatus}h`}</strong></span>
                           </div>
                         )}
@@ -734,94 +831,90 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                           </div>
                         </div>
 
-                        {/* Tech Tag */}
+                        {/* Tech Tag — one-tap quick assign (dropdown for managers, self-assign for techs) */}
                         <div className="flex items-center justify-between text-[10px] pt-1 border-t border-slate-100 text-muted">
                           <span>Tech: <strong className="text-ink">{tech?.name?.split(' ')[0] || 'Unassigned'}</strong></span>
-                          <button
-                            type="button"
-                            onClick={() => setAssignTechModalWo(wo)}
-                            className="text-brand hover:underline flex items-center space-x-0.5 font-semibold"
-                          >
-                            <UserCheck className="w-3 h-3" />
-                            <span>Assign</span>
-                          </button>
-                        </div>
-
-                        {/* Primary Card Actions */}
-                        <div className="grid grid-cols-3 gap-1 pt-1 border-t border-slate-100 text-[10px]">
-                          <button
-                            type="button"
-                            onClick={() => setDetailModalWo(wo)}
-                            className="py-1 px-1 bg-surface hover:bg-slate-100 text-ink font-semibold rounded-lg border border-line text-center flex items-center justify-center space-x-0.5 truncate"
-                          >
-                            <Eye className="w-3 h-3 text-ink shrink-0" />
-                            <span>Detail</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => setAddLogModalWo(wo)}
-                            className="py-1 px-1 bg-surface hover:bg-slate-100 text-brand font-semibold rounded-lg border border-line text-center flex items-center justify-center space-x-0.5 truncate"
-                          >
-                            <Plus className="w-3 h-3" />
-                            <span>Log</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setNotifWo(wo);
-                              setIsNotifModalOpen(true);
-                            }}
-                            className="py-1 px-1 bg-[#7360F2]/10 hover:bg-[#7360F2]/20 text-[#7360F2] font-extrabold rounded-lg border border-[#7360F2]/20 text-center flex items-center justify-center space-x-0.5 truncate"
-                            title="Alert Customer SMS/Viber/Telegram"
-                          >
-                            <BellRing className="w-3 h-3 text-[#7360F2]" />
-                            <span>Notify</span>
-                          </button>
-                        </div>
-
-                        {/* Special Stage Action Buttons (Checkout & After Diag on Finished stage only) */}
-                        {stage.id === 'Finished' && (
-                          <div className="grid grid-cols-2 gap-1.5 pt-1">
+                          {isTechnicianUser && myTechId ? (
                             <button
                               type="button"
-                              onClick={() => {
-                                setCheckoutModalWo(wo);
-                                setPaidAmountInput(wo.totalAmount.toString());
-                              }}
-                              className="w-full py-1.5 bg-success hover:bg-success/90 text-white font-extrabold rounded-lg text-[10px] flex items-center justify-center space-x-1 shadow-xs"
+                              onClick={() => handleQuickAssign(wo, myTechId)}
+                              className="text-brand hover:underline flex items-center space-x-0.5 font-semibold cursor-pointer min-h-7"
+                              title="Assign this ticket to yourself"
                             >
-                              <DollarSign className="w-3 h-3" />
+                              <UserCheck className="w-3 h-3" />
+                              <span>Assign Me</span>
+                            </button>
+                          ) : (
+                            <CustomDropdownMenu
+                              value={wo.assignedTechId || ''}
+                              onChange={(techId) => handleQuickAssign(wo, techId)}
+                              ariaLabel={`Assign technician for ${wo.orderNumber}`}
+                              placeholder="Assign"
+                              menuAlign="right"
+                              buttonClassName="!h-7 !min-w-0 !px-2 !border-0 !bg-transparent !text-brand hover:!bg-transparent !shadow-none !text-[10px]"
+                              options={[
+                                { value: 'unassigned', label: 'Unassigned' },
+                                ...technicians.map((t) => ({
+                                  value: t.id,
+                                  label: t.name,
+                                  badge: t.activeJobsCount,
+                                  badgeColor: t.activeJobsCount > 0 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500',
+                                })),
+                              ]}
+                            />
+                          )}
+                        </div>
+
+                        {/* Primary Card Action + ⋯ More menu (Detail/Log/Notify stay one tap away) */}
+                        <div className="grid grid-cols-2 gap-1 pt-1 border-t border-slate-100 text-[10px]">
+                          {stage.id === 'Finished' ? (
+                            <button
+                              type="button"
+                              onClick={() => openCheckoutModal(wo)}
+                              className="py-1.5 px-1 bg-success hover:bg-success/90 text-white font-extrabold rounded-lg border border-success text-center flex items-center justify-center space-x-0.5 truncate shadow-xs min-h-9"
+                            >
+                              <DollarSign className="w-3 h-3 shrink-0" />
                               <span>Checkout</span>
                             </button>
-
+                          ) : stage.id === 'Pending' ? (
                             <button
                               type="button"
                               onClick={() => {
-                                setAfterDiagModalWo(wo);
-                                setAfterSummaryNote(wo.afterRepairSummary || '');
-                                if (wo.afterDiagnostics && wo.afterDiagnostics.length > 0) {
-                                  setAfterDiagnostics(JSON.parse(JSON.stringify(wo.afterDiagnostics)));
-                                } else {
-                                  const base21 = get21Diagnostics(wo.beforeDiagnostics, wo.symptomsReported, wo.intakeChecklist);
-                                  setAfterDiagnostics(
-                                    base21.map((d, i) => ({
-                                      id: d.id || `after-diag-${i}`,
-                                      name: d.name,
-                                      status: 'Pass' as const,
-                                      note: d.status === 'Fail' ? 'Repaired & Verified' : d.note || '',
-                                    }))
-                                  );
-                                }
+                                setNotifWo(wo);
+                                setIsNotifModalOpen(true);
                               }}
-                              className="w-full py-1.5 bg-purple-50 text-[#AF52DE] border border-purple-200 hover:bg-purple-100 font-bold rounded-lg text-[10px] flex items-center justify-center space-x-1"
+                              className="py-1.5 px-1 bg-[#7360F2]/10 hover:bg-[#7360F2]/20 text-[#7360F2] font-extrabold rounded-lg border border-[#7360F2]/20 text-center flex items-center justify-center space-x-0.5 truncate min-h-9"
+                              title="Alert Customer SMS/Viber/Telegram"
                             >
-                              <ShieldCheck className="w-3 h-3" />
-                              <span>After Diag</span>
+                              <BellRing className="w-3 h-3 shrink-0" />
+                              <span>Notify</span>
                             </button>
-                          </div>
-                        )}
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => setAddLogModalWo(wo)}
+                              className="py-1.5 px-1 bg-surface hover:bg-slate-100 text-brand font-semibold rounded-lg border border-line text-center flex items-center justify-center space-x-0.5 truncate min-h-9"
+                            >
+                              <Plus className="w-3 h-3 shrink-0" />
+                              <span>Log</span>
+                            </button>
+                          )}
+                          <CustomDropdownMenu
+                            value=""
+                            onChange={(action) => handleCardMenuAction(action, wo)}
+                            ariaLabel={`More actions for ${wo.orderNumber}`}
+                            iconOnly
+                            triggerIcon={<MoreHorizontal className="w-4 h-4" />}
+                            buttonClassName="!h-10 !w-10"
+                            menuAlign="right"
+                            options={[
+                              { value: 'detail', label: 'Detail' },
+                              { value: 'log', label: 'Log' },
+                              { value: 'notify', label: 'Notify' },
+                              ...(wo.status === 'Finished' ? [{ value: 'after-diag', label: 'After Diag' }] : []),
+                            ]}
+                          />
+                        </div>
                       </div>
                     );
                   })
@@ -831,6 +924,38 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
           );
         })}
       </div>
+      {/* Right-edge scroll fade (mobile/tablet) — hints there are more stages off-screen */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-10 rounded-r-2xl bg-gradient-to-l from-white/70 to-transparent xl:hidden" />
+      </div>
+
+      {/* Stage-jump strip (below xl) — tap a stage chip to scroll the board to it */}
+      {(() => {
+        const visibleStages = KANBAN_STAGES.filter(
+          (s) => (showAllStages || (s.id !== 'Cant Repair' && s.id !== 'Customer Not Repair')) && (statusFilter === 'ALL' || s.id === statusFilter)
+        );
+        if (visibleStages.length <= 1 || filteredWorkOrders.length === 0) return null;
+        return (
+          <div className="xl:hidden flex items-center gap-1.5 overflow-x-auto no-scrollbar -mx-0.5 px-0.5" aria-label="Jump to pipeline stage">
+            {visibleStages.map((s) => {
+              const count = filteredWorkOrders.filter((w) => w.status === s.id).length;
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => scrollToStage(s.id)}
+                  className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[10px] font-extrabold transition-colors cursor-pointer active:scale-95 ${
+                    count > 0 ? 'bg-white text-ink border-line-strong hover:bg-slate-100' : 'bg-transparent text-muted border-dashed border-line'
+                  }`}
+                  title={`Scroll to ${s.title} column`}
+                >
+                  <span>{s.id}</span>
+                  <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-black ${count > 0 ? 'bg-brand text-white' : 'bg-slate-100 text-muted'}`}>{count}</span>
+                </button>
+              );
+            })}
+          </div>
+        );
+      })()}
 
       {/* MODAL 1: Full Ticket Detail View Modal */}
       {detailModalWo && (

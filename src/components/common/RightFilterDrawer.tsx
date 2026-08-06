@@ -75,7 +75,7 @@ export const RightFilterDrawer: React.FC<RightFilterDrawerProps> = ({
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-[80] lg:hidden ${open ? '' : 'pointer-events-none'}`}
+      className={`fixed inset-0 z-[80] lg:hidden ${open ? '' : 'pointer-events-none invisible'}`}
       aria-hidden={!open}
     >
       {/* Backdrop */}
