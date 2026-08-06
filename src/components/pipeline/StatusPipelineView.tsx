@@ -646,7 +646,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
         ref={boardRef}
         role="group"
         aria-label="Active pipeline kanban board — scroll horizontally to see all stages"
-        className="kanban-scroll flex min-h-[calc(100dvh-14rem)] gap-3 overflow-x-auto pb-4 pt-1 snap-x snap-mandatory touch-pan-x no-scrollbar xl:snap-none"
+        className={`kanban-scroll flex min-h-[calc(100dvh-14rem)] gap-3 overflow-x-auto pb-4 pt-1 ${isIpad ? 'snap-none' : 'snap-x snap-mandatory'} touch-pan-x no-scrollbar xl:snap-none`}
         onScroll={(e) => {
           const el = e.currentTarget;
           setKanbanAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 12);
@@ -689,7 +689,9 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
               className={`rounded-2xl border ${stage.color} bg-white/50 backdrop-blur-xs p-3 flex flex-col shadow-2xs transition-all snap-start ${
                 stageOrders.length === 0
                   ? 'w-[52px] min-w-[52px] items-center xl:w-[64px] xl:min-w-[64px]'
-                  : 'w-[260px] min-w-[260px] xl:w-auto xl:min-w-[240px] xl:flex-1 xl:max-w-none'
+                  : isIpad
+                    ? 'flex-1 min-w-[200px] xl:flex-1 xl:min-w-[240px] xl:max-w-none'
+                    : 'w-[260px] min-w-[260px] xl:w-auto xl:min-w-[240px] xl:flex-1 xl:max-w-none'
               }`}
             >
               {/* Column Header — slim vertical strip when empty, full header otherwise */}
