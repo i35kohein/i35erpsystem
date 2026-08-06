@@ -550,7 +550,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       setNotifWo(selectedWo);
                       setIsNotifModalOpen(true);
                     }}
-                    className="px-3 py-1.5 bg-[#7360F2]/10 hover:bg-[#7360F2]/20 text-[#7360F2] font-extrabold text-xs rounded-xl border border-[#7360F2]/30 transition-all flex items-center space-x-1.5 cursor-pointer shrink-0"
+                    className="h-10 px-3 bg-[#7360F2]/10 hover:bg-[#7360F2]/20 text-[#7360F2] font-extrabold text-xs rounded-xl border border-[#7360F2]/30 transition-all flex items-center space-x-1.5 cursor-pointer shrink-0"
                     title="Send SMS / Viber / Telegram Notification"
                   >
                     <BellRing className="w-3.5 h-3.5 text-[#7360F2]" />
@@ -689,7 +689,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     type="button"
                     onClick={() => setIsAddPartOpen(!isAddPartOpen)}
                     aria-expanded={isAddPartOpen}
-                    className="w-full flex items-center justify-between gap-2 text-left cursor-pointer"
+                    className="w-full min-h-10 flex items-center justify-between gap-2 text-left cursor-pointer"
                   >
                     <span>
                       <h4 className="text-xs font-extrabold text-ink">Add Inventory Part Used</h4>
@@ -1085,7 +1085,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                               key={amt}
                               type="button"
                               onClick={() => setCashTendered(amt)}
-                              className={`px-2 py-1 rounded-lg border text-[10px] font-extrabold transition-all cursor-pointer ${
+                              className={`h-10 px-2 rounded-lg border text-[10px] font-extrabold transition-all cursor-pointer ${
                                 cashTendered === amt
                                   ? 'bg-brand text-white border-brand'
                                   : 'bg-white text-ink border-line hover:bg-brand-soft'
