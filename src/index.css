@@ -1238,4 +1238,16 @@ html[data-theme="dark-slate"] .bg-teal-500, html[data-theme="dark-slate"] .bg-te
 html[data-theme="dark-slate"] [class~="text-[#1E7E34]"] { color: #4ADE80 !important; }
 html[data-theme="dark-slate"] .text-amber-950 { color: #FBBF24 !important; }
 
+/* Create-Ticket drawer wells/pills (were raw hexes; now tokens, keep dark parity) */
+html[data-theme="dark-slate"] [class~="bg-[#F8F9FA]"] { background-color: rgba(19, 27, 46, 0.55) !important; }
+html[data-theme="dark-slate"] [class~="bg-[#E5F1FF]"] { background-color: rgba(21, 89, 166, 0.22) !important; }
 
+html[data-theme="dark-slate"] .bg-amber-100 { background-color: rgba(245, 158, 11, 0.16) !important; }
+html[data-theme="dark-slate"] .bg-rose-100 { background-color: rgba(244, 63, 94, 0.16) !important; }
+html[data-theme="dark-slate"] .bg-red-100 { background-color: rgba(239, 68, 68, 0.16) !important; }
+html[data-theme="dark-slate"] .bg-emerald-100 { background-color: rgba(16, 185, 129, 0.16) !important; }
+html[data-theme="dark-slate"] .bg-blue-100 { background-color: rgba(59, 130, 246, 0.18) !important; }
+html[data-theme="dark-slate"] .bg-violet-100 { background-color: rgba(139, 92, 246, 0.17) !important; }
+html[data-theme="dark-slate"] .bg-orange-100 { background-color: rgba(249, 115, 22, 0.16) !important; }
+html[data-theme="dark-slate"] .bg-teal-100 { background-color: rgba(20, 184, 166, 0.16) !important; }
+html[data-theme="dark-slate"] .bg-yellow-100 { background-color: rgba(234, 179, 8, 0.16) !important; }
