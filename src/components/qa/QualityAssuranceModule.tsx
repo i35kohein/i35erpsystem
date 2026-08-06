@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useIsIpad } from '../../hooks/useIsIpad';
 import { 
   ShieldCheck, 
   CheckCircle2, 
@@ -75,6 +76,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
   const [selectedWoId, setSelectedWoId] = useState<string>(
     filteredWorkOrders[0]?.id || finishedWorkOrders[0]?.id || ''
   );
+  const isIpad = useIsIpad();
   const selectedWo = filteredWorkOrders.find((w) => w.id === selectedWoId);
   const [qaSavedNotice, setQaSavedNotice] = useState<boolean>(false);
   const repairCategorySummary = selectedWo?.selectedRepairs?.length
@@ -206,7 +208,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
   };
 
   return (
-    <div className="space-y-3 text-xs">
+    <div className={`space-y-3 text-xs ${isIpad ? 'flex min-h-0 flex-1 flex-col' : ''}`}>
       {/* Header */}
       <div className="module-subheader flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-line shadow-xs">
         <div>
@@ -223,9 +225,9 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-12">
+      <div className={`grid grid-cols-1 gap-3 md:grid-cols-12 ${isIpad ? 'md:flex-1 md:min-h-0 md:grid-rows-1' : ''}`}>
         {/* Left Column: Work Orders Awaiting QA (4 cols) */}
-        <div className="space-y-2 rounded-xl border border-line bg-white p-3 md:col-span-3 md:self-start">
+        <div className={`space-y-2 rounded-xl border border-line bg-white p-3 md:col-span-3 ${isIpad ? 'md:flex md:flex-col md:min-h-0' : 'md:self-start'}`}>
           <div className="flex items-center justify-between gap-2 border-b border-line pb-2">
             <h2 className="min-w-0 truncate font-bold text-ink text-xs">QA Queue</h2>
             <span className="shrink-0 text-[10px] font-mono font-bold bg-brand/10 text-brand px-2 py-0.5 rounded-full">
@@ -233,7 +235,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
             </span>
           </div>
 
-          <div className="space-y-2 max-h-[calc(100dvh-260px)] overflow-y-auto pr-1">
+          <div className={`space-y-2 overflow-y-auto pr-1 ${isIpad ? 'md:min-h-0 md:flex-1 md:max-h-none' : 'max-h-[calc(100dvh-260px)]'}`}>
             {filteredWorkOrders.length === 0 ? (
               <div className="p-6 text-center text-muted space-y-2">
                 <CheckCircle2 className="w-8 h-8 text-success mx-auto opacity-50" />
@@ -330,7 +332,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
         </div>
 
         {/* Right Column: QA Checklist Worksheet & 21 Diagnostic Points (8 cols) */}
-        <div className="space-y-3 rounded-xl border border-line bg-white p-3 md:col-span-9">
+        <div className={`space-y-3 rounded-xl border border-line bg-white p-3 md:col-span-9 ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:overflow-y-auto' : ''}`}>
           {selectedWo ? (
             <div className="space-y-3">
               {qaSavedNotice && (
