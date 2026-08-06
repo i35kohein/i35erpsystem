@@ -764,7 +764,8 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         key={wo.id}
                         draggable
                         onDragStart={() => setDraggedWoId(wo.id)}
-                        className={`p-3 rounded-xl shadow-xs hover:shadow-md space-y-2 text-xs min-h-[200px] transition-shadow duration-150 ease-out cursor-grab active:cursor-grabbing group ${
+                        onClick={() => setDetailModalWo(wo)}
+                        className={`p-3 rounded-xl shadow-xs hover:shadow-md space-y-2 text-xs min-h-[200px] transition-shadow duration-150 ease-out cursor-pointer active:cursor-grabbing group ${
                           isBeforeDiagNeeded 
                             ? 'border-l-4 border-l-amber-500 bg-amber-50/20' 
                             : isAfterDiagNeeded 
@@ -818,7 +819,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         )}
 
                         {/* Model & Customer & Repair Issue */}
-                        <div role="button" tabIndex={0} aria-label={`Open detail for ${wo.deviceModel || wo.orderNumber || wo.id}`} className="cursor-pointer space-y-1" onClick={() => setDetailModalWo(wo)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setDetailModalWo(wo); } }}>
+                        <div className="cursor-pointer space-y-1" title={`Open detail — ${wo.deviceModel || wo.orderNumber || wo.id}`}>
                           <p className="font-extrabold text-ink text-xs line-clamp-1 hover:text-brand transition-colors">{wo.deviceModel}</p>
                           <p className="text-[10px] text-slate-500 truncate" title={`${wo.customerName} • ${wo.customerPhone}`}>{wo.customerName} • {wo.customerPhone}</p>
                           
@@ -832,7 +833,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         </div>
 
                         {/* Tech Tag — one-tap quick assign (dropdown for managers, self-assign for techs) */}
-                        <div className="flex items-center justify-between text-[10px] pt-1 border-t border-slate-100 text-slate-500">
+                        <div className="flex items-center justify-between text-[10px] pt-1 border-t border-slate-100 text-slate-500" onClick={(e) => e.stopPropagation()}>
                           <span>Tech: <strong className="text-ink">{tech?.name?.split(' ')[0] || 'Unassigned'}</strong></span>
                           {isTechnicianUser && myTechId ? (
                             <button
@@ -866,7 +867,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         </div>
 
                         {/* Primary Card Action + ⋯ More menu (Detail/Log/Notify stay one tap away) */}
-                        <div className="flex items-stretch gap-1 pt-1 border-t border-slate-100 text-[10px]">
+                        <div className="flex items-stretch gap-1 pt-1 border-t border-slate-100 text-[10px]" onClick={(e) => e.stopPropagation()}>
                           {stage.id === 'Finished' ? (
                             <button
                               type="button"
@@ -909,8 +910,10 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                             menuAlign="right"
                             options={[
                               { value: 'detail', label: 'Detail' },
-                              { value: 'log', label: 'Log' },
-                              { value: 'notify', label: 'Notify' },
+                              // Primary button already covers Log (Receive/In Progress/…) and
+                              // Notify (Pending) — don't duplicate them in the ⋯ menu.
+                              ...(stage.id === 'Finished' || stage.id === 'Pending' ? [{ value: 'log', label: 'Log' }] : []),
+                              ...(stage.id === 'Pending' ? [] : [{ value: 'notify', label: 'Notify' }]),
                               ...(wo.status === 'Finished' ? [{ value: 'after-diag', label: 'After Diag' }] : []),
                             ]}
                           />
