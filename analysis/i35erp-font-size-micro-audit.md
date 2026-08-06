@@ -84,12 +84,12 @@ Page titles `text-2xl` (24), section `text-lg/xl` (18/20), stats `text-3xl` (30:
 
 ---
 
-## 5. Recommended fix batch (awaiting Ko Hein "fix")
-| # | P | Fix | Effort |
+## 5. Fix status — ALL APPLIED (2026-08-06 ~19:44-19:55, commit `4b98ac5`, bundle `index-YIuK6znX.js`)
+| # | P | Fix | Status |
 |---|---|---|---|
-| F1 | P0 | `.basic-ui th` 11px → 12px (index.css) | 1 line |
-| F4 | P0 | Dashboard Status Queue strip: wrap or overflow-x-auto at <1024 | small |
-| F5 | P2 | POS ticket row text: add truncate/min-w-0 | small |
-| F2 | P2 | Badge floor 11px → 12px (`.text-\[7px\],.text-\[8px\],.text-\[9px\]` floor → 12px) — visual +1px on badges | 3 lines |
-| F3 | P2 | 18 stray fixed sizes → token classes | small |
-| F6 | P3 | Bulk source cleanup `text-[10px]/[11px]` → `text-xs` (no visual change) | medium |
+| F1 | P0 | `.basic-ui th` 11px → 12px (index.css) | ✅ verified 12px, 0 sub-12 headers |
+| F4 | P0 | Dashboard subtab bar: relative wrapper + right-edge fade (xl:hidden) — scroll affordance | ✅ verified fade present |
+| F5 | P2 | POS ticket row: order# min-w-0 truncate + status row shrink-0 | ✅ verified no row overflow |
+| F2 | P2 | Badge floor 7/8/9px → 12px (index.css) | ✅ verified UNPAID 12px |
+| F3 | P2 | 20 stray fixed sizes → token classes (13→sm, 12→xs, 14→sm, 15/16→base) across 5 files | ✅ 0 strays left |
+| F6 | P3 | Bulk source cleanup `text-[10px]/[11px]` → `text-xs` (no visual change) | ⏳ optional — NOT done (no visual value) |
