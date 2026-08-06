@@ -24,7 +24,7 @@
 ## FINAL — ✅ 0 real violations (light theme, all 11 tabs)
 - **color-contrast: 0** (was 66) · **heading-order: 0** · **landmark: 0** · **select-name/nested-interactive: 0**
 - Remaining: `region` ×9 — the fixed-position `role="tooltip"` overlay (axe known limitation for position:fixed elements outside landmarks; functionally fine — tooltip is aria-describedby-linked). Acceptable.
-- **Theme note:** app supports `app_theme` (light / dark-slate). This audit = LIGHT mode. dark-slate theme needs its own contrast pass (light-on-dark + brand-on-dark) — separate follow-up.
+- **Theme note:** ✅ BOTH themes audited to 0 real violations (light + dark-slate). Only `region` ×9 remains (fixed-position tooltip — axe limitation, acceptable).
 
 ## Root causes fixed this pass (66 → 0)
 1. `--color-success` (Carbon #24a148) → #166534 (white-on-green 3.35 fail); muted/faint → #616161 (passes white AND surface).
@@ -35,3 +35,13 @@
 
 ## How to re-run
 Inject axe-core 4.10.2 (CDN), `axe.run(document)` per tab — script: `/tmp/erp_micro/axe_verify.cjs` pattern.
+
+## F7 — dark-slate theme pass (2026-08-06, 129 → 0 contrast)
+- Dark audit: 129 contrast nodes across 9 tabs. Fixed via `index.css` F7 dark override block (unlayered + !important):
+  - text remaps: .text-brand/-deep → #6EA8FE, .text-success(-deep)/emerald-* → #4ADE80, danger/red → #F87171, purple/violet → #C4B5FD, amber/orange → #FBBF24/#FDBA74, rose-7/8/950 → #FDA4AF, slate-600/700 → #CBD5E1/#E2E8F0, hardcoded text-[#15803D]/[#16A34A]/[#166534]/[#1E7E34]/[#27B1AE]/[#ED7132]/[#5A3FD4] → light variants
+  - pastel wells (bg-*-50 + /20-/80 opacity variants) → translucent dark tints; borders → tinted
+  - var(--primary)-mapped button bgs (bg-[#AF52DE]/[#7360F2]/[#0077ED], purple-5/6/700, indigo-600, teal-5/600) → dark button blues (dark --primary #38BDF8 is an accent, fails with white text)
+  - bg-ink (tooltip) → #26334D; bg-white/50 (stage columns) → dark; sidebar active nav bg-[#EAF2FF]/text-[#1559A6]/border-[#B8D3F4] → dark variants; bg-[#FAFAFC]/[#F8FAFC] → dark
+- Source fixes: POS IMEI + Configured-in-Settings, CRM roster name/expand/Full History/Edit/mobile-close/details-name/details-Full-History → `variant="ghost"` (raw plain-buttons were reverted by a concurrent refactor's button-policy pass; ghost is the policy-compliant way); `!text-brand` → `text-brand` in StatusPipelineView (important-variant utilities beat unlayered important in CSS layers — the `!` was the reason the override never applied).
+- ⚠️ LESSONS: (1) Tailwind v4 PURGES rules inside `@layer utilities` that carry html[] selectors — keep overrides unlayered; (2) important-variant utilities (`!text-brand`) beat unlayered !important overrides (layer priority for !important) — fix source, not CSS; (3) `[class~="bg-[#AF52DE]"]`-style tie specificity → place dark remaps at END of file; (4) REPO IS CONCURRENTLY EDITED by another process — re-check git log/status before assuming your edits are live; deploy from working tree can conflict.
+- Final: light 0 + dark 0 (only region ×9 tooltip). Screenshots erp-micro/dark_*.png.
