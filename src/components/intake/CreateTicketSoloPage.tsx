@@ -524,7 +524,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
     return (
       <div className={`mx-auto space-y-6 ${embedded ? 'w-full px-4 py-4 sm:px-5' : `py-6 ${isIpad ? 'max-w-6xl' : 'max-w-3xl xl:max-w-6xl'}`}`}>
         <div className="bg-white border border-line-strong rounded-2xl p-8 shadow-sm space-y-6 text-center">
-          <div className="w-16 h-16 bg-[#E8F8EE] text-success-deep rounded-2xl flex items-center justify-center mx-auto shadow-inner">
+          <div className="w-16 h-16 bg-success/10 text-success-deep rounded-2xl flex items-center justify-center mx-auto shadow-inner">
             <CheckCircle2 className="w-8 h-8" />
           </div>
 
@@ -810,7 +810,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                   <span className="text-xs text-amber-700">Click to select Apple iPhone, iPad, MacBook, Watch, or Mac</span>
                 </div>
               </div>
-              <span className="text-xs font-extrabold text-white bg-amber-600 group-hover:bg-amber-700 px-3 py-1.5 rounded-lg shadow-2xs transition-colors shrink-0">
+              <span className="text-xs font-extrabold text-white bg-warning group-hover:bg-warning/90 px-3 py-1.5 rounded-lg shadow-2xs transition-colors shrink-0">
                 Choose Model
               </span>
             </div>
@@ -864,7 +864,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 </h3>
               </div>
               <div className="grow bg-white p-3.5 rounded-xl border border-dashed border-line-strong flex flex-col items-center justify-center text-center space-y-1.5 shadow-2xs">
-                <Palette className="w-4 h-4 text-[#B6B6BC]" />
+                <Palette className="w-4 h-4 text-faint" />
                 <span className="text-xs text-muted font-semibold leading-snug">
                   Select a device model first<br />to see real color options
                 </span>
@@ -1145,7 +1145,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                   }
                   setBeforeDiagnostics(prev => prev.map(d => ({ ...d, status: 'Pass' })));
                 }}
-                className="text-xs text-white font-bold bg-success hover:bg-[#28A745] px-3 py-2 min-h-10 rounded-full shadow-xs transition-colors"
+                className="text-xs text-white font-bold bg-success hover:bg-success/90 px-3 py-2 min-h-10 rounded-full shadow-xs transition-colors"
               >
                 Mark All Pass
               </Button>
