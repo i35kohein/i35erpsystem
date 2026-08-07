@@ -524,7 +524,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
     return (
       <div className={`mx-auto space-y-6 ${embedded ? 'w-full px-4 py-4 sm:px-5' : `py-6 ${isIpad ? 'max-w-6xl' : 'max-w-3xl xl:max-w-6xl'}`}`}>
         <div className="bg-white border border-line-strong rounded-2xl p-8 shadow-sm space-y-6 text-center">
-          <div className="w-16 h-16 bg-[#E8F8EE] text-[#1E7E34] rounded-2xl flex items-center justify-center mx-auto shadow-inner">
+          <div className="w-16 h-16 bg-[#E8F8EE] text-success-deep rounded-2xl flex items-center justify-center mx-auto shadow-inner">
             <CheckCircle2 className="w-8 h-8" />
           </div>
 
@@ -1096,7 +1096,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 </div>
                 <div className="bg-white/60 p-2 rounded-lg">
                   <span className="block text-xs text-muted font-semibold">Overall Discount</span>
-                  <span className="font-extrabold text-[#AF52DE] text-sm">{overallDiscountPercent}%</span>
+                  <span className="font-extrabold text-purple text-sm">{overallDiscountPercent}%</span>
                 </div>
                 <div className="col-span-2 md:col-span-2 bg-brand text-white rounded-xl p-2.5 flex flex-col justify-center">
                   <span className="block text-xs opacity-90 uppercase font-bold tracking-wider">Final Estimate</span>
@@ -1135,7 +1135,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             <div className="flex items-center space-x-2">
               <span className="hidden md:inline-flex items-center space-x-1.5 text-xs font-bold">
                 <span className="bg-success/10 text-success-deep px-2 py-1 rounded-full">✓ {beforeDiagnostics.filter(d => d.status === 'Pass').length} Pass</span>
-                <span className="bg-[#DC2626]/10 text-danger px-2 py-1 rounded-full">✕ {beforeDiagnostics.filter(d => d.status === 'Fail').length} Fail</span>
+                <span className="bg-danger/10 text-danger px-2 py-1 rounded-full">✕ {beforeDiagnostics.filter(d => d.status === 'Fail').length} Fail</span>
               </span>
               <Button 
                 onClick={() => {
@@ -1208,7 +1208,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                         setBeforeDiagnostics(updated);
                       }}
                         className={`flex-1 min-h-10 py-2 rounded-lg font-black transition-all ${
-                        item.status === 'Fail' ? 'bg-[#DC2626] text-white shadow-xs' : 'bg-surface text-ink hover:bg-slate-200'
+                        item.status === 'Fail' ? 'bg-danger text-white shadow-xs' : 'bg-surface text-ink hover:bg-slate-200'
                       }`}
                     >
                       Fail
@@ -1220,7 +1220,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                         setBeforeDiagnostics(updated);
                       }}
                         className={`flex-1 min-h-10 py-2 rounded-lg font-black transition-all ${
-                        item.status === 'N/A' ? 'bg-[#475569] text-white shadow-xs' : 'bg-surface text-ink hover:bg-slate-200'
+                        item.status === 'N/A' ? 'bg-slate-600 text-white shadow-xs' : 'bg-surface text-ink hover:bg-slate-200'
                       }`}
                     >
                       N/A
@@ -1350,7 +1350,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             {repairCount === 0 ? (
               <div className="flex-1 flex items-center gap-2 text-xs min-w-0" role="status">
                 <AlertCircle className="w-4 h-4 text-amber-500 shrink-0" />
-                <span className="font-semibold text-[#51525C] line-clamp-2 leading-snug">
+                <span className="font-semibold text-muted line-clamp-2 leading-snug">
                   {!customerName.trim() || !customerPhone.trim()
                     ? 'Start with Step 1 — customer name & phone'
                     : !deviceModel

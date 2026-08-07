@@ -187,7 +187,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
             className={`shrink-0 rounded-xl border border-line ${
               currentFilter.preset === 'custom'
                 ? 'bg-brand text-white font-bold'
-                : 'bg-surface hover:bg-white text-[#424245]'
+                : 'bg-surface hover:bg-white text-muted'
             }`}
             title="Calendar Picker"
           >
@@ -203,7 +203,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
             variant="ghost" size="sm" className={`px-3 py-1 ${
               currentFilter.preset === 'all'
                 ? 'bg-brand text-white shadow-2xs font-bold'
-                : 'text-[#424245] hover:text-ink hover:bg-white/60'
+                : 'text-muted hover:text-ink hover:bg-white/60'
             }`}
           >
             All
@@ -215,7 +215,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
             variant="ghost" size="sm" className={`px-3 py-1 ${
               currentFilter.preset === 'today'
                 ? 'bg-brand text-white shadow-2xs font-bold'
-                : 'text-[#424245] hover:text-ink hover:bg-white/60'
+                : 'text-muted hover:text-ink hover:bg-white/60'
             }`}
           >
             Today
@@ -227,7 +227,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
             variant="ghost" size="sm" className={`px-3 py-1 ${
               currentFilter.preset === '7days'
                 ? 'bg-brand text-white shadow-2xs font-bold'
-                : 'text-[#424245] hover:text-ink hover:bg-white/60'
+                : 'text-muted hover:text-ink hover:bg-white/60'
             }`}
           >
             7 Days
@@ -239,7 +239,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
             variant="ghost" size="sm" className={`px-3 py-1 ${
               currentFilter.preset === '30days'
                 ? 'bg-brand text-white shadow-2xs font-bold'
-                : 'text-[#424245] hover:text-ink hover:bg-white/60'
+                : 'text-muted hover:text-ink hover:bg-white/60'
             }`}
           >
             30 Days
@@ -257,7 +257,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
             variant="ghost" size="sm" className={`px-3 py-1 flex items-center space-x-1.5 ${
               currentFilter.preset === 'custom'
                 ? 'bg-brand text-white shadow-2xs font-bold'
-                : 'text-[#424245] hover:text-ink hover:bg-white/60'
+                : 'text-muted hover:text-ink hover:bg-white/60'
             }`}
           >
             <Calendar className="w-3.5 h-3.5" />
@@ -418,7 +418,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
                 type="button"
                 onClick={handleApplyCustomRange}
                 disabled={!tempStartDate}
-                className="px-4 py-1.5 bg-brand hover:bg-[#0077ED] disabled:opacity-50 text-white font-bold text-xs rounded-lg shadow-xs transition-all cursor-pointer flex items-center space-x-1"
+                className="px-4 py-1.5 bg-brand hover:bg-brand-deep disabled:opacity-50 text-white font-bold text-xs rounded-lg shadow-xs transition-all cursor-pointer flex items-center space-x-1"
               >
                 <Check className="w-3.5 h-3.5" />
                 <span>Apply Range</span>

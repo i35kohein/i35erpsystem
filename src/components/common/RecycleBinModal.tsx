@@ -49,7 +49,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
       <div className="bg-white rounded-2xl border border-line shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden text-ink">
         
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-line flex items-center justify-between bg-[#F9F9FB]">
+        <div className="p-4 sm:p-5 border-b border-line flex items-center justify-between bg-surface">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600">
               <Trash2 className="w-5 h-5" />

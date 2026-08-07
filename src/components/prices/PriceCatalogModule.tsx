@@ -662,7 +662,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                           key={`placeholder-slot-${i}`}
                           className="h-14 p-2 border-2 border-dashed border-line/80 bg-surface/30 rounded-xl flex items-center gap-2.5 select-none"
                         >
-                          <div className="w-6 h-6 rounded-lg bg-white border border-line flex items-center justify-center font-extrabold text-xs text-[#C7C7CC] shrink-0">
+                          <div className="w-6 h-6 rounded-lg bg-white border border-line flex items-center justify-center font-extrabold text-xs text-muted shrink-0">
                             {i + 1}
                           </div>
                           <span className="text-xs font-bold text-muted truncate">
@@ -765,7 +765,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
               -{formatPrice(cartSummary.totalDiscountAmount)}
             </span>
           ) : (
-            <span className="font-mono text-[#C7C7CC]">0 MMK</span>
+            <span className="font-mono text-muted">0 MMK</span>
           )}
         </div>
 

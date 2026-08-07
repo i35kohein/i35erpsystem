@@ -243,7 +243,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="module-subheader">
             <div className="flex items-center space-x-2">
-              <span className="p-2 bg-[#E5F1FF] text-brand rounded-xl">
+              <span className="p-2 bg-brand-soft text-brand rounded-xl">
                 <UserCheck className="w-5 h-5" />
               </span>
               <div>
@@ -456,13 +456,13 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                     </div>
 
                     {/* What Was Repaired Banner */}
-                    <div className="bg-[#F0F7FB] border border-line rounded-xl p-3 text-xs space-y-1.5 mt-2">
+                    <div className="bg-brand-soft border border-line rounded-xl p-3 text-xs space-y-1.5 mt-2">
                       <div className="flex items-center justify-between">
                         <span className="font-extrabold text-brand flex items-center space-x-1.5">
                           <History className="w-3.5 h-3.5 text-brand" />
                           <span>Repaired Services & Replaced Components:</span>
                         </span>
-                        <span className="text-xs font-extrabold text-brand bg-[#E5F1FF] px-2 py-0.5 rounded-md border border-[#BCE0FD]">
+                        <span className="text-xs font-extrabold text-brand bg-brand-soft px-2 py-0.5 rounded-md border border-[#BCE0FD]">
                           {systemSettings.currencySymbol}{wo.totalAmount || 0}
                         </span>
                       </div>
@@ -556,7 +556,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                       type="button"
                       onClick={() => handleOpenLogModal(wo)}
                       size="sm"
-                      className="bg-brand hover:bg-[#0077ED] text-white flex items-center space-x-1.5"
+                      className="bg-brand hover:bg-brand-deep text-white flex items-center space-x-1.5"
                     >
                       <PhoneCall className="w-3.5 h-3.5" />
                       <span>Log Follow-Up</span>
@@ -575,7 +575,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
           <div className="bg-white border border-line rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-xl animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between border-b border-line pb-3">
               <div className="flex items-center space-x-2">
-                <div className="p-2 bg-[#E5F1FF] text-brand rounded-xl">
+                <div className="p-2 bg-brand-soft text-brand rounded-xl">
                   <PhoneCall className="w-5 h-5" />
                 </div>
                 <div>
@@ -597,7 +597,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
 
             <div className="space-y-4 text-xs">
               {/* Repaired Device Quick Reference Card */}
-              <div className="bg-[#F0F7FB] border border-line rounded-xl p-3 space-y-2 text-xs">
+              <div className="bg-brand-soft border border-line rounded-xl p-3 space-y-2 text-xs">
                 <div className="flex items-center justify-between border-b border-line pb-1.5">
                   <span className="font-extrabold text-brand flex items-center space-x-1.5">
                     <History className="w-4 h-4 text-brand" />
@@ -672,7 +672,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                       onClick={() => setFormStatus(s.id)}
                       className={`p-2 rounded-xl border font-bold text-center transition-all cursor-pointer ${
                         formStatus === s.id
-                          ? 'border-brand bg-[#E5F1FF] text-brand'
+                          ? 'border-brand bg-brand-soft text-brand'
                           : 'border-line bg-white text-ink hover:bg-surface'
                       }`}
                     >
@@ -771,7 +771,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
               <Button
                 type="button"
                 onClick={handleSaveFollowUpLog}
-                className="bg-brand hover:bg-[#0077ED] text-white flex items-center space-x-1.5"
+                className="bg-brand hover:bg-brand-deep text-white flex items-center space-x-1.5"
               >
                 <Check className="w-4 h-4" />
                 <span>Save Follow-Up Log</span>
@@ -807,7 +807,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
 
             <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
               {/* Repaired Device Details */}
-              <div className="bg-[#F0F7FB] border border-line rounded-xl p-3 text-xs space-y-1.5">
+              <div className="bg-brand-soft border border-line rounded-xl p-3 text-xs space-y-1.5">
                 <div className="flex items-center justify-between border-b border-line pb-1">
                   <span className="font-extrabold text-brand flex items-center space-x-1">
                     <History className="w-3.5 h-3.5 text-brand" />

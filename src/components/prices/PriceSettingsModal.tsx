@@ -400,9 +400,9 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
       case 'iPad':
         return <Tablet className="w-4 h-4 text-success" />;
       case 'Apple Watch':
-        return <Watch className="w-4 h-4 text-[#FF9500]" />;
+        return <Watch className="w-4 h-4 text-warning" />;
       case 'Mac':
-        return <Laptop className="w-4 h-4 text-[#AF52DE]" />;
+        return <Laptop className="w-4 h-4 text-purple" />;
       default:
         return <Layers className="w-4 h-4 text-muted" />;
     }
@@ -1227,7 +1227,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
               {/* Cloud Sync Notice */}
               <div className="bg-white p-5 rounded-2xl border border-line space-y-3 shadow-2xs">
                 <h3 className="text-sm font-extrabold text-ink flex items-center space-x-2">
-                  <AlertCircle className="w-4 h-4 text-[#FF9500]" />
+                  <AlertCircle className="w-4 h-4 text-warning" />
                   <span>Price Storage & Sync Notice</span>
                 </h3>
                 <p className="text-xs text-muted leading-relaxed">All price changes and rules update instantly.</p>

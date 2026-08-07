@@ -84,7 +84,7 @@ export const TechnicianLeaderboardView: React.FC<TechnicianLeaderboardViewProps>
         </div>
 
         {leaderboardData.length === 0 ? (
-          <div className="p-8 text-center text-xs text-muted bg-[#F8F9FA] rounded-xl border border-dashed border-line-strong space-y-1">
+          <div className="p-8 text-center text-xs text-muted bg-surface rounded-xl border border-dashed border-line-strong space-y-1">
             <Trophy className="w-6 h-6 mx-auto opacity-50" />
             <p className="font-extrabold text-sm text-ink">No technicians yet</p>
             <p>Add technicians in Settings to populate the leaderboard.</p>
@@ -93,7 +93,7 @@ export const TechnicianLeaderboardView: React.FC<TechnicianLeaderboardViewProps>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-ink">
               <thead>
-                <tr className="border-b border-line text-muted font-bold text-xs uppercase tracking-wider bg-[#F8F9FA]">
+                <tr className="border-b border-line text-muted font-bold text-xs uppercase tracking-wider bg-surface">
                   <th className="py-2.5 px-3 rounded-l-xl">Rank</th>
                   <th className="py-2.5 px-3">Technician</th>
                   <th className="py-2.5 px-3 text-center">Completed (Period)</th>
@@ -114,7 +114,7 @@ export const TechnicianLeaderboardView: React.FC<TechnicianLeaderboardViewProps>
                     <tr
                       key={item.tech.id}
                       onClick={() => onOpenTechDetail?.(item.tech)}
-                      className="hover:bg-[#F8F9FA] transition-colors cursor-pointer"
+                      className="hover:bg-surface transition-colors cursor-pointer"
                     >
                       <td className="py-3 px-3">
                         <span className={`w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center ${

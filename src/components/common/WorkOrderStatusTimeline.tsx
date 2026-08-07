@@ -304,7 +304,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
             <Button
               type="button"
               onClick={() => setIsAddingLog(!isAddingLog)}
-              className="px-3 py-1.5 bg-brand hover:bg-[#0077ED] text-white font-bold text-xs rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer shadow-md active:scale-95"
+              className="px-3 py-1.5 bg-brand hover:bg-brand-deep text-white font-bold text-xs rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer shadow-md active:scale-95"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>{t('logStatus')}</span>
@@ -480,7 +480,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
             <Button
               type="button"
               onClick={handleAddNewTransitionLog}
-              className="px-4 py-1.5 bg-brand hover:bg-[#0077ED] text-white font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center space-x-1 cursor-pointer"
+              className="px-4 py-1.5 bg-brand hover:bg-brand-deep text-white font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center space-x-1 cursor-pointer"
             >
               <Send className="w-3.5 h-3.5" />
               <span>Save & Publish Transition Log</span>
@@ -647,7 +647,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
           })}
         </div>
       ) : (
-        <div className="p-8 text-center text-muted bg-[#F8F9FA] rounded-2xl border border-dashed border-line">
+        <div className="p-8 text-center text-muted bg-surface rounded-2xl border border-dashed border-line">
           <Search className="w-8 h-8 text-muted/40 mx-auto mb-2" />
           <p className="font-extrabold text-xs text-ink">No Status Transition Events Found</p>
           <p className="text-xs text-muted mt-0.5">Adjust keywords or filters.</p>

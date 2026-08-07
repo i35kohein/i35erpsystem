@@ -884,9 +884,9 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
           // Work-desk accent tints per group (icon tile backgrounds)
           const accentByGroup: Record<string, string> = {
             Business: 'bg-[#EAF4FF] text-brand',
-            Staff: 'bg-[#E8F7EF] text-[#15803D]',
-            Operations: 'bg-[#F3EFFF] text-[#7C3AED]',
-            System: 'bg-[#FFF4E5] text-[#F59E0B]',
+            Staff: 'bg-[#E8F7EF] text-success-deep',
+            Operations: 'bg-[#F3EFFF] text-purple',
+            System: 'bg-warning/10 text-amber-500',
           };
           const q = settingsTabQuery.trim().toLowerCase();
           let visibleCount = 0;
@@ -943,7 +943,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                             {tab.badge}
                           </span>
                         )}
-                        <ChevronRight className="w-4 h-4 ml-auto md:hidden shrink-0 text-[#C7C7CC]" />
+                        <ChevronRight className="w-4 h-4 ml-auto md:hidden shrink-0 text-muted" />
                       </Button>
                     );
                   })}
@@ -1041,7 +1041,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
           <div className="bg-white rounded-2xl max-w-xl w-full p-6 space-y-5 border border-line-strong shadow-2xl animate-scale-in my-8">
             <div className="flex items-center justify-between border-b border-line pb-3">
               <div className="flex items-center space-x-2">
-                <span className="p-1.5 bg-purple-50 text-[#AF52DE] rounded-lg">
+                <span className="p-1.5 bg-purple-50 text-purple rounded-lg">
                   <Award className="w-5 h-5" />
                 </span>
                 <div>
@@ -1151,7 +1151,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               <div className="space-y-1.5">
                 <p className="text-xs font-black text-muted uppercase tracking-wider">Commission Rates</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="bg-[#F8F9FA] border border-line rounded-xl p-3">
+                  <div className="bg-surface border border-line rounded-xl p-3">
                     <label className="font-bold text-ink block mb-1.5">Spareparts Change (%)</label>
                     <Input
                       type="number"
@@ -1164,7 +1164,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                     <p className="text-xs text-muted mt-1.5">Standard Modular (parts-swap) jobs</p>
                   </div>
 
-                  <div className="bg-[#F8F9FA] border border-line rounded-xl p-3">
+                  <div className="bg-surface border border-line rounded-xl p-3">
                     <label className="font-bold text-ink block mb-1.5">Hardware Repair (%)</label>
                     <Input
                       type="number"

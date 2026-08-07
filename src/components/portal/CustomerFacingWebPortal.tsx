@@ -282,7 +282,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
 
               <Button
                 type="submit"
-                className="w-full max-w-md mx-auto py-3 bg-brand hover:bg-[#0077ED] text-white font-bold rounded-xl text-sm shadow-xs transition-all active:scale-95 flex items-center justify-center space-x-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2"
+                className="w-full max-w-md mx-auto py-3 bg-brand hover:bg-brand-deep text-white font-bold rounded-xl text-sm shadow-xs transition-all active:scale-95 flex items-center justify-center space-x-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2"
               >
                 <span className="truncate">Track Repair Voucher</span>
                 <ChevronRight className="w-4 h-4 shrink-0" />
@@ -381,7 +381,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
               <div className="space-y-0.5">
                 <div className="flex items-center space-x-2">
                   <h3 className="font-extrabold text-sm text-ink">Action Required: Review Repair Quote Estimate</h3>
-                  <span className="bg-[#FF9500] text-white text-xs font-black px-2 py-0.5 rounded-full uppercase">
+                  <span className="bg-warning text-white text-xs font-black px-2 py-0.5 rounded-full uppercase">
                     Awaiting Approval
                   </span>
                 </div>
@@ -423,7 +423,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 <span className={`text-xs font-bold px-2.5 py-1 rounded-lg border ${
                   currentWorkOrder.status === 'Finished' ? 'bg-success/10 text-success border-success/30' :
                   currentWorkOrder.status === 'In Progress' ? 'bg-brand/10 text-brand-deep border-brand/30' :
-                  'bg-[#FF9500]/10 text-[#FF9500] border-[#FF9500]/30'
+                  'bg-warning/10 text-warning border-warning/30'
                 }`}>
                   Status: {currentWorkOrder.status}
                 </span>
@@ -568,7 +568,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             <FileText className="w-4 h-4" />
             <span>Itemized Quote Estimate</span>
             {currentWorkOrder.estimateStatus === 'Pending Approval' && (
-              <span className="w-2 h-2 rounded-full bg-[#FF9500] animate-ping" />
+              <span className="w-2 h-2 rounded-full bg-warning animate-ping" />
             )}
           </Button>
 
@@ -705,7 +705,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   <span className={`font-extrabold text-xs px-2.5 py-0.5 rounded-full border ${
                     currentWorkOrder.isPaid
                       ? 'bg-success/15 text-success border-success/30'
-                      : 'bg-[#FF9500]/15 text-[#FF9500] border-[#FF9500]/30'
+                      : 'bg-warning/15 text-warning border-warning/30'
                   }`}>
                     {currentWorkOrder.isPaid ? 'PAID IN FULL' : 'PAYMENT DUE AT PICKUP'}
                   </span>
@@ -749,7 +749,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                     ? 'bg-success/15 text-success border-success/30'
                     : currentWorkOrder.estimateStatus === 'Rejected'
                     ? 'bg-danger/15 text-danger border-danger/30'
-                    : 'bg-[#FF9500]/15 text-[#FF9500] border-[#FF9500]/30 animate-pulse'
+                    : 'bg-warning/15 text-warning border-warning/30 animate-pulse'
                 }`}>
                   {currentWorkOrder.estimateStatus || 'Awaiting Approval'}
                 </span>
@@ -931,7 +931,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
               <Button
                 type="submit"
                 disabled={!messageInput.trim()}
-                className="bg-brand hover:bg-[#0077ED] disabled:opacity-50 text-white flex items-center space-x-1"
+                className="bg-brand hover:bg-brand-deep disabled:opacity-50 text-white flex items-center space-x-1"
               >
                 <span>Send</span>
                 <Send className="w-3.5 h-3.5" />

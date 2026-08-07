@@ -98,7 +98,7 @@ const AiTab: React.FC<AiTabProps> = ({ formData, setFormData, aiRescanning, aiRe
                       className={`px-2.5 py-1 ${
                         formData.aiModel === m.id
                           ? 'bg-brand text-white border-brand'
-                          : 'bg-surface text-[#51525C] border-line hover:border-brand hover:text-brand'
+                          : 'bg-surface text-muted border-line hover:border-brand hover:text-brand'
                       }`}
                     >
                       {m.label}

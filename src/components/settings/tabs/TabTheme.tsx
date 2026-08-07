@@ -19,7 +19,7 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
                   <Palette className="w-5 h-5 text-[#27B1AE]" />
                   <span>Application Visual Theme & Typography</span>
                 </h3>
-                <p className="text-xs text-[#7F7F7F] mt-1">
+                <p className="text-xs text-muted mt-1">
                   Choose your shop's visual theme and color palette. All modules, navigation bars, badges, and controls will update instantly.
                 </p>
               </div>
@@ -49,45 +49,45 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
                             <span>Active Theme</span>
                           </span>
                         ) : (
-                          <span className="text-xs font-bold text-[#7F7F7F]">Click to apply</span>
+                          <span className="text-xs font-bold text-muted">Click to apply</span>
                         )}
                       </div>
 
                       <div>
                         <h4 className="text-sm font-black text-ink">{preset.name}</h4>
-                        <p className="text-xs text-[#7F7F7F] mt-1 leading-relaxed">{preset.description}</p>
+                        <p className="text-xs text-muted mt-1 leading-relaxed">{preset.description}</p>
                       </div>
 
                       {/* Swatch Preview Grid */}
                       <div className="pt-2 space-y-2">
-                        <span className="text-xs font-extrabold text-[#7F7F7F] uppercase tracking-wider block">Palette Colors</span>
+                        <span className="text-xs font-extrabold text-muted uppercase tracking-wider block">Palette Colors</span>
                         <div className="grid grid-cols-4 gap-2">
                           <div className="space-y-1 text-center">
                             <div className="h-9 rounded-xl border border-black/10 shadow-2xs flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: preset.colors.primary }}>
                               Blue
                             </div>
-                            <span className="text-xs font-mono text-[#7F7F7F] block">{preset.colors.primary}</span>
+                            <span className="text-xs font-mono text-muted block">{preset.colors.primary}</span>
                           </div>
 
                           <div className="space-y-1 text-center">
                             <div className="h-9 rounded-xl border border-black/10 shadow-2xs flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: preset.colors.secondary }}>
                               Turquoise
                             </div>
-                            <span className="text-xs font-mono text-[#7F7F7F] block">{preset.colors.secondary}</span>
+                            <span className="text-xs font-mono text-muted block">{preset.colors.secondary}</span>
                           </div>
 
                           <div className="space-y-1 text-center">
                             <div className="h-9 rounded-xl border border-black/10 shadow-2xs flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: preset.colors.orange }}>
                               Orange
                             </div>
-                            <span className="text-xs font-mono text-[#7F7F7F] block">{preset.colors.orange}</span>
+                            <span className="text-xs font-mono text-muted block">{preset.colors.orange}</span>
                           </div>
 
                           <div className="space-y-1 text-center">
                             <div className="h-9 rounded-xl border border-black/10 shadow-2xs flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: preset.colors.darkBlue }}>
                               Navy
                             </div>
-                            <span className="text-xs font-mono text-[#7F7F7F] block">{preset.colors.darkBlue}</span>
+                            <span className="text-xs font-mono text-muted block">{preset.colors.darkBlue}</span>
                           </div>
                         </div>
                       </div>
@@ -120,7 +120,7 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
                 <Square className="w-5 h-5 text-brand" />
                 <span>Component Geometry & Design System Architecture</span>
               </h3>
-              <p className="text-xs text-[#7F7F7F] mt-1">Square (high-density) or Curved geometry for UI elements.</p>
+              <p className="text-xs text-muted mt-1">Square (high-density) or Curved geometry for UI elements.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
@@ -176,7 +176,7 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
                   <span className="text-xl">🇲🇲</span>
                   <span>System Language & Localization</span>
                 </h3>
-                <p className="text-xs text-[#7F7F7F] mt-1">Interface language: English or Burmese.</p>
+                <p className="text-xs text-muted mt-1">Interface language: English or Burmese.</p>
               </div>
               <LanguageSwitcher variant="pills" />
             </div>

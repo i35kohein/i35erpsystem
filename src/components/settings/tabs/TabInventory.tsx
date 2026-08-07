@@ -109,7 +109,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
               </Button>
             </div>
 
-            <div className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-[#F8F9FA]">
+            <div className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
               {inventoryCategories.map((category) => (
                 <div key={category} className="flex items-center gap-2 px-3 py-2">
                   {editingCategoryKey === category ? (
@@ -149,7 +149,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
               <span className="rounded-full bg-brand/10 px-2 py-0.5 font-mono text-xs font-bold text-brand-deep">{suppliers.length} suppliers</span>
             </div>
 
-            <form onSubmit={handleAddInventorySupplier} className="grid grid-cols-1 gap-2 rounded-xl border border-line bg-[#F8F9FA] p-3 sm:grid-cols-2 lg:grid-cols-5">
+            <form onSubmit={handleAddInventorySupplier} className="grid grid-cols-1 gap-2 rounded-xl border border-line bg-surface p-3 sm:grid-cols-2 lg:grid-cols-5">
               <Input required value={supplierDraft.name} onChange={(event) => setSupplierDraft({ ...supplierDraft, name: event.target.value })} placeholder="Supplier name" className="h-9 rounded-lg border border-line-strong bg-white px-2.5 text-xs font-semibold outline-none focus:border-brand" />
               <Input required value={supplierDraft.code} onChange={(event) => setSupplierDraft({ ...supplierDraft, code: event.target.value })} placeholder="Code" className="h-9 rounded-lg border border-line-strong bg-white px-2.5 font-mono text-xs outline-none focus:border-brand" />
               <Input value={supplierDraft.phone} onChange={(event) => setSupplierDraft({ ...supplierDraft, phone: event.target.value })} placeholder="Phone" className="h-9 rounded-lg border border-line-strong bg-white px-2.5 text-xs outline-none focus:border-brand" />
@@ -193,7 +193,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
               <Input value={qualityTierDraft} onChange={(event) => setQualityTierDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleAddInventoryQualityTier(); } }} placeholder="New quality tier" className="h-9 min-w-0 flex-1 rounded-lg border border-line-strong bg-surface px-3 text-xs font-medium outline-none focus:border-brand focus:bg-white" />
               <Button type="button" onClick={handleAddInventoryQualityTier} disabled={!qualityTierDraft.trim()} className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-purple-600 px-3 text-xs font-extrabold text-white hover:bg-purple-700 disabled:opacity-45"><Plus className="h-3.5 w-3.5" /> Add</Button>
             </div>
-            <div className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-[#F8F9FA]">
+            <div className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
               {inventoryQualityTiers.map((tier) => (
                 <div key={tier} className="flex items-center gap-2 px-3 py-2">
                   <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-purple-600" />
@@ -212,7 +212,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
               <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-bold text-brand-deep">{inventoryBinNames.length} bins</span>
             </div>
             <div className="flex gap-2"><Input value={binDraft} onChange={(event) => setBinDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleAddInventoryBin(); } }} placeholder="e.g. BIN-A01" className="h-9 min-w-0 flex-1 rounded-lg border border-line-strong bg-surface px-3 text-xs font-mono font-bold outline-none focus:border-brand focus:bg-white" /><Button type="button" onClick={handleAddInventoryBin} disabled={!binDraft.trim()} className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-brand px-3 text-xs font-extrabold text-white hover:bg-brand-deep disabled:opacity-45"><Plus className="h-3.5 w-3.5" /> Add bin</Button></div>
-            <div className="space-y-2 rounded-xl border border-line bg-[#F8F9FA] p-3">
+            <div className="space-y-2 rounded-xl border border-line bg-surface p-3">
               {inventoryBinNames.length ? inventoryBinNames.map((bin) => {
                 const binParts = partsByBin.get(bin) || [];
                 const isOpen = expandedBinName === bin;
@@ -238,7 +238,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                       </div>
                     </div>
                     {isOpen && (
-                      <div className="border-t border-line bg-[#FAFAFA] px-3 py-2">
+                      <div className="border-t border-line bg-surface px-3 py-2">
                         {binParts.length ? (
                           <div className="space-y-1.5">
                             {binParts.map((part) => (
@@ -265,7 +265,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
           <div className={`${inventoryDataTab === 'rules' ? 'grid' : 'hidden'} grid-cols-1 md:grid-cols-2 gap-5 text-xs`}>
             <div className="space-y-1.5">
               <label className="font-extrabold text-ink flex items-center space-x-1.5">
-                <AlertCircle className="w-3.5 h-3.5 text-[#FF9500]" />
+                <AlertCircle className="w-3.5 h-3.5 text-warning" />
                 <span>Global Low Stock Warning Threshold</span>
               </label>
               <Input
@@ -295,7 +295,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
             </div>
 
             <div className="md:col-span-2 space-y-3 pt-3 border-t border-line">
-              <label className="flex items-center space-x-3 cursor-pointer p-3 bg-[#F8F9FA] rounded-xl border border-line hover:border-brand transition-all">
+              <label className="flex items-center space-x-3 cursor-pointer p-3 bg-surface rounded-xl border border-line hover:border-brand transition-all">
                 <Input
                   type="checkbox"
                   checked={formData.autoReserveOnAssignment}

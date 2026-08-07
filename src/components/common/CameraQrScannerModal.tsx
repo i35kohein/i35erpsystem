@@ -417,7 +417,7 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
 
           {/* SCANNED RESULT DISPLAY BANNER */}
           {scannedResult && (
-            <div className="p-4 bg-[#EAF8ED] border-2 border-success rounded-2xl space-y-3 animate-fadeIn shadow-sm">
+            <div className="p-4 bg-success/10 border-2 border-success rounded-2xl space-y-3 animate-fadeIn shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <div className="p-1.5 bg-[#28A745] text-white rounded-xl">

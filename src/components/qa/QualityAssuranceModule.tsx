@@ -207,7 +207,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
           <p className="text-xs text-muted">Mandatory 21-point re-inspection before pickup.</p>
         </div>
 
-        <div className="bg-[#EAF8ED] text-[#15803D] font-mono font-bold px-3 py-1 rounded-full border border-success/20">
+        <div className="bg-success/10 text-success-deep font-mono font-bold px-3 py-1 rounded-full border border-success/20">
           QA Control • Zero Defect Standard
         </div>
       </div>
@@ -266,11 +266,11 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           {wo.status}
                         </span>
                         {isQaPassed ? (
-                          <span className="text-xs font-extrabold px-1.5 py-0.5 rounded-md border bg-[#EAF8ED] text-[#15803D] border-success/20 uppercase">
+                          <span className="text-xs font-extrabold px-1.5 py-0.5 rounded-md border bg-success/10 text-success-deep border-success/20 uppercase">
                             Ready
                           </span>
                         ) : (
-                          <span className="text-xs font-bold px-1.5 py-0.5 rounded-md border bg-[#FFF4E5] text-[#D97706] border-[#FF9F0A]/20 uppercase">
+                          <span className="text-xs font-bold px-1.5 py-0.5 rounded-md border bg-warning/10 text-amber-600 border-warning/20 uppercase">
                             QA Pending
                           </span>
                         )}
@@ -323,12 +323,12 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
           {selectedWo ? (
             <div className="space-y-3">
               {qaSavedNotice && (
-                <div className="p-3 bg-[#EAF8ED] border border-success text-[#1E7E34] rounded-xl flex items-center justify-between font-bold text-xs animate-in fade-in">
+                <div className="p-3 bg-success/10 border border-success text-success-deep rounded-xl flex items-center justify-between font-bold text-xs animate-in fade-in">
                   <div className="flex items-center space-x-2">
                     <CheckCircle2 className="w-4 h-4 text-success" />
                     <span>QA Inspection Confirmed! Card updated to Green & Ready for Checkout.</span>
                   </div>
-                  <Button onClick={() => setQaSavedNotice(false)} aria-label="Dismiss confirmation" className="text-[#1E7E34] hover:opacity-75">
+                  <Button onClick={() => setQaSavedNotice(false)} aria-label="Dismiss confirmation" className="text-success-deep hover:opacity-75">
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
@@ -399,7 +399,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
 
                           <span className={`text-xs font-black px-2 py-0.5 rounded-md tracking-wider uppercase shrink-0 shadow-2xs ${
                             item.status === 'Pass' ? 'bg-[#16A34A] text-white' :
-                            item.status === 'Fail' ? 'bg-[#DC2626] text-white animate-pulse' : 'bg-[#475569] text-white'
+                            item.status === 'Fail' ? 'bg-danger text-white animate-pulse' : 'bg-slate-600 text-white'
                           }`}>
                             {item.status === 'Pass' ? '✓ PASS' : item.status === 'Fail' ? '✕ FAIL' : 'N/A'}
                           </span>
@@ -421,7 +421,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                             type="button"
                             onClick={() => handleDiagnosticStatusChange(item.id, 'Fail')}
                             className={`flex-1 min-h-10 py-2 rounded-lg font-black transition-all ${
-                              item.status === 'Fail' ? 'bg-[#DC2626] text-white shadow-xs' : 'bg-surface text-ink hover:bg-slate-200'
+                              item.status === 'Fail' ? 'bg-danger text-white shadow-xs' : 'bg-surface text-ink hover:bg-slate-200'
                             }`}
                           >
                             Fail
@@ -430,7 +430,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                             type="button"
                             onClick={() => handleDiagnosticStatusChange(item.id, 'N/A')}
                             className={`flex-1 min-h-10 py-2 rounded-lg font-black transition-all ${
-                              item.status === 'N/A' ? 'bg-[#475569] text-white shadow-xs' : 'bg-surface text-ink hover:bg-slate-200'
+                              item.status === 'N/A' ? 'bg-slate-600 text-white shadow-xs' : 'bg-surface text-ink hover:bg-slate-200'
                             }`}
                           >
                             N/A

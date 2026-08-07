@@ -20,7 +20,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                 <Store className="w-5 h-5 text-brand" />
                 <span>Shop Identity & Logo Settings</span>
               </h3>
-              <p className="text-xs text-[#7F7F7F] mt-1">Store name and logo — applied across the app.</p>
+              <p className="text-xs text-muted mt-1">Store name and logo — applied across the app.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
@@ -161,12 +161,12 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                 <Building2 className="w-5 h-5 text-brand" />
                 <span>Store Contact & Location Information</span>
               </h3>
-              <p className="text-xs text-[#7F7F7F] mt-1">Store details shown on receipts, vouchers, SMS, invoices.</p>
+              <p className="text-xs text-muted mt-1">Store details shown on receipts, vouchers, SMS, invoices.</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Multiple Store Phone Numbers Section */}
-              <div className="sm:col-span-2 lg:col-span-3 space-y-2.5 bg-[#F8F9FA] p-4 rounded-xl border border-line">
+              <div className="sm:col-span-2 lg:col-span-3 space-y-2.5 bg-surface p-4 rounded-xl border border-line">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-extrabold text-ink flex items-center space-x-1.5">
                     <Phone className="w-3.5 h-3.5 text-success" />

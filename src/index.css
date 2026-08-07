@@ -48,6 +48,8 @@ body {
   --color-success: #34C759;      /* positive/green */
   --color-success-deep: #188038; /* success TEXT on light (WCAG AA) */
   --color-danger: #FF3B30;       /* destructive/red */
+  --color-purple: #AF52DE;       /* secondary accent — base utilities (carbon-coat overrides to #8a3ffc) */
+  --color-warning: #FF9500;      /* warning accent — base utilities (matches carbon-coat) */
 }
 
 /* Global focus ring — consistent visible keyboard focus across the app. */

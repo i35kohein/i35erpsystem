@@ -170,7 +170,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                 <h1 className="text-lg font-black text-ink">
                   Work Intake & Active Tickets
                 </h1>
-                <p className="text-xs text-[#7F7F7F]">
+                <p className="text-xs text-muted">
                   Spacious full-width roster for device intake, hardware diagnostics, and repair progress tracking
                 </p>
               </div>
@@ -187,7 +187,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                 className={`flex-1 md:flex-none px-2.5 sm:px-3 h-9 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center md:justify-start space-x-1.5 cursor-pointer ${
                   viewMode === 'table'
                     ? 'bg-brand text-white shadow-2xs'
-                    : 'text-[#7F7F7F] hover:text-ink'
+                    : 'text-muted hover:text-ink'
                 }`}
                 title="Table View"
                 aria-label="Table View"
@@ -202,7 +202,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                 className={`flex-1 md:flex-none px-2.5 sm:px-3 h-9 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center md:justify-start space-x-1.5 cursor-pointer ${
                   viewMode === 'cards'
                     ? 'bg-brand text-white shadow-2xs'
-                    : 'text-[#7F7F7F] hover:text-ink'
+                    : 'text-muted hover:text-ink'
                 }`}
                 title="Cards Grid View"
                 aria-label="Cards Grid View"
@@ -279,7 +279,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
             </div>
 
             {filterStatus !== 'ALL' && (
-              <div className="flex items-center space-x-1.5 text-xs bg-[#F0F7FB] text-brand px-3 py-1 rounded-lg border border-[#136F9A]/20">
+              <div className="flex items-center space-x-1.5 text-xs bg-brand-soft text-brand px-3 py-1 rounded-lg border border-[#136F9A]/20">
                 <span>Filter: <strong>{filterStatus}</strong></span>
                 <Button
                   type="button"
@@ -335,7 +335,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
             </div>
             <div className="space-y-1 max-w-sm mx-auto">
               <p className="font-extrabold text-base text-ink">No Repair Tickets Found</p>
-              <p className="text-xs text-[#7F7F7F]">
+              <p className="text-xs text-muted">
                 {workOrders.length === 0 
                   ? "There are currently no active repair tickets in the database."
                   : "No tickets match your active status filter or search query."}
@@ -447,7 +447,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
 
                       {/* Amount & payment */}
                       <td className="px-2 py-2">
-                        <p className="whitespace-nowrap font-sans text-xs font-semibold text-[#15803D]">{totalAmount.toLocaleString()} MMK</p>
+                        <p className="whitespace-nowrap font-sans text-xs font-semibold text-success-deep">{totalAmount.toLocaleString()} MMK</p>
                         <span className={`mt-0.5 inline-flex rounded-md border px-1.5 py-0.5 text-xs font-extrabold ${
                           wo.isPaid ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-rose-200 bg-rose-50 text-rose-800'
                         }`}>
@@ -502,14 +502,14 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                     <div className="flex justify-between items-center font-extrabold text-sm text-ink">
                       <span>{wo.deviceModel}</span>
                       <div className="flex items-center space-x-1.5">
-                        <span className="text-xs text-[#7F7F7F] font-medium">{wo.deviceColor || 'Standard'}</span>
+                        <span className="text-xs text-muted font-medium">{wo.deviceColor || 'Standard'}</span>
                         <span 
                           className={`w-3.5 h-3.5 rounded-full border border-white shadow-2xs ${woColorStyle.border}`}
                           style={{ background: woColorStyle.gradient }}
                         />
                       </div>
                     </div>
-                    <p className="text-xs text-[#7F7F7F]">
+                    <p className="text-xs text-muted">
                       Customer: <strong className="text-ink">{wo.customerName}</strong> ({wo.customerPhone})
                     </p>
                   </div>
@@ -526,7 +526,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
 
                   <div className="flex justify-between items-center pt-2 border-t border-line">
                     <div>
-                      <span className="block text-xs text-[#7F7F7F] uppercase font-bold">Total Estimate</span>
+                      <span className="block text-xs text-muted uppercase font-bold">Total Estimate</span>
                       <span className="font-mono font-black text-sm text-brand">
                         {(wo.totalAmount || wo.subtotal || 0).toLocaleString()} MMK
                       </span>

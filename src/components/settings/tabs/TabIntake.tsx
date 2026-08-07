@@ -56,7 +56,7 @@ const IntakeTab: React.FC<IntakeTabProps> = ({ formData, setFormData }) => {
 
             {/* Checkbox Toggles */}
             <div className="md:col-span-2 space-y-3 pt-3 border-t border-line">
-              <label className="flex items-center space-x-3 cursor-pointer p-3 bg-[#F8F9FA] rounded-xl border border-line hover:border-brand transition-all">
+              <label className="flex items-center space-x-3 cursor-pointer p-3 bg-surface rounded-xl border border-line hover:border-brand transition-all">
                 <Input
                   type="checkbox"
                   checked={formData.requirePasscodeIntake}
@@ -69,7 +69,7 @@ const IntakeTab: React.FC<IntakeTabProps> = ({ formData, setFormData }) => {
                 </div>
               </label>
 
-              <label className="flex items-center space-x-3 cursor-pointer p-3 bg-[#F8F9FA] rounded-xl border border-line hover:border-brand transition-all">
+              <label className="flex items-center space-x-3 cursor-pointer p-3 bg-surface rounded-xl border border-line hover:border-brand transition-all">
                 <Input
                   type="checkbox"
                   checked={formData.requireFindMyCheck}

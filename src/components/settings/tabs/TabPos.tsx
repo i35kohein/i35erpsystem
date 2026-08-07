@@ -61,7 +61,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
             <Button
               type="button"
               onClick={() => toggleSection('pos-formats')}
-              className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-[#F8F9FA] hover:bg-[#F0F1F4] transition-colors cursor-pointer"
+              className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-surface hover:bg-[#F0F1F4] transition-colors cursor-pointer"
               aria-expanded={isSectionOpen('pos-formats')}
             >
               <span className="text-xs font-extrabold text-ink flex items-center space-x-2">
@@ -181,7 +181,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                   </div>
                   <div>
                     <span className="font-extrabold text-ink block text-xs group-hover:text-brand transition-colors">3" × 2" Device Sticker Label</span>
-                    <p className="text-xs text-[#7F7F7F] mt-1 leading-snug">
+                    <p className="text-xs text-muted mt-1 leading-snug">
                       Compact label sticker format with QR code and barcode for physical hardware tagging.
                     </p>
                   </div>
@@ -229,7 +229,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                   />
                   <p className="text-xs text-muted">Select a line, then choose alignment.</p>
 
-                  <div className="flex flex-col gap-1.5 rounded-lg border border-line bg-[#F8F9FA] p-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex flex-col gap-1.5 rounded-lg border border-line bg-surface p-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-1">
                       <span className="flex items-center gap-0.5 text-xs font-extrabold text-muted">
                         <AlignLeft className="h-3 w-3" />
@@ -383,7 +383,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-              <label className="flex items-center space-x-2.5 p-3 bg-[#F8F9FA] rounded-xl border border-line cursor-pointer hover:border-brand transition-all">
+              <label className="flex items-center space-x-2.5 p-3 bg-surface rounded-xl border border-line cursor-pointer hover:border-brand transition-all">
                 <Input
                   type="checkbox"
                   checked={formData.a4ShowDiagnosticsTable ?? true}
@@ -396,7 +396,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                 </div>
               </label>
 
-              <label className="flex items-center space-x-2.5 p-3 bg-[#F8F9FA] rounded-xl border border-line cursor-pointer hover:border-brand transition-all">
+              <label className="flex items-center space-x-2.5 p-3 bg-surface rounded-xl border border-line cursor-pointer hover:border-brand transition-all">
                 <Input
                   type="checkbox"
                   checked={formData.a4ShowPricingTable ?? true}
@@ -409,7 +409,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                 </div>
               </label>
 
-              <label className="flex items-center space-x-2.5 p-3 bg-[#F8F9FA] rounded-xl border border-line cursor-pointer hover:border-brand transition-all">
+              <label className="flex items-center space-x-2.5 p-3 bg-surface rounded-xl border border-line cursor-pointer hover:border-brand transition-all">
                 <Input
                   type="checkbox"
                   checked={formData.a4ShowTermsDisclaimer ?? true}

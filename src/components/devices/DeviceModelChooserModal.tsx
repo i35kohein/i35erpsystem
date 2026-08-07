@@ -121,7 +121,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                     isActive
                       ? 'bg-brand text-white border-brand shadow-xs'
                       : count === 0 && fam.key !== 'All'
-                      ? 'bg-surface text-[#C7C7CC] border-line cursor-not-allowed'
+                      ? 'bg-surface text-muted border-line cursor-not-allowed'
                       : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
                   }`}
                 >

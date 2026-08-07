@@ -387,7 +387,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
                 All installed hardware parts and labor services carry an official <strong>{workOrder.warrantyDays || 90}-day limited warranty</strong> from the completion date. Physical, liquid, or unauthorized third-party tampering post-repair voids warranty coverage.
               </p>
               {workOrder.isPaid && workOrder.paymentMethod && (
-                <div className="pt-2 border-t border-line text-xs text-[#15803D] font-bold">
+                <div className="pt-2 border-t border-line text-xs text-success-deep font-bold">
                   ✓ Payment Processed via {workOrder.paymentMethod}
                 </div>
               )}
@@ -414,7 +414,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
                 </div>
 
                 {workOrder.discountAmount > 0 && (
-                  <div className="flex justify-between text-[#15803D] font-semibold">
+                  <div className="flex justify-between text-success-deep font-semibold">
                     <span>Account / B2B Discount:</span>
                     <span>-{workOrder.discountAmount.toLocaleString()} {currency}</span>
                   </div>
@@ -428,7 +428,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
                 )}
 
                 {workOrder.depositAmount > 0 && (
-                  <div className="flex justify-between text-[#15803D] font-semibold">
+                  <div className="flex justify-between text-success-deep font-semibold">
                     <span>Upfront Deposit Paid:</span>
                     <span>-{workOrder.depositAmount.toLocaleString()} {currency}</span>
                   </div>

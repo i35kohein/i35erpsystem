@@ -121,14 +121,14 @@ export const Navigation: React.FC<NavigationProps> = ({
           label: t('navQa'),
           icon: ShieldCheck,
           badge: qaFinishedCount > 0 ? qaFinishedCount : undefined,
-          badgeColor: 'bg-[#AF52DE] text-white',
+          badgeColor: 'bg-purple text-white',
         },
         {
           id: 'follow-up',
           label: t('navFollowUp'),
           icon: PhoneCall,
           badge: pendingFollowUpCount > 0 ? pendingFollowUpCount : undefined,
-          badgeColor: 'bg-[#FF9500] text-black',
+          badgeColor: 'bg-warning text-black',
         },
         {
           id: 'price-catalog',
@@ -162,7 +162,7 @@ export const Navigation: React.FC<NavigationProps> = ({
           label: isCollapsed ? t('navPartsMatrix') : 'Parts & Stock Matrix',
           icon: Boxes,
           badge: inventoryLowStock > 0 ? inventoryLowStock : undefined,
-          badgeColor: 'bg-[#FF9500] text-black',
+          badgeColor: 'bg-warning text-black',
         },
         {
           id: 'suppliers',
@@ -436,7 +436,7 @@ export const Navigation: React.FC<NavigationProps> = ({
         </nav>
 
         {/* Sidebar Footer Quick Action Utilities */}
-        <div className="p-2.5 border-t border-line bg-[#F9F9FB] space-y-2 pb-[calc(0.625rem+env(safe-area-inset-bottom))]">
+        <div className="p-2.5 border-t border-line bg-surface space-y-2 pb-[calc(0.625rem+env(safe-area-inset-bottom))]">
           {/* Active User Role Switcher */}
           {currentUser && onSwitchUser && (
             <div className="w-full flex justify-center">

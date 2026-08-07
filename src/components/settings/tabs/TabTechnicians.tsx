@@ -75,7 +75,7 @@ const TechniciansTab: React.FC<TechniciansTabProps> = ({ formData, setFormData, 
 
             {/* Technicians Grid / Empty State */}
             {technicians.length === 0 ? (
-              <div className="p-8 bg-[#F8F9FA] border-2 border-dashed border-line-strong rounded-2xl text-center space-y-4">
+              <div className="p-8 bg-surface border-2 border-dashed border-line-strong rounded-2xl text-center space-y-4">
                 <div className="w-12 h-12 rounded-2xl bg-blue-100 text-brand flex items-center justify-center mx-auto">
                   <Users className="w-6 h-6" />
                 </div>
@@ -100,7 +100,7 @@ const TechniciansTab: React.FC<TechniciansTabProps> = ({ formData, setFormData, 
                 {technicians.map((tech) => (
                   <div
                     key={tech.id}
-                    className="p-4 bg-[#F8F9FA] border border-line rounded-2xl space-y-3 relative hover:border-brand/50 transition-all shadow-2xs"
+                    className="p-4 bg-surface border border-line rounded-2xl space-y-3 relative hover:border-brand/50 transition-all shadow-2xs"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-center space-x-3 min-w-0">

@@ -2212,7 +2212,7 @@ export default function App() {
             ) : activeTab === 'suppliers' ? (
               <Button
                 onClick={() => setRmaModalOpen(true)}
-                className="h-10 flex items-center space-x-1.5 px-3.5 bg-[#AF52DE] hover:bg-purple-600 text-white text-xs font-bold rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+                className="h-10 flex items-center space-x-1.5 px-3.5 bg-purple hover:bg-purple-600 text-white text-xs font-bold rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>{t('flagRma')}</span>

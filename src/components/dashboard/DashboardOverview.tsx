@@ -430,9 +430,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     const totalRevenue = filteredWorkOrders.reduce((sum, wo) => sum + (wo.subtotal || 0), 0);
     const stats = [
       { id: 'screen', label: 'Screen & Display OLED', icon: Smartphone, color: 'bg-brand', textCol: 'text-brand', bgLight: 'bg-brand-soft', count: 0, revenue: 0 },
-      { id: 'battery', label: 'Battery & Charging System', icon: Zap, color: 'bg-success', textCol: 'text-success', bgLight: 'bg-[#EAF8ED]', count: 0, revenue: 0 },
-      { id: 'board', label: 'Logic Board & Micro-Soldering', icon: Activity, color: 'bg-[#AF52DE]', textCol: 'text-[#AF52DE]', bgLight: 'bg-purple-50', count: 0, revenue: 0 },
-      { id: 'housing', label: 'Glass, Port, Camera & Housing', icon: Smartphone, color: 'bg-[#FF9500]', textCol: 'text-[#FF9500]', bgLight: 'bg-[#FFF8ED]', count: 0, revenue: 0 },
+      { id: 'battery', label: 'Battery & Charging System', icon: Zap, color: 'bg-success', textCol: 'text-success', bgLight: 'bg-success/10', count: 0, revenue: 0 },
+      { id: 'board', label: 'Logic Board & Micro-Soldering', icon: Activity, color: 'bg-purple', textCol: 'text-purple', bgLight: 'bg-purple-50', count: 0, revenue: 0 },
+      { id: 'housing', label: 'Glass, Port, Camera & Housing', icon: Smartphone, color: 'bg-warning', textCol: 'text-warning', bgLight: 'bg-[#FFF8ED]', count: 0, revenue: 0 },
     ];
 
     filteredWorkOrders.forEach((wo) => {
@@ -816,7 +816,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           <span>Status Queue</span>
           <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold ${
             activeDashboardSubTab === 'status-queue'
-              ? 'bg-[#003A78] text-white'
+              ? 'bg-brand-deep text-white'
               : 'bg-line text-ink'
           }`}>
             {activeRepairs.length} Active
@@ -842,7 +842,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           <span>Hardware Analytics</span>
           <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold ${
             activeDashboardSubTab === 'repair-data'
-              ? 'bg-[#003A78] text-white'
+              ? 'bg-brand-deep text-white'
               : 'bg-line text-ink'
           }`}>
             {filteredWorkOrders.length} Tickets
@@ -868,7 +868,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           <span>Technicians</span>
           <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold ${
             activeDashboardSubTab === 'tech-kpi'
-              ? 'bg-[#003A78] text-white'
+              ? 'bg-brand-deep text-white'
               : 'bg-line text-ink'
           }`}>
             {technicians.length} Staff
@@ -895,7 +895,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           {repairLowStockParts.length > 0 ? (
             <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-extrabold ${
               activeDashboardSubTab === 'inventory'
-                ? 'bg-[#003A78] text-white'
+                ? 'bg-brand-deep text-white'
                 : 'bg-amber-100 text-amber-800 border border-amber-200'
             }`}>
               {repairLowStockParts.length} Low
@@ -903,7 +903,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           ) : (
             <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold ${
               activeDashboardSubTab === 'inventory'
-                ? 'bg-[#003A78] text-white'
+                ? 'bg-brand-deep text-white'
                 : 'bg-line text-ink'
             }`}>
               {parts.length} Parts
@@ -958,7 +958,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           {expiringSoonWorkOrders.length > 0 ? (
             <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold ${
               activeDashboardSubTab === 'warranty-watch'
-                ? 'bg-[#003A78] text-white'
+                ? 'bg-brand-deep text-white'
                 : 'bg-rose-100 text-rose-800 border border-rose-200'
             }`}>
               {expiringSoonWorkOrders.length} Flagged
@@ -966,7 +966,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           ) : (
             <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold ${
               activeDashboardSubTab === 'warranty-watch'
-                ? 'bg-[#003A78] text-white'
+                ? 'bg-brand-deep text-white'
                 : 'bg-line text-ink'
             }`}>
               Clear
@@ -1148,7 +1148,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </div>
 
             {/* Queue Search & Quick Filter Controls */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-[#F8F9FA] p-3 rounded-xl border border-line">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface p-3 rounded-xl border border-line">
               <div className="relative flex-1 min-w-[200px]">
                 <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
                 <Input
@@ -1219,7 +1219,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
             {/* Work Orders Queue Table */}
             {statusQueueWorkOrders.length === 0 ? (
-              <div className="p-8 text-center text-xs text-muted space-y-2 bg-[#F8F9FA] rounded-xl border border-dashed border-line-strong">
+              <div className="p-8 text-center text-xs text-muted space-y-2 bg-surface rounded-xl border border-dashed border-line-strong">
                 <Inbox className="w-8 h-8 text-muted mx-auto opacity-60" />
                 <p className="font-extrabold text-sm text-ink">No Work Orders in Queue Matching Selection</p>
                 <p className="text-xs">
@@ -1246,7 +1246,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead className="sticky top-0 z-10">
-                    <tr className="border-b border-line text-muted font-bold text-xs uppercase tracking-wider bg-[#F8F9FA]">
+                    <tr className="border-b border-line text-muted font-bold text-xs uppercase tracking-wider bg-surface">
                       <th className="py-2.5 px-3">Ticket # & Date</th>
                       <th className="py-2.5 px-3">Customer & Contact</th>
                       <th className="py-2.5 px-3">Device & Serial/IMEI</th>
@@ -1268,7 +1268,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                       const totalAmt = wo.totalAmount || wo.subtotal || 0;
 
                       return (
-                        <tr key={wo.id} className="hover:bg-[#F8F9FA] transition-colors">
+                        <tr key={wo.id} className="hover:bg-surface transition-colors">
                           {/* Ticket # & Date */}
                           <td className="py-3 px-3">
                             <p className="font-mono font-black text-brand text-xs">{wo.orderNumber || wo.id}</p>
@@ -1382,7 +1382,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-line">
               <div className="space-y-0.5">
                 <div className="flex items-center space-x-2">
-                  <div className="p-2 bg-[#AF52DE]/10 text-[#AF52DE] rounded-xl border border-[#AF52DE]/20">
+                  <div className="p-2 bg-purple/10 text-purple rounded-xl border border-[#AF52DE]/20">
                     <Smartphone className="w-5 h-5" />
                   </div>
                   <h3 className="text-base font-extrabold text-ink">Top Repair Devices</h3>
@@ -1397,7 +1397,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
             <div className="space-y-2.5">
               {topRepairDevices.length === 0 ? (
-                <div className="p-8 text-center text-xs text-muted bg-[#F8F9FA] rounded-xl border border-dashed border-line-strong">
+                <div className="p-8 text-center text-xs text-muted bg-surface rounded-xl border border-dashed border-line-strong">
                   No repair tickets in the selected date range.
                 </div>
               ) : (
@@ -1406,7 +1406,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   const barPct = Math.max(8, Math.round((dev.count / maxCount) * 100));
                   const medal = idx === 0 ? 'bg-[#FFD60A]/20 text-[#B25000] border-[#FFD60A]/50' : idx === 1 ? 'bg-slate-100 text-slate-600 border-slate-200' : idx === 2 ? 'bg-orange-50 text-orange-700 border-orange-200' : 'bg-surface text-muted border-line';
                   return (
-                    <div key={dev.name} className="p-3 bg-[#F8F9FA] border border-line rounded-xl space-y-2">
+                    <div key={dev.name} className="p-3 bg-surface border border-line rounded-xl space-y-2">
                       <div className="flex items-center justify-between gap-2 text-xs">
                         <div className="flex items-center space-x-2 min-w-0">
                           <span className={`w-6 h-6 rounded-full border flex items-center justify-center font-black text-xs shrink-0 ${medal}`}>
@@ -1420,7 +1420,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                         </div>
                       </div>
                       <div className="w-full bg-line rounded-full h-2 overflow-hidden">
-                        <div className="h-full rounded-full bg-[#AF52DE]" style={{ width: `${barPct}%` }} />
+                        <div className="h-full rounded-full bg-purple" style={{ width: `${barPct}%` }} />
                       </div>
                     </div>
                   );
@@ -1448,7 +1448,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
               {topRepairCategories.length === 0 ? (
-                <div className="p-8 text-center text-xs text-muted bg-[#F8F9FA] rounded-xl border border-dashed border-line-strong md:col-span-2">
+                <div className="p-8 text-center text-xs text-muted bg-surface rounded-xl border border-dashed border-line-strong md:col-span-2">
                   No repair tickets in the selected date range.
                 </div>
               ) : (
@@ -1457,7 +1457,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   const maxRevenue = topRepairCategories[0]?.revenue || 1;
                   const barPct = Math.max(8, Math.round((cat.revenue / maxRevenue) * 100));
                   return (
-                    <div key={cat.id} className="p-3.5 bg-[#F8F9FA] border border-line rounded-xl space-y-2.5">
+                    <div key={cat.id} className="p-3.5 bg-surface border border-line rounded-xl space-y-2.5">
                       <div className="flex items-center justify-between text-xs">
                         <div className="flex items-center space-x-2">
                           <div className={`p-1.5 rounded-md ${cat.bgLight} ${cat.textCol}`}>
@@ -1529,14 +1529,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
             <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-1">
               <span className="text-xs font-bold text-muted uppercase">Low Stock Repair Items</span>
-              <p className="text-xl font-extrabold text-[#FF9500]">{repairLowStockParts.length} Repair Parts</p>
-              <p className="text-xs text-[#FF9500] font-semibold">Below reorder threshold</p>
+              <p className="text-xl font-extrabold text-warning">{repairLowStockParts.length} Repair Parts</p>
+              <p className="text-xs text-warning font-semibold">Below reorder threshold</p>
             </div>
 
             <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-1">
               <span className="text-xs font-bold text-muted uppercase">Pending Vendor RMAs</span>
-              <p className="text-xl font-extrabold text-[#AF52DE]">{pendingRmas.length} Defective Returns</p>
-              <p className="text-xs text-[#AF52DE] font-semibold">Awaiting supplier credits</p>
+              <p className="text-xl font-extrabold text-purple">{pendingRmas.length} Defective Returns</p>
+              <p className="text-xs text-purple font-semibold">Awaiting supplier credits</p>
             </div>
           </div>
 
@@ -1545,7 +1545,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="flex items-center justify-between pb-3 border-b border-line">
               <div>
                 <h3 className="text-sm font-bold text-ink flex items-center space-x-2 truncate">
-                  <AlertTriangle className="w-4 h-4 text-[#FF9500] shrink-0" />
+                  <AlertTriangle className="w-4 h-4 text-warning shrink-0" />
                   <span className="hidden sm:inline">Low Stock Repair Component Auto Triggers</span>
                   <span className="sm:hidden">Low Stock Alerts</span>
                 </h3>
@@ -1556,7 +1556,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 type="button"
                 onClick={() => onNavigateToTab('inventory')}
                 size="sm"
-                className="bg-brand hover:bg-[#0077ED] text-white"
+                className="bg-brand hover:bg-brand-deep text-white"
               >
                 Open Parts Inventory
               </Button>
@@ -1566,7 +1566,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <p className="text-xs text-muted -mt-1">Quick stock/profit glance — full views in Inventory.</p>
 
             {repairLowStockParts.length === 0 ? (
-              <div className="p-8 text-center text-xs text-success bg-[#EAF8ED] border border-success/20 rounded-xl space-y-1">
+              <div className="p-8 text-center text-xs text-success bg-success/10 border border-success/20 rounded-xl space-y-1">
                 <CheckCircle2 className="w-6 h-6 mx-auto" />
                 <p className="font-extrabold text-sm text-ink">All Repair Components In Stock</p>
                 <p className="text-muted">No parts currently low on stock.</p>
@@ -1574,18 +1574,18 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {repairLowStockParts.map((part) => (
-                  <div key={part.id} className="p-3.5 bg-[#FFF8ED] border border-[#FF9500]/30 rounded-xl space-y-2 shadow-2xs">
+                  <div key={part.id} className="p-3.5 bg-[#FFF8ED] border border-warning/30 rounded-xl space-y-2 shadow-2xs">
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <p className="font-extrabold text-xs text-ink">{part.name}</p>
                         <p className="text-xs text-muted">{part.category} · {part.qualityTier}</p>
                       </div>
-                      <span className="text-xs font-extrabold text-[#D97706] bg-amber-100 px-2 py-0.5 rounded-lg border border-amber-200 shrink-0">
+                      <span className="text-xs font-extrabold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-lg border border-amber-200 shrink-0">
                         {part.quantityInStock} Left
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between text-xs border-t border-[#FF9500]/20 pt-2 text-muted">
+                    <div className="flex items-center justify-between text-xs border-t border-warning/20 pt-2 text-muted">
                       <span>Supplier: <strong className="text-ink">{part.supplierName}</strong></span>
                       <span className="font-mono font-bold text-brand">{part.costPrice.toLocaleString()} MMK Cost</span>
                     </div>
@@ -1605,7 +1605,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-1">
               <span className="text-xs font-bold text-muted uppercase">Total Revenue</span>
               <p className="text-2xl font-extrabold text-ink">{totalRevenue.toLocaleString()} MMK</p>
-              <p className={`text-xs font-semibold flex items-center space-x-1 ${marginPercent < 0 ? 'text-rose-600' : 'text-[#15803D]'}`}>
+              <p className={`text-xs font-semibold flex items-center space-x-1 ${marginPercent < 0 ? 'text-rose-600' : 'text-success-deep'}`}>
                 {marginPercent < 0 && <AlertTriangle className="w-3 h-3 shrink-0" />}
                 <span>{marginPercent}% Gross Profit Margin</span>
               </p>
@@ -1662,7 +1662,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </div>
 
             {trendSeries.curRev === 0 && trendSeries.curRep === 0 ? (
-              <div className="p-8 text-center text-xs text-muted bg-[#F8F9FA] rounded-xl border border-dashed border-line-strong space-y-1">
+              <div className="p-8 text-center text-xs text-muted bg-surface rounded-xl border border-dashed border-line-strong space-y-1">
                 <TrendingUp className="w-6 h-6 mx-auto opacity-50" />
                 <p className="font-extrabold text-sm text-ink">No completed repairs in this period</p>
                 <p className="text-xs">Completed (Finished / Taken Out) tickets will appear here.</p>
@@ -1695,7 +1695,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   type="button"
                   onClick={() => onNavigateToTab('finance')}
                   size="sm"
-                  className="bg-brand hover:bg-[#0077ED] text-white"
+                  className="bg-brand hover:bg-brand-deep text-white"
                 >
                   Open Shop Finance
                 </Button>
@@ -1716,13 +1716,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-4 bg-[#F8F9FA] border border-line rounded-xl space-y-1">
+              <div className="p-4 bg-surface border border-line rounded-xl space-y-1">
                 <p className="text-xs font-bold text-muted uppercase">Average Ticket Value (ATV)</p>
                 <p className="text-2xl font-extrabold text-ink">{avgTicketValue.toLocaleString()} MMK</p>
                 <p className="text-xs text-muted">Per repair work order</p>
               </div>
 
-              <div className="p-4 bg-[#F8F9FA] border border-line rounded-xl space-y-1">
+              <div className="p-4 bg-surface border border-line rounded-xl space-y-1">
                 <p className="text-xs font-bold text-muted uppercase">Total Parts Cost</p>
                 <p className="text-2xl font-extrabold text-ink">{totalPartsCost.toLocaleString()} MMK</p>
                 <p className="text-xs text-muted">Direct hardware component cost</p>
@@ -1903,7 +1903,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
               if (displayList.length === 0) {
                 return (
-                  <div className="p-10 text-center text-xs text-muted space-y-2 bg-[#F8F9FA] rounded-xl border border-dashed border-line-strong">
+                  <div className="p-10 text-center text-xs text-muted space-y-2 bg-surface rounded-xl border border-dashed border-line-strong">
                     <ShieldCheck className="w-10 h-10 text-success mx-auto opacity-70" />
                     <p className="font-extrabold text-sm text-ink">No Work Orders Matching Warranty Criteria</p>
                     <p className="text-xs">
@@ -1933,7 +1933,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                       {displayList.map((item) => {
                         const isCopied = copiedNoticeId === item.wo.id;
                         return (
-                          <tr key={item.wo.id} className={`hover:bg-[#F8F9FA] transition-colors ${item.isCritical ? 'bg-rose-50/40' : ''}`}>
+                          <tr key={item.wo.id} className={`hover:bg-surface transition-colors ${item.isCritical ? 'bg-rose-50/40' : ''}`}>
                             <td className="py-3 px-3">
                               <p className="font-mono font-bold text-brand">{item.wo.orderNumber}</p>
                               <span className="text-xs text-muted">{item.wo.status}</span>

@@ -18,7 +18,7 @@ const QaTab: React.FC<QaTabProps> = ({ formData, setFormData }) => {
           </div>
 
           <div className="space-y-3 text-xs">
-            <label className="flex items-center space-x-3 cursor-pointer p-3 bg-[#F8F9FA] rounded-xl border border-line hover:border-brand transition-all">
+            <label className="flex items-center space-x-3 cursor-pointer p-3 bg-surface rounded-xl border border-line hover:border-brand transition-all">
               <Input
                 type="checkbox"
                 checked={formData.mandatoryQaChecklist}
@@ -31,7 +31,7 @@ const QaTab: React.FC<QaTabProps> = ({ formData, setFormData }) => {
               </div>
             </label>
 
-            <label className="flex items-center space-x-3 cursor-pointer p-3 bg-[#F8F9FA] rounded-xl border border-line hover:border-brand transition-all">
+            <label className="flex items-center space-x-3 cursor-pointer p-3 bg-surface rounded-xl border border-line hover:border-brand transition-all">
               <Input
                 type="checkbox"
                 checked={formData.requireMicroSolderingLog}

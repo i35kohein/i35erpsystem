@@ -145,7 +145,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
                 onClick={() => setChannel('Viber')}
                 className={`py-2.5 px-3 rounded-2xl border font-extrabold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer ${
                   channel === 'Viber'
-                    ? 'bg-[#7360F2] text-white border-[#7360F2] shadow-sm'
+                    ? 'bg-purple text-white border-purple shadow-sm'
                     : 'bg-surface text-ink border-line hover:bg-slate-200'
                 }`}
               >
@@ -258,7 +258,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
               onClick={handleSendAction}
               className={`flex-1 py-3 text-white font-extrabold text-xs rounded-2xl shadow-md transition-all flex items-center justify-center space-x-1.5 cursor-pointer active:scale-95 ${
                 channel === 'Viber'
-                  ? 'bg-[#7360F2] hover:bg-[#614fe0]'
+                  ? 'bg-purple hover:bg-[#614fe0]'
                   : channel === 'SMS'
                   ? 'bg-success hover:bg-[#2fb350]'
                   : 'bg-[#229ED9] hover:bg-[#1f8ec3]'

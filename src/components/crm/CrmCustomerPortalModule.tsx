@@ -283,7 +283,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
 
             <div className="min-h-0 flex-1 space-y-2 overflow-y-auto py-3 pr-1">
               {filteredCustomers.length === 0 && (
-                <div className="flex h-full min-h-[260px] flex-col items-center justify-center rounded-xl border border-dashed border-line bg-[#F8F9FA] px-5 text-center text-muted">
+                <div className="flex h-full min-h-[260px] flex-col items-center justify-center rounded-xl border border-dashed border-line bg-surface px-5 text-center text-muted">
                   <Users className="mb-2 h-7 w-7 text-muted/50" />
                   <p className="font-semibold">No customer accounts found</p>
                   <p className="mt-1 text-xs">Customers from new intake tickets will appear here.</p>
@@ -331,7 +331,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
 
                     <div className="flex justify-between items-center text-xs text-muted mt-1.5">
                       <span>{cust.phone}</span>
-                      <span className="font-bold text-[#15803D]">{cust.totalSpent.toLocaleString()} {systemSettings.currencySymbol} Spent</span>
+                      <span className="font-bold text-success-deep">{cust.totalSpent.toLocaleString()} {systemSettings.currencySymbol} Spent</span>
                     </div>
 
                     {/* Expandable Row Toggle Bar */}
@@ -417,7 +417,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                             {custOrders.map((wo) => (
                               <div
                                 key={wo.id}
-                                className="p-2 rounded-lg bg-[#F8F9FA] border border-line hover:border-brand transition-all text-xs space-y-1"
+                                className="p-2 rounded-lg bg-surface border border-line hover:border-brand transition-all text-xs space-y-1"
                               >
                                 <div className="flex items-center justify-between">
                                   <span className="font-mono font-bold text-ink">{wo.orderNumber || wo.id}</span>
@@ -442,7 +442,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                                 </div>
                                 <div className="flex items-center justify-between">
                                   <span className="font-semibold text-ink truncate max-w-[160px]">{wo.deviceModel}</span>
-                                  <span className="font-bold text-[#15803D]">{wo.totalAmount?.toLocaleString() || 0} {systemSettings.currencySymbol}</span>
+                                  <span className="font-bold text-success-deep">{wo.totalAmount?.toLocaleString() || 0} {systemSettings.currencySymbol}</span>
                                 </div>
                                 {wo.symptomsReported && (
                                   <p className="text-xs text-muted line-clamp-1 italic">
@@ -530,12 +530,12 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                   </div>
                   <div>
                     <span className="text-muted">Total Spent:</span>
-                    <p className="font-bold text-[#15803D]">{selectedCustomer.totalSpent.toLocaleString()} {systemSettings.currencySymbol}</p>
+                    <p className="font-bold text-success-deep">{selectedCustomer.totalSpent.toLocaleString()} {systemSettings.currencySymbol}</p>
                   </div>
                 </div>
 
                 {selectedCustomer.notes && (
-                  <div className="p-3 bg-[#FFF4E5] border border-[#FF9F0A]/30 rounded-xl text-[#B26B00]">
+                  <div className="p-3 bg-warning/10 border border-warning/30 rounded-xl text-[#B26B00]">
                     <strong>Account Notes:</strong> {selectedCustomer.notes}
                   </div>
                 )}
@@ -562,7 +562,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                 </div>
               </div>
             ) : (
-              <div className="flex min-h-[360px] flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-line bg-[#F8F9FA] p-8 text-center text-muted">
+              <div className="flex min-h-[360px] flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-line bg-surface p-8 text-center text-muted">
                 <Users className="mb-2 h-8 w-8 text-muted/50" />
                 <p className="font-semibold">Select a customer to view details.</p>
               </div>

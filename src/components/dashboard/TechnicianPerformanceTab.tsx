@@ -98,9 +98,9 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
               <span className="text-xs font-bold text-muted uppercase tracking-wider">Total Successful Repairs</span>
               <div className="flex items-baseline space-x-2">
                 <span className="text-2xl font-extrabold text-ink">{totalShopLiveCompleted}</span>
-                <span className="text-xs text-[#15803D] font-bold">Completed This Period</span>
+                <span className="text-xs text-success-deep font-bold">Completed This Period</span>
               </div>
-              <p className="text-xs text-[#1E7E34] font-medium flex items-center gap-1">
+              <p className="text-xs text-success-deep font-medium flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5 text-success" />
                 {shopSuccessRate !== null ? `${shopSuccessRate}% QA Pass Rate` : '— Awaiting completed repairs'}
               </p>
@@ -136,14 +136,14 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
               <span className="text-xs font-bold text-muted uppercase tracking-wider">Active Queue Capacity</span>
               <div className="flex items-baseline space-x-2">
                 <span className="text-2xl font-extrabold text-ink">{totalActiveQueue}</span>
-                <span className="text-xs text-[#AF52DE] font-bold">In-Queue Jobs</span>
+                <span className="text-xs text-purple font-bold">In-Queue Jobs</span>
               </div>
-              <p className="text-xs text-[#AF52DE] font-medium flex items-center gap-1">
-                <Scale className="w-3.5 h-3.5 text-[#AF52DE]" />
+              <p className="text-xs text-purple font-medium flex items-center gap-1">
+                <Scale className="w-3.5 h-3.5 text-purple" />
                 Across {technicians.length} staff · {totalShopBaseline} baseline/mo
               </p>
             </div>
-            <div className="p-3 bg-[#AF52DE] text-white rounded-xl shadow-xs">
+            <div className="p-3 bg-purple text-white rounded-xl shadow-xs">
               <BarChart3 className="w-6 h-6" />
             </div>
           </div>
@@ -169,7 +169,7 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
               <div className="space-y-3 pb-3 border-b border-line">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center space-x-3">
-                    <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-100 to-indigo-100 text-[#AF52DE] font-black text-lg flex items-center justify-center border border-purple-200 shadow-2xs shrink-0">
+                    <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-100 to-indigo-100 text-purple font-black text-lg flex items-center justify-center border border-purple-200 shadow-2xs shrink-0">
                       {tech.name.charAt(0)}
                     </div>
                     <div>
@@ -182,9 +182,9 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
                   </div>
 
                   <span className={`text-xs font-extrabold px-2.5 py-1 rounded-lg border shadow-2xs shrink-0 ${
-                    tech.level === 'Level 3 Master' ? 'bg-purple-50 text-[#AF52DE] border-purple-200' :
+                    tech.level === 'Level 3 Master' ? 'bg-purple-50 text-purple border-purple-200' :
                     tech.level === 'Level 2 Spareparts + Hardware' ? 'bg-blue-50 text-brand border-blue-200' :
-                    'bg-emerald-50 text-[#1E7E34] border-emerald-200'
+                    'bg-emerald-50 text-success-deep border-emerald-200'
                   }`}>
                     {tech.level}
                   </span>
@@ -203,7 +203,7 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
               </div>
 
               {/* Core Performance Metrics: Throughput, Duration, Successful Repairs */}
-              <div className="grid grid-cols-3 gap-2 py-1 text-center bg-[#F8F9FA] p-3 rounded-xl border border-line">
+              <div className="grid grid-cols-3 gap-2 py-1 text-center bg-surface p-3 rounded-xl border border-line">
                 {/* 1. Throughput */}
                 <div className="space-y-0.5">
                   <span className="block text-xs font-bold text-muted uppercase">Throughput</span>
@@ -223,7 +223,7 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
                 {/* 3. Successful Repairs */}
                 <div className="space-y-0.5">
                   <span className="block text-xs font-bold text-muted uppercase">Success Rate</span>
-                  <span className="block text-lg font-extrabold text-[#1E7E34]">
+                  <span className="block text-lg font-extrabold text-success-deep">
                     {successRate !== null ? `${successRate}%` : '—'}
                   </span>
                   <span className="block text-xs text-muted font-medium">
@@ -281,7 +281,7 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
                           e.stopPropagation();
                           onNavigateToTab('pipeline');
                         }}
-                        className="p-2 bg-[#F8F9FA] hover:bg-white border border-line hover:border-brand/40 rounded-lg flex items-center justify-between text-xs cursor-pointer transition-all group/ticket"
+                        className="p-2 bg-surface hover:bg-white border border-line hover:border-brand/40 rounded-lg flex items-center justify-between text-xs cursor-pointer transition-all group/ticket"
                       >
                         <div className="min-w-0 pr-2">
                           <p className="font-mono font-bold text-brand group-hover/ticket:underline text-xs truncate">

@@ -20,9 +20,9 @@ type ResultItem =
   | { kind: 'customer'; id: string; label: string; sub: string; tab: string };
 
 const KIND_META = {
-  ticket: { icon: TicketCheck, label: 'Tickets', tab: 'intake', color: 'text-brand bg-[#E5F1FF]' },
-  part: { icon: Package, label: 'Parts', tab: 'inventory', color: 'text-[#AF52DE] bg-purple-50' },
-  customer: { icon: Users, label: 'Customers', tab: 'crm', color: 'text-success bg-[#EAF8ED]' },
+  ticket: { icon: TicketCheck, label: 'Tickets', tab: 'intake', color: 'text-brand bg-brand-soft' },
+  part: { icon: Package, label: 'Parts', tab: 'inventory', color: 'text-purple bg-purple-50' },
+  customer: { icon: Users, label: 'Customers', tab: 'crm', color: 'text-success bg-success/10' },
 } as const;
 
 /** Global Cmd/Ctrl+K search across tickets, parts and customers. */

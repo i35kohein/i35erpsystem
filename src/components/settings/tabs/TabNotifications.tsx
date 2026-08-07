@@ -60,7 +60,7 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   {[
-                    { id: 'Viber', label: 'Viber', color: 'bg-[#7360F2]' },
+                    { id: 'Viber', label: 'Viber', color: 'bg-purple' },
                     { id: 'SMS', label: 'Direct SMS', color: 'bg-success' },
                     { id: 'Telegram', label: 'Telegram', color: 'bg-[#229ED9]' },
                   ].map((ch) => {
@@ -102,7 +102,7 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
             {/* Telegram Bot Integration Config */}
             <div className="p-4 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 rounded-2xl border border-blue-200 space-y-3">
               <div className="flex items-center space-x-2">
-                <Send className="w-4 h-4 text-[#229ED9]" />
+                <Send className="w-4 h-4 text-brand" />
                 <h4 className="text-xs font-extrabold text-ink">Telegram Bot & Store Alerts Integration</h4>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
@@ -135,7 +135,7 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
             <Button
               type="button"
               onClick={() => toggleSection('notif-templates')}
-              className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-[#F8F9FA] hover:bg-[#F0F1F4] transition-colors cursor-pointer"
+              className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-surface hover:bg-[#F0F1F4] transition-colors cursor-pointer"
               aria-expanded={isSectionOpen('notif-templates')}
             >
               <span className="text-xs font-extrabold text-ink flex items-center space-x-2">

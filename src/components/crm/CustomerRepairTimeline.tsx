@@ -158,7 +158,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
 
   if (workOrders.length === 0) {
     return (
-      <div className={`flex min-h-[260px] flex-col items-center justify-center rounded-2xl border border-dashed border-line bg-[#F8F9FA] p-8 text-center text-muted ${emptyClassName}`}>
+      <div className={`flex min-h-[260px] flex-col items-center justify-center rounded-2xl border border-dashed border-line bg-surface p-8 text-center text-muted ${emptyClassName}`}>
         <Clock className="w-8 h-8 text-muted/50 mx-auto mb-2" />
         <p className="font-semibold text-xs">No repair history recorded for this customer account.</p>
         <p className="text-xs text-muted mt-0.5">When work orders are intaken, they will appear chronologically here.</p>
@@ -299,7 +299,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                   </div>
 
                   {/* Device Specification & Serial Section */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#F9F9FB] p-3 rounded-xl border border-line/80">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-surface p-3 rounded-xl border border-line/80">
                     <div>
                       <span className="text-xs font-bold text-muted uppercase tracking-wider block mb-0.5">
                         Device Specification
@@ -401,7 +401,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                     <div className="flex items-center space-x-3">
                       <div className="text-right">
                         <span className="text-xs text-muted uppercase font-bold block leading-none">Total Cost</span>
-                        <span className="text-sm font-extrabold text-[#15803D]">
+                        <span className="text-sm font-extrabold text-success-deep">
                           {wo.totalAmount?.toLocaleString() || 0} {systemSettings.currencySymbol}
                         </span>
                       </div>
@@ -447,7 +447,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
           })}
         </div>
       ) : (
-        <div className="p-8 text-center text-muted bg-[#F8F9FA] rounded-2xl border border-dashed border-line">
+        <div className="p-8 text-center text-muted bg-surface rounded-2xl border border-dashed border-line">
           <Search className="w-6 h-6 text-muted/50 mx-auto mb-2" />
           <p className="font-semibold text-xs">No repair history matched your search filter.</p>
           <Button

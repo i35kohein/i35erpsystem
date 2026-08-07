@@ -54,16 +54,16 @@ export const TechnicianDetailModal: React.FC<TechnicianDetailModalProps> = ({
         {/* Header */}
         <div className="sticky top-0 bg-white/95 backdrop-blur-md border-b border-line px-5 py-4 flex items-start justify-between gap-3 z-10">
           <div className="flex items-center space-x-3 min-w-0">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-100 to-indigo-100 text-[#AF52DE] font-black text-xl flex items-center justify-center border border-purple-200 shadow-2xs shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-100 to-indigo-100 text-purple font-black text-xl flex items-center justify-center border border-purple-200 shadow-2xs shrink-0">
               {tech.name.charAt(0)}
             </div>
             <div className="min-w-0">
               <h3 className="font-extrabold text-base text-ink truncate">{tech.name}</h3>
               <div className="flex items-center space-x-2 mt-0.5 flex-wrap gap-y-1">
                 <span className={`text-xs font-extrabold px-2 py-0.5 rounded-lg border ${
-                  tech.level === 'Level 3 Master' ? 'bg-purple-50 text-[#AF52DE] border-purple-200' :
+                  tech.level === 'Level 3 Master' ? 'bg-purple-50 text-purple border-purple-200' :
                   tech.level === 'Level 2 Spareparts + Hardware' ? 'bg-blue-50 text-brand border-blue-200' :
-                  'bg-emerald-50 text-[#1E7E34] border-emerald-200'
+                  'bg-emerald-50 text-success-deep border-emerald-200'
                 }`}>
                   {tech.level}
                 </span>
@@ -92,7 +92,7 @@ export const TechnicianDetailModal: React.FC<TechnicianDetailModalProps> = ({
         <div className="p-5 space-y-5">
           {/* KPI Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <div className="p-3 bg-[#F8F9FA] border border-line rounded-xl">
+            <div className="p-3 bg-surface border border-line rounded-xl">
               <span className="text-xs font-bold text-muted uppercase flex items-center gap-1">
                 <Scale className="w-3 h-3" /> Active Queue
               </span>
@@ -101,14 +101,14 @@ export const TechnicianDetailModal: React.FC<TechnicianDetailModalProps> = ({
                 {loadBadge.label}
               </span>
             </div>
-            <div className="p-3 bg-[#F8F9FA] border border-line rounded-xl">
+            <div className="p-3 bg-surface border border-line rounded-xl">
               <span className="text-xs font-bold text-muted uppercase flex items-center gap-1">
                 <CheckCircle2 className="w-3 h-3" /> Completed {periodLabel ? `(${periodLabel})` : ''}
               </span>
               <p className="text-xl font-extrabold text-ink mt-1">{liveCompleted}</p>
               <span className="text-xs text-muted font-bold">Baseline {baselineMonthly}/mo</span>
             </div>
-            <div className="p-3 bg-[#F8F9FA] border border-line rounded-xl">
+            <div className="p-3 bg-surface border border-line rounded-xl">
               <span className="text-xs font-bold text-muted uppercase flex items-center gap-1">
                 <Clock className="w-3 h-3" /> Avg Turnaround
               </span>
@@ -117,18 +117,18 @@ export const TechnicianDetailModal: React.FC<TechnicianDetailModalProps> = ({
               </p>
               <span className="text-xs text-muted font-bold">per completed job</span>
             </div>
-            <div className="p-3 bg-[#F8F9FA] border border-line rounded-xl">
+            <div className="p-3 bg-surface border border-line rounded-xl">
               <span className="text-xs font-bold text-muted uppercase flex items-center gap-1">
                 <Award className="w-3 h-3" /> QA Pass Rate
               </span>
-              <p className="text-xl font-extrabold text-[#1E7E34] mt-1">
+              <p className="text-xl font-extrabold text-success-deep mt-1">
                 {successRate !== null ? `${successRate}%` : '—'}
               </p>
               <span className="text-xs text-muted font-bold">
                 {warrantyReturnCount === 0 ? '0 returns' : `${warrantyReturnCount} return${warrantyReturnCount > 1 ? 's' : ''}`}
               </span>
             </div>
-            <div className="p-3 bg-[#F8F9FA] border border-line rounded-xl">
+            <div className="p-3 bg-surface border border-line rounded-xl">
               <span className="text-xs font-bold text-muted uppercase flex items-center gap-1">
                 <DollarSign className="w-3 h-3" /> Labor Revenue
               </span>
@@ -137,7 +137,7 @@ export const TechnicianDetailModal: React.FC<TechnicianDetailModalProps> = ({
               </p>
               <span className="text-xs text-muted font-bold">this period</span>
             </div>
-            <div className="p-3 bg-[#F8F9FA] border border-line rounded-xl">
+            <div className="p-3 bg-surface border border-line rounded-xl">
               <span className="text-xs font-bold text-muted uppercase flex items-center gap-1">
                 <Percent className="w-3 h-3" /> Est. Commission
               </span>
@@ -161,7 +161,7 @@ export const TechnicianDetailModal: React.FC<TechnicianDetailModalProps> = ({
             <span className="text-muted">
               Tickets <span className="font-black text-ink">{finishedOrders.length}</span>
               <span className="mx-1.5 text-line-strong">|</span>
-              <span className="font-bold text-[#AF52DE]">{hardwareJobCount} HW</span>
+              <span className="font-bold text-purple">{hardwareJobCount} HW</span>
               <span className="mx-1 text-line-strong">·</span>
               <span className="font-bold text-brand">{partsJobCount} Parts</span>
               <span className="mx-1.5 text-line-strong">|</span>
@@ -192,7 +192,7 @@ export const TechnicianDetailModal: React.FC<TechnicianDetailModalProps> = ({
                   <div
                     key={wo.id}
                     onClick={() => { onClose(); onNavigateToTab('pipeline'); }}
-                    className="p-2.5 bg-[#F8F9FA] hover:bg-white border border-line hover:border-brand/40 rounded-lg flex items-center justify-between text-xs cursor-pointer transition-all"
+                    className="p-2.5 bg-surface hover:bg-white border border-line hover:border-brand/40 rounded-lg flex items-center justify-between text-xs cursor-pointer transition-all"
                   >
                     <div className="min-w-0 pr-2">
                       <p className="font-mono font-bold text-brand text-xs truncate">{wo.orderNumber}</p>
@@ -224,17 +224,17 @@ export const TechnicianDetailModal: React.FC<TechnicianDetailModalProps> = ({
                     <div
                       key={wo.id}
                       onClick={() => { onClose(); onNavigateToTab('pipeline'); }}
-                      className="p-2.5 bg-[#EAF8ED]/40 hover:bg-white border border-line hover:border-success/40 rounded-lg flex items-center justify-between text-xs cursor-pointer transition-all"
+                      className="p-2.5 bg-success/10/40 hover:bg-white border border-line hover:border-success/40 rounded-lg flex items-center justify-between text-xs cursor-pointer transition-all"
                     >
                       <div className="min-w-0 pr-2">
-                        <p className="font-mono font-bold text-[#1E7E34] text-xs truncate">{wo.orderNumber}</p>
+                        <p className="font-mono font-bold text-success-deep text-xs truncate">{wo.orderNumber}</p>
                         <p className="text-xs text-ink font-semibold truncate">{wo.deviceModel}</p>
                       </div>
                       <div className="flex items-center space-x-2 shrink-0">
                         <span
                           className={`text-xs font-black px-1.5 py-0.5 rounded-md border flex items-center space-x-0.5 ${
                             isHardware
-                              ? 'bg-purple-50 text-[#AF52DE] border-purple-200'
+                              ? 'bg-purple-50 text-purple border-purple-200'
                               : 'bg-brand-soft text-brand border-brand/20'
                           }`}
                           title={source === 'AI' ? 'Classified by AI' : 'Classified by keyword rules'}
@@ -265,7 +265,7 @@ export const TechnicianDetailModal: React.FC<TechnicianDetailModalProps> = ({
             </p>
             <Button
               onClick={onClose}
-              className="px-4 py-2 bg-brand hover:bg-[#0077ED] text-white font-bold text-xs rounded-xl transition-all cursor-pointer"
+              className="px-4 py-2 bg-brand hover:bg-brand-deep text-white font-bold text-xs rounded-xl transition-all cursor-pointer"
             >
               Done
             </Button>

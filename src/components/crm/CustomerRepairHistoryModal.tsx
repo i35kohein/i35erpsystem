@@ -153,9 +153,9 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
 
             <div className="bg-white p-3.5 rounded-2xl border border-line shadow-2xs">
               <span className="text-xs font-bold text-muted uppercase">Total Expenditure</span>
-              <div className="text-lg font-black text-[#15803D] mt-0.5 flex items-center justify-between">
+              <div className="text-lg font-black text-success-deep mt-0.5 flex items-center justify-between">
                 <span>{totalSpent.toLocaleString()} {systemSettings.currencySymbol}</span>
-                <TrendingUp className="w-5 h-5 text-[#15803D]" />
+                <TrendingUp className="w-5 h-5 text-success-deep" />
               </div>
             </div>
           </div>

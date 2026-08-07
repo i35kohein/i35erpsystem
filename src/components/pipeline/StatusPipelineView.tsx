@@ -856,7 +856,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                                 setNotifWo(wo);
                                 setIsNotifModalOpen(true);
                               }}
-                              className="flex-1 py-1.5 px-1 bg-[#7360F2]/10 hover:bg-[#7360F2]/20 text-[#5A3FD4] font-extrabold rounded-lg border border-[#7360F2]/20 text-center flex items-center justify-center space-x-0.5 truncate min-h-9"
+                              className="flex-1 py-1.5 px-1 bg-purple/10 hover:bg-purple/20 text-[#5A3FD4] font-extrabold rounded-lg border border-purple/20 text-center flex items-center justify-center space-x-0.5 truncate min-h-9"
                               title="Alert Customer SMS/Viber/Telegram"
                             >
                               <BellRing className="w-3 h-3 shrink-0" />
@@ -964,14 +964,14 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                 value={logText}
                 onChange={(e) => setLogText(e.target.value)}
                 placeholder="e.g. Jul 22, 2026 5:57 PM - No Power fixed. Speaker still not working."
-                className="w-full bg-[#F8F9FA] border border-line-strong rounded-xl p-3 text-xs text-ink focus:border-brand"
+                className="w-full bg-surface border border-line-strong rounded-xl p-3 text-xs text-ink focus:border-brand"
               />
             </div>
 
             <Button
               type="button"
               onClick={handleAddRepairLog}
-              className="w-full bg-brand text-white hover:bg-[#0077ED]"
+              className="w-full bg-brand text-white hover:bg-brand-deep"
             >
               Save Repair Log
             </Button>
@@ -999,7 +999,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   onClick={() => handleAssignTechnician(t.id)}
                   className={`w-full p-3 rounded-xl border text-left flex justify-between items-center transition-all ${
                     assignTechModalWo.assignedTechId === t.id
-                      ? 'border-brand bg-[#E5F1FF] text-brand font-bold'
+                      ? 'border-brand bg-brand-soft text-brand font-bold'
                       : 'border-line-strong bg-white text-ink hover:bg-slate-50'
                   }`}
                 >
@@ -1055,7 +1055,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
               <span>Checkout Payment ({checkoutModalWo.orderNumber})</span>
             </h3>
 
-            <div className="bg-[#E8F8EE] p-3 rounded-xl border border-success/30 text-xs text-[#1E7E34] font-bold flex justify-between">
+            <div className="bg-[#E8F8EE] p-3 rounded-xl border border-success/30 text-xs text-success-deep font-bold flex justify-between">
               <span>Total Invoice Due:</span>
               <span className="text-sm font-mono">{checkoutModalWo.totalAmount.toLocaleString()} MMK</span>
             </div>
@@ -1067,7 +1067,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   type="number"
                   value={paidAmountInput}
                   onChange={(e) => setPaidAmountInput(e.target.value)}
-                  className="w-full bg-[#F8F9FA] border border-line-strong rounded-xl px-3 py-2 text-sm font-mono font-bold text-ink"
+                  className="w-full bg-surface border border-line-strong rounded-xl px-3 py-2 text-sm font-mono font-bold text-ink"
                 />
               </div>
 
@@ -1107,7 +1107,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
 
             <div className="border-b border-line-strong pb-3 space-y-1">
               <div className="flex items-center space-x-2">
-                <ShieldCheck className="w-5 h-5 text-[#AF52DE]" />
+                <ShieldCheck className="w-5 h-5 text-purple" />
                 <h3 className="text-sm font-bold text-ink">
                   After-Repair 21-Point QA Inspection
                 </h3>
@@ -1147,7 +1147,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
             {/* 21-Point Diagnostic Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-72 overflow-y-auto pr-1">
               {afterDiagnostics.map((item, idx) => (
-                <div key={item.id || item.name} className="p-2 bg-[#F8F9FA] border border-line rounded-xl space-y-1.5">
+                <div key={item.id || item.name} className="p-2 bg-surface border border-line rounded-xl space-y-1.5">
                   <div className="flex justify-between items-center text-xs font-bold text-ink">
                     <span className="truncate pr-1">{idx + 1}. {item.name}</span>
                     <span className={`text-xs font-extrabold px-1.5 py-0.2 rounded ${
@@ -1216,14 +1216,14 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                 value={afterSummaryNote}
                 onChange={(e) => setAfterSummaryNote(e.target.value)}
                 placeholder="e.g. All functions tested pass. TrueTone transferred, battery charging test pass."
-                className="w-full bg-[#F8F9FA] border border-line-strong rounded-xl p-2.5 text-xs text-ink"
+                className="w-full bg-surface border border-line-strong rounded-xl p-2.5 text-xs text-ink"
               />
             </div>
 
             <Button
               type="button"
               onClick={handleSaveAfterDiagnostic}
-              className="w-full max-w-md mx-auto bg-brand hover:bg-[#0077ED] text-white"
+              className="w-full max-w-md mx-auto bg-brand hover:bg-brand-deep text-white"
             >
               <span className="truncate">Save After-Repair Diagnostic & Update Ticket</span>
             </Button>
@@ -1289,7 +1289,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   setPendingBeforeDiagAlertWo(null);
                   setDetailModalWo(woToInspect);
                 }}
-                className="w-full sm:w-auto flex-1 py-2.5 px-4 bg-brand hover:bg-[#0077ED] text-white font-extrabold rounded-xl text-xs flex items-center justify-center space-x-2 transition-all shadow-md active:scale-95 cursor-pointer"
+                className="w-full sm:w-auto flex-1 py-2.5 px-4 bg-brand hover:bg-brand-deep text-white font-extrabold rounded-xl text-xs flex items-center justify-center space-x-2 transition-all shadow-md active:scale-95 cursor-pointer"
               >
                 <ShieldCheck className="w-4 h-4" />
                 <span>Complete Intake Diagnostic First</span>
@@ -1379,7 +1379,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   setPendingDiagAlertWo(null);
                   setDetailModalWo(woToInspect);
                 }}
-                className="w-full sm:w-auto flex-1 py-2.5 px-4 bg-brand hover:bg-[#0077ED] text-white font-extrabold rounded-xl text-xs flex items-center justify-center space-x-2 transition-all shadow-md active:scale-95 cursor-pointer"
+                className="w-full sm:w-auto flex-1 py-2.5 px-4 bg-brand hover:bg-brand-deep text-white font-extrabold rounded-xl text-xs flex items-center justify-center space-x-2 transition-all shadow-md active:scale-95 cursor-pointer"
               >
                 <ShieldCheck className="w-4 h-4" />
                 <span>Complete Diagnostic First</span>

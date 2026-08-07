@@ -229,7 +229,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-sm font-bold text-ink flex items-center space-x-2">
-                <RotateCcw className="w-4 h-4 text-[#AF52DE]" />
+                <RotateCcw className="w-4 h-4 text-purple" />
                 <span className="hidden sm:inline">Defective Return Merchandise Authorizations (RMA)</span>
                 <span className="sm:hidden">Defective RMA Returns</span>
               </h2>
@@ -260,7 +260,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
               <Button
                 type="button"
                 onClick={() => setShowNewRmaModal(true)}
-                className="bg-[#AF52DE] hover:bg-purple-600 text-white flex items-center space-x-1.5"
+                className="bg-purple hover:bg-purple-600 text-white flex items-center space-x-1.5"
               >
                 <Plus className="w-4 h-4" />
                 <span>Flag Defective RMA</span>
@@ -286,7 +286,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                       <p className="font-mono font-bold text-brand">{rma.rmaNumber}</p>
                       <p className="text-xs text-muted">{new Date(rma.createdAt).toLocaleDateString()}</p>
                     </div>
-                    <span className={`inline-flex items-center gap-1.5 text-xs font-extrabold px-2.5 py-1 rounded-lg border shadow-2xs ${rma.status === 'Credit Approved' ? 'bg-[#EAF8ED] text-[#15803D] border-success/30' : rma.status === 'Shipped to Vendor' ? 'bg-brand-soft text-brand border-brand/25' : 'bg-slate-100 text-slate-700 border-slate-200'}`}>
+                    <span className={`inline-flex items-center gap-1.5 text-xs font-extrabold px-2.5 py-1 rounded-lg border shadow-2xs ${rma.status === 'Credit Approved' ? 'bg-success/10 text-success-deep border-success/30' : rma.status === 'Shipped to Vendor' ? 'bg-brand-soft text-brand border-brand/25' : 'bg-slate-100 text-slate-700 border-slate-200'}`}>
                       <span>{rma.status}</span>
                     </span>
                   </div>
@@ -298,7 +298,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                         <span className="w-1.5 h-1.5 rounded-full bg-brand" />
                         <span>Tier: {rma.partQuality}</span>
                       </span>
-                      <span className="font-bold text-[#AF52DE]">{rma.supplierName}</span>
+                      <span className="font-bold text-purple">{rma.supplierName}</span>
                     </div>
                   </div>
 
@@ -307,11 +307,11 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                   <div className="flex items-center justify-between gap-2 border-t border-line pt-2">
                     <span className="font-mono text-xs text-muted">{rma.trackingNumber || 'No tracking yet'}</span>
                     {rma.vendorCreditAmount ? (
-                      <span className="text-xs text-[#15803D] font-extrabold">+{rma.vendorCreditAmount.toLocaleString()} MMK Credit</span>
+                      <span className="text-xs text-success-deep font-extrabold">+{rma.vendorCreditAmount.toLocaleString()} MMK Credit</span>
                     ) : rma.status === 'Shipped to Vendor' ? (
                       <Button
                         onClick={() => onUpdateRmaStatus(rma.id, 'Credit Approved', rma.unitCost * rma.quantity)}
-                        className="px-2.5 py-1.5 bg-[#EAF8ED] hover:bg-emerald-100 text-[#15803D] border border-success/20 text-xs font-bold rounded-lg cursor-pointer"
+                        className="px-2.5 py-1.5 bg-success/10 hover:bg-emerald-100 text-success-deep border border-success/20 text-xs font-bold rounded-lg cursor-pointer"
                       >
                         Approve Credit
                       </Button>
@@ -350,7 +350,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                       </span>
                     </td>
 
-                    <td className="p-3.5 font-bold text-[#AF52DE]">{rma.supplierName}</td>
+                    <td className="p-3.5 font-bold text-purple">{rma.supplierName}</td>
 
                     <td className="p-3.5 text-ink max-w-xs text-xs hidden lg:table-cell">{rma.reason}</td>
 
@@ -360,14 +360,14 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
 
                     <td className="p-3.5">
                       <span className={`inline-flex items-center gap-1.5 text-xs font-extrabold px-2.5 py-1 rounded-lg border shadow-2xs ${
-                        rma.status === 'Credit Approved' ? 'bg-[#EAF8ED] text-[#15803D] border-success/30' :
+                        rma.status === 'Credit Approved' ? 'bg-success/10 text-success-deep border-success/30' :
                         rma.status === 'Shipped to Vendor' ? 'bg-brand-soft text-brand border-brand/25' :
                         'bg-slate-100 text-slate-700 border-slate-200'
                       }`}>
                         <span>{rma.status}</span>
                       </span>
                       {rma.vendorCreditAmount && (
-                        <p className="text-xs text-[#15803D] font-extrabold mt-1">+{rma.vendorCreditAmount.toLocaleString()} MMK Credit</p>
+                        <p className="text-xs text-success-deep font-extrabold mt-1">+{rma.vendorCreditAmount.toLocaleString()} MMK Credit</p>
                       )}
                     </td>
 
@@ -375,7 +375,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                       {rma.status === 'Shipped to Vendor' && (
                         <Button
                           onClick={() => onUpdateRmaStatus(rma.id, 'Credit Approved', rma.unitCost * rma.quantity)}
-                          className="px-2 py-1 bg-[#EAF8ED] hover:bg-emerald-100 text-[#15803D] border border-success/20 text-xs font-bold rounded"
+                          className="px-2 py-1 bg-success/10 hover:bg-emerald-100 text-success-deep border border-success/20 text-xs font-bold rounded"
                         >
                           Approve Credit
                         </Button>
@@ -421,7 +421,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
 
                 <div className="flex justify-between items-center pt-2 border-t border-line font-bold">
                   <span className="text-muted">Total PO Value:</span>
-                  <span className="text-[#15803D] font-mono text-sm">{po.totalCost.toLocaleString()} MMK</span>
+                  <span className="text-success-deep font-mono text-sm">{po.totalCost.toLocaleString()} MMK</span>
                 </div>
               </div>
             ))}
@@ -567,7 +567,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
               <Button
                 type="button"
                 onClick={handleCreateRma}
-                className="bg-[#AF52DE] hover:bg-purple-600 text-white"
+                className="bg-purple hover:bg-purple-600 text-white"
               >
                 Submit Defective RMA
               </Button>

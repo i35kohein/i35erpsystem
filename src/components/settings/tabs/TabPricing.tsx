@@ -59,7 +59,7 @@ const PricingTab: React.FC<PricingTabProps> = ({ formData, setFormData, setActiv
             {/* Default Discount */}
             <div className="space-y-1.5">
               <label className="font-extrabold text-ink flex items-center space-x-1.5">
-                <Tag className="w-3.5 h-3.5 text-[#AF52DE]" />
+                <Tag className="w-3.5 h-3.5 text-purple" />
                 <span>Default Labor Discount (%)</span>
               </label>
               <Input

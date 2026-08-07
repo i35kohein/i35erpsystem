@@ -124,7 +124,7 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ currentPaymentMethods, handleTo
                         className={`p-4 rounded-2xl border transition-all ${
                           method.enabled
                             ? 'bg-white border-line shadow-2xs hover:border-brand'
-                            : 'bg-[#F8F9FA] border-line opacity-60'
+                            : 'bg-surface border-line opacity-60'
                         }`}
                       >
                         <div className="flex items-center justify-between pb-3 border-b border-surface">
