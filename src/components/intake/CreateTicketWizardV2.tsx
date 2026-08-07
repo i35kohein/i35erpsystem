@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, lazy, Suspense } from 'react';
 import {
   ArrowLeft, ArrowRight, Camera, Check, CheckCircle2, ChevronDown, ClipboardList,
   Search, ShieldCheck, Smartphone, Sparkles, Wrench, X, Zap, MapPin, AlertCircle,
@@ -6,7 +6,9 @@ import {
 import { Button, Input } from '../ui';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
-import { CameraQrScannerModal } from '../common/CameraQrScannerModal';
+// Camera/barcode scanner is code-split: html5-qrcode (~340KB) only downloads
+// when the scanner is actually opened, not when the intake form loads.
+const CameraQrScannerModal = lazy(() => import('../common/CameraQrScannerModal').then((m) => ({ default: m.CameraQrScannerModal })));
 import { WorkOrder, Customer, SystemSettings, WorkOrderLineItem } from '../../types';
 import { getAvailableColorsForModel, WARRANTY_OPTIONS, getRealisticColorStyle } from './deviceData';
 import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
@@ -680,17 +682,21 @@ export const CreateTicketWizardV2: React.FC<CreateTicketWizardV2Props> = ({
         selectedDevice={deviceModel}
         onSelectDevice={(m) => { setDeviceModel(m); setDeviceColor(''); setSelectedRepairs([]); setIsModelModalOpen(false); }}
       />
-      <CameraQrScannerModal
-        isOpen={isScannerOpen}
-        onClose={() => setIsScannerOpen(false)}
-        onScanSuccess={(text) => {
-          const digits = text.replace(/\D/g, '');
-          if (digits.length === 15) setImei(digits.slice(0, 15));
-          else setSerialNumber(text.toUpperCase());
-          setIsScannerOpen(false);
-        }}
-        title="Scan Device Barcode / IMEI"
-      />
+      {isScannerOpen && (
+        <Suspense fallback={null}>
+          <CameraQrScannerModal
+            isOpen={isScannerOpen}
+            onClose={() => setIsScannerOpen(false)}
+            onScanSuccess={(text) => {
+              const digits = text.replace(/\D/g, '');
+              if (digits.length === 15) setImei(digits.slice(0, 15));
+              else setSerialNumber(text.toUpperCase());
+              setIsScannerOpen(false);
+            }}
+            title="Scan Device Barcode / IMEI"
+          />
+        </Suspense>
+      )}
     </div>
   );
 };

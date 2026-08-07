@@ -89,15 +89,18 @@ const PriceCatalogModule = lazy(() => import('./components/prices/PriceCatalogMo
 const SystemManagementSettingsModule = lazy(() => import('./components/settings/SystemManagementSettingsModule').then((m) => ({ default: m.SystemManagementSettingsModule })));
 const CustomerFacingWebPortal = lazy(() => import('./components/portal/CustomerFacingWebPortal').then((m) => ({ default: m.CustomerFacingWebPortal })));
 // Small/modals stay eager-loaded (used in the root render).
-import { AiDiagnosticAssistantModal } from './components/ai/AiDiagnosticAssistantModal';
-import { DeviceTagPrinterModal } from './components/common/DeviceTagPrinterModal';
-import { RecycleBinModal } from './components/common/RecycleBinModal';
-import { CompletedDeviceFollowUpModule } from './components/followup/CompletedDeviceFollowUpModule';
-import { ShopFinancePlModule } from './components/finance/ShopFinancePlModule';
+// Modal / tab modules below are also code-split (React.lazy) so their chunks
+// only download when actually opened (AI chat, tag printing, recycle bin,
+// Cmd+K search, follow-up & finance tabs).
+const AiDiagnosticAssistantModal = lazy(() => import('./components/ai/AiDiagnosticAssistantModal').then((m) => ({ default: m.AiDiagnosticAssistantModal })));
+const DeviceTagPrinterModal = lazy(() => import('./components/common/DeviceTagPrinterModal').then((m) => ({ default: m.DeviceTagPrinterModal })));
+const RecycleBinModal = lazy(() => import('./components/common/RecycleBinModal').then((m) => ({ default: m.RecycleBinModal })));
+const CompletedDeviceFollowUpModule = lazy(() => import('./components/followup/CompletedDeviceFollowUpModule').then((m) => ({ default: m.CompletedDeviceFollowUpModule })));
+const ShopFinancePlModule = lazy(() => import('./components/finance/ShopFinancePlModule').then((m) => ({ default: m.ShopFinancePlModule })));
 import { usePriceCatalog } from './hooks/usePriceCatalog';
 import { useIsIpad } from './hooks/useIsIpad';
 import { OfflineSyncStatusBadge } from './components/common/OfflineSyncStatusBadge';
-import { GlobalSearchModal } from './components/common/GlobalSearchModal';
+const GlobalSearchModal = lazy(() => import('./components/common/GlobalSearchModal').then((m) => ({ default: m.GlobalSearchModal })));
 import { HoverTooltip } from './components/common/HoverTooltip';
 import { registerToastHandler, unregisterToastHandler } from './lib/toast';
 import { LoginPage } from './components/auth/LoginPage';
@@ -2570,15 +2573,19 @@ export default function App() {
         </main>
       </div>
 
-      {/* Global Search Modal (Cmd/Ctrl+K) */}
-      <GlobalSearchModal
-        open={isGlobalSearchOpen}
-        onClose={() => setIsGlobalSearchOpen(false)}
-        workOrders={workOrders}
-        parts={parts}
-        customers={rosterCustomers}
-        onNavigate={(tab) => setActiveTab(tab)}
-      />
+      {/* Global Search Modal (Cmd/Ctrl+K) — mounted only when open so the chunk loads on demand */}
+      {isGlobalSearchOpen && (
+        <Suspense fallback={null}>
+          <GlobalSearchModal
+            open={isGlobalSearchOpen}
+            onClose={() => setIsGlobalSearchOpen(false)}
+            workOrders={workOrders}
+            parts={parts}
+            customers={rosterCustomers}
+            onNavigate={(tab) => setActiveTab(tab)}
+          />
+        </Suspense>
+      )}
 
       {/* AI FAB: available from every tab & every screen size. On mobile it sits
           above the bottom nav / POS checkout bar; on desktop it's a bottom-right
@@ -2595,43 +2602,55 @@ export default function App() {
         </Button>
       )}
 
-      {/* AI Diagnostic Assistant Modal */}
-      <AiDiagnosticAssistantModal
-        isOpen={isAiAssistantOpen}
-        onClose={() => setIsAiAssistantOpen(false)}
-        workOrders={activeWorkOrders}
-        parts={parts}
-        customers={rosterCustomers}
-        technicians={technicians}
-        suppliers={suppliers}
-        technicianPayouts={technicianPayouts}
-        priceCatalog={priceCatalog.catalog}
-        systemSettings={systemSettings}
-        currentUserId={currentUser?.id}
-        onOpenAiSettings={() => {
-          setIsAiAssistantOpen(false);
-          setSettingsInitialSubTab('ai');
-          setActiveTab('settings');
-        }}
-      />
+      {/* AI Diagnostic Assistant Modal — mounted only when open */}
+      {isAiAssistantOpen && (
+        <Suspense fallback={null}>
+          <AiDiagnosticAssistantModal
+            isOpen={isAiAssistantOpen}
+            onClose={() => setIsAiAssistantOpen(false)}
+            workOrders={activeWorkOrders}
+            parts={parts}
+            customers={rosterCustomers}
+            technicians={technicians}
+            suppliers={suppliers}
+            technicianPayouts={technicianPayouts}
+            priceCatalog={priceCatalog.catalog}
+            systemSettings={systemSettings}
+            currentUserId={currentUser?.id}
+            onOpenAiSettings={() => {
+              setIsAiAssistantOpen(false);
+              setSettingsInitialSubTab('ai');
+              setActiveTab('settings');
+            }}
+          />
+        </Suspense>
+      )}
 
-      {/* Printable Device Tag Sticker Modal */}
-      <DeviceTagPrinterModal
-        workOrder={printableTagWo}
-        systemSettings={systemSettings}
-        onClose={() => setPrintableTagWo(null)}
-      />
+      {/* Printable Device Tag Sticker Modal — mounted only when printing */}
+      {printableTagWo && (
+        <Suspense fallback={null}>
+          <DeviceTagPrinterModal
+            workOrder={printableTagWo}
+            systemSettings={systemSettings}
+            onClose={() => setPrintableTagWo(null)}
+          />
+        </Suspense>
+      )}
 
-      {/* Recycle Bin & Archive Modal */}
-      <RecycleBinModal
-        isOpen={isRecycleBinOpen}
-        onClose={() => setIsRecycleBinOpen(false)}
-        archivedWorkOrders={archivedWorkOrders}
-        onRestoreWorkOrder={handleRestoreWorkOrder}
-        onPermanentDeleteWorkOrder={handlePermanentDeleteWorkOrder}
-        onRestoreAll={handleRestoreAllWorkOrders}
-        onEmptyRecycleBin={handleEmptyRecycleBin}
-      />
+      {/* Recycle Bin & Archive Modal — mounted only when open */}
+      {isRecycleBinOpen && (
+        <Suspense fallback={null}>
+          <RecycleBinModal
+            isOpen={isRecycleBinOpen}
+            onClose={() => setIsRecycleBinOpen(false)}
+            archivedWorkOrders={archivedWorkOrders}
+            onRestoreWorkOrder={handleRestoreWorkOrder}
+            onPermanentDeleteWorkOrder={handlePermanentDeleteWorkOrder}
+            onRestoreAll={handleRestoreAllWorkOrders}
+            onEmptyRecycleBin={handleEmptyRecycleBin}
+          />
+        </Suspense>
+      )}
 
       {/* Mobile pipeline filter drawer — all navbar filters in one right panel */}
             {/* Mobile filter drawer — per-tab filters in one right panel (dropdowns live here on mobile) */}

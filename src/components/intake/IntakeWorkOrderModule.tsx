@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { DateFilterState, filterByDateRange } from '../common/DateFilterSelector';
 
 import { timeAgoShort } from '../../utils/timeAgo';
@@ -6,7 +6,9 @@ import { StatusBadge } from '../common/StatusBadge';
 import { PriorityBadge } from '../common/PriorityBadge';
 import { useIsIpad } from '../../hooks/useIsIpad';
 
-import { CameraQrScannerModal } from '../common/CameraQrScannerModal';
+// Camera/barcode scanner is code-split: html5-qrcode (~340KB) only downloads
+// when the scanner is actually opened, not when the intake module loads.
+const CameraQrScannerModal = lazy(() => import('../common/CameraQrScannerModal').then((m) => ({ default: m.CameraQrScannerModal })));
 import { ConfirmDeleteModal } from '../common/ConfirmDeleteModal';
 import { Button } from '../ui';
 import { TicketDetailInspectorModal } from '../common/TicketDetailInspectorModal';
@@ -574,23 +576,27 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
         onClose={() => setTicketToDelete(null)}
       />
 
-      {/* Camera QR & Barcode Scanner Modal */}
-      <CameraQrScannerModal
-        isOpen={isCameraScannerOpen}
-        onClose={() => setIsCameraScannerOpen(false)}
-        onScanSuccess={(scannedText) => {
-          // Pass the scan through to the intake form instead of dropping it
-          // (15 digits = IMEI, anything else = serial, same rule as the form).
-          const clean = scannedText.trim();
-          if (onNavigateToCreateTicket) {
-            onNavigateToCreateTicket(
-              /^\d{15}$/.test(clean)
-                ? { imei: clean }
-                : { serialNumber: clean.toUpperCase() }
-            );
-          }
-        }}
-      />
+      {/* Camera QR & Barcode Scanner Modal — mounted only while scanning */}
+      {isCameraScannerOpen && (
+        <Suspense fallback={null}>
+          <CameraQrScannerModal
+            isOpen={isCameraScannerOpen}
+            onClose={() => setIsCameraScannerOpen(false)}
+            onScanSuccess={(scannedText) => {
+              // Pass the scan through to the intake form instead of dropping it
+              // (15 digits = IMEI, anything else = serial, same rule as the form).
+              const clean = scannedText.trim();
+              if (onNavigateToCreateTicket) {
+                onNavigateToCreateTicket(
+                  /^\d{15}$/.test(clean)
+                    ? { imei: clean }
+                    : { serialNumber: clean.toUpperCase() }
+                );
+              }
+            }}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };

@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
-import { CameraQrScannerModal } from '../common/CameraQrScannerModal';
+// Camera/barcode scanner is code-split: html5-qrcode (~340KB) only downloads
+// when the scanner is actually opened, not when the intake form loads.
+const CameraQrScannerModal = lazy(() => import('../common/CameraQrScannerModal').then((m) => ({ default: m.CameraQrScannerModal })));
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 import { useIsIpad } from '../../hooks/useIsIpad';
 import {
@@ -1700,19 +1702,23 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           </div>
         </div>
       )}
-      {/* MODAL 5: Camera QR / Barcode Scanner */}
-      <CameraQrScannerModal
-        isOpen={isCameraScannerOpen}
-        onClose={() => setIsCameraScannerOpen(false)}
-        onScanSuccess={(scannedText) => {
-          const clean = scannedText.trim();
-          if (/^\d{15}$/.test(clean)) {
-            setImei(clean);
-          } else {
-            setSerialNumber(clean.toUpperCase());
-          }
-        }}
-      />
+      {/* MODAL 5: Camera QR / Barcode Scanner — mounted only while scanning */}
+      {isCameraScannerOpen && (
+        <Suspense fallback={null}>
+          <CameraQrScannerModal
+            isOpen={isCameraScannerOpen}
+            onClose={() => setIsCameraScannerOpen(false)}
+            onScanSuccess={(scannedText) => {
+              const clean = scannedText.trim();
+              if (/^\d{15}$/.test(clean)) {
+                setImei(clean);
+              } else {
+                setSerialNumber(clean.toUpperCase());
+              }
+            }}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };
