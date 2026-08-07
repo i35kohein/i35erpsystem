@@ -2244,35 +2244,22 @@ export default function App() {
               )}
 
               {activeTab === 'create-ticket' && (
-                <div className="fixed inset-0 z-50">
-                  <div
-                    className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
-                    onClick={() => {
-                      setTicketPrefill(null);
-                      setActiveTab('intake');
-                    }}
-                  />
-                  <div className="absolute inset-y-0 right-0 w-full max-w-2xl xl:max-w-3xl bg-white shadow-2xl overflow-y-auto">
-                    <CreateTicketSoloPage
-                      embedded
-                      workOrders={workOrders}
-                      customers={rosterCustomers}
-                      technicians={technicians}
-                      systemSettings={systemSettings}
-                      priceCatalog={priceCatalog.catalog}
-                      prefill={ticketPrefill}
-                      onSaveWorkOrder={handleSaveWorkOrder}
-                      onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
-                      onOpenAiAssistant={() => setIsAiAssistantOpen(true)}
-                      onViewRepairTickets={() => {
-                        setTicketPrefill(null);
-                        setActiveTab('intake');
-                      }}
-                      onCancelEdit={handleCancelEdit}
-                      onContinueEditing={(wo) => setTicketPrefill({ editWorkOrder: wo })}
-                    />
-                  </div>
-                </div>
+                <CreateTicketSoloPage
+                  workOrders={workOrders}
+                  customers={rosterCustomers}
+                  technicians={technicians}
+                  systemSettings={systemSettings}
+                  priceCatalog={priceCatalog.catalog}
+                  prefill={ticketPrefill}
+                  onSaveWorkOrder={handleSaveWorkOrder}
+                  onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
+                  onOpenAiAssistant={() => setIsAiAssistantOpen(true)}
+                  onViewRepairTickets={() => {
+                    setTicketPrefill(null);
+                    setActiveTab('intake');
+                  }}
+                  onCancelEdit={handleCancelEdit}
+                />
               )}
 
               {activeTab === 'intake' && (
