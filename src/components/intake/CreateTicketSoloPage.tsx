@@ -1125,12 +1125,12 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           />
         </div>
 
-        {/* STEP 4B (Phase 4): 21-Point Repair Diagnostic Inspection with Comment Box & Dedicated Icons */}
+        {/* STEP 4B (Phase 4): 21-Point Post-Repair Hardware Inspection (QA-style UI) */}
         <div id="intake-diagnostics" className={`p-3 bg-surface rounded-xl border border-line space-y-2.5 scroll-mt-40 ${wizardMode && wizardStep !== 3 ? 'hidden' : ''}`}>
           <div className="flex items-center justify-between border-b border-line pb-2">
             <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
               <span className={`px-1.5 h-5 rounded-full bg-brand text-white flex items-center justify-center text-xs font-black ${!wizardMode ? 'hidden' : ''}`}>4B</span>
-              <span>21-Point Repair Diagnostic List</span>
+              <span>21-Point Post-Repair Hardware Inspection</span>
             </h3>
             <div className="flex items-center space-x-2">
               <span className="hidden md:inline-flex items-center space-x-1.5 text-xs font-bold">
@@ -1165,7 +1165,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-2.5 text-xs">
+          <div className="grid grid-cols-1 gap-2.5 text-xs sm:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4">
             {beforeDiagnostics.map((item, idx) => {
               const IconComp = getDiagnosticIcon(item.name);
 
@@ -1227,34 +1227,20 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                     </Button>
                   </div>
 
-                  {/* Diagnostic Comment Box — only for Fail (or when a note exists); 90% of comments are on failed items */}
-                  {(item.status === 'Fail' || (item.note || '').length > 0) ? (
-                    <div className="relative pt-1">
-                      <Input
-                        type="text"
-                        value={item.note || ''}
-                        onChange={(e) => {
-                          const updated = [...beforeDiagnostics];
-                          updated[idx].note = e.target.value;
-                          setBeforeDiagnostics(updated);
-                        }}
-                        placeholder={`Comment for ${item.name}...`}
-                        className="w-full bg-surface border border-line rounded-lg px-2.5 py-1.5 text-xs text-ink focus:bg-white focus:border-brand focus:outline-none"
-                      />
-                    </div>
-                  ) : (
-                    <Button
-                      type="button"
-                      onClick={() => {
+                  {/* Diagnostic Comment Box — always visible (QA 21-point style) */}
+                  <div className="relative pt-1">
+                    <Input
+                      type="text"
+                      value={item.note || ''}
+                      onChange={(e) => {
                         const updated = [...beforeDiagnostics];
-                        updated[idx].note = ' ';
+                        updated[idx].note = e.target.value;
                         setBeforeDiagnostics(updated);
                       }}
-                      className="pt-1 text-xs font-semibold text-muted hover:text-brand transition-colors"
-                    >
-                      + Add comment
-                    </Button>
-                  )}
+                      placeholder={`Comment for ${item.name}...`}
+                      className="w-full bg-surface border border-line rounded-lg px-2.5 py-1 text-xs text-ink focus:bg-white focus:border-brand focus:outline-none"
+                    />
+                  </div>
                 </div>
               );
             })}
