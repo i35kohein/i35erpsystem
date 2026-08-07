@@ -789,7 +789,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           type="button"
           id="intake-device"
           onClick={() => setIsModelModalOpen(true)}
-          className={`w-full text-left p-3 bg-surface/80 rounded-xl border border-line space-y-2.5 cursor-pointer hover:border-brand/50 hover:bg-surface transition-all group scroll-mt-40 flex flex-col ${wizardMode && wizardStep !== 1 ? 'hidden' : ''}`}
+          className={`w-full text-left p-3 bg-surface/80 rounded-xl border border-line space-y-2.5 cursor-pointer hover:border-brand/50 hover:bg-surface transition-all group scroll-mt-40 flex flex-col h-auto items-stretch justify-start ${wizardMode && wizardStep !== 1 ? 'hidden' : ''}`}
         >
           <div className="flex items-center justify-between border-b border-line pb-2">
             <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
@@ -834,7 +834,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             <Button
               type="button"
               onClick={() => setIsColorModalOpen(true)}
-              className="w-full min-w-0 text-left p-3 bg-surface rounded-xl border border-line space-y-2.5 cursor-pointer hover:border-brand/50 transition-all group flex flex-col"
+              className="w-full min-w-0 text-left p-3 bg-surface rounded-xl border border-line space-y-2.5 cursor-pointer hover:border-brand/50 transition-all group flex flex-col h-auto items-stretch justify-start"
             >
               <div className="flex items-center justify-between border-b border-line pb-2.5">
                 <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
@@ -876,7 +876,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           <Button
             type="button"
             onClick={() => setIsWarrantyModalOpen(true)}
-            className="w-full min-w-0 text-left p-3 bg-surface rounded-xl border border-line space-y-2.5 cursor-pointer hover:border-brand/50 transition-all group flex flex-col"
+            className="w-full min-w-0 text-left p-3 bg-surface rounded-xl border border-line space-y-2.5 cursor-pointer hover:border-brand/50 transition-all group flex flex-col h-auto items-stretch justify-start"
           >
             <div className="flex items-center justify-between border-b border-line pb-2.5">
               <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
