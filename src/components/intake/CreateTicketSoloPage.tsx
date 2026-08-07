@@ -18,7 +18,6 @@ import {
   CheckSquare,
   ShieldCheck,
   ArrowLeft,
-  ArrowRight,
   List,
   MapPin,
   Monitor, 
@@ -134,10 +133,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
 }) => {
   const [createdTicket, setCreatedTicket] = useState<WorkOrder | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
-  // Wizard mode: one step at a time (Customer → Device → Repairs → Review)
-  const [wizardMode, setWizardMode] = useState(embedded); // drawer → wizard-first (3-step quick intake)
   const isIpad = useIsIpad();
-  const [wizardStep, setWizardStep] = useState(0);
   const editWorkOrder = prefill?.editWorkOrder ?? null;
   const isEditMode = !!editWorkOrder;
 
@@ -653,39 +649,13 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         {/* Stepper removed per Ko Hein 2026-08-05 — jump anchors (intake-customer/device/repairs/diagnostics)
            are kept for validation-error scrolling; scroll-mt-40 still applies. */}
 
-        {/* Form mode toggle: Standard (all sections) vs Wizard (step by step) */}
-        <div className="flex items-center justify-between gap-3 rounded-xl border border-line bg-white p-2.5 shadow-2xs">
-          <div className="min-w-0">
-            <p className="text-xs font-extrabold text-ink">Ticket Form Mode</p>
-            <p className="text-xs text-muted truncate">
-              {wizardMode ? 'One step at a time — press Next to continue' : 'All sections visible on one page'}
-            </p>
-          </div>
-          <div className="flex shrink-0 items-center rounded-lg border border-line bg-surface p-0.5">
-            <Button
-              type="button"
-              onClick={() => { setWizardMode(false); setWizardStep(0); }}
-              className={`rounded-md px-3 py-1.5 text-xs font-extrabold transition-colors cursor-pointer ${!wizardMode ? 'bg-white text-brand shadow-xs' : 'text-muted hover:text-ink'}`}
-            >
-              Standard
-            </Button>
-            <Button
-              type="button"
-              onClick={() => setWizardMode(true)}
-              className={`rounded-md px-3 py-1.5 text-xs font-extrabold transition-colors cursor-pointer ${wizardMode ? 'bg-white text-brand shadow-xs' : 'text-muted hover:text-ink'}`}
-            >
-              Wizard
-            </Button>
-          </div>
-        </div>
-
         {/* Full page keeps the 2-column layout; the DRAWER (embedded) stacks
             sections full-width — nested 2-col grids inside a 672px drawer
             squeezed/clipped cards (2026-08-06 diagnosis P1-5). */}
         <div className={`space-y-3 ${embedded ? '' : 'lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0'}`}>
 
         {/* STEP 1: Customer Information */}
-        <div id="intake-customer" className={`p-3 bg-surface rounded-xl border border-line space-y-2.5 scroll-mt-40 ${wizardMode && wizardStep !== 0 ? 'hidden' : ''}`}>
+        <div id="intake-customer" className={`p-3 bg-surface rounded-xl border border-line space-y-2.5 scroll-mt-40 `}>
           <div className="flex items-center justify-between border-b border-line pb-2.5">
             <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
               <span className="w-6 h-6 rounded-full bg-brand text-white flex items-center justify-center text-xs font-black">1</span>
@@ -789,7 +759,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           type="button"
           id="intake-device"
           onClick={() => setIsModelModalOpen(true)}
-          className={`w-full text-left p-3 bg-surface/80 rounded-xl border border-line space-y-2.5 cursor-pointer hover:border-brand/50 hover:bg-surface transition-all group scroll-mt-40 flex flex-col h-auto items-stretch justify-start ${wizardMode && wizardStep !== 1 ? 'hidden' : ''}`}
+          className={`w-full text-left p-3 bg-surface/80 rounded-xl border border-line space-y-2.5 cursor-pointer hover:border-brand/50 hover:bg-surface transition-all group scroll-mt-40 flex flex-col h-auto items-stretch justify-start `}
         >
           <div className="flex items-center justify-between border-b border-line pb-2">
             <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
@@ -828,7 +798,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         </Button>
 
         {/* STEP 3 & STEP 4: Color (REAL DEVICE COLOR BIG CIRCLE WITH SHADOW) & Warranty */}
-        <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 ${wizardMode && wizardStep < 1 ? 'hidden' : ''}`}>
+        <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 `}>
           {/* STEP 2b: Real Official Color Selection — only after a model is chosen */}
           {deviceModel ? (
             <Button
@@ -838,7 +808,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             >
               <div className="flex items-center justify-between border-b border-line pb-2.5">
                 <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
-                  <span className={`w-6 h-6 rounded-full bg-brand/15 text-brand-deep flex items-center justify-center text-xs font-black group-hover:scale-105 transition-transform border border-brand/30 ${!wizardMode ? 'hidden' : ''}`}>2a</span>
+                  <span className={`w-6 h-6 rounded-full bg-brand/15 text-brand-deep flex items-center justify-center text-xs font-black group-hover:scale-105 transition-transform border border-brand/30 hidden`}>2a</span>
                   <span className="text-xs">Realistic Color ({availableRealColors.length} Palette)</span>
                 </h3>
                 <span className="text-xs font-bold text-brand group-hover:underline">Change</span>
@@ -859,7 +829,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             <div className="w-full p-3 bg-surface rounded-xl border border-line space-y-2.5 flex flex-col">
               <div className="flex items-center justify-between border-b border-line pb-2.5">
                 <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
-                  <span className={`w-6 h-6 rounded-full bg-brand/15 text-brand-deep flex items-center justify-center text-xs font-black border border-brand/30 ${!wizardMode ? 'hidden' : ''}`}>2a</span>
+                  <span className={`w-6 h-6 rounded-full bg-brand/15 text-brand-deep flex items-center justify-center text-xs font-black border border-brand/30 hidden`}>2a</span>
                   <span className="text-xs">Realistic Color (0 Palette)</span>
                 </h3>
               </div>
@@ -880,7 +850,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           >
             <div className="flex items-center justify-between border-b border-line pb-2.5">
               <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
-                <span className={`w-6 h-6 rounded-full bg-brand/15 text-brand-deep flex items-center justify-center text-xs font-black group-hover:scale-105 transition-transform border border-brand/30 ${!wizardMode ? 'hidden' : ''}`}>2b</span>
+                <span className={`w-6 h-6 rounded-full bg-brand/15 text-brand-deep flex items-center justify-center text-xs font-black group-hover:scale-105 transition-transform border border-brand/30 hidden`}>2b</span>
                 <span className="text-xs">Warranty Policy</span>
               </h3>
               <span className="text-xs font-bold text-brand group-hover:underline">Change</span>
@@ -899,7 +869,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         </div>
 
         {/* Serial / IMEI Input */}
-        <div className={`p-3 bg-surface/80 rounded-xl border border-line space-y-2.5 ${wizardMode && wizardStep < 1 ? 'hidden' : ''}`}>
+        <div className={`p-3 bg-surface/80 rounded-xl border border-line space-y-2.5 `}>
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-2">
             <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2 min-w-0">
               <Smartphone className="w-4 h-4 text-brand shrink-0" />
@@ -975,7 +945,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         </div>
 
         {/* STEP 3 (Phase 3): Choose Available Repairs (MMK CURRENCY) */}
-        <div id="intake-repairs" className={`p-3 bg-surface/80 rounded-xl border border-line space-y-2.5 scroll-mt-40 ${wizardMode && wizardStep !== 2 ? 'hidden' : ''}`}>
+        <div id="intake-repairs" className={`p-3 bg-surface/80 rounded-xl border border-line space-y-2.5 scroll-mt-40 `}>
           <div className="flex items-center justify-between border-b border-line pb-2">
             <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
               <span className="w-5 h-5 rounded-full bg-brand text-white flex items-center justify-center text-xs">3</span>
@@ -1108,9 +1078,9 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         </div>
 
         {/* STEP 4A (Phase 4): Intake Notes */}
-        <div className={`p-3 bg-surface rounded-xl border border-line-strong space-y-2.5 ${wizardMode && wizardStep < 3 ? 'hidden' : ''}`}>
+        <div className={`p-3 bg-surface rounded-xl border border-line-strong space-y-2.5 `}>
           <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2 border-b border-line-strong pb-2">
-            <span className={`px-1.5 h-5 rounded-full bg-brand text-white flex items-center justify-center text-xs font-black ${!wizardMode ? 'hidden' : ''}`}>4A</span>
+            <span className={`px-1.5 h-5 rounded-full bg-brand text-white flex items-center justify-center text-xs font-black hidden`}>4A</span>
             <span>Intake Notes & Customer Symptoms</span>
           </h3>
 
@@ -1126,10 +1096,10 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         </div>
 
         {/* STEP 4B (Phase 4): 21-Point Post-Repair Hardware Inspection (QA-style UI) */}
-        <div id="intake-diagnostics" className={`p-3 bg-surface rounded-xl border border-line space-y-2.5 scroll-mt-40 ${wizardMode && wizardStep !== 3 ? 'hidden' : ''}`}>
+        <div id="intake-diagnostics" className={`p-3 bg-surface rounded-xl border border-line space-y-2.5 scroll-mt-40 `}>
           <div className="flex items-center justify-between border-b border-line pb-2">
             <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
-              <span className={`px-1.5 h-5 rounded-full bg-brand text-white flex items-center justify-center text-xs font-black ${!wizardMode ? 'hidden' : ''}`}>4B</span>
+              <span className={`px-1.5 h-5 rounded-full bg-brand text-white flex items-center justify-center text-xs font-black hidden`}>4B</span>
               <span>21-Point Post-Repair Hardware Inspection</span>
             </h3>
             <div className="flex items-center space-x-2">
@@ -1248,9 +1218,9 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         </div>
 
         {/* STEP 4C (Phase 4): Before-Repair Condition Photos */}
-        <div className={`p-3 bg-surface rounded-xl border border-line space-y-2.5 ${wizardMode && wizardStep !== 3 ? 'hidden' : ''}`}>
+        <div className={`p-3 bg-surface rounded-xl border border-line space-y-2.5 `}>
           <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2 border-b border-line pb-2">
-            <span className={`px-1.5 h-5 rounded-full bg-brand text-white flex items-center justify-center text-xs font-black ${!wizardMode ? 'hidden' : ''}`}>4C</span>
+            <span className={`px-1.5 h-5 rounded-full bg-brand text-white flex items-center justify-center text-xs font-black hidden`}>4C</span>
             <span>Before-Repair Condition Photos</span>
           </h3>
 
@@ -1309,27 +1279,6 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         {/* Spacer so the sticky bar never covers the content above it at full scroll */}
         <div className="h-20 shrink-0" aria-hidden="true" />
 
-        {/* Wizard step indicator */}
-        {wizardMode && (
-          <div className="flex items-center justify-between gap-2 rounded-xl border border-brand/20 bg-brand-soft p-2.5">
-            {['Customer', 'Device', 'Repairs', 'Review'].map((label, idx) => (
-              <Button
-                key={label}
-                type="button"
-                onClick={() => setWizardStep(idx)}
-                className={`flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-extrabold transition-colors cursor-pointer ${
-                  wizardStep === idx ? 'bg-brand text-white shadow-xs' : 'text-brand hover:bg-white'
-                }`}
-              >
-                <span className={`flex h-4 w-4 items-center justify-center rounded-full text-xs font-black ${wizardStep === idx ? 'bg-white/20' : 'bg-white border border-brand/30'}`}>
-                  {idx + 1}
-                </span>
-                <span className="hidden sm:inline">{label}</span>
-              </Button>
-            ))}
-          </div>
-        )}
-
         {/* Sticky Action Bar — live ticket summary + register, always reachable on desktop */}
         <div className={`sticky bottom-0 z-20 ${embedded ? 'rounded-b-none' : '-mx-4 -mb-4 mt-1 rounded-b-xl'} bg-white border-t border-line px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-6px_16px_rgba(0,0,0,0.06)]`}>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
@@ -1360,67 +1309,6 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 </div>
               </div>
             )}
-            {wizardMode && (
-              <div className="flex w-full sm:w-auto items-center gap-2">
-                {embedded && wizardStep === 0 && (
-                  <Button
-                    type="button"
-                    onClick={handleRegisterDevice}
-                    disabled={isRegistering}
-                    variant="secondary"
-                    className="shrink-0 border border-brand/30 bg-brand-soft text-brand font-black"
-                    style={{ marginRight: '2px' }}
-                    title="Create ticket with just customer, device and fault — add repairs later"
-                  >
-                    {isRegistering ? (
-                      <span className="w-4 h-4 border-2 border-brand/40 border-t-brand rounded-full animate-spin" />
-                    ) : (
-                      <><Zap className="w-4 h-4" /><span>Quick Create</span></>
-                    )}
-                  </Button>
-                )}
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setWizardStep((step) => Math.max(0, step - 1))}
-                  disabled={wizardStep === 0}
-                  className="shrink-0"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  <span>Back</span>
-                </Button>
-                {wizardStep < 3 ? (
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      if (wizardStep === 0 && (!customerName.trim() || !customerPhone.trim())) {
-                        toast.error('Enter customer name and phone to continue.', 'Step 1 Required');
-                        return;
-                      }
-                      setWizardStep((step) => Math.min(3, step + 1));
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }}
-                    className="flex-1 h-10 sm:flex-none sm:min-w-40 bg-brand hover:bg-brand-deep text-white font-black"
-                  >
-                    Next <ArrowRight className="w-4 h-4" />
-                  </Button>
-                ) : (
-                  <Button
-                    type="button"
-                    onClick={handleRegisterDevice}
-                    disabled={isRegistering}
-                    className="flex-1 h-10 sm:flex-none bg-brand hover:bg-brand-deep text-white font-black"
-                  >
-                    {isRegistering ? (
-                      <span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                    ) : (
-                      <><CheckCircle2 className="w-5 h-5" /><span>Register Device</span></>
-                    )}
-                  </Button>
-                )}
-              </div>
-            )}
-            {!wizardMode && (
             <Button
               type="button"
               onClick={handleRegisterDevice}
@@ -1444,7 +1332,6 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 </>
               )}
             </Button>
-            )}
           </div>
         </div>
       </div>
