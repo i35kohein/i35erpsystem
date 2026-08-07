@@ -540,10 +540,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       setNotifWo(selectedWo);
                       setIsNotifModalOpen(true);
                     }}
-                    className="h-10 px-3 bg-purple/10 hover:bg-purple/20 text-[#5A3FD4] font-extrabold text-xs rounded-xl border border-purple/30 transition-all flex items-center space-x-1.5 cursor-pointer shrink-0"
+                    className="h-10 px-3 bg-purple/10 hover:bg-purple/20 text-purple font-extrabold text-xs rounded-xl border border-purple/30 transition-all flex items-center space-x-1.5 cursor-pointer shrink-0"
                     title="Send SMS / Viber / Telegram Notification"
                   >
-                    <BellRing className="w-3.5 h-3.5 text-[#5A3FD4]" />
+                    <BellRing className="w-3.5 h-3.5 text-purple" />
                     <span>Notify Customer</span>
                   </Button>
                 </div>
@@ -601,7 +601,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 <div className="relative">
                 <div className="border border-line rounded-xl overflow-x-auto bg-surface/80">
                   <table className="w-full text-left min-w-[520px]">
-                    <thead className="sticky top-0 z-10 bg-surface text-[#4A4A4F] text-xs uppercase font-mono border-b border-line">
+                    <thead className="sticky top-0 z-10 bg-surface text-muted text-xs uppercase font-mono border-b border-line">
                       <tr>
                         <th className="p-2.5">Item</th>
                         <th className="p-2.5 text-right">Qty</th>
@@ -621,12 +621,12 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           : li.unitPrice;
                         const hasDiscount = quote && typeof quote.discountPercent === 'number' && quote.discountPercent > 0;
                         return (
-                        <tr key={li.id} className={li.partId && !li.isLabor ? 'bg-[#F8FBFF]' : ''}>
+                        <tr key={li.id} className={li.partId && !li.isLabor ? 'bg-brand-soft/60' : ''}>
                           <td className="px-2.5 py-3 text-ink">
                             <div className="space-y-1">
                               <div className="font-medium">{li.description}</div>
                               {li.partId && !li.isLabor && (
-                                <span className="inline-flex items-center rounded-full border border-[#D6E7FF] bg-brand-soft px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-brand">
+                                <span className="inline-flex items-center rounded-full border border-brand/20 bg-brand-soft px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-brand">
                                   Inventory Part
                                 </span>
                               )}
@@ -745,7 +745,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       type="button"
                       onClick={handleAddInventoryPartToWorkOrder}
                       disabled={!selectedInventoryPart}
-                      className="inline-flex h-9 shrink-0 items-center justify-center rounded-lg bg-brand px-3.5 py-2 text-xs font-extrabold text-white transition-all hover:bg-[#005BBB] disabled:cursor-not-allowed disabled:opacity-40"
+                      className="inline-flex h-9 shrink-0 items-center justify-center rounded-lg bg-brand px-3.5 py-2 text-xs font-extrabold text-white transition-all hover:bg-brand-deep disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       Add Part
                     </Button>
@@ -878,10 +878,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   <div className="p-3.5 bg-purple-50/80 border border-purple-200 rounded-xl space-y-3 text-xs animate-fade-in">
                     <div className="flex items-center justify-between border-b border-purple-200/80 pb-2">
                       <span className="font-extrabold text-ink flex items-center space-x-1.5">
-                        <Split className="w-4 h-4 text-[#5A3FD4]" />
+                        <Split className="w-4 h-4 text-purple" />
                         <span>Split Payment Breakdown (အကွဲပေးချေမှု)</span>
                       </span>
-                      <span className="text-xs font-mono font-bold bg-purple/10 text-[#5A3FD4] px-2 py-0.5 rounded-full border border-purple/20">
+                      <span className="text-xs font-mono font-bold bg-purple/10 text-purple px-2 py-0.5 rounded-full border border-purple/20">
                         Due: {selectedWo.totalAmount.toLocaleString()} MMK
                       </span>
                     </div>
@@ -893,7 +893,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
                         return (
                           <div key={idx} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-white p-2.5 rounded-xl border border-purple-100 shadow-2xs">
-                            <span className="font-mono text-xs text-[#5A3FD4] font-extrabold px-1.5 py-0.5 bg-purple-100/70 rounded shrink-0 self-start sm:self-auto">
+                            <span className="font-mono text-xs text-purple font-extrabold px-1.5 py-0.5 bg-purple-100/70 rounded shrink-0 self-start sm:self-auto">
                               #{idx + 1}
                             </span>
 
@@ -934,7 +934,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                   updated[idx].amount = remForThis;
                                   setSplitPayments(updated);
                                 }}
-                                className="px-2 py-1.5 bg-purple-100 hover:bg-purple-200 text-[#5A3FD4] font-bold text-xs rounded-lg border border-purple-200 shrink-0 cursor-pointer transition-all active:scale-95"
+                                className="px-2 py-1.5 bg-purple-100 hover:bg-purple-200 text-purple font-bold text-xs rounded-lg border border-purple-200 shrink-0 cursor-pointer transition-all active:scale-95"
                                 title="Auto-fill remaining amount"
                               >
                                 Auto-Fill
@@ -995,7 +995,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                   'Cash';
                                 setSplitPayments([...splitPayments, { method: unusedMethod, amount: remaining }]);
                               }}
-                              className="px-2.5 py-1 bg-white hover:bg-purple-100 text-[#5A3FD4] font-bold text-xs rounded-lg border border-purple-200 transition-all flex items-center space-x-1 cursor-pointer shrink-0 active:scale-95"
+                              className="px-2.5 py-1 bg-white hover:bg-purple-100 text-purple font-bold text-xs rounded-lg border border-purple-200 transition-all flex items-center space-x-1 cursor-pointer shrink-0 active:scale-95"
                             >
                               <Plus className="w-3.5 h-3.5" />
                               <span>Add Split Method</span>
@@ -1125,7 +1125,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       </p>
                     )}
                     {cashTendered >= selectedWo.totalAmount && (
-                      <p className="flex items-center gap-1.5 text-[#1A7F37] font-extrabold text-sm bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
+                      <p className="flex items-center gap-1.5 text-success-deep font-extrabold text-sm bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
                         <CheckCircle2 className="w-4 h-4 shrink-0 text-success-deep" />
                         Change Due: {(cashTendered - selectedWo.totalAmount).toLocaleString()} MMK
                       </p>
@@ -1135,7 +1135,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               </div>
 
               {/* Receipt preview — what Pay & Print will produce */}
-              <div className="rounded-xl border border-line bg-[#FBFBFD]">
+              <div className="rounded-xl border border-line bg-surface">
                 <div className="flex items-center justify-between px-3 pt-2.5 pb-1.5">
                   <span className="text-xs font-extrabold uppercase tracking-wide text-muted">Receipt Preview</span>
                   <FileText className="w-3.5 h-3.5 text-muted" />
@@ -1187,7 +1187,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   className={`w-full sm:w-1/2 ${
                     isProcessingPayment
                       ? 'bg-muted text-white opacity-80'
-                      : 'bg-success hover:bg-[#30B753] text-white'
+                      : 'bg-success hover:bg-success/90 text-white'
                   }`}
                 >
                   {isProcessingPayment ? (
@@ -1234,7 +1234,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               onClick={() => setIsConfirmOpen(true)}
               disabled={isProcessingPayment}
               variant="success"
-              className="flex-1 max-w-[220px] py-3 hover:bg-[#30B753]"
+              className="flex-1 max-w-[220px] py-3 hover:bg-success/90"
             >
               <CreditCard className="w-4 h-4 shrink-0" />
               <span className="truncate hidden sm:inline">Pay & Print Receipt</span>
@@ -1323,7 +1323,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   handleProcessPayment();
                 }}
                 disabled={isProcessingPayment}
-                className="flex-1 bg-success hover:bg-[#30B753] text-white"
+                className="flex-1 bg-success hover:bg-success/90 text-white"
               >
                 <ShieldCheck className="w-4 h-4 shrink-0" />
                 <span>Confirm & Print</span>

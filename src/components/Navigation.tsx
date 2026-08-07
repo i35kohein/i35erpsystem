@@ -145,7 +145,7 @@ export const Navigation: React.FC<NavigationProps> = ({
           label: t('navPos'),
           icon: CreditCard,
           badge: posReadyCount > 0 ? posReadyCount : undefined,
-          badgeColor: 'bg-[#16A34A] text-white',
+          badgeColor: 'bg-success text-white',
         },
         {
           id: 'finance',
@@ -234,6 +234,8 @@ export const Navigation: React.FC<NavigationProps> = ({
         <div 
           className={`fixed inset-0 bg-black/40 backdrop-blur-xs z-40 ${isIpad ? '' : 'lg:hidden'} transition-opacity duration-300`}
           onClick={() => setIsMobileMenuOpen(false)}
+          role="presentation"
+          aria-hidden="true"
         />
       )}
 
@@ -271,7 +273,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                 onClick={() => setIsCollapsed(false)}
                 variant="iconGhost"
                 size="icon"
-                className="hidden lg:flex hover:text-brand hover:bg-[#F0F7FF] border border-transparent hover:border-brand/20"
+                className="hidden lg:flex hover:text-brand hover:bg-brand-soft border border-transparent hover:border-brand/20"
                 title="Expand sidebar"
                 aria-label="Expand sidebar"
               >
@@ -284,6 +286,11 @@ export const Navigation: React.FC<NavigationProps> = ({
               <div 
                 className="flex items-center space-x-2.5 cursor-pointer overflow-hidden"
                 onClick={() => handleTabSelect('dashboard')}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleTabSelect('dashboard'); }
+                }}
               >
                 {systemSettings?.shopLogoUrl ? (
                   <img 
@@ -374,8 +381,8 @@ export const Navigation: React.FC<NavigationProps> = ({
                 effectiveCollapsed ? 'w-10 h-10 mx-auto justify-center p-0 relative' : 'justify-between px-3.5 py-2.5 min-h-10'
               } ${
                 activeTab === 'dashboard'
-                  ? 'bg-[#EAF2FF] text-[#1559A6] font-bold border-[#B8D3F4]'
-                  : 'border-transparent hover:text-ink hover:bg-[#F3F4F6]'
+                  ? 'bg-brand-soft text-brand-deep font-bold border-brand/30'
+                  : 'border-transparent hover:text-ink hover:bg-surface'
               }`}
             >
               <div className="flex items-center justify-center min-w-0">
@@ -411,8 +418,8 @@ export const Navigation: React.FC<NavigationProps> = ({
                         effectiveCollapsed ? 'w-10 h-10 mx-auto justify-center p-0 relative' : 'justify-between px-3.5 py-2.5 min-h-10'
                       } ${
                         isActive
-                          ? 'bg-[#EAF2FF] text-[#1559A6] font-bold border-[#B8D3F4]'
-                          : 'border-transparent hover:text-ink hover:bg-[#F3F4F6]'
+                          ? 'bg-brand-soft text-brand-deep font-bold border-brand/30'
+                          : 'border-transparent hover:text-ink hover:bg-surface'
                       }`}
                       title={item.badge !== undefined && (typeof item.badge === 'string' || item.badge > 0) ? `${item.label} (${item.badge})` : item.label}
                       aria-label={item.badge !== undefined && (typeof item.badge === 'string' || item.badge > 0) ? `${item.label} (${item.badge} pending)` : item.label}
@@ -470,7 +477,7 @@ export const Navigation: React.FC<NavigationProps> = ({
           {!effectiveCollapsed && (
             <div className="pt-1 px-1 flex items-center justify-between text-xs text-muted">
               <span className="flex items-center space-x-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#2E7D32]" />
+                <span className="w-2 h-2 rounded-full bg-success-deep" />
                 <span className="font-medium">System online</span>
               </span>
               <span className="font-mono text-xs bg-line px-1.5 py-0.5 rounded-md text-ink">v2.4.0</span>

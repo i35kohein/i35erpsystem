@@ -281,7 +281,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
 
             <div className="space-y-1.5">
               <label className="font-extrabold text-ink flex items-center space-x-1.5">
-                <Boxes className="w-3.5 h-3.5 text-[#5856D6]" />
+                <Boxes className="w-3.5 h-3.5 text-purple" />
                 <span>Default Vendor RMA Turnaround (Days)</span>
               </label>
               <Input

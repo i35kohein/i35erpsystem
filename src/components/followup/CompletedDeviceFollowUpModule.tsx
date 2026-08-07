@@ -361,7 +361,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
 
       {/* Main Completed Tickets List */}
       <div className="bg-white border border-line rounded-2xl shadow-2xs overflow-hidden">
-        <div className="px-5 py-3.5 border-b border-line flex items-center justify-between bg-[#FAFAFC]">
+        <div className="px-5 py-3.5 border-b border-line flex items-center justify-between bg-surface">
           <h2 className="text-xs font-extrabold text-ink uppercase tracking-wider">
             Devices Due for Follow-Up ({filteredWorkOrders.length})
           </h2>
@@ -394,7 +394,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
               return (
                 <div
                   key={wo.id}
-                  className="p-4 hover:bg-[#FAFAFC] transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4"
+                  className="p-4 hover:bg-surface transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4"
                 >
                   {/* Customer & Ticket Info */}
                   <div className="space-y-1.5 flex-1 min-w-0">
@@ -462,7 +462,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                           <History className="w-3.5 h-3.5 text-brand" />
                           <span>Repaired Services & Replaced Components:</span>
                         </span>
-                        <span className="text-xs font-extrabold text-brand bg-brand-soft px-2 py-0.5 rounded-md border border-[#BCE0FD]">
+                        <span className="text-xs font-extrabold text-brand bg-brand-soft px-2 py-0.5 rounded-md border border-brand/30">
                           {systemSettings.currencySymbol}{wo.totalAmount || 0}
                         </span>
                       </div>
@@ -498,7 +498,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                       </div>
 
                       {(wo.afterRepairSummary || wo.symptomsReported || wo.diagnosticResult) && (
-                        <div className="text-xs text-muted space-y-1 pt-1 border-t border-[#EBF3F8]">
+                        <div className="text-xs text-muted space-y-1 pt-1 border-t border-brand/10">
                           {wo.afterRepairSummary && (
                             <p><strong className="text-ink">Tech Repair Notes:</strong> {wo.afterRepairSummary}</p>
                           )}
@@ -645,7 +645,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                     </p>
                   )}
 
-                  <div className="flex items-center justify-between text-xs text-muted pt-1 border-t border-[#EBF3F8]">
+                  <div className="flex items-center justify-between text-xs text-muted pt-1 border-t border-brand/10">
                     <span>Assigned Tech: <strong className="text-ink">{selectedWo.assignedTechName || 'Shop Technician'}</strong></span>
                     <span>Warranty: <strong className="text-ink">{selectedWo.warrantyDays || 30} Days</strong></span>
                   </div>

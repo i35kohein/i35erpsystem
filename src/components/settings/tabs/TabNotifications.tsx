@@ -62,7 +62,7 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
                   {[
                     { id: 'Viber', label: 'Viber', color: 'bg-purple' },
                     { id: 'SMS', label: 'Direct SMS', color: 'bg-success' },
-                    { id: 'Telegram', label: 'Telegram', color: 'bg-[#229ED9]' },
+                    { id: 'Telegram', label: 'Telegram', color: 'bg-sky' },
                   ].map((ch) => {
                     const isSelected = (formData.defaultNotificationChannel || 'Viber') === ch.id;
                     return (
@@ -135,7 +135,7 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
             <Button
               type="button"
               onClick={() => toggleSection('notif-templates')}
-              className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-surface hover:bg-[#F0F1F4] transition-colors cursor-pointer"
+              className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-surface hover:bg-surface transition-colors cursor-pointer"
               aria-expanded={isSectionOpen('notif-templates')}
             >
               <span className="text-xs font-extrabold text-ink flex items-center space-x-2">

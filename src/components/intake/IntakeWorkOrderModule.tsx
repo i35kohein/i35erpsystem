@@ -230,8 +230,8 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           {[
             { id: 'ALL', label: 'All Active Tickets', count: counts.total, color: 'text-brand', bg: 'bg-blue-50/60', border: 'border-blue-200' },
             { id: 'Receive', label: 'Intake (Receive)', count: counts.receive, color: 'text-brand', bg: 'bg-blue-50/60', border: 'border-blue-200' },
-            { id: 'In Progress', label: 'In Progress', count: counts.inProgress, color: 'text-[#27B1AE]', bg: 'bg-teal-50/60', border: 'border-teal-200' },
-            { id: 'Pending', label: 'Pending Approval', count: counts.pending, color: 'text-[#ED7132]', bg: 'bg-orange-50/60', border: 'border-orange-200' },
+            { id: 'In Progress', label: 'In Progress', count: counts.inProgress, color: 'text-teal', bg: 'bg-teal-50/60', border: 'border-teal-200' },
+            { id: 'Pending', label: 'Pending Approval', count: counts.pending, color: 'text-warning', bg: 'bg-orange-50/60', border: 'border-orange-200' },
             { id: 'Finished', label: 'Ready (Finished)', count: counts.finished, color: 'text-emerald-700', bg: 'bg-emerald-50/60', border: 'border-emerald-200' },
             { id: 'RUSH', label: 'Urgent Priority', count: counts.rush, color: 'text-rose-600', bg: 'bg-rose-50/60', border: 'border-rose-200' },
           ].map((st) => {
@@ -249,8 +249,8 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                 }}
                 className={`min-h-[84px] px-4 py-3.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                   isSelected
-                    ? `${st.bg} ${st.border} ring-1 ring-[#136F9A]/20`
-                    : `${st.bg} ${st.border} hover:border-[#136F9A]/45`
+                    ? `${st.bg} ${st.border} ring-1 ring-brand/20`
+                    : `${st.bg} ${st.border} hover:border-brand/45`
                 }`}
               >
                 <span className="text-xs font-bold text-muted uppercase tracking-[0.06em] block leading-4">
@@ -279,7 +279,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
             </div>
 
             {filterStatus !== 'ALL' && (
-              <div className="flex items-center space-x-1.5 text-xs bg-brand-soft text-brand px-3 py-1 rounded-lg border border-[#136F9A]/20">
+              <div className="flex items-center space-x-1.5 text-xs bg-brand-soft text-brand px-3 py-1 rounded-lg border border-brand/20">
                 <span>Filter: <strong>{filterStatus}</strong></span>
                 <Button
                   type="button"
@@ -317,7 +317,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
               onClick={() => setSortByPriority(!sortByPriority)}
               className={`h-8 px-3 border text-xs font-bold rounded-lg transition-all inline-flex items-center space-x-1.5 cursor-pointer ${
                 sortByPriority 
-                  ? 'bg-brand text-white border-[#136F9A] shadow-2xs' 
+                  ? 'bg-brand text-white border-brand shadow-2xs' 
                   : 'bg-surface text-ink border-line hover:bg-slate-100'
               }`}
             >
@@ -485,6 +485,11 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                 <div
                   key={wo.id}
                   onClick={() => handleOpenTicketDetail(wo)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpenTicketDetail(wo); }
+                  }}
                   className={`p-4 rounded-2xl border text-xs cursor-pointer transition-all space-y-3 hover:shadow-md ${getPriorityStyle(wo.priority)}`}
                 >
                   <div className="flex justify-between items-center pb-2 border-b border-line">

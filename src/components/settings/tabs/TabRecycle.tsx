@@ -26,7 +26,7 @@ const RecycleTab: React.FC<RecycleTabProps> = ({ onOpenRecycleBin, archivedCount
               <Button
                 type="button"
                 onClick={onOpenRecycleBin}
-                className="px-4 py-2.5 bg-danger hover:bg-[#D70015] text-white font-extrabold text-xs rounded-xl transition-all shadow-2xs flex items-center space-x-2 shrink-0 cursor-pointer active:scale-95"
+                className="px-4 py-2.5 bg-danger hover:bg-danger-deep text-white font-extrabold text-xs rounded-xl transition-all shadow-2xs flex items-center space-x-2 shrink-0 cursor-pointer active:scale-95"
               >
                 <Trash2 className="w-4 h-4" />
                 <span>Open Recycle Bin ({archivedCount})</span>

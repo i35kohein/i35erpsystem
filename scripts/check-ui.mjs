@@ -43,6 +43,10 @@ function findTagEnd(s, start) {
 
 const files = walk(SRC);
 const hexRe = /(?:text|bg|border|ring|fill|stroke)-\[#([0-9A-Fa-f]{3,8})\]/;
+// Data files hold real product colors (device swatches etc.) — not UI design tokens.
+const DATA_FILES = new Set([
+  'components/intake/deviceData.ts',
+]);
 let hexCount = 0;
 let divCount = 0;
 const hexByColor = new Map();
@@ -56,9 +60,11 @@ for (const file of files) {
     // raw hex utilities
     let m;
     const re = new RegExp(hexRe.source, 'g');
-    while ((m = re.exec(line)) !== null) {
-      hexCount++;
-      hexByColor.set(`#${m[1].toUpperCase()}`, (hexByColor.get(`#${m[1].toUpperCase()}`) || 0) + 1);
+    if (!DATA_FILES.has(file.replace(SRC + '/', ''))) {
+      while ((m = re.exec(line)) !== null) {
+        hexCount++;
+        hexByColor.set(`#${m[1].toUpperCase()}`, (hexByColor.get(`#${m[1].toUpperCase()}`) || 0) + 1);
+      }
     }
   }
   // clickable divs without role/tabIndex (skip stopPropagation wrappers).

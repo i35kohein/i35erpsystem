@@ -210,7 +210,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
       case 'Receive':
         return 'bg-white border border-line shadow-2xs hover:border-brand hover:ring-2 hover:ring-brand/20 transition-all duration-200';
       case 'In Progress':
-        return 'bg-white border border-line shadow-2xs hover:border-[#AF52DE] hover:ring-2 hover:ring-[#AF52DE]/20 transition-all duration-200';
+        return 'bg-white border border-line shadow-2xs hover:border-purple hover:ring-2 hover:ring-purple/20 transition-all duration-200';
       case 'Pending':
         return 'bg-white border border-line shadow-2xs hover:border-amber-500 hover:ring-2 hover:ring-amber-500/20 transition-all duration-200';
       case 'Finished':
@@ -737,6 +737,11 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         draggable
                         onDragStart={() => setDraggedWoId(wo.id)}
                         onClick={() => setDetailModalWo(wo)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setDetailModalWo(wo); }
+                        }}
                         className={`p-3 rounded-xl shadow-xs hover:shadow-md space-y-2 text-xs min-h-[200px] transition-shadow duration-150 ease-out cursor-pointer active:cursor-grabbing group ${
                           isBeforeDiagNeeded 
                             ? 'border-l-4 border-l-amber-500 bg-amber-50/20' 
@@ -856,7 +861,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                                 setNotifWo(wo);
                                 setIsNotifModalOpen(true);
                               }}
-                              className="flex-1 py-1.5 px-1 bg-purple/10 hover:bg-purple/20 text-[#5A3FD4] font-extrabold rounded-lg border border-purple/20 text-center flex items-center justify-center space-x-0.5 truncate min-h-9"
+                              className="flex-1 py-1.5 px-1 bg-purple/10 hover:bg-purple/20 text-purple font-extrabold rounded-lg border border-purple/20 text-center flex items-center justify-center space-x-0.5 truncate min-h-9"
                               title="Alert Customer SMS/Viber/Telegram"
                             >
                               <BellRing className="w-3 h-3 shrink-0" />
@@ -1055,7 +1060,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
               <span>Checkout Payment ({checkoutModalWo.orderNumber})</span>
             </h3>
 
-            <div className="bg-[#E8F8EE] p-3 rounded-xl border border-success/30 text-xs text-success-deep font-bold flex justify-between">
+            <div className="bg-success/10 p-3 rounded-xl border border-success/30 text-xs text-success-deep font-bold flex justify-between">
               <span>Total Invoice Due:</span>
               <span className="text-sm font-mono">{checkoutModalWo.totalAmount.toLocaleString()} MMK</span>
             </div>

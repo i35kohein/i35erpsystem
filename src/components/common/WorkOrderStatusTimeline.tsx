@@ -325,6 +325,11 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
                 <div
                   key={stage.status}
                   onClick={() => setSelectedStageFilter(selectedStageFilter === stage.status ? 'ALL' : stage.status)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedStageFilter(selectedStageFilter === stage.status ? 'ALL' : stage.status); }
+                  }}
                   className={`p-2.5 rounded-xl border transition-all cursor-pointer relative overflow-hidden ${
                     selectedStageFilter === stage.status
                       ? 'ring-2 ring-white border-white bg-white/20'

@@ -171,7 +171,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
                 onClick={() => setChannel('Telegram')}
                 className={`py-2.5 px-3 rounded-2xl border font-extrabold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer ${
                   channel === 'Telegram'
-                    ? 'bg-[#229ED9] text-white border-[#229ED9] shadow-sm'
+                    ? 'bg-sky text-white border-sky shadow-sm'
                     : 'bg-surface text-ink border-line hover:bg-slate-200'
                 }`}
               >
@@ -258,10 +258,10 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
               onClick={handleSendAction}
               className={`flex-1 py-3 text-white font-extrabold text-xs rounded-2xl shadow-md transition-all flex items-center justify-center space-x-1.5 cursor-pointer active:scale-95 ${
                 channel === 'Viber'
-                  ? 'bg-purple hover:bg-[#614fe0]'
+                  ? 'bg-purple hover:bg-purple/90'
                   : channel === 'SMS'
-                  ? 'bg-success hover:bg-[#2fb350]'
-                  : 'bg-[#229ED9] hover:bg-[#1f8ec3]'
+                  ? 'bg-success hover:bg-success/90'
+                  : 'bg-sky hover:bg-sky/90'
               }`}
             >
               <ExternalLink className="w-4 h-4" />

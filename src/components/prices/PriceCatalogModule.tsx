@@ -492,7 +492,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                             </div>
 
                             {/* Price row */}
-                            <div className="mt-2.5 pt-2.5 border-t border-[#F0F0F2] flex items-center justify-between gap-2">
+                            <div className="mt-2.5 pt-2.5 border-t border-line flex items-center justify-between gap-2">
                               <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Price</span>
                               <div className="flex items-baseline space-x-1.5 min-w-0">
                                 {item.discountPercent > 0 && (
@@ -513,7 +513,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                 onClick={() => setDiscountMenuOpenFor(discountMenuOpenFor === item.categoryKey ? null : item.categoryKey)}
                                 className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg border text-xs font-extrabold transition-all cursor-pointer active:scale-95 ${
                                   discountMenuOpenFor === item.categoryKey
-                                    ? 'bg-[#F0F7FF] text-brand border-brand/40'
+                                    ? 'bg-brand-soft text-brand border-brand/40'
                                     : item.discountPercent > 0
                                       ? 'bg-success/10 text-success border-success/30'
                                       : 'bg-surface text-ink border-line hover:border-brand/50'
@@ -540,6 +540,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                 <div
                                   className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 backdrop-blur-sm animate-fadeIn"
                                   onClick={() => setDiscountMenuOpenFor(null)}
+                                  role="presentation"
                                 >
                                   <div
                                     className="w-64 rounded-2xl border border-line bg-white p-3 shadow-2xl animate-i35-slide-up"
@@ -1020,7 +1021,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                         className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 border transition-all sm:absolute sm:top-3 sm:right-3 ${
                           isSelected
                             ? 'bg-brand border-brand text-white shadow-2xs'
-                            : 'border-[#D1D1D6] bg-white text-transparent group-hover:border-brand'
+                            : 'border-line-strong bg-white text-transparent group-hover:border-brand'
                         }`}
                       >
                         <Check className="w-3 h-3 stroke-[3]" />
@@ -1104,6 +1105,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
         <div
           className="fixed inset-0 z-50 flex items-end justify-center bg-black/45 backdrop-blur-sm animate-fadeIn lg:hidden"
           onClick={() => setIsCartSheetOpen(false)}
+          role="presentation"
         >
           <div
             className="w-full max-w-lg max-h-[88vh] flex flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl animate-i35-slide-up"

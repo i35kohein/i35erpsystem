@@ -350,7 +350,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     type="button"
                     onClick={handleSaveQaPass}
                     title="Confirm QA pass and mark device ready"
-                    className="bg-success hover:bg-[#30B753] text-white flex items-center space-x-1.5"
+                    className="bg-success hover:bg-success/90 text-white flex items-center space-x-1.5"
                   >
                     <CheckCircle2 className="w-4 h-4" />
                     <span>Confirm QA Pass</span>
@@ -369,7 +369,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     <Button
                       type="button"
                       onClick={handleMarkAllPass}
-                      className="rounded-full bg-success px-3 py-2 min-h-10 text-xs font-bold text-white shadow-xs transition-colors hover:bg-[#28A745]"
+                      className="rounded-full bg-success px-3 py-2 min-h-10 text-xs font-bold text-white shadow-xs transition-colors hover:bg-success/90"
                     >
                       Mark All Pass
                     </Button>
@@ -398,7 +398,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           </div>
 
                           <span className={`text-xs font-black px-2 py-0.5 rounded-md tracking-wider uppercase shrink-0 shadow-2xs ${
-                            item.status === 'Pass' ? 'bg-[#16A34A] text-white' :
+                            item.status === 'Pass' ? 'bg-success text-white' :
                             item.status === 'Fail' ? 'bg-danger text-white animate-pulse' : 'bg-slate-600 text-white'
                           }`}>
                             {item.status === 'Pass' ? '✓ PASS' : item.status === 'Fail' ? '✕ FAIL' : 'N/A'}
@@ -412,7 +412,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                             type="button"
                             onClick={() => handleDiagnosticStatusChange(item.id, 'Pass')}
                             className={`flex-1 min-h-10 py-2 rounded-lg font-black transition-all ${
-                              item.status === 'Pass' ? 'bg-[#16A34A] text-white shadow-xs' : 'bg-surface text-ink hover:bg-slate-200'
+                              item.status === 'Pass' ? 'bg-success text-white shadow-xs' : 'bg-surface text-ink hover:bg-slate-200'
                             }`}
                           >
                             Pass

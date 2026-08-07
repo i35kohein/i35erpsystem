@@ -130,6 +130,7 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
         className="fixed inset-0 z-[95]"
         onMouseDown={close}
         onTouchStart={close}
+        role="presentation"
         aria-hidden="true"
       />
       <div

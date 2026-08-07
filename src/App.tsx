@@ -1735,6 +1735,7 @@ export default function App() {
                       <div
                         className="fixed inset-0 z-40"
                         onClick={() => setPriceCatalogMenuOpen(false)}
+                        role="presentation"
                         aria-hidden="true"
                       />
                       <div className="absolute right-0 top-full mt-1.5 z-50 w-48 rounded-xl border border-line bg-white p-1.5 shadow-xl">

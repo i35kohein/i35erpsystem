@@ -163,6 +163,11 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
             <div
               key={tech.id}
               onClick={() => onOpenTechDetail?.(tech)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpenTechDetail?.(tech); }
+              }}
               className="bg-white border border-line hover:border-brand/40 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all space-y-5 flex flex-col justify-between cursor-pointer group"
             >
               {/* Header: Technician Info */}

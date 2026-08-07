@@ -395,7 +395,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
               <Button
                 type="button"
                 onClick={() => setApprovalModalOpen(true)}
-                className="bg-success hover:bg-[#30B753] text-white flex items-center space-x-1.5"
+                className="bg-success hover:bg-success/90 text-white flex items-center space-x-1.5"
               >
                 <ThumbsUp className="w-4 h-4" />
                 <span>Approve Estimate</span>
@@ -826,7 +826,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 )}
                 <Button
                   onClick={() => setApprovalModalOpen(true)}
-                  className="w-full sm:w-auto px-6 py-3 bg-success hover:bg-[#30B753] text-white font-extrabold rounded-xl shadow-xs transition-all active:scale-95 flex items-center justify-center space-x-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success/40 focus-visible:ring-offset-2"
+                  className="w-full sm:w-auto px-6 py-3 bg-success hover:bg-success/90 text-white font-extrabold rounded-xl shadow-xs transition-all active:scale-95 flex items-center justify-center space-x-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success/40 focus-visible:ring-offset-2"
                 >
                   <ThumbsUp className="w-4 h-4 shrink-0" />
                   <span className="truncate hidden sm:inline">Approve Estimate & Authorize Repair</span>
@@ -1014,7 +1014,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 type="button"
                 onClick={handleApproveEstimate}
                 disabled={!agreedToTerms || !customerNameSig.trim()}
-                className="flex-1 bg-success hover:bg-[#30B753] disabled:opacity-50 text-white"
+                className="flex-1 bg-success hover:bg-success/90 disabled:opacity-50 text-white"
               >
                 Confirm & Authorize
               </Button>

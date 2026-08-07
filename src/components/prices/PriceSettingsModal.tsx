@@ -1025,6 +1025,11 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                       {/* Folder Show/Hide Toggle */}
                       <div
                         onClick={() => toggleFolder(folder.id)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleFolder(folder.id); }
+                        }}
                         className="flex items-center space-x-2 shrink-0 ml-2 cursor-pointer"
                       >
                         <span className={`text-xs font-extrabold ${folder.enabled ? 'text-brand' : 'text-muted'}`}>

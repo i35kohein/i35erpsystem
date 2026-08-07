@@ -192,6 +192,11 @@ export const TechnicianDetailModal: React.FC<TechnicianDetailModalProps> = ({
                   <div
                     key={wo.id}
                     onClick={() => { onClose(); onNavigateToTab('pipeline'); }}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClose(); onNavigateToTab('pipeline'); }
+                    }}
                     className="p-2.5 bg-surface hover:bg-white border border-line hover:border-brand/40 rounded-lg flex items-center justify-between text-xs cursor-pointer transition-all"
                   >
                     <div className="min-w-0 pr-2">
@@ -224,6 +229,11 @@ export const TechnicianDetailModal: React.FC<TechnicianDetailModalProps> = ({
                     <div
                       key={wo.id}
                       onClick={() => { onClose(); onNavigateToTab('pipeline'); }}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClose(); onNavigateToTab('pipeline'); }
+                      }}
                       className="p-2.5 bg-success/10/40 hover:bg-white border border-line hover:border-success/40 rounded-lg flex items-center justify-between text-xs cursor-pointer transition-all"
                     >
                       <div className="min-w-0 pr-2">

@@ -432,7 +432,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       { id: 'screen', label: 'Screen & Display OLED', icon: Smartphone, color: 'bg-brand', textCol: 'text-brand', bgLight: 'bg-brand-soft', count: 0, revenue: 0 },
       { id: 'battery', label: 'Battery & Charging System', icon: Zap, color: 'bg-success', textCol: 'text-success', bgLight: 'bg-success/10', count: 0, revenue: 0 },
       { id: 'board', label: 'Logic Board & Micro-Soldering', icon: Activity, color: 'bg-purple', textCol: 'text-purple', bgLight: 'bg-purple-50', count: 0, revenue: 0 },
-      { id: 'housing', label: 'Glass, Port, Camera & Housing', icon: Smartphone, color: 'bg-warning', textCol: 'text-warning', bgLight: 'bg-[#FFF8ED]', count: 0, revenue: 0 },
+      { id: 'housing', label: 'Glass, Port, Camera & Housing', icon: Smartphone, color: 'bg-warning', textCol: 'text-warning', bgLight: 'bg-warning/10', count: 0, revenue: 0 },
     ];
 
     filteredWorkOrders.forEach((wo) => {
@@ -1016,6 +1016,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <div
                 key={item.wo.id}
                 onClick={() => setActiveDashboardSubTab('warranty-watch')}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveDashboardSubTab('warranty-watch'); }
+                }}
                 className="bg-white/80 hover:bg-white border border-rose-200 px-2.5 py-1 rounded-lg text-xs flex items-center space-x-2 cursor-pointer shrink-0 shadow-2xs transition-all"
               >
                 <span className="font-mono font-bold text-brand">{item.wo.orderNumber}</span>
@@ -1382,7 +1387,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-line">
               <div className="space-y-0.5">
                 <div className="flex items-center space-x-2">
-                  <div className="p-2 bg-purple/10 text-purple rounded-xl border border-[#AF52DE]/20">
+                  <div className="p-2 bg-purple/10 text-purple rounded-xl border border-purple/20">
                     <Smartphone className="w-5 h-5" />
                   </div>
                   <h3 className="text-base font-extrabold text-ink">Top Repair Devices</h3>
@@ -1404,7 +1409,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 topRepairDevices.map((dev, idx) => {
                   const maxCount = topRepairDevices[0]?.count || 1;
                   const barPct = Math.max(8, Math.round((dev.count / maxCount) * 100));
-                  const medal = idx === 0 ? 'bg-[#FFD60A]/20 text-[#B25000] border-[#FFD60A]/50' : idx === 1 ? 'bg-slate-100 text-slate-600 border-slate-200' : idx === 2 ? 'bg-orange-50 text-orange-700 border-orange-200' : 'bg-surface text-muted border-line';
+                  const medal = idx === 0 ? 'bg-warning/20 text-amber-700 border-warning/50' : idx === 1 ? 'bg-slate-100 text-slate-600 border-slate-200' : idx === 2 ? 'bg-orange-50 text-orange-700 border-orange-200' : 'bg-surface text-muted border-line';
                   return (
                     <div key={dev.name} className="p-3 bg-surface border border-line rounded-xl space-y-2">
                       <div className="flex items-center justify-between gap-2 text-xs">
@@ -1574,7 +1579,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {repairLowStockParts.map((part) => (
-                  <div key={part.id} className="p-3.5 bg-[#FFF8ED] border border-warning/30 rounded-xl space-y-2 shadow-2xs">
+                  <div key={part.id} className="p-3.5 bg-warning/10 border border-warning/30 rounded-xl space-y-2 shadow-2xs">
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <p className="font-extrabold text-xs text-ink">{part.name}</p>

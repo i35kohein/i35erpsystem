@@ -883,9 +883,9 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
           ];
           // Work-desk accent tints per group (icon tile backgrounds)
           const accentByGroup: Record<string, string> = {
-            Business: 'bg-[#EAF4FF] text-brand',
-            Staff: 'bg-[#E8F7EF] text-success-deep',
-            Operations: 'bg-[#F3EFFF] text-purple',
+            Business: 'bg-brand-soft text-brand',
+            Staff: 'bg-success/10 text-success-deep',
+            Operations: 'bg-purple/10 text-purple',
             System: 'bg-warning/10 text-amber-500',
           };
           const q = settingsTabQuery.trim().toLowerCase();

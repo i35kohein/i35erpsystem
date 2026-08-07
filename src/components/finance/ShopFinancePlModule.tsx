@@ -459,7 +459,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
           {/* Benchmark Target Banner (50%-70% Gross Margin Rule) */}
           <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 rounded-xl bg-[#16A34A] text-white flex items-center justify-center font-black shrink-0">
+              <div className="w-8 h-8 rounded-xl bg-success text-white flex items-center justify-center font-black shrink-0">
                 <Percent className="w-5 h-5" />
               </div>
               <div>
@@ -837,7 +837,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                         <Button
                           type="button"
                           onClick={() => onUpdatePayoutStatus(payout.id, 'Paid')}
-                          className="px-2.5 py-1 bg-[#16A34A] hover:bg-emerald-700 text-white font-bold rounded-lg text-xs cursor-pointer"
+                          className="px-2.5 py-1 bg-success hover:bg-emerald-700 text-white font-bold rounded-lg text-xs cursor-pointer"
                         >
                           Mark Paid
                         </Button>

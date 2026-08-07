@@ -50,6 +50,9 @@ body {
   --color-danger: #FF3B30;       /* destructive/red */
   --color-purple: #AF52DE;       /* secondary accent — base utilities (carbon-coat overrides to #8a3ffc) */
   --color-warning: #FF9500;      /* warning accent — base utilities (matches carbon-coat) */
+  --color-teal: #27B1AE;         /* teal accent — theme presets, In Progress status */
+  --color-sky: #229ED9;          /* sky blue — Telegram/notification channel accent */
+  --color-danger-deep: #D70015;  /* danger hover/pressed red */
 }
 
 /* Global focus ring — consistent visible keyboard focus across the app. */
@@ -179,9 +182,7 @@ html[data-theme="dark-slate"] .text-warning { color: #FBBF24 !important; }
 html[data-theme="dark-slate"] [class~="text-[#15803D]"] { color: #4ADE80 !important; }
 html[data-theme="dark-slate"] [class~="text-[#16A34A]"] { color: #4ADE80 !important; }
 html[data-theme="dark-slate"] [class~="text-[#166534]"] { color: #4ADE80 !important; }
-html[data-theme="dark-slate"] [class~="text-[#27B1AE]"] { color: #2DD4BF !important; }
-html[data-theme="dark-slate"] [class~="text-[#ED7132]"] { color: #FB923C !important; }
-html[data-theme="dark-slate"] [class~="text-[#5A3FD4]"] { color: #C4B5FD !important; }
+html[data-theme="dark-slate"] [class~="text-teal"] { color: #2DD4BF !important; }
 html[data-theme="dark-slate"] .text-slate-700 { color: #E2E8F0 !important; }
 html[data-theme="dark-slate"] .text-slate-600 { color: #CBD5E1 !important; }
 html[data-theme="dark-slate"] .text-emerald-700 { color: #34D399 !important; }
@@ -234,11 +235,10 @@ html[data-theme="dark-slate"] .bg-slate-100 { background-color: rgba(100, 116, 1
 html[data-theme="dark-slate"] .bg-slate-50 { background-color: rgba(100, 116, 139, 0.12) !important; }
 html[data-theme="dark-slate"] .bg-white\/50 { background-color: rgba(19, 27, 46, 0.7) !important; }
 html[data-theme="dark-slate"] .bg-ink { background-color: #26334D !important; }
-html[data-theme="dark-slate"] [class~="bg-[#EAF2FF]"] { background-color: rgba(21, 89, 166, 0.25) !important; }
-html[data-theme="dark-slate"] [class~="text-[#1559A6]"] { color: #6EA8FE !important; }
-html[data-theme="dark-slate"] [class~="border-[#B8D3F4]"] { border-color: rgba(107, 150, 205, 0.45) !important; }
+html[data-theme="dark-slate"] [class~="bg-brand-soft"] { background-color: rgba(21, 89, 166, 0.25) !important; }
+html[data-theme="dark-slate"] [class~="border-brand/30"] { border-color: rgba(107, 150, 205, 0.45) !important; }
 html[data-theme="dark-slate"] [class~="bg-[#7360F2]/10"] { background-color: rgba(115, 96, 242, 0.16) !important; }
-html[data-theme="dark-slate"] [class~="bg-[#FAFAFC]"] { background-color: rgba(19, 27, 46, 0.55) !important; }
+html[data-theme="dark-slate"] [class~="bg-surface"] { background-color: rgba(19, 27, 46, 0.55) !important; }
 html[data-theme="dark-slate"] [class~="bg-[#F8FAFC]"] { background-color: rgba(19, 27, 46, 0.55) !important; }
 html[data-theme="dark-slate"] [class~="bg-sky-400"] { background-color: #0284C7 !important; }
 html[data-theme="dark-slate"] .border-amber-200 { border-color: rgba(253, 230, 138, 0.3) !important; }
@@ -713,7 +713,7 @@ html[data-theme] [class~="border-[#D2D2D7]"] {
   border-color: var(--border) !important;
 }
 
-html[data-theme] [class~="bg-[#27B1AE]"] {
+html[data-theme] [class~="bg-teal"] {
   background-color: var(--turquoise) !important;
 }
 

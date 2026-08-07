@@ -61,7 +61,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
             <Button
               type="button"
               onClick={() => toggleSection('pos-formats')}
-              className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-surface hover:bg-[#F0F1F4] transition-colors cursor-pointer"
+              className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-surface hover:bg-surface transition-colors cursor-pointer"
               aria-expanded={isSectionOpen('pos-formats')}
             >
               <span className="text-xs font-extrabold text-ink flex items-center space-x-2">
@@ -169,6 +169,11 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                 {/* Option 2: 3"x2" Sticker Tag */}
                 <div 
                   onClick={() => setIsDeviceTagPrinterOpen(true)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setIsDeviceTagPrinterOpen(true); }
+                  }}
                   className="p-4 rounded-xl border border-line-strong bg-white hover:border-brand hover:bg-surface transition-all cursor-pointer space-y-2 group shadow-2xs"
                 >
                   <div className="flex items-center justify-between">

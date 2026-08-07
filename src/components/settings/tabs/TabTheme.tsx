@@ -16,7 +16,7 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-base font-extrabold text-ink flex items-center space-x-2">
-                  <Palette className="w-5 h-5 text-[#27B1AE]" />
+                  <Palette className="w-5 h-5 text-teal" />
                   <span>Application Visual Theme & Typography</span>
                 </h3>
                 <p className="text-xs text-muted mt-1">
@@ -32,19 +32,24 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
                   <div
                     key={preset.id}
                     onClick={() => setTheme(preset.id)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setTheme(preset.id); }
+                    }}
                     className={`p-5 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-4 ${
                       isSelected
-                        ? 'border-[#27B1AE] bg-surface shadow-md ring-2 ring-[#27B1AE]/20'
-                        : 'border-line bg-white hover:border-[#136F9A]/40 shadow-xs'
+                        ? 'border-teal bg-surface shadow-md ring-2 ring-teal/20'
+                        : 'border-line bg-white hover:border-brand/40 shadow-xs'
                     }`}
                   >
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-black px-2.5 py-1 rounded-lg bg-[#2C3E50] text-white">
+                        <span className="text-xs font-black px-2.5 py-1 rounded-lg bg-ink text-white">
                           {preset.fontName}
                         </span>
                         {isSelected ? (
-                          <span className="flex items-center space-x-1 text-xs font-extrabold text-[#27B1AE]">
+                          <span className="flex items-center space-x-1 text-xs font-extrabold text-teal">
                             <Check className="w-4 h-4" />
                             <span>Active Theme</span>
                           </span>
@@ -101,8 +106,8 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
                       }}
                       className={`w-full py-2.5 ${
                         isSelected
-                          ? 'bg-[#27B1AE] text-white shadow-xs'
-                          : 'bg-[#2C3E50] hover:bg-brand text-white'
+                          ? 'bg-teal text-white shadow-xs'
+                          : 'bg-ink hover:bg-brand text-white'
                       }`}
                     >
                       {isSelected ? 'Currently Selected' : `Activate ${preset.name}`}
@@ -126,6 +131,11 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
               <div
                 onClick={() => setGeometry('square')}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setGeometry('square'); }
+                }}
                 className={`p-5 rounded-none border-2 transition-all cursor-pointer flex flex-col justify-between space-y-3 ${
                   geometry === 'square'
                     ? 'border-brand bg-brand-soft ring-2 ring-brand/20 shadow-xs'
@@ -146,6 +156,11 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
 
               <div
                 onClick={() => setGeometry('curved')}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setGeometry('curved'); }
+                }}
                 className={`p-5 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-3 ${
                   geometry === 'curved'
                     ? 'border-brand bg-brand-soft ring-2 ring-brand/20 shadow-xs'
@@ -184,6 +199,11 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
               <div
                 onClick={() => setLanguage('en')}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setLanguage('en'); }
+                }}
                 className={`p-4 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-between ${
                   language === 'en'
                     ? 'border-brand bg-brand-soft ring-2 ring-brand/20'
@@ -202,6 +222,11 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
 
               <div
                 onClick={() => setLanguage('mm')}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setLanguage('mm'); }
+                }}
                 className={`p-4 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-between ${
                   language === 'mm'
                     ? 'border-brand bg-brand-soft ring-2 ring-brand/20'

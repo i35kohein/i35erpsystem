@@ -3129,7 +3129,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 type="button"
                 onClick={confirmInlineSave}
                 disabled={!inlineSaveReview.length || isInlineSaving}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-5 py-2 text-xs font-extrabold text-white shadow-xs transition-all hover:bg-brand-deep disabled:cursor-not-allowed disabled:bg-[#A5A5AA]"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-5 py-2 text-xs font-extrabold text-white shadow-xs transition-all hover:bg-brand-deep disabled:cursor-not-allowed disabled:bg-faint"
               >
                 {isInlineSaving && <span className="h-3 w-3 rounded-full border-2 border-white/40 border-t-white animate-spin" />}
                 {isInlineSaving ? 'Saving…' : 'Approve & Save'}
@@ -3458,7 +3458,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       window.print();
                     }}
                     disabled={selectedTagIds.size === 0}
-                    className="flex items-center gap-1.5 rounded-lg bg-ink px-3 py-2 text-xs font-extrabold text-white transition hover:bg-[#2C3E50] disabled:cursor-not-allowed disabled:bg-[#A5A5AA]"
+                    className="flex items-center gap-1.5 rounded-lg bg-ink px-3 py-2 text-xs font-extrabold text-white transition hover:bg-ink disabled:cursor-not-allowed disabled:bg-faint"
                   >
                     <Check className="h-3.5 w-3.5" /> Print Selected ({selectedTagIds.size})
                   </Button>
@@ -3514,6 +3514,11 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     <div
                       key={part.id}
                       onClick={toggleSelect}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleSelect(); }
+                      }}
                       className={`tag-card relative flex cursor-pointer flex-col rounded-lg border bg-white p-2.5 transition-colors ${
                         isSelected ? 'tag-selected border-brand ring-2 ring-brand/30' : 'border-ink hover:border-brand'
                       }`}

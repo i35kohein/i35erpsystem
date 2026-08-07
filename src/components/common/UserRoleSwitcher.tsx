@@ -95,6 +95,8 @@ export const UserRoleSwitcher: React.FC<UserRoleSwitcherProps> = ({
           <div
             className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
+            role="presentation"
+            aria-hidden="true"
           />
           <div className={`absolute z-50 w-56 max-w-[calc(100vw-1rem)] rounded-2xl bg-white border border-line-strong shadow-2xl p-2 space-y-1.5 animate-in fade-in zoom-in-95 duration-150 ${
             compact ? 'left-full bottom-0 ml-2' : 'left-0 bottom-full mb-2'

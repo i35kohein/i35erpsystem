@@ -420,7 +420,7 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
             <div className="p-4 bg-success/10 border-2 border-success rounded-2xl space-y-3 animate-fadeIn shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <div className="p-1.5 bg-[#28A745] text-white rounded-xl">
+                  <div className="p-1.5 bg-success text-white rounded-xl">
                     <CheckCircle2 className="w-5 h-5" />
                   </div>
                   <div>
@@ -446,7 +446,7 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
               {/* Confirm Action */}
               <Button
                 onClick={handleConfirmResult}
-                className="w-full max-w-md mx-auto py-3 bg-[#28A745] hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow-sm transition-all flex items-center justify-center space-x-2 cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#28A745]/40 focus-visible:ring-offset-2"
+                className="w-full max-w-md mx-auto py-3 bg-success hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow-sm transition-all flex items-center justify-center space-x-2 cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success/40 focus-visible:ring-offset-2"
               >
                 <span className="truncate">Apply Code to Intake ({scannedResult})</span>
                 <ArrowRight className="w-4 h-4 shrink-0" />

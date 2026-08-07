@@ -81,7 +81,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
             )}
             <Button
               onClick={onClose}
-              className="w-7 h-7 rounded-lg bg-line hover:bg-[#D1D1D6] text-ink transition-all cursor-pointer flex items-center justify-center"
+              className="w-7 h-7 rounded-lg bg-line hover:bg-line-strong text-ink transition-all cursor-pointer flex items-center justify-center"
             >
               <X className="w-4 h-4" />
             </Button>

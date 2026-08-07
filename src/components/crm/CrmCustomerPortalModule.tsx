@@ -298,6 +298,11 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                   <div
                     key={cust.id}
                     onClick={() => setSelectedCustomer(cust)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedCustomer(cust); }
+                    }}
                     className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
                       isSelected
                         ? 'bg-brand-soft border-brand shadow-xs'
@@ -535,7 +540,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                 </div>
 
                 {selectedCustomer.notes && (
-                  <div className="p-3 bg-warning/10 border border-warning/30 rounded-xl text-[#B26B00]">
+                  <div className="p-3 bg-warning/10 border border-warning/30 rounded-xl text-amber-700">
                     <strong>Account Notes:</strong> {selectedCustomer.notes}
                   </div>
                 )}
