@@ -434,9 +434,11 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
   return (
     <div className={`space-y-3 ${isIpad ? 'flex min-h-0 flex-1 flex-col' : ''}`}>
-      <div className={`grid grid-cols-1 gap-3 text-xs md:grid-cols-12 pb-16 md:pb-0 ${isIpad ? 'md:flex-1 md:min-h-0 md:grid-rows-1' : ''}`}>
-        {/* Left Column: Select Work Order to Checkout (4 cols, collapsible) */}
-        <div className={`md:col-span-4 bg-white border border-line rounded-2xl p-3 space-y-3 shadow-xs ${isIpad ? 'md:flex md:flex-col md:min-h-0' : 'md:self-start'} ${isQueueCollapsed ? 'md:col-span-1' : ''}`}>
+      <div className={`flex flex-col md:flex-row gap-3 text-xs pb-16 md:pb-0 ${isIpad ? 'md:flex-1 md:min-h-0' : ''}`}>
+        {/* Left Column: Select Work Order to Checkout (collapsible, hugs sidebar) */}
+        <div className={`bg-white border border-line rounded-2xl p-3 space-y-3 shadow-xs shrink-0 ${
+          isQueueCollapsed ? 'md:w-9' : 'md:w-[380px]'
+        } ${isIpad ? 'md:flex md:flex-col md:min-h-0' : 'md:self-start'}`}>
           <div className="flex justify-between items-center border-b border-line pb-2">
             {!isQueueCollapsed ? (
               <>
@@ -571,7 +573,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
         </div>
 
         {/* Right Column: Dynamic Invoice & Terminal Checkout (8 cols) */}
-        <div className={`${isQueueCollapsed ? 'md:col-span-11' : 'md:col-span-8'} bg-white border border-line rounded-2xl p-5 space-y-5 shadow-xs ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:overflow-y-auto' : ''}`}>
+        <div className={`flex-1 min-w-0 bg-white border border-line rounded-2xl p-5 space-y-5 shadow-xs ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:overflow-y-auto' : ''}`}>
           {selectedWo ? (
             <div className="space-y-5">
               <div className="border-b border-line pb-3 space-y-2">
