@@ -473,59 +473,32 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           <IconComp className="w-8 h-8" />
                         </button>
 
-                        {/* Name — click to mark Pass */}
-                        <button
-                          type="button"
-                          onClick={() => handleDiagnosticStatusChange(item.id, 'Pass')}
-                          className={`w-full mt-1.5 text-[11px] font-bold truncate text-left transition-colors ${
-                            isPass ? 'text-success-deep' : 'text-ink hover:text-success-deep'
-                          }`}
-                          title={`Mark ${item.name} as Pass`}
-                          aria-label={`Mark ${item.name} as Pass`}
-                        >
-                          {idx + 1}. {item.name}
-                        </button>
-
-                        {/* ⋮ menu (Comment) */}
-                        <div className="relative flex items-center justify-end mt-1">
-                            <button
-                              type="button"
-                              onClick={(e) => { e.stopPropagation(); setMenuOpenId(menuOpenId === item.id ? null : item.id); }}
-                              className={`!h-5 !min-h-5 w-5 px-0 rounded flex items-center justify-center transition-colors ${
-                                menuOpenId === item.id ? 'bg-line text-ink' : 'text-muted hover:bg-line/60 hover:text-ink'
-                              }`}
-                              title="More options"
-                              aria-label={`More options for ${item.name}`}
-                            >
-                              <MoreHorizontal className="w-3.5 h-3.5" />
-                            </button>
-
-                            {/* ⋮ popup — comment box */}
-                            {menuOpenId === item.id && (
-                              <div
-                                className="absolute right-0 top-6 z-30 w-52 bg-white border border-line rounded-xl shadow-xl p-2 space-y-1.5"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <p className="text-[10px] font-extrabold text-muted uppercase tracking-wider px-0.5">
-                                  Comment — {item.name}
-                                </p>
-                                <Input
-                                  type="text"
-                                  value={item.note || ''}
-                                  onChange={(e) => handleDiagnosticNoteChange(item.id, e.target.value)}
-                                  placeholder="Type a note..."
-                                  autoFocus
-                                  className="!h-7 !min-h-7 w-full rounded-md bg-surface border border-line px-2 text-[11px] text-ink focus:bg-white focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/20"
-                                />
-                                <Button
-                                  type="button"
-                                  onClick={() => setMenuOpenId(null)}
-                                  className="!h-6 !min-h-6 w-full rounded-md bg-brand text-white text-[10px] font-bold hover:bg-brand-deep"
-                                >
-                                  Done
-                                </Button>
-                              </div>
-                            )}
+                        {/* Name + ⋮ — same row */}
+                        <div className="flex items-center gap-1 mt-1">
+                          {/* Name — click to mark Pass */}
+                          <button
+                            type="button"
+                            onClick={() => handleDiagnosticStatusChange(item.id, 'Pass')}
+                            className={`flex-1 min-w-0 text-[11px] font-bold truncate text-left transition-colors ${
+                              isPass ? 'text-success-deep' : 'text-ink hover:text-success-deep'
+                            }`}
+                            title={`Mark ${item.name} as Pass`}
+                            aria-label={`Mark ${item.name} as Pass`}
+                          >
+                            {idx + 1}. {item.name}
+                          </button>
+                          {/* ⋮ menu (Comment) */}
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); setMenuOpenId(menuOpenId === item.id ? null : item.id); }}
+                            className={`!h-5 !min-h-5 w-5 px-0 rounded shrink-0 flex items-center justify-center transition-colors ${
+                              menuOpenId === item.id ? 'bg-line text-ink' : 'text-muted hover:bg-line/60 hover:text-ink'
+                            }`}
+                            title="More options"
+                            aria-label={`More options for ${item.name}`}
+                          >
+                            <MoreHorizontal className="w-3.5 h-3.5" />
+                          </button>
                         </div>
 
                       </div>
@@ -533,6 +506,50 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                   })}
                 </div>
               </div>
+
+              {/* Comment modal — fixed, never overflows the QA modal */}
+              {menuOpenId && (() => {
+                const item = qaDiagnostics.find((d) => d.id === menuOpenId);
+                if (!item) return null;
+                return (
+                  <div
+                    className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/40 p-4"
+                    onClick={() => setMenuOpenId(null)}
+                  >
+                    <div
+                      className="w-full max-w-xs bg-white border border-line rounded-2xl shadow-2xl p-3 space-y-2"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="flex items-center justify-between">
+                        <p className="text-[11px] font-extrabold text-ink truncate">Comment — {item.name}</p>
+                        <button
+                          type="button"
+                          onClick={() => setMenuOpenId(null)}
+                          className="!h-6 !min-h-6 w-6 px-0 rounded flex items-center justify-center text-muted hover:bg-surface hover:text-ink"
+                          aria-label="Close comment"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      <Input
+                        type="text"
+                        value={item.note || ''}
+                        onChange={(e) => handleDiagnosticNoteChange(item.id, e.target.value)}
+                        placeholder="Type a note..."
+                        autoFocus
+                        className="!h-8 !min-h-8 w-full rounded-lg bg-surface border border-line px-2.5 text-xs text-ink focus:bg-white focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/20"
+                      />
+                      <Button
+                        type="button"
+                        onClick={() => setMenuOpenId(null)}
+                        className="!h-7 !min-h-7 w-full rounded-lg bg-brand text-white text-[11px] font-bold hover:bg-brand-deep"
+                      >
+                        Done
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Inspector Technician & Notes */}
               <div className="grid grid-cols-1 gap-3 rounded-xl border border-line bg-surface/80 p-3 sm:grid-cols-[minmax(220px,0.8fr)_minmax(0,1.2fr)]">
