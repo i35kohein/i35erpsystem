@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, forwardRef, useImperativeHandle } from 'react';
 
 import {Coins, 
   AlertTriangle, 
@@ -137,7 +137,11 @@ const TrendChart: React.FC<{
   );
 };
 
-export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
+export interface DashboardOverviewHandle {
+  setSubTab: (tab: 'status-queue' | 'repair-data' | 'tech-kpi' | 'inventory' | 'finance' | 'warranty-watch') => void;
+}
+
+export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOverviewProps>(({
   workOrders,
   parts,
   rmas,
@@ -148,11 +152,16 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   currencySymbol,
   dateFilter: externalDateFilter,
   onSettleInventoryFund,
-}) => {
+}: DashboardOverviewProps, ref) => {
   const [internalDateFilter] = useState<DateFilterState>({ preset: 'all' });
   const dateFilter = externalDateFilter || internalDateFilter;
 
   const [activeDashboardSubTab, setActiveDashboardSubTab] = useState<'status-queue' | 'repair-data' | 'tech-kpi' | 'inventory' | 'finance' | 'warranty-watch'>('status-queue');
+
+  // Expose subtab switching to the navbar (App.tsx renders dashboard tab buttons)
+  useImperativeHandle(ref, () => ({
+    setSubTab: (tab) => setActiveDashboardSubTab(tab),
+  }));
 
   // Technician drill-down modal (tech-kpi tab)
   const [detailTechId, setDetailTechId] = useState<string | null>(null);
@@ -425,23 +434,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   }, [parts]);
 
   // ===== Revenue & Repairs Trend (previous-period comparison) =====
-  const DASHBOARD_TAB_IDS = ['status-queue', 'repair-data', 'tech-kpi', 'inventory', 'finance', 'warranty-watch'];
-
-  const handleDashboardTabKeyDown = (e: React.KeyboardEvent, currentTab: string) => {
-    const idx = DASHBOARD_TAB_IDS.indexOf(currentTab);
-    if (idx === -1) return;
-    let next: string | null = null;
-    if (e.key === 'ArrowRight') next = DASHBOARD_TAB_IDS[(idx + 1) % DASHBOARD_TAB_IDS.length];
-    else if (e.key === 'ArrowLeft') next = DASHBOARD_TAB_IDS[(idx - 1 + DASHBOARD_TAB_IDS.length) % DASHBOARD_TAB_IDS.length];
-    else if (e.key === 'Home') next = DASHBOARD_TAB_IDS[0];
-    else if (e.key === 'End') next = DASHBOARD_TAB_IDS[DASHBOARD_TAB_IDS.length - 1];
-    if (next) {
-      e.preventDefault();
-      setActiveDashboardSubTab(next as typeof activeDashboardSubTab);
-      document.getElementById(`dash-tab-${next}`)?.focus();
-    }
-  };
-
   const DAY_MS = 1000 * 60 * 60 * 24;
   const trendSeries = useMemo(() => {
     const todayStart = new Date();
@@ -660,190 +652,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </div>
       </div>
 
-{/* Top Dashboard Navigation Subtabs Bar */}
-      <div className="relative">
-      <div role="tablist" aria-label="Dashboard sections" className="bg-surface p-1.5 rounded-2xl border border-line flex items-center space-x-1.5 overflow-x-auto no-scrollbar w-full text-xs shadow-2xs">
-        {/* Subtab 1: Status Queue */}
-        <Button
-          type="button"
-          role="tab"
-          id="dash-tab-status-queue"
-          aria-controls="dash-panel-status-queue"
-          aria-selected={activeDashboardSubTab === 'status-queue'}
-          onClick={() => setActiveDashboardSubTab('status-queue')}
-          onKeyDown={(e) => handleDashboardTabKeyDown(e, 'status-queue')}
-          className={`px-3.5 h-10 lg:h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
-            activeDashboardSubTab === 'status-queue'
-              ? 'bg-brand text-white border-brand shadow-xs'
-              : 'bg-white hover:bg-surface text-muted hover:text-ink border-line'
-          }`}
-        >
-          <ListFilter className="w-4 h-4" />
-          <span>Status Queue</span>
-          <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold ${
-            activeDashboardSubTab === 'status-queue'
-              ? 'bg-brand-deep text-white'
-              : 'bg-line text-ink'
-          }`}>
-            {activeRepairs.length} Active
-          </span>
-        </Button>
-
-        {/* Subtab 2: Repair Data */}
-        <Button
-          type="button"
-          role="tab"
-          id="dash-tab-repair-data"
-          aria-controls="dash-panel-repair-data"
-          aria-selected={activeDashboardSubTab === 'repair-data'}
-          onClick={() => setActiveDashboardSubTab('repair-data')}
-          onKeyDown={(e) => handleDashboardTabKeyDown(e, 'repair-data')}
-          className={`px-3.5 h-10 lg:h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
-            activeDashboardSubTab === 'repair-data'
-              ? 'bg-brand text-white border-brand shadow-xs'
-              : 'bg-white hover:bg-surface text-muted hover:text-ink border-line'
-          }`}
-        >
-          <Activity className="w-4 h-4" />
-          <span>Hardware Analytics</span>
-          <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold ${
-            activeDashboardSubTab === 'repair-data'
-              ? 'bg-brand-deep text-white'
-              : 'bg-line text-ink'
-          }`}>
-            {filteredWorkOrders.length} Tickets
-          </span>
-        </Button>
-
-        {/* Subtab 3: Technician KPI & Leaderboard (merged) */}
-        <Button
-          type="button"
-          role="tab"
-          id="dash-tab-tech-kpi"
-          aria-controls="dash-panel-tech-kpi"
-          aria-selected={activeDashboardSubTab === 'tech-kpi'}
-          onClick={() => setActiveDashboardSubTab('tech-kpi')}
-          onKeyDown={(e) => handleDashboardTabKeyDown(e, 'tech-kpi')}
-          className={`px-3.5 h-10 lg:h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
-            activeDashboardSubTab === 'tech-kpi'
-              ? 'bg-brand text-white border-brand shadow-xs'
-              : 'bg-white hover:bg-surface text-muted hover:text-ink border-line'
-          }`}
-        >
-          <Users className="w-4 h-4" />
-          <span>Technicians</span>
-          <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold ${
-            activeDashboardSubTab === 'tech-kpi'
-              ? 'bg-brand-deep text-white'
-              : 'bg-line text-ink'
-          }`}>
-            {technicians.length} Staff
-          </span>
-        </Button>
-
-        {/* Subtab 4: Inventory */}
-        <Button
-          type="button"
-          role="tab"
-          id="dash-tab-inventory"
-          aria-controls="dash-panel-inventory"
-          aria-selected={activeDashboardSubTab === 'inventory'}
-          onClick={() => setActiveDashboardSubTab('inventory')}
-          onKeyDown={(e) => handleDashboardTabKeyDown(e, 'inventory')}
-          className={`px-3.5 h-10 lg:h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
-            activeDashboardSubTab === 'inventory'
-              ? 'bg-brand text-white border-brand shadow-xs'
-              : 'bg-white hover:bg-surface text-muted hover:text-ink border-line'
-          }`}
-        >
-          <Boxes className="w-4 h-4" />
-          <span>Inventory</span>
-          {repairLowStockParts.length > 0 ? (
-            <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-extrabold ${
-              activeDashboardSubTab === 'inventory'
-                ? 'bg-brand-deep text-white'
-                : 'bg-warning/15 text-warning border border-warning/30'
-            }`}>
-              {repairLowStockParts.length} Low
-            </span>
-          ) : (
-            <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold ${
-              activeDashboardSubTab === 'inventory'
-                ? 'bg-brand-deep text-white'
-                : 'bg-line text-ink'
-            }`}>
-              {parts.length} Parts
-            </span>
-          )}
-        </Button>
-
-        {/* Subtab 6: Finance */}
-        <Button
-          type="button"
-          role="tab"
-          id="dash-tab-finance"
-          aria-controls="dash-panel-finance"
-          aria-selected={activeDashboardSubTab === 'finance'}
-          onClick={() => setActiveDashboardSubTab('finance')}
-          onKeyDown={(e) => handleDashboardTabKeyDown(e, 'finance')}
-          className={`px-3.5 h-10 lg:h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
-            activeDashboardSubTab === 'finance'
-              ? 'bg-brand text-white border-brand shadow-xs'
-              : 'bg-white hover:bg-surface text-muted hover:text-ink border-line'
-          }`}
-        >
-          <Coins className="w-4 h-4" />
-          <span>Finance</span>
-          <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold inline-flex items-center space-x-0.5 ${
-            activeDashboardSubTab === 'finance'
-              ? marginPercent < 0 ? 'bg-white/25 text-white' : 'bg-white/20 text-white'
-              : marginPercent < 0 ? 'bg-danger/15 text-danger' : 'bg-line text-ink'
-          }`}>
-            {marginPercent < 0 && !(activeDashboardSubTab === 'finance') && <AlertTriangle className="w-2.5 h-2.5 shrink-0" />}
-            <span>{marginPercent}% Margin</span>
-          </span>
-        </Button>
-
-        {/* Subtab 7: Warranty Watch */}
-        <Button
-          type="button"
-          role="tab"
-          id="dash-tab-warranty-watch"
-          aria-controls="dash-panel-warranty-watch"
-          aria-selected={activeDashboardSubTab === 'warranty-watch'}
-          onClick={() => setActiveDashboardSubTab('warranty-watch')}
-          onKeyDown={(e) => handleDashboardTabKeyDown(e, 'warranty-watch')}
-          className={`px-3.5 h-10 lg:h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
-            activeDashboardSubTab === 'warranty-watch'
-              ? 'bg-brand text-white border-brand shadow-xs'
-              : 'bg-white hover:bg-surface text-muted hover:text-ink border-line'
-          }`}
-        >
-          <ShieldAlert className="w-4 h-4" />
-          <span>Warranty Watch</span>
-          {expiringSoonWorkOrders.length > 0 ? (
-            <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold ${
-              activeDashboardSubTab === 'warranty-watch'
-                ? 'bg-brand-deep text-white'
-                : 'bg-danger/15 text-danger border border-danger/30'
-            }`}>
-              {expiringSoonWorkOrders.length} Flagged
-            </span>
-          ) : (
-            <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold ${
-              activeDashboardSubTab === 'warranty-watch'
-                ? 'bg-brand-deep text-white'
-                : 'bg-line text-ink'
-            }`}>
-              Clear
-            </span>
-          )}
-        </Button>
-      </div>
-      {/* Right-edge fade on the scrollable subtab bar (below xl) */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-6 rounded-r-xl bg-gradient-to-l from-surface/80 to-transparent xl:hidden" />
-      </div>
-
       {/* Background Warranty Check Alert Banner on Dashboard */}
       {expiringSoonWorkOrders.length > 0 && activeDashboardSubTab !== 'warranty-watch' && (
         <div className="p-4 bg-gradient-to-r from-rose-50 via-amber-50 to-orange-50 border border-danger/30 rounded-2xl shadow-xs space-y-3">
@@ -907,10 +715,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       {activeDashboardSubTab === 'status-queue' && (
         <div role="tabpanel" id="dash-panel-status-queue" aria-labelledby="dash-tab-status-queue" className="space-y-6">
           {/* Analytics Grid — stage, devices, categories, finance, inventory, tech, warranty */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3.5">
+          <div className="grid auto-rows-fr grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3.5">
 
             {/* Stage Distribution */}
-            <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs">
+            <div className="flex flex-col min-h-[210px] bg-white border border-line rounded-2xl p-4 shadow-2xs">
               <div className="flex items-center space-x-2 mb-3">
                 <ListFilter className="w-4 h-4 text-brand" />
                 <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Stage Distribution</h3>
@@ -940,7 +748,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </div>
 
             {/* Top Repair Devices */}
-            <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs">
+            <div className="flex flex-col min-h-[210px] bg-white border border-line rounded-2xl p-4 shadow-2xs">
               <div className="flex items-center space-x-2 mb-3">
                 <Smartphone className="w-4 h-4 text-purple" />
                 <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Top Repair Devices</h3>
@@ -969,7 +777,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </div>
 
             {/* Repair Categories */}
-            <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs">
+            <div className="flex flex-col min-h-[210px] bg-white border border-line rounded-2xl p-4 shadow-2xs">
               <div className="flex items-center space-x-2 mb-3">
                 <Activity className="w-4 h-4 text-brand" />
                 <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Repair Categories</h3>
@@ -997,7 +805,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </div>
 
             {/* Financial Snapshot */}
-            <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs">
+            <div className="flex flex-col min-h-[210px] bg-white border border-line rounded-2xl p-4 shadow-2xs">
               <div className="flex items-center space-x-2 mb-3">
                 <Coins className="w-4 h-4 text-success" />
                 <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Financial Snapshot</h3>
@@ -1029,7 +837,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </div>
 
             {/* Inventory Snapshot */}
-            <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs">
+            <div className="flex flex-col min-h-[210px] bg-white border border-line rounded-2xl p-4 shadow-2xs">
               <div className="flex items-center space-x-2 mb-3">
                 <Boxes className="w-4 h-4 text-warning" />
                 <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Inventory</h3>
@@ -1059,7 +867,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </div>
 
             {/* Technician Load */}
-            <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs">
+            <div className="flex flex-col min-h-[210px] bg-white border border-line rounded-2xl p-4 shadow-2xs">
               <div className="flex items-center space-x-2 mb-3">
                 <Users className="w-4 h-4 text-brand" />
                 <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Technician Load</h3>
@@ -1088,7 +896,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </div>
 
             {/* Warranty Watch */}
-            <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs">
+            <div className="flex flex-col min-h-[210px] bg-white border border-line rounded-2xl p-4 shadow-2xs">
               <div className="flex items-center space-x-2 mb-3">
                 <ShieldAlert className="w-4 h-4 text-purple" />
                 <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Warranty Watch</h3>
@@ -1805,4 +1613,4 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       )}
     </div>
   );
-};
+});

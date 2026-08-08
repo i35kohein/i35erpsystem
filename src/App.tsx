@@ -1,6 +1,6 @@
 import  {useState, useRef, useEffect, useMemo, lazy, Suspense} from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import {Sparkles, Plus, Search, Filter, Calculator, Folder, Settings, Download, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, Timer, MoreHorizontal, SlidersHorizontal, Eye, Stethoscope, Edit2, List, LayoutGrid, Printer, Smartphone, Layers, ScanLine} from 'lucide-react';
+import {Sparkles, Plus, Search, Filter, Calculator, Folder, Settings, Download, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, Timer, MoreHorizontal, SlidersHorizontal, Eye, Stethoscope, Edit2, List, LayoutGrid, Printer, Smartphone, Layers, ScanLine, ListFilter, Activity, Users, Boxes, Coins, ShieldAlert} from 'lucide-react';
 import {subscribeToCollection, fetchCloudCollection, saveDocument, deleteDocument, clearCollection} from './lib/supabase';
 import { setActiveUserId, notifyAccountChanged } from './utils/accountSettings';
 
@@ -128,6 +128,7 @@ export default function App() {
   // Dynamic Header Top Bar Filter States
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [techFilter, setTechFilter] = useState<string>('ALL');
+  const [dashboardSubTab, setDashboardSubTab] = useState<string>('status-queue');
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
   const [stockFilter, setStockFilter] = useState<string>('ALL');
   const [modelFilter, setModelFilter] = useState<string>('ALL');
@@ -151,6 +152,7 @@ export default function App() {
 
   // Finance: Record Expense button lives in the top navbar — module exposes openAddExpense via ref
   const financeModuleRef = useRef<{ openAddExpense: () => void } | null>(null);
+  const dashboardRef = useRef<{ setSubTab: (tab: string) => void } | null>(null);
   
   // Price Catalog top navigation controls state
   const [priceCatalogQuickCalcOpen, setPriceCatalogQuickCalcOpen] = useState(false);
@@ -1963,6 +1965,43 @@ export default function App() {
               </>
             )}
 
+            {activeTab === 'dashboard' && (
+              <>
+                <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-1.5'}>
+                  {[
+                    { id: 'status-queue', label: 'Status Queue', icon: ListFilter },
+                    { id: 'repair-data', label: 'Analytics', icon: Activity },
+                    { id: 'tech-kpi', label: 'Technicians', icon: Users },
+                    { id: 'inventory', label: 'Inventory', icon: Boxes },
+                    { id: 'finance', label: 'Finance', icon: Coins },
+                    { id: 'warranty-watch', label: 'Warranty', icon: ShieldAlert },
+                  ].map((tab) => {
+                    const Icon = tab.icon;
+                    const isActive = dashboardSubTab === tab.id;
+                    return (
+                      <Button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => {
+                          setDashboardSubTab(tab.id);
+                          dashboardRef.current?.setSubTab(tab.id as any);
+                        }}
+                        aria-pressed={isActive}
+                        className={`px-3 h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 shrink-0 cursor-pointer border select-none active:scale-95 ${
+                          isActive
+                            ? 'bg-brand text-white border-brand shadow-xs'
+                            : 'bg-white hover:bg-surface text-muted hover:text-ink border-line'
+                        }`}
+                      >
+                        <Icon className="w-4 h-4" />
+                        <span>{tab.label}</span>
+                      </Button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+
             {activeTab === 'trello' && (
               <>
                 <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
@@ -2261,6 +2300,7 @@ export default function App() {
           <div key={activeTab} className="app-module-content flex-1 w-full min-w-0 flex flex-col">
               {activeTab === 'dashboard' && (
                 <DashboardOverview
+                  ref={dashboardRef}
                   workOrders={activeWorkOrders}
                   parts={parts}
                   rmas={rmas}
