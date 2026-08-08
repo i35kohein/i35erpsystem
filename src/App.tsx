@@ -626,6 +626,8 @@ export default function App() {
     switch (tab) {
       case 'pipeline':
         return (statusFilter !== 'ALL' ? 1 : 0) + (techFilter !== 'ALL' ? 1 : 0) + (showBottlenecksOnly ? 1 : 0) + (showAllStages ? 1 : 0) + (showBeforeNeedsDiagOnly ? 1 : 0) + (showNeedsDiagOnly ? 1 : 0) + d;
+      case 'trello':
+        return (techFilter !== 'ALL' ? 1 : 0) + d;
       case 'intake':
       case 'pos':
       case 'suppliers':
@@ -1961,6 +1963,24 @@ export default function App() {
               </>
             )}
 
+            {activeTab === 'trello' && (
+              <>
+                <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
+                  <CustomDropdownMenu
+                    value={techFilter}
+                    onChange={(val) => setTechFilter(val)}
+                    buttonClassName="!px-2.5 !py-1.5 !h-10 text-xs"
+                    options={[
+                      { value: 'ALL', label: 'All Techs' },
+                      { value: 'unassigned', label: 'Unassigned' },
+                      ...technicians.map((t) => ({ value: t.id, label: t.name })),
+                    ]}
+                  />
+                  <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
+                </div>
+              </>
+            )}
+
             {activeTab === 'inventory' && (
               <>
                 <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
@@ -2338,6 +2358,10 @@ export default function App() {
                   onSaveWorkOrder={handleSaveWorkOrder}
                   onDeleteWorkOrder={handleDeleteWorkOrder}
                   onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
+                  techFilter={techFilter}
+                  setTechFilter={setTechFilter}
+                  dateFilter={dateFilter}
+                  setDateFilter={setDateFilter}
                 />
               )}
 

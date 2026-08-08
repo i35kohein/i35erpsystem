@@ -16,6 +16,10 @@ interface TrelloBoardProps {
   onDeleteWorkOrder?: (id: string) => void;
   onSelectPrintTag?: (wo: WorkOrder) => void;
   onOpenAiAssistant?: () => void;
+  techFilter?: string;
+  setTechFilter?: (t: string) => void;
+  dateFilter?: any;
+  setDateFilter?: (d: any) => void;
 }
 
 const STAGE_COLUMNS: { id: WorkOrderStatus; title: string; dot: string; border: string; headerBg: string }[] = [
@@ -37,7 +41,12 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
   onSaveWorkOrder,
   onDeleteWorkOrder,
   onSelectPrintTag,
+  techFilter: propTechFilter,
+  dateFilter: propDateFilter,
 }) => {
+  const techFilter = propTechFilter !== undefined ? propTechFilter : 'ALL';
+  const dateFilter = propDateFilter !== undefined ? propDateFilter : { preset: 'all' };
+
   const [detailWo, setDetailWo] = useState<WorkOrder | null>(null);
   const [draggedWoId, setDraggedWoId] = useState<string | null>(null);
   const [dragOverStage, setDragOverStage] = useState<WorkOrderStatus | null>(null);
@@ -57,10 +66,30 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
             (myTechName && (wo.assignedTechName || '').toLowerCase() === myTechName.toLowerCase());
           if (!isMine) return false;
         }
+        // Tech filter (manager/desktop)
+        if (techFilter !== 'ALL') {
+          if (techFilter === 'unassigned') {
+            if (wo.assignedTechId || wo.assignedTechName) return false;
+          } else if (wo.assignedTechId !== techFilter && (wo.assignedTechName || '') !== techFilter) {
+            return false;
+          }
+        }
+        // Date filter
+        if (dateFilter && dateFilter.preset !== 'all') {
+          const created = new Date(wo.createdAt).getTime();
+          const now = Date.now();
+          const DAY = 1000 * 60 * 60 * 24;
+          let windowMs = now;
+          if (dateFilter.preset === 'today') windowMs = now;
+          else if (dateFilter.preset === '7days') windowMs = now - 6 * DAY;
+          else if (dateFilter.preset === '30days') windowMs = now - 29 * DAY;
+          else if (dateFilter.preset === '60days') windowMs = now - 59 * DAY;
+          if (!isNaN(created) && created < windowMs) return false;
+        }
         return true;
       })
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }, [workOrders, isTechnicianUser, myTechId, myTechName]);
+  }, [workOrders, isTechnicianUser, myTechId, myTechName, techFilter, dateFilter]);
 
   const columns = useMemo(() => {
     return STAGE_COLUMNS.map((col) => ({
@@ -76,6 +105,17 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
     // they'd always look 'stale' by age and shouldn't get the red border.
     if (wo.status === 'Finished' || wo.status === 'Taken Out') return false;
     return (Date.now() - created) / (1000 * 60 * 60) >= 48;
+  };
+
+  const getRepairSummary = (wo: WorkOrder) => {
+    if (wo.selectedRepairs && wo.selectedRepairs.length > 0) {
+      return wo.selectedRepairs.map((r) => r.name).join(', ');
+    }
+    if (wo.lineItems && wo.lineItems.length > 0) {
+      const items = wo.lineItems.map((l) => l.description || l.partName).filter(Boolean);
+      if (items.length > 0) return items.join(', ');
+    }
+    return wo.symptomsReported || 'General Device Repair & Inspection';
   };
 
   const techName = (wo: WorkOrder) => {
@@ -165,6 +205,11 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
                       {/* Device + customer */}
                       <p className="mt-1.5 text-xs font-extrabold text-ink truncate">{wo.deviceModel}</p>
                       <p className="text-[11px] text-muted truncate">{wo.customerName} · {wo.customerPhone}</p>
+
+                      {/* What's being repaired */}
+                      <p className="mt-1 line-clamp-2 text-[11px] font-medium text-muted leading-snug" title={getRepairSummary(wo)}>
+                        {getRepairSummary(wo)}
+                      </p>
 
                       {/* Footer: tech + amount */}
                       <div className="mt-2 flex items-center justify-between border-t border-line/60 pt-1.5">
