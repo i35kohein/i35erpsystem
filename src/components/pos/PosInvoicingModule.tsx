@@ -23,6 +23,8 @@ import {CreditCard,
   XCircle, 
   Split,
   UserCheck,
+  ChevronsLeft,
+  ChevronsRight,
   type LucideIcon,
 } from 'lucide-react';
 import { WorkOrder, Customer, SystemSettings, PartItem, WorkOrderLineItem } from '../../types';
@@ -199,6 +201,8 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   const [inventoryPartQty, setInventoryPartQty] = useState<number>(1);
   const [isAddPartOpen, setIsAddPartOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  // Left (ticket queue) panel collapse toggle
+  const [isQueueCollapsed, setIsQueueCollapsed] = useState(false);
 
   // POS keyboard-first: focus the cash tendered field the moment the payment
   // confirmation panel opens, so staff can type the amount immediately.
@@ -431,15 +435,41 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   return (
     <div className={`space-y-3 ${isIpad ? 'flex min-h-0 flex-1 flex-col' : ''}`}>
       <div className={`grid grid-cols-1 gap-3 text-xs md:grid-cols-12 pb-16 md:pb-0 ${isIpad ? 'md:flex-1 md:min-h-0 md:grid-rows-1' : ''}`}>
-        {/* Left Column: Select Work Order to Checkout (5 cols) */}
-        <div className={`md:col-span-5 bg-white border border-line rounded-2xl p-4 space-y-3 shadow-xs ${isIpad ? 'md:flex md:flex-col md:min-h-0' : 'md:self-start'}`}>
+        {/* Left Column: Select Work Order to Checkout (4 cols, collapsible) */}
+        <div className={`md:col-span-4 bg-white border border-line rounded-2xl p-3 space-y-3 shadow-xs ${isIpad ? 'md:flex md:flex-col md:min-h-0' : 'md:self-start'} ${isQueueCollapsed ? 'md:col-span-1' : ''}`}>
           <div className="flex justify-between items-center border-b border-line pb-2">
-            <h2 className="font-bold text-ink text-xs">Ready to Checkout ({filteredWorkOrders.length})</h2>
-            <span className="text-xs font-mono font-bold bg-success/10 text-success-deep px-2 py-0.5 rounded-full border border-success/20">
-              Checkout
-            </span>
+            {!isQueueCollapsed ? (
+              <>
+                <h2 className="font-bold text-ink text-xs">Ready to Checkout ({filteredWorkOrders.length})</h2>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="text-xs font-mono font-bold bg-success/10 text-success-deep px-2 py-0.5 rounded-full border border-success/20">
+                    Checkout
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setIsQueueCollapsed(true)}
+                    className="!h-6 !min-h-6 w-6 px-0 rounded flex items-center justify-center text-muted hover:bg-surface hover:text-ink transition-colors"
+                    title="Collapse ticket list"
+                    aria-label="Collapse ticket list"
+                  >
+                    <ChevronsLeft className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsQueueCollapsed(false)}
+                className="w-full h-8 rounded-lg flex items-center justify-center text-muted hover:bg-surface hover:text-brand transition-colors"
+                title="Expand ticket list"
+                aria-label="Expand ticket list"
+              >
+                <ChevronsRight className="w-4 h-4" />
+              </button>
+            )}
           </div>
 
+          {!isQueueCollapsed && (
           <div className={`space-y-2 overflow-y-auto ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:flex-1 md:max-h-none' : 'min-h-[360px] max-h-[calc(100dvh-280px)]'}`}>
             {filteredWorkOrders.length === 0 ? (
               <div className="flex min-h-0 flex-1 flex-col items-center justify-center p-8 text-center text-muted space-y-2 bg-surface rounded-xl border border-dashed border-line-strong my-4">
@@ -519,10 +549,29 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               </p>
             )}
           </div>
+          )}
+
+          {isQueueCollapsed && filteredWorkOrders.length > 0 && (
+            <div className="space-y-1.5">
+              {filteredWorkOrders.map((wo) => (
+                <button
+                  key={wo.id}
+                  type="button"
+                  onClick={() => setSelectedWoId(wo.id)}
+                  className={`w-full px-2 py-1.5 rounded-lg text-[10px] font-bold text-left truncate transition-colors ${
+                    wo.id === selectedWoId ? 'bg-brand text-white' : 'bg-surface text-ink hover:bg-line'
+                  }`}
+                  title={wo.orderNumber}
+                >
+                  {wo.orderNumber} · {wo.deviceModel}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Right Column: Dynamic Invoice & Terminal Checkout (7 cols) */}
-        <div className={`md:col-span-7 bg-white border border-line rounded-2xl p-5 space-y-5 shadow-xs ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:overflow-y-auto' : ''}`}>
+        {/* Right Column: Dynamic Invoice & Terminal Checkout (8 cols) */}
+        <div className={`${isQueueCollapsed ? 'md:col-span-11' : 'md:col-span-8'} bg-white border border-line rounded-2xl p-5 space-y-5 shadow-xs ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:overflow-y-auto' : ''}`}>
           {selectedWo ? (
             <div className="space-y-5">
               <div className="border-b border-line pb-3 space-y-2">
