@@ -6,7 +6,6 @@ import {Coins,
   Clock, 
   TrendingUp, 
   Users,
-  ChevronRight,
   BarChart3,
   Smartphone,
   Activity,
@@ -23,7 +22,6 @@ import {Coins,
   Search,
   RefreshCw,
   Printer,
-  Kanban,
   Eye} from 'lucide-react';
 import { WorkOrder, PartItem, RmaItem, Technician, WorkOrderStatus } from '../../types';
 import { Button , Input } from '../ui';
@@ -386,25 +384,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const maxLoadTechs = techLoadData.filter((t) => t.activeCount === maxTechLoad);
   const minLoadTechs = techLoadData.filter((t) => t.activeCount === minTechLoad && t.activeCount < maxTechLoad);
 
-  // Status Queue Breakdown Analytics
-  const statusQueueCounts = useMemo(() => {
-    const counts = {
-      Receive: 0,
-      'In Progress': 0,
-      Pending: 0,
-      Finished: 0,
-      'Taken Out': 0,
-      'Cant Repair': 0,
-      'Customer Not Repair': 0,
-    };
-    filteredWorkOrders.forEach((wo) => {
-      if (counts[wo.status] !== undefined) {
-        counts[wo.status] += 1;
-      }
-    });
-    return counts;
-  }, [filteredWorkOrders]);
-
   // Top Repair Devices — most-repaired models by ticket count + revenue
   const topRepairDevices = useMemo(() => {
     const byModel = new Map<string, { count: number; revenue: number }>();
@@ -458,16 +437,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       }))
       .filter((st) => st.count > 0)
       .sort((a, b) => b.revenue - a.revenue);
-  }, [filteredWorkOrders]);
-
-  const stagnantWorkOrders = useMemo(() => {
-    const now = Date.now();
-    return filteredWorkOrders.filter((wo) => {
-      if (wo.status === 'Taken Out' || wo.status === 'Finished' || wo.status === 'Cant Repair' || wo.status === 'Customer Not Repair') return false;
-      const created = new Date(wo.createdAt).getTime();
-      const ageHours = (now - created) / (1000 * 60 * 60);
-      return ageHours >= 48;
-    });
   }, [filteredWorkOrders]);
 
   // Diagnostic 21-Point Analytics
@@ -994,93 +963,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       {/* SUBTAB 1: STATUS QUEUE */}
       {activeDashboardSubTab === 'status-queue' && (
         <div role="tabpanel" id="dash-panel-status-queue" aria-labelledby="dash-tab-status-queue" className="space-y-6">
-          {/* Stagnant Bottlenecks Notice */}
-          {stagnantWorkOrders.length > 0 && (
-            <div className="p-4 bg-warning/10 border border-warning/30 rounded-2xl flex items-center justify-between gap-3 text-xs text-warning shadow-2xs">
-              <div className="flex items-center space-x-2.5">
-                <AlertTriangle className="w-5 h-5 text-warning shrink-0" />
-                <div>
-                  <p className="font-bold text-warning">{stagnantWorkOrders.length} Repair Ticket(s) Bottlenecked (&gt;48h in Queue)</p>
-                  <p className="text-xs text-warning">Inactive over 48h — reassign or update status.</p>
-                </div>
-              </div>
-              <Button
-                type="button"
-                onClick={() => onNavigateToTab('pipeline')}
-                size="sm"
-                className="min-h-10 bg-warning hover:bg-amber-800 text-white shrink-0"
-              >
-                Inspect Bottlenecks
-              </Button>
-            </div>
-          )}
-
-          {/* Clean Executive Stage Summary Card & Quick Pipeline Jump */}
-          <div className="bg-white border border-line rounded-2xl p-5 shadow-xs space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-line">
-              <div className="space-y-0.5">
-                <div className="flex items-center space-x-2.5">
-                  <ListFilter className="w-4 h-4 text-brand" />
-                  <h2 className="text-sm font-extrabold text-ink truncate">
-                    <span className="hidden sm:inline">Status Queue & Stage Distribution</span>
-                    <span className="sm:hidden">Stage Distribution</span>
-                  </h2>
-                  <span className="px-2.5 py-0.5 bg-brand/10 text-brand-deep rounded-full text-xs font-mono font-bold whitespace-nowrap">
-                    {filteredWorkOrders.length} <span className="hidden md:inline">Total Work Orders</span><span className="md:hidden">Orders</span>
-                  </span>
-                </div>
-                <p className="text-xs text-muted">Stage tracking, bottlenecks, active repairs</p>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Button
-                  type="button"
-                  onClick={() => onNavigateToTab('pipeline')}
-                  className="min-h-10 bg-brand hover:bg-brand/90 text-white flex items-center space-x-2"
-                >
-                  <Kanban className="w-4 h-4" />
-                  <span className="hidden sm:inline">Open Interactive Pipeline</span>
-                  <span className="sm:hidden">Open Pipeline</span>
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Visual Stage Progress Bars Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
-              {[
-                { stage: 'Receive', title: 'Intake / Receive', count: statusQueueCounts['Receive'], color: 'bg-brand-soft', bg: 'bg-brand-soft', text: 'text-brand' },
-                { stage: 'In Progress', title: 'In Progress (Active)', count: statusQueueCounts['In Progress'], color: 'bg-success', bg: 'bg-success/10', text: 'text-success-deep' },
-                { stage: 'Pending', title: 'Pending Approval / Parts', count: statusQueueCounts['Pending'], color: 'bg-warning', bg: 'bg-warning/10', text: 'text-warning' },
-                { stage: 'Finished', title: 'Finished / Ready for Pickup', count: statusQueueCounts['Finished'], color: 'bg-teal/100', bg: 'bg-teal/10', text: 'text-teal' },
-              ].map((item) => {
-                const total = filteredWorkOrders.length || 1;
-                const pct = Math.round((item.count / total) * 100);
-                return (
-                  <div
-                    key={item.stage}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => setStatusQueueFilter(item.stage)}
-                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setStatusQueueFilter(item.stage); } }}
-                    title={`Filter queue to ${item.title}`}
-                    className={`p-4 rounded-xl border border-line/80 ${item.bg} space-y-2 cursor-pointer transition-all hover:shadow-md hover:border-brand/40 select-none`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className={`text-xs font-bold ${item.text}`}>{item.title}</span>
-                      <span className="font-mono text-xs font-black text-ink">{item.count} <span className="hidden xl:inline">tickets</span></span>
-                    </div>
-                    <div className="w-full h-2.5 bg-line rounded-full overflow-hidden">
-                      <div className={`h-full ${item.color} rounded-full transition-all duration-500`} style={{ width: `${pct}%` }} />
-                    </div>
-                    <div className="flex justify-between items-center text-xs text-muted">
-                      <span>{pct}% of active queue</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>          {/* Live Work Order Status Analytics Queue Roster Table */}
+          {/* Live Work Order Status Analytics Queue Roster Table */}
           <div className="bg-white border border-line rounded-2xl p-5 shadow-xs space-y-4">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-line">
               <div className="space-y-0.5">
