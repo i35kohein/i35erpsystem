@@ -22,7 +22,7 @@ export type CustomerType = 'Retail' | 'B2B Corporate' | 'Wholesale Mail-In';
 
 export type RmaStatus = 'Draft' | 'Shipped to Vendor' | 'Credit Approved' | 'Replacement Received' | 'Rejected';
 
-export type DiagnosticStatus = 'Pass' | 'Fail' | 'N/A';
+export type DiagnosticStatus = 'Pass' | 'Fail' | 'N/A' | 'Cant Test';
 
 export type FollowUpStatus = 
   | 'Pending Call' 

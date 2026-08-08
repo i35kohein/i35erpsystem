@@ -6,7 +6,7 @@ import {ShieldCheck,
   ClipboardCheck,
   MoreHorizontal,
   Camera} from 'lucide-react';
-import { WorkOrder, PostRepairChecklist, Technician, DiagnosticItemResult, AppUser } from '../../types';
+import { WorkOrder, PostRepairChecklist, Technician, DiagnosticItemResult, DiagnosticStatus, AppUser } from '../../types';
 import { Button , Input } from '../ui';
 import { DIAGNOSTIC_NAMES, getDiagnosticIcon } from '../intake/deviceData';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
@@ -124,8 +124,12 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
   };
   // Cycle status: Pass -> Fail -> N/A -> Pass
   const cycleStatus = (id: string, current: string) => {
-    const next = current === 'Pass' ? 'Fail' : current === 'Fail' ? 'N/A' : 'Pass';
-    handleDiagnosticStatusChange(id, next as 'Pass' | 'Fail' | 'N/A');
+    const order: DiagnosticStatus[] = ['Pass', 'Fail', 'N/A', 'Cant Test'];
+    const idx = order.indexOf(current as DiagnosticStatus);
+    const next = order[(idx + 1) % order.length];
+    handleDiagnosticStatusChange(id, next);
+    // Auto-open the comment popup to capture the reason for 'Cant Test'
+    if (next === 'Cant Test') setMenuOpenId(id);
   };
   // Long-press on a card opens its note input (no comment icon)
   const pressTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -201,7 +205,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
 
   
 
-  const handleDiagnosticStatusChange = (id: string, status: 'Pass' | 'Fail' | 'N/A') => {
+  const handleDiagnosticStatusChange = (id: string, status: DiagnosticStatus) => {
     setQaDiagnostics((prev) =>
       prev.map((item) => (item.id === id ? { ...item, status } : item))
     );
@@ -555,6 +559,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     const IconComp = getDiagnosticIcon(item.name);
                     const isPass = item.status === 'Pass';
                     const isFail = item.status === 'Fail';
+                    const isCantTest = item.status === 'Cant Test';
 
                     return (
                       <div
@@ -566,7 +571,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                         onTouchEnd={cancelNotePress}
                         onContextMenu={(e) => e.preventDefault()}
                         className={`rounded-xl border p-2.5 transition-colors select-none ${
-                          isFail ? 'bg-danger/5 border-danger/20' : isPass ? 'bg-success/5 border-success/20' : 'bg-white border-line hover:border-brand/30'
+                          isFail ? 'bg-danger/5 border-danger/20' : isPass ? 'bg-success/5 border-success/20' : isCantTest ? 'bg-warning/5 border-warning/30' : 'bg-white border-line hover:border-brand/30'
                         }`}
                         title="Hold to add note"
                       >
@@ -579,6 +584,8 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                               ? 'text-danger'
                               : isPass
                               ? 'text-success-deep'
+                              : isCantTest
+                              ? 'text-warning'
                               : 'text-brand'
                           }`}
                           title={`Status: ${item.status} — click to change`}
@@ -594,7 +601,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                             type="button"
                             onClick={() => handleDiagnosticStatusChange(item.id, 'Pass')}
                             className={`flex-1 min-w-0 text-[11px] font-bold truncate text-left transition-colors ${
-                              isPass ? 'text-success-deep' : 'text-ink hover:text-success-deep'
+                              isPass ? 'text-success-deep' : isCantTest ? 'text-warning' : 'text-ink hover:text-success-deep'
                             }`}
                             title={`Mark ${item.name} as Pass`}
                             aria-label={`Mark ${item.name} as Pass`}
@@ -602,6 +609,11 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                             {idx + 1}. {item.name}
                           </button>
                           {/* ⋮ menu (Comment) */}
+                          {isCantTest && (item.note || '').trim() && (
+                            <p className="text-[9px] font-semibold text-warning truncate mt-0.5" title={item.note}>
+                              ⚠ {item.note}
+                            </p>
+                          )}
                           <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); setMenuOpenId(menuOpenId === item.id ? null : item.id); }}
