@@ -2,7 +2,6 @@ import React, { useState, useMemo } from 'react';
 import {
   Trello,
   UserCheck,
-  AlertTriangle,
   Search,
   X,
 } from 'lucide-react';
@@ -214,14 +213,6 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
                       {/* Device + customer */}
                       <p className="mt-1.5 text-xs font-extrabold text-ink truncate">{wo.deviceModel}</p>
                       <p className="text-[11px] text-muted truncate">{wo.customerName} · {wo.customerPhone}</p>
-
-                      {/* Stagnant alert */}
-                      {stagnant && (
-                        <div className="mt-1.5 flex items-center space-x-1 rounded-md bg-danger/10 px-1.5 py-0.5 text-[10px] font-extrabold text-danger">
-                          <AlertTriangle className="w-2.5 h-2.5" />
-                          <span>&gt;48h</span>
-                        </div>
-                      )}
 
                       {/* Footer: tech + amount */}
                       <div className="mt-2 flex items-center justify-between border-t border-line/60 pt-1.5">
