@@ -2,8 +2,7 @@ const FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:rin
 
 import React, { useEffect, useState } from 'react';
 import {Users, 
-  Plus, 
-  ExternalLink,
+  Plus,
   X,
   ChevronDown,
   ChevronUp,
@@ -17,7 +16,6 @@ import { Button , Input } from '../ui';
 import { CustomerFacingWebPortal } from '../portal/CustomerFacingWebPortal';
 import { PrintableInvoiceModal } from '../common/PrintableInvoiceModal';
 import { CustomerRepairHistoryModal } from './CustomerRepairHistoryModal';
-import { CustomerRepairTimeline } from './CustomerRepairTimeline';
 import { DEFAULT_SYSTEM_SETTINGS } from '../../data/seedData';
 
 interface CrmCustomerPortalModuleProps {
@@ -110,20 +108,6 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
   });
 
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(filteredCustomers[0] || customers[0] || null);
-
-  // Mobile master-detail: detail column becomes a bottom sheet; auto-open when the
-  // user taps a different customer on phones (skips the initial auto-selection).
-  const [isMobileDetailOpen, setIsMobileDetailOpen] = useState(false);
-  const isFirstRenderRef = React.useRef(true);
-  useEffect(() => {
-    if (isFirstRenderRef.current) {
-      isFirstRenderRef.current = false;
-      return;
-    }
-    if (selectedCustomer && window.matchMedia('(max-width: 767px)').matches) {
-      setIsMobileDetailOpen(true);
-    }
-  }, [selectedCustomer]);
 
   // Keyboard shortcuts: [ / ] cycle through customers (desktop convenience)
   useEffect(() => {
@@ -220,8 +204,6 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
     );
   };
 
-  const selectedCustomerOrders = selectedCustomer ? getCustomerWorkOrders(selectedCustomer) : [];
-
   return (
     <div className="space-y-3 text-xs">
       {/* Header — compact on mobile: subtitle hidden, tabs slimmer */}
@@ -262,9 +244,9 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
       </div>
 
       {activeTab === 'CRM' ? (
-        <div className="workspace-grid grid grid-cols-1 gap-3 overflow-hidden md:grid-cols-12">
-          {/* Customer Directory List */}
-          <div className="flex min-h-0 h-full flex-col md:col-span-6 xl:col-span-5 bg-white border border-line rounded-2xl p-4 shadow-xs">
+        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
+          {/* Customer Directory List — full-width table, details open in modal */}
+          <div className="flex min-h-0 h-full flex-col bg-white border border-line rounded-2xl p-4 shadow-xs">
             <div className="flex flex-wrap justify-between items-center border-b border-line pb-2 gap-x-2 gap-y-1">
               <h2 className="font-bold text-ink text-xs">Customer Account Roster</h2>
               <div className="flex items-center gap-2 min-w-0">
@@ -478,107 +460,6 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
             </div>
           </div>
 
-          {/* Customer Details & History — bottom sheet on mobile (fixed), in-flow panel on md+ */}
-          <div className={`fixed inset-x-0 bottom-0 z-[60] max-h-[85vh] overflow-y-auto rounded-t-3xl bg-white border-t border-line shadow-raised-top transition-transform duration-300 flex min-h-0 flex-col p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] md:static md:inset-auto md:z-auto md:max-h-none md:overflow-visible md:rounded-none md:border md:border-line md:shadow-xs md:transition-none md:translate-y-0 md:col-span-6 xl:col-span-7 ${isMobileDetailOpen ? 'translate-y-0' : 'translate-y-full'}`}>
-            {/* Mobile sheet handle + close (md:hidden) */}
-            <div className="flex items-center justify-between pb-2 md:hidden">
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="h-1 w-8 shrink-0 rounded-full bg-line-strong" />
-                <p className="truncate text-xs font-extrabold text-ink">{selectedCustomer?.name || 'Customer Details'}</p>
-              </div>
-              <Button
-                variant="ghost"
-                type="button"
-                onClick={() => setIsMobileDetailOpen(false)}
-                aria-label="Close customer details"
-                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted hover:bg-surface hover:text-ink transition-colors cursor-pointer ${FOCUS}`}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            {selectedCustomer ? (
-              <div className="flex min-h-0 flex-1 flex-col gap-5">
-                <div className="border-b border-line pb-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <Button
-                        variant="ghost"
-                        type="button"
-                        onClick={() => handleOpenHistoryModal(selectedCustomer)}
-                        className={`text-base font-black text-ink hover:text-brand hover:underline flex items-center space-x-2 cursor-pointer text-left group ${FOCUS}`}
-                        title="Click to view full repair history modal"
-                      >
-                        <span>{selectedCustomer.name}</span>
-                        <ExternalLink className="w-4 h-4 text-brand opacity-80 group-hover:opacity-100 transition-opacity" />
-                      </Button>
-                      {selectedCustomer.company && <p className="text-muted text-xs font-medium">{selectedCustomer.company}</p>}
-                    </div>
-
-                    <Button
-                      type="button"
-                      onClick={() => handleOpenHistoryModal(selectedCustomer)}
-                      className={`bg-brand/10 hover:bg-brand text-brand-deep hover:text-white border border-brand/30 rounded-lg px-3 py-1.5 text-xs font-bold transition-colors cursor-pointer ${FOCUS}`}
-                    >
-                      <FileText className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">Full History</span>
-                      <span className="sm:hidden">History</span>
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 bg-surface p-2.5 rounded-xl border border-line text-ink">
-                  <div>
-                    <span className="text-muted">Email:</span>
-                    <p className="font-semibold text-ink truncate">{selectedCustomer.email}</p>
-                  </div>
-                  <div>
-                    <span className="text-muted">Phone:</span>
-                    <p className="font-mono text-ink">{selectedCustomer.phone}</p>
-                  </div>
-                  <div>
-                    <span className="text-muted">Total Orders:</span>
-                    <p className="font-bold text-brand">{selectedCustomerOrders.length} Repairs</p>
-                  </div>
-                  <div>
-                    <span className="text-muted">Total Spent:</span>
-                    <p className="font-bold text-success-deep">{selectedCustomer.totalSpent.toLocaleString()} {systemSettings.currencySymbol}</p>
-                  </div>
-                </div>
-
-                {selectedCustomer.notes && (
-                  <div className="p-3 bg-warning/10 border border-warning/30 rounded-xl text-warning">
-                    <strong>Account Notes:</strong> {selectedCustomer.notes}
-                  </div>
-                )}
-
-                {/* Selected Customer Detailed Repair History Timeline */}
-                <div className="flex min-h-0 flex-1 flex-col space-y-3 pt-2 border-t border-line">
-                  <div className="flex items-center justify-between pb-1">
-                    <h3 className="font-black text-ink text-xs flex items-center space-x-1.5">
-                      <History className="w-4 h-4 text-brand" />
-                      <span>Chronological Repair History & Outcomes ({selectedCustomerOrders.length})</span>
-                    </h3>
-                  </div>
-
-                  <CustomerRepairTimeline
-                    workOrders={selectedCustomerOrders}
-                    systemSettings={systemSettings}
-                    emptyClassName="flex-1"
-                    onPrintInvoice={(wo) => {
-                      setSelectedInvoiceWo(wo);
-                      setIsInvoiceModalOpen(true);
-                    }}
-                    showFilters={true}
-                  />
-                </div>
-              </div>
-            ) : (
-              <div className="flex min-h-[360px] flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-line bg-surface p-8 text-center text-muted">
-                <Users className="mb-2 h-8 w-8 text-muted/50" />
-                <p className="font-semibold">Select a customer to view details.</p>
-              </div>
-            )}
-          </div>
         </div>
       ) : (
         /* PORTAL VIEW SIMULATOR */
