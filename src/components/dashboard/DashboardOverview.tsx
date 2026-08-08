@@ -46,6 +46,8 @@ interface DashboardOverviewProps {
   setDateFilter?: (filter: DateFilterState) => void;
   currencySymbol?: string;
   onSettleInventoryFund?: (ids: string[]) => void;
+  activeSubTab?: 'status-queue' | 'repair-data' | 'tech-kpi' | 'inventory' | 'finance' | 'warranty-watch';
+  onSubTabChange?: (tab: 'status-queue' | 'repair-data' | 'tech-kpi' | 'inventory' | 'finance' | 'warranty-watch') => void;
 }
 
 const REPAIR_CATEGORIES_KEYWORDS = [
@@ -152,11 +154,22 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
   currencySymbol,
   dateFilter: externalDateFilter,
   onSettleInventoryFund,
+  activeSubTab,
+  onSubTabChange,
 }: DashboardOverviewProps, ref) => {
   const [internalDateFilter] = useState<DateFilterState>({ preset: 'all' });
   const dateFilter = externalDateFilter || internalDateFilter;
 
-  const [activeDashboardSubTab, setActiveDashboardSubTab] = useState<'status-queue' | 'repair-data' | 'tech-kpi' | 'inventory' | 'finance' | 'warranty-watch'>('status-queue');
+  const [internalSubTab, setInternalSubTab] = useState<'status-queue' | 'repair-data' | 'tech-kpi' | 'inventory' | 'finance' | 'warranty-watch'>('status-queue');
+  // Controlled from App navbar when provided; falls back to internal state.
+  const activeDashboardSubTab = activeSubTab || internalSubTab;
+  const setActiveDashboardSubTab = (tab: typeof activeDashboardSubTab) => {
+    if (onSubTabChange) {
+      onSubTabChange(tab);
+    } else {
+      setInternalSubTab(tab);
+    }
+  };
 
   // Expose subtab switching to the navbar (App.tsx renders dashboard tab buttons)
   useImperativeHandle(ref, () => ({
@@ -549,6 +562,70 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
       )}
 
       {/* Headline summary cards — always visible above the subtab tabs. */}
+
+      {/* Background Warranty Check Alert Banner on Dashboard */}
+      {expiringSoonWorkOrders.length > 0 && activeDashboardSubTab !== 'warranty-watch' && (
+        <div className="p-4 bg-gradient-to-r from-rose-50 via-amber-50 to-orange-50 border border-danger/30 rounded-2xl shadow-xs space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div className="flex items-start sm:items-center space-x-3">
+              <div className="p-2 bg-danger text-white rounded-xl shadow-2xs shrink-0">
+                <ShieldAlert className="w-5 h-5 animate-pulse" />
+              </div>
+              <div className="space-y-0.5">
+                <div className="flex items-center space-x-2">
+                  <span className="font-black text-danger text-sm">Background Warranty Monitor Flagged</span>
+                  <span className="text-xs font-mono font-bold bg-danger/15 text-danger px-2 py-0.5 rounded-full border border-danger/30">
+                    90-Day Standard Window
+                  </span>
+                </div>
+                <p className="text-ink text-xs">
+                  <strong className="text-danger font-extrabold">{expiringSoonWorkOrders.length} Work Order(s)</strong> are nearing the end of their 90-day warranty period ({criticalWarrantyCount} critical within 7 days).
+                </p>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              onClick={() => setActiveDashboardSubTab('warranty-watch')}
+              className="bg-danger hover:bg-danger-deep text-white shrink-0 flex items-center space-x-1.5"
+            >
+              <ShieldCheck className="w-4 h-4" />
+              <span>Inspect Flagged Tickets ({expiringSoonWorkOrders.length})</span>
+            </Button>
+          </div>
+
+          {/* Quick Preview Chips of Top Expiring Tickets */}
+          <div className="flex items-center space-x-2 overflow-x-auto no-scrollbar pt-1 border-t border-danger/30">
+            <span className="text-xs font-bold text-danger uppercase tracking-wider shrink-0">Expiring Soon:</span>
+            {expiringSoonWorkOrders.slice(0, 4).map((item) => (
+              <div
+                key={item.wo.id}
+                onClick={() => setActiveDashboardSubTab('warranty-watch')}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveDashboardSubTab('warranty-watch'); }
+                }}
+                className="bg-white/80 hover:bg-white border border-danger/30 px-2.5 py-1 rounded-lg text-xs flex items-center space-x-2 cursor-pointer shrink-0 shadow-2xs transition-all"
+              >
+                <span className="font-mono font-bold text-brand">{item.wo.orderNumber}</span>
+                <span className="font-bold text-ink">{item.wo.customerName}</span>
+                <span className="text-muted">({item.wo.deviceModel})</span>
+                <span className={`px-1.5 py-0.5 rounded font-extrabold text-xs ${
+                  item.remainingDays <= 3 ? 'bg-danger text-white' : 'bg-warning/15 text-warning'
+                }`}>
+                  ⏳ {item.remainingDays}d left
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* SUBTAB 1: STATUS QUEUE */}
+      {activeDashboardSubTab === 'status-queue' && (
+        <div role="tabpanel" id="dash-panel-status-queue" aria-labelledby="dash-tab-status-queue" className="space-y-6">
+
       {/* 4 KPI cards stay 4-up on every large screen — simplified: label + number + one action hint */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Card 1: Active In-Shop Repairs */}
@@ -652,68 +729,6 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
         </div>
       </div>
 
-      {/* Background Warranty Check Alert Banner on Dashboard */}
-      {expiringSoonWorkOrders.length > 0 && activeDashboardSubTab !== 'warranty-watch' && (
-        <div className="p-4 bg-gradient-to-r from-rose-50 via-amber-50 to-orange-50 border border-danger/30 rounded-2xl shadow-xs space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-            <div className="flex items-start sm:items-center space-x-3">
-              <div className="p-2 bg-danger text-white rounded-xl shadow-2xs shrink-0">
-                <ShieldAlert className="w-5 h-5 animate-pulse" />
-              </div>
-              <div className="space-y-0.5">
-                <div className="flex items-center space-x-2">
-                  <span className="font-black text-danger text-sm">Background Warranty Monitor Flagged</span>
-                  <span className="text-xs font-mono font-bold bg-danger/15 text-danger px-2 py-0.5 rounded-full border border-danger/30">
-                    90-Day Standard Window
-                  </span>
-                </div>
-                <p className="text-ink text-xs">
-                  <strong className="text-danger font-extrabold">{expiringSoonWorkOrders.length} Work Order(s)</strong> are nearing the end of their 90-day warranty period ({criticalWarrantyCount} critical within 7 days).
-                </p>
-              </div>
-            </div>
-
-            <Button
-              type="button"
-              onClick={() => setActiveDashboardSubTab('warranty-watch')}
-              className="bg-danger hover:bg-danger-deep text-white shrink-0 flex items-center space-x-1.5"
-            >
-              <ShieldCheck className="w-4 h-4" />
-              <span>Inspect Flagged Tickets ({expiringSoonWorkOrders.length})</span>
-            </Button>
-          </div>
-
-          {/* Quick Preview Chips of Top Expiring Tickets */}
-          <div className="flex items-center space-x-2 overflow-x-auto no-scrollbar pt-1 border-t border-danger/30">
-            <span className="text-xs font-bold text-danger uppercase tracking-wider shrink-0">Expiring Soon:</span>
-            {expiringSoonWorkOrders.slice(0, 4).map((item) => (
-              <div
-                key={item.wo.id}
-                onClick={() => setActiveDashboardSubTab('warranty-watch')}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveDashboardSubTab('warranty-watch'); }
-                }}
-                className="bg-white/80 hover:bg-white border border-danger/30 px-2.5 py-1 rounded-lg text-xs flex items-center space-x-2 cursor-pointer shrink-0 shadow-2xs transition-all"
-              >
-                <span className="font-mono font-bold text-brand">{item.wo.orderNumber}</span>
-                <span className="font-bold text-ink">{item.wo.customerName}</span>
-                <span className="text-muted">({item.wo.deviceModel})</span>
-                <span className={`px-1.5 py-0.5 rounded font-extrabold text-xs ${
-                  item.remainingDays <= 3 ? 'bg-danger text-white' : 'bg-warning/15 text-warning'
-                }`}>
-                  ⏳ {item.remainingDays}d left
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* SUBTAB 1: STATUS QUEUE */}
-      {activeDashboardSubTab === 'status-queue' && (
-        <div role="tabpanel" id="dash-panel-status-queue" aria-labelledby="dash-tab-status-queue" className="space-y-6">
           {/* Analytics Grid — stage, devices, categories, finance, inventory, tech, warranty */}
           <div className="grid auto-rows-fr grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3.5">
 

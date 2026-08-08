@@ -2282,6 +2282,8 @@ export default function App() {
               {activeTab === 'dashboard' && (
                 <DashboardOverview
                   ref={dashboardRef}
+                  activeSubTab={dashboardSubTab as any}
+                  onSubTabChange={(tab) => setDashboardSubTab(tab)}
                   workOrders={activeWorkOrders}
                   parts={parts}
                   rmas={rmas}
