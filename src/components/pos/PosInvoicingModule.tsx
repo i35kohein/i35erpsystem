@@ -1,4 +1,3 @@
-const FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2';
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useIsIpad } from '../../hooks/useIsIpad';
@@ -23,11 +22,11 @@ import {CreditCard,
   AlertTriangle, 
   XCircle, 
   Split,
-  Wrench,
-  Palette,
+  UserCheck,
   type LucideIcon,
 } from 'lucide-react';
 import { WorkOrder, Customer, SystemSettings, PartItem, WorkOrderLineItem } from '../../types';
+import { PriorityBadge } from '../common/PriorityBadge';
 import { Button , Input } from '../ui';
 import { StatusChip } from '../common/StatusChip';
 import { getActivePaymentMethods } from '../../data/seedData';
@@ -146,12 +145,6 @@ function PaymentMethodTile({ selected, selectedClass, icon: Icon, iconColor, nam
 }
 
 // Group a raw IMEI/S/N into readable chunks: 350627792231777 -> 3506 2779 2231 777
-const formatSerialGrouped = (value: string): string => {
-  const digits = value.replace(/[^0-9a-zA-Z]/g, '');
-  if (/^\d{15}$/.test(digits)) return digits.replace(/(\d{4})(?=\d)/g, '$1 ');
-  return value.trim();
-};
-
 interface PosInvoicingModuleProps {
   workOrders: WorkOrder[];
   customers: Customer[];
@@ -168,6 +161,14 @@ interface PosInvoicingModuleProps {
   setStatusFilter?: (s: string) => void;
   onOpenSettings?: () => void;
 }
+
+const repairSummaryOf = (wo: WorkOrder): string => {
+  const repairs = (wo.selectedRepairs || []).filter((r) => r && r.name);
+  if (repairs.length > 0) return repairs.map((r) => r.name).join(', ');
+  const items = (wo.lineItems || []).map((li) => li.description || li.partName || '').filter(Boolean);
+  if (items.length > 0) return items.join(', ');
+  return wo.symptomsReported || 'General Repair';
+};
 
 export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   workOrders,
@@ -474,73 +475,39 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         handleSelectWo();
                       }
                     }}
-                    className={`p-4 rounded-xl border transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/50 ${
-                      isSelected
-                        ? 'bg-brand-soft border-brand shadow-xs'
-                        : 'bg-surface border-line hover:bg-surface'
+                    className={`group cursor-pointer rounded-xl border bg-white p-3 shadow-2xs transition-all hover:shadow-md hover:border-brand/50 select-none ${
+                      isSelected ? 'border-brand ring-2 ring-brand/20 bg-brand-soft/40' : 'border-line'
                     }`}
                   >
-                    <div className="flex justify-between items-center gap-1">
-                      <span className="font-mono font-bold text-brand flex items-center gap-1 min-w-0 truncate">
-                        {isSelected && <Check className="w-3 h-3 shrink-0" />}
-                        {wo.orderNumber}
-                      </span>
-                      <div className="flex items-center space-x-1 shrink-0">
-                        <StatusChip status={wo.status} />
-                        <span className={`text-xs font-bold px-1.5 py-0.5 rounded-md border ${
-                          wo.isPaid ? 'bg-success/10 text-success-deep border-success/20' : 'bg-warning/10 text-warning border-warning/20'
+                    {/* Top row: order # + priority */}
+                    <div className="flex items-center justify-between gap-1.5">
+                      <span className="font-mono text-[11px] font-extrabold text-brand truncate">{wo.orderNumber}</span>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <PriorityBadge priority={wo.priority} size="xs" />
+                        <span className={`text-[9px] font-black px-1.5 py-px rounded uppercase ${
+                          wo.isPaid ? 'bg-success text-white' : 'bg-warning text-white'
                         }`}>
-                          {wo.isPaid ? 'PAID' : 'UNPAID'}
+                          {wo.isPaid ? 'PAID' : 'DUE'}
                         </span>
                       </div>
                     </div>
 
-                    <div className="flex justify-between items-center gap-2 mt-1">
-                      <p className="font-semibold text-ink truncate">{wo.deviceModel}</p>
-                      <span className="font-mono font-bold text-ink shrink-0">{wo.totalAmount.toLocaleString()} {currency}</span>
-                    </div>
+                    {/* Device + customer */}
+                    <p className="mt-1.5 text-xs font-extrabold text-ink truncate">{wo.deviceModel}</p>
+                    <p className="text-[11px] text-muted truncate">{wo.customerName} · {wo.customerPhone}</p>
 
-                    <div className="flex flex-wrap items-center gap-1 mt-1">
-                      {(wo.selectedRepairs || []).filter((r) => r && r.name).slice(0, 2).map((r, i) => (
-                        <span key={i} className="inline-flex items-center gap-1 rounded-md border border-brand/20 bg-brand/8 px-1.5 py-0.5 text-xs font-extrabold text-brand-deep">
-                          <Wrench className="h-2.5 w-2.5" />
-                          {r.name}
-                        </span>
-                      ))}
-                      {(wo.selectedRepairs || []).filter((r) => r && r.name).length > 2 && (
-                        <span className="text-xs font-bold text-muted">+{((wo.selectedRepairs || []).filter((r) => r && r.name).length) - 2}</span>
-                      )}
-                      {wo.deviceColor && (
-                        <span className="inline-flex items-center gap-1 rounded-md bg-white px-1.5 py-0.5 text-xs font-bold text-ink border border-line">
-                          <Palette className="h-2.5 w-2.5 text-muted" />
-                          {wo.deviceColor}
-                        </span>
-                      )}
-                    </div>
+                    {/* Repair summary */}
+                    <p className="mt-1 line-clamp-2 text-[11px] font-medium text-muted leading-snug">
+                      {repairSummaryOf(wo)}
+                    </p>
 
-                    <div className="flex items-center justify-between gap-2 text-xs text-muted mt-1">
-                      <span className="truncate">
-                        Cust: {wo.customerName}
-                        {wo.depositAmount > 0 && (
-                          <span className="text-brand font-bold"> · Deposit {wo.depositAmount.toLocaleString()} {currency}</span>
-                        )}
+                    {/* Footer: tech + amount */}
+                    <div className="mt-2 flex items-center justify-between border-t border-line/60 pt-1.5">
+                      <span className="flex items-center space-x-1 text-[11px] font-bold text-brand min-w-0 truncate">
+                        <UserCheck className="w-3 h-3 shrink-0" />
+                        <span className="truncate max-w-[80px]">{wo.assignedTechName || 'Unassigned'}</span>
                       </span>
-                      {(wo.imei || wo.serialNumber) && (
-                        <Button
-                          variant="ghost"
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const raw = wo.imei || wo.serialNumber || '';
-                            navigator.clipboard?.writeText(raw).then(() => toast('IMEI copied')).catch(() => {});
-                          }}
-                          title="Copy IMEI"
-                          aria-label={`Copy IMEI ${wo.imei || wo.serialNumber}`}
-                          className={`font-mono text-xs shrink-0 truncate text-muted hover:text-brand transition-colors ${FOCUS}`}
-                        >
-                          #{formatSerialGrouped(wo.imei || wo.serialNumber)}
-                        </Button>
-                      )}
+                      <span className="font-mono text-[11px] font-black text-success-deep">{wo.totalAmount.toLocaleString()} {currency}</span>
                     </div>
                   </div>
                 );
