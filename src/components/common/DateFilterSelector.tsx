@@ -156,6 +156,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
             value={currentFilter.preset}
             onChange={(val) => handlePresetChange(val as DatePreset)}
             iconOnly={iconOnly}
+            size="md"
             triggerIcon={<Calendar className="h-3.5 w-3.5" />}
             ariaLabel="Filter by date"
             options={[

@@ -1837,7 +1837,7 @@ export default function App() {
                 <CustomDropdownMenu
                   value={statusFilter}
                   onChange={(val) => setStatusFilter(val)}
-                  buttonClassName="!px-2.5 !py-1.5 text-xs"
+                  buttonClassName="!px-2.5 !py-1.5 !h-10 text-xs"
                   options={[
                     { value: 'ALL', label: 'All Statuses' },
                     { value: 'Receive', label: 'Receive' },
@@ -1910,7 +1910,7 @@ export default function App() {
                 <CustomDropdownMenu
                   value={statusFilter}
                   onChange={(val) => setStatusFilter(val)}
-                  buttonClassName="!px-2.5 !py-1.5 !min-h-10 text-xs"
+                  buttonClassName="!px-2.5 !py-1.5 !h-10 text-xs"
                   options={[
                     { value: 'ALL', label: 'All Stages' },
                     { value: 'Receive', label: 'Receive' },
@@ -1926,7 +1926,7 @@ export default function App() {
                 <CustomDropdownMenu
                   value={techFilter}
                   onChange={(val) => setTechFilter(val)}
-                  buttonClassName="!px-2.5 !py-1.5 !min-h-10 text-xs"
+                  buttonClassName="!px-2.5 !py-1.5 !h-10 text-xs"
                   options={[
                     { value: 'ALL', label: 'All Techs' },
                     { value: 'unassigned', label: 'Unassigned' },
@@ -1996,7 +1996,7 @@ export default function App() {
                 <CustomDropdownMenu
                   value={statusFilter}
                   onChange={(val) => setStatusFilter(val)}
-                  buttonClassName="!px-2.5 !py-1.5 text-xs"
+                  buttonClassName="!px-2.5 !py-1.5 !h-10 text-xs"
                   options={[
                     { value: 'ALL', label: 'All Checkout Status' },
                     { value: 'Pending Payment', label: 'Unpaid / Ready' },
@@ -2015,7 +2015,7 @@ export default function App() {
                 <CustomDropdownMenu
                   value={customerTypeFilter}
                   onChange={(val) => setCustomerTypeFilter(val)}
-                  buttonClassName="!px-2.5 !py-1.5 text-xs"
+                  buttonClassName="!px-2.5 !py-1.5 !h-10 text-xs"
                   options={[
                     { value: 'ALL', label: 'All Account Types' },
                     { value: 'Retail', label: 'Retail' },
@@ -2035,7 +2035,7 @@ export default function App() {
                 <CustomDropdownMenu
                   value={statusFilter}
                   onChange={(val) => setStatusFilter(val)}
-                  buttonClassName="!px-2.5 !py-1.5 text-xs"
+                  buttonClassName="!px-2.5 !py-1.5 !h-10 text-xs"
                   options={[
                     { value: 'ALL', label: 'All RMA Statuses' },
                     { value: 'Draft', label: 'Draft' },
@@ -2056,7 +2056,7 @@ export default function App() {
                 <CustomDropdownMenu
                   value={statusFilter}
                   onChange={(val) => setStatusFilter(val)}
-                  buttonClassName="!px-2.5 !py-1.5 text-xs"
+                  buttonClassName="!px-2.5 !py-1.5 !h-10 text-xs"
                   options={[
                     { value: 'ALL', label: 'All QA Statuses' },
                     { value: 'Pending QA', label: 'Pending QA' },
