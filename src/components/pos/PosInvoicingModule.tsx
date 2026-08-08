@@ -434,7 +434,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 return (
                   <div
                     key={wo.id}
-                    role="group"
+                    role="radio"
+                    tabIndex={0}
+                    aria-checked={isSelected}
+                    aria-label={`Select work order ${wo.orderNumber}`}
                     onClick={handleSelectWo}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
@@ -442,7 +445,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         handleSelectWo();
                       }
                     }}
-                    className={`p-4 rounded-xl border transition-all cursor-pointer ${
+                    className={`p-4 rounded-xl border transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/50 ${
                       isSelected
                         ? 'bg-brand-soft border-brand shadow-xs'
                         : 'bg-surface border-line hover:bg-slate-100'
@@ -655,7 +658,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                 <Button
                                   type="button"
                                   onClick={() => handleRemoveInventoryPartFromWorkOrder(li.id)}
-                                  className="inline-flex h-9 w-9 items-center justify-center rounded-full text-rose-500 transition-colors hover:bg-rose-50 hover:text-rose-600 active:scale-90"
+                                  className="inline-flex h-10 w-10 items-center justify-center rounded-full text-rose-500 transition-colors hover:bg-rose-50 hover:text-rose-600 active:scale-90"
                                   title="Remove inventory part"
                                   aria-label={`Remove ${li.description}`}
                                 >
@@ -745,7 +748,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       type="button"
                       onClick={handleAddInventoryPartToWorkOrder}
                       disabled={!selectedInventoryPart}
-                      className="inline-flex h-9 shrink-0 items-center justify-center rounded-lg bg-brand px-3.5 py-2 text-xs font-extrabold text-white transition-all hover:bg-brand-deep disabled:cursor-not-allowed disabled:opacity-40"
+                      className="inline-flex h-10 shrink-0 items-center justify-center rounded-lg bg-brand px-3.5 text-xs font-extrabold text-white transition-all hover:bg-brand-deep disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       Add Part
                     </Button>

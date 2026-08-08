@@ -218,7 +218,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
               className="w-full md:w-auto bg-brand hover:bg-brand-deep text-white flex items-center justify-center md:justify-start space-x-1.5"
               title="Scan Device Barcode or QR Code"
             >
-              <Camera className="w-3.5 h-3.5 text-brand shrink-0" />
+              <Camera className="w-3.5 h-3.5 text-white shrink-0" />
               <span className="hidden sm:inline">Scan Barcode / QR</span>
               <span className="sm:hidden">Scan</span>
             </Button>
@@ -387,7 +387,16 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                     <tr
                       key={wo.id}
                       onClick={() => handleOpenTicketDetail(wo)}
-                      className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          handleOpenTicketDetail(wo);
+                        }
+                      }}
+                      tabIndex={0}
+                      role="link"
+                      aria-label={`Open ticket ${wo.orderNumber || wo.id}`}
+                      className="hover:bg-slate-50/80 transition-colors cursor-pointer group focus:outline-none focus-visible:bg-brand-soft"
                     >
                       {/* Ticket # & Date */}
                       <td className="px-2 py-2">

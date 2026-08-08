@@ -5,7 +5,8 @@ import {ShieldCheck,
   X,
   Check,
   Wrench,
-  Palette} from 'lucide-react';
+  Palette,
+  ClipboardCheck} from 'lucide-react';
 import { WorkOrder, PostRepairChecklist, Technician, DiagnosticItemResult, AppUser } from '../../types';
 import { Button , Input } from '../ui';
 import { DIAGNOSTIC_NAMES, getDiagnosticIcon } from '../intake/deviceData';
@@ -362,7 +363,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
               <div className="space-y-2.5 rounded-xl border border-line bg-surface p-3">
                 <div className="flex items-center justify-between border-b border-line pb-2">
                   <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand text-xs text-white">7</span>
+                    <ClipboardCheck className="h-4 w-4 text-brand" />
                     <span>21-Point Post-Repair Hardware Inspection</span>
                   </h3>
                   <div className="flex space-x-2">

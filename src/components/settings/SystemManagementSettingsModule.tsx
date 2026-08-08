@@ -1124,7 +1124,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
 
                   <div>
                     <label className="font-bold text-ink block mb-1.5">Status</label>
-                    <select aria-label="Active"
+                    <select aria-label="Status"
                       value={techFormData.status}
                       onChange={(e) => setTechFormData({ ...techFormData, status: e.target.value as any })}
                       className="w-full h-10 bg-surface text-ink font-bold px-3 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand"
@@ -1294,7 +1294,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
 
                 <div className="space-y-1">
                   <label className="font-bold text-ink block">Account Status</label>
-                  <select aria-label="Active User"
+                  <select aria-label="Account Status"
                     value={userFormData.status}
                     onChange={(e) => setUserFormData({ ...userFormData, status: e.target.value as any })}
                     className="w-full px-3 py-2 rounded-xl border border-line-strong focus:outline-none focus:border-brand font-bold bg-white"

@@ -328,10 +328,10 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             {matchingWorkOrders.length > 1 && (
               <div className="flex items-center space-x-1.5 bg-surface px-2.5 py-1.5 rounded-xl border border-line">
                 <label className="text-xs text-muted font-bold">Select Device:</label>
-                <select aria-label="{wo.orderNumber} -"
+                <select aria-label={`${currentWorkOrder.orderNumber} - device selector`}
                   value={currentWorkOrder.id}
                   onChange={(e) => setSelectedWorkOrderId(e.target.value)}
-                  className="bg-transparent text-brand font-bold text-xs focus:outline-none"
+                  className="bg-transparent text-brand font-bold text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 rounded"
                 >
                   {matchingWorkOrders.map((wo) => (
                     <option key={wo.id} value={wo.id}>
@@ -871,7 +871,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                     <span className={`px-2 py-0.5 rounded-full text-xs font-extrabold ${
                       item.status === 'Pass' ? 'bg-success text-white' :
                       item.status === 'Fail' ? 'bg-danger text-white' :
-                      'bg-muted text-white'
+                      'bg-slate-600 text-white'
                     }`}>
                       {item.status}
                     </span>

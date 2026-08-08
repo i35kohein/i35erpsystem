@@ -12,6 +12,7 @@ import {Truck,
   List} from 'lucide-react';
 import { Supplier, RmaItem, PurchaseOrder, PartItem, RmaStatus } from '../../types';
 import { Button , Input } from '../ui';
+import { toast } from '../../lib/toast';
 
 interface SupplierRmaModuleProps {
   suppliers: Supplier[];
@@ -128,6 +129,10 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
 
   const handleCreateRma = () => {
     const part = parts.find((p) => p.id === newRmaData.partId) || parts[0];    const supplier = suppliers.find((s) => s.id === newRmaData.supplierId) || suppliers[0];
+    if (!part || !supplier) {
+      toast.error('Register at least one part and one supplier before creating an RMA.', 'Missing Parts / Suppliers');
+      return;
+    }
 
     const rma: RmaItem = {
       id: `rma-${Date.now()}`,

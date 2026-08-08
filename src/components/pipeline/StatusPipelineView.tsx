@@ -16,6 +16,7 @@ import {ChevronsRight,
   Trash2,
   BellRing,
   Stethoscope,
+  GitBranch,
   MoreHorizontal} from 'lucide-react';
 import {WorkOrder, 
   WorkOrderStatus, 
@@ -152,6 +153,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
   const [detailModalWo, setDetailModalWo] = useState<WorkOrder | null>(null);
   const [addLogModalWo, setAddLogModalWo] = useState<WorkOrder | null>(null);
   const [assignTechModalWo, setAssignTechModalWo] = useState<WorkOrder | null>(null);
+  const [moveStageModalWo, setMoveStageModalWo] = useState<WorkOrder | null>(null);
   const [checkoutModalWo, setCheckoutModalWo] = useState<WorkOrder | null>(null);
   const [afterDiagModalWo, setAfterDiagModalWo] = useState<WorkOrder | null>(null);
   const [isNotifModalOpen, setIsNotifModalOpen] = useState(false);
@@ -279,6 +281,27 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
       setNotifWo(wo);
       setIsNotifModalOpen(true);
     } else if (action === 'after-diag') openAfterDiagModal(wo);
+    else if (action === 'move-stage') setMoveStageModalWo(wo);
+  };
+
+  const handleMoveToStage = (targetWo: WorkOrder, newStatus: WorkOrderStatus) => {
+    setMoveStageModalWo(null);
+    if (!targetWo || newStatus === targetWo.status) return;
+    // Mirror the onDrop guard chain so keyboard moves obey the same rules as drag-and-drop.
+    if (newStatus === 'Taken Out') {
+      setCheckoutModalWo(targetWo);
+      setPaidAmountInput(targetWo.totalAmount ? String(targetWo.totalAmount) : '0');
+      return;
+    }
+    if (newStatus === 'Finished' && !checkIsAfterDiagnosticCompleted(targetWo)) {
+      setPendingDiagAlertWo({ wo: targetWo, newStatus: 'Finished' });
+      return;
+    }
+    if ((newStatus === 'In Progress' || newStatus === 'Pending') && !checkIsBeforeDiagnosticCompleted(targetWo)) {
+      setPendingBeforeDiagAlertWo({ wo: targetWo, newStatus });
+      return;
+    }
+    onUpdateWorkOrderStatus(targetWo.id, newStatus);
   };
 
   const scrollToStage = (stageId: string) => {
@@ -849,7 +872,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                             <Button
                               type="button"
                               onClick={() => openCheckoutModal(wo)}
-                              className="flex-1 py-1.5 px-1 bg-success hover:bg-success/90 text-white font-extrabold rounded-lg border border-success text-center flex items-center justify-center space-x-0.5 truncate shadow-xs min-h-9"
+                              className="flex-1 py-1.5 px-1 bg-success hover:bg-success/90 text-white font-extrabold rounded-lg border border-success text-center flex items-center justify-center space-x-0.5 truncate shadow-xs min-h-10"
                             >
                               <DollarSign className="w-3 h-3 shrink-0" />
                               <span>Checkout</span>
@@ -861,7 +884,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                                 setNotifWo(wo);
                                 setIsNotifModalOpen(true);
                               }}
-                              className="flex-1 py-1.5 px-1 bg-purple/10 hover:bg-purple/20 text-purple font-extrabold rounded-lg border border-purple/20 text-center flex items-center justify-center space-x-0.5 truncate min-h-9"
+                              className="flex-1 py-1.5 px-1 bg-purple/10 hover:bg-purple/20 text-purple font-extrabold rounded-lg border border-purple/20 text-center flex items-center justify-center space-x-0.5 truncate min-h-10"
                               title="Alert Customer SMS/Viber/Telegram"
                             >
                               <BellRing className="w-3 h-3 shrink-0" />
@@ -871,7 +894,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                             <Button
                               type="button"
                               onClick={() => setAddLogModalWo(wo)}
-                              className="flex-1 py-1.5 px-1 bg-brand/10 hover:bg-brand/15 text-brand-deep font-extrabold rounded-lg border border-brand/20 text-center flex items-center justify-center space-x-0.5 truncate min-h-9"
+                              className="flex-1 py-1.5 px-1 bg-brand/10 hover:bg-brand/15 text-brand-deep font-extrabold rounded-lg border border-brand/20 text-center flex items-center justify-center space-x-0.5 truncate min-h-10"
                             >
                               <Plus className="w-3 h-3 shrink-0" />
                               <span>Log</span>
@@ -883,7 +906,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                             ariaLabel={`More actions for ${wo.orderNumber}`}
                             iconOnly
                             triggerIcon={<MoreHorizontal className="w-4 h-4" />}
-                            buttonClassName="!h-9 !w-9 shrink-0"
+                            buttonClassName="!h-10 !w-10 shrink-0"
                             menuAlign="right"
                             options={[
                               { value: 'detail', label: 'Detail' },
@@ -892,6 +915,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                               ...(stage.id === 'Finished' || stage.id === 'Pending' ? [{ value: 'log', label: 'Log' }] : []),
                               ...(stage.id === 'Pending' ? [] : [{ value: 'notify', label: 'Notify' }]),
                               ...(wo.status === 'Finished' ? [{ value: 'after-diag', label: 'After Diag' }] : []),
+                              { value: 'move-stage', label: 'Move to Stage…' },
                             ]}
                           />
                         </div>
@@ -1017,6 +1041,50 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   </span>
                 </Button>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 3b: Move to Stage — keyboard-accessible status change (mirrors drag-and-drop) */}
+      {moveStageModalWo && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white border border-line-strong rounded-2xl max-w-sm w-full p-6 space-y-4 text-xs shadow-2xl relative">
+            <Button onClick={() => setMoveStageModalWo(null)} aria-label="Close move to stage" className="absolute right-4 top-4 text-muted hover:text-ink">
+              <X className="w-5 h-5" />
+            </Button>
+
+            <h3 className="text-sm font-bold text-ink border-b border-line-strong pb-2 flex items-center space-x-2">
+              <GitBranch className="w-4 h-4 text-brand" />
+              <span>Move to Stage ({moveStageModalWo.orderNumber})</span>
+            </h3>
+
+            <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
+              {KANBAN_STAGES.map((s) => {
+                const isCurrent = moveStageModalWo.status === s.id;
+                const count = workOrders.filter((w) => w.status === s.id).length;
+                return (
+                  <Button
+                    key={s.id}
+                    type="button"
+                    disabled={isCurrent}
+                    onClick={() => handleMoveToStage(moveStageModalWo, s.id)}
+                    className={`w-full p-3 rounded-xl border text-left flex justify-between items-center transition-all ${
+                      isCurrent
+                        ? 'border-line bg-slate-50 text-muted cursor-not-allowed'
+                        : 'border-line-strong bg-white text-ink hover:bg-brand-soft hover:border-brand/40'
+                    }`}
+                  >
+                    <div>
+                      <p className="font-bold text-xs">{s.title}</p>
+                      <p className="text-xs opacity-70">{s.subtitle}</p>
+                    </div>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${isCurrent ? 'bg-slate-100 text-muted' : 'bg-slate-100 text-ink'}`}>
+                      {isCurrent ? 'Current' : `${count} tickets`}
+                    </span>
+                  </Button>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -1171,7 +1239,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         copy[idx].status = 'Pass';
                         setAfterDiagnostics(copy);
                       }}
-                      className={`flex-1 py-1 rounded-md font-extrabold transition-all ${item.status === 'Pass' ? 'bg-success text-white shadow-2xs' : 'bg-slate-200 text-ink hover:bg-slate-300'}`}
+                      className={`flex-1 min-h-10 py-1 rounded-md font-extrabold transition-all ${item.status === 'Pass' ? 'bg-success text-white shadow-2xs' : 'bg-slate-200 text-ink hover:bg-slate-300'}`}
                     >
                       Pass
                     </Button>
@@ -1182,7 +1250,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         copy[idx].status = 'Fail';
                         setAfterDiagnostics(copy);
                       }}
-                      className={`flex-1 py-1 rounded-md font-extrabold transition-all ${item.status === 'Fail' ? 'bg-rose-600 text-white shadow-2xs' : 'bg-slate-200 text-ink hover:bg-slate-300'}`}
+                      className={`flex-1 min-h-10 py-1 rounded-md font-extrabold transition-all ${item.status === 'Fail' ? 'bg-rose-600 text-white shadow-2xs' : 'bg-slate-200 text-ink hover:bg-slate-300'}`}
                     >
                       Fail
                     </Button>
@@ -1193,7 +1261,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         copy[idx].status = 'N/A';
                         setAfterDiagnostics(copy);
                       }}
-                      className={`flex-1 py-1 rounded-md font-extrabold transition-all ${item.status === 'N/A' ? 'bg-slate-600 text-white shadow-2xs' : 'bg-slate-200 text-ink hover:bg-slate-300'}`}
+                      className={`flex-1 min-h-10 py-1 rounded-md font-extrabold transition-all ${item.status === 'N/A' ? 'bg-slate-600 text-white shadow-2xs' : 'bg-slate-200 text-ink hover:bg-slate-300'}`}
                     >
                       N/A
                     </Button>

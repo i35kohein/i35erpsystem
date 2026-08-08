@@ -748,18 +748,26 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 ]}
                 menuAlign="left"
                 className="w-full"
-                buttonClassName="w-full bg-white border-line rounded-xl h-9 px-3 text-xs"
+                buttonClassName="w-full bg-white border-line rounded-xl h-10 px-3 text-xs"
               />
             </div>
           </div>
         </div>
 
         {/* STEP 2: Choose Device Model */}
-        <Button
-          type="button"
+        <div
+          role="button"
+          tabIndex={0}
           id="intake-device"
           onClick={() => setIsModelModalOpen(true)}
-          className={`w-full text-left p-3 bg-surface/80 rounded-xl border border-line space-y-2.5 cursor-pointer hover:border-brand/50 hover:bg-surface transition-all group scroll-mt-40 flex flex-col h-auto items-stretch justify-start `}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setIsModelModalOpen(true);
+            }
+          }}
+          aria-label={deviceModel ? `Selected model: ${deviceModel}. Change device model` : 'Choose Apple hardware device model'}
+          className={`w-full text-left p-3 bg-surface/80 rounded-xl border border-line space-y-2.5 cursor-pointer hover:border-brand/50 hover:bg-surface transition-all group scroll-mt-40 flex flex-col h-auto items-stretch justify-start focus-visible:ring-2 focus-visible:ring-brand/60 focus-visible:border-brand`}
         >
           <div className="flex items-center justify-between border-b border-line pb-2">
             <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
@@ -795,7 +803,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               </span>
             </div>
           )}
-        </Button>
+        </div>
 
         {/* STEP 3 & STEP 4: Color (REAL DEVICE COLOR BIG CIRCLE WITH SHADOW) & Warranty */}
         <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 `}>
@@ -881,7 +889,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               onClick={() => setIsCameraScannerOpen(true)}
               className="bg-ink hover:bg-black text-white flex items-center space-x-1.5"
             >
-              <Camera className="w-3.5 h-3.5 text-brand" />
+              <Camera className="w-3.5 h-3.5 text-white/90" />
               <span>Scan QR / Barcode</span>
             </Button>
             </div>
@@ -1091,7 +1099,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             value={extraReportedNotes}
             onChange={(e) => setExtraReportedNotes(e.target.value)}
             placeholder="Enter customer symptoms or intake notes"
-            className="w-full bg-white border border-line-strong rounded-xl p-3.5 text-sm text-ink focus:border-brand"
+            className="w-full bg-white border border-line-strong rounded-xl p-3.5 text-sm text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/25 transition-all"
           />
         </div>
 
@@ -1227,7 +1235,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           <div className="flex flex-wrap gap-3">
             {intakePhotos.map((photo, idx) => (
               <div key={idx} className="relative w-20 h-20 rounded-xl overflow-hidden border border-line group">
-                <img src={photo} alt="Intake" className="w-full h-full object-cover" />
+                <img src={photo} alt={`${deviceModel || 'Device'} condition photo ${idx + 1}`} className="w-full h-full object-cover" />
                 <Button
                   onClick={() => setIntakePhotos(prev => prev.filter((_, i) => i !== idx))}
                   aria-label={`Remove photo ${idx + 1}`}

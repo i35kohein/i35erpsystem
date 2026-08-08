@@ -123,15 +123,15 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-3 sm:p-5">
-      <div className="flex h-[92vh] max-h-[760px] min-h-0 w-full max-w-5xl flex-col overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card-bg)] shadow-xl">
-        <header className="flex items-center justify-between gap-3 border-b border-[var(--border)] px-4 py-3 sm:px-5">
+      <div className="flex h-[92vh] max-h-[760px] min-h-0 w-full max-w-5xl flex-col overflow-hidden rounded-xl border border-line bg-white shadow-xl">
+        <header className="flex items-center justify-between gap-3 border-b border-line px-4 py-3 sm:px-5">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2.5">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--blue-tint)] text-[var(--primary)]">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-brand">
               <Ticket className="h-4 w-4" />
             </span>
-            <h2 className="whitespace-nowrap text-sm font-black text-[var(--text-main)]">Ticket Details</h2>
-            <span className="h-4 w-px bg-[var(--border)]" />
-            <span className="inline-flex min-w-0 items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--bg)] px-2.5 py-1 font-mono text-xs font-black text-[var(--primary)]">
+            <h2 className="whitespace-nowrap text-sm font-black text-ink">Ticket Details</h2>
+            <span className="h-4 w-px bg-line" />
+            <span className="inline-flex min-w-0 items-center gap-1.5 rounded-md border border-line bg-surface px-2.5 py-1 font-mono text-xs font-black text-brand">
               <Hash className="h-3 w-3 shrink-0" />
               <span className="truncate">{workOrder.orderNumber}</span>
             </span>
@@ -141,8 +141,8 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                 Urgent
               </span>
             )}
-            <span className="inline-flex h-6 shrink-0 items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--blue-tint)] px-2 text-xs font-extrabold uppercase tracking-[0.08em] text-[var(--primary)]">
-              <span className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" />
+            <span className="inline-flex h-6 shrink-0 items-center gap-1.5 rounded-md border border-line bg-brand-soft px-2 text-xs font-extrabold uppercase tracking-[0.08em] text-brand">
+              <span className="h-1.5 w-1.5 rounded-full bg-brand" />
               {workOrder.status}
             </span>
           </div>
@@ -156,7 +156,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                   size="icon"
                   aria-label="Ticket actions"
                   title="Ticket actions"
-                  className="text-[var(--text-muted)] hover:bg-[var(--bg)] hover:text-[var(--text-main)]"
+                  className="text-muted hover:bg-surface hover:text-ink"
                 >
                   <MoreHorizontal className="h-5 w-5" />
                 </Button>
@@ -198,22 +198,26 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
               onClick={onClose}
               aria-label="Close ticket details"
               title="Close"
-              className="ml-1 flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-muted)] transition-colors hover:bg-[var(--bg)] hover:text-[var(--text-main)]"
+              className="ml-1 flex min-h-10 min-w-10 items-center justify-center rounded-lg text-muted transition-colors hover:bg-surface hover:text-ink"
             >
-              <X className="h-4.5 w-4.5" />
+              <X className="h-4 w-4" />
             </Button>
           </div>
         </header>
 
-        <nav className="flex items-center gap-1 border-b border-[var(--border)] bg-[var(--bg)] px-4 py-1.5 sm:px-5" aria-label="Ticket detail sections">
+        <nav className="flex items-center gap-1 border-b border-line bg-surface px-4 py-1.5 sm:px-5" role="tablist" aria-label="Ticket detail sections">
           <Button
             variant="ghost"
             type="button"
+            role="tab"
+            id="inspector-tab-details"
+            aria-selected={activeTab === 'details'}
+            aria-controls="inspector-panel-details"
             onClick={() => setActiveTab('details')}
-            className={`inline-flex h-10 lg:h-8 items-center gap-1.5 rounded-md px-3 text-xs font-extrabold transition-colors ${
+            className={`inline-flex min-h-10 items-center gap-1.5 rounded-md px-3 text-xs font-extrabold transition-colors ${
               activeTab === 'details'
-                ? 'bg-[var(--card-bg)] text-[var(--primary)] shadow-sm ring-1 ring-[var(--border)]'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+                ? 'bg-white text-brand shadow-sm ring-1 ring-line'
+                : 'text-muted hover:text-ink'
             }`}
           >
             <FileText className="h-3.5 w-3.5" />
@@ -222,16 +226,20 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
           <Button
             variant="ghost"
             type="button"
+            role="tab"
+            id="inspector-tab-log"
+            aria-selected={activeTab === 'log'}
+            aria-controls="inspector-panel-log"
             onClick={() => setActiveTab('log')}
-            className={`inline-flex h-10 lg:h-8 items-center gap-1.5 rounded-md px-3 text-xs font-extrabold transition-colors ${
+            className={`inline-flex min-h-10 items-center gap-1.5 rounded-md px-3 text-xs font-extrabold transition-colors ${
               activeTab === 'log'
-                ? 'bg-[var(--card-bg)] text-[var(--primary)] shadow-sm ring-1 ring-[var(--border)]'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+                ? 'bg-white text-brand shadow-sm ring-1 ring-line'
+                : 'text-muted hover:text-ink'
             }`}
           >
             <History className="h-3.5 w-3.5" />
             Log
-            <span className="inline-flex min-w-5 justify-center rounded-full bg-[var(--blue-tint)] px-1.5 py-0.5 text-xs text-[var(--primary)]">
+            <span className="inline-flex min-w-5 justify-center rounded-full bg-brand-soft px-1.5 py-0.5 text-xs text-brand">
               {repairLogs.length}
             </span>
           </Button>
@@ -239,19 +247,22 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
 
         {activeTab === 'details' ? (
           <div
+            id="inspector-panel-details"
+            role="tabpanel"
+            aria-labelledby="inspector-tab-details"
             className="grid min-h-0 flex-1 grid-cols-1 overflow-y-scroll md:grid-cols-[250px_minmax(0,1fr)]" tabIndex={0}
             style={{ scrollbarGutter: 'stable' }}
           >
-          <aside aria-label="Ticket summary" className="border-b border-[var(--border)] bg-[var(--bg)] p-4 md:border-b-0 md:border-r md:p-5">
+          <aside aria-label="Ticket summary" className="border-b border-line bg-surface p-4 md:border-b-0 md:border-r md:p-5">
             <div className="space-y-5">
               <div>
                 <div className="flex items-start gap-2">
-                  <Smartphone className="mt-0.5 h-4 w-4 shrink-0 text-[var(--primary)]" />
-                  <h3 className="text-lg font-black leading-6 text-[var(--text-main)]">{workOrder.deviceModel}</h3>
+                  <Smartphone className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
+                  <h3 className="text-lg font-black leading-6 text-ink">{workOrder.deviceModel}</h3>
                 </div>
-                <div className="mt-2 rounded-md border border-[var(--border)] bg-[var(--card-bg)] px-2.5 py-2">
-                  <p className="text-xs font-black uppercase tracking-wider text-[var(--text-muted)]">Repair Category</p>
-                  <p className="mt-0.5 text-xs font-bold leading-snug text-[var(--text-main)]">
+                <div className="mt-2 rounded-md border border-line bg-white px-2.5 py-2">
+                  <p className="text-xs font-black uppercase tracking-wider text-muted">Repair Category</p>
+                  <p className="mt-0.5 text-xs font-bold leading-snug text-ink">
                     {repairCategoryLabel}
                   </p>
                 </div>
@@ -260,7 +271,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                   style={{ background: deviceColor.gradient }}
                   aria-hidden="true"
                 />
-                <div className="mt-1.5 flex items-center gap-1.5 text-xs font-bold text-[var(--text-muted)]">
+                <div className="mt-1.5 flex items-center gap-1.5 text-xs font-bold text-muted">
                   <span
                     className={`h-2 w-2 shrink-0 rounded-sm border border-white shadow-sm ${deviceColor.border}`}
                     style={{ background: deviceColor.gradient }}
@@ -270,7 +281,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                 </div>
               </div>
 
-              <div className="divide-y divide-[var(--border)] border-y border-[var(--border)] text-xs">
+              <div className="divide-y divide-line border-y border-line text-xs">
                 {[
                   ['Customer Name', workOrder.customerName || 'Unknown customer', UserRound],
                   ['Address', workOrder.customerAddress || 'No address', MapPin],
@@ -281,22 +292,22 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                   ['Time in Shop', timeInShop, Clock3],
                 ].map(([label, value, Icon]) => (
                   <div key={label as string} className="flex items-center gap-2.5 py-2.5">
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--blue-tint)] text-[var(--primary)]">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-brand-soft text-brand">
                       <Icon className="h-3.5 w-3.5" />
                     </span>
                     <div className="min-w-0">
-                      <div className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-muted)]">{typeof label === 'string' ? label : null}</div>
-                      <p className="mt-0.5 truncate font-bold text-[var(--text-main)]">{typeof value === 'string' ? value : null}</p>
+                      <div className="text-xs font-extrabold uppercase tracking-wider text-muted">{typeof label === 'string' ? label : null}</div>
+                      <p className="mt-0.5 truncate font-bold text-ink">{typeof value === 'string' ? value : null}</p>
                     </div>
                   </div>
                 ))}
                 <div className="flex items-center gap-2.5 py-2.5">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--blue-tint)] text-[var(--primary)]">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-brand-soft text-brand">
                     <Banknote className="h-3.5 w-3.5" />
                   </span>
                   <div className="min-w-0">
-                    <div className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Total Estimate</div>
-                    <p className="mt-0.5 font-mono text-base font-black text-[var(--primary)]">
+                    <div className="text-xs font-extrabold uppercase tracking-wider text-muted">Total Estimate</div>
+                    <p className="mt-0.5 font-mono text-base font-black text-brand">
                       {(workOrder.totalAmount || workOrder.subtotal || 0).toLocaleString()} MMK
                     </p>
                   </div>
@@ -320,39 +331,39 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
               </div>
             )}
 
-            <section className="rounded-lg border border-[var(--border)] bg-[var(--bg)] p-4">
-              <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)] pb-2.5">
-                <span className="text-xs font-black text-[var(--text-main)]">21-Point Hardware Diagnostic Comparison</span>
-                <span className="rounded-md border border-[var(--border)] bg-[var(--card-bg)] px-2 py-0.5 text-xs font-extrabold text-[var(--text-muted)]">
+            <section className="rounded-lg border border-line bg-surface p-4">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-line pb-2.5">
+                <span className="text-xs font-black text-ink">21-Point Hardware Diagnostic Comparison</span>
+                <span className="rounded-md border border-line bg-white px-2 py-0.5 text-xs font-extrabold text-muted">
                   {diagnosticRows.length} checks
                 </span>
               </div>
 
-              <div className="overflow-hidden rounded-lg border border-[var(--border)]">
+              <div className="overflow-hidden rounded-lg border border-line">
                 {/* Mini table header */}
-                <div className="sticky top-0 z-10 grid grid-cols-[24px_minmax(0,1fr)_auto_auto] items-center gap-x-3 border-b border-[var(--border)] bg-[var(--bg)] px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider text-[var(--text-muted)]">
+                <div className="sticky top-0 z-10 grid grid-cols-[24px_minmax(0,1fr)_auto_auto] items-center gap-x-3 border-b border-line bg-surface px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider text-muted">
                   <span>#</span>
                   <span>Check item</span>
                   <span className="w-14 text-right">Before</span>
                   <span className="w-14 text-right">After</span>
                 </div>
-                <div className="divide-y divide-[var(--border)]">
+                <div className="divide-y divide-line">
                   {diagnosticRows.map(({ beforeItem, afterItem }, index) => {
                     const hasFail = beforeItem.status === 'Fail' || afterItem.status === 'Fail';
                     const statusText = (status: string) =>
                       status === 'Pass' ? 'text-emerald-600'
                       : status === 'Fail' ? 'text-rose-600 font-extrabold'
-                      : 'text-[var(--text-muted)]';
+                      : 'text-muted';
                     return (
                       <div
                         key={beforeItem.id || beforeItem.name}
                         className={`grid grid-cols-[24px_minmax(0,1fr)_auto_auto] items-baseline gap-x-3 px-3 py-1.5 ${hasFail ? 'bg-rose-50/50' : ''}`}
                       >
-                        <span className="font-mono text-xs text-[var(--text-muted)]">{index + 1}</span>
-                        <span className="min-w-0 text-xs font-semibold text-[var(--text-main)]">
+                        <span className="font-mono text-xs text-muted">{index + 1}</span>
+                        <span className="min-w-0 text-xs font-semibold text-ink">
                           {beforeItem.name}
                           {(afterItem.note || beforeItem.note) && (
-                            <span className="ml-1.5 text-xs font-normal italic text-[var(--text-muted)]">
+                            <span className="ml-1.5 text-xs font-normal italic text-muted">
                               — {afterItem.note || beforeItem.note}
                             </span>
                           )}
@@ -373,46 +384,49 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
           </div>
         ) : (
           <section
-            className="min-h-0 flex-1 overflow-y-scroll bg-[var(--bg)] p-4 sm:p-5"
+            id="inspector-panel-log"
+            role="tabpanel"
+            aria-labelledby="inspector-tab-log"
+            className="min-h-0 flex-1 overflow-y-scroll bg-surface p-4 sm:p-5"
             style={{ scrollbarGutter: 'stable' }}
             tabIndex={0}
           >
-            <section className="mx-auto max-w-3xl rounded-lg border border-[var(--border)] bg-[var(--card-bg)]">
-              <div className="flex items-center justify-between gap-3 border-b border-[var(--border)] px-4 py-3">
+            <section className="mx-auto max-w-3xl rounded-lg border border-line bg-white">
+              <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
                 <div>
-                  <h3 className="text-sm font-black text-[var(--text-main)]">Repair Activity Log</h3>
-                  <p className="mt-0.5 text-xs font-medium text-[var(--text-muted)]">
+                  <h3 className="text-sm font-black text-ink">Repair Activity Log</h3>
+                  <p className="mt-0.5 text-xs font-medium text-muted">
                     Status changes and updates recorded from the repair pipeline.
                   </p>
                 </div>
-                <span className="shrink-0 text-xs font-extrabold text-[var(--text-muted)]">
+                <span className="shrink-0 text-xs font-extrabold text-muted">
                   {repairLogs.length} {repairLogs.length === 1 ? 'event' : 'events'}
                 </span>
               </div>
 
               {repairLogs.length > 0 ? (
-                <ol className="divide-y divide-[var(--border)]">
+                <ol className="divide-y divide-line">
                   {repairLogs.map((log, index) => (
                     <li key={log.id} className="relative flex gap-3 px-4 py-3.5">
                       <div className="relative flex shrink-0 flex-col items-center">
-                        <span className="z-10 flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--blue-tint)] text-[var(--primary)]">
+                        <span className="z-10 flex h-8 w-8 items-center justify-center rounded-lg bg-brand-soft text-brand">
                           <History className="h-4 w-4" />
                         </span>
                         {index < repairLogs.length - 1 && (
-                          <span className="absolute top-8 h-[calc(100%+14px)] w-px bg-[var(--border)]" aria-hidden="true" />
+                          <span className="absolute top-8 h-[calc(100%+14px)] w-px bg-line" aria-hidden="true" />
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                          <span className="text-xs font-black text-[var(--text-main)]">{log.author || 'System'}</span>
+                          <span className="text-xs font-black text-ink">{log.author || 'System'}</span>
                           {log.statusChange && (
-                            <span className="inline-flex rounded-md border border-[var(--border)] bg-[var(--blue-tint)] px-2 py-0.5 text-xs font-extrabold uppercase tracking-wide text-[var(--primary)]">
+                            <span className="inline-flex rounded-md border border-line bg-brand-soft px-2 py-0.5 text-xs font-extrabold uppercase tracking-wide text-brand">
                               {log.statusChange}
                             </span>
                           )}
-                          <time className="ml-auto text-xs font-semibold text-[var(--text-muted)]">{log.timestamp}</time>
+                          <time className="ml-auto text-xs font-semibold text-muted">{log.timestamp}</time>
                         </div>
-                        <p className="mt-1.5 whitespace-pre-wrap text-xs font-medium leading-relaxed text-[var(--text-secondary)]">
+                        <p className="mt-1.5 whitespace-pre-wrap text-xs font-medium leading-relaxed text-muted">
                           {log.note}
                         </p>
                       </div>
@@ -421,11 +435,11 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                 </ol>
               ) : (
                 <div className="flex min-h-56 flex-col items-center justify-center px-6 py-10 text-center">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--blue-tint)] text-[var(--primary)]">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-soft text-brand">
                     <History className="h-5 w-5" />
                   </span>
-                  <p className="mt-3 text-sm font-black text-[var(--text-main)]">No repair logs yet</p>
-                  <p className="mt-1 max-w-sm text-xs leading-relaxed text-[var(--text-muted)]">
+                  <p className="mt-3 text-sm font-black text-ink">No repair logs yet</p>
+                  <p className="mt-1 max-w-sm text-xs leading-relaxed text-muted">
                     Pipeline status changes and technician updates will appear here.
                   </p>
                 </div>
@@ -434,8 +448,8 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
           </section>
         )}
 
-        <footer className="flex items-center justify-between border-t border-[var(--border)] px-4 py-3 sm:px-5">
-          <span className="text-xs font-bold text-[var(--text-muted)]">Repair ticket record</span>
+        <footer className="flex items-center justify-between border-t border-line px-4 py-3 sm:px-5">
+          <span className="text-xs font-bold text-muted">Repair ticket record</span>
           <Button
             type="button"
             onClick={onClose}

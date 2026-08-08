@@ -660,6 +660,13 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                   ))}
                 </tbody>
               </table>
+            {filteredWorkOrders.length === 0 && (
+              <div className="p-8 text-center text-xs text-muted space-y-1">
+                <DollarSign className="w-6 h-6 mx-auto opacity-50" />
+                <p className="font-extrabold text-sm text-ink">No completed repair income in this period</p>
+                <p>Completed & paid tickets appear here once a checkout is registered.</p>
+              </div>
+            )}
             </div>
           </div>
         </div>
@@ -717,6 +724,13 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                 ))}
               </tbody>
             </table>
+            {expenses.length === 0 && (
+              <div className="p-8 text-center text-xs text-muted space-y-1">
+                <Receipt className="w-6 h-6 mx-auto opacity-50" />
+                <p className="font-extrabold text-sm text-ink">No expense entries recorded</p>
+                <p>Rent, electricity, tools and other shop overhead logs appear here.</p>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -777,6 +791,13 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                 })}
               </tbody>
             </table>
+            {parts.length === 0 && (
+              <div className="p-8 text-center text-xs text-muted space-y-1">
+                <Boxes className="w-6 h-6 mx-auto opacity-50" />
+                <p className="font-extrabold text-sm text-ink">No inventory assets tracked yet</p>
+                <p>Parts stock and their potential margin appear here once parts are registered.</p>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -852,6 +873,13 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                 ))}
               </tbody>
             </table>
+            {technicianPayouts.length === 0 && (
+              <div className="p-8 text-center text-xs text-muted space-y-1">
+                <Users className="w-6 h-6 mx-auto opacity-50" />
+                <p className="font-extrabold text-sm text-ink">No technician payouts for this period</p>
+                <p>Verified ticket commissions and QA bonus payouts appear here.</p>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -933,6 +961,13 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                 })}
               </tbody>
             </table>
+            {supplierDebts.length === 0 && (
+              <div className="p-8 text-center text-xs text-muted space-y-1">
+                <Truck className="w-6 h-6 mx-auto opacity-50" />
+                <p className="font-extrabold text-sm text-ink">No outstanding supplier debts</p>
+                <p>Unpaid invoices to parts wholesalers appear here to protect your shop credit rating.</p>
+              </div>
+            )}
           </div>
         </div>
       )}

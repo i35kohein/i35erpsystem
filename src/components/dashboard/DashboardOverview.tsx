@@ -101,7 +101,7 @@ const TrendChart: React.FC<{
               x2={W}
               y1={TOP + plotH * f}
               y2={TOP + plotH * f}
-              stroke="#E5E5EA"
+              stroke="var(--color-line)"
               strokeWidth={1}
               strokeDasharray={f === 1 ? undefined : '3 3'}
             />
@@ -114,21 +114,21 @@ const TrendChart: React.FC<{
               width={barW}
               height={Math.max(0, TOP + plotH - yFor(v, maxRevenue))}
               rx={2}
-              fill={v > 0 ? '#0071E3' : '#E5E5EA'}
+              fill={v > 0 ? 'var(--color-brand)' : 'var(--color-line)'}
               opacity={v > 0 ? 0.85 : 0.35}
             />
           ))}
           {repairs.some((v) => v > 0) && (
-            <polyline points={linePoints} fill="none" stroke="#34C759" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+            <polyline points={linePoints} fill="none" stroke="var(--color-success)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
           )}
           {repairs.map((v, i) =>
             v > 0 ? (
-              <circle key={i} cx={slot * i + slot / 2} cy={yFor(v, maxRepairs)} r={3} fill="#34C759" />
+              <circle key={i} cx={slot * i + slot / 2} cy={yFor(v, maxRepairs)} r={3} fill="var(--color-success)" />
             ) : null
           )}
           {buckets.map((b, i) =>
             i % labelStep === 0 || i === n - 1 ? (
-              <text key={i} x={slot * i + slot / 2} y={H - 8} textAnchor="middle" fontSize={10} fill="#86868B">
+              <text key={i} x={slot * i + slot / 2} y={H - 8} textAnchor="middle" fontSize={10} fill="var(--color-muted)">
                 {b.label}
               </text>
             ) : null
@@ -975,7 +975,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </Button>
       </div>
       {/* Right-edge fade on the scrollable subtab bar (below xl) */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-6 rounded-r-xl bg-gradient-to-l from-white/80 to-transparent xl:hidden" />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-6 rounded-r-xl bg-gradient-to-l from-surface/80 to-transparent xl:hidden" />
       </div>
 
       {/* Background Warranty Check Alert Banner on Dashboard */}
@@ -1161,7 +1161,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   value={queueSearchQuery}
                   onChange={(e) => setQueueSearchQuery(e.target.value)}
                   placeholder="Search analytics queue by order #, customer, model, serial..."
-                  className="w-full h-10 bg-white text-xs text-ink placeholder-muted pl-8 pr-7 rounded-lg border border-line focus:outline-none focus:border-brand transition-all"
+                  className="w-full h-10 bg-white text-sm text-ink placeholder-muted pl-8 pr-7 rounded-xl border border-line focus:outline-none focus:border-brand transition-all"
                 />
                 {queueSearchQuery && (
                   <Button
@@ -1182,7 +1182,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   aria-label="Filter by technician"
                   value={queueTechFilter}
                   onChange={(e) => setQueueTechFilter(e.target.value)}
-                  className="bg-white text-xs text-ink font-semibold py-1.5 px-2.5 rounded-lg border border-line focus:outline-none focus:border-brand"
+                  className="min-h-10 bg-white text-xs text-ink font-semibold px-2.5 py-1.5 rounded-lg border border-line focus:outline-none focus:border-brand"
                 >
                   <option value="ALL">All Technicians</option>
                   <option value="unassigned">Unassigned</option>
@@ -1196,7 +1196,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   aria-label="Filter by priority"
                   value={queuePriorityFilter}
                   onChange={(e) => setQueuePriorityFilter(e.target.value)}
-                  className="bg-white text-xs text-ink font-semibold py-1.5 px-2.5 rounded-lg border border-line focus:outline-none focus:border-brand"
+                  className="min-h-10 bg-white text-xs text-ink font-semibold py-1.5 px-2.5 rounded-lg border border-line focus:outline-none focus:border-brand"
                 >
                   <option value="ALL">All Priorities</option>
                   <option value="Urgent">Urgent</option>
@@ -1214,7 +1214,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                       setQueuePriorityFilter('ALL');
                       setQueueSearchQuery('');
                     }}
-                    className="px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-lg transition-all cursor-pointer shrink-0"
+                    className="min-h-10 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-lg transition-all cursor-pointer shrink-0 px-2.5"
                   >
                     Reset Filters
                   </Button>
@@ -1372,7 +1372,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 </table>
               </div>
               {/* Right-edge fade on scrollable roster (below xl) */}
-              <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-6 rounded-r-xl bg-gradient-to-l from-white/80 to-transparent xl:hidden" />
+              <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-6 rounded-r-xl bg-gradient-to-l from-surface/80 to-transparent xl:hidden" />
               </div>
             )}
           </div>

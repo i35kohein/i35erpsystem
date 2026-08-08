@@ -533,7 +533,8 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                     {/* Direct Contact Buttons */}
                     <a
                       href={`tel:${wo.customerPhone}`}
-                      className="p-2 rounded-xl bg-surface hover:bg-line text-ink border border-line transition-colors cursor-pointer"
+                      aria-label={`Call ${wo.customerName || 'customer'}`}
+                      className="p-2 min-h-10 min-w-10 rounded-xl bg-surface hover:bg-line text-ink border border-line transition-colors cursor-pointer inline-flex items-center justify-center"
                       title="Call Phone"
                     >
                       <Phone className="w-3.5 h-3.5 text-brand" />

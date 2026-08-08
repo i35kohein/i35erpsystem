@@ -632,7 +632,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                 </div>
                 <div>
                   <label className="block font-bold text-ink mb-1">Account Type</label>
-                  <select aria-label="Filter" 
+                  <select aria-label="Account Type" 
                     value={newCustomerForm.type}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, type: e.target.value as CustomerType })}
                     className="w-full bg-surface border border-line rounded-xl p-2 text-xs font-bold text-ink outline-none cursor-pointer focus:border-brand focus:ring-2 focus:ring-brand/20"

@@ -1861,9 +1861,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           {filteredParts.length > 0 && (
             <div className="workspace-panel__footer p-3.5 bg-white border-t border-line flex items-center justify-between text-xs text-muted">
               <span className="font-bold">
-                Showing <strong className="text-ink">1-{filteredParts.length}</strong> of <strong className="text-ink">{filteredParts.length}</strong> parts
+                Showing <strong className="text-ink">{Math.min(paginatedParts.length, (tablePageSafe - 1) * TABLE_PAGE_SIZE + 1)}-{Math.min(tablePageSafe * TABLE_PAGE_SIZE, paginatedParts.length)}</strong> of <strong className="text-ink">{paginatedParts.length}</strong> parts
               </span>
-              <span className="font-bold text-ink">{filteredParts.length > 0 ? 'All rows visible' : ''}</span>
+              <span className="font-bold text-ink">Page {tablePageSafe}/{tableTotalPages}</span>
             </div>
           )}
         </div>
@@ -1969,6 +1969,13 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 })}
               </tbody>
             </table>
+            {paginatedParts.length === 0 && (
+              <div className="p-8 text-center text-xs text-muted space-y-1">
+                <TrendingUp className="w-6 h-6 mx-auto opacity-50" />
+                <p className="font-extrabold text-sm text-ink">No parts match the current filters</p>
+                <p>Adjust the quality, category, or search filters to see profit analysis.</p>
+              </div>
+            )}
           </div>
         </div>
       )}
