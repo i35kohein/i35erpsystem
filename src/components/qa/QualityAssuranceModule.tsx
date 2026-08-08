@@ -8,7 +8,7 @@ import {ShieldCheck,
   Camera,
   UserCheck,
   StickyNote} from 'lucide-react';
-import { WorkOrder, PostRepairChecklist, Technician, DiagnosticItemResult, DiagnosticStatus, AppUser } from '../../types';
+import { WorkOrder, PostRepairChecklist, Technician, DiagnosticItemResult, DiagnosticStatus, AppUser, SystemSettings } from '../../types';
 import { Button , Input } from '../ui';
 import { DIAGNOSTIC_NAMES, getDiagnosticIcon } from '../intake/deviceData';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
@@ -18,6 +18,7 @@ interface QualityAssuranceModuleProps {
   workOrders: WorkOrder[];
   technicians: Technician[];
   currentUser?: AppUser;
+  systemSettings?: SystemSettings;
   onSavePostRepairChecklist: (
     workOrderId: string, 
     checklist: PostRepairChecklist, 
@@ -34,6 +35,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
   workOrders,
   technicians,
   currentUser,
+  systemSettings,
   onSavePostRepairChecklist,
   searchQuery = '',
   statusFilter = 'ALL',
@@ -231,6 +233,10 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
 
   // Confirm disabled until at least one diagnostic has an explicit verdict (Pass/Fail)
   const hasExplicitVerdict = qaDiagnostics.some((d) => d.status === 'Pass' || d.status === 'Fail');
+  // Optional gate: require a before/after photo before confirming (per Settings)
+  const hasAnyPhoto = qaBeforePhotos.length > 0 || qaAfterPhotos.length > 0;
+  const photoGateBlocked = !!systemSettings?.requireQaPhotoBeforeConfirm && !hasAnyPhoto;
+  const canConfirm = hasExplicitVerdict && !photoGateBlocked;
 
   const handleSaveQaPass = () => {
     if (!selectedWo) return;
@@ -421,10 +427,16 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                 <Button
                   type="button"
                   onClick={handleSaveQaPass}
-                  disabled={!hasExplicitVerdict}
-                  title={hasExplicitVerdict ? 'Confirm QA pass and mark device ready' : 'Set at least one diagnostic (Pass/Fail) to confirm'}
+                  disabled={!canConfirm}
+                  title={
+                    !hasExplicitVerdict
+                      ? 'Set at least one diagnostic (Pass/Fail) to confirm'
+                      : photoGateBlocked
+                      ? 'Attach a before/after photo to confirm (required by Settings)'
+                      : 'Confirm QA pass and mark device ready'
+                  }
                   className={`flex items-center space-x-1.5 transition-colors ${
-                    hasExplicitVerdict
+                    canConfirm
                       ? 'bg-success hover:bg-success/90 text-white'
                       : 'bg-slate-300 text-slate-500 cursor-not-allowed'
                   }`}

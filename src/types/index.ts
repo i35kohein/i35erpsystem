@@ -380,6 +380,7 @@ export interface SystemSettings {
   // Quality Assurance
   mandatoryQaChecklist: boolean;
   requireMicroSolderingLog: boolean;
+  requireQaPhotoBeforeConfirm: boolean;
 
   // Automated SMS & Telegram Notification Templates
   notificationTemplates?: NotificationTemplate[];

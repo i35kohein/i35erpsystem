@@ -43,6 +43,19 @@ const QaTab: React.FC<QaTabProps> = ({ formData, setFormData }) => {
                 <span className="text-xs text-muted">Require multimeter diode readings and IC replacement logs for L3 micro-soldering work orders.</span>
               </div>
             </label>
+
+            <label className="flex items-center space-x-3 cursor-pointer p-3 bg-surface rounded-xl border border-line hover:border-brand transition-all">
+              <Input
+                type="checkbox"
+                checked={formData.requireQaPhotoBeforeConfirm}
+                onChange={(e) => setFormData({ ...formData, requireQaPhotoBeforeConfirm: e.target.checked })}
+                className="w-4 h-4 text-brand rounded focus:ring-0 cursor-pointer"
+              />
+              <div>
+                <span className="font-extrabold text-ink text-xs block">Require Before/After Photo to Confirm QA</span>
+                <span className="text-xs text-muted">Block "Confirm QA Pass" until at least one before or after repair photo is attached.</span>
+              </div>
+            </label>
           </div>
         </div>
   );

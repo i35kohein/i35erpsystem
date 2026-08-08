@@ -251,6 +251,7 @@ export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
 
   mandatoryQaChecklist: true,
   requireMicroSolderingLog: true,
+  requireQaPhotoBeforeConfirm: false,
 
   notificationTemplates: DEFAULT_NOTIFICATION_TEMPLATES,
   defaultNotificationChannel: 'Viber',

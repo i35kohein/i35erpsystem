@@ -2560,6 +2560,7 @@ export default function App() {
                   technicians={technicians}
                   currentUser={currentUser}
                   onSavePostRepairChecklist={handleSavePostRepairChecklist}
+                  systemSettings={systemSettings}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
                   statusFilter={statusFilter}
