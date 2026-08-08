@@ -446,6 +446,27 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
     return { totalValuation, totalItems, lowStockCount };
   }, [parts]);
 
+  // Top Selling Parts — by units sold across revenue-eligible tickets
+  // (includes labor service lines so the list shows data even before part
+  //  sales exist — label stays 'Top Selling Items' friendly)
+  const topSellingParts = useMemo(() => {
+    const byPart = new Map<string, { name: string; units: number; revenue: number }>();
+    filteredWorkOrders.forEach((wo) => {
+      const lineItems = wo.lineItems || [];
+      lineItems.forEach((li) => {
+        const key = li.partId || li.partName || li.description || 'Unknown';
+        const entry = byPart.get(key) || { name: li.partName || li.description || 'Unknown', units: 0, revenue: 0 };
+        const qty = li.quantity || 1;
+        entry.units += qty;
+        entry.revenue += (li.unitPrice || 0) * qty;
+        byPart.set(key, entry);
+      });
+    });
+    return Array.from(byPart.values())
+      .sort((a, b) => b.units - a.units || b.revenue - a.revenue)
+      .slice(0, 6);
+  }, [filteredWorkOrders]);
+
   // ===== Revenue & Repairs Trend (previous-period comparison) =====
   const DAY_MS = 1000 * 60 * 60 * 24;
   const trendSeries = useMemo(() => {
@@ -1092,6 +1113,53 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
               <p className="text-xl font-extrabold text-purple">{pendingRmas.length} Defective Returns</p>
               <p className="text-xs text-purple font-semibold">Awaiting supplier credits</p>
             </div>
+          </div>
+
+          {/* Top Selling Parts */}
+          <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-3">
+            <div className="flex items-center justify-between gap-2 pb-2 border-b border-line">
+              <h3 className="text-xs font-extrabold text-ink uppercase tracking-wider flex items-center space-x-1.5">
+                <Boxes className="w-4 h-4 text-brand" />
+                <span>Top Selling Parts</span>
+              </h3>
+              <Button
+                type="button"
+                onClick={() => onNavigateToTab('inventory')}
+                size="sm"
+                className="text-xs font-bold bg-brand-soft text-brand border border-brand/20 hover:bg-brand hover:text-white"
+              >
+                View Inventory
+              </Button>
+            </div>
+
+            {topSellingParts.length === 0 ? (
+              <div className="p-6 text-center text-xs text-muted bg-surface rounded-xl border border-dashed border-line-strong">
+                No parts sold in the selected period.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {topSellingParts.map((part, idx) => {
+                  const maxUnits = topSellingParts[0]?.units || 1;
+                  const barPct = Math.max(6, Math.round((part.units / maxUnits) * 100));
+                  return (
+                    <div key={part.name + idx} className="space-y-1">
+                      <div className="flex items-center justify-between gap-2 text-xs">
+                        <span className="font-bold text-ink truncate">{idx + 1}. {part.name}</span>
+                        <span className="font-mono font-black text-brand shrink-0">{part.units} sold</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-full h-1.5 bg-line rounded-full overflow-hidden">
+                          <div className="h-full bg-brand rounded-full" style={{ width: `${barPct}%` }} />
+                        </div>
+                        <span className="text-[11px] font-bold text-muted shrink-0 w-20 text-right">
+                          {part.revenue.toLocaleString()} MMK
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Low Stock Repair Triggers Card */}
