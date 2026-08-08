@@ -4,7 +4,8 @@ import {ShieldCheck,
   CheckCircle2, 
   X,
   ClipboardCheck,
-  MoreHorizontal} from 'lucide-react';
+  MoreHorizontal,
+  MessageSquare} from 'lucide-react';
 import { WorkOrder, PostRepairChecklist, Technician, DiagnosticItemResult, AppUser } from '../../types';
 import { Button , Input } from '../ui';
 import { DIAGNOSTIC_NAMES, getDiagnosticIcon } from '../intake/deviceData';
@@ -106,6 +107,8 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
   const [qaDiagnostics, setQaDiagnostics] = useState<DiagnosticItemResult[]>([]);
   // Which checklist rows have the note input open (comment icon toggle)
   const [noteOpenIds, setNoteOpenIds] = useState<Set<string>>(new Set());
+  // Which card's ⋮ menu popup is open
+  const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   // Cycle status: Pass -> Fail -> N/A -> Pass
   const cycleStatus = (id: string, current: string) => {
     const next = current === 'Pass' ? 'Fail' : current === 'Fail' ? 'N/A' : 'Pass';
@@ -486,16 +489,35 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                         </button>
 
                         {/* ⋮ menu (Comment) */}
-                        <div className="flex items-center justify-end mt-1">
+                        <div className="relative flex items-center justify-end mt-1">
                             <button
                               type="button"
-                              onClick={(e) => { e.stopPropagation(); setNoteOpenIds((prev) => { const next = new Set(prev); next.add(item.id); return next; }); }}
-                              className="!h-5 !min-h-5 w-5 px-0 rounded flex items-center justify-center text-muted hover:bg-line/60 hover:text-ink transition-colors"
-                              title="Add comment"
-                              aria-label={`Add comment for ${item.name}`}
+                              onClick={(e) => { e.stopPropagation(); setMenuOpenId(menuOpenId === item.id ? null : item.id); }}
+                              className={`!h-5 !min-h-5 w-5 px-0 rounded flex items-center justify-center transition-colors ${
+                                menuOpenId === item.id ? 'bg-line text-ink' : 'text-muted hover:bg-line/60 hover:text-ink'
+                              }`}
+                              title="More options"
+                              aria-label={`More options for ${item.name}`}
                             >
                               <MoreHorizontal className="w-3.5 h-3.5" />
                             </button>
+
+                            {/* ⋮ popup menu */}
+                            {menuOpenId === item.id && (
+                              <div className="absolute right-0 top-6 z-20 w-36 bg-white border border-line rounded-lg shadow-lg py-1" onClick={(e) => e.stopPropagation()}>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setNoteOpenIds((prev) => { const next = new Set(prev); next.add(item.id); return next; });
+                                    setMenuOpenId(null);
+                                  }}
+                                  className="w-full px-2.5 py-1.5 text-left text-[11px] font-bold text-ink hover:bg-surface flex items-center gap-1.5"
+                                >
+                                  <MessageSquare className="w-3 h-3 text-muted" />
+                                  Comment
+                                </button>
+                              </div>
+                            )}
                         </div>
 
                         {/* Note input — long-press to open; stays when note exists */}
