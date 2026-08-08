@@ -3,9 +3,7 @@ import { useIsIpad } from '../../hooks/useIsIpad';
 import {ShieldCheck, 
   CheckCircle2, 
   X,
-  Check,
   Wrench,
-  Palette,
   ClipboardCheck} from 'lucide-react';
 import { WorkOrder, PostRepairChecklist, Technician, DiagnosticItemResult, AppUser } from '../../types';
 import { Button , Input } from '../ui';
@@ -69,6 +67,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
   const [selectedWoId, setSelectedWoId] = useState<string>(
     filteredWorkOrders[0]?.id || finishedWorkOrders[0]?.id || ''
   );
+  const [isQaModalOpen, setIsQaModalOpen] = useState(false);
   const isIpad = useIsIpad();
   const selectedWo = filteredWorkOrders.find((w) => w.id === selectedWoId);
   const [qaSavedNotice, setQaSavedNotice] = useState<boolean>(false);
@@ -213,59 +212,72 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
         </div>
       </div>
 
-      <div className={`grid grid-cols-1 gap-3 md:grid-cols-12 ${isIpad ? 'md:flex-1 md:min-h-0 md:grid-rows-1' : ''}`}>
-        {/* Left Column: Work Orders Awaiting QA (4 cols) */}
-        <div className={`space-y-2 rounded-xl border border-line bg-white p-3 md:col-span-3 ${isIpad ? 'md:flex md:flex-col md:min-h-0' : 'md:self-start'}`}>
-          <div className="flex items-center justify-between gap-2 border-b border-line pb-2">
-            <h2 className="min-w-0 truncate font-bold text-ink text-xs">QA Queue</h2>
-            <span className="shrink-0 text-xs font-mono font-bold bg-brand/10 text-brand-deep px-2 py-0.5 rounded-full">
-              {filteredWorkOrders.length} Pending
-            </span>
+      {/* QA Roster Table — click a row to run the 21-Point Diagnostic */}
+      <div className="bg-white border border-line rounded-2xl shadow-2xs overflow-hidden">
+        {filteredWorkOrders.length === 0 ? (
+          <div className="flex flex-col items-center justify-center p-10 text-center text-muted space-y-2">
+            <CheckCircle2 className="w-8 h-8 text-success mx-auto opacity-50" />
+            <p className="font-semibold text-xs">No Finished Devices Pending QA Control</p>
+            <p className="text-xs">Devices moved to 'Finished' status in the repair pipeline automatically flow into QA Control for final inspection.</p>
           </div>
-
-          <div className={`space-y-2 overflow-y-auto pr-1 ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:flex-1 md:max-h-none' : 'max-h-[calc(100dvh-260px)]'}`}>
-            {filteredWorkOrders.length === 0 ? (
-              <div className="flex flex-1 flex-col items-center justify-center p-6 text-center text-muted space-y-2">
-                <CheckCircle2 className="w-8 h-8 text-success mx-auto opacity-50" />
-                <p className="font-semibold text-xs">No Finished Devices Pending QA Control</p>
-                <p className="text-xs">Devices moved to 'Finished' status in the repair pipeline automatically flow into QA Control for final inspection.</p>
-              </div>
-            ) : (
-              filteredWorkOrders.map((wo) => {
-                const isSelected = wo.id === selectedWoId;
-                const isQaPassed = !!wo.postRepairChecklist;
-                const handleSelect = () => setSelectedWoId(wo.id);
-                const repairs = (wo.selectedRepairs || []).filter((r) => r && r.name);
-
-                return (
-                  <div
-                    key={wo.id}
-                    role="button"
-                    tabIndex={0}
-                    onClick={handleSelect}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        handleSelect();
-                      }
-                    }}
-                    className={`p-3 rounded-xl border transition-all cursor-pointer ${
-                      isSelected
-                        ? 'bg-brand-soft border-brand shadow-xs'
-                        : 'bg-surface border-line hover:bg-surface'
-                    }`}
-                  >
-                    <div className="flex justify-between items-center gap-1">
-                      <span className="font-mono font-bold text-brand flex items-center gap-1">
-                        {isSelected && <Check className="w-3 h-3 shrink-0" />}
-                        {wo.orderNumber}
-                      </span>
-                      <div className="flex items-center space-x-1">
-                        <span className={`text-xs font-extrabold px-1.5 py-0.5 rounded-md border uppercase ${
-                          wo.status === 'Taken Out' ? 'bg-surface text-muted border-line' : 'bg-success/10 text-success-deep border-success/30'
-                        }`}>
-                          {wo.status}
-                        </span>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs text-ink">
+              <thead>
+                <tr className="border-b border-line text-muted font-bold text-xs uppercase tracking-wider bg-surface">
+                  <th className="py-2.5 px-3 rounded-l-xl">Order</th>
+                  <th className="py-2.5 px-3">Device</th>
+                  <th className="py-2.5 px-3 hidden md:table-cell">Customer</th>
+                  <th className="py-2.5 px-3 hidden lg:table-cell">Repairs</th>
+                  <th className="py-2.5 px-3 text-center">Status</th>
+                  <th className="py-2.5 px-3 text-right">Total</th>
+                  <th className="py-2.5 px-3 text-right rounded-r-xl">Inspect</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-line">
+                {filteredWorkOrders.map((wo) => {
+                  const isQaPassed = !!wo.postRepairChecklist;
+                  const repairs = (wo.selectedRepairs || []).filter((r) => r && r.name);
+                  const openQa = () => {
+                    setSelectedWoId(wo.id);
+                    setIsQaModalOpen(true);
+                  };
+                  return (
+                    <tr
+                      key={wo.id}
+                      onClick={openQa}
+                      className="hover:bg-surface transition-colors cursor-pointer"
+                    >
+                      <td className="py-2.5 px-3">
+                        <span className="font-mono font-bold text-brand">{wo.orderNumber}</span>
+                      </td>
+                      <td className="py-2.5 px-3">
+                        <p className="font-extrabold text-ink truncate max-w-[180px]">{wo.deviceModel}</p>
+                        <p className="text-xs text-muted truncate max-w-[180px]">
+                          {(wo.imei || wo.serialNumber) && <>#{wo.imei || wo.serialNumber}</>}
+                          {wo.deviceColor && <> · {wo.deviceColor}</>}
+                        </p>
+                      </td>
+                      <td className="py-2.5 px-3 hidden md:table-cell">
+                        <span className="text-ink font-semibold truncate max-w-[140px] block">{wo.customerName}</span>
+                        {wo.depositAmount > 0 && (
+                          <span className="text-xs text-brand font-bold">Deposit {wo.depositAmount.toLocaleString()} MMK</span>
+                        )}
+                      </td>
+                      <td className="py-2.5 px-3 hidden lg:table-cell">
+                        <div className="flex flex-wrap items-center gap-1 max-w-[260px]">
+                          {repairs.slice(0, 2).map((r, i) => (
+                            <span key={i} className="inline-flex items-center gap-1 rounded-md border border-brand/20 bg-brand/10 px-1.5 py-0.5 text-xs font-extrabold text-brand">
+                              <Wrench className="h-2.5 w-2.5" />
+                              {r.name}
+                            </span>
+                          ))}
+                          {repairs.length > 2 && (
+                            <span className="text-xs font-bold text-muted">+{repairs.length - 2}</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-2.5 px-3 text-center">
                         {isQaPassed ? (
                           <span className="text-xs font-extrabold px-1.5 py-0.5 rounded-md border bg-success/10 text-success-deep border-success/20 uppercase">
                             Ready
@@ -275,91 +287,80 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                             QA Pending
                           </span>
                         )}
-                      </div>
-                    </div>
-
-                    <div className="flex justify-between items-center gap-2 mt-1">
-                      <p className="font-semibold text-ink truncate">{wo.deviceModel}</p>
-                      <span className="font-mono font-bold text-ink shrink-0">{wo.totalAmount.toLocaleString()} MMK</span>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-1 mt-1">
-                      {repairs.slice(0, 2).map((r, i) => (
-                        <span key={i} className="inline-flex items-center gap-1 rounded-md border border-brand/20 bg-brand/10 px-1.5 py-0.5 text-xs font-extrabold text-brand">
-                          <Wrench className="h-2.5 w-2.5" />
-                          {r.name}
-                        </span>
-                      ))}
-                      {repairs.length > 2 && (
-                        <span className="text-xs font-bold text-muted">+{repairs.length - 2}</span>
-                      )}
-                      {wo.deviceColor && (
-                        <span className="inline-flex items-center gap-1 rounded-md bg-white px-1.5 py-0.5 text-xs font-bold text-ink border border-line">
-                          <Palette className="h-2.5 w-2.5 text-muted" />
-                          {wo.deviceColor}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center justify-between gap-2 text-xs text-muted mt-1">
-                      <span className="truncate">
-                        {wo.customerName}
-                        {wo.depositAmount > 0 && (
-                          <span className="text-brand font-bold"> · Deposit {wo.depositAmount.toLocaleString()} MMK</span>
-                        )}
-                      </span>
-                      <span className="font-mono text-xs shrink-0 truncate">
-                        {(wo.imei || wo.serialNumber) && <>#{wo.imei || wo.serialNumber}</>}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })
-            )}
+                      </td>
+                      <td className="py-2.5 px-3 text-right font-mono font-bold text-ink">
+                        {wo.totalAmount.toLocaleString()} MMK
+                      </td>
+                      <td className="py-2.5 px-3 text-right">
+                        <Button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); openQa(); }}
+                          variant="ghost"
+                          className="!h-7 !min-h-7 w-7 px-0 border border-line bg-brand-soft text-brand hover:bg-white rounded-lg"
+                          title="Run 21-Point Diagnostic"
+                          aria-label={`Run 21-point diagnostic for ${wo.orderNumber}`}
+                        >
+                          <ClipboardCheck className="h-3.5 w-3.5" />
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
-        </div>
+        )}
+      </div>
 
-        {/* Right Column: QA Checklist Worksheet & 21 Diagnostic Points (8 cols) */}
-        <div className={`space-y-3 rounded-xl border border-line bg-white p-3 md:col-span-9 ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:overflow-y-auto' : ''}`}>
-          {selectedWo ? (
-            <div className="space-y-3">
-              {qaSavedNotice && (
-                <div className="p-3 bg-success/10 border border-success text-success-deep rounded-xl flex items-center justify-between font-bold text-xs animate-in fade-in">
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle2 className="w-4 h-4 text-success" />
-                    <span>QA Inspection Confirmed! Card updated to Green & Ready for Checkout.</span>
-                  </div>
-                  <Button onClick={() => setQaSavedNotice(false)} aria-label="Dismiss confirmation" className="text-success-deep hover:opacity-75">
-                    <X className="w-4 h-4" />
-                  </Button>
+      {/* 21-Point Diagnostic Modal */}
+      {isQaModalOpen && selectedWo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-3 sm:p-5" onClick={() => setIsQaModalOpen(false)}>
+          <div
+            className="flex h-[92vh] max-h-[760px] min-h-0 w-full max-w-5xl flex-col overflow-hidden rounded-xl border border-line bg-white shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal header */}
+            <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3 shrink-0">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-brand font-bold shrink-0">{selectedWo.orderNumber}</span>
+                  <h2 className="text-sm font-bold text-ink truncate">{selectedWo.deviceModel} — 21-Point Post-Repair Inspection</h2>
                 </div>
-              )}
-
-              <div className="border-b border-line pb-3 flex flex-wrap justify-between items-center gap-3">
-                <div>
-                  <span className="font-mono text-brand font-bold">{selectedWo.orderNumber}</span>
-                  <h2 className="text-base font-bold text-ink">{selectedWo.deviceModel} Post-Repair QA Verification</h2>
-                  {repairCategorySummary && (
-                    <p className="mt-1 text-xs font-semibold text-muted">
-                      Repair Category: <span className="text-ink">{repairCategorySummary}</span>
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <Button
-                    type="button"
-                    onClick={handleSaveQaPass}
-                    title="Confirm QA pass and mark device ready"
-                    className="bg-success hover:bg-success/90 text-white flex items-center space-x-1.5"
-                  >
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>Confirm QA Pass</span>
-                  </Button>
-                </div>
+                {repairCategorySummary && (
+                  <p className="mt-0.5 text-xs font-semibold text-muted truncate">
+                    Repair: <span className="text-ink">{repairCategorySummary}</span>
+                  </p>
+                )}
               </div>
+              <div className="flex items-center gap-2 shrink-0">
+                {qaSavedNotice && (
+                  <span className="text-xs font-bold text-success-deep bg-success/10 border border-success/30 px-2 py-1 rounded-lg">
+                    ✓ QA Confirmed
+                  </span>
+                )}
+                <Button
+                  type="button"
+                  onClick={handleSaveQaPass}
+                  title="Confirm QA pass and mark device ready"
+                  className="bg-success hover:bg-success/90 text-white flex items-center space-x-1.5"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Confirm QA Pass</span>
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => setIsQaModalOpen(false)}
+                  variant="ghost"
+                  className="!h-8 !min-h-8 w-8 px-0 text-muted hover:bg-surface hover:text-ink rounded-lg"
+                  aria-label="Close QA inspection"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
 
-              {/* 21-Point Post-Repair Hardware Diagnostic Checklist */}
+            {/* Modal body: 21-point checklist + inspector */}
+            <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-3">
               <div className="space-y-2.5 rounded-xl border border-line bg-surface p-3">
                 <div className="flex items-center justify-between border-b border-line pb-2">
                   <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
@@ -406,8 +407,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           </span>
                         </div>
 
-                        {/* Status Toggle Buttons — min-h-10 so the highest-frequency
-                            tap action in QA clears the 40px touch floor (audit 3.1) */}
+                        {/* Status Toggle Buttons */}
                         <div className="flex space-x-1 text-xs">
                           <Button
                             type="button"
@@ -487,15 +487,9 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                 </div>
               </div>
             </div>
-          ) : (
-            <div className="flex min-h-0 flex-1 flex-col items-center justify-center p-12 text-center text-muted">
-              <CheckCircle2 className="mb-2 h-10 w-10 text-line-strong" />
-              <p className="text-xs font-extrabold text-ink">Select a work order</p>
-              <p className="mt-1 text-xs">Choose a device from the QA Queue to run the 21-point post-repair inspection.</p>
-            </div>
-          )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
