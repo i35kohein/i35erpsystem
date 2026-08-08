@@ -206,6 +206,9 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
     );
   };
 
+  // Confirm disabled until at least one diagnostic has an explicit verdict (Pass/Fail)
+  const hasExplicitVerdict = qaDiagnostics.some((d) => d.status === 'Pass' || d.status === 'Fail');
+
   const handleSaveQaPass = () => {
     if (!selectedWo) return;
     onSavePostRepairChecklist(selectedWo.id, qaData, qaDiagnostics);
@@ -392,8 +395,13 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                 <Button
                   type="button"
                   onClick={handleSaveQaPass}
-                  title="Confirm QA pass and mark device ready"
-                  className="bg-success hover:bg-success/90 text-white flex items-center space-x-1.5"
+                  disabled={!hasExplicitVerdict}
+                  title={hasExplicitVerdict ? 'Confirm QA pass and mark device ready' : 'Set at least one diagnostic (Pass/Fail) to confirm'}
+                  className={`flex items-center space-x-1.5 transition-colors ${
+                    hasExplicitVerdict
+                      ? 'bg-success hover:bg-success/90 text-white'
+                      : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                  }`}
                 >
                   <CheckCircle2 className="w-4 h-4" />
                   <span>Confirm QA Pass</span>
