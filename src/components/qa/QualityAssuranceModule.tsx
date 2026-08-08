@@ -295,7 +295,11 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
 
                       {/* Priority */}
                       <td className="py-3 px-3 hidden xl:table-cell">
-                        <PriorityBadge priority={wo.priority} showNormal />
+                        {wo.priority && wo.priority !== 'Normal' ? (
+                          <PriorityBadge priority={wo.priority} />
+                        ) : (
+                          <span className="text-xs text-muted">-</span>
+                        )}
                       </td>
 
                       {/* Stage & Status */}
@@ -391,9 +395,9 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
             <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-3">
               <div className="space-y-2.5 rounded-xl border border-line bg-surface p-3">
                 <div className="flex items-center justify-between border-b border-line pb-2">
-                  <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
-                    <ClipboardCheck className="h-4 w-4 text-brand" />
-                    <span>21-Point Post-Repair Hardware Inspection</span>
+                  <h3 className="text-[11px] font-bold text-ink flex items-center space-x-1.5">
+                    <ClipboardCheck className="h-3.5 w-3.5 text-brand" />
+                    <span>21-Point Post-Repair Inspection</span>
                   </h3>
                   <div className="flex space-x-2">
                     <Button

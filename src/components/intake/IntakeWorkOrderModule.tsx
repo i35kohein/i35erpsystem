@@ -451,7 +451,11 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
 
                       {/* Priority */}
                       <td className="py-3 px-3 hidden xl:table-cell">
-                        <PriorityBadge priority={wo.priority} showNormal />
+                        {wo.priority && wo.priority !== 'Normal' ? (
+                          <PriorityBadge priority={wo.priority} />
+                        ) : (
+                          <span className="text-xs text-muted">-</span>
+                        )}
                       </td>
 
                       {/* Stage & Status (Read-Only Badge) */}
@@ -568,7 +572,11 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                       </span>
 
                       <div className="flex items-center space-x-1.5">
-                        <PriorityBadge priority={wo.priority} size="xs" showNormal />
+                        {wo.priority && wo.priority !== 'Normal' ? (
+                            <PriorityBadge priority={wo.priority} size="xs" />
+                          ) : (
+                            <span className="text-xs text-muted">-</span>
+                          )}
                         <StatusBadge status={wo.status} size="xs" />
                       </div>
                     </div>
