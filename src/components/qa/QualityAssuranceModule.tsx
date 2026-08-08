@@ -447,13 +447,15 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           className="!h-5 !min-h-5 w-16 shrink-0 rounded bg-surface border border-line px-1 text-[10px] text-ink focus:bg-white focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/20"
                         />
 
-                        {/* Status segmented — minimal */}
-                        <div className="flex gap-px shrink-0">
+                        {/* Status segmented — pill group */}
+                        <div className="flex items-center gap-0.5 shrink-0 bg-surface border border-line rounded-md p-0.5">
                           <Button
                             type="button"
                             onClick={() => handleDiagnosticStatusChange(item.id, 'Pass')}
-                            className={`!h-5 !min-h-5 w-5 px-0 rounded-sm text-[9px] font-black transition-all ${
-                              isPass ? 'bg-success text-white shadow-2xs' : 'bg-surface text-ink hover:bg-success/15'
+                            className={`!h-4 !min-h-4 px-1 rounded text-[9px] font-black leading-none transition-all ${
+                              isPass
+                                ? 'bg-success text-white shadow-2xs'
+                                : 'text-muted hover:text-success hover:bg-success/10'
                             }`}
                           >
                             ✓
@@ -461,8 +463,10 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           <Button
                             type="button"
                             onClick={() => handleDiagnosticStatusChange(item.id, 'Fail')}
-                            className={`!h-5 !min-h-5 w-5 px-0 rounded-sm text-[9px] font-black transition-all ${
-                              isFail ? 'bg-danger text-white shadow-2xs' : 'bg-surface text-ink hover:bg-danger/15'
+                            className={`!h-4 !min-h-4 px-1 rounded text-[9px] font-black leading-none transition-all ${
+                              isFail
+                                ? 'bg-danger text-white shadow-2xs'
+                                : 'text-muted hover:text-danger hover:bg-danger/10'
                             }`}
                           >
                             ✕
@@ -470,11 +474,13 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           <Button
                             type="button"
                             onClick={() => handleDiagnosticStatusChange(item.id, 'N/A')}
-                            className={`!h-5 !min-h-5 px-1 rounded-sm text-[9px] font-black transition-all ${
-                              isNa ? 'bg-slate-500 text-white shadow-2xs' : 'bg-surface text-ink hover:bg-slate-200'
+                            className={`!h-4 !min-h-4 px-1 rounded text-[8px] font-black leading-none transition-all ${
+                              isNa
+                                ? 'bg-slate-500 text-white shadow-2xs'
+                                : 'text-muted hover:text-ink hover:bg-slate-200/60'
                             }`}
                           >
-                            N/A
+                            NA
                           </Button>
                         </div>
                       </div>
