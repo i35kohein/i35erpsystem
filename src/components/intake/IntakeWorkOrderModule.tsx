@@ -27,7 +27,7 @@ import {ClipboardList,
   Wrench,
   Clock,
   CheckCircle2,
-  Expand,
+  MoveDiagonal2,
   Printer,
   Flame} from 'lucide-react';
 import {WorkOrder, 
@@ -482,7 +482,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                             title="View Ticket Status"
                             aria-label={`View status for ${wo.orderNumber || wo.id}`}
                           >
-                            <Expand className="h-3.5 w-3.5" />
+                            <MoveDiagonal2 className="h-3.5 w-3.5" />
                           </Button>
                           {onSelectPrintTag && (
                           <Button
