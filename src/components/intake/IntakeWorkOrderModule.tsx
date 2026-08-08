@@ -21,6 +21,8 @@ import {ClipboardList,
   SlidersHorizontal,
   LayoutGrid,
   Table as TableIcon,
+  ChevronLeft,
+  ChevronRight,
   User,
   Wrench,
   Clock,
@@ -153,6 +155,17 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
     finished: dateFilteredOrders.filter(w => w.status === 'Finished').length,
     rush: dateFilteredOrders.filter(w => w.priority === 'Urgent' || w.priority === 'Warranty Redo').length,
   };
+
+  // Roster pagination (same pattern as Inventory table)
+  const ROSTER_PAGE_SIZE = 50;
+  const [rosterPage, setRosterPage] = useState(1);
+  const rosterTotalPages = Math.max(1, Math.ceil(filteredOrders.length / ROSTER_PAGE_SIZE));
+  const rosterPageSafe = Math.min(rosterPage, rosterTotalPages);
+  const rosterPageOrders = filteredOrders.slice((rosterPageSafe - 1) * ROSTER_PAGE_SIZE, rosterPageSafe * ROSTER_PAGE_SIZE);
+  // Reset to page 1 when filters change the result set
+  useEffect(() => {
+    setRosterPage(1);
+  }, [filterStatus, searchQuery, dateFilter, sortByPriority]);
 
   const handleOpenTicketDetail = (wo: WorkOrder) => {
     setSelectedWorkOrder(wo);
@@ -385,7 +398,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                     </td>
                   </tr>
                 )}
-                {filteredOrders.map((wo) => {
+                {rosterPageOrders.map((wo) => {
                   const createdDate = timeAgoShort(wo.createdAt);
                   const createdDateFull = new Date(wo.createdAt || Date.now()).toLocaleDateString('en-US', {
                     month: 'short',
@@ -483,6 +496,34 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                 })}
               </tbody>
             </table>
+            {/* Roster pagination — same pattern as Inventory table */}
+            {rosterTotalPages > 1 && (
+              <div className="sticky bottom-0 flex items-center justify-between gap-2 border-t border-line bg-white px-3 py-2">
+                <span className="text-xs font-mono font-bold text-muted">
+                  {filteredOrders.length} tickets · Page {rosterPageSafe}/{rosterTotalPages}
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <Button
+                    type="button"
+                    onClick={() => setRosterPage((p) => Math.max(1, p - 1))}
+                    disabled={rosterPageSafe <= 1}
+                    className="flex h-10 lg:h-8 items-center gap-1 rounded-lg border border-line bg-white px-2.5 text-xs font-bold text-ink hover:border-brand hover:text-brand disabled:opacity-40 disabled:hover:border-line disabled:hover:text-ink transition-colors cursor-pointer"
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                    Prev
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => setRosterPage((p) => Math.min(rosterTotalPages, p + 1))}
+                    disabled={rosterPageSafe >= rosterTotalPages}
+                    className="flex h-10 lg:h-8 items-center gap-1 rounded-lg border border-line bg-white px-2.5 text-xs font-bold text-ink hover:border-brand hover:text-brand disabled:opacity-40 disabled:hover:border-line disabled:hover:text-ink transition-colors cursor-pointer"
+                  >
+                    Next
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           /* GRID CARDS VIEW */

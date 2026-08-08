@@ -281,7 +281,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
               </div>
             </div>
 
-            <div className="min-h-0 flex-1 space-y-2 overflow-y-auto py-3 pr-1">
+            <div className="min-h-0 flex-1 overflow-y-auto py-3 pr-1">
               {filteredCustomers.length === 0 && (
                 <div className="flex h-full min-h-[260px] flex-col items-center justify-center rounded-xl border border-dashed border-line bg-surface px-5 text-center text-muted">
                   <Users className="mb-2 h-7 w-7 text-muted/50" />
@@ -289,35 +289,45 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                   <p className="mt-1 text-xs">Customers from new intake tickets will appear here.</p>
                 </div>
               )}
+              {filteredCustomers.length > 0 && (
+                <div className="overflow-hidden rounded-xl border border-line bg-white shadow-2xs">
+                  <table className="w-full text-left text-xs">
+                    <thead className="border-b border-line bg-surface font-mono text-xs uppercase text-muted">
+                      <tr>
+                        <th className="px-3 py-2">Customer</th>
+                        <th className="px-3 py-2 hidden sm:table-cell">Phone</th>
+                        <th className="px-3 py-2 hidden md:table-cell">Type</th>
+                        <th className="px-3 py-2 text-center">Repairs</th>
+                        <th className="px-3 py-2 text-right hidden sm:table-cell">Total Spent</th>
+                        <th className="px-3 py-2 text-right">View</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-line">
               {filteredCustomers.map((cust) => {
                 const custOrders = getCustomerWorkOrders(cust);
                 const isExpanded = expandedCustomerIds.includes(cust.id);
                 const isSelected = selectedCustomer?.id === cust.id;
 
                 return (
-                  <div
-                    key={cust.id}
-                    className={`p-2.5 rounded-xl border transition-all ${
-                      isSelected
-                        ? 'bg-brand-soft border-brand shadow-xs'
-                        : 'bg-surface border-line hover:bg-surface'
+                  <React.Fragment key={cust.id}>
+                  <tr
+                    className={`cursor-pointer transition-colors hover:bg-surface/80 ${
+                      isSelected ? 'bg-brand-soft/60' : ''
                     }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedCustomer(cust);
+                      handleOpenHistoryModal(cust);
+                    }}
                   >
-                    <div className="flex justify-between items-center">
-                      <Button
-                        variant="ghost"
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedCustomer(cust);
-                          handleOpenHistoryModal(cust);
-                        }}
-                        className={`font-bold text-ink hover:text-brand hover:underline cursor-pointer text-left flex items-center space-x-1 group ${FOCUS}`}
-                        title="Click to view full repair history modal"
-                      >
-                        <span>{cust.name}</span>
-                        <ExternalLink className="w-3 h-3 text-brand opacity-70 group-hover:opacity-100 transition-opacity" />
-                      </Button>
+                    <td className="px-3 py-2.5">
+                      <div className="min-w-0">
+                        <p className="font-extrabold text-ink truncate max-w-[140px]">{cust.name}</p>
+                        {cust.company && <p className="text-xs text-muted truncate max-w-[140px]">{cust.company}</p>}
+                      </div>
+                    </td>
+                    <td className="px-3 py-2.5 font-mono text-muted hidden sm:table-cell">{cust.phone}</td>
+                    <td className="px-3 py-2.5 hidden md:table-cell">
                       <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${
                         cust.type === 'B2B Corporate' ? 'bg-purple/10 text-purple border-purple/30' :
                         cust.type === 'Wholesale Mail-In' ? 'bg-brand-soft text-brand border-brand/20' :
@@ -325,30 +335,23 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                       }`}>
                         {cust.type}
                       </span>
-                    </div>
-
-                    {cust.company && <p className="text-xs text-muted">{cust.company}</p>}
-
-                    <div className="flex justify-between items-center text-xs text-muted mt-1.5">
-                      <span>{cust.phone}</span>
-                      <span className="font-bold text-success-deep">{cust.totalSpent.toLocaleString()} {systemSettings.currencySymbol} Spent</span>
-                    </div>
-
-                    {/* Expandable Row Toggle Bar */}
-                    <div className="flex justify-between items-center mt-1.5 pt-1.5 border-t border-line/70">
-                      <Button
-                        variant="ghost"
+                    </td>
+                    <td className="px-3 py-2.5 text-center">
+                      <button
                         type="button"
                         onClick={(e) => toggleExpandCustomer(cust.id, e)}
-                        className={`flex items-center space-x-1 text-xs font-bold text-brand hover:text-brand-deep transition-colors py-0.5 px-1.5 rounded-md hover:bg-brand/50 cursor-pointer ${FOCUS}`}
+                        className={`inline-flex items-center space-x-1 text-xs font-bold text-brand hover:text-brand-deep cursor-pointer ${FOCUS}`}
+                        title="Toggle repair history"
                       >
                         {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                        <span>
-                          {custOrders.length} Repair{custOrders.length === 1 ? '' : 's'}
-                        </span>
-                      </Button>
-
-                      <div className="flex items-center space-x-1.5">
+                        <span>{custOrders.length}</span>
+                      </button>
+                    </td>
+                    <td className="px-3 py-2.5 text-right font-bold text-success-deep hidden sm:table-cell">
+                      {cust.totalSpent.toLocaleString()} {systemSettings.currencySymbol}
+                    </td>
+                    <td className="px-3 py-2.5 text-right">
+                      <div className="flex items-center justify-end space-x-1.5">
                         <Button
                           variant="ghost"
                           type="button"
@@ -356,13 +359,12 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                             e.stopPropagation();
                             handleOpenHistoryModal(cust);
                           }}
-                          className={`px-2 py-0.5 bg-brand-soft text-brand hover:bg-brand/15 font-bold text-xs rounded-md transition-colors flex items-center space-x-1 cursor-pointer ${FOCUS}`}
-                          title="Open Full Repair History Modal"
+                          className="p-1.5 bg-brand-soft text-brand hover:bg-brand/15 font-bold rounded-md transition-colors cursor-pointer"
+                          title="View full repair history"
+                          aria-label={`View full history for ${cust.name}`}
                         >
-                          <FileText className="w-2.5 h-2.5" />
-                          <span>Full History</span>
+                          <FileText className="w-3.5 h-3.5" />
                         </Button>
-
                         {(cloudCustomerIds?.has(cust.id) ?? true) && (
                           <Button
                             variant="ghost"
@@ -371,99 +373,108 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                               e.stopPropagation();
                               openEditCustomerModal(cust);
                             }}
-                            className="p-1 bg-brand-soft text-brand hover:bg-brand/15 font-bold text-xs rounded-md transition-colors cursor-pointer"
+                            className="p-1.5 bg-brand-soft text-brand hover:bg-brand/15 font-bold rounded-md transition-colors cursor-pointer"
                             title="Edit Customer Account"
+                            aria-label={`Edit ${cust.name}`}
                           >
-                            <Edit2 className="w-3 h-3" />
+                            <Edit2 className="w-3.5 h-3.5" />
                           </Button>
                         )}
                         {(cloudCustomerIds?.has(cust.id) ?? true) ? (
-                        <Button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (window.confirm(`Are you sure you want to delete customer "${cust.name}"?`)) {
-                              if (onDeleteCustomer) onDeleteCustomer(cust.id);
-                            }
-                          }}
-                          className="p-1 bg-danger/10 text-danger hover:bg-danger hover:text-white font-bold text-xs rounded-md transition-colors cursor-pointer"
-                          title="Delete Customer Account"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
-                      ) : (
-                        <span
-                          className="px-1.5 py-0.5 text-xs font-bold text-muted bg-white border border-line rounded-md"
-                          title="Ticket-derived customer — no standalone account to delete"
-                        >
-                          Derived
-                        </span>
-                      )}
-                      </div>
-                    </div>
-
-                    {/* Expandable Inline Repair History */}
-                    {isExpanded && (
-                      <div className="mt-2.5 pt-2 border-t border-brand/20 bg-white p-2.5 rounded-xl border space-y-2 shadow-2xs">
-                        <div className="flex items-center justify-between text-xs font-extrabold uppercase tracking-wider text-ink">
-                          <span className="flex items-center space-x-1">
-                            <History className="w-3 h-3 text-brand" />
-                            <span>Repair History ({custOrders.length})</span>
-                          </span>
-                        </div>
-
-                        {custOrders.length > 0 ? (
-                          <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-                            {custOrders.map((wo) => (
-                              <div
-                                key={wo.id}
-                                className="p-2 rounded-lg bg-surface border border-line hover:border-brand transition-all text-xs space-y-1"
-                              >
-                                <div className="flex items-center justify-between">
-                                  <span className="font-mono font-bold text-ink">{wo.orderNumber || wo.id}</span>
-                                  <div className="flex items-center space-x-1.5">
-                                    <span className={`px-1.5 py-0.5 text-xs font-bold rounded-full border ${getStatusBadgeStyle(wo.status)}`}>
-                                      {wo.status}
-                                    </span>
-                                    <Button
-                                      type="button"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setSelectedInvoiceWo(wo);
-                                        setIsInvoiceModalOpen(true);
-                                      }}
-                                      className="px-1.5 py-0.5 bg-white hover:bg-brand-soft border border-line-strong hover:border-brand text-brand font-bold text-xs rounded flex items-center space-x-1 cursor-pointer transition-colors"
-                                      title="Print Invoice"
-                                    >
-                                      <Printer className="w-2.5 h-2.5" />
-                                      <span>Invoice</span>
-                                    </Button>
-                                  </div>
-                                </div>
-                                <div className="flex items-center justify-between">
-                                  <span className="font-semibold text-ink truncate max-w-[160px]">{wo.deviceModel}</span>
-                                  <span className="font-bold text-success-deep">{wo.totalAmount?.toLocaleString() || 0} {systemSettings.currencySymbol}</span>
-                                </div>
-                                {wo.symptomsReported && (
-                                  <p className="text-xs text-muted line-clamp-1 italic">
-                                    "{wo.symptomsReported}"
-                                  </p>
-                                )}
-                                <div className="flex justify-between items-center text-xs text-muted pt-0.5 border-t border-line/50">
-                                  <span>{new Date(wo.createdAt).toLocaleDateString()}</span>
-                                  {wo.serialNumber && <span>SN: {wo.serialNumber}</span>}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
+                          <Button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (window.confirm(`Are you sure you want to delete customer "${cust.name}"?`)) {
+                                if (onDeleteCustomer) onDeleteCustomer(cust.id);
+                              }
+                            }}
+                            className="p-1.5 bg-danger/10 text-danger hover:bg-danger hover:text-white font-bold rounded-md transition-colors cursor-pointer"
+                            title="Delete Customer Account"
+                            aria-label={`Delete ${cust.name}`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
                         ) : (
-                          <p className="text-xs text-muted italic py-1 text-center">No repair history recorded for this customer.</p>
+                          <span
+                            className="px-1.5 py-0.5 text-xs font-bold text-muted bg-white border border-line rounded-md"
+                            title="Ticket-derived customer — no standalone account to delete"
+                          >
+                            Derived
+                          </span>
                         )}
                       </div>
-                    )}
-                  </div>
+                    </td>
+                  </tr>
+                  {isExpanded && (
+                    <tr>
+                      <td colSpan={6} className="px-3 pb-3">
+                        <div className="border border-brand/20 bg-white p-2.5 rounded-xl space-y-2 shadow-2xs">
+                          <div className="flex items-center justify-between text-xs font-extrabold uppercase tracking-wider text-ink">
+                            <span className="flex items-center space-x-1">
+                              <History className="w-3 h-3 text-brand" />
+                              <span>Repair History ({custOrders.length})</span>
+                            </span>
+                          </div>
+
+                          {custOrders.length > 0 ? (
+                            <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                              {custOrders.map((wo) => (
+                                <div
+                                  key={wo.id}
+                                  className="p-2 rounded-lg bg-surface border border-line hover:border-brand transition-all text-xs space-y-1"
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <span className="font-mono font-bold text-ink">{wo.orderNumber || wo.id}</span>
+                                    <div className="flex items-center space-x-1.5">
+                                      <span className={`px-1.5 py-0.5 text-xs font-bold rounded-full border ${getStatusBadgeStyle(wo.status)}`}>
+                                        {wo.status}
+                                      </span>
+                                      <Button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setSelectedInvoiceWo(wo);
+                                          setIsInvoiceModalOpen(true);
+                                        }}
+                                        className="px-1.5 py-0.5 bg-white hover:bg-brand-soft border border-line-strong hover:border-brand text-brand font-bold text-xs rounded flex items-center space-x-1 cursor-pointer transition-colors"
+                                        title="Print Invoice"
+                                      >
+                                        <Printer className="w-2.5 h-2.5" />
+                                        <span>Invoice</span>
+                                      </Button>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <span className="font-semibold text-ink truncate max-w-[160px]">{wo.deviceModel}</span>
+                                    <span className="font-bold text-success-deep">{wo.totalAmount?.toLocaleString() || 0} {systemSettings.currencySymbol}</span>
+                                  </div>
+                                  {wo.symptomsReported && (
+                                    <p className="text-xs text-muted line-clamp-1 italic">
+                                      "{wo.symptomsReported}"
+                                    </p>
+                                  )}
+                                  <div className="flex justify-between items-center text-xs text-muted pt-0.5 border-t border-line/50">
+                                    <span>{new Date(wo.createdAt).toLocaleDateString()}</span>
+                                    {wo.serialNumber && <span>SN: {wo.serialNumber}</span>}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-xs text-muted italic py-1 text-center">No repair history recorded for this customer.</p>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                  </React.Fragment>
                 );
               })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
 
