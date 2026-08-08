@@ -221,21 +221,25 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
             <p className="text-xs">Devices moved to 'Finished' status in the repair pipeline automatically flow into QA Control for final inspection.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-ink">
-              <thead>
+                  <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="sticky top-0 z-10">
                 <tr className="border-b border-line text-muted font-bold text-xs uppercase tracking-wider bg-surface">
-                  <th className="py-2.5 px-3 rounded-l-xl">Order</th>
-                  <th className="py-2.5 px-3">Device</th>
-                  <th className="py-2.5 px-3 hidden md:table-cell">Customer</th>
-                  <th className="py-2.5 px-3 hidden lg:table-cell">Repairs</th>
-                  <th className="py-2.5 px-3 text-center">Status</th>
-                  <th className="py-2.5 px-3 text-right">Total</th>
-                  <th className="py-2.5 px-3 text-right rounded-r-xl">Inspect</th>
+                  <th className="py-2.5 px-3">Ticket # & Date</th>
+                  <th className="py-2.5 px-3">Customer & Contact</th>
+                  <th className="py-2.5 px-3">Device & Serial/IMEI</th>
+                  <th className="py-2.5 px-3 hidden lg:table-cell">Symptoms / Service</th>
+                  <th className="py-2.5 px-3">Stage & Status</th>
+                  <th className="py-2.5 px-3">Amount</th>
+                  <th className="py-2.5 px-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
                 {filteredWorkOrders.map((wo) => {
+                  const createdDate = new Date(wo.createdAt || Date.now()).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                  });
                   const isQaPassed = !!wo.postRepairChecklist;
                   const repairs = (wo.selectedRepairs || []).filter((r) => r && r.name);
                   const openQa = () => {
@@ -248,24 +252,30 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                       onClick={openQa}
                       className="hover:bg-surface transition-colors cursor-pointer"
                     >
-                      <td className="py-2.5 px-3">
-                        <span className="font-mono font-bold text-brand">{wo.orderNumber}</span>
+                      {/* Ticket # & Date */}
+                      <td className="py-3 px-3">
+                        <p className="font-mono font-black text-brand text-xs">{wo.orderNumber || wo.id}</p>
+                        <span className="text-xs text-muted">{createdDate}</span>
                       </td>
-                      <td className="py-2.5 px-3">
-                        <p className="font-extrabold text-ink truncate max-w-[180px]">{wo.deviceModel}</p>
-                        <p className="text-xs text-muted truncate max-w-[180px]">
-                          {(wo.imei || wo.serialNumber) && <>#{wo.imei || wo.serialNumber}</>}
-                          {wo.deviceColor && <> · {wo.deviceColor}</>}
+
+                      {/* Customer */}
+                      <td className="py-3 px-3">
+                        <p className="font-bold text-ink truncate max-w-[140px]">{wo.customerName}</p>
+                        <p className="text-xs text-muted font-mono">{wo.customerPhone}</p>
+                      </td>
+
+                      {/* Device & Serial */}
+                      <td className="py-3 px-3">
+                        <p className="font-semibold text-ink truncate max-w-[150px]">{wo.deviceModel}</p>
+                        <p className="text-xs font-mono text-muted truncate max-w-[150px]">
+                          {wo.serialNumber || wo.imei ? `SN: ${wo.serialNumber || wo.imei}` : 'No Serial'}
+                          {wo.deviceColor ? ` · ${wo.deviceColor}` : ''}
                         </p>
                       </td>
-                      <td className="py-2.5 px-3 hidden md:table-cell">
-                        <span className="text-ink font-semibold truncate max-w-[140px] block">{wo.customerName}</span>
-                        {wo.depositAmount > 0 && (
-                          <span className="text-xs text-brand font-bold">Deposit {wo.depositAmount.toLocaleString()} MMK</span>
-                        )}
-                      </td>
-                      <td className="py-2.5 px-3 hidden lg:table-cell">
-                        <div className="flex flex-wrap items-center gap-1 max-w-[260px]">
+
+                      {/* Symptoms / Service */}
+                      <td className="py-3 px-3 hidden lg:table-cell">
+                        <div className="flex flex-wrap items-center gap-1 max-w-[240px]">
                           {repairs.slice(0, 2).map((r, i) => (
                             <span key={i} className="inline-flex items-center gap-1 rounded-md border border-brand/20 bg-brand/10 px-1.5 py-0.5 text-xs font-extrabold text-brand">
                               <Wrench className="h-2.5 w-2.5" />
@@ -277,7 +287,9 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           )}
                         </div>
                       </td>
-                      <td className="py-2.5 px-3 text-center">
+
+                      {/* Stage & Status */}
+                      <td className="py-3 px-3">
                         {isQaPassed ? (
                           <span className="text-xs font-extrabold px-1.5 py-0.5 rounded-md border bg-success/10 text-success-deep border-success/20 uppercase">
                             Ready
@@ -288,20 +300,26 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           </span>
                         )}
                       </td>
-                      <td className="py-2.5 px-3 text-right font-mono font-bold text-ink">
-                        {wo.totalAmount.toLocaleString()} MMK
+
+                      {/* Amount */}
+                      <td className="py-3 px-3">
+                        <p className="font-mono font-extrabold text-xs text-ink">{wo.totalAmount.toLocaleString()} MMK</p>
                       </td>
-                      <td className="py-2.5 px-3 text-right">
-                        <Button
-                          type="button"
-                          onClick={(e) => { e.stopPropagation(); openQa(); }}
-                          variant="ghost"
-                          className="!h-7 !min-h-7 w-7 px-0 border border-line bg-brand-soft text-brand hover:bg-white rounded-lg"
-                          title="Run 21-Point Diagnostic"
-                          aria-label={`Run 21-point diagnostic for ${wo.orderNumber}`}
-                        >
-                          <ClipboardCheck className="h-3.5 w-3.5" />
-                        </Button>
+
+                      {/* Actions — Inspect only */}
+                      <td className="py-3 px-3 text-right">
+                        <div className="inline-flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); openQa(); }}
+                            className="!h-7 !min-h-7 w-7 px-0 border border-line bg-brand-soft text-brand hover:bg-white rounded-lg"
+                            title="Run 21-Point Diagnostic"
+                            aria-label={`Run 21-point diagnostic for ${wo.orderNumber}`}
+                          >
+                            <ClipboardCheck className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   );
