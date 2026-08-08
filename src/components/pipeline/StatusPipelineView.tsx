@@ -491,22 +491,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
     toast.success('After-repair diagnostic inspection saved.', 'Inspection Saved');
   };
 
-  // Check if active filters exist
-  const hasActiveFilters =
-    statusFilter !== 'ALL' ||
-    techFilter !== 'ALL' ||
-    (dateFilter && dateFilter.preset !== 'all') ||
-    !!searchQuery ||
-    showBottlenecksOnly;
-
-  const handleResetFilters = () => {
-    setStatusFilter('ALL');
-    setTechFilter('ALL');
-    if (setDateFilter) setDateFilter({ preset: 'all' });
-    setSearchQuery('');
-    setShowBottlenecksOnly(false);
-  };
-
+  // Check if active filters exist (used for UX hints elsewhere)
   const isTechnicianUser = currentUser?.role === 'Technician';
   const myTechName = currentUser?.technicianName || currentUser?.name || '';
   const myTechId = currentUser?.technicianId || '';
@@ -583,19 +568,6 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
         <div className="flex min-w-0 items-center gap-1.5">
           <span className="whitespace-nowrap font-extrabold text-ink">Active Pipeline Overview</span>
           <span className="truncate text-xs font-medium text-muted">({filteredWorkOrders.length} tickets matching filters)</span>
-          {hasActiveFilters && (
-            <Button
-              type="button"
-              onClick={() => {
-                handleResetFilters();
-                setShowNeedsDiagOnly(false);
-                setShowBeforeNeedsDiagOnly(false);
-              }}
-              className="px-2 min-h-10 text-xs bg-surface hover:bg-line text-brand font-bold rounded-lg transition-all cursor-pointer border border-line flex items-center"
-            >
-              Reset Filters ↺
-            </Button>
-          )}
         </div>
 
         <div className="hidden lg:grid lg:grid-cols-2 xl:flex xl:flex-wrap xl:items-center xl:justify-end gap-1.5">

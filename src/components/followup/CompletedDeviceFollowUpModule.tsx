@@ -365,19 +365,6 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
             </Button>
           ))}
         </div>
-
-        {statusFilter !== 'ALL' || searchQuery ? (
-          <Button
-            type="button"
-            onClick={() => {
-              setStatusFilter('ALL');
-              setSearchQuery('');
-            }}
-            className="text-xs text-brand font-bold hover:underline shrink-0 text-right sm:text-left"
-          >
-            Reset Filters
-          </Button>
-        ) : null}
       </div>
 
       {/* Main Completed Tickets List */}
