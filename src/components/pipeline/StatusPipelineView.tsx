@@ -746,7 +746,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                      stage.id === 'Cant Repair' ? t('statusCantRepair') :
                      stage.id === 'Customer Not Repair' ? t('statusCustomerNotRepair') : stage.title}
                   </div>
-                  <span className={`text-xs font-extrabold px-1.5 py-0.5 rounded-full shadow-2xs ${stage.badgeColor}`}>0</span>
+                  <span className={`text-[11px] font-extrabold px-1.5 py-px rounded-full shadow-2xs ${stage.badgeColor}`}>0</span>
                 </div>
               ) : (
                 <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-line">
@@ -765,14 +765,14 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   <div className="flex items-center space-x-1">
                     {stageStagnantOrders.length > 0 && (
                       <span
-                        className="text-xs font-extrabold px-1.5 py-0.5 rounded-full bg-warning/15 text-warning border border-warning/30 flex items-center space-x-0.5"
+                        className="text-[11px] font-extrabold px-1.5 py-px rounded-full bg-warning/15 text-warning border border-warning/30 flex items-center space-x-0.5"
                         title={`${stageStagnantOrders.length} ticket(s) stationary >48h in this stage`}
                       >
-                        <AlertTriangle className="w-2.5 h-2.5 text-warning shrink-0" />
+                        <AlertTriangle className="w-2 h-2 text-warning shrink-0" />
                         <span>{stageStagnantOrders.length}</span>
                       </span>
                     )}
-                    <span className={`text-xs font-extrabold px-2.5 py-0.5 rounded-full shadow-2xs ${stage.badgeColor}`}>
+                    <span className={`text-[11px] font-extrabold px-1.5 py-px rounded-full shadow-2xs ${stage.badgeColor}`}>
                       {stageOrders.length}
                     </span>
                   </div>
@@ -994,13 +994,13 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   key={s.id}
                   type="button"
                   onClick={() => scrollToStage(s.id)}
-                  className={`inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-full border px-3 text-xs font-extrabold transition-colors cursor-pointer active:scale-95 ${
+                  className={`inline-flex !h-7 !min-h-7 shrink-0 items-center gap-1.5 rounded-full border px-2.5 text-[11px] font-extrabold transition-colors cursor-pointer active:scale-95 ${
                     count > 0 ? 'bg-white text-ink border-line-strong hover:bg-surface' : 'bg-transparent text-muted border-dashed border-line'
                   }`}
                   title={`Scroll to ${s.title} column`}
                 >
                   <span>{s.id}</span>
-                  <span className={`rounded-full px-1.5 py-0.5 text-xs font-black ${count > 0 ? 'bg-brand text-white' : 'bg-surface text-muted'}`}>{count}</span>
+                  <span className={`rounded-full px-1.5 py-px text-[11px] font-black ${count > 0 ? 'bg-brand text-white' : 'bg-surface text-muted'}`}>{count}</span>
                 </Button>
               );
             })}

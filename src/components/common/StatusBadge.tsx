@@ -16,19 +16,19 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
 }) => {
   const normStatus = (status || '').toString().trim();
 
-  // Size variations
+  // Size variations — compact
   const sizeClasses = {
-    xs: 'text-xs px-2 rounded-md font-extrabold uppercase tracking-wider h-[20px] inline-flex items-center leading-none',
-    sm: 'text-xs px-2.5 rounded-lg font-extrabold uppercase tracking-wider h-[22px] inline-flex items-center leading-none',
-    md: 'text-xs px-2.5 rounded-lg font-extrabold uppercase tracking-wider h-[26px] inline-flex items-center leading-none',
-    lg: 'text-sm px-3 rounded-xl font-extrabold uppercase tracking-wider h-[30px] inline-flex items-center leading-none',
+    xs: 'text-[11px] px-1.5 rounded-md font-extrabold uppercase tracking-wider h-[16px] inline-flex items-center leading-none',
+    sm: 'text-[11px] px-2 rounded-lg font-extrabold uppercase tracking-wider h-[18px] inline-flex items-center leading-none',
+    md: 'text-[11px] px-2 rounded-lg font-extrabold uppercase tracking-wider h-[20px] inline-flex items-center leading-none',
+    lg: 'text-xs px-2.5 rounded-xl font-extrabold uppercase tracking-wider h-[22px] inline-flex items-center leading-none',
   }[size];
 
   const dotSizes = {
-    xs: 'h-1.5 w-1.5',
-    sm: 'h-1.5 w-1.5',
-    md: 'h-2 w-2',
-    lg: 'h-2.5 w-2.5',
+    xs: 'h-1 w-1',
+    sm: 'h-1 w-1',
+    md: 'h-1.5 w-1.5',
+    lg: 'h-1.5 w-1.5',
   }[size];
 
   // Specific configuration per status
@@ -112,7 +112,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
 
   return (
     <span
-      className={`inline-flex items-center space-x-1.5 transition-all duration-200 whitespace-nowrap ${sizeClasses} ${badgeStyle} ${className}`}
+      className={`inline-flex items-center space-x-1 transition-all duration-200 whitespace-nowrap ${sizeClasses} ${badgeStyle} ${className}`}
     >
       {showIndicator && (
         <span className={`relative flex ${dotSizes} shrink-0`}>
