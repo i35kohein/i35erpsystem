@@ -1617,16 +1617,6 @@ export default function App() {
 
           {/* Dynamic Header Actions & Quick Filters per Tab */}
           <div className="app-topbar-actions flex min-w-0 items-center flex-nowrap justify-end gap-1.5 sm:gap-2 text-xs py-1 shrink-0 relative z-30 overflow-x-auto no-scrollbar max-w-full lg:overflow-visible">
-            {/* Global Search (Cmd/Ctrl+K) — hidden on iPad: the contextual search box (and inventory scan box) already cover it */}
-            <Button
-              type="button"
-              onClick={() => setIsGlobalSearchOpen(true)}
-              className={`${isIpad ? 'hidden' : 'inline-flex'} h-11 w-11 lg:h-10 lg:w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2`}
-              title="Global search (⌘K)"
-              aria-label="Global search (⌘K)"
-            >
-              <Search className="h-4 w-4" />
-            </Button>
             {/* Reset All Filters Pill Button when any filter is active */}
             {hasActiveFilters && (
               <Button
@@ -1952,15 +1942,6 @@ export default function App() {
               <>
                 <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
                 {!isIpad && <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />}
-                <Button
-                  type="button"
-                  onClick={() => setIsAiAssistantOpen(true)}
-                  className="px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-bold rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 active:scale-95"
-                  title="Open AI Diagnostic Assistant"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-purple-600" />
-                  <span className="hidden sm:inline">AI Assistant</span>
-                </Button>
                 </div>
               </>
             )}
