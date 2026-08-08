@@ -174,26 +174,6 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
               },
             ]}
           />
-
-          {!iconOnly && <Button
-            type="button"
-            onClick={() => {
-              setShowCalendarModal(!showCalendarModal);
-              if (currentFilter.preset !== 'custom') {
-                onChange({ ...currentFilter, preset: 'custom' });
-              }
-            }}
-            variant="iconGhost"
-            size="iconSm"
-            className={`shrink-0 rounded-xl border border-line ${
-              currentFilter.preset === 'custom'
-                ? 'bg-brand text-white font-bold'
-                : 'bg-surface hover:bg-white text-muted'
-            }`}
-            title="Calendar Picker"
-          >
-            <Calendar className="w-3.5 h-3.5" />
-          </Button>}
         </div>
       ) : (
         /* Minimalistic Segmented Control */

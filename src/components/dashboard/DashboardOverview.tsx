@@ -70,7 +70,7 @@ const TrendChart: React.FC<{
   maxRevenue: number;
   maxRepairs: number;
   currencySymbol?: string;
-}> = ({ buckets, revenue, repairs, maxRevenue, maxRepairs, currencySymbol = 'MMK' }) => {
+}> = ({ buckets, revenue, repairs, currencySymbol = 'MMK' }) => {
   const hasAny = revenue.some((v) => v > 0) || repairs.some((v) => v > 0);
 
   if (!hasAny) return null;
@@ -369,7 +369,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   // collected — counting them inflated the card.
   const readyForPickup = filteredWorkOrders.filter((w) => w.status === 'Finished');
 
-  const inRepair = filteredWorkOrders.filter((w) => w.status === 'In Progress' || w.status === 'Receive');
   const pendingRmas = rmas.filter((r) => r.status === 'Shipped to Vendor' || r.status === 'Draft');
 
     // Technician load imbalance — drives the amber suggestion banner (single source: computeTechStats)
@@ -640,7 +639,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       )}
 
       {/* Headline summary cards — always visible above the subtab tabs. */}
-      {/* 4 KPI cards stay 4-up on every large screen (no 6/8-col squeeze with only 4 cards) */}
+      {/* 4 KPI cards stay 4-up on every large screen — simplified: label + number + one action hint */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Card 1: Active In-Shop Repairs */}
         <div
@@ -662,18 +661,15 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <ClipboardList className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-2.5 flex items-baseline justify-between">
+          <div className="mt-2.5">
             <span className="text-2xl sm:text-3xl font-black text-ink tracking-tight">
               {activeRepairs.length}
-            </span>
-            <span className="text-xs font-bold text-brand bg-brand-soft px-2 py-0.5 rounded-full border border-brand/20">
-              {inRepair.length} In Progress / Received
             </span>
           </div>
           <div className="mt-3 pt-2.5 border-t border-surface flex items-center justify-between text-xs text-muted">
             <span>In-shop workload</span>
             <span className="font-bold text-brand group-hover:underline flex items-center space-x-0.5">
-              <span>View Queue</span>
+              <span>View</span>
               <ChevronRight className="w-3 h-3" />
             </span>
           </div>
@@ -699,18 +695,15 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-2.5 flex items-baseline justify-between">
+          <div className="mt-2.5">
             <span className="text-2xl sm:text-3xl font-black text-ink tracking-tight">
               {readyForPickup.length}
-            </span>
-            <span className="text-xs font-bold text-success-deep bg-success/10 px-2 py-0.5 rounded-full border border-success/30">
-              Completed
             </span>
           </div>
           <div className="mt-3 pt-2.5 border-t border-surface flex items-center justify-between text-xs text-muted">
             <span>Awaiting customer</span>
             <span className="font-bold text-success-deep group-hover:underline flex items-center space-x-0.5">
-              <span>View Finished</span>
+              <span>View</span>
               <ChevronRight className="w-3 h-3" />
             </span>
           </div>
@@ -733,18 +726,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <Coins className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-2.5 flex items-baseline justify-between">
-            <span className="text-xl sm:text-2xl font-black text-ink tracking-tight truncate">
+          <div className="mt-2.5">
+            <span className="text-xl sm:text-2xl font-black text-ink tracking-tight truncate block">
               {totalRevenue.toLocaleString()} <span className="text-xs font-bold text-muted">MMK</span>
-            </span>
-            <span className={`text-xs font-bold px-2 py-0.5 rounded-full border shrink-0 ml-1 inline-flex items-center space-x-0.5 ${marginPercent < 0 ? 'bg-danger/10 text-danger border-danger/30' : 'bg-brand-soft text-brand-deep border-indigo-200'}`}
-              title={marginPercent < 0 ? '⚠️ Negative margin — average costs exceed revenue' : 'Gross margin %'}>
-              {marginPercent < 0 && <AlertTriangle className="w-2.5 h-2.5 shrink-0" />}
-              <span>{marginPercent}% Margin</span>
             </span>
           </div>
           <div className="mt-3 pt-2.5 border-t border-surface flex items-center justify-between text-xs text-muted">
-            <span>Avg: {avgTicketValue.toLocaleString()} MMK</span>
+            <span>{marginPercent}% margin</span>
             <span className="font-bold text-brand group-hover:underline flex items-center space-x-0.5">
               <span>Finance</span>
               <ChevronRight className="w-3 h-3" />
@@ -769,7 +757,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <Clock className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-2.5 flex items-baseline justify-between">
+          <div className="mt-2.5">
             <span className="text-2xl sm:text-3xl font-black text-ink tracking-tight">
               {avgTurnaroundHours > 0
                 ? avgTurnaroundHours >= 24
@@ -777,12 +765,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   : `${avgTurnaroundHours}h`
                 : '—'}
             </span>
-            <span className="text-xs font-bold text-teal bg-teal/10 px-2 py-0.5 rounded-full border border-teal/30">
-              Intake → Ready
-            </span>
           </div>
           <div className="mt-3 pt-2.5 border-t border-surface flex items-center justify-between text-xs text-muted">
-            <span>{completedWorkOrders.length} completed tickets</span>
+            <span>{completedWorkOrders.length} done</span>
             <span className="font-bold text-teal group-hover:underline flex items-center space-x-0.5">
               <span>Tech KPIs</span>
               <ChevronRight className="w-3 h-3" />
@@ -1100,7 +1085,15 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 const total = filteredWorkOrders.length || 1;
                 const pct = Math.round((item.count / total) * 100);
                 return (
-                  <div key={item.stage} className={`p-4 rounded-xl border border-line/80 ${item.bg} space-y-2`}>
+                  <div
+                    key={item.stage}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setStatusQueueFilter(item.stage)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setStatusQueueFilter(item.stage); } }}
+                    title={`Filter queue to ${item.title}`}
+                    className={`p-4 rounded-xl border border-line/80 ${item.bg} space-y-2 cursor-pointer transition-all hover:shadow-md hover:border-brand/40 select-none`}
+                  >
                     <div className="flex items-center justify-between">
                       <span className={`text-xs font-bold ${item.text}`}>{item.title}</span>
                       <span className="font-mono text-xs font-black text-ink">{item.count} <span className="hidden xl:inline">tickets</span></span>
@@ -1110,17 +1103,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     </div>
                     <div className="flex justify-between items-center text-xs text-muted">
                       <span>{pct}% of active queue</span>
-                      <Button
-  variant="link"
-  
-                        onClick={() => {
-                          setStatusQueueFilter(item.stage);
-                        }}
-                        className="min-h-10 flex items-center space-x-0.5"
-                      >
-                        <span>Filter Queue Below</span>
+                      <span className="font-bold text-brand flex items-center space-x-0.5">
+                        <span>Filter Queue</span>
                         <ChevronRight className="w-3 h-3" />
-                      </Button>
+                      </span>
                     </div>
                   </div>
                 );

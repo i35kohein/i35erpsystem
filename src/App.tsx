@@ -2229,8 +2229,8 @@ export default function App() {
               </Button>
             ) : null}
 
-            {/* Live Supabase connection indicator — desktop only; hidden on iPad (declutter) */}
-            {!isIpad && <OfflineSyncStatusBadge />}
+            {/* Live Supabase connection indicator — dev-mode only (VITE_DEV_MODE or localhost); hidden in production & iPad */}
+            {!isIpad && import.meta.env.DEV && <OfflineSyncStatusBadge />}
           </div>
         </header>
 
@@ -2568,14 +2568,12 @@ export default function App() {
         </Suspense>
       )}
 
-      {/* AI FAB: available from every tab & every screen size. On mobile it sits
-          above the bottom nav / POS checkout bar; on desktop it's a bottom-right
-          launcher for the chat widget (which slides up from the corner). */}
+      {/* AI FAB: mobile only — desktop uses the header AI button (decluttered) */}
       {!isAiAssistantOpen && (
         <Button
           type="button"
           onClick={() => setIsAiAssistantOpen(true)}
-          className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-4 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent)] text-white shadow-lg lg:bottom-5 lg:right-5 cursor-pointer active:scale-95 transition-transform hover:scale-105"
+          className="lg:hidden fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-4 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent)] text-white shadow-lg cursor-pointer active:scale-95 transition-transform hover:scale-105"
           aria-label="Open AI Assistant"
           title="Open AI Assistant"
         >

@@ -21,7 +21,7 @@ import {ClipboardList,
   SlidersHorizontal,
   LayoutGrid,
   Table as TableIcon,
-  Maximize2,
+  ChevronRight,
   User,
   Wrench,
   Clock,
@@ -475,19 +475,9 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                         </span>
                       </td>
 
-                      {/* Action */}
+                      {/* Action — row is fully clickable; passive chevron affordance */}
                       <td className="px-2 py-2 text-right hidden xl:table-cell">
-                        <div className="flex items-center justify-end" onClick={(e) => e.stopPropagation()}>
-                          <Button
-                            type="button"
-                            onClick={() => handleOpenTicketDetail(wo)}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors hover:border-brand hover:bg-brand-soft hover:text-brand"
-                            title="View Ticket Status"
-                            aria-label={`View status for ${wo.orderNumber || wo.id}`}
-                          >
-                            <Maximize2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        <ChevronRight className="w-4 h-4 text-muted group-hover:text-brand transition-colors" />
                       </td>
                     </tr>
                   );
@@ -557,16 +547,8 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                       </span>
                     </div>
 
-                    <div className="flex items-center space-x-1.5" onClick={(e) => e.stopPropagation()}>
-                      <Button
-                        type="button"
-                        onClick={() => handleOpenTicketDetail(wo)}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-brand-soft text-brand transition-colors hover:bg-brand hover:text-white"
-                        title="View Ticket Status"
-                        aria-label={`View status for ${wo.orderNumber || wo.id}`}
-                      >
-                        <Maximize2 className="h-4 w-4" />
-                      </Button>
+                    <div className="flex items-center space-x-1.5">
+                      <ChevronRight className="w-4 h-4 text-muted transition-colors" />
                     </div>
                   </div>
                 </div>

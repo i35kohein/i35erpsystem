@@ -56,7 +56,6 @@ export const Navigation: React.FC<NavigationProps> = ({
   onOpenUserManagement,
   onOpenNewWorkOrder,
   onOpenRecycleBin,
-  lowStockCount = 0,
   isCollapsed,
   setIsCollapsed,
   isMobileMenuOpen: externalMobileMenuOpen,
@@ -80,23 +79,13 @@ export const Navigation: React.FC<NavigationProps> = ({
       )
     : workOrders;
 
-  // Sidebar counts mirror the actual module queues.
-  const intakeCount = myWorkOrders.filter((w) => w.status === 'Receive').length;
+  // Sidebar counts — only Pipeline & POS keep badges (decluttered sidebar).
   const activePipelineCount = myWorkOrders.filter(
     (w) => w.status === 'Receive' || w.status === 'In Progress' || w.status === 'Pending'
-  ).length;
-  const qaFinishedCount = myWorkOrders.filter(
-    (w) => (w.status === 'Finished' || w.status === 'Taken Out') && !w.postRepairChecklist
   ).length;
   // POS-ready = tickets past QA (have a postRepairChecklist). Declined/cant-repair
   // tickets are NOT payable work — don't count them here (P0 #2).
   const posReadyCount = myWorkOrders.filter((w) => Boolean(w.postRepairChecklist)).length;
-  const pendingFollowUpCount = myWorkOrders.filter(
-    (w) => (w.status === 'Finished' || w.status === 'Taken Out') && (!w.followUpStatus || w.followUpStatus === 'Pending Call')
-  ).length;
-
-  // lowStockCount comes from App (real: parts at/below reorderPoint) — P0 #1 fix.
-  const inventoryLowStock = lowStockCount;
 
   const allNavGroups = [
     {
@@ -106,8 +95,6 @@ export const Navigation: React.FC<NavigationProps> = ({
           id: 'intake',
           label: t('navIntake'),
           icon: ClipboardList,
-          badge: intakeCount > 0 ? intakeCount : myWorkOrders.length,
-          badgeColor: 'bg-brand text-white',
         },
         {
           id: 'pipeline',
@@ -120,15 +107,11 @@ export const Navigation: React.FC<NavigationProps> = ({
           id: 'qa',
           label: t('navQa'),
           icon: ShieldCheck,
-          badge: qaFinishedCount > 0 ? qaFinishedCount : undefined,
-          badgeColor: 'bg-purple text-white',
         },
         {
           id: 'follow-up',
           label: t('navFollowUp'),
           icon: PhoneCall,
-          badge: pendingFollowUpCount > 0 ? pendingFollowUpCount : undefined,
-          badgeColor: 'bg-warning text-black',
         },
         {
           id: 'price-catalog',
@@ -161,8 +144,6 @@ export const Navigation: React.FC<NavigationProps> = ({
           id: 'inventory',
           label: isCollapsed ? t('navPartsMatrix') : 'Parts & Stock Matrix',
           icon: Boxes,
-          badge: inventoryLowStock > 0 ? inventoryLowStock : undefined,
-          badgeColor: 'bg-warning text-black',
         },
         {
           id: 'suppliers',
