@@ -72,6 +72,9 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
   const isStagnant = (wo: WorkOrder) => {
     const created = new Date(wo.createdAt).getTime();
     if (isNaN(created)) return false;
+    // Bottleneck applies only to OPEN stages — Finished / Taken Out are terminal,
+    // they'd always look 'stale' by age and shouldn't get the red border.
+    if (wo.status === 'Finished' || wo.status === 'Taken Out') return false;
     return (Date.now() - created) / (1000 * 60 * 60) >= 48;
   };
 
