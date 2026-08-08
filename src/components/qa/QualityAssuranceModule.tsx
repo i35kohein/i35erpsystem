@@ -705,7 +705,6 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                       options={technicians.map((technician) => ({
                         value: technician.id,
                         label: technician.name,
-                        badge: technician.level,
                       }))}
                       placeholder="Select inspector"
                       className="w-full"
