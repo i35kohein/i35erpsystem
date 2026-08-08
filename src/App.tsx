@@ -941,22 +941,6 @@ export default function App() {
           </div>
         )}
 
-        {(tab === 'intake' || tab === 'pipeline') && (
-          <Button
-            type="button"
-            onClick={() => { setIsRecycleBinOpen(true); setIsFilterDrawerOpen(false); }}
-            className={`${rowCls} bg-white text-ink border-line hover:bg-slate-100`}
-          >
-            <span className="flex items-center gap-2">
-              <Trash2 className={`w-4 h-4 ${archivedWorkOrders.length > 0 ? 'text-rose-600' : 'text-muted'}`} />
-              Recycle Bin
-            </span>
-            {archivedWorkOrders.length > 0 && (
-              <span className="rounded-full bg-rose-600 px-2 py-0.5 text-xs font-black text-white">{archivedWorkOrders.length}</span>
-            )}
-          </Button>
-        )}
-
       </div>
     );
   };
