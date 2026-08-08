@@ -534,6 +534,15 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                 </div>
               </div>
             )}
+            {/* Full list footer — same pattern as Inventory */}
+            {filteredOrders.length > 0 && (
+              <div className="p-3.5 bg-white border-t border-line flex items-center justify-between text-xs text-muted">
+                <span className="font-bold">
+                  Showing <strong className="text-ink">{Math.min(filteredOrders.length, (rosterPageSafe - 1) * ROSTER_PAGE_SIZE + 1)}-{Math.min(rosterPageSafe * ROSTER_PAGE_SIZE, filteredOrders.length)}</strong> of <strong className="text-ink">{filteredOrders.length}</strong> tickets
+                </span>
+                <span className="font-bold text-ink">Page {rosterPageSafe}/{rosterTotalPages}</span>
+              </div>
+            )}
           </div>
         ) : (
           /* GRID CARDS VIEW */
