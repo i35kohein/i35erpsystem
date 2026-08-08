@@ -43,7 +43,7 @@ import {
   AlertTriangle, 
   HelpCircle,
   Search,
-  Wrench} from 'lucide-react';
+  Wrench, UserPlus , MoreHorizontal } from 'lucide-react';
 import { 
   WorkOrder, 
   Customer, 
@@ -137,6 +137,11 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
   const isIpad = useIsIpad();
   const editWorkOrder = prefill?.editWorkOrder ?? null;
   const isEditMode = !!editWorkOrder;
+
+  // Phone suggestion dropdown open state
+  const [phoneSuggestOpen, setPhoneSuggestOpen] = useState(false);
+  // Intake 21-point comment modal (QA-style ⋮)
+  const [diagCommentId, setDiagCommentId] = useState<string | null>(null);
 
   // Modals inside form
   const [isModelModalOpen, setIsModelModalOpen] = useState(false);
@@ -278,6 +283,9 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
     }))
   );
 
+  // Active comment target for the 21-point diagnostic modal
+  const diagCommentItem = diagCommentId ? beforeDiagnostics.find((d) => d.id === diagCommentId) || null : null;
+
   // Photos
   const [intakePhotos, setIntakePhotos] = useState<string[]>([]);
 
@@ -310,17 +318,26 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       if (found) {
         setMatchedCustomer(found);
         setCustomerName(found.name);
-        // Do NOT stuff company into Town/City — a company name is not a town.
-        // The Customer type has no address/town field yet; leave Town for manual
-        // entry (or prefill from a future Customer.city field).
         setCustomerType(found.type);
       } else {
+        // No existing user → treat as NEW customer: clear name + type
         setMatchedCustomer(null);
+        setCustomerName('');
+        setCustomerType('Retail');
       }
     } else {
       setMatchedCustomer(null);
     }
   };
+  // Suggested customers for the phone field dropdown (typed prefix match)
+  const phoneSuggestions = (() => {
+    const digits = customerPhone.replace(/\D/g, '');
+    if (digits.length < 3) return [];
+    const normalize = (p: string) => (p || '').replace(/\D/g, '');
+    return customers
+      .filter((c) => normalize(c.phone).includes(digits) || c.name.toLowerCase().includes(customerPhone.toLowerCase()))
+      .slice(0, 5);
+  })();
 
   // Discount & Totals calculation in MMK
   const baseTotal = selectedRepairs.reduce((sum, item) => sum + item.basePrice, 0);
@@ -710,7 +727,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-            <div>
+            <div className="relative">
               <label htmlFor="field-customer-phone" className="flex items-center justify-between text-muted mb-1 font-medium">
                 <span>Phone Number *</span>
                 {customerPhone.replace(/\D/g, '').length > 0 && (
@@ -726,21 +743,56 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 aria-required="true"
                 aria-invalid={Boolean(fieldErrors['field-customer-phone'])}
                 value={customerPhone}
-                onChange={(e) => { handlePhoneChange(e.target.value); clearFieldError('field-customer-phone'); }}
+                onChange={(e) => { handlePhoneChange(e.target.value); clearFieldError('field-customer-phone'); setPhoneSuggestOpen(true); }}
+                onFocus={() => setPhoneSuggestOpen(true)}
+                onBlur={() => setTimeout(() => setPhoneSuggestOpen(false), 150)}
                 placeholder="e.g. 09-123456789 or 09-987654321"
+                autoComplete="off"
                 className={`w-full bg-white border rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none transition-all ${
                   fieldErrors['field-customer-phone']
                     ? 'border-danger focus:border-danger focus:ring-2 focus:ring-danger/20'
                     : 'border-line focus:border-brand focus:ring-2 focus:ring-brand/20'
                 }`}
               />
+              {/* Previously used customer suggestions */}
+              {phoneSuggestOpen && phoneSuggestions.length > 0 && (
+                <div className="absolute left-0 right-0 top-full z-30 mt-1 bg-white border border-line rounded-xl shadow-xl overflow-hidden">
+                  {phoneSuggestions.map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        handlePhoneChange(c.phone);
+                        setPhoneSuggestOpen(false);
+                      }}
+                      onClick={() => {
+                        handlePhoneChange(c.phone);
+                        setPhoneSuggestOpen(false);
+                      }}
+                      className="w-full px-3 py-2 text-left flex items-center justify-between gap-2 hover:bg-brand-soft transition-colors"
+                    >
+                      <span className="text-xs font-bold text-ink truncate">{c.name}</span>
+                      <span className="text-xs font-mono text-muted shrink-0">{c.phone}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
               {fieldErrors['field-customer-phone'] && (
                 <p role="alert" className="mt-1 text-xs font-semibold text-danger">{fieldErrors['field-customer-phone']}</p>
               )}
             </div>
 
             <div>
-              <label htmlFor="field-customer-name" className="block text-muted mb-1 font-medium">Customer Name *</label>
+              <label htmlFor="field-customer-name" className="flex items-center justify-between text-muted mb-1 font-medium">
+                <span>Customer Name *</span>
+                {customerPhone.replace(/\D/g, '').length >= 7 && !matchedCustomer && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-black px-1.5 py-0.5 rounded-full bg-brand/10 text-brand border border-brand/25">
+                    <UserPlus className="w-2.5 h-2.5" />
+                    NEW USER
+                  </span>
+                )}
+              </label>
               <Input
                 id="field-customer-name"
                 type="text"
@@ -749,7 +801,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 aria-invalid={Boolean(fieldErrors['field-customer-name'])}
                 value={customerName}
                 onChange={(e) => { setCustomerName(e.target.value); clearFieldError('field-customer-name'); }}
-                placeholder="e.g. Mg Mg (Full Name)"
+                placeholder={matchedCustomer ? '' : 'e.g. Mg Mg (Full Name)'}
                 className={`w-full bg-white border rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none transition-all ${
                   fieldErrors['field-customer-name']
                     ? 'border-danger focus:border-danger focus:ring-2 focus:ring-danger/20'
@@ -1194,86 +1246,122 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-2.5 text-xs sm:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4">
+          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-1.5">
             {beforeDiagnostics.map((item, idx) => {
               const IconComp = getDiagnosticIcon(item.name);
+              const isPass = item.status === 'Pass';
+              const isFail = item.status === 'Fail';
 
               return (
-                <div key={item.id} className="p-2.5 bg-white border border-line rounded-xl space-y-1.5 text-xs shadow-xs hover:border-brand/50 transition-all">
-                  <div className="font-bold text-ink flex justify-between items-center">
-                    <div className="flex items-center space-x-1.5 truncate">
-                      <div className="w-5 h-5 rounded-md bg-surface text-brand flex items-center justify-center shrink-0">
-                        <IconComp className="w-3.5 h-3.5" />
-                      </div>
-                        <span className="text-xs font-extrabold truncate">{idx + 1}. {item.name}</span>
-                    </div>
+                <div key={item.id} className={`rounded-xl border p-2 transition-colors ${
+                  isFail ? 'bg-danger/5 border-danger/20' : isPass ? 'bg-success/5 border-success/20' : 'bg-white border-line hover:border-brand/30'
+                }`}>
+                  {/* Big icon — click to cycle status */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updated = [...beforeDiagnostics];
+                      updated[idx].status = isPass ? 'Fail' : isFail ? 'N/A' : 'Pass';
+                      setBeforeDiagnostics(updated);
+                    }}
+                    className={`mx-auto flex items-center justify-center transition-colors ${
+                      isFail ? 'text-danger' : isPass ? 'text-success-deep' : 'text-brand'
+                    }`}
+                    title={`Status: ${item.status} — click to change`}
+                    aria-label={`Change status for ${item.name}`}
+                  >
+                    <IconComp className="w-8 h-8" />
+                  </button>
 
-                    <span className={`text-xs font-black px-2 py-0.5 rounded-md tracking-wider uppercase shrink-0 shadow-2xs ${
-                      item.status === 'Pass' ? 'bg-success text-white' :
-                      item.status === 'Fail' ? 'bg-danger text-white animate-pulse' : 'bg-muted text-white'
-                    }`}>
-                      {item.status === 'Pass' ? '✓ PASS' : item.status === 'Fail' ? '✕ FAIL' : 'N/A'}
-                    </span>
-
-                  </div>
-
-                  <div className="flex space-x-1 text-xs">
-                    <Button
+                  {/* Name + ⋮ — same row */}
+                  <div className="flex items-center gap-1 mt-1">
+                    {/* Name — click to mark Pass */}
+                    <button
+                      type="button"
                       onClick={() => {
                         const updated = [...beforeDiagnostics];
                         updated[idx].status = 'Pass';
                         setBeforeDiagnostics(updated);
                       }}
-                        className={`flex-1 min-h-10 py-2 rounded-lg font-black transition-all ${
-                        item.status === 'Pass' ? 'bg-success text-white shadow-xs' : 'bg-surface text-ink hover:bg-line'
+                      className={`flex-1 min-w-0 text-[11px] font-bold truncate text-left transition-colors ${
+                        isPass ? 'text-success-deep' : isFail ? 'text-danger' : 'text-ink hover:text-success-deep'
                       }`}
+                      title={`Mark ${item.name} as Pass`}
+                      aria-label={`Mark ${item.name} as Pass`}
                     >
-                      Pass
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        const updated = [...beforeDiagnostics];
-                        updated[idx].status = 'Fail';
-                        setBeforeDiagnostics(updated);
-                      }}
-                        className={`flex-1 min-h-10 py-2 rounded-lg font-black transition-all ${
-                        item.status === 'Fail' ? 'bg-danger text-white shadow-xs' : 'bg-surface text-ink hover:bg-line'
+                      {idx + 1}. {item.name}
+                    </button>
+                    {/* ⋮ menu (Comment) */}
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); setDiagCommentId(diagCommentId === item.id ? null : item.id); }}
+                      className={`!h-5 !min-h-5 w-5 px-0 rounded shrink-0 flex items-center justify-center transition-colors ${
+                        diagCommentId === item.id ? 'bg-line text-ink' : 'text-muted hover:bg-line/60 hover:text-ink'
                       }`}
+                      title="More options"
+                      aria-label={`More options for ${item.name}`}
                     >
-                      Fail
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        const updated = [...beforeDiagnostics];
-                        updated[idx].status = 'N/A';
-                        setBeforeDiagnostics(updated);
-                      }}
-                        className={`flex-1 min-h-10 py-2 rounded-lg font-black transition-all ${
-                        item.status === 'N/A' ? 'bg-slate-600 text-white shadow-xs' : 'bg-surface text-ink hover:bg-line'
-                      }`}
-                    >
-                      N/A
-                    </Button>
+                      <MoreHorizontal className="w-3.5 h-3.5" />
+                    </button>
                   </div>
 
-                  {/* Diagnostic Comment Box — always visible (QA 21-point style) */}
-                  <div className="relative pt-1">
-                    <Input
-                      type="text"
-                      value={item.note || ''}
-                      onChange={(e) => {
-                        const updated = [...beforeDiagnostics];
-                        updated[idx].note = e.target.value;
-                        setBeforeDiagnostics(updated);
-                      }}
-                      placeholder={`Comment for ${item.name}...`}
-                      className="w-full bg-surface border border-line rounded-lg px-2.5 py-1 text-xs text-ink focus:bg-white focus:border-brand focus:outline-none"
-                    />
-                  </div>
+                  {/* Reason chip when Fail + note */}
+                  {isFail && (item.note || '').trim() && (
+                    <p className="text-[9px] font-semibold text-danger truncate mt-0.5" title={item.note}>
+                      ⚠ {item.note}
+                    </p>
+                  )}
                 </div>
               );
             })}
           </div>
+
+
+
+          {/* Intake comment modal */}
+          {diagCommentItem && (
+              <div
+                className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/40 p-4"
+                onClick={() => setDiagCommentId(null)}
+              >
+                <div
+                  className="w-full max-w-xs bg-white border border-line rounded-2xl shadow-2xl p-3 space-y-2"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-center justify-between">
+                    <p className="text-[11px] font-extrabold text-ink truncate">Comment — {diagCommentItem.name}</p>
+                    <button
+                      type="button"
+                      onClick={() => setDiagCommentId(null)}
+                      className="!h-6 !min-h-6 w-6 px-0 rounded flex items-center justify-center text-muted hover:bg-surface hover:text-ink"
+                      aria-label="Close comment"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <Input
+                    type="text"
+                    value={diagCommentItem.note || ''}
+                    onChange={(e) => {
+                      const updated = [...beforeDiagnostics];
+                      const target = updated.find((d) => d.id === diagCommentItem.id);
+                      if (target) target.note = e.target.value;
+                      setBeforeDiagnostics(updated);
+                    }}
+                    placeholder="Type a note..."
+                    autoFocus
+                    className="!h-8 !min-h-8 w-full rounded-lg bg-surface border border-line px-2.5 text-xs text-ink focus:bg-white focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/20"
+                  />
+                  <Button
+                    type="button"
+                    onClick={() => setDiagCommentId(null)}
+                    className="!h-7 !min-h-7 w-full rounded-lg bg-brand text-white text-[11px] font-bold hover:bg-brand-deep"
+                  >
+                    Done
+                  </Button>
+                </div>
+              </div>
+          )}
         </div>
 
         {/* STEP 4C (Phase 4): Before-Repair Condition Photos */}
