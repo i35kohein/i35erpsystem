@@ -4,6 +4,7 @@ import {
 } from 'lucide-react';
 import { WorkOrder, Technician } from '../../types';
 import { computeTechStats} from '../../utils/techAnalytics';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 interface TechnicianPerformanceTabProps {
   technicians: Technician[];
@@ -19,8 +20,36 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
 }) => {
   const techStats = technicians.map((tech) => computeTechStats(workOrders, tech));
 
+  const chartData = techStats.map((stats) => ({
+    name: stats.tech.name.split(' ')[0],
+    Done: stats.liveCompleted,
+    Pass: stats.successRate !== null ? stats.successRate : 0,
+  }));
+
   return (
     <div className="space-y-3">
+      {/* Done vs Pass bar chart */}
+      {techStats.length > 0 && (
+        <div className="bg-white border border-line rounded-2xl p-3 shadow-2xs">
+          <h3 className="text-xs font-extrabold text-ink uppercase tracking-wider mb-2">Technician Output</h3>
+          <div className="h-44">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-line)" />
+                <XAxis dataKey="name" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'var(--color-muted)' }} />
+                <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'var(--color-muted)' }} allowDecimals={false} />
+                <Tooltip
+                  cursor={{ fill: 'var(--color-surface)', opacity: 0.4 }}
+                  contentStyle={{ borderRadius: 12, border: '1px solid var(--color-line)', fontSize: 12 }}
+                />
+                <Bar dataKey="Done" fill="var(--color-brand)" radius={[4, 4, 0, 0]} maxBarSize={36} />
+                <Bar dataKey="Pass" fill="var(--color-success)" radius={[4, 4, 0, 0]} maxBarSize={36} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
+
       {/* Technician Compact Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
         {techStats.map((stats) => {
