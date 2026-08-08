@@ -25,9 +25,6 @@ import {CreditCard,
   UserCheck,
   ChevronsLeft,
   ChevronsRight,
-  Tablet,
-  Watch,
-  Laptop,
   type LucideIcon,
 } from 'lucide-react';
 import { WorkOrder, Customer, SystemSettings, PartItem, WorkOrderLineItem } from '../../types';
@@ -166,14 +163,6 @@ interface PosInvoicingModuleProps {
   setStatusFilter?: (s: string) => void;
   onOpenSettings?: () => void;
 }
-
-const deviceIconOf = (model: string): LucideIcon => {
-  const m = (model || '').toLowerCase();
-  if (m.includes('ipad') || m.includes('tablet')) return Tablet;
-  if (m.includes('watch')) return Watch;
-  if (m.includes('mac') || m.includes('macbook') || m.includes('laptop') || m.includes('imac')) return Laptop;
-  return Smartphone;
-};
 
 const repairSummaryOf = (wo: WorkOrder): string => {
   const repairs = (wo.selectedRepairs || []).filter((r) => r && r.name);
@@ -448,7 +437,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
       <div className={`flex flex-col md:flex-row gap-3 text-xs pb-16 md:pb-0 ${isIpad ? 'md:flex-1 md:min-h-0' : ''}`}>
         {/* Left Column: Select Work Order to Checkout (collapsible, hugs sidebar) */}
         <div className={`bg-white border border-line rounded-2xl p-3 space-y-3 shadow-xs shrink-0 ${
-          isQueueCollapsed ? 'md:w-9' : 'md:w-[380px]'
+          isQueueCollapsed ? 'md:w-36' : 'md:w-[380px]'
         } ${isIpad ? 'md:flex md:flex-col md:min-h-0' : 'md:self-start'}`}>
           <div className="flex justify-between items-center border-b border-line pb-2">
             {!isQueueCollapsed ? (
@@ -567,24 +556,26 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
           {isQueueCollapsed && filteredWorkOrders.length > 0 && (
             <div className={`space-y-1.5 ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:flex-1 md:max-h-none' : 'min-h-[360px] max-h-[calc(100dvh-280px)] overflow-y-auto'}`}>
               {filteredWorkOrders.map((wo) => {
-                const DeviceIcon = deviceIconOf(wo.deviceModel);
                 const isSel = wo.id === selectedWoId;
                 return (
                   <button
                     key={wo.id}
                     type="button"
                     onClick={() => setSelectedWoId(wo.id)}
-                    className={`w-full py-1.5 rounded-lg flex flex-col items-center gap-1 transition-colors ${
+                    className={`w-full px-2 py-1.5 rounded-lg flex flex-col items-start transition-colors ${
                       isSel ? 'bg-brand text-white shadow-2xs' : 'bg-white text-ink border border-line hover:bg-brand-soft hover:border-brand/30'
                     }`}
                     title={`${wo.orderNumber} · ${wo.deviceModel} · ${wo.customerName}`}
                     aria-label={`Select ${wo.orderNumber} ${wo.deviceModel}`}
                   >
-                    <span className={`w-6 h-6 rounded-full flex items-center justify-center ${isSel ? 'bg-white/20' : 'bg-brand-soft'}`}>
-                      <DeviceIcon className={`w-4 h-4 ${isSel ? 'text-white' : 'text-brand'}`} />
+                    <span className={`font-mono text-[10px] font-black leading-tight ${isSel ? 'text-white' : 'text-brand'}`}>
+                      {wo.orderNumber}
                     </span>
-                    <span className={`text-[8px] font-black leading-none ${isSel ? 'text-white' : 'text-muted'}`}>
-                      {wo.isPaid ? '✓' : '$'}
+                    <span className={`text-[9px] font-bold leading-tight truncate w-full ${isSel ? 'text-white/90' : 'text-ink'}`}>
+                      {wo.deviceModel}
+                    </span>
+                    <span className={`text-[8px] font-black leading-tight ${isSel ? 'text-white/80' : 'text-muted'}`}>
+                      {wo.isPaid ? '✓ PAID' : '$ DUE'} · {wo.totalAmount.toLocaleString()}
                     </span>
                   </button>
                 );
