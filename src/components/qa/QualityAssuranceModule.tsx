@@ -3,7 +3,8 @@ import { useIsIpad } from '../../hooks/useIsIpad';
 import {ShieldCheck, 
   CheckCircle2, 
   X,
-  ClipboardCheck} from 'lucide-react';
+  ClipboardCheck,
+  MoreHorizontal} from 'lucide-react';
 import { WorkOrder, PostRepairChecklist, Technician, DiagnosticItemResult, AppUser } from '../../types';
 import { Button , Input } from '../ui';
 import { DIAGNOSTIC_NAMES, getDiagnosticIcon } from '../intake/deviceData';
@@ -454,21 +455,21 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                         }`}
                         title="Hold to add note"
                       >
-                        {/* Big icon — click to cycle status */}
+                        {/* Icon — click to cycle status (no border box) */}
                         <button
                           type="button"
                           onClick={() => cycleStatus(item.id, item.status)}
-                          className={`w-full h-11 rounded-lg flex items-center justify-center transition-all ${
+                          className={`mx-auto flex items-center justify-center transition-colors ${
                             isFail
-                              ? 'bg-danger/15 text-danger'
+                              ? 'text-danger'
                               : isPass
-                              ? 'bg-success/15 text-success-deep'
-                              : 'bg-brand-soft text-brand hover:bg-brand/15'
+                              ? 'text-success-deep'
+                              : 'text-brand'
                           }`}
                           title={`Status: ${item.status} — click to change`}
                           aria-label={`Change status for ${item.name}`}
                         >
-                          <IconComp className="w-5 h-5" />
+                          <IconComp className="w-6 h-6" />
                         </button>
 
                         {/* Name — click to mark Pass */}
@@ -484,7 +485,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           {idx + 1}. {item.name}
                         </button>
 
-                        {/* Footer: status pill + comment icon */}
+                        {/* Footer: status pill + 3-dot menu (Comment) */}
                         <div className="flex items-center justify-between gap-1 mt-1.5">
                           <span className={`px-1.5 py-px rounded text-[9px] font-black leading-none ${
                             isPass
@@ -495,6 +496,17 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           }`}>
                             {isPass ? '✓ PASS' : isFail ? '✕ FAIL' : 'NA'}
                           </span>
+                          <div className="relative">
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); setNoteOpenIds((prev) => { const next = new Set(prev); next.add(item.id); return next; }); }}
+                              className="!h-5 !min-h-5 w-5 px-0 rounded flex items-center justify-center text-muted hover:bg-line/60 hover:text-ink transition-colors"
+                              title="Add comment"
+                              aria-label={`Add comment for ${item.name}`}
+                            >
+                              <MoreHorizontal className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </div>
 
                         {/* Note input — long-press to open; stays when note exists */}
