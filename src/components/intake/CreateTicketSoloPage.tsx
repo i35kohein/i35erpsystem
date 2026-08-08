@@ -18,6 +18,7 @@ import {
   CheckSquare,
   ShieldCheck,
   ArrowLeft,
+  ChevronRight,
   List,
   MapPin,
   Monitor, 
@@ -176,6 +177,17 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
 
   // Default Repairs in MMK
   const [selectedRepairs, setSelectedRepairs] = useState<SelectedRepairItem[]>(editWorkOrder?.selectedRepairs || []);
+
+  // Wizard step: 1 Customer → 2 Device → 3 Repairs/Notes/Photos → 4 21-Diagnostic → done
+  const [wizardStep, setWizardStep] = useState(1);
+  const canNextStep = (): boolean => {
+    if (wizardStep === 1) return !!(customerName.trim() && customerPhone.trim());
+    if (wizardStep === 2) return !!deviceModel;
+    if (wizardStep === 3) return repairCount > 0;
+    return true;
+  };
+  const goNext = () => { if (canNextStep()) setWizardStep((s) => Math.min(4, s + 1)); };
+  const goBack = () => setWizardStep((s) => Math.max(1, s - 1));
 
   // Effect to process prefill from Price Catalog
   useEffect(() => {
@@ -646,15 +658,43 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       {/* Main Container */}
       <div className="bg-white border border-line rounded-xl p-4 shadow-xs space-y-4">
 
-        {/* Stepper removed per Ko Hein 2026-08-05 — jump anchors (intake-customer/device/repairs/diagnostics)
-           are kept for validation-error scrolling; scroll-mt-40 still applies. */}
+        {/* Wizard Stepper — 1 Customer · 2 Device · 3 Repairs · 4 Diagnostic */}
+        <div className="flex items-center justify-center gap-1.5 sm:gap-2 pb-1">
+          {[
+            { n: 1, label: 'Customer' },
+            { n: 2, label: 'Device' },
+            { n: 3, label: 'Repairs' },
+            { n: 4, label: 'Diagnostic' },
+          ].map((s, i) => (
+            <React.Fragment key={s.n}>
+              {i > 0 && <span className={`h-px w-6 sm:w-10 ${wizardStep >= s.n ? 'bg-brand' : 'bg-line'}`} />}
+              <button
+                type="button"
+                onClick={() => { if (s.n < wizardStep || canNextStep()) setWizardStep(s.n); }}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-extrabold transition-all cursor-pointer border ${
+                  wizardStep === s.n
+                    ? 'bg-brand text-white border-brand shadow-2xs'
+                    : wizardStep > s.n
+                    ? 'bg-success/10 text-success-deep border-success/25'
+                    : 'bg-surface text-muted border-line'
+                }`}
+                title={`Step ${s.n}: ${s.label}`}
+              >
+                <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black ${
+                  wizardStep === s.n ? 'bg-white/20' : wizardStep > s.n ? 'bg-success text-white' : 'bg-line text-muted'
+                }`}>
+                  {wizardStep > s.n ? '✓' : s.n}
+                </span>
+                <span className="hidden sm:inline">{s.label}</span>
+              </button>
+            </React.Fragment>
+          ))}
+        </div>
 
-        {/* Full page keeps the 2-column layout; the DRAWER (embedded) stacks
-            sections full-width — nested 2-col grids inside a 672px drawer
-            squeezed/clipped cards (2026-08-06 diagnosis P1-5). */}
-        <div className={`space-y-3 ${embedded ? '' : 'lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0'}`}>
+        <div className="space-y-3">
 
-        {/* STEP 1: Customer Information */}
+        {wizardStep === 1 && (
+        <>
         <div id="intake-customer" className={`p-3 bg-surface rounded-xl border border-line space-y-2.5 scroll-mt-40 `}>
           <div className="flex items-center justify-between border-b border-line pb-2.5">
             <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
@@ -754,7 +794,11 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           </div>
         </div>
 
+        </>
+        )}
         {/* STEP 2: Choose Device Model */}
+        {wizardStep === 2 && (
+        <>
         <div
           role="button"
           tabIndex={0}
@@ -950,9 +994,12 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
 
         </div>
 
-        </div>
 
+        </>
+        )}
         {/* STEP 3 (Phase 3): Choose Available Repairs (MMK CURRENCY) */}
+        {wizardStep === 3 && (
+        <>
         <div id="intake-repairs" className={`p-3 bg-surface/80 rounded-xl border border-line space-y-2.5 scroll-mt-40 `}>
           <div className="flex items-center justify-between border-b border-line pb-2">
             <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
@@ -1103,7 +1150,11 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           />
         </div>
 
+        </>
+        )}
         {/* STEP 4B (Phase 4): 21-Point Post-Repair Hardware Inspection (QA-style UI) */}
+        {wizardStep === 4 && (
+        <>
         <div id="intake-diagnostics" className={`p-3 bg-surface rounded-xl border border-line space-y-2.5 scroll-mt-40 `}>
           <div className="flex items-center justify-between border-b border-line pb-2">
             <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
@@ -1284,65 +1335,86 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           <p className="text-xs text-muted font-medium pt-1">Up to 4MB per photo — tap × on a thumbnail to delete.</p>
         </div>
 
+        </>
+        )}
+
         {/* Spacer so the sticky bar never covers the content above it at full scroll */}
         <div className="h-20 shrink-0" aria-hidden="true" />
 
-        {/* Sticky Action Bar — live ticket summary + register, always reachable on desktop */}
+        {/* Sticky Action Bar — step wizard nav + register */}
         <div className={`sticky bottom-0 z-20 ${embedded ? 'rounded-b-none' : '-mx-4 -mb-4 mt-1 rounded-b-xl'} bg-white border-t border-line px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-raised-top`}>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            {repairCount === 0 ? (
-              <div className="flex-1 flex items-center gap-2 text-xs min-w-0" role="status">
-                <AlertCircle className="w-4 h-4 text-warning shrink-0" />
-                <span className="font-semibold text-muted line-clamp-2 leading-snug">
-                  {!customerName.trim() || !customerPhone.trim()
-                    ? 'Start with Step 1 — customer name & phone'
-                    : !deviceModel
-                    ? 'Next: choose a device model to unlock repairs'
-                    : 'Next: tap "+ Add Repairs" to build the estimate'}
-                </span>
+            {/* Live summary (steps 2-4) */}
+            <div className="flex-1 grid grid-cols-3 sm:flex sm:items-center sm:gap-6 text-xs min-w-0">
+              <div className="text-center sm:text-left">
+                <span className="block text-xs uppercase tracking-wider text-muted font-bold">Repairs</span>
+                <span className="font-black text-ink text-sm">{repairCount} item{repairCount === 1 ? '' : 's'}</span>
               </div>
-            ) : (
-              <div className="flex-1 grid grid-cols-3 sm:flex sm:items-center sm:gap-6 text-xs min-w-0">
-                <div className="text-center sm:text-left">
-                  <span className="block text-xs uppercase tracking-wider text-muted font-bold">Repairs</span>
-                  <span className="font-black text-ink text-sm">{repairCount} item{repairCount === 1 ? '' : 's'}</span>
-                </div>
-                <div className="text-center sm:text-left">
-                  <span className="block text-xs uppercase tracking-wider text-muted font-bold">Estimate</span>
-                  <span className="font-black text-brand text-sm">{finalEstimate.toLocaleString()} MMK</span>
-                </div>
-                <div className="text-center sm:text-left">
-                  <span className="block text-xs uppercase tracking-wider text-muted font-bold">{overallDiscountPercent > 0 ? `${overallDiscountPercent}% Off` : 'Saved'}</span>
-                  <span className={`font-bold text-sm ${savedAmount > 0 ? 'text-success' : 'text-muted'}`}>{savedAmount.toLocaleString()} MMK</span>
-                </div>
+              <div className="text-center sm:text-left">
+                <span className="block text-xs uppercase tracking-wider text-muted font-bold">Estimate</span>
+                <span className="font-black text-brand text-sm">{finalEstimate.toLocaleString()} MMK</span>
               </div>
-            )}
-            <Button
-              type="button"
-              onClick={handleRegisterDevice}
-              disabled={isRegistering}
-              className={`h-10 w-full sm:w-auto sm:w-72 font-black text-sm ${
-                isRegistering
-                  ? 'bg-muted text-white opacity-80'
-                  : 'bg-brand hover:bg-brand-deep text-white'
-              }`}
-            >
-              {isRegistering ? (
-                <>
-                  <span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                  <span>Registering…</span>
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 className="w-5 h-5" />
-                  <span className="hidden sm:inline">{isEditMode ? 'Save Ticket Changes' : 'Register Device & Generate Voucher'}</span>
-                  <span className="sm:hidden">{isEditMode ? 'Save Changes' : 'Register Device'}</span>
-                </>
+              <div className="text-center sm:text-left">
+                <span className="block text-xs uppercase tracking-wider text-muted font-bold">{overallDiscountPercent > 0 ? `${overallDiscountPercent}% Off` : 'Saved'}</span>
+                <span className={`font-bold text-sm ${savedAmount > 0 ? 'text-success' : 'text-muted'}`}>{savedAmount.toLocaleString()} MMK</span>
+              </div>
+            </div>
+
+            {/* Back / Next / Register */}
+            <div className="flex items-center gap-2">
+              {wizardStep > 1 && (
+                <Button
+                  type="button"
+                  onClick={goBack}
+                  variant="outline"
+                  className="h-10 px-4 border-line-strong hover:bg-surface"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Back</span>
+                </Button>
               )}
-            </Button>
+              {wizardStep < 4 ? (
+                <Button
+                  type="button"
+                  onClick={goNext}
+                  disabled={!canNextStep()}
+                  className={`h-10 w-full sm:w-52 font-black text-sm ${
+                    canNextStep() ? 'bg-brand hover:bg-brand-deep text-white' : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                  }`}
+                >
+                  Next
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  onClick={handleRegisterDevice}
+                  disabled={isRegistering}
+                  className={`h-10 w-full sm:w-72 font-black text-sm ${
+                    isRegistering
+                      ? 'bg-muted text-white opacity-80'
+                      : 'bg-brand hover:bg-brand-deep text-white'
+                  }`}
+                >
+                  {isRegistering ? (
+                    <>
+                      <span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                      <span>Registering…</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-5 h-5" />
+                      <span className="hidden sm:inline">{isEditMode ? 'Save Ticket Changes' : 'Create Ticket & Print'}</span>
+                      <span className="sm:hidden">{isEditMode ? 'Save' : 'Create'}</span>
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>
+        </div>
 
       {/* MODAL 1: Select Device Model Chooser (Synced with Price Catalog Folders) */}
       <DeviceModelChooserModal
