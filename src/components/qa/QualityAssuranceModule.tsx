@@ -399,87 +399,95 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     <ClipboardCheck className="h-3.5 w-3.5 text-brand" />
                     <span>21-Point Post-Repair Inspection</span>
                   </h3>
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-1.5">
                     <Button
                       type="button"
                       onClick={handleMarkAllPass}
-                      className="rounded-full bg-success px-3 py-2 min-h-10 text-xs font-bold text-white shadow-xs transition-colors hover:bg-success/90"
+                      className="!h-7 !min-h-7 rounded-lg bg-success px-2.5 text-[11px] font-bold text-white shadow-2xs transition-colors hover:bg-success/90"
                     >
                       Mark All Pass
                     </Button>
                     <Button
                       type="button"
                       onClick={() => setQaDiagnostics((prev) => prev.map((diagnostic) => ({ ...diagnostic, status: 'N/A' })))}
-                      className="rounded-full border border-line-strong bg-surface px-3 min-h-10 text-xs font-bold text-ink shadow-xs transition-colors hover:bg-line-strong"
+                      className="!h-7 !min-h-7 rounded-lg border border-line-strong bg-surface px-2.5 text-[11px] font-bold text-ink shadow-2xs transition-colors hover:bg-line-strong"
                     >
                       Mark All N/A
                     </Button>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-2.5 text-xs sm:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4">
+                <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {qaDiagnostics.map((item, idx) => {
                     const IconComp = getDiagnosticIcon(item.name);
+                    const isPass = item.status === 'Pass';
+                    const isFail = item.status === 'Fail';
+                    const isNa = item.status === 'N/A';
 
                     return (
-                      <div key={item.id} className="space-y-1.5 rounded-xl border border-line bg-white p-2.5 text-xs shadow-xs transition-all hover:border-brand/50">
-                        <div className="font-bold text-ink flex justify-between items-center">
-                          <div className="flex items-center space-x-1.5 truncate">
-                            <div className="w-5 h-5 rounded-md bg-surface text-brand flex items-center justify-center shrink-0">
-                              <IconComp className="w-3.5 h-3.5" />
+                      <div key={item.id} className={`rounded-xl border p-2 text-xs transition-all ${
+                        isFail
+                          ? 'border-danger/40 bg-danger/5 shadow-2xs'
+                          : isPass
+                          ? 'border-success/40 bg-success/5 shadow-2xs'
+                          : 'border-line bg-white hover:border-brand/40'
+                      }`}>
+                        {/* Header row: icon + name + status dot */}
+                        <div className="flex items-center justify-between gap-1.5">
+                          <div className="flex items-center space-x-1.5 min-w-0">
+                            <div className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 ${
+                              isFail ? 'bg-danger/10 text-danger' : isPass ? 'bg-success/10 text-success-deep' : 'bg-surface text-brand'
+                            }`}>
+                              <IconComp className="w-3 h-3" />
                             </div>
-                            <span className="text-xs font-extrabold truncate">{idx + 1}. {item.name}</span>
+                            <span className="text-[11px] font-bold text-ink truncate">{idx + 1}. {item.name}</span>
                           </div>
-
-                          <span className={`text-xs font-black px-2 py-0.5 rounded-md tracking-wider uppercase shrink-0 shadow-2xs ${
-                            item.status === 'Pass' ? 'bg-success text-white' :
-                            item.status === 'Fail' ? 'bg-danger text-white' : 'bg-slate-600 text-white'
+                          <span className={`text-[10px] font-black px-1.5 py-px rounded tracking-wider uppercase shrink-0 ${
+                            isPass ? 'bg-success text-white' : isFail ? 'bg-danger text-white' : 'bg-slate-400 text-white'
                           }`}>
-                            {item.status === 'Pass' ? '✓ PASS' : item.status === 'Fail' ? '✕ FAIL' : 'N/A'}
+                            {isPass ? 'PASS' : isFail ? 'FAIL' : 'N/A'}
                           </span>
                         </div>
 
-                        {/* Status Toggle Buttons */}
-                        <div className="flex space-x-1 text-xs">
+                        {/* Segmented Pass/Fail/N/A toggle — compact */}
+                        <div className="flex gap-1 mt-1.5">
                           <Button
                             type="button"
                             onClick={() => handleDiagnosticStatusChange(item.id, 'Pass')}
-                            className={`flex-1 min-h-10 py-2 rounded-lg font-black transition-all ${
-                              item.status === 'Pass' ? 'bg-success text-white shadow-xs' : 'bg-surface text-ink hover:bg-line'
+                            className={`!h-6 !min-h-6 flex-1 rounded-md text-[10px] font-black transition-all ${
+                              isPass ? 'bg-success text-white shadow-2xs' : 'bg-surface text-ink hover:bg-success/15'
                             }`}
                           >
-                            Pass
+                            ✓ Pass
                           </Button>
                           <Button
                             type="button"
                             onClick={() => handleDiagnosticStatusChange(item.id, 'Fail')}
-                            className={`flex-1 min-h-10 py-2 rounded-lg font-black transition-all ${
-                              item.status === 'Fail' ? 'bg-danger text-white shadow-xs' : 'bg-surface text-ink hover:bg-line'
+                            className={`!h-6 !min-h-6 flex-1 rounded-md text-[10px] font-black transition-all ${
+                              isFail ? 'bg-danger text-white shadow-2xs' : 'bg-surface text-ink hover:bg-danger/15'
                             }`}
                           >
-                            Fail
+                            ✕ Fail
                           </Button>
                           <Button
                             type="button"
                             onClick={() => handleDiagnosticStatusChange(item.id, 'N/A')}
-                            className={`flex-1 min-h-10 py-2 rounded-lg font-black transition-all ${
-                              item.status === 'N/A' ? 'bg-slate-600 text-white shadow-xs' : 'bg-surface text-ink hover:bg-line'
+                            className={`!h-6 !min-h-6 flex-1 rounded-md text-[10px] font-black transition-all ${
+                              isNa ? 'bg-slate-500 text-white shadow-2xs' : 'bg-surface text-ink hover:bg-slate-200'
                             }`}
                           >
                             N/A
                           </Button>
                         </div>
 
-                        {/* Diagnostic Comment Box */}
-                        <div className="relative pt-1">
-                          <Input
-                            type="text"
-                            value={item.note || ''}
-                            onChange={(e) => handleDiagnosticNoteChange(item.id, e.target.value)}
-                            placeholder={`Comment for ${item.name}...`}
-                            className="w-full min-h-10 bg-surface border border-line rounded-xl px-3 text-sm text-ink focus:bg-white focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/25"
-                          />
-                        </div>
+                        {/* Comment box — compact */}
+                        <Input
+                          type="text"
+                          value={item.note || ''}
+                          onChange={(e) => handleDiagnosticNoteChange(item.id, e.target.value)}
+                          placeholder={`Comment ${idx + 1}...`}
+                          className="!h-6 !min-h-6 mt-1.5 w-full rounded-md bg-surface border border-line px-2 text-[11px] text-ink focus:bg-white focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/20"
+                        />
                       </div>
                     );
                   })}
