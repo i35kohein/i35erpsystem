@@ -615,24 +615,18 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Labor Income Card */}
             <div className="p-4 bg-brand-soft/60 border border-brand/30 rounded-2xl space-y-2">
-              <span className="text-xs font-bold text-brand-deep uppercase tracking-wider block">🛠️ Labor & Service Income</span>
+              <span className="text-xs font-bold text-brand-deep uppercase tracking-wider block">Labor & Service Income</span>
               <div className="text-2xl font-black text-brand font-mono">
                 {financialSummary.laborIncome.toLocaleString()} {currency}
               </div>
-              <p className="text-xs text-brand-deep font-medium">
-                Direct profit earned from service fees, micro-soldering, and technician labor charges.
-              </p>
             </div>
 
             {/* Parts Sales Income Card */}
             <div className="p-4 bg-success/10 border border-success/30 rounded-2xl space-y-2">
-              <span className="text-xs font-bold text-success-deep uppercase tracking-wider block">📱 Replacement Parts Sales Revenue</span>
+              <span className="text-xs font-bold text-success-deep uppercase tracking-wider block">Parts Sales Revenue</span>
               <div className="text-2xl font-black text-success-deep font-mono">
                 {financialSummary.partsSalesIncome.toLocaleString()} {currency}
               </div>
-              <p className="text-xs text-success-deep font-medium">
-                Revenue generated from screen assemblies, batteries, back glass, and accessory sales.
-              </p>
             </div>
           </div>
 

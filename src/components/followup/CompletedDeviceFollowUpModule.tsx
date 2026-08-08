@@ -278,31 +278,26 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
           <div className="bg-surface border border-line rounded-xl p-3 space-y-1">
             <span className="text-xs font-semibold text-muted">Total Completed</span>
             <div className="text-xl font-extrabold text-ink">{totalCompleted}</div>
-            <p className="text-xs text-muted">Finished & Picked Up</p>
           </div>
 
           <div className="bg-brand-soft/70 border border-indigo-200 rounded-xl p-3 space-y-1">
             <span className="text-xs font-bold text-brand-deep">7-Day Check</span>
             <div className="text-xl font-extrabold text-brand-deep">{count7Days}</div>
-            <p className="text-xs text-brand-deep font-medium">≥ 7 days post-repair</p>
           </div>
 
           <div className="bg-purple/10/70 border border-purple/30 rounded-xl p-3 space-y-1">
             <span className="text-xs font-bold text-purple">1-Month Check</span>
             <div className="text-xl font-extrabold text-purple">{count30Days}</div>
-            <p className="text-xs text-purple font-medium">≥ 30 days post-repair</p>
           </div>
 
           <div className="bg-violet-50/80 border border-violet-200 rounded-xl p-3 space-y-1">
             <span className="text-xs font-bold text-violet-900">2-Month Check</span>
             <div className="text-xl font-extrabold text-violet-800">{count60Days}</div>
-            <p className="text-xs text-violet-700 font-medium">≥ 60 days post-repair</p>
           </div>
 
           <div className="bg-success/50 border border-success/30 rounded-xl p-3 space-y-1">
             <span className="text-xs font-semibold text-success-deep">Satisfied</span>
             <div className="text-xl font-extrabold text-success-deep">{satisfiedCount}</div>
-            <p className="text-xs text-success-deep">Positive feedback</p>
           </div>
 
           <div className="bg-warning/50 border border-warning/30 rounded-xl p-3 space-y-1 col-span-2 sm:col-span-1">
@@ -313,7 +308,6 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                 <Star className="w-4 h-4 fill-amber-400 text-warning" />
               </div>
             </div>
-            <p className="text-xs text-warning">Out of 5.0 rating</p>
           </div>
         </div>
       </div>

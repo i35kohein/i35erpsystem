@@ -666,9 +666,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               {activeRepairs.length}
             </span>
           </div>
-          <div className="mt-3 pt-2.5 border-t border-surface flex items-center justify-between text-xs text-muted">
-            <span>In-shop workload</span>
-            <ChevronRight className="w-3.5 h-3.5 text-muted group-hover:text-brand transition-colors" />
+          <div className="absolute top-1/2 right-4 -translate-y-1/2 text-muted/50 group-hover:text-brand transition-colors">
+            <ChevronRight className="w-4 h-4" />
           </div>
         </div>
 
@@ -697,9 +696,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               {readyForPickup.length}
             </span>
           </div>
-          <div className="mt-3 pt-2.5 border-t border-surface flex items-center justify-between text-xs text-muted">
-            <span>Awaiting customer</span>
-            <ChevronRight className="w-3.5 h-3.5 text-muted group-hover:text-success-deep transition-colors" />
+          <div className="absolute top-1/2 right-4 -translate-y-1/2 text-muted/50 group-hover:text-success-deep transition-colors">
+            <ChevronRight className="w-4 h-4" />
           </div>
         </div>
 
@@ -725,9 +723,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               {totalRevenue.toLocaleString()} <span className="text-xs font-bold text-muted">MMK</span>
             </span>
           </div>
-          <div className="mt-3 pt-2.5 border-t border-surface flex items-center justify-between text-xs text-muted">
-            <span>{marginPercent}% margin</span>
-            <ChevronRight className="w-3.5 h-3.5 text-muted group-hover:text-brand transition-colors" />
+          <div className="absolute top-1/2 right-4 -translate-y-1/2 text-muted/50 group-hover:text-brand transition-colors">
+            <ChevronRight className="w-4 h-4" />
           </div>
         </div>
 
@@ -757,9 +754,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 : '—'}
             </span>
           </div>
-          <div className="mt-3 pt-2.5 border-t border-surface flex items-center justify-between text-xs text-muted">
-            <span>{completedWorkOrders.length} done</span>
-            <ChevronRight className="w-3.5 h-3.5 text-muted group-hover:text-teal transition-colors" />
+          <div className="absolute top-1/2 right-4 -translate-y-1/2 text-muted/50 group-hover:text-teal transition-colors">
+            <ChevronRight className="w-4 h-4" />
           </div>
         </div>
       </div>

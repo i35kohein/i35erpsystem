@@ -500,7 +500,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpenTicketDetail(wo); }
                   }}
-                  className={`p-4 rounded-2xl border text-xs cursor-pointer transition-all space-y-3 hover:shadow-md ${getPriorityStyle(wo.priority)}`}
+                  className={`relative p-4 rounded-2xl border text-xs cursor-pointer transition-all space-y-3 hover:shadow-md ${getPriorityStyle(wo.priority)}`}
                 >
                   <div className="flex justify-between items-center pb-2 border-b border-line">
                     <span className="font-mono font-black text-brand bg-brand/10 px-2.5 py-1 rounded-md text-xs">
@@ -525,31 +525,22 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                       </div>
                     </div>
                     <p className="text-xs text-muted">
-                      Customer: <strong className="text-ink">{wo.customerName}</strong> ({wo.customerPhone})
+                      <strong className="text-ink">{wo.customerName}</strong> · {wo.customerPhone}
                     </p>
                   </div>
 
-                  <div className="p-2.5 bg-surface border border-line rounded-xl flex items-center justify-between text-xs">
+                  <div className="flex items-center justify-between text-xs">
                     <span className="font-bold text-ink flex items-center space-x-1.5">
-                      <User className="w-4 h-4 text-brand" />
-                      <span>Assigned Tech</span>
-                    </span>
-                    <span className="font-bold text-xs text-ink bg-white border border-line px-2.5 py-0.5 rounded-lg shadow-2xs">
+                      <User className="w-3.5 h-3.5 text-brand" />
                       {wo.assignedTechName || 'Unassigned'}
+                    </span>
+                    <span className="font-mono font-black text-sm text-brand">
+                      {(wo.totalAmount || wo.subtotal || 0).toLocaleString()} MMK
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center pt-2 border-t border-line">
-                    <div>
-                      <span className="block text-xs text-muted uppercase font-bold">Total Estimate</span>
-                      <span className="font-mono font-black text-sm text-brand">
-                        {(wo.totalAmount || wo.subtotal || 0).toLocaleString()} MMK
-                      </span>
-                    </div>
-
-                    <div className="flex items-center space-x-1.5">
-                      <ChevronRight className="w-4 h-4 text-muted transition-colors" />
-                    </div>
+                  <div className="absolute top-1/2 right-3 -translate-y-1/2 text-muted/40 group-hover:text-brand transition-colors">
+                    <ChevronRight className="w-4 h-4" />
                   </div>
                 </div>
               );

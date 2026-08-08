@@ -589,7 +589,6 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 <div className="flex items-end justify-between gap-3">
                   <h2 className="text-base font-bold text-ink truncate">{selectedWo.deviceModel}</h2>
                   <div className="text-right shrink-0">
-                    <span className="text-muted text-xs">Customer:</span>
                     <p className="font-bold text-ink text-xs">{selectedWo.customerName}</p>
                   </div>
                 </div>

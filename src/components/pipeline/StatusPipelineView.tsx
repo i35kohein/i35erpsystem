@@ -886,7 +886,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         ) : (
                           <div className={`flex items-center space-x-1 text-xs ${ageChipClass}`}>
                             <Clock className={`w-3 h-3 shrink-0 ${ageChipIconClass}`} />
-                            <span>In stage: <strong className="text-ink">{hoursInStatus < 1 ? '< 1h' : `${hoursInStatus}h`}</strong></span>
+                            <span><strong className="text-ink">{hoursInStatus < 1 ? '< 1h' : `${hoursInStatus}h`}</strong></span>
                           </div>
                         )}
 
@@ -904,9 +904,12 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                           </div>
                         </div>
 
-                        {/* Tech Tag — one-tap quick assign (dropdown for managers, self-assign for techs) */}
+                        {/* Tech — one-tap quick assign (dropdown for managers, self-assign for techs) */}
                         <div className="flex items-center justify-between text-xs pt-1 border-t border-line text-muted" onClick={(e) => e.stopPropagation()}>
-                          <span>Tech: <strong className="text-ink">{tech?.name?.split(' ')[0] || 'Unassigned'}</strong></span>
+                          <span className="font-bold text-ink flex items-center space-x-1">
+                            <UserCheck className="w-3.5 h-3.5 text-brand shrink-0" />
+                            {tech?.name?.split(' ')[0] || 'Unassigned'}
+                          </span>
                           {isTechnicianUser && myTechId ? (
                             <Button
                               type="button"

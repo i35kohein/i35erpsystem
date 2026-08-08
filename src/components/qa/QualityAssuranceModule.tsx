@@ -303,7 +303,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
 
                     <div className="flex items-center justify-between gap-2 text-xs text-muted mt-1">
                       <span className="truncate">
-                        Cust: {wo.customerName}
+                        {wo.customerName}
                         {wo.depositAmount > 0 && (
                           <span className="text-brand font-bold"> · Deposit {wo.depositAmount.toLocaleString()} MMK</span>
                         )}

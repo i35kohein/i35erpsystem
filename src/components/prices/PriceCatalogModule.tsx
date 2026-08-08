@@ -989,9 +989,6 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                     {/* Price (right on mobile / bottom on desktop) + selection checkmark */}
                     <div className="flex items-center gap-2 shrink-0 sm:w-full sm:mt-2 sm:pt-2 sm:border-t sm:border-line sm:flex-col sm:items-start sm:gap-0.5">
                       <div className="text-right sm:text-left min-w-0">
-                        <span className="hidden sm:block text-xs font-extrabold uppercase text-muted truncate">
-                          {discountPct > 0 ? 'Discounted Price' : 'Standard Price'}
-                        </span>
                         <div className="flex items-baseline space-x-1 sm:mt-0.5">
                           <span className="font-mono text-xs sm:text-sm font-extrabold text-ink">
                             {formatPrice(finalPrice)}
