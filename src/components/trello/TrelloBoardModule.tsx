@@ -18,12 +18,12 @@ interface TrelloBoardProps {
   onOpenAiAssistant?: () => void;
 }
 
-const STAGE_COLUMNS: { id: WorkOrderStatus; title: string; accent: string; dot: string }[] = [
-  { id: 'Receive', title: 'Received', accent: 'text-brand', dot: 'bg-brand' },
-  { id: 'In Progress', title: 'In Progress', accent: 'text-purple', dot: 'bg-purple' },
-  { id: 'Pending', title: 'Pending', accent: 'text-warning', dot: 'bg-warning' },
-  { id: 'Finished', title: 'Finished', accent: 'text-success-deep', dot: 'bg-success-deep' },
-  { id: 'Taken Out', title: 'Taken Out', accent: 'text-teal', dot: 'bg-teal' },
+const STAGE_COLUMNS: { id: WorkOrderStatus; title: string; dot: string; border: string; headerBg: string }[] = [
+  { id: 'Receive', title: 'Received', dot: 'bg-brand', border: 'border-brand/30', headerBg: 'bg-brand/5' },
+  { id: 'In Progress', title: 'In Progress', dot: 'bg-purple', border: 'border-purple/30', headerBg: 'bg-purple/5' },
+  { id: 'Pending', title: 'Pending', dot: 'bg-warning', border: 'border-warning/40', headerBg: 'bg-warning/5' },
+  { id: 'Finished', title: 'Finished', dot: 'bg-success-deep', border: 'border-success/40', headerBg: 'bg-success/5' },
+  { id: 'Taken Out', title: 'Taken Out', dot: 'bg-slate-400', border: 'border-line', headerBg: 'bg-surface' },
 ];
 
 /** Trello-style board for the Repair Ticket Roster.
@@ -115,12 +115,12 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
             onDragOver={(e) => { e.preventDefault(); setDragOverStage(col.id); }}
             onDragLeave={() => setDragOverStage((s) => (s === col.id ? null : s))}
             onDrop={(e) => { e.preventDefault(); handleDrop(col.id); }}
-            className={`flex min-h-[140px] w-[300px] shrink-0 flex-col rounded-2xl border bg-surface/60 transition-colors ${
-              dragOverStage === col.id ? 'border-brand/60 bg-brand/5' : 'border-line'
+            className={`flex min-h-[140px] w-[300px] shrink-0 flex-col rounded-2xl border transition-colors ${
+              dragOverStage === col.id ? 'border-brand/60 bg-brand/5' : `${col.border} bg-surface/60`
             }`}
           >
-            {/* Column header */}
-            <div className="flex items-center justify-between px-3 py-2.5 border-b border-line/70">
+            {/* Column header — tinted with the stage color */}
+            <div className={`flex items-center justify-between px-3 py-2.5 rounded-t-2xl border-b border-line/70 ${col.headerBg}`}>
               <div className="flex items-center space-x-2 min-w-0">
                 <span className={`w-2 h-2 rounded-full shrink-0 ${col.dot}`} />
                 <span className="text-xs font-extrabold text-ink truncate">{col.title}</span>
