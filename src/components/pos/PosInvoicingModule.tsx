@@ -223,15 +223,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   // Filter Work Orders by date, search, and status - ONLY show devices AFTER diagnostic is completed
   const dateFiltered = filterByDateRange<WorkOrder>(workOrders, dateFilter);
   const filteredWorkOrders = dateFiltered.filter((wo) => {
-    // Normal repair tickets enter POS only after the post-repair QA record is saved.
-    // Declined/unrepairable tickets remain eligible so the diagnostic fee can be collected.
-    const hasRecordedDiagnostic =
-      (wo.beforeDiagnostics && wo.beforeDiagnostics.some((diagnostic) => diagnostic.status === 'Pass' || diagnostic.status === 'Fail')) ||
-      (wo.diagnosticResult && wo.diagnosticResult.trim().length > 0 && wo.diagnosticResult !== 'Diagnostic Pending');
-    const isDeclinedDiagnostic =
-      (wo.status === 'Cant Repair' || wo.status === 'Customer Not Repair') &&
-      hasRecordedDiagnostic;
-    const isDiagnosticDone = Boolean(wo.postRepairChecklist) || isDeclinedDiagnostic;
+    // Checkout-viable only: Finished / Taken Out tickets with a recorded QA
+    // checklist (same set that gets the green $ icon on Trello/rosters).
+    if (wo.status !== 'Finished' && wo.status !== 'Taken Out') return false;
+    const isDiagnosticDone = Boolean(wo.postRepairChecklist);
 
     if (!isDiagnosticDone) return false;
 
@@ -438,9 +433,9 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
         {/* Left Column: Select Work Order to Checkout (5 cols) */}
         <div className={`md:col-span-5 bg-white border border-line rounded-2xl p-4 space-y-3 shadow-xs ${isIpad ? 'md:flex md:flex-col md:min-h-0' : 'md:self-start'}`}>
           <div className="flex justify-between items-center border-b border-line pb-2">
-            <h2 className="font-bold text-ink text-xs">Diagnostic Completed Devices ({filteredWorkOrders.length})</h2>
+            <h2 className="font-bold text-ink text-xs">Ready to Checkout ({filteredWorkOrders.length})</h2>
             <span className="text-xs font-mono font-bold bg-success/10 text-success-deep px-2 py-0.5 rounded-full border border-success/20">
-              Diag Finished
+              Checkout
             </span>
           </div>
 
