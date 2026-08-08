@@ -22,7 +22,6 @@ import {
   AlignRight,
   BellRing,
   Sparkles,
-  ChevronRight,
   Search,
   ArrowLeft} from 'lucide-react';
 import { Technician, SystemSettings, TechnicianLevel, PaymentMethodConfig, WorkOrder, NotificationTemplate, AppUser, UserRole, UserPermissions, PartItem, PartQualityTier, Supplier } from '../../types';
@@ -899,11 +898,13 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             visibleCount += tabs.length;
             const accent = accentByGroup[group.label] || 'bg-brand-soft text-brand';
             return (
-              <div key={group.label}>
-                <p className="px-1 pb-1.5 text-xs font-extrabold uppercase tracking-wider text-muted">
-                  {group.label}
-                </p>
-                <div className="flex flex-col gap-1.5 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-2">
+              <div key={group.label} className="bg-white border border-line rounded-2xl p-3 shadow-2xs space-y-2.5">
+                <div className="flex items-center justify-between px-1">
+                  <p className="text-xs font-extrabold uppercase tracking-wider text-muted">
+                    {group.label}
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
                   {tabs.map((tab) => {
                     const Icon = tab.icon;
                     const isActive = activeSubTab === tab.id;
@@ -919,36 +920,26 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                           setSettingsDrilledIn(true);
                         }}
                         title={tab.label}
-                        className={`relative flex items-center gap-2.5 w-full text-left text-xs font-extrabold rounded-xl transition-all cursor-pointer border select-none active:scale-95 shrink-0 !min-h-10 px-3 py-2 ${
+                        className={`relative flex flex-col items-center justify-center gap-2 w-full text-center text-xs font-extrabold rounded-xl transition-all cursor-pointer border select-none active:scale-95 shrink-0 !min-h-24 px-2 py-3 ${
                           isActive
                             ? 'bg-brand text-white border-brand shadow-xs'
                             : 'bg-white hover:bg-surface text-faint hover:text-ink border-line'
                         }`}
                       >
-                        {/* Work-desk app-icon tile */}
+                        {/* Big app-icon tile */}
                         <span
-                          className={`flex items-center justify-center w-7 h-7 rounded-lg shrink-0 transition-colors ${
+                          className={`flex items-center justify-center w-11 h-11 rounded-xl shrink-0 transition-colors shadow-2xs ${
                             isActive ? 'bg-white/20' : accent
                           }`}
                         >
-                          <Icon className="w-4 h-4" />
+                          <Icon className="w-5 h-5" />
                         </span>
-                        <span className="truncate leading-tight">{tab.label}</span>
-                        <span className="ml-auto flex items-center gap-1.5 shrink-0">
+                        <span className="leading-tight line-clamp-2">{tab.label}</span>
+                        <span className="absolute top-1.5 right-1.5 flex items-center gap-1 shrink-0">
                           {isDirty && isActive && (
                             <span className="w-1.5 h-1.5 rounded-full bg-warning shrink-0" title="Unsaved changes" />
                           )}
-                          {tab.badge !== undefined && (
-                            <span
-                              className={`px-1.5 rounded-full text-[11px] font-mono font-bold leading-[14px] ${
-                                isActive ? 'bg-white/20 text-white' : 'bg-line text-ink'
-                              }`}
-                            >
-                              {tab.badge}
-                            </span>
-                          )}
                         </span>
-                        <ChevronRight className="w-3.5 h-3.5 shrink-0 text-muted" />
                       </Button>
                     );
                   })}
