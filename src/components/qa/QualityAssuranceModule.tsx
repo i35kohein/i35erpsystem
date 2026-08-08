@@ -3,7 +3,8 @@ import { useIsIpad } from '../../hooks/useIsIpad';
 import {ShieldCheck, 
   CheckCircle2, 
   X,
-  ClipboardCheck} from 'lucide-react';
+  ClipboardCheck,
+  MessageSquare} from 'lucide-react';
 import { WorkOrder, PostRepairChecklist, Technician, DiagnosticItemResult, AppUser } from '../../types';
 import { Button , Input } from '../ui';
 import { DIAGNOSTIC_NAMES, getDiagnosticIcon } from '../intake/deviceData';
@@ -103,6 +104,19 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
 
   // 21-Point Post-Repair Diagnostic Checklist State
   const [qaDiagnostics, setQaDiagnostics] = useState<DiagnosticItemResult[]>([]);
+  // Which checklist rows have the note input open (comment icon toggle)
+  const [noteOpenIds, setNoteOpenIds] = useState<Set<string>>(new Set());
+  const toggleNote = (id: string) =>
+    setNoteOpenIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  // Cycle status: Pass -> Fail -> N/A -> Pass
+  const cycleStatus = (id: string, current: string) => {
+    const next = current === 'Pass' ? 'Fail' : current === 'Fail' ? 'N/A' : 'Pass';
+    handleDiagnosticStatusChange(id, next as 'Pass' | 'Fail' | 'N/A');
+  };
   // Update QA form & 21-point checklist whenever selectedWoId changes
   useEffect(() => {
     if (!selectedWo) return;
@@ -422,7 +436,6 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     const IconComp = getDiagnosticIcon(item.name);
                     const isPass = item.status === 'Pass';
                     const isFail = item.status === 'Fail';
-                    const isNa = item.status === 'N/A';
 
                     return (
                       <div key={item.id} className={`flex items-center gap-1.5 px-2 py-1 text-[11px] rounded-lg border transition-colors ${
@@ -438,51 +451,48 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           <span className="text-[10px] font-bold text-ink truncate">{idx + 1}. {item.name}</span>
                         </div>
 
-                        {/* Comment */}
-                        <Input
-                          type="text"
-                          value={item.note || ''}
-                          onChange={(e) => handleDiagnosticNoteChange(item.id, e.target.value)}
-                          placeholder="Note"
-                          className="!h-5 !min-h-5 w-16 shrink-0 rounded bg-surface border border-line px-1 text-[10px] text-ink focus:bg-white focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/20"
-                        />
+                        {/* Comment icon — click to show note input */}
+                        <Button
+                          type="button"
+                          onClick={() => toggleNote(item.id)}
+                          className={`!h-5 !min-h-5 w-5 px-0 rounded shrink-0 transition-colors ${
+                            (item.note || '').trim() || noteOpenIds.has(item.id)
+                              ? 'text-brand bg-brand/10'
+                              : 'text-muted hover:text-brand hover:bg-brand/5'
+                          }`}
+                          title={item.note ? `Note: ${item.note}` : 'Add note'}
+                          aria-label={`Add note for ${item.name}`}
+                        >
+                          <MessageSquare className="w-3 h-3" />
+                        </Button>
 
-                        {/* Status segmented — pill group */}
-                        <div className="flex items-center gap-0.5 shrink-0 bg-surface border border-line rounded-md p-0.5">
-                          <Button
-                            type="button"
-                            onClick={() => handleDiagnosticStatusChange(item.id, 'Pass')}
-                            className={`!h-4 !min-h-4 px-1 rounded text-[9px] font-black leading-none transition-all ${
-                              isPass
-                                ? 'bg-success text-white shadow-2xs'
-                                : 'text-muted hover:text-success hover:bg-success/10'
-                            }`}
-                          >
-                            ✓
-                          </Button>
-                          <Button
-                            type="button"
-                            onClick={() => handleDiagnosticStatusChange(item.id, 'Fail')}
-                            className={`!h-4 !min-h-4 px-1 rounded text-[9px] font-black leading-none transition-all ${
-                              isFail
-                                ? 'bg-danger text-white shadow-2xs'
-                                : 'text-muted hover:text-danger hover:bg-danger/10'
-                            }`}
-                          >
-                            ✕
-                          </Button>
-                          <Button
-                            type="button"
-                            onClick={() => handleDiagnosticStatusChange(item.id, 'N/A')}
-                            className={`!h-4 !min-h-4 px-1 rounded text-[8px] font-black leading-none transition-all ${
-                              isNa
-                                ? 'bg-slate-500 text-white shadow-2xs'
-                                : 'text-muted hover:text-ink hover:bg-slate-200/60'
-                            }`}
-                          >
-                            NA
-                          </Button>
-                        </div>
+                        {/* Note input — only when open or has a note */}
+                        {noteOpenIds.has(item.id) && (
+                          <Input
+                            type="text"
+                            value={item.note || ''}
+                            onChange={(e) => handleDiagnosticNoteChange(item.id, e.target.value)}
+                            placeholder="Note..."
+                            autoFocus
+                            className="!h-5 !min-h-5 w-24 shrink-0 rounded bg-surface border border-line px-1.5 text-[10px] text-ink focus:bg-white focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/20"
+                          />
+                        )}
+
+                        {/* Status — single pill, click to cycle Pass/Fail/NA */}
+                        <Button
+                          type="button"
+                          onClick={() => cycleStatus(item.id, item.status)}
+                          className={`!h-5 !min-h-5 px-1.5 rounded shrink-0 text-[9px] font-black leading-none transition-all border ${
+                            isPass
+                              ? 'bg-success text-white border-success shadow-2xs'
+                              : isFail
+                              ? 'bg-danger text-white border-danger shadow-2xs'
+                              : 'bg-slate-100 text-slate-500 border-line hover:bg-slate-200'
+                          }`}
+                          title={`Current: ${item.status} — click to change`}
+                        >
+                          {isPass ? '✓ PASS' : isFail ? '✕ FAIL' : 'NA'}
+                        </Button>
                       </div>
                     );
                   })}
