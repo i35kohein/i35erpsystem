@@ -2419,7 +2419,6 @@ export default function App() {
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
                   dateFilter={dateFilter}
-                  setDateFilter={setDateFilter}
                 />
               )}
 

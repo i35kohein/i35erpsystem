@@ -131,7 +131,7 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
           </div>
 
           {/* Shop Capacity & Active Load */}
-          <div className="bg-gradient-to-br from-purple-50/50 to-purple-50/20 border border-purple-300/40 p-4 rounded-xl flex items-center justify-between shadow-2xs">
+          <div className="bg-gradient-to-br from-purple-50/50 to-purple-50/20 border border-purple/30/40 p-4 rounded-xl flex items-center justify-between shadow-2xs">
             <div className="space-y-1">
               <span className="text-xs font-bold text-muted uppercase tracking-wider">Active Queue Capacity</span>
               <div className="flex items-baseline space-x-2">

@@ -84,7 +84,7 @@ export const RightFilterDrawer: React.FC<RightFilterDrawerProps> = ({
     >
       {/* Backdrop */}
       <div
-        className={`absolute inset-0 bg-black/45 backdrop-blur-sm transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0'}`}
+        className={`absolute inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0'}`}
         onClick={onClose}
         role="presentation"
         aria-hidden="true"

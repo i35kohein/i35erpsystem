@@ -27,12 +27,12 @@ interface WorkOrderStatusTimelineProps {
   compact?: boolean;
 }
 
-export const MAIN_STATUS_PIPELINE: { status: WorkOrderStatus; label: string; desc: string; icon: any; color: string; badge: string; bg: string }[] = [
-  { status: 'Receive', label: 'Received', desc: 'Ticket Intake & Inspection', icon: PackageCheck, color: 'text-purple-600 border-purple-500 bg-purple-500', badge: 'bg-purple-100 text-purple-800 border-purple-200', bg: 'bg-purple-50' },
-  { status: 'In Progress', label: 'In Progress', desc: 'Active Hardware Repair', icon: Cog, color: 'text-brand border-brand bg-brand', badge: 'bg-blue-100 text-blue-800 border-blue-200', bg: 'bg-blue-50' },
-  { status: 'Pending', label: 'Pending', desc: 'Awaiting Parts or Client Approval', icon: Clock, color: 'text-amber-600 border-amber-500 bg-amber-500', badge: 'bg-amber-100 text-amber-800 border-amber-200', bg: 'bg-amber-50' },
-  { status: 'Finished', label: 'Finished', desc: 'QA Passed & Ready for Pickup', icon: CheckCircle2, color: 'text-emerald-600 border-emerald-500 bg-emerald-500', badge: 'bg-emerald-100 text-emerald-800 border-emerald-200', bg: 'bg-emerald-50' },
-  { status: 'Taken Out', label: 'Taken Out', desc: 'Paid & Returned to Customer', icon: ShieldCheck, color: 'text-slate-700 border-slate-700 bg-slate-700', badge: 'bg-slate-200 text-slate-800 border-slate-300', bg: 'bg-slate-100' },
+export const MAIN_STATUS_PIPELINE: { status: WorkOrderStatus; label: string; desc: string; icon: any; color: string; badge: string }[] = [
+  { status: 'Receive', label: 'Received', desc: 'Ticket Intake & Inspection', icon: PackageCheck, color: 'text-purple border-purple/50 bg-purple/20', badge: 'bg-purple/15 text-purple border-purple/30' },
+  { status: 'In Progress', label: 'In Progress', desc: 'Active Hardware Repair', icon: Cog, color: 'text-brand border-brand/60 bg-brand/25', badge: 'bg-brand/15 text-brand-deep border-brand/30' },
+  { status: 'Pending', label: 'Pending', desc: 'Awaiting Parts or Client Approval', icon: Clock, color: 'text-warning border-warning/50 bg-warning/20', badge: 'bg-warning/15 text-warning border-warning/30' },
+  { status: 'Finished', label: 'Finished', desc: 'QA Passed & Ready for Pickup', icon: CheckCircle2, color: 'text-success border-success/50 bg-success/20', badge: 'bg-success/15 text-success-deep border-success/30' },
+  { status: 'Taken Out', label: 'Taken Out', desc: 'Paid & Returned to Customer', icon: ShieldCheck, color: 'text-muted border-slate-700 bg-ink/80', badge: 'bg-line text-slate-800 border-line' },
 ];
 
 export interface FormattedAuditItem {
@@ -191,8 +191,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
         filterType === 'ALL' ||
         (filterType === 'TRANSITION' && (item.type === 'STATUS_TRANSITION' || item.type === 'INTAKE')) ||
         (filterType === 'NOTES' && item.type === 'TECH_NOTE') ||
-        (filterType === 'QA' && item.type === 'QA_CHECK') ||
-        (filterType === 'POS' && item.type === 'PAYMENT');
+        (filterType === 'QA' && item.type === 'QA_CHECK');
 
       const matchesStage =
         selectedStageFilter === 'ALL' ||
@@ -343,7 +342,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
                   {/* Top line indicator */}
                   <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center space-x-1.5">
-                      <div className={`p-1 rounded-lg ${isCurrent ? stage.color : isPassed ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-700 text-slate-300'}`}>
+                      <div className={`p-1 rounded-lg ${isCurrent ? stage.color : isPassed ? 'bg-success/20 text-emerald-300' : 'bg-ink/80 text-slate-300'}`}>
                         <StageIcon className="w-3.5 h-3.5" />
                       </div>
                       <span className="font-extrabold text-xs text-white truncate">{stage.label}</span>
@@ -356,7 +355,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
 
                   <p className="text-xs text-slate-300 line-clamp-1 leading-tight">{stage.desc}</p>
 
-                  <div className="flex justify-between items-center mt-2 pt-1 border-t border-white/10 text-xs text-slate-400">
+                  <div className="flex justify-between items-center mt-2 pt-1 border-t border-white/10 text-xs text-muted">
                     <span>{isCurrent ? 'Current Stage' : isPassed ? 'Completed' : 'Upcoming'}</span>
                     {logCount > 0 && (
                       <span className="font-mono font-bold bg-white/20 text-white px-1.5 rounded">
@@ -371,7 +370,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
 
           {/* Special Terminal State Indicator if Cant Repair / Customer Cancelled */}
           {(workOrder.status === 'Cant Repair' || workOrder.status === 'Customer Not Repair') && (
-            <div className="mt-2 p-2 bg-rose-500/20 border border-rose-500/40 rounded-xl flex items-center justify-between text-xs text-rose-200">
+            <div className="mt-2 p-2 bg-danger/100/20 border border-rose-500/40 rounded-xl flex items-center justify-between text-xs text-rose-200">
               <div className="flex items-center space-x-2 font-bold">
                 <AlertCircle className="w-4 h-4 text-rose-400" />
                 <span>Ticket Outcome: {workOrder.status === 'Cant Repair' ? "Unrepairable / Can't Repair" : 'Cancelled / Customer Not Repair'}</span>
@@ -423,30 +422,30 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
                 </p>
               )}
               {['Receive', 'In Progress', 'Pending'].includes(targetStatus) && !checkIsBeforeDiagnosticCompleted(workOrder) && (
-                <div className="p-2.5 bg-amber-50 border border-amber-300 rounded-xl text-amber-900 text-xs space-y-1 mt-2">
-                  <div className="flex items-center space-x-1.5 font-extrabold text-amber-950">
-                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 animate-pulse" />
+                <div className="p-2.5 bg-warning/10 border border-warning/30 rounded-xl text-warning text-xs space-y-1 mt-2">
+                  <div className="flex items-center space-x-1.5 font-extrabold text-warning">
+                    <AlertTriangle className="w-3.5 h-3.5 text-warning shrink-0 animate-pulse" />
                     <span>Initial Diagnostic Alert:</span>
                   </div>
-                  <p className="text-amber-900 leading-tight">Initial 21-point diagnostic not completed.</p>
+                  <p className="text-warning leading-tight">Initial 21-point diagnostic not completed.</p>
                 </div>
               )}
               {targetStatus === 'Finished' && !checkIsAfterDiagnosticCompleted(workOrder) && (
-                <div className="p-2.5 bg-rose-50 border border-rose-300 rounded-xl text-rose-900 text-xs space-y-1 mt-2">
-                  <div className="flex items-center space-x-1.5 font-extrabold text-rose-950">
-                    <AlertCircle className="w-3.5 h-3.5 text-rose-600 shrink-0 animate-pulse" />
+                <div className="p-2.5 bg-danger/10 border border-danger/30 rounded-xl text-danger text-xs space-y-1 mt-2">
+                  <div className="flex items-center space-x-1.5 font-extrabold text-danger">
+                    <AlertCircle className="w-3.5 h-3.5 text-danger shrink-0 animate-pulse" />
                     <span>Finished Device Diagnostic Alert:</span>
                   </div>
-                  <p className="text-rose-900 leading-tight">Marking Finished without post-repair diagnostic.</p>
+                  <p className="text-danger leading-tight">Marking Finished without post-repair diagnostic.</p>
                 </div>
               )}
               {targetStatus === 'Taken Out' && (
-                <div className="p-2.5 bg-purple-50 border border-purple-300 rounded-xl text-purple-950 text-xs space-y-1 mt-2">
+                <div className="p-2.5 bg-purple/10 border border-purple/30 rounded-xl text-purple-950 text-xs space-y-1 mt-2">
                   <div className="flex items-center space-x-1.5 font-extrabold text-purple-950">
-                    <AlertCircle className="w-3.5 h-3.5 text-purple-600 shrink-0 animate-pulse" />
+                    <AlertCircle className="w-3.5 h-3.5 text-purple shrink-0 animate-pulse" />
                     <span>POS Cashout Required for Taken Out:</span>
                   </div>
-                  <p className="text-purple-900 leading-tight">Taken Out opens the POS checkout to collect payment.</p>
+                  <p className="text-purple leading-tight">Taken Out opens the POS checkout to collect payment.</p>
                 </div>
               )}
             </div>
@@ -478,7 +477,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
             <Button
               type="button"
               onClick={() => setIsAddingLog(false)}
-              className="px-3.5 py-1.5 bg-white border border-line hover:bg-slate-100 text-ink font-bold text-xs rounded-xl transition-all cursor-pointer"
+              className="px-3.5 py-1.5 bg-white border border-line hover:bg-surface text-ink font-bold text-xs rounded-xl transition-all cursor-pointer"
             >
               Discard
             </Button>
@@ -512,82 +511,63 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
           {/* Filter Pills */}
           <div className="flex items-center space-x-1 overflow-x-auto no-scrollbar w-full sm:w-auto">
             <span className="text-xs font-bold text-muted uppercase tracking-wider pr-1">Filter:</span>
-            <Button
-              type="button"
-              onClick={() => setFilterType('ALL')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                filterType === 'ALL' ? 'bg-brand text-white' : 'bg-white text-ink hover:bg-slate-200'
-              }`}
-            >
-              All Events ({auditItems.length})
-            </Button>
-            <Button
-              type="button"
-              onClick={() => setFilterType('TRANSITION')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                filterType === 'TRANSITION' ? 'bg-brand text-white' : 'bg-white text-ink hover:bg-slate-200'
-              }`}
-            >
-              Transitions Only
-            </Button>
-            <Button
-              type="button"
-              onClick={() => setFilterType('NOTES')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                filterType === 'NOTES' ? 'bg-brand text-white' : 'bg-white text-ink hover:bg-slate-200'
-              }`}
-            >
-              Tech Notes
-            </Button>
-            <Button
-              type="button"
-              onClick={() => setFilterType('QA')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                filterType === 'QA' ? 'bg-brand text-white' : 'bg-white text-ink hover:bg-slate-200'
-              }`}
-            >
-              QA & Diagnostics
-            </Button>
+            {([
+              { id: 'ALL' as const, label: `All Events (${auditItems.length})` },
+              { id: 'TRANSITION' as const, label: 'Transitions Only' },
+              { id: 'NOTES' as const, label: 'Tech Notes' },
+              { id: 'QA' as const, label: 'QA & Diagnostics' },
+            ]).map((pill) => (
+              <Button
+                key={pill.id}
+                type="button"
+                onClick={() => setFilterType(pill.id)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  filterType === pill.id ? 'bg-brand text-white' : 'bg-white text-ink hover:bg-line'
+                }`}
+              >
+                {pill.label}
+              </Button>
+            ))}
           </div>
         </div>
       )}
 
       {/* SECTION 4: Interactive Chronological Audit Timeline */}
       {filteredAuditItems.length > 0 ? (
-        <div className="relative pl-6 sm:pl-8 space-y-5 before:absolute before:left-3 sm:before:left-4 before:top-3 before:bottom-3 before:w-0.5 before:bg-gradient-to-b before:from-brand before:via-[#AF52DE] before:to-emerald-500">
+        <div className="relative pl-6 sm:pl-8 space-y-5 before:absolute before:left-3 sm:before:left-4 before:top-3 before:bottom-3 before:w-0.5 before:bg-gradient-to-b before:from-brand before:via-purple before:to-success">
           {filteredAuditItems.map((item) => {
 
             // Determine Icon & Styling by Event Type
-            let iconBg = 'bg-blue-600 text-white';
+            let iconBg = 'bg-brand text-white';
             let IconComponent = Activity;
             let categoryLabel = 'Repair Audit Log';
-            let categoryBadge = 'bg-blue-50 text-blue-700 border-blue-200';
+            let categoryBadge = 'bg-brand-soft text-brand border-brand/30';
 
             if (item.type === 'INTAKE') {
-              iconBg = 'bg-purple-600 text-white ring-4 ring-purple-100';
+              iconBg = 'bg-purple text-white ring-4 ring-purple/20';
               IconComponent = PackageCheck;
               categoryLabel = 'Work Order Created & Intaken';
-              categoryBadge = 'bg-purple-50 text-purple-800 border-purple-200';
+              categoryBadge = 'bg-purple/10 text-purple border-purple/30';
             } else if (item.type === 'STATUS_TRANSITION') {
-              iconBg = 'bg-brand text-white ring-4 ring-blue-100';
+              iconBg = 'bg-brand text-white ring-4 ring-brand/20';
               IconComponent = ArrowRight;
               categoryLabel = 'Status Transition Mapped';
-              categoryBadge = 'bg-blue-50 text-brand border-blue-200';
+              categoryBadge = 'bg-brand-soft text-brand border-brand/30';
             } else if (item.type === 'QA_CHECK') {
-              iconBg = 'bg-purple-600 text-white ring-4 ring-purple-100';
+              iconBg = 'bg-purple text-white ring-4 ring-purple/20';
               IconComponent = ShieldCheck;
               categoryLabel = 'QA 21-Point Inspection';
-              categoryBadge = 'bg-purple-50 text-purple-700 border-purple-200';
+              categoryBadge = 'bg-purple/10 text-purple border-purple/30';
             } else if (item.type === 'PAYMENT') {
-              iconBg = 'bg-emerald-600 text-white ring-4 ring-emerald-100';
+              iconBg = 'bg-success text-white ring-4 ring-success/20';
               IconComponent = DollarSign;
               categoryLabel = 'POS Payment & Checkout';
-              categoryBadge = 'bg-emerald-50 text-emerald-800 border-emerald-200';
+              categoryBadge = 'bg-success/10 text-success-deep border-success/30';
             } else if (item.type === 'ASSIGNMENT') {
-              iconBg = 'bg-amber-500 text-white ring-4 ring-amber-100';
+              iconBg = 'bg-warning text-white ring-4 ring-warning/20';
               IconComponent = User;
               categoryLabel = 'Technician Assignment';
-              categoryBadge = 'bg-amber-50 text-amber-800 border-amber-200';
+              categoryBadge = 'bg-warning/10 text-warning border-warning/30';
             }
 
             return (
@@ -618,8 +598,8 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
 
                     <div className="flex items-center space-x-2 text-xs text-muted">
                       {item.timeDelta && (
-                        <span className="bg-slate-100 text-slate-700 font-mono font-bold px-1.5 py-0.5 rounded inline-flex items-center">
-                          <Clock className="w-3 h-3 text-slate-500 shrink-0 mr-1" />
+                        <span className="bg-surface text-muted font-mono font-bold px-1.5 py-0.5 rounded inline-flex items-center">
+                          <Clock className="w-3 h-3 text-muted shrink-0 mr-1" />
                           <span>{item.timeDelta}</span>
                         </span>
                       )}
@@ -640,7 +620,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
                       </span>
 
                       {item.isInitialIntake && (
-                        <span className="text-xs font-mono font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+                        <span className="text-xs font-mono font-bold text-purple bg-purple/10 px-2 py-0.5 rounded border border-purple/30">
                           Intake Baseline Timestamp
                         </span>
                       )}

@@ -45,7 +45,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
   });
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-200">
+    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl border border-line shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden text-ink">
         
         {/* Header */}
@@ -189,7 +189,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
                   <Button
                     type="button"
                     onClick={() => onRestoreWorkOrder(wo.id)}
-                    className="flex-1 sm:flex-initial bg-emerald-600 hover:bg-emerald-700 text-white"
+                    className="flex-1 sm:flex-initial bg-success hover:bg-success-deep text-white"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     <span>Restore Ticket</span>
@@ -228,7 +228,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
 
         {/* Confirm Empty Recycle Bin Modal Popup */}
         {confirmEmptyOpen && (
-          <div className="fixed inset-0 bg-slate-900/60 z-60 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-slate-900/50 z-60 flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl border border-line shadow-2xl p-6 max-w-md w-full space-y-4">
               <div className="flex items-center space-x-3 text-rose-600">
                 <ShieldAlert className="w-7 h-7" />
@@ -252,7 +252,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
                     onEmptyRecycleBin();
                     setConfirmEmptyOpen(false);
                   }}
-                  className="px-4 py-2 rounded-xl bg-rose-600 text-white font-bold text-xs hover:bg-rose-700 transition-all shadow-2xs cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-danger text-white font-bold text-xs hover:bg-danger-deep transition-all shadow-2xs cursor-pointer"
                 >
                   Yes, Empty Everything
                 </Button>

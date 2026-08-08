@@ -23,6 +23,14 @@ import { WorkOrder, SystemSettings, Customer } from '../../types';
 import { Button , Input } from '../ui';
 import { applyEstimateApproval, applyEstimateRejection } from '../../utils/portalWorkflow';
 
+/** Shared phone matcher — strict: query digits must EQUAL the ticket digits or be the
+    trailing 6+ digits of it. (Was duplicated verbatim ×2, P2 audit 2026-08-08.) */
+const makePhoneMatcher = (queryDigits: string) => (wo: WorkOrder): boolean => {
+  const digits = (wo.customerPhone || '').replace(/[^0-9]/g, '');
+  if (!digits || queryDigits.length < 6) return false;
+  return digits === queryDigits || digits.endsWith(queryDigits);
+};
+
 interface CustomerFacingWebPortalProps {
   workOrders: WorkOrder[];
   customers?: Customer[];
@@ -61,11 +69,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
   // trailing 6+ digits of it. Raw substring matching was leaking tickets (typing "0"
   // logged into the first ticket whose phone contained a 0).
   const cleanQueryDigits = (authenticatedCustomerPhoneOrEmail || '').toLowerCase().replace(/[^0-9]/g, '');
-  const phoneMatch = (wo: WorkOrder) => {
-    const digits = (wo.customerPhone || '').replace(/[^0-9]/g, '');
-    if (!digits || cleanQueryDigits.length < 6) return false;
-    return digits === cleanQueryDigits || digits.endsWith(cleanQueryDigits);
-  };
+  const phoneMatch = makePhoneMatcher(cleanQueryDigits);
   const matchingWorkOrders = workOrders.filter((wo) => {
     if (!authenticatedCustomerPhoneOrEmail) return false;
     const target = authenticatedCustomerPhoneOrEmail.toLowerCase().trim();
@@ -96,11 +100,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
     const cleanQuery = query.toLowerCase().replace(/[^0-9a-z]/gi, '');
     const cleanQueryDigits = cleanQuery.replace(/[^0-9]/g, '');
 
-    const phoneMatch = (wo: WorkOrder) => {
-      const digits = (wo.customerPhone || '').replace(/[^0-9]/g, '');
-      if (!digits || cleanQueryDigits.length < 6) return false;
-      return digits === cleanQueryDigits || digits.endsWith(cleanQueryDigits);
-    };
+    const phoneMatch = makePhoneMatcher(cleanQueryDigits);
 
     // Check if any work order matches (strict: exact order#/email/serial/IMEI, or
     // phone digits equal / trailing-6+ digits — never a raw substring).
@@ -319,7 +319,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   LIVE PORTAL
                 </span>
               </div>
-              <p className="text-xs text-muted">Logged in: <strong className="text-ink">{currentWorkOrder.customerName}</strong> ({currentWorkOrder.customerPhone || currentWorkOrder.customerEmail})</p>
+              <p className="text-xs text-muted min-w-0 truncate">Logged in: <strong className="text-ink">{currentWorkOrder.customerName}</strong> ({currentWorkOrder.customerPhone || currentWorkOrder.customerEmail})</p>
             </div>
           </div>
 
@@ -373,9 +373,9 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
         
         {/* Urgent Action Banner if Estimate is Pending Approval */}
         {(currentWorkOrder.estimateStatus === 'Pending Approval' || (currentWorkOrder.status === 'Receive' && !currentWorkOrder.estimateStatus)) && (
-          <div className="p-4 bg-amber-50 border border-amber-300 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="p-4 bg-warning/10 border border-warning/30 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-start space-x-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-warning/100 text-white flex items-center justify-center shrink-0">
                 <AlertTriangle className="w-5 h-5" />
               </div>
               <div className="space-y-0.5">
@@ -385,7 +385,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                     Awaiting Approval
                   </span>
                 </div>
-                <p className="text-xs text-faint">
+                <p className="text-xs text-muted">
                   Our technicians have completed the initial diagnostic inspection for your <strong>{currentWorkOrder.deviceModel}</strong>. Total estimated cost: <strong className="text-ink font-mono text-sm">{currentWorkOrder.totalAmount.toLocaleString()} {systemSettings.currencySymbol}</strong>.
                 </p>
               </div>
@@ -485,12 +485,12 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 currentStage >= 2
                   ? 'bg-brand-soft border-brand/40 text-brand'
                   : currentStage === 1
-                  ? 'bg-amber-50 border-amber-300 text-amber-700'
+                  ? 'bg-warning/10 border-warning/30 text-warning'
                   : 'bg-surface border-line text-muted'
               }`}>
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-xs font-extrabold uppercase">2. Diagnostics</span>
-                  {currentStage >= 2 ? <CheckCircle2 className="w-4 h-4 text-brand" /> : currentStage === 1 ? <Clock className="w-4 h-4 animate-spin text-amber-600" /> : null}
+                  {currentStage >= 2 ? <CheckCircle2 className="w-4 h-4 text-brand" /> : currentStage === 1 ? <Clock className="w-4 h-4 animate-spin text-warning" /> : null}
                 </div>
                 <p className="font-bold text-xs text-ink">Testing & Quote</p>
                 <p className="text-xs text-muted">Inspection complete</p>
@@ -718,7 +718,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   <Award className="w-5 h-5" />
                   <h3 className="font-extrabold text-sm text-ink">Warranty Coverage Guarantee</h3>
                 </div>
-                <p className="text-xs text-faint">
+                <p className="text-xs text-muted">
                   All modular repairs and replacement parts installed by {systemSettings.shopName} include full warranty protection.
                 </p>
 
@@ -775,7 +775,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   </div>
                   <div className="col-span-2 text-center">
                     <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                      li.isLabor ? 'bg-purple-50 text-purple-700' : 'bg-brand-soft text-brand'
+                      li.isLabor ? 'bg-purple/10 text-purple' : 'bg-brand-soft text-brand'
                     }`}>
                       {li.isLabor ? 'Labor' : 'Part'}
                     </span>
@@ -943,7 +943,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
 
       {/* APPROVAL CONFIRMATION MODAL */}
       {approvalModalOpen && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-5 shadow-2xl border border-line animate-in fade-in zoom-in duration-150">
             <div className="flex items-center justify-between border-b border-line pb-3">
               <div className="flex items-center space-x-2 text-success">
@@ -1025,7 +1025,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
 
       {/* REJECTION / CALL REQUEST MODAL */}
       {rejectionModalOpen && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-5 shadow-2xl border border-line animate-in fade-in zoom-in duration-150">
             <div className="flex items-center justify-between border-b border-line pb-3">
               <div className="flex items-center space-x-2 text-danger">
@@ -1043,7 +1043,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             <div className="space-y-4 text-xs text-ink">
               <div>
                 <label className="block font-bold mb-1">Reason for Requesting Modification</label>
-                <select aria-label="Select"
+                <select aria-label="Reason for Requesting Modification"
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
                   className="w-full bg-surface border border-line rounded-xl px-3 py-2 text-xs font-semibold focus:bg-white focus:border-brand"
@@ -1079,7 +1079,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
               <Button
                 type="button"
                 onClick={handleRejectEstimate}
-                className="flex-1 bg-danger hover:bg-red-600 text-white"
+                className="flex-1 bg-danger hover:bg-danger text-white"
               >
                 Submit Request
               </Button>
@@ -1090,7 +1090,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
 
       {/* PRINTABLE VOUCHER MODAL */}
       {printModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto">
           <style>{`
             @media print {
               nav, header, footer, aside, .no-print, .print\\:hidden {

@@ -263,7 +263,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
   if (embedded) return chooserContent;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-3 backdrop-blur-xs sm:p-5 animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-3 backdrop-blur-xs sm:p-5 animate-fadeIn">
       {chooserContent}
     </div>
   );

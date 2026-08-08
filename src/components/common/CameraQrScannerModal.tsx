@@ -337,7 +337,7 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
                       {/* Laser beam */}
                       <div className="w-full h-0.5 bg-rose-500 shadow-[0_0_8px_#f43f5e] animate-pulse absolute top-1/2" />
                     </div>
-                    <span className="mt-3 text-xs font-bold text-white/90 bg-black/60 px-3 py-1 rounded-full backdrop-blur-xs">
+                    <span className="mt-3 text-xs font-bold text-white/90 bg-slate-900/50 px-3 py-1 rounded-full backdrop-blur-xs">
                       Align Barcode or QR Code within Frame
                     </span>
                   </div>
@@ -446,7 +446,7 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
               {/* Confirm Action */}
               <Button
                 onClick={handleConfirmResult}
-                className="w-full max-w-md mx-auto py-3 bg-success hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow-sm transition-all flex items-center justify-center space-x-2 cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success/40 focus-visible:ring-offset-2"
+                className="w-full max-w-md mx-auto py-3 bg-success hover:bg-success-deep text-white font-black text-xs rounded-xl shadow-sm transition-all flex items-center justify-center space-x-2 cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success/40 focus-visible:ring-offset-2"
               >
                 <span className="truncate">Apply Code to Intake ({scannedResult})</span>
                 <ArrowRight className="w-4 h-4 shrink-0" />

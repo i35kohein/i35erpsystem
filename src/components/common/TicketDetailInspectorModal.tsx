@@ -122,7 +122,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-3 sm:p-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-3 sm:p-5">
       <div className="flex h-[92vh] max-h-[760px] min-h-0 w-full max-w-5xl flex-col overflow-hidden rounded-xl border border-line bg-white shadow-xl">
         <header className="flex items-center justify-between gap-3 border-b border-line px-4 py-3 sm:px-5">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2.5">

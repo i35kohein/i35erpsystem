@@ -96,7 +96,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
   };
 
   return (
-    <div className="printable-invoice-root fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[70] flex items-center justify-center p-3 sm:p-6 overflow-y-auto no-print-bg">
+    <div className="printable-invoice-root fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[70] flex items-center justify-center p-3 sm:p-6 overflow-y-auto no-print-bg">
       {/* Print CSS rules */}
       <style>{`
         @media print {

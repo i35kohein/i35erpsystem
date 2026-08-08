@@ -109,11 +109,11 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-      <div className="bg-white rounded-3xl border border-line shadow-2xl max-w-lg w-full overflow-hidden">
+    <div role="dialog" aria-modal="true" aria-labelledby="customer-notification-title" className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
+      <div className="bg-white rounded-2xl border border-line shadow-2xl max-w-lg w-full overflow-hidden">
         {/* Modal Header */}
         <div className="bg-ink text-white p-5 flex items-center justify-between">
-          <div className="flex items-center space-x-2.5">
+          <div className="flex items-center space-x-2.5" id="customer-notification-title">
             <div className="p-2 bg-brand rounded-2xl text-white">
               <BellRing className="w-5 h-5 animate-pulse" />
             </div>
@@ -210,10 +210,12 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
           {/* Message Text Area */}
           <div>
             <div className="flex justify-between items-center mb-1">
-              <span className="text-xs font-bold text-muted">Message Preview:</span>
+              <label htmlFor="customer-notification-text" className="text-xs font-bold text-muted">Message Preview:</label>
               <span className="text-xs text-brand font-bold">{messageText.length} characters</span>
             </div>
             <textarea
+              id="customer-notification-text"
+              aria-label="Message preview"
               rows={4}
               value={messageText}
               onChange={(e) => setMessageText(e.target.value)}

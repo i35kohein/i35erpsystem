@@ -36,7 +36,7 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
       <div
         id="confirm-delete-panel"
         tabIndex={-1}
@@ -92,7 +92,7 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
               onClose();
             }}
             className={`px-5 py-2.5 text-white text-xs font-black rounded-xl shadow-md transition-all flex items-center space-x-2 cursor-pointer active:scale-95 ${
-              isDanger ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-200' : 'bg-amber-600 hover:bg-amber-700'
+              isDanger ? 'bg-danger hover:bg-danger-deep shadow-rose-200' : 'bg-warning hover:bg-warning'
             }`}
           >
             <Trash2 className="w-4 h-4" />

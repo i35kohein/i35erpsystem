@@ -30,7 +30,7 @@ export const DrawerSelect: React.FC<DrawerSelectProps> = ({ label, value, onChan
       </button>
       {/* Overlay list — does not affect flow, so no layout shift when opened */}
       {open && (
-        <div className="absolute left-0 right-0 top-full z-20 mt-1.5 max-h-56 overflow-y-auto rounded-xl border border-line bg-white p-1 shadow-xl animate-fade-in">
+        <div className="absolute left-0 right-0 top-full z-20 mt-1.5 max-h-56 overflow-y-auto rounded-xl border border-line bg-white p-1 shadow-xl animate-fadeIn">
           {options.map((opt) => (
             <button
               key={opt.value}

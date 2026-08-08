@@ -282,7 +282,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-5 animate-fadeIn">
+      <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-5 animate-fadeIn">
         <div className="bg-white border border-line rounded-3xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
           {/* Modal Top Header */}
           <div className="px-5 py-4 border-b border-line bg-white flex items-center justify-between">
@@ -654,7 +654,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                         );
                         onClose();
                       }}
-                      className="col-span-2 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-extrabold rounded-xl text-xs transition-all flex items-center justify-center space-x-1.5 shadow-2xs cursor-pointer"
+                      className="col-span-2 py-2 bg-success hover:bg-success-deep disabled:opacity-50 text-white font-extrabold rounded-xl text-xs transition-all flex items-center justify-center space-x-1.5 shadow-2xs cursor-pointer"
                     >
                       <ChevronRight className="w-4 h-4" />
                       <span>Push to Ticket Intake</span>

@@ -252,7 +252,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     className={`p-3 rounded-xl border transition-all cursor-pointer ${
                       isSelected
                         ? 'bg-brand-soft border-brand shadow-xs'
-                        : 'bg-surface border-line hover:bg-slate-100'
+                        : 'bg-surface border-line hover:bg-surface'
                     }`}
                   >
                     <div className="flex justify-between items-center gap-1">
@@ -262,7 +262,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                       </span>
                       <div className="flex items-center space-x-1">
                         <span className={`text-xs font-extrabold px-1.5 py-0.5 rounded-md border uppercase ${
-                          wo.status === 'Taken Out' ? 'bg-slate-100 text-slate-600 border-slate-300' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          wo.status === 'Taken Out' ? 'bg-surface text-muted border-line' : 'bg-success/10 text-success-deep border-success/30'
                         }`}>
                           {wo.status}
                         </span>
@@ -271,7 +271,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                             Ready
                           </span>
                         ) : (
-                          <span className="text-xs font-bold px-1.5 py-0.5 rounded-md border bg-warning/10 text-amber-600 border-warning/20 uppercase">
+                          <span className="text-xs font-bold px-1.5 py-0.5 rounded-md border bg-warning/10 text-warning border-warning/20 uppercase">
                             QA Pending
                           </span>
                         )}
@@ -285,7 +285,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
 
                     <div className="flex flex-wrap items-center gap-1 mt-1">
                       {repairs.slice(0, 2).map((r, i) => (
-                        <span key={i} className="inline-flex items-center gap-1 rounded-md border border-brand/20 bg-brand/8 px-1.5 py-0.5 text-xs font-extrabold text-brand">
+                        <span key={i} className="inline-flex items-center gap-1 rounded-md border border-brand/20 bg-brand/10 px-1.5 py-0.5 text-xs font-extrabold text-brand">
                           <Wrench className="h-2.5 w-2.5" />
                           {r.name}
                         </span>
@@ -377,7 +377,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     <Button
                       type="button"
                       onClick={() => setQaDiagnostics((prev) => prev.map((diagnostic) => ({ ...diagnostic, status: 'N/A' })))}
-                      className="rounded-full border border-line-strong bg-surface px-3 py-2 min-h-10 text-xs font-bold text-ink shadow-xs transition-colors hover:bg-line"
+                      className="rounded-full border border-line-strong bg-surface px-3 min-h-10 text-xs font-bold text-ink shadow-xs transition-colors hover:bg-line-strong"
                     >
                       Mark All N/A
                     </Button>
@@ -413,7 +413,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                             type="button"
                             onClick={() => handleDiagnosticStatusChange(item.id, 'Pass')}
                             className={`flex-1 min-h-10 py-2 rounded-lg font-black transition-all ${
-                              item.status === 'Pass' ? 'bg-success text-white shadow-xs' : 'bg-surface text-ink hover:bg-slate-200'
+                              item.status === 'Pass' ? 'bg-success text-white shadow-xs' : 'bg-surface text-ink hover:bg-line'
                             }`}
                           >
                             Pass
@@ -422,7 +422,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                             type="button"
                             onClick={() => handleDiagnosticStatusChange(item.id, 'Fail')}
                             className={`flex-1 min-h-10 py-2 rounded-lg font-black transition-all ${
-                              item.status === 'Fail' ? 'bg-danger text-white shadow-xs' : 'bg-surface text-ink hover:bg-slate-200'
+                              item.status === 'Fail' ? 'bg-danger text-white shadow-xs' : 'bg-surface text-ink hover:bg-line'
                             }`}
                           >
                             Fail
@@ -431,7 +431,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                             type="button"
                             onClick={() => handleDiagnosticStatusChange(item.id, 'N/A')}
                             className={`flex-1 min-h-10 py-2 rounded-lg font-black transition-all ${
-                              item.status === 'N/A' ? 'bg-slate-600 text-white shadow-xs' : 'bg-surface text-ink hover:bg-slate-200'
+                              item.status === 'N/A' ? 'bg-slate-600 text-white shadow-xs' : 'bg-surface text-ink hover:bg-line'
                             }`}
                           >
                             N/A
@@ -445,7 +445,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                             value={item.note || ''}
                             onChange={(e) => handleDiagnosticNoteChange(item.id, e.target.value)}
                             placeholder={`Comment for ${item.name}...`}
-                            className="w-full bg-surface border border-line rounded-lg px-2.5 py-1 text-xs text-ink focus:bg-white focus:border-brand focus:outline-none"
+                            className="w-full min-h-10 bg-surface border border-line rounded-xl px-3 text-sm text-ink focus:bg-white focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/25"
                           />
                         </div>
                       </div>

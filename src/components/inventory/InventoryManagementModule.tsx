@@ -225,17 +225,12 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
   // Supplier & Quality Tier Edit States
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
-  const [editingQualityTier, setEditingQualityTier] = useState<{ oldName: string; newName: string } | null>(null);
 
   // Tiers are managed centrally in System Management and synchronised with Supabase.
   const customQualityTiers = DEFAULT_QUALITY_TIERS;
-  // Legacy modal handlers remain mounted only while the inventory page is open;
-  // management now lives in System Management and is intentionally read-only here.
-  const setCustomQualityTiers = (_tiers: string[]) => undefined;
 
   // Mini modals for quick-add inside Part Add/Edit forms
   const [showAddSupplierMiniModal, setShowAddSupplierMiniModal] = useState(false);
-  const [showAddQualityMiniModal, setShowAddQualityMiniModal] = useState(false);
 
   // Form State for Adding Supplier
   const [newSupplierForm, setNewSupplierForm] = useState({
@@ -249,9 +244,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   });
 
   // Form State for Adding Quality Tier
-  const [newQualityForm, setNewQualityForm] = useState({
-    name: '',
-  });
 
   const handleCreateSupplier = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -283,24 +275,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     setShowAddSupplierMiniModal(false);
   };
 
-  const handleCreateQualityTier = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    const name = newQualityForm.name.trim();
-    if (!name) return;
-    if (customQualityTiers.some((t) => t.toLowerCase() === name.toLowerCase())) {
-      return;
-    }
-    const updated = [...customQualityTiers, name];
-    setCustomQualityTiers(updated);
-    try {
-      localStorage.setItem('custom_quality_tiers', JSON.stringify(updated));
-    } catch (err) {
-      console.error(err);
-    }
-    setNewQualityForm({ name: '' });
-    setShowAddQualityMiniModal(false);
-  };
-
   const handleSaveEditSupplier = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!editingSupplier || !editingSupplier.name.trim()) return;
@@ -311,32 +285,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   };
 
   
-
-  const handleSaveEditQualityTier = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!editingQualityTier) return;
-    const oldName = editingQualityTier.oldName;
-    const newName = editingQualityTier.newName.trim();
-    if (!newName) return;
-    if (oldName !== newName && customQualityTiers.some((t) => t.toLowerCase() === newName.toLowerCase())) {
-      return;
-    }
-    const updated = customQualityTiers.map((t) => (t === oldName ? newName : t));
-    setCustomQualityTiers(updated);
-    try {
-      localStorage.setItem('custom_quality_tiers', JSON.stringify(updated));
-    } catch (err) {
-      console.error(err);
-    }
-    if (onUpdatePart) {
-      parts.forEach((p) => {
-        if (p.qualityTier === oldName) {
-          onUpdatePart({ ...p, qualityTier: newName as PartQualityTier });
-        }
-      });
-    }
-    setEditingQualityTier(null);
-  };
 
   
 
@@ -1028,7 +976,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               variant="ghost"
               type="button"
               onClick={() => setViewMode('stock')}
-              className={`flex-1 md:flex-none h-9 lg:h-8 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
+              className={`flex-1 md:flex-none h-10 lg:h-8 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
                 viewMode === 'stock'
                   ? 'bg-white text-brand shadow-xs border border-brand/20'
                   : 'text-muted hover:text-ink'
@@ -1041,7 +989,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               variant="ghost"
               type="button"
               onClick={() => setViewMode('profit')}
-              className={`flex-1 md:flex-none h-9 lg:h-8 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
+              className={`flex-1 md:flex-none h-10 lg:h-8 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
                 viewMode === 'profit'
                   ? 'bg-white text-brand shadow-xs border border-brand/20'
                   : 'text-muted hover:text-ink'
@@ -1054,7 +1002,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               variant="ghost"
               type="button"
               onClick={() => setViewMode('matrix')}
-              className={`flex-1 md:flex-none h-9 lg:h-8 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
+              className={`flex-1 md:flex-none h-10 lg:h-8 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
                 viewMode === 'matrix'
                   ? 'bg-white text-brand shadow-xs border border-brand/20'
                   : 'text-muted hover:text-ink'
@@ -1069,7 +1017,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           {/* Filters — desktop only (iPad: side drawer) */}
           {!isIpad && (
             <div className="hidden md:flex items-stretch md:items-center gap-1.5 md:shrink-0">
-              <div className="flex h-9 lg:h-8 items-center gap-1 rounded-lg bg-surface p-1 flex-1 min-w-0 md:flex-none">
+              <div className="flex h-10 lg:h-8 items-center gap-1 rounded-lg bg-surface p-1 flex-1 min-w-0 md:flex-none">
                 <div className="flex items-center gap-1 w-full">
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white text-brand">
                     <Smartphone className="h-3 w-3" />
@@ -1086,7 +1034,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 </div>
               </div>
 
-              <div className="flex h-9 lg:h-8 items-center gap-1 rounded-lg bg-surface p-1 flex-1 min-w-0 md:flex-none">
+              <div className="flex h-10 lg:h-8 items-center gap-1 rounded-lg bg-surface p-1 flex-1 min-w-0 md:flex-none">
                 <div className="flex items-center gap-1 w-full">
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white text-brand">
                     <Layers className="h-3 w-3" />
@@ -1103,7 +1051,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 </div>
               </div>
 
-              <div className="flex h-9 lg:h-8 items-center gap-1 rounded-lg bg-surface p-1 flex-1 min-w-0 md:flex-none">
+              <div className="flex h-10 lg:h-8 items-center gap-1 rounded-lg bg-surface p-1 flex-1 min-w-0 md:flex-none">
                 <div className="flex items-center gap-1 w-full">
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white text-brand">
                     <Filter className="h-3 w-3" />
@@ -1147,7 +1095,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   className={`toolbar-compact-btn flex-1 min-w-0 inline-flex items-center justify-center rounded-l-lg border transition-colors ${
                     stockView === 'table'
                       ? 'bg-brand text-white border-brand'
-                      : 'bg-white text-faint border-line-strong hover:bg-slate-100'
+                      : 'bg-white text-faint border-line-strong hover:bg-surface'
                   }`}
                 >
                   <List className="h-3.5 w-3.5" />
@@ -1163,7 +1111,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   className={`toolbar-compact-btn flex-1 min-w-0 inline-flex items-center justify-center rounded-r-lg border transition-colors ${
                     stockView === 'cards'
                       ? 'bg-brand text-white border-brand'
-                      : 'bg-white text-faint border-line-strong hover:bg-slate-100'
+                      : 'bg-white text-faint border-line-strong hover:bg-surface'
                   }`}
                 >
                   <LayoutGrid className="h-3.5 w-3.5" />
@@ -1197,8 +1145,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 }}
                 className={`toolbar-compact-btn flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 rounded-lg border px-2 py-1.5 text-xs font-bold transition-colors ${
                   inlineEditMode
-                    ? 'border-amber-300 bg-amber-50 text-amber-700 hover:border-amber-400'
-                    : 'border-amber-200 bg-amber-50 text-amber-700 hover:border-amber-400 hover:bg-amber-100'
+                    ? 'border-warning/30 bg-warning/10 text-warning hover:border-amber-400'
+                    : 'border-warning/30 bg-warning/10 text-warning hover:border-amber-400 hover:bg-warning/15'
                 }`}
                 title={inlineEditMode ? 'Cancel inline edit mode' : 'Edit stock rows'}
               >
@@ -1221,7 +1169,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     }
                     setShowInlineSaveConfirm(true);
                   }}
-                  className="toolbar-compact-btn flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 rounded-lg border border-brand bg-brand px-3 py-1.5 text-xs font-bold text-white shadow-xs transition-colors hover:bg-blue-700"
+                  className="toolbar-compact-btn flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 rounded-lg border border-brand bg-brand px-3 py-1.5 text-xs font-bold text-white shadow-xs transition-colors hover:bg-brand-deep"
                   title="Save all inline edits"
                 >
                   <Check className="h-3.5 w-3.5" />
@@ -1282,22 +1230,22 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           onClick={() => setShowLowStockOnly(!showLowStockOnly)}
           className={`p-4 rounded-2xl border text-left transition-all cursor-pointer shadow-2xs ${
             showLowStockOnly
-              ? 'bg-amber-500 text-white border-amber-600 ring-2 ring-amber-400'
+              ? 'bg-warning/100 text-white border-amber-600 ring-2 ring-amber-400'
               : metrics.lowStockCount > 0
-              ? 'bg-amber-50 hover:bg-amber-100/80 text-amber-900 border-amber-200'
+              ? 'bg-warning/10 hover:bg-warning/15/80 text-warning border-warning/30'
               : 'bg-white text-ink border-line'
           }`}
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider">Low Stock Reorders</span>
-            <AlertTriangle className={`w-4 h-4 ${showLowStockOnly ? 'text-white' : 'text-amber-600'}`} />
+            <AlertTriangle className={`w-4 h-4 ${showLowStockOnly ? 'text-white' : 'text-warning'}`} />
           </div>
           <div className="flex items-baseline justify-between mt-1">
             <span className="text-2xl font-black font-mono">
               {metrics.lowStockCount} <span className="text-xs font-bold">SKUs</span>
             </span>
             <span className={`text-xs font-black px-2 py-0.5 rounded-full ${
-              showLowStockOnly ? 'bg-white text-amber-800' : 'bg-amber-200/80 text-amber-900'
+              showLowStockOnly ? 'bg-white text-warning' : 'bg-warning/25/80 text-warning'
             }`}>
               {showLowStockOnly ? 'Filter Active' : 'Click to Audit'}
             </span>
@@ -1317,7 +1265,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         <>
         {/* Scan + search bar — iPad: lives in the navbar (topbar) instead */}
         {!isIpad && (
-        <div className="flex items-center gap-2 rounded-xl border border-brand/25 bg-blue-50/50 px-3 py-2">
+        <div className="flex items-center gap-2 rounded-xl border border-brand/25 bg-brand-soft/50 px-3 py-2">
           <ScanLine className="h-4 w-4 shrink-0 text-brand" />
           <Input
             ref={scanInputRef}
@@ -1343,7 +1291,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 scanInputRef.current?.focus();
               }}
               aria-label="Clear search"
-              className="shrink-0 w-7 h-7 flex items-center justify-center rounded-full text-muted hover:bg-blue-100 hover:text-ink transition-colors cursor-pointer"
+              className="shrink-0 w-7 h-7 flex items-center justify-center rounded-full text-muted hover:bg-brand/15 hover:text-ink transition-colors cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </Button>
@@ -1382,7 +1330,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <Button
                 type="button"
                 onClick={bulkDelete}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-100 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-danger/30 bg-danger/10 px-2.5 py-1.5 text-xs font-bold text-danger hover:bg-danger/15 transition-colors cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 Delete
@@ -1406,18 +1354,18 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             onClick={() => setShowLowStockOnly(!showLowStockOnly)}
             className={`w-full flex items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-xs transition-all cursor-pointer active:scale-[0.99] ${
               showLowStockOnly
-                ? 'bg-amber-500 border-amber-600 text-white'
-                : 'bg-amber-50 hover:bg-amber-100/80 border-amber-200 text-amber-900'
+                ? 'bg-warning/100 border-amber-600 text-white'
+                : 'bg-warning/10 hover:bg-warning/15/80 border-warning/30 text-warning'
             }`}
           >
             <span className="flex items-center gap-2 min-w-0">
-              <AlertTriangle className={`w-4 h-4 shrink-0 ${showLowStockOnly ? 'text-white' : 'text-amber-600'}`} />
+              <AlertTriangle className={`w-4 h-4 shrink-0 ${showLowStockOnly ? 'text-white' : 'text-warning'}`} />
               <span className="truncate">
                 <strong className="font-mono">{metrics.lowStockCount}</strong> SKUs at or below reorder point
                 {metrics.outOfStockCount > 0 && <span className="opacity-80"> · {metrics.outOfStockCount} out of stock</span>}
               </span>
             </span>
-            <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-black ${showLowStockOnly ? 'bg-white text-amber-800' : 'bg-amber-200/80 text-amber-900'}`}>
+            <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-black ${showLowStockOnly ? 'bg-white text-warning' : 'bg-warning/25/80 text-warning'}`}>
               {showLowStockOnly ? 'Filter Active ✓' : 'Tap to Filter'}
             </span>
           </Button>
@@ -1438,6 +1386,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   setSelectedCategory('ALL');
                   setShowLowStockOnly(false);
                   setSearchQuery('');
+                  setSelectedModelFilter('ALL');
                 }}
                 className="mt-2 px-3 py-1.5 bg-brand text-white font-bold rounded-xl text-xs"
               >
@@ -1453,23 +1402,23 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 const isOut = part.quantityInStock === 0;
                 const qualityBadge =
                   part.qualityTier === 'Original' || part.qualityTier.includes('Original') ? (
-                    <span className="inline-flex max-w-[130px] items-center gap-1 truncate rounded-md border border-blue-200 bg-blue-50 px-1.5 py-0.5 text-xs font-extrabold text-blue-800">
-                      <ShieldCheck className="h-3 w-3 shrink-0 text-blue-600" />
+                    <span className="inline-flex max-w-[130px] items-center gap-1 truncate rounded-md border border-brand/30 bg-brand-soft px-1.5 py-0.5 text-xs font-extrabold text-brand-deep">
+                      <ShieldCheck className="h-3 w-3 shrink-0 text-brand" />
                       <span>{part.qualityTier}</span>
                     </span>
                   ) : part.qualityTier === 'OEM' ? (
-                    <span className="inline-flex max-w-[130px] items-center gap-1 truncate rounded-md border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-xs font-extrabold text-emerald-800">
-                      <Sparkles className="h-3 w-3 shrink-0 text-emerald-600" />
+                    <span className="inline-flex max-w-[130px] items-center gap-1 truncate rounded-md border border-success/30 bg-success/10 px-1.5 py-0.5 text-xs font-extrabold text-success-deep">
+                      <Sparkles className="h-3 w-3 shrink-0 text-success" />
                       <span>{part.qualityTier}</span>
                     </span>
                   ) : part.qualityTier === 'Genuine' ? (
-                    <span className="inline-flex max-w-[130px] items-center gap-1 truncate rounded-md border border-purple-200 bg-purple-50 px-1.5 py-0.5 text-xs font-extrabold text-purple-800">
-                      <Cpu className="h-3 w-3 shrink-0 text-purple-600" />
+                    <span className="inline-flex max-w-[130px] items-center gap-1 truncate rounded-md border border-purple/30 bg-purple/10 px-1.5 py-0.5 text-xs font-extrabold text-purple">
+                      <Cpu className="h-3 w-3 shrink-0 text-purple" />
                       <span>{part.qualityTier}</span>
                     </span>
                   ) : (
-                    <span className="inline-flex max-w-[130px] items-center gap-1 truncate rounded-md border border-slate-300 bg-slate-100 px-1.5 py-0.5 text-xs font-extrabold text-slate-800">
-                      <Tag className="h-3 w-3 shrink-0 text-slate-600" />
+                    <span className="inline-flex max-w-[130px] items-center gap-1 truncate rounded-md border border-line bg-surface px-1.5 py-0.5 text-xs font-extrabold text-slate-800">
+                      <Tag className="h-3 w-3 shrink-0 text-muted" />
                       <span>{part.qualityTier}</span>
                     </span>
                   );
@@ -1491,7 +1440,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         onClick={() => setSelectedPartForDetails(part)}
                         aria-label={`View ${part.name} details`}
                         title="View part details"
-                        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors hover:border-brand hover:bg-blue-50 hover:text-brand"
+                        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors hover:border-brand hover:bg-brand-soft hover:text-brand"
                       >
                         <FileText className="h-3.5 w-3.5" />
                       </Button>
@@ -1508,15 +1457,15 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     </div>
 
                     {inlineEditMode ? (
-                      <div className="flex items-center justify-between gap-2 rounded-xl border border-amber-200 bg-amber-50/60 p-2.5">
-                        <span className="text-xs font-extrabold uppercase tracking-wide text-amber-700">Adjust Stock</span>
+                      <div className="flex items-center justify-between gap-2 rounded-xl border border-warning/30 bg-warning/10/60 p-2.5">
+                        <span className="text-xs font-extrabold uppercase tracking-wide text-warning">Adjust Stock</span>
                         <div className="flex items-center gap-1.5">
                           <Button
                             type="button"
                             onClick={() => { onUpdatePartStock(part.id, Math.max(0, part.quantityInStock - 1)); toast.info(`${part.name}: ${Math.max(0, part.quantityInStock - 1)} units`, 'Stock −1'); }}
                             aria-label={`Decrease stock for ${part.name}`}
                             title="Decrease stock"
-                            className="flex h-10 w-10 items-center justify-center rounded-lg border border-amber-300 bg-white font-black text-rose-600 active:scale-95"
+                            className="flex h-10 w-10 items-center justify-center rounded-lg border border-warning/30 bg-white font-black text-danger active:scale-95"
                           >−</Button>
                           <span className="min-w-10 text-center font-mono text-base font-black text-ink">{part.quantityInStock}</span>
                           <Button
@@ -1524,27 +1473,27 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                             onClick={() => { onUpdatePartStock(part.id, part.quantityInStock + 1); toast.success(`${part.name}: ${part.quantityInStock + 1} units`, 'Stock +1'); }}
                             aria-label={`Increase stock for ${part.name}`}
                             title="Increase stock"
-                            className="flex h-10 w-10 items-center justify-center rounded-lg border border-amber-300 bg-white font-black text-brand active:scale-95"
+                            className="flex h-10 w-10 items-center justify-center rounded-lg border border-warning/30 bg-white font-black text-brand active:scale-95"
                           >+</Button>
                         </div>
                       </div>
                     ) : (
                     <div className="space-y-1.5 rounded-xl border border-line bg-surface p-2.5">
                       <div className="flex items-center justify-between">
-                        <span className={`font-mono text-base font-black tracking-wide ${isOut ? 'text-red-600' : isLow ? 'text-amber-600' : 'text-ink'}`}>
+                        <span className={`font-mono text-base font-black tracking-wide ${isOut ? 'text-danger' : isLow ? 'text-warning' : 'text-ink'}`}>
                           {part.quantityInStock} <span className="text-xs font-normal text-muted">units</span>
                         </span>
                         {isOut ? (
-                          <span className="animate-pulse rounded bg-red-600 px-1.5 py-0.5 text-xs font-black uppercase leading-none tracking-[0.1em] text-white">OUT OF STOCK</span>
+                          <span className="animate-pulse rounded bg-danger px-1.5 py-0.5 text-xs font-black uppercase leading-none tracking-[0.1em] text-white">OUT OF STOCK</span>
                         ) : isLow ? (
-                          <span className="rounded bg-amber-500 px-1.5 py-0.5 text-xs font-black uppercase leading-none tracking-[0.1em] text-white">REORDER</span>
+                          <span className="rounded bg-warning/100 px-1.5 py-0.5 text-xs font-black uppercase leading-none tracking-[0.1em] text-white">REORDER</span>
                         ) : (
                           <span className="text-xs font-bold text-muted">Min: {part.reorderPoint}</span>
                         )}
                       </div>
                       <div className="h-1.5 w-full overflow-hidden rounded-full bg-line">
                         <div
-                          className={`h-full transition-all duration-300 ${isOut ? 'w-0 bg-red-600' : isLow ? 'bg-amber-500' : 'bg-success'}`}
+                          className={`h-full transition-all duration-300 ${isOut ? 'w-0 bg-danger' : isLow ? 'bg-warning/100' : 'bg-success'}`}
                           style={isOut ? undefined : { width: `${Math.min(100, Math.max(8, (part.quantityInStock / (part.reorderPoint * 3)) * 100))}%` }}
                         />
                       </div>
@@ -1553,15 +1502,15 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
                     {/* Selling price edit — mobile card edit mode (step 1,000 MMK, instant save) */}
                     {inlineEditMode && (
-                      <div className="flex items-center justify-between gap-2 rounded-xl border border-emerald-200 bg-emerald-50/60 p-2.5">
-                        <span className="text-xs font-extrabold uppercase tracking-wide text-emerald-700">Selling Price</span>
+                      <div className="flex items-center justify-between gap-2 rounded-xl border border-success/30 bg-success/10/60 p-2.5">
+                        <span className="text-xs font-extrabold uppercase tracking-wide text-success-deep">Selling Price</span>
                         <div className="flex items-center gap-1.5">
                           <Button
                             type="button"
                             onClick={() => onUpdatePart?.({ ...part, sellingPrice: Math.max(0, part.sellingPrice - 1000) })}
                             aria-label={`Decrease price for ${part.name}`}
                             title="Decrease price by 1,000 MMK"
-                            className="flex h-10 w-10 items-center justify-center rounded-lg border border-emerald-300 bg-white font-black text-rose-600 active:scale-95"
+                            className="flex h-10 w-10 items-center justify-center rounded-lg border border-success/30 bg-white font-black text-danger active:scale-95"
                           >−</Button>
                           <span className="min-w-[70px] text-center font-mono text-sm font-black text-ink">{part.sellingPrice.toLocaleString()}</span>
                           <Button
@@ -1569,7 +1518,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                             onClick={() => onUpdatePart?.({ ...part, sellingPrice: part.sellingPrice + 1000 })}
                             aria-label={`Increase price for ${part.name}`}
                             title="Increase price by 1,000 MMK"
-                            className="flex h-10 w-10 items-center justify-center rounded-lg border border-emerald-300 bg-white font-black text-brand active:scale-95"
+                            className="flex h-10 w-10 items-center justify-center rounded-lg border border-success/30 bg-white font-black text-brand active:scale-95"
                           >+</Button>
                         </div>
                       </div>
@@ -1637,7 +1586,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     const editValue = (key: keyof PartItem, fallback: string | number) => draft[key] ?? fallback;
 
                     return (
-                      <tr key={part.id} className={`transition-colors ${selectedPartIds.has(part.id) ? 'bg-brand-soft' : 'hover:bg-slate-50/80'}`}>
+                      <tr key={part.id} className={`transition-colors ${selectedPartIds.has(part.id) ? 'bg-brand-soft' : 'hover:bg-surface/80'}`}>
                         {/* Selection checkbox */}
                         {!inlineEditMode && (
                           <td className="px-2 py-2">
@@ -1668,23 +1617,23 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         {/* Quality Tier */}
                         <td className="w-[108px] px-2 py-2 hidden md:table-cell">
                           {part.qualityTier === 'Original' || part.qualityTier.includes('Original') ? (
-                            <span className="inline-flex max-w-[112px] items-center gap-1 truncate rounded-md border border-blue-200 bg-blue-50 px-1.5 py-0.5 text-xs font-extrabold text-blue-800">
-                              <ShieldCheck className="h-3 w-3 shrink-0 text-blue-600" />
+                            <span className="inline-flex max-w-[112px] items-center gap-1 truncate rounded-md border border-brand/30 bg-brand-soft px-1.5 py-0.5 text-xs font-extrabold text-brand-deep">
+                              <ShieldCheck className="h-3 w-3 shrink-0 text-brand" />
                               <span>{part.qualityTier}</span>
                             </span>
                           ) : part.qualityTier === 'OEM' ? (
-                            <span className="inline-flex max-w-[112px] items-center gap-1 truncate rounded-md border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-xs font-extrabold text-emerald-800">
-                              <Sparkles className="h-3 w-3 shrink-0 text-emerald-600" />
+                            <span className="inline-flex max-w-[112px] items-center gap-1 truncate rounded-md border border-success/30 bg-success/10 px-1.5 py-0.5 text-xs font-extrabold text-success-deep">
+                              <Sparkles className="h-3 w-3 shrink-0 text-success" />
                               <span>{part.qualityTier}</span>
                             </span>
                           ) : part.qualityTier === 'Genuine' ? (
-                            <span className="inline-flex max-w-[112px] items-center gap-1 truncate rounded-md border border-purple-200 bg-purple-50 px-1.5 py-0.5 text-xs font-extrabold text-purple-800">
-                              <Cpu className="h-3 w-3 shrink-0 text-purple-600" />
+                            <span className="inline-flex max-w-[112px] items-center gap-1 truncate rounded-md border border-purple/30 bg-purple/10 px-1.5 py-0.5 text-xs font-extrabold text-purple">
+                              <Cpu className="h-3 w-3 shrink-0 text-purple" />
                               <span>{part.qualityTier}</span>
                             </span>
                           ) : (
-                            <span className="inline-flex max-w-[112px] items-center gap-1 truncate rounded-md border border-slate-300 bg-slate-100 px-1.5 py-0.5 text-xs font-extrabold text-slate-800">
-                              <Tag className="h-3 w-3 shrink-0 text-slate-600" />
+                            <span className="inline-flex max-w-[112px] items-center gap-1 truncate rounded-md border border-line bg-surface px-1.5 py-0.5 text-xs font-extrabold text-slate-800">
+                              <Tag className="h-3 w-3 shrink-0 text-muted" />
                               <span>{part.qualityTier}</span>
                             </span>
                           )}
@@ -1703,16 +1652,16 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                           {!inlineEditMode && <div className="space-y-1">
                             <div className="flex items-center justify-between">
                               <span className={`font-black text-sm font-mono tracking-wide ${
-                                isOut ? 'text-red-600' : isLow ? 'text-amber-600' : 'text-ink'
+                                isOut ? 'text-danger' : isLow ? 'text-warning' : 'text-ink'
                               }`}>
                                 {(inlineEditMode ? editValue('quantityInStock', part.quantityInStock) : part.quantityInStock)} <span className="text-xs font-normal text-muted">units</span>
                               </span>
                               {!inlineEditMode && isOut ? (
-                                <span className="bg-red-600 text-white text-xs font-black px-1 py-0.5 rounded uppercase tracking-[0.1em] leading-none animate-pulse">
+                                <span className="bg-danger text-white text-xs font-black px-1 py-0.5 rounded uppercase tracking-[0.1em] leading-none animate-pulse">
                                   OUT OF STOCK
                                 </span>
                               ) : !inlineEditMode && isLow ? (
-                                <span className="bg-amber-500 text-white text-xs font-black px-1 py-0.5 rounded uppercase tracking-[0.1em] leading-none">
+                                <span className="bg-warning/100 text-white text-xs font-black px-1 py-0.5 rounded uppercase tracking-[0.1em] leading-none">
                                   REORDER
                                 </span>
                               ) : !inlineEditMode ? (
@@ -1726,7 +1675,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                             {!inlineEditMode && <div className="w-full h-1.5 bg-line rounded-full overflow-hidden">
                               <div
                                 className={`h-full transition-all duration-300 ${
-                                  isOut ? 'bg-red-600 w-0' : isLow ? 'bg-amber-500' : 'bg-success'
+                                  isOut ? 'bg-danger w-0' : isLow ? 'bg-warning/100' : 'bg-success'
                                 }`}
                                 style={{ width: `${Math.min(100, Math.max(8, (part.quantityInStock / (part.reorderPoint * 3)) * 100))}%` }}
                               />
@@ -1815,7 +1764,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                             type="button"
                             onClick={() => setSelectedPartForDetails(part)}
                             aria-label={`View ${part.name} details`}
-                            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors hover:border-brand hover:bg-blue-50 hover:text-brand"
+                            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors hover:border-brand hover:bg-brand-soft hover:text-brand"
                             title="View part details"
                           >
                             <FileText className="h-3.5 w-3.5" />
@@ -1891,10 +1840,10 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 const profit = part.sellingPrice - part.costPrice;
                 const margin = part.sellingPrice ? Math.round((profit / part.sellingPrice) * 100) : 0;
                 const heat =
-                  margin >= 40 ? 'bg-emerald-100 text-emerald-800' :
+                  margin >= 40 ? 'bg-success/15 text-success-deep' :
                   margin >= 20 ? 'bg-lime-100 text-lime-800' :
-                  margin >= 0 ? 'bg-amber-100 text-amber-800' :
-                  'bg-rose-100 text-rose-700';
+                  margin >= 0 ? 'bg-warning/15 text-warning' :
+                  'bg-danger/15 text-danger';
                 return (
                   <div key={part.id} className="space-y-2.5 rounded-2xl border border-line bg-white p-4 text-xs shadow-xs">
                     <div className="flex items-start justify-between gap-2">
@@ -1907,7 +1856,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         onClick={() => setSelectedPartForDetails(part)}
                         aria-label={`View ${part.name} details`}
                         title="View part details"
-                        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors hover:border-brand hover:bg-blue-50 hover:text-brand"
+                        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors hover:border-brand hover:bg-brand-soft hover:text-brand"
                       >
                         <Eye className="h-3.5 w-3.5" />
                       </Button>
@@ -1923,7 +1872,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       </div>
                       <div>
                         <p className="text-xs font-extrabold uppercase tracking-wider text-muted">Profit</p>
-                        <p className={`mt-0.5 font-mono text-xs font-black break-words ${profit >= 0 ? 'text-brand' : 'text-rose-600'}`}>{profit >= 0 ? '+' : ''}{profit.toLocaleString()}</p>
+                        <p className={`mt-0.5 font-mono text-xs font-black break-words ${profit >= 0 ? 'text-brand' : 'text-danger'}`}>{profit >= 0 ? '+' : ''}{profit.toLocaleString()}</p>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
@@ -1952,16 +1901,16 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   const margin = part.sellingPrice ? Math.round((profit / part.sellingPrice) * 100) : 0;
                   // Margin heat map: >=40% green, 20-39% lime/emerald, 0-19% amber, negative red
                   const heat =
-                    margin >= 40 ? 'bg-emerald-100 text-emerald-800' :
+                    margin >= 40 ? 'bg-success/15 text-success-deep' :
                     margin >= 20 ? 'bg-lime-100 text-lime-800' :
-                    margin >= 0 ? 'bg-amber-100 text-amber-800' :
-                    'bg-rose-100 text-rose-700';
+                    margin >= 0 ? 'bg-warning/15 text-warning' :
+                    'bg-danger/15 text-danger';
                   return (
-                    <tr key={part.id} className="hover:bg-slate-50/80">
+                    <tr key={part.id} className="hover:bg-surface/80">
                       <td className="p-2.5"><p className="max-w-[260px] truncate font-bold text-ink">{part.name}</p><p className="mt-0.5 font-mono text-xs text-muted">{part.sku}</p></td>
                       <td className="p-2.5 font-mono text-faint whitespace-nowrap hidden md:table-cell">{part.costPrice.toLocaleString()} MMK</td>
                       <td className="p-2.5 font-mono font-bold text-success-deep whitespace-nowrap">{part.sellingPrice.toLocaleString()} MMK</td>
-                      <td className={`p-2.5 font-mono font-black whitespace-nowrap ${profit >= 0 ? 'text-brand' : 'text-rose-600'}`}>{profit >= 0 ? '+' : ''}{profit.toLocaleString()} MMK<span className={`mt-0.5 block w-max rounded-md px-1.5 py-0.5 font-mono text-xs font-black sm:hidden ${heat}`}>{margin}%</span></td>
+                      <td className={`p-2.5 font-mono font-black whitespace-nowrap ${profit >= 0 ? 'text-brand' : 'text-danger'}`}>{profit >= 0 ? '+' : ''}{profit.toLocaleString()} MMK<span className={`mt-0.5 block w-max rounded-md px-1.5 py-0.5 font-mono text-xs font-black sm:hidden ${heat}`}>{margin}%</span></td>
                       <td className="p-2.5 hidden sm:table-cell"><span className={`rounded-md px-1.5 py-0.5 font-mono text-xs font-black ${heat}`} title={margin >= 40 ? 'High margin' : margin >= 20 ? 'Good margin' : margin >= 0 ? 'Low margin' : 'Loss'}>{margin}%</span></td>
                       <td className="p-2.5 text-right"><Button type="button" aria-label={`View ${part.name} details`} title="View part details" onClick={() => setSelectedPartForDetails(part)} className="inline-flex h-10 w-10 lg:h-7 lg:w-7 items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand"><Eye className="h-3 w-3" /></Button></td>
                     </tr>
@@ -2019,7 +1968,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 </thead>
                 <tbody className="divide-y divide-line">
                   {matrixModels.map((model) => (
-                    <tr key={model} className="hover:bg-slate-50/80">
+                    <tr key={model} className="hover:bg-surface/80">
                       <td className="sticky left-0 z-10 bg-white p-2.5 font-bold text-ink">{model}</td>
                       {matrixCategories.map((category) => {
                         const merge = matrixMergeGroups[category]?.[model];
@@ -2045,7 +1994,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                                   setViewMode('stock');
                                 }}
                                 className={`min-w-14 min-h-9 md:min-h-8 rounded-lg border px-2 py-1 font-mono text-xs font-black ${
-                                  quantity === 0 ? 'border-rose-200 bg-rose-50 text-rose-600' : isLow ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                                  quantity === 0 ? 'border-danger/30 bg-danger/10 text-danger' : isLow ? 'border-warning/30 bg-warning/10 text-warning' : 'border-success/30 bg-success/10 text-success-deep'
                                 }`}
                                 title={`${matchingParts.length} SKU${matchingParts.length === 1 ? '' : 's'} · ${quantity} units · Cost ${costValue.toLocaleString()} MMK · Retail ${retailValue.toLocaleString()} MMK${sharedLabel}`}
                               >
@@ -2115,7 +2064,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 type="button"
                 onClick={() => setIsDeviceModelChooserOpen(true)}
                 aria-haspopup="dialog"
-                className="flex h-24 w-full items-center justify-between rounded-xl border border-brand/30 bg-blue-50/60 px-4 text-left transition-colors hover:border-brand hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-brand/20"
+                className="flex h-24 w-full items-center justify-between rounded-xl border border-brand/30 bg-brand-soft/60 px-4 text-left transition-colors hover:border-brand hover:bg-brand-soft focus:outline-none focus:ring-2 focus:ring-brand/20"
                 title="Choose a model from the Price List"
               >
                 <span className="flex min-w-0 items-center gap-2">
@@ -2166,7 +2115,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             </div>
 
             {isBackGlassCategory && (
-              <div className="rounded-xl border border-brand/20 bg-blue-50/40 p-3">
+              <div className="rounded-xl border border-brand/20 bg-brand-soft p-3">
                 <div className="mb-2 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <Palette className="h-4 w-4 text-brand" />
@@ -2356,7 +2305,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                                 setNewPartData({ ...newPartData, locationBin: bin });
                                 setIsLocationBinMenuOpen(false);
                               }}
-                              className="flex w-full items-center rounded-md px-2 py-1.5 text-left font-mono text-xs font-bold text-ink hover:bg-blue-50 hover:text-brand"
+                              className="flex w-full items-center rounded-md px-2 py-1.5 text-left font-mono text-xs font-bold text-ink hover:bg-brand-soft hover:text-brand"
                             >
                               {bin}
                             </Button>
@@ -2434,8 +2383,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 <p className="text-xs font-bold uppercase tracking-wide text-muted">In Stock</p>
                 <p className="mt-1 font-mono text-xl font-black text-ink">{selectedPartForDetails.quantityInStock}</p>
                 <div className="mt-2 flex gap-1.5">
-                  <Button type="button" onClick={() => { onUpdatePartStock(selectedPartForDetails.id, Math.max(0, selectedPartForDetails.quantityInStock - 1)); setSelectedPartForDetails({ ...selectedPartForDetails, quantityInStock: Math.max(0, selectedPartForDetails.quantityInStock - 1) }); }} aria-label="Subtract one from stock" title="Subtract one" className="flex h-10 w-10 lg:h-7 lg:w-7 items-center justify-center rounded-lg border border-line bg-white font-black hover:bg-rose-50 hover:text-rose-600">−</Button>
-                  <Button type="button" onClick={() => { onUpdatePartStock(selectedPartForDetails.id, selectedPartForDetails.quantityInStock + 1); setSelectedPartForDetails({ ...selectedPartForDetails, quantityInStock: selectedPartForDetails.quantityInStock + 1 }); }} aria-label="Add one to stock" title="Add one" className="flex h-10 w-10 lg:h-7 lg:w-7 items-center justify-center rounded-lg border border-line bg-white font-black text-brand hover:bg-emerald-50 hover:text-emerald-600">+</Button>
+                  <Button type="button" onClick={() => { onUpdatePartStock(selectedPartForDetails.id, Math.max(0, selectedPartForDetails.quantityInStock - 1)); setSelectedPartForDetails({ ...selectedPartForDetails, quantityInStock: Math.max(0, selectedPartForDetails.quantityInStock - 1) }); }} aria-label="Subtract one from stock" title="Subtract one" className="flex h-10 w-10 lg:h-7 lg:w-7 items-center justify-center rounded-lg border border-line bg-white font-black hover:bg-danger/10 hover:text-danger">−</Button>
+                  <Button type="button" onClick={() => { onUpdatePartStock(selectedPartForDetails.id, selectedPartForDetails.quantityInStock + 1); setSelectedPartForDetails({ ...selectedPartForDetails, quantityInStock: selectedPartForDetails.quantityInStock + 1 }); }} aria-label="Add one to stock" title="Add one" className="flex h-10 w-10 lg:h-7 lg:w-7 items-center justify-center rounded-lg border border-line bg-white font-black text-brand hover:bg-success/10 hover:text-success">+</Button>
                   <span className="self-center text-xs font-bold text-muted">Min: {selectedPartForDetails.reorderPoint}</span>
                 </div>
               </div>
@@ -2453,7 +2402,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             </div>
 
             <div className="flex items-center justify-end gap-2 border-t border-line pt-3">
-              <Button type="button" onClick={() => { setClaimingWarrantyPart(selectedPartForDetails); setSelectedPartForDetails(null); }} className="inline-flex h-10 lg:h-8 items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 font-extrabold text-amber-700 hover:bg-amber-100"><ShieldAlert className="h-3.5 w-3.5" /> Warranty</Button>
+              <Button type="button" onClick={() => { setClaimingWarrantyPart(selectedPartForDetails); setSelectedPartForDetails(null); }} className="inline-flex h-10 lg:h-8 items-center gap-1.5 rounded-lg border border-warning/30 bg-warning/10 px-2.5 font-extrabold text-warning hover:bg-warning/15"><ShieldAlert className="h-3.5 w-3.5" /> Warranty</Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button type="button" variant="iconGhost" size="icon" aria-label="Part actions" className="border border-line">
@@ -2584,7 +2533,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                                 setEditingPart({ ...editingPart, locationBin: bin });
                                 setIsEditLocationBinMenuOpen(false);
                               }}
-                              className="flex w-full items-center rounded-md px-2 py-1.5 text-left font-mono text-xs font-bold text-ink hover:bg-blue-50 hover:text-brand"
+                              className="flex w-full items-center rounded-md px-2 py-1.5 text-left font-mono text-xs font-bold text-ink hover:bg-brand-soft hover:text-brand"
                             >
                               {bin}
                             </Button>
@@ -2677,7 +2626,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           <div className="bg-white border border-line rounded-2xl max-w-lg w-full p-6 space-y-4 text-xs shadow-2xl">
             <div className="flex justify-between items-center border-b border-line pb-3">
               <h3 className="text-base font-extrabold text-ink flex items-center space-x-2">
-                <ShieldAlert className="w-5 h-5 text-amber-600" />
+                <ShieldAlert className="w-5 h-5 text-warning" />
                 <span>File Parts Warranty Claim (RMA)</span>
               </h3>
               <Button
@@ -2689,11 +2638,11 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             </div>
 
             {/* Part Details Summary Banner */}
-            <div className="p-3 bg-amber-50/80 border border-amber-200 rounded-xl space-y-1">
-              <p className="font-extrabold text-amber-900 text-xs">
+            <div className="p-3 bg-warning/10/80 border border-warning/30 rounded-xl space-y-1">
+              <p className="font-extrabold text-warning text-xs">
                 Component: {claimingWarrantyPart.name}
               </p>
-              <p className="text-xs text-amber-800 font-mono">
+              <p className="text-xs text-warning font-mono">
                 SKU: {claimingWarrantyPart.sku} | Quality: {claimingWarrantyPart.qualityTier} | Stock: {claimingWarrantyPart.quantityInStock} units
               </p>
             </div>
@@ -2792,7 +2741,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <Button
                 type="button"
                 onClick={handleSubmitWarrantyClaim}
-                className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-extrabold rounded-xl shadow-xs flex items-center space-x-1.5 cursor-pointer"
+                className="px-5 py-2 bg-warning hover:bg-warning text-white font-extrabold rounded-xl shadow-xs flex items-center space-x-1.5 cursor-pointer"
               >
                 <ShieldAlert className="w-4 h-4" />
                 <span>File Warranty Claim</span>
@@ -2805,7 +2754,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
       {/* MINI MODAL: QUICK ADD SUPPLIER */}
       {showAddSupplierMiniModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <form onSubmit={handleCreateSupplier} className="bg-white border border-line rounded-2xl max-w-md w-full p-5 space-y-4 text-xs shadow-2xl">
             <div className="flex justify-between items-center border-b border-line pb-2">
               <h4 className="font-extrabold text-ink text-sm flex items-center space-x-1.5">
@@ -2873,55 +2822,11 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       )}
 
       {/* MINI MODAL: QUICK ADD QUALITY TIER */}
-      {showAddQualityMiniModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <form onSubmit={handleCreateQualityTier} className="bg-white border border-line rounded-2xl max-w-md w-full p-5 space-y-4 text-xs shadow-2xl">
-            <div className="flex justify-between items-center border-b border-line pb-2">
-              <h4 className="font-extrabold text-ink text-sm flex items-center space-x-1.5">
-                <ShieldCheck className="w-4 h-4 text-purple-600" />
-                <span>Create Quality Tier</span>
-              </h4>
-              <Button
-                type="button"
-                onClick={() => setShowAddQualityMiniModal(false)}
-                className="text-muted hover:text-ink"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-            <div>
-              <label className="block font-bold text-ink mb-1">Quality Tier Name *</label>
-              <Input
-                type="text"
-                required
-                value={newQualityForm.name}
-                onChange={(e) => setNewQualityForm({ name: e.target.value })}
-                placeholder="e.g. OEM / Original / Genuine"
-                className="w-full bg-surface border border-line rounded-xl p-2.5 text-xs font-bold text-ink"
-              />
-            </div>
-            <div className="flex justify-end space-x-2 pt-2 border-t border-line">
-              <Button
-                type="button"
-                onClick={() => setShowAddQualityMiniModal(false)}
-                className="px-3 py-2 bg-white border border-line text-ink font-bold rounded-xl"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                className="px-4 py-2 bg-purple-600 text-white font-extrabold rounded-xl shadow-xs"
-              >
-                Create Tier
-              </Button>
-            </div>
-          </form>
-        </div>
-      )}
+
 
       {/* EDIT SUPPLIER MODAL */}
       {editingSupplier && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <form onSubmit={handleSaveEditSupplier} className="bg-white border border-line rounded-2xl max-w-md w-full p-5 space-y-4 text-xs shadow-2xl">
             <div className="flex justify-between items-center border-b border-line pb-2">
               <h4 className="font-extrabold text-ink text-sm flex items-center space-x-1.5">
@@ -3012,55 +2917,10 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       )}
 
       {/* EDIT QUALITY TIER MODAL */}
-      {editingQualityTier && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <form onSubmit={handleSaveEditQualityTier} className="bg-white border border-line rounded-2xl max-w-md w-full p-5 space-y-4 text-xs shadow-2xl">
-            <div className="flex justify-between items-center border-b border-line pb-2">
-              <h4 className="font-extrabold text-ink text-sm flex items-center space-x-1.5">
-                <ShieldCheck className="w-4 h-4 text-purple-600" />
-                <span>Rename Quality Tier</span>
-              </h4>
-              <Button
-                type="button"
-                onClick={() => setEditingQualityTier(null)}
-                className="text-muted hover:text-ink"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
 
-            <div>
-              <label className="block font-bold text-ink mb-1">Quality Tier Name *</label>
-              <Input
-                type="text"
-                required
-                value={editingQualityTier.newName}
-                onChange={(e) => setEditingQualityTier({ ...editingQualityTier, newName: e.target.value })}
-                className="w-full bg-surface border border-line rounded-xl p-2.5 text-xs font-bold text-ink"
-              />
-            </div>
-
-            <div className="flex justify-end space-x-2 pt-2 border-t border-line">
-              <Button
-                type="button"
-                onClick={() => setEditingQualityTier(null)}
-                className="px-3 py-2 bg-white border border-line text-ink font-bold rounded-xl cursor-pointer"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-extrabold rounded-xl shadow-xs cursor-pointer"
-              >
-                Save Tier Name
-              </Button>
-            </div>
-          </form>
-        </div>
-      )}
 
       {showInlineSaveConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
           <div className="w-full max-w-3xl space-y-4 rounded-2xl border border-line-strong bg-white p-5 text-xs shadow-2xl">
             {(() => {
               const totalChangeCount = inlineSaveReview.reduce((count, item) => count + item.changes.length, 0);
@@ -3105,7 +2965,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         <p className="truncate text-xs font-black text-ink">{part.name}</p>
                         <p className="mt-0.5 font-mono text-xs font-bold text-ink">{part.sku}</p>
                       </div>
-                      <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-extrabold text-brand">{changes.length} change{changes.length === 1 ? '' : 's'}</span>
+                      <span className="rounded-full bg-brand-soft px-2 py-0.5 text-xs font-extrabold text-brand">{changes.length} change{changes.length === 1 ? '' : 's'}</span>
                     </div>
                     <div className="mt-2 grid gap-1.5">
                       {changes.map((change) => (
@@ -3151,7 +3011,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
       {/* PRINT: Ground Stock Checking Matrix Sheet */}
       {isMatrixPrintOpen && (
-        <div className="printable-print-root fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 p-2 backdrop-blur-sm sm:p-4">
+        <div className="printable-print-root fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 p-2 backdrop-blur-sm sm:p-4">
           <style>{`
             @media print {
               html, body, #root, #main-content-scroll, main, .basic-ui {
@@ -3344,7 +3204,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
       {/* PRINT: A4 Spare Parts Tags */}
       {isTagsPrintOpen && (
-        <div className="printable-print-root fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 p-2 backdrop-blur-sm sm:p-4">
+        <div className="printable-print-root fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 p-2 backdrop-blur-sm sm:p-4">
           <style>{`
             @media print {
               html, body, #root, #main-content-scroll, main, .basic-ui {

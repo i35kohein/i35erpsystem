@@ -93,6 +93,20 @@ interface CartItem {
   discountPercent: number;
 }
 
+/** Shared warranty pill (extracted 2026-08-08 — was duplicated 4× verbatim) */
+const DISCOUNT_OPTIONS = [0, 5, 10, 15, 20, 25, 30, 40, 50];
+
+function WarrantyPill({ warranty, size = 'sm' }: { warranty: string; size?: 'sm' | 'md' }) {
+  const icon = size === 'md' ? 'w-2.5 h-2.5' : 'w-2 h-2';
+  const pad = size === 'md' ? 'px-1.5 py-0.5' : 'px-1 py-0.5';
+  return (
+    <span className={`inline-flex items-center space-x-0.5 text-xs font-extrabold text-success-deep bg-success/10 ${pad} rounded-full border border-success/30 shrink-0`}>
+      <ShieldCheck className={`${icon} text-success shrink-0`} />
+      <span>{warranty}</span>
+    </span>
+  );
+}
+
 
 
 export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
@@ -181,70 +195,70 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
     if (k.includes('battery')) {
       return {
         icon: Zap,
-        color: 'text-amber-600',
-        bg: 'bg-amber-50 border-amber-200/80',
+        color: 'text-warning',
+        bg: 'bg-warning/10 border-warning/30',
       };
     }
     if (k.includes('display') || k.includes('touch') || k.includes('lcd')) {
       return {
         icon: Smartphone,
-        color: 'text-blue-600',
-        bg: 'bg-blue-50 border-blue-200/80',
+        color: 'text-brand',
+        bg: 'bg-brand-soft border-brand/30',
       };
     }
     if (k.includes('backglass') || k.includes('housing')) {
       return {
         icon: Layers,
-        color: 'text-rose-600',
-        bg: 'bg-rose-50 border-rose-200/80',
+        color: 'text-danger',
+        bg: 'bg-danger/10 border-danger/30',
       };
     }
     if (k.includes('charing') || k.includes('charging') || k.includes('flex')) {
       return {
         icon: Power,
-        color: 'text-red-600',
-        bg: 'bg-red-50 border-red-200/80',
+        color: 'text-danger',
+        bg: 'bg-danger/10 border-danger/30',
       };
     }
     if (k.includes('speaker') || k.includes('ear_') || k.includes('ring_')) {
       return {
         icon: Volume2,
-        color: 'text-purple-600',
-        bg: 'bg-purple-50 border-purple-200/80',
+        color: 'text-purple',
+        bg: 'bg-purple/10 border-purple/30',
       };
     }
     if (k.includes('mic')) {
       return {
         icon: Mic,
-        color: 'text-pink-600',
-        bg: 'bg-pink-50 border-pink-200/80',
+        color: 'text-purple',
+        bg: 'bg-purple/10 border-purple/30',
       };
     }
     if (k.includes('logic') || k.includes('rf_layer') || k.includes('no_power')) {
       return {
         icon: Cpu,
-        color: 'text-indigo-600',
-        bg: 'bg-indigo-50 border-indigo-200/80',
+        color: 'text-brand',
+        bg: 'bg-brand-soft border-brand/30',
       };
     }
     if (k.includes('network') || k.includes('wifi') || k.includes('pay') || k.includes('nfc')) {
       return {
         icon: Wifi,
-        color: 'text-sky-600',
-        bg: 'bg-sky-50 border-sky-200/80',
+        color: 'text-sky',
+        bg: 'bg-sky/10 border-sky/30',
       };
     }
     if (k.includes('face_id') || k.includes('key') || k.includes('sensor')) {
       return {
         icon: Scan,
-        color: 'text-emerald-600',
-        bg: 'bg-emerald-50 border-emerald-200/80',
+        color: 'text-success',
+        bg: 'bg-success/10 border-success/30',
       };
     }
     return {
       icon: ListChecks,
-      color: 'text-slate-600',
-      bg: 'bg-slate-100 border-slate-200',
+      color: 'text-muted',
+      bg: 'bg-surface border-line',
     };
   };
 
@@ -448,7 +462,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
               // Mobile bottom sheet: real items only — no placeholder slots, upgraded card UI.
               if (mobile) {
-                const DISCOUNT_OPTIONS = [0, 5, 10, 15, 20, 25, 30, 40, 50];
+
                 return (
                   <div className="p-3 space-y-2.5">
                     {cartItems.length === 0 ? (
@@ -476,10 +490,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                   {idx + 1}
                                 </span>
                                 <h4 className="font-extrabold text-sm text-ink leading-snug truncate min-w-0">{item.label}</h4>
-                                <span className="inline-flex items-center space-x-0.5 text-xs font-extrabold text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded-full border border-emerald-200 shrink-0">
-                                  <ShieldCheck className="w-2 h-2 text-emerald-600 shrink-0" />
-                                  <span>{item.warranty}</span>
-                                </span>
+                                <WarrantyPill warranty={item.warranty} />
                               </div>
                               <Button
                                 type="button"
@@ -538,7 +549,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                             {discountMenuOpenFor === item.categoryKey &&
                               createPortal(
                                 <div
-                                  className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 backdrop-blur-sm animate-fadeIn"
+                                  className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm animate-fadeIn"
                                   onClick={() => setDiscountMenuOpenFor(null)}
                                   role="presentation"
                                 >
@@ -606,10 +617,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                     {i + 1}
                                   </span>
                                   <h4 className="font-extrabold text-xs text-ink truncate leading-tight min-w-0">{item.label}</h4>
-                                  <span className="inline-flex items-center space-x-1 text-xs font-extrabold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-200 shrink-0">
-                                    <ShieldCheck className="w-2.5 h-2.5 text-emerald-600 shrink-0" />
-                                    <span>{item.warranty}</span>
-                                  </span>
+                                  <WarrantyPill warranty={item.warranty} size="md" />
                                 </div>
                               </div>
                               <Button
@@ -630,15 +638,9 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                   onChange={(e) => handleUpdateItemDiscount(item.categoryKey, Number(e.target.value))}
                                   className="bg-white border border-line rounded-md px-1 py-0.5 text-xs font-extrabold text-brand outline-none cursor-pointer hover:border-brand"
                                 >
-                                  <option value={0}>0% Off</option>
-                                  <option value={5}>5% Off</option>
-                                  <option value={10}>10% Off</option>
-                                  <option value={15}>15% Off</option>
-                                  <option value={20}>20% Off</option>
-                                  <option value={25}>25% Off</option>
-                                  <option value={30}>30% Off</option>
-                                  <option value={40}>40% Off</option>
-                                  <option value={50}>50% Off</option>
+                                  {DISCOUNT_OPTIONS.map((p) => (
+                                    <option key={p} value={p}>{p}% Off</option>
+                                  ))}
                                 </select>
                               </div>
 
@@ -695,10 +697,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                 {idx + 1}
                               </span>
                               <h4 className="font-extrabold text-xs text-ink truncate leading-tight min-w-0">{item.label}</h4>
-                              <span className="inline-flex items-center space-x-1 text-xs font-extrabold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-200 shrink-0">
-                                <ShieldCheck className="w-2.5 h-2.5 text-emerald-600 shrink-0" />
-                                <span>{item.warranty}</span>
-                              </span>
+                              <WarrantyPill warranty={item.warranty} size="md" />
                             </div>
                           </div>
                           <Button
@@ -719,15 +718,9 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                               onChange={(e) => handleUpdateItemDiscount(item.categoryKey, Number(e.target.value))}
                               className="bg-white border border-line rounded-md px-1 py-0.5 text-xs font-extrabold text-brand outline-none cursor-pointer hover:border-brand"
                             >
-                              <option value={0}>0% Off</option>
-                              <option value={5}>5% Off</option>
-                              <option value={10}>10% Off</option>
-                              <option value={15}>15% Off</option>
-                              <option value={20}>20% Off</option>
-                              <option value={25}>25% Off</option>
-                              <option value={30}>30% Off</option>
-                              <option value={40}>40% Off</option>
-                              <option value={50}>50% Off</option>
+                              {DISCOUNT_OPTIONS.map((p) => (
+                                <option key={p} value={p}>{p}% Off</option>
+                              ))}
                             </select>
                           </div>
 
@@ -766,7 +759,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
               -{formatPrice(cartSummary.totalDiscountAmount)}
             </span>
           ) : (
-            <span className="font-mono text-muted">0 MMK</span>
+            <span className="font-mono text-muted">{formatPrice(0)}</span>
           )}
         </div>
 
@@ -985,10 +978,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                             {item.label}
                           </h3>
                           {/* Warranty pill — small, beside the service name */}
-                          <span className="inline-flex items-center space-x-0.5 text-xs font-extrabold text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded-full border border-emerald-200 shrink-0">
-                            <ShieldCheck className="w-2 h-2 text-emerald-600 shrink-0" />
-                            <span>{item.warranty}</span>
-                          </span>
+                          <WarrantyPill warranty={item.warranty} />
                         </div>
                         <span className="hidden sm:block text-xs font-extrabold text-muted uppercase tracking-wider mt-0.5">
                           {item.group}
@@ -1075,7 +1065,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
       {/* Mobile floating cart bar — always reachable while adding services (lg:hidden) */}
       {cart.size > 0 && (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/95 backdrop-blur-sm px-4 pt-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] shadow-[0_-4px_12px_rgba(0,0,0,0.06)] lg:hidden">
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/95 backdrop-blur-sm px-4 pt-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] shadow-raised-top lg:hidden">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 shrink-0">
               <p className="text-xs font-bold text-muted uppercase tracking-wide">Selected Services</p>
@@ -1103,7 +1093,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
       {/* Mobile cart bottom sheet — popup instead of scrolling down (lg:hidden) */}
       {isCartSheetOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/45 backdrop-blur-sm animate-fadeIn lg:hidden"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 backdrop-blur-sm animate-fadeIn lg:hidden"
           onClick={() => setIsCartSheetOpen(false)}
           role="presentation"
         >

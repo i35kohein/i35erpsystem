@@ -42,7 +42,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'In Repair':
     case 'Diagnosing':
       badgeStyle = 'bg-purple-50 text-purple-700 border border-purple-200';
-      dotColor = 'bg-purple-600';
+      dotColor = 'bg-purple';
       pingColor = 'bg-purple-400';
       isPulsing = false;
       break;
@@ -70,7 +70,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'Ready for Pickup':
     case 'QA Passed':
       badgeStyle = 'bg-emerald-50 text-emerald-800 border border-emerald-200';
-      dotColor = 'bg-emerald-600';
+      dotColor = 'bg-success';
       pingColor = 'bg-emerald-400';
       isPulsing = false;
       break;
@@ -79,7 +79,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'Declined':
     case 'Unfixable':
       badgeStyle = 'bg-rose-50 text-rose-700 border border-rose-200';
-      dotColor = 'bg-rose-600';
+      dotColor = 'bg-danger';
       pingColor = 'bg-rose-400';
       isPulsing = false;
       break;
@@ -88,7 +88,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'Customer No Repair':
     case 'No Repair':
       badgeStyle = 'bg-orange-50 text-orange-800 border border-orange-200';
-      dotColor = 'bg-orange-600';
+      dotColor = 'bg-warning';
       pingColor = 'bg-orange-400';
       isPulsing = false;
       break;

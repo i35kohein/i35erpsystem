@@ -136,7 +136,7 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
       <div
         ref={menuRef}
         role="listbox"
-        className={`fixed z-[96] w-56 max-w-[calc(100vw-1rem)] rounded-xl border border-[var(--border)] bg-[var(--card-bg)] p-1.5 shadow-lg ${menuPos.placeTop ? '-translate-y-full' : ''} ${menuClassName}`}
+        className={`fixed z-[96] w-56 max-w-[calc(100vw-1rem)] rounded-xl border border-line bg-white p-1.5 shadow-lg ${menuPos.placeTop ? '-translate-y-full' : ''} ${menuClassName}`}
         style={{ top: menuPos.top, left: menuPos.left }}
         onMouseDown={(e) => e.stopPropagation()}
       >
@@ -156,14 +156,14 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
                 className={`min-h-9 w-full flex items-center justify-between gap-3 px-3 py-2 text-xs rounded-lg transition-colors cursor-pointer text-left ${
                   isSelected
                     ? 'bg-brand text-white font-extrabold'
-                    : 'text-[var(--text-main)] hover:bg-[var(--blue-tint)] font-semibold'
+                    : 'text-ink hover:bg-brand-soft font-semibold'
                 }`}
               >
                 <span className="truncate">{option.label}</span>
                 <div className="flex items-center space-x-1.5">
                   {option.badge !== undefined && (
                     <span className={`px-1.5 py-0.5 rounded-full text-xs font-bold ${
-                      isSelected ? 'bg-white/20 text-white' : 'bg-[var(--border-subtle)] text-[var(--text-secondary)]'
+                      isSelected ? 'bg-white/20 text-white' : 'bg-line text-muted'
                     }`}>
                       {option.badge}
                     </span>
@@ -188,14 +188,14 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
         aria-expanded={isOpen}
         aria-label={ariaLabel || selectedOption?.label || placeholder}
         title={ariaLabel || selectedOption?.label || placeholder}
-        className={`flex items-center justify-between gap-2 rounded-lg border border-[var(--border)] bg-[var(--card-bg)] font-bold text-[var(--text-main)] transition-colors cursor-pointer hover:bg-[var(--blue-tint)] focus:outline-none focus:border-[var(--primary)] ${
+        className={`flex items-center justify-between gap-2 rounded-lg border border-line bg-white font-bold text-ink transition-colors cursor-pointer hover:bg-brand-soft focus:outline-none focus:border-brand ${
           iconOnly
             ? size === 'sm' ? 'h-8 w-8 justify-center' : 'h-10 w-10 justify-center'
             : size === 'sm' ? 'h-8 min-w-32 px-2.5 text-xs' : 'h-10 min-w-32 px-3.5 text-sm'
         } ${buttonClassName}`}
       >
         {iconOnly ? (
-          <span className="flex h-5 w-5 shrink-0 items-center justify-center text-[var(--primary)]">
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center text-brand">
             {triggerIcon}
           </span>
         ) : (
@@ -203,8 +203,8 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
             {selectedOption ? selectedOption.label : placeholder}
           </span>
         )}
-        <span className={`${iconOnly ? 'sr-only' : 'flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-[var(--border-subtle)]'}`}>
-          <ChevronDown className={`h-3.5 w-3.5 text-[var(--text-muted)] transition-transform ${isOpen ? 'rotate-180 text-[var(--primary)]' : ''}`} />
+        <span className={`${iconOnly ? 'sr-only' : 'flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-line'}`}>
+          <ChevronDown className={`h-3.5 w-3.5 text-muted transition-transform ${isOpen ? 'rotate-180 text-brand' : ''}`} />
         </span>
       </button>
 

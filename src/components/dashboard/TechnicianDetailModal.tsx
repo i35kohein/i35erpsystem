@@ -41,7 +41,7 @@ export const TechnicianDetailModal: React.FC<TechnicianDetailModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-[100] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -234,7 +234,7 @@ export const TechnicianDetailModal: React.FC<TechnicianDetailModalProps> = ({
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClose(); onNavigateToTab('pipeline'); }
                       }}
-                      className="p-2.5 bg-success/10/40 hover:bg-white border border-line hover:border-success/40 rounded-lg flex items-center justify-between text-xs cursor-pointer transition-all"
+                      className="p-2.5 bg-success/10 hover:bg-white border border-line hover:border-success/40 rounded-lg flex items-center justify-between text-xs cursor-pointer transition-all"
                     >
                       <div className="min-w-0 pr-2">
                         <p className="font-mono font-bold text-success-deep text-xs truncate">{wo.orderNumber}</p>

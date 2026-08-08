@@ -431,7 +431,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     const stats = [
       { id: 'screen', label: 'Screen & Display OLED', icon: Smartphone, color: 'bg-brand', textCol: 'text-brand', bgLight: 'bg-brand-soft', count: 0, revenue: 0 },
       { id: 'battery', label: 'Battery & Charging System', icon: Zap, color: 'bg-success', textCol: 'text-success', bgLight: 'bg-success/10', count: 0, revenue: 0 },
-      { id: 'board', label: 'Logic Board & Micro-Soldering', icon: Activity, color: 'bg-purple', textCol: 'text-purple', bgLight: 'bg-purple-50', count: 0, revenue: 0 },
+      { id: 'board', label: 'Logic Board & Micro-Soldering', icon: Activity, color: 'bg-purple', textCol: 'text-purple', bgLight: 'bg-purple/10', count: 0, revenue: 0 },
       { id: 'housing', label: 'Glass, Port, Camera & Housing', icon: Smartphone, color: 'bg-warning', textCol: 'text-warning', bgLight: 'bg-warning/10', count: 0, revenue: 0 },
     ];
 
@@ -612,10 +612,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     <div className="space-y-3">
       {/* Inventory Fund reminder — parts used from stock, not settled yet */}
       {pendingFundTickets.length > 0 && (
-        <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-amber-50 border border-amber-200 rounded-2xl text-xs shadow-2xs">
+        <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-warning/10 border border-warning/30 rounded-2xl text-xs shadow-2xs">
           <div className="flex items-center gap-2 min-w-0">
-            <Coins className="w-4 h-4 text-amber-600 shrink-0" />
-            <span className="font-bold text-amber-800 min-w-0">
+            <Coins className="w-4 h-4 text-warning shrink-0" />
+            <span className="font-bold text-warning min-w-0">
               Inventory fund reminder — {pendingFundTickets.length} ticket{pendingFundTickets.length > 1 ? 's' : ''} used parts worth{' '}
               <span className="font-black">{pendingFundTotal.toLocaleString()} MMK</span> from stock, not settled yet
             </span>
@@ -626,7 +626,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               onClick={() => onNavigateToTab('finance')}
               variant="outline"
               size="sm"
-              className="text-amber-800 border-amber-300 hover:bg-surface"
+              className="text-warning border-warning/30 hover:bg-surface"
             >
               View Details
             </Button>
@@ -634,7 +634,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               type="button"
               onClick={() => onSettleInventoryFund?.(pendingFundTickets.map((wo) => wo.id))}
               size="sm"
-              className="bg-amber-600 hover:bg-amber-700 text-white"
+              className="bg-warning hover:bg-warning text-white"
             >
               Mark All Settled
             </Button>
@@ -698,7 +698,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <span className="text-xs font-extrabold uppercase tracking-wider text-muted">
               Ready for Pickup
             </span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <div className="w-8 h-8 rounded-xl bg-success/10 text-success flex items-center justify-center group-hover:scale-110 transition-transform">
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
@@ -706,13 +706,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <span className="text-2xl sm:text-3xl font-black text-ink tracking-tight">
               {readyForPickup.length}
             </span>
-            <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+            <span className="text-xs font-bold text-success-deep bg-success/10 px-2 py-0.5 rounded-full border border-success/30">
               Completed
             </span>
           </div>
           <div className="mt-3 pt-2.5 border-t border-surface flex items-center justify-between text-xs text-muted">
             <span>Awaiting customer</span>
-            <span className="font-bold text-emerald-700 group-hover:underline flex items-center space-x-0.5">
+            <span className="font-bold text-success-deep group-hover:underline flex items-center space-x-0.5">
               <span>View Finished</span>
               <ChevronRight className="w-3 h-3" />
             </span>
@@ -732,7 +732,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <span className="text-xs font-extrabold uppercase tracking-wider text-muted">
               Total Revenue
             </span>
-            <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <div className="w-8 h-8 rounded-xl bg-brand-soft text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
               <Coins className="w-4 h-4" />
             </div>
           </div>
@@ -740,7 +740,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <span className="text-xl sm:text-2xl font-black text-ink tracking-tight truncate">
               {totalRevenue.toLocaleString()} <span className="text-xs font-bold text-muted">MMK</span>
             </span>
-            <span className={`text-xs font-bold px-2 py-0.5 rounded-full border shrink-0 ml-1 inline-flex items-center space-x-0.5 ${marginPercent < 0 ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-indigo-50 text-indigo-700 border-indigo-200'}`}
+            <span className={`text-xs font-bold px-2 py-0.5 rounded-full border shrink-0 ml-1 inline-flex items-center space-x-0.5 ${marginPercent < 0 ? 'bg-danger/10 text-danger border-danger/30' : 'bg-brand-soft text-brand-deep border-indigo-200'}`}
               title={marginPercent < 0 ? '⚠️ Negative margin — average costs exceed revenue' : 'Gross margin %'}>
               {marginPercent < 0 && <AlertTriangle className="w-2.5 h-2.5 shrink-0" />}
               <span>{marginPercent}% Margin</span>
@@ -768,7 +768,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <span className="text-xs font-extrabold uppercase tracking-wider text-muted">
               Avg Turnaround
             </span>
-            <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <div className="w-8 h-8 rounded-xl bg-teal/10 text-teal-600 flex items-center justify-center group-hover:scale-110 transition-transform">
               <Clock className="w-4 h-4" />
             </div>
           </div>
@@ -780,7 +780,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   : `${avgTurnaroundHours}h`
                 : '—'}
             </span>
-            <span className="text-xs font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200">
+            <span className="text-xs font-bold text-teal-700 bg-teal/10 px-2 py-0.5 rounded-full border border-teal-200">
               Intake → Ready
             </span>
           </div>
@@ -809,7 +809,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           className={`px-3.5 h-10 lg:h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'status-queue'
               ? 'bg-brand text-white border-brand shadow-xs'
-              : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
+              : 'bg-white hover:bg-surface text-faint hover:text-ink border-line'
           }`}
         >
           <ListFilter className="w-4 h-4" />
@@ -835,7 +835,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           className={`px-3.5 h-10 lg:h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'repair-data'
               ? 'bg-brand text-white border-brand shadow-xs'
-              : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
+              : 'bg-white hover:bg-surface text-faint hover:text-ink border-line'
           }`}
         >
           <Activity className="w-4 h-4" />
@@ -861,7 +861,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           className={`px-3.5 h-10 lg:h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'tech-kpi'
               ? 'bg-brand text-white border-brand shadow-xs'
-              : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
+              : 'bg-white hover:bg-surface text-faint hover:text-ink border-line'
           }`}
         >
           <Users className="w-4 h-4" />
@@ -887,7 +887,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           className={`px-3.5 h-10 lg:h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'inventory'
               ? 'bg-brand text-white border-brand shadow-xs'
-              : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
+              : 'bg-white hover:bg-surface text-faint hover:text-ink border-line'
           }`}
         >
           <Boxes className="w-4 h-4" />
@@ -896,7 +896,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-extrabold ${
               activeDashboardSubTab === 'inventory'
                 ? 'bg-brand-deep text-white'
-                : 'bg-amber-100 text-amber-800 border border-amber-200'
+                : 'bg-warning/15 text-warning border border-warning/30'
             }`}>
               {repairLowStockParts.length} Low
             </span>
@@ -923,7 +923,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           className={`px-3.5 h-10 lg:h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'finance'
               ? 'bg-brand text-white border-brand shadow-xs'
-              : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
+              : 'bg-white hover:bg-surface text-faint hover:text-ink border-line'
           }`}
         >
           <Coins className="w-4 h-4" />
@@ -931,7 +931,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold inline-flex items-center space-x-0.5 ${
             activeDashboardSubTab === 'finance'
               ? marginPercent < 0 ? 'bg-white/25 text-white' : 'bg-white/20 text-white'
-              : marginPercent < 0 ? 'bg-rose-100 text-rose-700' : 'bg-line text-ink'
+              : marginPercent < 0 ? 'bg-danger/15 text-danger' : 'bg-line text-ink'
           }`}>
             {marginPercent < 0 && !(activeDashboardSubTab === 'finance') && <AlertTriangle className="w-2.5 h-2.5 shrink-0" />}
             <span>{marginPercent}% Margin</span>
@@ -950,7 +950,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           className={`px-3.5 h-10 lg:h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'warranty-watch'
               ? 'bg-brand text-white border-brand shadow-xs'
-              : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
+              : 'bg-white hover:bg-surface text-faint hover:text-ink border-line'
           }`}
         >
           <ShieldAlert className="w-4 h-4" />
@@ -959,7 +959,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <span className={`text-xs font-mono px-2 py-0.5 rounded-full font-bold ${
               activeDashboardSubTab === 'warranty-watch'
                 ? 'bg-brand-deep text-white'
-                : 'bg-rose-100 text-rose-800 border border-rose-200'
+                : 'bg-danger/15 text-danger border border-danger/30'
             }`}>
               {expiringSoonWorkOrders.length} Flagged
             </span>
@@ -980,21 +980,21 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
       {/* Background Warranty Check Alert Banner on Dashboard */}
       {expiringSoonWorkOrders.length > 0 && activeDashboardSubTab !== 'warranty-watch' && (
-        <div className="p-4 bg-gradient-to-r from-rose-50 via-amber-50 to-orange-50 border border-rose-200 rounded-2xl shadow-xs space-y-3">
+        <div className="p-4 bg-gradient-to-r from-rose-50 via-amber-50 to-orange-50 border border-danger/30 rounded-2xl shadow-xs space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
             <div className="flex items-start sm:items-center space-x-3">
-              <div className="p-2 bg-rose-600 text-white rounded-xl shadow-2xs shrink-0">
+              <div className="p-2 bg-danger text-white rounded-xl shadow-2xs shrink-0">
                 <ShieldAlert className="w-5 h-5 animate-pulse" />
               </div>
               <div className="space-y-0.5">
                 <div className="flex items-center space-x-2">
-                  <span className="font-black text-rose-950 text-sm">Background Warranty Monitor Flagged</span>
-                  <span className="text-xs font-mono font-bold bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full border border-rose-200">
+                  <span className="font-black text-danger text-sm">Background Warranty Monitor Flagged</span>
+                  <span className="text-xs font-mono font-bold bg-danger/15 text-danger px-2 py-0.5 rounded-full border border-danger/30">
                     90-Day Standard Window
                   </span>
                 </div>
                 <p className="text-ink text-xs">
-                  <strong className="text-rose-700 font-extrabold">{expiringSoonWorkOrders.length} Work Order(s)</strong> are nearing the end of their 90-day warranty period ({criticalWarrantyCount} critical within 7 days).
+                  <strong className="text-danger font-extrabold">{expiringSoonWorkOrders.length} Work Order(s)</strong> are nearing the end of their 90-day warranty period ({criticalWarrantyCount} critical within 7 days).
                 </p>
               </div>
             </div>
@@ -1002,7 +1002,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <Button
               type="button"
               onClick={() => setActiveDashboardSubTab('warranty-watch')}
-              className="bg-rose-600 hover:bg-rose-700 text-white shrink-0 flex items-center space-x-1.5"
+              className="bg-danger hover:bg-danger-deep text-white shrink-0 flex items-center space-x-1.5"
             >
               <ShieldCheck className="w-4 h-4" />
               <span>Inspect Flagged Tickets ({expiringSoonWorkOrders.length})</span>
@@ -1010,8 +1010,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
 
           {/* Quick Preview Chips of Top Expiring Tickets */}
-          <div className="flex items-center space-x-2 overflow-x-auto no-scrollbar pt-1 border-t border-rose-200/60">
-            <span className="text-xs font-bold text-rose-800 uppercase tracking-wider shrink-0">Expiring Soon:</span>
+          <div className="flex items-center space-x-2 overflow-x-auto no-scrollbar pt-1 border-t border-danger/30">
+            <span className="text-xs font-bold text-danger uppercase tracking-wider shrink-0">Expiring Soon:</span>
             {expiringSoonWorkOrders.slice(0, 4).map((item) => (
               <div
                 key={item.wo.id}
@@ -1021,13 +1021,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveDashboardSubTab('warranty-watch'); }
                 }}
-                className="bg-white/80 hover:bg-white border border-rose-200 px-2.5 py-1 rounded-lg text-xs flex items-center space-x-2 cursor-pointer shrink-0 shadow-2xs transition-all"
+                className="bg-white/80 hover:bg-white border border-danger/30 px-2.5 py-1 rounded-lg text-xs flex items-center space-x-2 cursor-pointer shrink-0 shadow-2xs transition-all"
               >
                 <span className="font-mono font-bold text-brand">{item.wo.orderNumber}</span>
                 <span className="font-bold text-ink">{item.wo.customerName}</span>
                 <span className="text-muted">({item.wo.deviceModel})</span>
                 <span className={`px-1.5 py-0.2 rounded font-extrabold text-xs ${
-                  item.remainingDays <= 3 ? 'bg-rose-600 text-white' : 'bg-amber-100 text-amber-800'
+                  item.remainingDays <= 3 ? 'bg-danger text-white' : 'bg-warning/15 text-warning'
                 }`}>
                   ⏳ {item.remainingDays}d left
                 </span>
@@ -1042,19 +1042,19 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         <div role="tabpanel" id="dash-panel-status-queue" aria-labelledby="dash-tab-status-queue" className="space-y-6">
           {/* Stagnant Bottlenecks Notice */}
           {stagnantWorkOrders.length > 0 && (
-            <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-between gap-3 text-xs text-amber-900 shadow-2xs">
+            <div className="p-4 bg-warning/10 border border-warning/30 rounded-2xl flex items-center justify-between gap-3 text-xs text-warning shadow-2xs">
               <div className="flex items-center space-x-2.5">
-                <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+                <AlertTriangle className="w-5 h-5 text-warning shrink-0" />
                 <div>
-                  <p className="font-bold text-amber-950">{stagnantWorkOrders.length} Repair Ticket(s) Bottlenecked (&gt;48h in Queue)</p>
-                  <p className="text-xs text-amber-800">Inactive over 48h — reassign or update status.</p>
+                  <p className="font-bold text-warning">{stagnantWorkOrders.length} Repair Ticket(s) Bottlenecked (&gt;48h in Queue)</p>
+                  <p className="text-xs text-warning">Inactive over 48h — reassign or update status.</p>
                 </div>
               </div>
               <Button
                 type="button"
                 onClick={() => onNavigateToTab('pipeline')}
                 size="sm"
-                className="min-h-10 bg-amber-700 hover:bg-amber-800 text-white shrink-0"
+                className="min-h-10 bg-warning hover:bg-amber-800 text-white shrink-0"
               >
                 Inspect Bottlenecks
               </Button>
@@ -1095,23 +1095,23 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             {/* Visual Stage Progress Bars Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 3xl:grid-cols-6 4xl:grid-cols-8 gap-4 pt-1">
               {[
-                { stage: 'Receive', title: 'Intake / Receive', count: statusQueueCounts['Receive'], color: 'bg-blue-500', bg: 'bg-blue-50', text: 'text-blue-700' },
-                { stage: 'In Progress', title: 'In Progress (Active)', count: statusQueueCounts['In Progress'], color: 'bg-emerald-500', bg: 'bg-emerald-50', text: 'text-emerald-700' },
-                { stage: 'Pending', title: 'Pending Approval / Parts', count: statusQueueCounts['Pending'], color: 'bg-amber-500', bg: 'bg-amber-50', text: 'text-amber-700' },
-                { stage: 'Finished', title: 'Finished / Ready for Pickup', count: statusQueueCounts['Finished'], color: 'bg-teal-500', bg: 'bg-teal-50', text: 'text-teal-700' },
+                { stage: 'Receive', title: 'Intake / Receive', count: statusQueueCounts['Receive'], color: 'bg-brand-soft0', bg: 'bg-brand-soft', text: 'text-brand' },
+                { stage: 'In Progress', title: 'In Progress (Active)', count: statusQueueCounts['In Progress'], color: 'bg-success/100', bg: 'bg-success/10', text: 'text-success-deep' },
+                { stage: 'Pending', title: 'Pending Approval / Parts', count: statusQueueCounts['Pending'], color: 'bg-warning/100', bg: 'bg-warning/10', text: 'text-warning' },
+                { stage: 'Finished', title: 'Finished / Ready for Pickup', count: statusQueueCounts['Finished'], color: 'bg-teal/100', bg: 'bg-teal/10', text: 'text-teal-700' },
               ].map((item) => {
                 const total = filteredWorkOrders.length || 1;
                 const pct = Math.round((item.count / total) * 100);
                 return (
-                  <div key={item.stage} className={`p-4 rounded-xl border border-slate-200/80 ${item.bg} space-y-2`}>
+                  <div key={item.stage} className={`p-4 rounded-xl border border-line/80 ${item.bg} space-y-2`}>
                     <div className="flex items-center justify-between">
                       <span className={`text-xs font-bold ${item.text}`}>{item.title}</span>
                       <span className="font-mono text-xs font-black text-slate-800">{item.count} <span className="hidden xl:inline">tickets</span></span>
                     </div>
-                    <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
+                    <div className="w-full h-2.5 bg-line rounded-full overflow-hidden">
                       <div className={`h-full ${item.color} rounded-full transition-all duration-500`} style={{ width: `${pct}%` }} />
                     </div>
-                    <div className="flex justify-between items-center text-xs text-slate-600">
+                    <div className="flex justify-between items-center text-xs text-muted">
                       <span>{pct}% of active queue</span>
                       <Button
   variant="link"
@@ -1214,7 +1214,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                       setQueuePriorityFilter('ALL');
                       setQueueSearchQuery('');
                     }}
-                    className="min-h-10 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-lg transition-all cursor-pointer shrink-0 px-2.5"
+                    className="min-h-10 bg-line hover:bg-line text-muted text-xs font-bold rounded-lg transition-all cursor-pointer shrink-0 px-2.5"
                   >
                     Reset Filters
                   </Button>
@@ -1304,7 +1304,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                           {/* Assigned Tech */}
                           <td className="py-3 px-3 hidden lg:table-cell">
                             <div className="flex items-center space-x-1.5">
-                              <div className="w-5 h-5 rounded-full bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0">
+                              <div className="w-5 h-5 rounded-full bg-line text-muted font-bold text-xs flex items-center justify-center shrink-0">
                                 {(wo.assignedTechName || 'U').charAt(0)}
                               </div>
                               <span className="text-xs text-ink font-medium truncate max-w-[100px]">
@@ -1329,7 +1329,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                               {totalAmt.toLocaleString()} MMK
                             </p>
                             <span className={`text-xs font-bold px-1.5 py-0.2 rounded ${
-                              wo.isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                              wo.isPaid ? 'bg-success/15 text-success-deep' : 'bg-danger/15 text-danger'
                             }`}>
                               {wo.isPaid ? 'Paid' : 'Unpaid'}
                             </span>
@@ -1343,7 +1343,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   
                                 type="button"
                                 onClick={() => setRosterTicket(wo)}
-                                className="border border-[var(--border)] bg-[var(--blue-tint)] px-2.5 text-[var(--primary)] hover:bg-[var(--card-bg)]"
+                                className="border border-line bg-brand-soft px-2.5 text-brand hover:bg-white"
                                 title="View Ticket Status"
                                 aria-label={`View status for ${wo.orderNumber || wo.id}`}
                               >
@@ -1409,7 +1409,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 topRepairDevices.map((dev, idx) => {
                   const maxCount = topRepairDevices[0]?.count || 1;
                   const barPct = Math.max(8, Math.round((dev.count / maxCount) * 100));
-                  const medal = idx === 0 ? 'bg-warning/20 text-amber-700 border-warning/50' : idx === 1 ? 'bg-slate-100 text-slate-600 border-slate-200' : idx === 2 ? 'bg-orange-50 text-orange-700 border-orange-200' : 'bg-surface text-muted border-line';
+                  const medal = idx === 0 ? 'bg-warning/20 text-warning border-warning/50' : idx === 1 ? 'bg-surface text-muted border-line' : idx === 2 ? 'bg-warning/10 text-warning border-orange-200' : 'bg-surface text-muted border-line';
                   return (
                     <div key={dev.name} className="p-3 bg-surface border border-line rounded-xl space-y-2">
                       <div className="flex items-center justify-between gap-2 text-xs">
@@ -1493,12 +1493,12 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         <div role="tabpanel" id="dash-panel-tech-kpi" aria-labelledby="dash-tab-tech-kpi" className="space-y-6">
           {/* Queue imbalance suggestion — unique decision-support, kept at top */}
           {isQueueImbalanced && maxLoadTechs.length > 0 && minLoadTechs.length > 0 && (
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs">
-              <span className="font-bold text-amber-800 flex items-center gap-1.5">
-                <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-warning/10 border border-warning/30 rounded-xl text-xs">
+              <span className="font-bold text-warning flex items-center gap-1.5">
+                <AlertTriangle className="w-3.5 h-3.5 text-warning shrink-0" />
                 Queue imbalanced — reassign 1–2 tickets from {maxLoadTechs.map((t) => t.tech.name).join(' / ')} ({maxTechLoad}) to {minLoadTechs.map((t) => t.tech.name).join(' / ')} ({minTechLoad})
               </span>
-              <span className="text-amber-700/80 text-xs font-semibold shrink-0">Load gap: {maxTechLoad - minTechLoad} tickets</span>
+              <span className="text-warning/80 text-xs font-semibold shrink-0">Load gap: {maxTechLoad - minTechLoad} tickets</span>
             </div>
           )}
 
@@ -1585,7 +1585,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                         <p className="font-extrabold text-xs text-ink">{part.name}</p>
                         <p className="text-xs text-muted">{part.category} · {part.qualityTier}</p>
                       </div>
-                      <span className="text-xs font-extrabold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-lg border border-amber-200 shrink-0">
+                      <span className="text-xs font-extrabold text-warning bg-warning/15 px-2 py-0.5 rounded-lg border border-warning/30 shrink-0">
                         {part.quantityInStock} Left
                       </span>
                     </div>
@@ -1610,7 +1610,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-1">
               <span className="text-xs font-bold text-muted uppercase">Total Revenue</span>
               <p className="text-2xl font-extrabold text-ink">{totalRevenue.toLocaleString()} MMK</p>
-              <p className={`text-xs font-semibold flex items-center space-x-1 ${marginPercent < 0 ? 'text-rose-600' : 'text-success-deep'}`}>
+              <p className={`text-xs font-semibold flex items-center space-x-1 ${marginPercent < 0 ? 'text-danger' : 'text-success-deep'}`}>
                 {marginPercent < 0 && <AlertTriangle className="w-3 h-3 shrink-0" />}
                 <span>{marginPercent}% Gross Profit Margin</span>
               </p>
@@ -1630,8 +1630,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
             <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-1">
               <span className="text-xs font-bold text-muted uppercase">Unpaid Pending Balance</span>
-              <p className="text-2xl font-extrabold text-rose-600">{financialAnalytics.totalUnpaidBalance.toLocaleString()} MMK</p>
-              <p className="text-xs text-rose-600 font-semibold">{financialAnalytics.unpaidCount} Tickets Outstanding</p>
+              <p className="text-2xl font-extrabold text-danger">{financialAnalytics.totalUnpaidBalance.toLocaleString()} MMK</p>
+              <p className="text-xs text-danger font-semibold">{financialAnalytics.unpaidCount} Tickets Outstanding</p>
             </div>
           </div>
 
@@ -1649,13 +1649,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               </div>
               <div className="flex items-center space-x-2 flex-wrap gap-y-1.5">
                 {trendSeries.revenueDeltaPct !== null && (
-                  <span className={`px-2.5 py-1 rounded-full border flex items-center space-x-1 text-xs font-extrabold ${trendSeries.revenueDeltaPct >= 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}>
+                  <span className={`px-2.5 py-1 rounded-full border flex items-center space-x-1 text-xs font-extrabold ${trendSeries.revenueDeltaPct >= 0 ? 'bg-success/10 text-success-deep border-success/30' : 'bg-danger/10 text-danger border-danger/30'}`}>
                     <ArrowUpRight className={`w-3 h-3 ${trendSeries.revenueDeltaPct >= 0 ? '' : 'rotate-90'}`} />
                     <span>Revenue {trendSeries.revenueDeltaPct >= 0 ? '+' : ''}{trendSeries.revenueDeltaPct}% vs prev period</span>
                   </span>
                 )}
                 {trendSeries.repairsDeltaPct !== null && (
-                  <span className={`px-2.5 py-1 rounded-full border flex items-center space-x-1 text-xs font-extrabold ${trendSeries.repairsDeltaPct >= 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}>
+                  <span className={`px-2.5 py-1 rounded-full border flex items-center space-x-1 text-xs font-extrabold ${trendSeries.repairsDeltaPct >= 0 ? 'bg-success/10 text-success-deep border-success/30' : 'bg-danger/10 text-danger border-danger/30'}`}>
                     <ArrowUpRight className={`w-3 h-3 ${trendSeries.repairsDeltaPct >= 0 ? '' : 'rotate-90'}`} />
                     <span>Repairs {trendSeries.repairsDeltaPct >= 0 ? '+' : ''}{trendSeries.repairsDeltaPct}% vs prev period</span>
                   </span>
@@ -1745,13 +1745,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="space-y-1">
                 <div className="flex items-center space-x-2.5">
-                  <div className="p-2 bg-rose-600 text-white rounded-xl shadow-xs">
+                  <div className="p-2 bg-danger text-white rounded-xl shadow-xs">
                     <ShieldAlert className="w-5 h-5 animate-pulse" />
                   </div>
                   <h2 className="text-lg font-black tracking-tight text-white flex items-center space-x-2">
                     <span>90-Day Warranty Background Telemetry</span>
                   </h2>
-                  <span className="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono text-xs font-bold rounded-full flex items-center space-x-1">
+                  <span className="px-2.5 py-0.5 bg-success/100/20 text-emerald-300 border border-emerald-500/30 font-mono text-xs font-bold rounded-full flex items-center space-x-1">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block mr-1" />
                     <span>Background Scanner Active</span>
                   </span>
@@ -1775,28 +1775,28 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <div className="p-3 bg-white/10 rounded-xl border border-white/10 space-y-0.5">
                 <span className="text-xs text-slate-300 font-bold uppercase">Scanned Tickets</span>
                 <p className="text-xl font-black text-white">{warrantyCheckData.length}</p>
-                <p className="text-xs text-slate-400">Total with warranty</p>
+                <p className="text-xs text-muted">Total with warranty</p>
               </div>
 
-              <div className="p-3 bg-rose-500/20 border border-rose-500/40 rounded-xl space-y-0.5">
+              <div className="p-3 bg-danger/100/20 border border-rose-500/40 rounded-xl space-y-0.5">
                 <span className="text-xs text-rose-200 font-bold uppercase">Nearing Expiry (&le;14d)</span>
                 <p className="text-xl font-black text-rose-300">{expiringSoonWorkOrders.length}</p>
                 <p className="text-xs text-rose-200">Flagged by monitor</p>
               </div>
 
-              <div className="p-3 bg-rose-600/30 border border-rose-500/50 rounded-xl space-y-0.5">
+              <div className="p-3 bg-danger/30 border border-rose-500/50 rounded-xl space-y-0.5">
                 <span className="text-xs text-rose-200 font-bold uppercase">Critical Window (&le;7d)</span>
                 <p className="text-xl font-black text-rose-200">{criticalWarrantyCount}</p>
                 <p className="text-xs text-rose-300">Requires attention</p>
               </div>
 
-              <div className="p-3 bg-amber-500/20 border border-amber-500/40 rounded-xl space-y-0.5">
+              <div className="p-3 bg-warning/100/20 border border-amber-500/40 rounded-xl space-y-0.5">
                 <span className="text-xs text-amber-200 font-bold uppercase">Warning Window (8-14d)</span>
                 <p className="text-xl font-black text-amber-300">{warningWarrantyCount}</p>
                 <p className="text-xs text-amber-200">Nearing end period</p>
               </div>
 
-              <div className="p-3 bg-emerald-500/20 border border-emerald-500/40 rounded-xl space-y-0.5 col-span-2 lg:col-span-1">
+              <div className="p-3 bg-success/100/20 border border-emerald-500/40 rounded-xl space-y-0.5 col-span-2 lg:col-span-1">
                 <span className="text-xs text-emerald-200 font-bold uppercase">Active & Protected</span>
                 <p className="text-xl font-black text-emerald-300">{activeWarrantyCount}</p>
                 <p className="text-xs text-emerald-200">&gt;14 days remaining</p>
@@ -1938,7 +1938,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                       {displayList.map((item) => {
                         const isCopied = copiedNoticeId === item.wo.id;
                         return (
-                          <tr key={item.wo.id} className={`hover:bg-surface transition-colors ${item.isCritical ? 'bg-rose-50/40' : ''}`}>
+                          <tr key={item.wo.id} className={`hover:bg-surface transition-colors ${item.isCritical ? 'bg-danger/10' : ''}`}>
                             <td className="py-3 px-3">
                               <p className="font-mono font-bold text-brand">{item.wo.orderNumber}</p>
                               <span className="text-xs text-muted">{item.wo.status}</span>
@@ -1956,7 +1956,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
                             <td className="py-3 px-3 text-xs hidden md:table-cell">
                               <p className="text-muted">Start: <strong className="text-ink">{item.startDateFormatted}</strong></p>
-                              <p className="text-muted">Expires: <strong className="text-rose-700">{item.expiryDateFormatted}</strong></p>
+                              <p className="text-muted">Expires: <strong className="text-danger">{item.expiryDateFormatted}</strong></p>
                             </td>
 
                             <td className="py-3 px-3 w-36">
@@ -1969,9 +1969,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                                   <div
                                     className={`h-full rounded-full ${
                                       item.remainingDays <= 3
-                                        ? 'bg-rose-600'
+                                        ? 'bg-danger'
                                         : item.remainingDays <= 14
-                                        ? 'bg-amber-500'
+                                        ? 'bg-warning/100'
                                         : 'bg-success'
                                     }`}
                                     style={{ width: `${item.percentElapsed}%` }}
@@ -1982,25 +1982,25 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
                             <td className="py-3 px-3">
                               {item.isCritical && (
-                                <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-rose-600 text-white text-xs font-extrabold rounded-lg shadow-2xs">
+                                <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-danger text-white text-xs font-extrabold rounded-lg shadow-2xs">
                                   <Clock className="w-3 h-3" />
                                   <span>Critical: {item.remainingDays}d Left</span>
                                 </span>
                               )}
                               {item.isWarning && (
-                                <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-amber-100 text-amber-800 border border-amber-300 text-xs font-bold rounded-lg">
-                                  <Clock className="w-3 h-3 text-amber-600" />
+                                <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-warning/15 text-warning border border-warning/30 text-xs font-bold rounded-lg">
+                                  <Clock className="w-3 h-3 text-warning" />
                                   <span>Nearing Expiry: {item.remainingDays}d Left</span>
                                 </span>
                               )}
                               {item.isExpired && (
-                                <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-slate-200 text-slate-700 text-xs font-bold rounded-lg">
+                                <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-line text-muted text-xs font-bold rounded-lg">
                                   <span>Expired ({Math.abs(item.remainingDays)}d ago)</span>
                                 </span>
                               )}
                               {item.isActive && (
-                                <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold rounded-lg">
-                                  <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                                <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-success/10 text-success-deep border border-success/30 text-xs font-bold rounded-lg">
+                                  <ShieldCheck className="w-3 h-3 text-success" />
                                   <span>Protected ({item.remainingDays}d Left)</span>
                                 </span>
                               )}
@@ -2015,7 +2015,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                                   onClick={() => handleCopyWarrantyCourtesyMessage(item)}
                                   className={`px-2.5 py-1.5 font-bold text-xs rounded-lg border transition-all flex items-center space-x-1 cursor-pointer active:scale-95 ${
                                     isCopied
-                                      ? 'bg-emerald-600 text-white border-emerald-600'
+                                      ? 'bg-success text-white border-emerald-600'
                                       : 'bg-surface hover:bg-line text-brand border-line'
                                   }`}
                                   title="Copy Customer Warranty Courtesy SMS/Notice"

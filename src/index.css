@@ -360,6 +360,7 @@ button {
 .basic-ui select {
   appearance: none;
   min-width: 112px;
+  min-height: 40px; /* 40px touch floor — matches Input spec (P2 audit 2026-08-08) */
   padding-right: 34px !important;
   background-image:
     linear-gradient(45deg, transparent 50%, var(--text-muted) 50%),
@@ -1267,3 +1268,12 @@ html[data-theme="dark-slate"] .bg-violet-100 { background-color: rgba(139, 92, 2
 html[data-theme="dark-slate"] .bg-orange-100 { background-color: rgba(249, 115, 22, 0.16) !important; }
 html[data-theme="dark-slate"] .bg-teal-100 { background-color: rgba(20, 184, 166, 0.16) !important; }
 html[data-theme="dark-slate"] .bg-yellow-100 { background-color: rgba(234, 179, 8, 0.16) !important; }
+
+/* Shared raised-surface shadow for mobile sticky bottom bars (unifies arbitrary
+   shadow-[0_-4px_12px…] utilities — P2 audit 2026-08-08) */
+.shadow-raised-top {
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.06);
+}
+html[data-theme="dark-slate"] .shadow-raised-top {
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.45);
+}

@@ -232,7 +232,7 @@ export const Navigation: React.FC<NavigationProps> = ({
       {/* Backdrop overlay for mobile menu drawer */}
       {isMobileMenuOpen && (
         <div 
-          className={`fixed inset-0 bg-black/40 backdrop-blur-xs z-40 ${isIpad ? '' : 'lg:hidden'} transition-opacity duration-300`}
+          className={`fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-40 ${isIpad ? '' : 'lg:hidden'} transition-opacity duration-300`}
           onClick={() => setIsMobileMenuOpen(false)}
           role="presentation"
           aria-hidden="true"

@@ -455,38 +455,38 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
       role="dialog"
       aria-modal="true"
       aria-label="Operations Copilot chat"
-      className="fixed bottom-0 left-0 right-0 sm:left-auto sm:right-4 sm:bottom-4 sm:w-[400px] sm:max-w-[calc(100vw-2rem)] h-[82dvh] sm:h-[min(70vh,560px)] z-50 bg-white border-t sm:border border-[var(--border)] rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-i35-slide-up"
+      className="fixed bottom-0 left-0 right-0 sm:left-auto sm:right-4 sm:bottom-4 sm:w-[400px] sm:max-w-[calc(100vw-2rem)] h-[82dvh] sm:h-[min(70vh,560px)] z-50 bg-white border-t sm:border border-line rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-i35-slide-up"
     >
-        <div className="px-4 py-3 border-b border-[var(--border)] flex items-center justify-between shrink-0">
+        <div className="px-4 py-3 border-b border-line flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 bg-brand text-white flex items-center justify-center rounded-lg"><Bot className="w-4 h-4" /></div>
             <div className="min-w-0">
-              <h2 className="text-sm font-extrabold text-[var(--text-main)]">Operations Copilot</h2>
-              <p className="text-xs text-[var(--text-muted)] truncate flex items-center gap-1"><span className={`w-1.5 h-1.5 rounded-full ${isExternalAi ? 'bg-emerald-500' : 'bg-[var(--primary)]'}`} />{providerLabel}</p>
+              <h2 className="text-sm font-extrabold text-ink">Operations Copilot</h2>
+              <p className="text-xs text-muted truncate flex items-center gap-1"><span className={`w-1.5 h-1.5 rounded-full ${isExternalAi ? 'bg-emerald-500' : 'bg-brand'}`} />{providerLabel}</p>
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <Button type="button" onClick={clearConversation} disabled={isLoading} title="New conversation" aria-label="New conversation" className="p-2 text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--blue-tint)] rounded-lg disabled:opacity-40"><RotateCcw className="w-4 h-4" /></Button>
-            <Button type="button" onClick={onOpenAiSettings} title="AI provider settings" aria-label="AI provider settings" className="p-2 text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--blue-tint)] rounded-lg"><Settings2 className="w-4 h-4" /></Button>
-            <Button type="button" onClick={onClose} title="Close assistant" aria-label="Close assistant" className="p-2 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--blue-tint)] rounded-lg"><X className="w-4 h-4" /></Button>
+            <Button type="button" onClick={clearConversation} disabled={isLoading} title="New conversation" aria-label="New conversation" className="p-2 text-muted hover:text-brand hover:bg-brand-soft rounded-lg disabled:opacity-40"><RotateCcw className="w-4 h-4" /></Button>
+            <Button type="button" onClick={onOpenAiSettings} title="AI provider settings" aria-label="AI provider settings" className="p-2 text-muted hover:text-brand hover:bg-brand-soft rounded-lg"><Settings2 className="w-4 h-4" /></Button>
+            <Button type="button" onClick={onClose} title="Close assistant" aria-label="Close assistant" className="p-2 text-muted hover:text-ink hover:bg-brand-soft rounded-lg"><X className="w-4 h-4" /></Button>
           </div>
         </div>
 
-        <div className="px-4 py-2.5 border-b border-[var(--border)] shrink-0">
-          <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] mb-2">
-            <Database className="w-3.5 h-3.5 text-[var(--primary)]" />
-            <span>Live context: <strong className="text-[var(--text-main)]">{context.summary.activeTickets} active</strong> · <strong className="text-[var(--text-main)]">{context.lowStockParts.length} low stock</strong> · <strong className="text-[var(--text-main)]">{context.followUps.length} follow-ups</strong></span>
+        <div className="px-4 py-2.5 border-b border-line shrink-0">
+          <div className="flex items-center gap-1.5 text-xs text-muted mb-2">
+            <Database className="w-3.5 h-3.5 text-brand" />
+            <span>Live context: <strong className="text-ink">{context.summary.activeTickets} active</strong> · <strong className="text-ink">{context.lowStockParts.length} low stock</strong> · <strong className="text-ink">{context.followUps.length} follow-ups</strong></span>
           </div>
           <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
           {QUICK_PROMPTS.map(({ label, prompt, icon: Icon }) => (
-            <Button key={label} type="button" disabled={isLoading} onClick={() => sendMessage(prompt)} className="px-2.5 py-1.5 bg-[var(--bg)] border border-[var(--border)] text-[var(--text-main)] rounded-lg text-xs font-bold flex items-center gap-1.5 shrink-0 hover:border-[var(--primary)] hover:bg-[var(--blue-tint)] disabled:opacity-50">
-              <Icon className="w-3.5 h-3.5 text-[var(--primary)]" /> {label}
+            <Button key={label} type="button" disabled={isLoading} onClick={() => sendMessage(prompt)} className="px-2.5 py-1.5 bg-surface border border-line text-ink rounded-lg text-xs font-bold flex items-center gap-1.5 shrink-0 hover:border-brand hover:bg-brand-soft disabled:opacity-50">
+              <Icon className="w-3.5 h-3.5 text-brand" /> {label}
             </Button>
           ))}
           </div>
         </div>
 
-        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-[var(--bg)] [scrollbar-gutter:stable]">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-surface [scrollbar-gutter:stable]">
           {messages.map((message) => (
             message.role === 'system' ? (
               <div key={message.id} className="mx-auto max-w-[92%] px-2.5 py-1.5 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg text-center">{message.content}</div>
@@ -495,12 +495,12 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
               <div className={`relative max-w-[90%] px-3 py-2.5 text-xs leading-relaxed whitespace-pre-wrap border ${
                 message.role === 'user'
                   ? 'bg-brand text-white border-brand rounded-2xl rounded-br-md'
-                  : 'bg-white text-[var(--text-main)] border-[var(--border)] rounded-2xl rounded-bl-md shadow-sm'
+                  : 'bg-white text-ink border-line rounded-2xl rounded-bl-md shadow-sm'
               }`}>
-                {message.role === 'assistant' && <span className="block mb-1 text-xs font-bold uppercase tracking-wide text-[var(--text-muted)]">{message.source === 'ai' ? 'AI analysis' : 'Live ERP analysis'}</span>}
+                {message.role === 'assistant' && <span className="block mb-1 text-xs font-bold uppercase tracking-wide text-muted">{message.source === 'ai' ? 'AI analysis' : 'Live ERP analysis'}</span>}
                 {message.content}
                 {message.role === 'assistant' && (
-                  <Button type="button" onClick={() => void copyMessage(message.content)} aria-label="Copy response" title="Copy response" className="absolute -right-8 top-1.5 p-1 text-[var(--text-muted)] opacity-0 group-hover:opacity-100 hover:text-[var(--primary)]">
+                  <Button type="button" onClick={() => void copyMessage(message.content)} aria-label="Copy response" title="Copy response" className="absolute -right-8 top-1.5 p-1 text-muted opacity-0 group-hover:opacity-100 hover:text-brand">
                     <Copy className="w-3.5 h-3.5" />
                   </Button>
                 )}
@@ -510,14 +510,14 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
           ))}
           {isLoading && (
             <div className="flex justify-start">
-              <div className="px-3 py-2.5 bg-white border border-[var(--border)] rounded-2xl rounded-bl-md text-xs text-[var(--text-muted)] flex items-center gap-2">
-                <Sparkles className="w-3.5 h-3.5 text-[var(--primary)] animate-pulse" /> Reviewing live ERP data…
+              <div className="px-3 py-2.5 bg-white border border-line rounded-2xl rounded-bl-md text-xs text-muted flex items-center gap-2">
+                <Sparkles className="w-3.5 h-3.5 text-brand animate-pulse" /> Reviewing live ERP data…
               </div>
             </div>
           )}
         </div>
 
-        <form onSubmit={(event) => { event.preventDefault(); sendMessage(); }} className="p-3 border-t border-[var(--border)] bg-white shrink-0">
+        <form onSubmit={(event) => { event.preventDefault(); sendMessage(); }} className="p-3 border-t border-line bg-white shrink-0">
           <div className="flex items-end gap-2">
             <textarea
               value={input}
@@ -530,13 +530,13 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
               }}
               rows={1}
               placeholder="Ask a business question…"
-              className="flex-1 min-h-[42px] max-h-28 resize-none border border-[var(--border)] bg-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[var(--primary)]"
+              className="flex-1 min-h-[42px] max-h-28 resize-none border border-line bg-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand"
             />
             <Button type="submit" disabled={!input.trim() || isLoading} title="Send message" aria-label="Send message" className="w-10 h-10 bg-brand text-white rounded-xl flex items-center justify-center disabled:opacity-40">
               <Send className="w-4 h-4" />
             </Button>
           </div>
-          <p className="mt-1.5 text-xs text-[var(--text-muted)] text-center">Enter sends · Shift+Enter new line.</p>
+          <p className="mt-1.5 text-xs text-muted text-center">Enter sends · Shift+Enter new line.</p>
         </form>
       </aside>
   );

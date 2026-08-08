@@ -55,7 +55,7 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
   const avgCost = customerOrders.length > 0 ? Math.round(totalSpent / customerOrders.length) : 0;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-[70] flex items-center justify-center p-3 sm:p-6 animate-fadeIn">
+    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-[70] flex items-center justify-center p-3 sm:p-6 animate-fadeIn">
       <div className="bg-white border border-line rounded-3xl w-full max-w-5xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Modal Header */}
         <div className="px-6 py-4 border-b border-line bg-surface flex items-center justify-between">

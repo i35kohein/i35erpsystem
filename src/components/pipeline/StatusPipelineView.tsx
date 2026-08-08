@@ -74,14 +74,86 @@ interface StatusPipelineViewProps {
 }
 
 export const KANBAN_STAGES: { id: WorkOrderStatus; title: string; subtitle: string; color: string; badgeColor: string }[] = [
-  { id: 'Receive', title: 'Receive', subtitle: 'New Intake', color: 'border-blue-200 bg-blue-50/40', badgeColor: 'bg-brand text-white font-extrabold tracking-wide' },
-  { id: 'In Progress', title: 'In Progress', subtitle: 'Repair Active', color: 'border-purple-200 bg-purple-50/40', badgeColor: 'bg-purple-700 text-white font-extrabold tracking-wide' },
-  { id: 'Pending', title: 'Pending', subtitle: 'Waiting Parts/Client', color: 'border-amber-200 bg-amber-50/40', badgeColor: 'bg-amber-600 text-white font-extrabold' },
-  { id: 'Finished', title: 'Finished', subtitle: 'QA Passed / Ready', color: 'border-emerald-200 bg-emerald-50/40', badgeColor: 'bg-emerald-600 text-white font-extrabold' },
-  { id: 'Taken Out', title: 'Taken Out', subtitle: 'Paid & Returned', color: 'border-slate-200 bg-slate-100/50', badgeColor: 'bg-slate-700 text-white font-extrabold' },
-  { id: 'Cant Repair', title: 'Cant Repair', subtitle: 'Declined / Unfixable', color: 'border-rose-200 bg-rose-50/40', badgeColor: 'bg-rose-600 text-white font-extrabold' },
-  { id: 'Customer Not Repair', title: 'Customer Not Repair', subtitle: 'Cancelled by Client', color: 'border-orange-200 bg-orange-50/40', badgeColor: 'bg-orange-600 text-white font-extrabold' },
+  { id: 'Receive', title: 'Receive', subtitle: 'New Intake', color: 'border-brand/30 bg-brand-soft/40', badgeColor: 'bg-brand text-white font-extrabold tracking-wide' },
+  { id: 'In Progress', title: 'In Progress', subtitle: 'Repair Active', color: 'border-purple/30 bg-purple/10', badgeColor: 'bg-purple text-white font-extrabold tracking-wide' },
+  { id: 'Pending', title: 'Pending', subtitle: 'Waiting Parts/Client', color: 'border-warning/30 bg-warning/10', badgeColor: 'bg-warning text-white font-extrabold' },
+  { id: 'Finished', title: 'Finished', subtitle: 'QA Passed / Ready', color: 'border-success/30 bg-success/10', badgeColor: 'bg-success text-white font-extrabold' },
+  { id: 'Taken Out', title: 'Taken Out', subtitle: 'Paid & Returned', color: 'border-line bg-surface/50', badgeColor: 'bg-ink/80 text-white font-extrabold' },
+  { id: 'Cant Repair', title: 'Cant Repair', subtitle: 'Declined / Unfixable', color: 'border-danger/30 bg-danger/10', badgeColor: 'bg-danger text-white font-extrabold' },
+  { id: 'Customer Not Repair', title: 'Customer Not Repair', subtitle: 'Cancelled by Client', color: 'border-warning/30 bg-warning/10', badgeColor: 'bg-warning text-white font-extrabold' },
 ];
+
+/** Shared soft-notification alert for diagnostic-gated status moves (was ~87-line verbatim copy ×2, P2 audit 2026-08-08) */
+function DiagnosticSoftAlert({ tone, title, subtitle, body, noticeLabel, noticeBody, inspectLabel, overrideLabel, onClose, onInspect, onOverride }: {
+  tone: 'warning' | 'danger';
+  title: string;
+  subtitle: string;
+  body: React.ReactNode;
+  noticeLabel: string;
+  noticeBody: string;
+  inspectLabel: string;
+  overrideLabel: string;
+  onClose: () => void;
+  onInspect: () => void;
+  onOverride: () => void;
+}) {
+  const isWarn = tone === 'warning';
+  const Icon = isWarn ? AlertTriangle : AlertCircle;
+  return (
+    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className={`bg-white border ${isWarn ? 'border-warning/30' : 'border-danger/30'} rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative`}>
+        <Button
+          type="button"
+          onClick={onClose}
+          className="absolute right-4 top-4 text-muted hover:text-ink p-1 rounded-lg hover:bg-surface transition-colors"
+        >
+          <X className="w-5 h-5" />
+        </Button>
+
+        <div className={`flex items-center space-x-3 ${isWarn ? 'text-warning bg-warning/10 border-warning/30' : 'text-danger bg-danger/10 border-danger/30'} p-3.5 rounded-xl border`}>
+          <div className={`p-2.5 ${isWarn ? 'bg-warning' : 'bg-danger'} text-white rounded-xl shadow-xs shrink-0`}>
+            <Icon className="w-6 h-6 animate-pulse" />
+          </div>
+          <div>
+            <h3 className={`font-black text-sm ${isWarn ? 'text-warning' : 'text-danger'} uppercase tracking-tight`}>{title}</h3>
+            <p className={`text-xs ${isWarn ? 'text-warning' : 'text-danger'} font-bold`}>{subtitle}</p>
+          </div>
+        </div>
+
+        <div className="space-y-3 text-xs text-ink">
+          {body}
+
+          <div className={`p-3.5 ${isWarn ? 'bg-warning/10 border-warning/30' : 'bg-danger/10 border-danger/30'} rounded-xl ${isWarn ? 'text-warning' : 'text-danger'} text-xs space-y-1.5`}>
+            <span className={`font-black flex items-center space-x-1.5 ${isWarn ? 'text-warning' : 'text-danger'}`}>
+              <AlertTriangle className={`w-4 h-4 ${isWarn ? 'text-warning' : 'text-danger'} shrink-0`} />
+              <span>{noticeLabel}</span>
+            </span>
+            <p className={`leading-relaxed ${isWarn ? 'text-warning' : 'text-danger'}`}>{noticeBody}</p>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center gap-2 pt-3 border-t border-line">
+          <Button
+            type="button"
+            onClick={onInspect}
+            className="w-full sm:w-auto flex-1 py-2.5 px-4 bg-brand hover:bg-brand-deep text-white font-extrabold rounded-xl text-xs flex items-center justify-center space-x-2 transition-all shadow-md active:scale-95 cursor-pointer"
+          >
+            <ShieldCheck className="w-4 h-4" />
+            <span>{inspectLabel}</span>
+          </Button>
+
+          <Button
+            type="button"
+            onClick={onOverride}
+            className="w-full sm:w-auto py-2.5 px-3 bg-surface hover:bg-line text-muted font-extrabold rounded-xl text-xs border border-line transition-all cursor-pointer"
+          >
+            {overrideLabel}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
   workOrders,
@@ -181,7 +253,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
 
   // Bottleneck Helper Functions
   const getHoursInStatus = (wo: WorkOrder) => {
-    const refTime = Math.max(Date.now(), new Date('2026-07-22T08:46:00Z').getTime());
+    const refTime = Date.now();
     const updatedTime = new Date(wo.updatedAt || wo.createdAt).getTime();
     if (isNaN(updatedTime)) return 0;
     return Math.max(0, Math.floor((refTime - updatedTime) / (1000 * 60 * 60)));
@@ -206,7 +278,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
 
   const getCardStyle = (status: WorkOrderStatus, isStagnant: boolean) => {
     if (isStagnant) {
-      return 'bg-amber-50/50 border border-amber-300 shadow-2xs hover:border-amber-500 hover:ring-2 hover:ring-amber-400/30 transition-all duration-200';
+      return 'bg-warning/50 border border-warning/30 shadow-2xs hover:border-amber-500 hover:ring-2 hover:ring-amber-400/30 transition-all duration-200';
     }
     switch (status) {
       case 'Receive':
@@ -519,7 +591,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                 setShowNeedsDiagOnly(false);
                 setShowBeforeNeedsDiagOnly(false);
               }}
-              className="px-2 py-0.5 text-xs bg-slate-100 hover:bg-slate-200 text-brand font-bold rounded-lg transition-all cursor-pointer border border-slate-200"
+              className="px-2 py-0.5 text-xs bg-surface hover:bg-line text-brand font-bold rounded-lg transition-all cursor-pointer border border-line"
             >
               Reset Filters ↺
             </Button>
@@ -533,7 +605,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
             className={`inline-flex w-full sm:w-auto h-8 sm:h-7 items-center justify-center gap-1 rounded-md border px-2 text-xs font-bold transition-colors cursor-pointer ${
               showAllStages
                 ? 'bg-ink text-white border-ink shadow-2xs'
-                : 'bg-white text-ink border-line hover:bg-slate-100'
+                : 'bg-white text-ink border-line hover:bg-surface'
             }`}
             title={showAllStages ? 'Hide the exception columns again' : 'Show Cant Repair and Customer Not Repair columns'}
           >
@@ -552,8 +624,8 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
             }}
                 className={`inline-flex w-full sm:w-auto h-8 sm:h-7 items-center justify-center gap-1 rounded-md border px-2 text-xs font-bold transition-colors cursor-pointer ${
                   showBeforeNeedsDiagOnly
-                    ? 'bg-blue-600 text-white border-blue-700 shadow-2xs'
-                    : 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100'
+                    ? 'bg-brand text-white border-blue-700 shadow-2xs'
+                    : 'bg-brand-soft text-brand border-brand/30 hover:bg-brand/15'
                 }`}
           >
             <Stethoscope className="h-3 w-3 shrink-0" />
@@ -568,8 +640,8 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
             }}
               className={`inline-flex w-full sm:w-auto h-8 sm:h-7 items-center justify-center gap-1 rounded-md border px-2 text-xs font-bold transition-colors cursor-pointer ${
                 showNeedsDiagOnly
-                  ? 'bg-purple-600 text-white border-purple-700 shadow-2xs'
-                  : 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100'
+                  ? 'bg-purple text-white border-purple-700 shadow-2xs'
+                  : 'bg-purple/10 text-purple border-purple/30 hover:bg-purple/15'
               }`}
           >
             <ShieldCheck className="h-3 w-3 shrink-0" />
@@ -577,7 +649,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
           </Button>
 
           {showBottlenecksOnly && (
-            <span className="inline-flex h-7 items-center gap-1 rounded-md border border-red-600 bg-red-500 px-2 text-xs font-bold text-white shadow-2xs">
+            <span className="inline-flex h-7 items-center gap-1 rounded-md border border-red-600 bg-danger/100 px-2 text-xs font-bold text-white shadow-2xs">
               <Timer className="h-3 w-3 shrink-0" />
               <span>Filtering Bottlenecks (&gt;48h)</span>
             </span>
@@ -591,10 +663,10 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   onClearAllWorkOrders();
                 }
               }}
-              className="inline-flex h-7 items-center gap-1 rounded-md border border-rose-200 bg-rose-50 px-2 text-xs font-bold text-rose-700 shadow-2xs transition-colors hover:bg-rose-100"
+              className="inline-flex h-7 items-center gap-1 rounded-md border border-danger/30 bg-danger/10 px-2 text-xs font-bold text-danger shadow-2xs transition-colors hover:bg-danger/15"
               title="⚠️ Permanently delete ALL tickets from the system (Admin only)"
             >
-              <Trash2 className="h-3 w-3 shrink-0 text-rose-600" />
+              <Trash2 className="h-3 w-3 shrink-0 text-danger" />
               <span>Delete All Tickets ({workOrders.length})</span>
             </Button>
           )}
@@ -609,14 +681,14 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
           className={`inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-xl border px-3 text-xs font-bold transition-colors cursor-pointer active:scale-95 ${
             showAllStages
               ? 'bg-ink text-white border-ink shadow-2xs'
-              : 'bg-white text-ink border-line-strong hover:bg-slate-100'
+              : 'bg-white text-ink border-line-strong hover:bg-surface'
           }`}
           aria-pressed={showAllStages}
         >
           {showAllStages ? <EyeOff className="w-3.5 h-3.5 shrink-0" /> : <Eye className="w-3.5 h-3.5 shrink-0 text-brand" />}
           <span>{showAllStages ? 'Hide Exception Stages' : 'Show Exception Stages'}</span>
           {hiddenStageCounts.some((h) => h.count > 0) && (
-            <span className={`rounded-full px-1.5 py-0.5 text-xs font-black ${showAllStages ? 'bg-black/25 text-white' : 'bg-rose-100 text-rose-700'}`}>
+            <span className={`rounded-full px-1.5 py-0.5 text-xs font-black ${showAllStages ? 'bg-black/25 text-white' : 'bg-danger/15 text-danger'}`}>
               {hiddenStageCounts.filter((h) => h.count > 0).reduce((acc, h) => acc + h.count, 0)}
             </span>
           )}
@@ -721,10 +793,10 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   <div className="flex items-center space-x-1">
                     {stageStagnantOrders.length > 0 && (
                       <span
-                        className="text-xs font-extrabold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300/80 flex items-center space-x-0.5"
+                        className="text-xs font-extrabold px-1.5 py-0.5 rounded-full bg-warning/15 text-warning border border-warning/30/80 flex items-center space-x-0.5"
                         title={`${stageStagnantOrders.length} ticket(s) stationary >48h in this stage`}
                       >
-                        <AlertTriangle className="w-2.5 h-2.5 text-amber-600 shrink-0" />
+                        <AlertTriangle className="w-2.5 h-2.5 text-warning shrink-0" />
                         <span>{stageStagnantOrders.length}</span>
                       </span>
                     )}
@@ -745,11 +817,11 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                     // Age chip: neutral <24h · amber 24–48h · red ≥48h (red only matters for
                     // terminal stages — active stages already get the red Bottleneck banner)
                     const ageChipClass = hoursInStatus >= 48
-                      ? 'text-red-700 bg-red-50 border border-red-200 rounded-md px-1.5 py-0.5'
+                      ? 'text-danger bg-danger/10 border border-red-200 rounded-md px-1.5 py-0.5'
                       : hoursInStatus >= 24
-                      ? 'text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-1.5 py-0.5'
+                      ? 'text-warning bg-warning/10 border border-warning/30 rounded-md px-1.5 py-0.5'
                       : 'text-muted';
-                    const ageChipIconClass = hoursInStatus >= 24 ? 'text-amber-600' : 'text-brand';
+                    const ageChipIconClass = hoursInStatus >= 24 ? 'text-warning' : 'text-brand';
 
                     const isBeforeDiagNeeded = checkIsBeforeDiagnosticNeeded(wo);
                     const isAfterDiagNeeded = checkIsAfterDiagnosticNeeded(wo);
@@ -767,9 +839,9 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         }}
                         className={`p-3 rounded-xl shadow-xs hover:shadow-md space-y-2 text-xs min-h-[200px] transition-shadow duration-150 ease-out cursor-pointer active:cursor-grabbing group ${
                           isBeforeDiagNeeded 
-                            ? 'border-l-4 border-l-amber-500 bg-amber-50/20' 
+                            ? 'border-l-4 border-l-amber-500 bg-warning/10/20' 
                             : isAfterDiagNeeded 
-                            ? 'border-l-4 border-l-purple-600 bg-purple-50/20' 
+                            ? 'border-l-4 border-l-purple-600 bg-purple/10/20' 
                             : ''
                         } ${getCardStyle(
                           wo.status,
@@ -785,18 +857,18 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                           <div className="flex items-center space-x-1 shrink-0">
                             {isBeforeDiagNeeded && (
                               <span
-                                className="w-5 h-5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 flex items-center justify-center shrink-0 shadow-2xs"
+                                className="w-5 h-5 rounded-full bg-brand-soft text-brand border border-brand/30 flex items-center justify-center shrink-0 shadow-2xs"
                                 title="Initial 21-Point Diagnostic Pending"
                               >
-                                <Stethoscope className="w-3 h-3 text-blue-600 shrink-0" />
+                                <Stethoscope className="w-3 h-3 text-brand shrink-0" />
                               </span>
                             )}
                             {isAfterDiagNeeded && (
                               <span
-                                className="w-5 h-5 rounded-full bg-purple-100 text-purple-900 border border-purple-300 flex items-center justify-center shrink-0 shadow-2xs"
+                                className="w-5 h-5 rounded-full bg-purple/15 text-purple border border-purple/30 flex items-center justify-center shrink-0 shadow-2xs"
                                 title="Post-Repair Diagnostic Quality Check Pending"
                               >
-                                <ShieldCheck className="w-3 h-3 text-purple-700 shrink-0" />
+                                <ShieldCheck className="w-3 h-3 text-purple shrink-0" />
                               </span>
                             )}
                           </div>
@@ -804,12 +876,12 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
 
                         {/* Stagnant Bottleneck Alert Banner / Age Chip (amber ≥24h, red ≥48h) */}
                         {isStagnant ? (
-                          <div className="flex items-center justify-between px-2 py-1 rounded-lg bg-red-50 border border-red-200 text-red-800 text-xs font-extrabold">
+                          <div className="flex items-center justify-between px-2 py-1 rounded-lg bg-danger/10 border border-red-200 text-danger text-xs font-extrabold">
                             <span className="flex items-center space-x-1">
-                              <Timer className="w-3.5 h-3.5 text-red-600 animate-pulse shrink-0" />
+                              <Timer className="w-3.5 h-3.5 text-danger animate-pulse shrink-0" />
                               <span>Bottleneck (&gt;48h)</span>
                             </span>
-                            <span className="font-mono bg-red-100 px-1.5 py-0.5 rounded text-red-800">{hoursInStatus}h</span>
+                            <span className="font-mono bg-danger/15 px-1.5 py-0.5 rounded text-danger">{hoursInStatus}h</span>
                           </div>
                         ) : (
                           <div className={`flex items-center space-x-1 text-xs ${ageChipClass}`}>
@@ -821,19 +893,19 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         {/* Model & Customer & Repair Issue */}
                         <div className="cursor-pointer space-y-1" title={`Open detail — ${wo.deviceModel || wo.orderNumber || wo.id}`}>
                           <p className="font-extrabold text-ink text-xs line-clamp-1 hover:text-brand transition-colors">{wo.deviceModel}</p>
-                          <p className="text-xs text-slate-500 truncate" title={`${wo.customerName} • ${wo.customerPhone}`}>{wo.customerName} • {wo.customerPhone}</p>
+                          <p className="text-xs text-muted truncate" title={`${wo.customerName} • ${wo.customerPhone}`}>{wo.customerName} • {wo.customerPhone}</p>
                           
                           {/* What to repair under Customer info */}
-                          <div className="flex items-start space-x-1.5 pt-1 mt-1 border-t border-slate-100 text-xs text-ink">
+                          <div className="flex items-start space-x-1.5 pt-1 mt-1 border-t border-line text-xs text-ink">
                             <ClipboardCheck className="w-3.5 h-3.5 text-brand shrink-0 mt-0.5" />
-                            <span className="font-semibold text-slate-700 line-clamp-2 leading-tight">
+                            <span className="font-semibold text-muted line-clamp-2 leading-tight">
                               {getRepairSummary(wo)}
                             </span>
                           </div>
                         </div>
 
                         {/* Tech Tag — one-tap quick assign (dropdown for managers, self-assign for techs) */}
-                        <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-100 text-slate-500" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between text-xs pt-1 border-t border-line text-muted" onClick={(e) => e.stopPropagation()}>
                           <span>Tech: <strong className="text-ink">{tech?.name?.split(' ')[0] || 'Unassigned'}</strong></span>
                           {isTechnicianUser && myTechId ? (
                             <Button
@@ -859,7 +931,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                                   value: t.id,
                                   label: t.name,
                                   badge: t.activeJobsCount,
-                                  badgeColor: t.activeJobsCount > 0 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500',
+                                  badgeColor: t.activeJobsCount > 0 ? 'bg-warning/15 text-warning' : 'bg-surface text-muted',
                                 })),
                               ]}
                             />
@@ -867,7 +939,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         </div>
 
                         {/* Primary Card Action + ⋯ More menu (Detail/Log/Notify stay one tap away) */}
-                        <div className="flex items-stretch gap-1 pt-1 border-t border-slate-100 text-xs" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-stretch gap-1 pt-1 border-t border-line text-xs" onClick={(e) => e.stopPropagation()}>
                           {stage.id === 'Finished' ? (
                             <Button
                               type="button"
@@ -948,12 +1020,12 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   type="button"
                   onClick={() => scrollToStage(s.id)}
                   className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-3 text-xs font-extrabold transition-colors cursor-pointer active:scale-95 ${
-                    count > 0 ? 'bg-white text-ink border-line-strong hover:bg-slate-100' : 'bg-transparent text-muted border-dashed border-line'
+                    count > 0 ? 'bg-white text-ink border-line-strong hover:bg-surface' : 'bg-transparent text-muted border-dashed border-line'
                   }`}
                   title={`Scroll to ${s.title} column`}
                 >
                   <span>{s.id}</span>
-                  <span className={`rounded-full px-1.5 py-0.5 text-xs font-black ${count > 0 ? 'bg-brand text-white' : 'bg-slate-100 text-muted'}`}>{count}</span>
+                  <span className={`rounded-full px-1.5 py-0.5 text-xs font-black ${count > 0 ? 'bg-brand text-white' : 'bg-surface text-muted'}`}>{count}</span>
                 </Button>
               );
             })}
@@ -975,7 +1047,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
 
       {/* MODAL 2: Add Manual Repair Log */}
       {addLogModalWo && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border border-line-strong rounded-2xl max-w-md w-full p-6 space-y-4 text-xs shadow-2xl relative">
             <Button onClick={() => setAddLogModalWo(null)} aria-label="Close repair log" className="absolute right-4 top-4 text-muted hover:text-ink">
               <X className="w-5 h-5" />
@@ -1010,7 +1082,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
 
       {/* MODAL 3: Assign Technician */}
       {assignTechModalWo && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border border-line-strong rounded-2xl max-w-sm w-full p-6 space-y-4 text-xs shadow-2xl relative">
             <Button onClick={() => setAssignTechModalWo(null)} aria-label="Close technician assignment" className="absolute right-4 top-4 text-muted hover:text-ink">
               <X className="w-5 h-5" />
@@ -1029,14 +1101,14 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   className={`w-full p-3 rounded-xl border text-left flex justify-between items-center transition-all ${
                     assignTechModalWo.assignedTechId === t.id
                       ? 'border-brand bg-brand-soft text-brand font-bold'
-                      : 'border-line-strong bg-white text-ink hover:bg-slate-50'
+                      : 'border-line-strong bg-white text-ink hover:bg-surface'
                   }`}
                 >
                   <div>
                     <p className="font-bold text-xs">{t.name}</p>
                     <p className="text-xs opacity-70">{t.level}</p>
                   </div>
-                  <span className="text-xs bg-slate-100 text-ink px-2 py-0.5 rounded-full font-bold">
+                  <span className="text-xs bg-surface text-ink px-2 py-0.5 rounded-full font-bold">
                     {t.activeJobsCount} Active Jobs
                   </span>
                 </Button>
@@ -1048,7 +1120,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
 
       {/* MODAL 3b: Move to Stage — keyboard-accessible status change (mirrors drag-and-drop) */}
       {moveStageModalWo && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border border-line-strong rounded-2xl max-w-sm w-full p-6 space-y-4 text-xs shadow-2xl relative">
             <Button onClick={() => setMoveStageModalWo(null)} aria-label="Close move to stage" className="absolute right-4 top-4 text-muted hover:text-ink">
               <X className="w-5 h-5" />
@@ -1071,7 +1143,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                     onClick={() => handleMoveToStage(moveStageModalWo, s.id)}
                     className={`w-full p-3 rounded-xl border text-left flex justify-between items-center transition-all ${
                       isCurrent
-                        ? 'border-line bg-slate-50 text-muted cursor-not-allowed'
+                        ? 'border-line bg-surface text-muted cursor-not-allowed'
                         : 'border-line-strong bg-white text-ink hover:bg-brand-soft hover:border-brand/40'
                     }`}
                   >
@@ -1079,7 +1151,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                       <p className="font-bold text-xs">{s.title}</p>
                       <p className="text-xs opacity-70">{s.subtitle}</p>
                     </div>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${isCurrent ? 'bg-slate-100 text-muted' : 'bg-slate-100 text-ink'}`}>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${isCurrent ? 'bg-surface text-muted' : 'bg-surface text-ink'}`}>
                       {isCurrent ? 'Current' : `${count} tickets`}
                     </span>
                   </Button>
@@ -1099,16 +1171,16 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
           <Button
             type="button"
             onClick={() => setShowAllStages(true)}
-            className="flex w-full items-center justify-center gap-1.5 rounded-full border border-dashed border-rose-300 bg-rose-50 px-3 py-2.5 text-xs font-extrabold text-rose-700 transition-colors cursor-pointer active:scale-[0.99]"
+            className="flex w-full items-center justify-center gap-1.5 rounded-full border border-dashed border-danger/30 bg-danger/10 px-3 py-2.5 text-xs font-extrabold text-danger transition-colors cursor-pointer active:scale-[0.99]"
           >
-            <Eye className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+            <Eye className="w-3.5 h-3.5 text-danger shrink-0" />
             <span>
               Show Cant Repair{hiddenStageCounts[0].count > 0 ? ` (${hiddenStageCounts[0].count})` : ''} & Customer Not Repair{hiddenStageCounts[1].count > 0 ? ` (${hiddenStageCounts[1].count})` : ''}
             </span>
           </Button>
         </div>
       ) : !kanbanAtEnd ? (
-        <div className="flex items-center justify-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-extrabold text-muted md:hidden animate-fade-in">
+        <div className="flex items-center justify-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-extrabold text-muted md:hidden animate-fadeIn">
           <ChevronsRight className="w-3.5 h-3.5 text-brand" />
           <span>Scroll for Cant Repair / Customer Not Repair</span>
           <ChevronsRight className="w-3.5 h-3.5 text-brand" />
@@ -1117,7 +1189,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
 
       {/* MODAL 4: Checkout Payment */}
       {checkoutModalWo && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border border-line-strong rounded-2xl max-w-md w-full p-6 space-y-4 text-xs shadow-2xl relative">
             <Button onClick={() => setCheckoutModalWo(null)} aria-label="Close checkout" className="absolute right-4 top-4 text-muted hover:text-ink">
               <X className="w-5 h-5" />
@@ -1172,7 +1244,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
 
       {/* MODAL 5: After-Repair Diagnostic */}
       {afterDiagModalWo && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border border-line-strong rounded-2xl max-w-xl w-full p-6 space-y-4 text-xs shadow-2xl relative max-h-[88vh] overflow-y-auto">
             <Button onClick={() => setAfterDiagModalWo(null)} aria-label="Close post-diagnosis" className="absolute right-4 top-4 text-muted hover:text-ink">
               <X className="w-5 h-5" />
@@ -1191,15 +1263,15 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
             </div>
 
             {/* Quick Actions & Pass/Fail Counts */}
-            <div className="flex items-center justify-between p-2.5 bg-purple-50/60 rounded-xl border border-purple-200 text-xs">
+            <div className="flex items-center justify-between p-2.5 bg-purple/10/60 rounded-xl border border-purple/30 text-xs">
               <div className="flex items-center space-x-2 font-bold text-ink">
-                <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-xs">
+                <span className="px-2 py-0.5 rounded bg-success/15 text-success-deep text-xs">
                   Pass: {afterDiagnostics.filter(d => d.status === 'Pass').length}
                 </span>
-                <span className="px-2 py-0.5 rounded bg-rose-100 text-rose-800 text-xs">
+                <span className="px-2 py-0.5 rounded bg-danger/15 text-danger text-xs">
                   Fail: {afterDiagnostics.filter(d => d.status === 'Fail').length}
                 </span>
-                <span className="px-2 py-0.5 rounded bg-slate-200 text-slate-700 text-xs">
+                <span className="px-2 py-0.5 rounded bg-line text-muted text-xs">
                   N/A: {afterDiagnostics.filter(d => d.status === 'N/A').length}
                 </span>
               </div>
@@ -1224,8 +1296,8 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   <div className="flex justify-between items-center text-xs font-bold text-ink">
                     <span className="truncate pr-1">{idx + 1}. {item.name}</span>
                     <span className={`text-xs font-extrabold px-1.5 py-0.2 rounded ${
-                      item.status === 'Pass' ? 'bg-emerald-100 text-emerald-800' :
-                      item.status === 'Fail' ? 'bg-rose-100 text-rose-800' : 'bg-slate-200 text-slate-600'
+                      item.status === 'Pass' ? 'bg-success/15 text-success-deep' :
+                      item.status === 'Fail' ? 'bg-danger/15 text-danger' : 'bg-line text-muted'
                     }`}>
                       {item.status}
                     </span>
@@ -1239,7 +1311,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         copy[idx].status = 'Pass';
                         setAfterDiagnostics(copy);
                       }}
-                      className={`flex-1 min-h-10 py-1 rounded-md font-extrabold transition-all ${item.status === 'Pass' ? 'bg-success text-white shadow-2xs' : 'bg-slate-200 text-ink hover:bg-slate-300'}`}
+                      className={`flex-1 min-h-10 py-1 rounded-md font-extrabold transition-all ${item.status === 'Pass' ? 'bg-success text-white shadow-2xs' : 'bg-line text-ink hover:bg-line'}`}
                     >
                       Pass
                     </Button>
@@ -1250,7 +1322,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         copy[idx].status = 'Fail';
                         setAfterDiagnostics(copy);
                       }}
-                      className={`flex-1 min-h-10 py-1 rounded-md font-extrabold transition-all ${item.status === 'Fail' ? 'bg-rose-600 text-white shadow-2xs' : 'bg-slate-200 text-ink hover:bg-slate-300'}`}
+                      className={`flex-1 min-h-10 py-1 rounded-md font-extrabold transition-all ${item.status === 'Fail' ? 'bg-danger text-white shadow-2xs' : 'bg-line text-ink hover:bg-line'}`}
                     >
                       Fail
                     </Button>
@@ -1261,7 +1333,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         copy[idx].status = 'N/A';
                         setAfterDiagnostics(copy);
                       }}
-                      className={`flex-1 min-h-10 py-1 rounded-md font-extrabold transition-all ${item.status === 'N/A' ? 'bg-slate-600 text-white shadow-2xs' : 'bg-slate-200 text-ink hover:bg-slate-300'}`}
+                      className={`flex-1 min-h-10 py-1 rounded-md font-extrabold transition-all ${item.status === 'N/A' ? 'bg-slate-600 text-white shadow-2xs' : 'bg-line text-ink hover:bg-line'}`}
                     >
                       N/A
                     </Button>
@@ -1314,184 +1386,105 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
         />
       )}
 
-      {/* MODAL: Initial Device Diagnostic Soft Notification Alert */}
+      
       {pendingBeforeDiagAlertWo && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-amber-200 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative">
-            <Button 
-              type="button" 
-              onClick={() => setPendingBeforeDiagAlertWo(null)} 
-              className="absolute right-4 top-4 text-muted hover:text-ink p-1 rounded-lg hover:bg-slate-100 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </Button>
-
-            <div className="flex items-center space-x-3 text-amber-900 bg-amber-50 p-3.5 rounded-xl border border-amber-200">
-              <div className="p-2.5 bg-amber-500 text-white rounded-xl shadow-xs shrink-0">
-                <AlertTriangle className="w-6 h-6 animate-pulse" />
-              </div>
-              <div>
-                <h3 className="font-black text-sm text-amber-950 uppercase tracking-tight">Initial Diagnostic Alert</h3>
-                <p className="text-xs text-amber-800 font-bold">Mandatory Intake Inspection Pending</p>
-              </div>
-            </div>
-
-            <div className="space-y-3 text-xs text-ink">
-              <p className="leading-relaxed">
-                You are attempting to move Ticket{' '}
-                <strong className="font-mono text-brand font-black bg-brand-soft px-2 py-0.5 rounded border border-brand/20">
-                  {pendingBeforeDiagAlertWo.wo.orderNumber}
-                </strong>{' '}
-                ({pendingBeforeDiagAlertWo.wo.deviceModel}) to <strong className="text-amber-800 font-bold">"{pendingBeforeDiagAlertWo.newStatus}"</strong>.
-              </p>
-
-              <div className="p-3.5 bg-amber-50/90 border border-amber-300 rounded-xl text-amber-950 text-xs space-y-1.5">
-                <span className="font-black flex items-center space-x-1.5 text-amber-900">
-                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-                  <span>Intake Inspection Notice:</span>
-                </span>
-                <p className="leading-relaxed text-amber-900">Initial 21-point diagnostic not recorded yet.</p>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-center gap-2 pt-3 border-t border-slate-100">
-              <Button
-                type="button"
-                onClick={() => {
-                  const woToInspect = pendingBeforeDiagAlertWo.wo;
-                  setPendingBeforeDiagAlertWo(null);
-                  setDetailModalWo(woToInspect);
-                }}
-                className="w-full sm:w-auto flex-1 py-2.5 px-4 bg-brand hover:bg-brand-deep text-white font-extrabold rounded-xl text-xs flex items-center justify-center space-x-2 transition-all shadow-md active:scale-95 cursor-pointer"
-              >
-                <ShieldCheck className="w-4 h-4" />
-                <span>Complete Intake Diagnostic First</span>
-              </Button>
-
-              <Button
-                type="button"
-                onClick={() => {
-                  const targetWo = pendingBeforeDiagAlertWo.wo;
-                  const targetStatus = pendingBeforeDiagAlertWo.newStatus;
-                  setPendingBeforeDiagAlertWo(null);
-
-                  const formattedDate = new Date().toLocaleString('en-US', {
-                    month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true
-                  });
-                  const newLog: RepairLogEntry = {
-                    id: `log-${Date.now()}`,
-                    timestamp: formattedDate,
-                    author: currentUser?.name || 'Staff',
-                    note: `⚠️ Initial Diagnostic Notice: Moved to "${targetStatus}" without recorded intake 21-point inspection.`,
-                    statusChange: targetStatus
-                  };
-                  const updatedWo: WorkOrder = {
-                    ...targetWo,
-                    status: targetStatus,
-                    repairLogs: [newLog, ...(targetWo.repairLogs || [])],
-                    updatedAt: new Date().toISOString()
-                  };
-
-                  if (onSaveWorkOrder) onSaveWorkOrder(updatedWo);
-                  onUpdateWorkOrderStatus(targetWo.id, targetStatus);
-                }}
-                className="w-full sm:w-auto py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold rounded-xl text-xs border border-slate-200 transition-all cursor-pointer"
-              >
-                Proceed (Soft Override)
-              </Button>
-            </div>
-          </div>
-        </div>
+        <DiagnosticSoftAlert
+          tone="warning"
+          title="Initial Diagnostic Alert"
+          subtitle="Mandatory Intake Inspection Pending"
+          body={(
+            <p className="leading-relaxed">
+              You are attempting to move Ticket{' '}
+              <strong className="font-mono text-brand font-black bg-brand-soft px-2 py-0.5 rounded border border-brand/20">
+                {pendingBeforeDiagAlertWo.wo.orderNumber}
+              </strong>{' '}
+              ({pendingBeforeDiagAlertWo.wo.deviceModel}) to <strong className="text-warning font-bold">"{pendingBeforeDiagAlertWo.newStatus}"</strong>.
+            </p>
+          )}
+          noticeLabel="Intake Inspection Notice:"
+          noticeBody="Initial 21-point diagnostic not recorded yet."
+          inspectLabel="Complete Intake Diagnostic First"
+          overrideLabel="Proceed (Soft Override)"
+          onClose={() => setPendingBeforeDiagAlertWo(null)}
+          onInspect={() => {
+            const woToInspect = pendingBeforeDiagAlertWo.wo;
+            setPendingBeforeDiagAlertWo(null);
+            setDetailModalWo(woToInspect);
+          }}
+          onOverride={() => {
+            const targetWo = pendingBeforeDiagAlertWo.wo;
+            const targetStatus = pendingBeforeDiagAlertWo.newStatus;
+            setPendingBeforeDiagAlertWo(null);
+            const formattedDate = new Date().toLocaleString('en-US', {
+              month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true
+            });
+            const newLog: RepairLogEntry = {
+              id: `log-${Date.now()}`,
+              timestamp: formattedDate,
+              author: currentUser?.name || 'Staff',
+              note: `⚠️ Initial Diagnostic Notice: Moved to "${targetStatus}" without recorded intake 21-point inspection.`,
+              statusChange: targetStatus
+            };
+            const updatedWo: WorkOrder = {
+              ...targetWo,
+              status: targetStatus,
+              repairLogs: [newLog, ...(targetWo.repairLogs || [])],
+              updatedAt: new Date().toISOString()
+            };
+            if (onSaveWorkOrder) onSaveWorkOrder(updatedWo);
+            onUpdateWorkOrderStatus(targetWo.id, targetStatus);
+          }}
+        />
       )}
 
-      {/* MODAL: Finished Device Diagnostic Soft Notification Alert */}
       {pendingDiagAlertWo && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-rose-200 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative">
-            <Button 
-              type="button" 
-              onClick={() => setPendingDiagAlertWo(null)} 
-              className="absolute right-4 top-4 text-muted hover:text-ink p-1 rounded-lg hover:bg-slate-100 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </Button>
-
-            <div className="flex items-center space-x-3 text-rose-800 bg-rose-50 p-3.5 rounded-xl border border-rose-200">
-              <div className="p-2.5 bg-rose-600 text-white rounded-xl shadow-xs shrink-0">
-                <AlertCircle className="w-6 h-6 animate-pulse" />
-              </div>
-              <div>
-                <h3 className="font-black text-sm text-rose-950 uppercase tracking-tight">Finished Device Diagnostic Alert</h3>
-                <p className="text-xs text-rose-700 font-bold">Mandatory Diagnostic Checklist Pending</p>
-              </div>
-            </div>
-
-            <div className="space-y-3 text-xs text-ink">
-              <p className="leading-relaxed">
-                You are attempting to move Ticket{' '}
-                <strong className="font-mono text-brand font-black bg-brand-soft px-2 py-0.5 rounded border border-brand/20">
-                  {pendingDiagAlertWo.wo.orderNumber}
-                </strong>{' '}
-                ({pendingDiagAlertWo.wo.deviceModel}) to <strong className="text-emerald-700 font-bold">"Finished"</strong>.
-              </p>
-
-              <div className="p-3.5 bg-rose-50/90 border border-rose-300 rounded-xl text-rose-950 text-xs space-y-1.5">
-                <span className="font-black flex items-center space-x-1.5 text-rose-900">
-                  <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
-                  <span>Finished Device Protocol Notice:</span>
-                </span>
-                <p className="leading-relaxed text-rose-900">Marking Finished without a completed 21-point diagnostic.</p>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-center gap-2 pt-3 border-t border-slate-100">
-              <Button
-                type="button"
-                onClick={() => {
-                  const woToInspect = pendingDiagAlertWo.wo;
-                  setPendingDiagAlertWo(null);
-                  setDetailModalWo(woToInspect);
-                }}
-                className="w-full sm:w-auto flex-1 py-2.5 px-4 bg-brand hover:bg-brand-deep text-white font-extrabold rounded-xl text-xs flex items-center justify-center space-x-2 transition-all shadow-md active:scale-95 cursor-pointer"
-              >
-                <ShieldCheck className="w-4 h-4" />
-                <span>Complete Diagnostic First</span>
-              </Button>
-
-              <Button
-                type="button"
-                onClick={() => {
-                  const targetWo = pendingDiagAlertWo.wo;
-                  const targetStatus = pendingDiagAlertWo.newStatus;
-                  setPendingDiagAlertWo(null);
-
-                  const formattedDate = new Date().toLocaleString('en-US', {
-                    month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true
-                  });
-                  const newLog: RepairLogEntry = {
-                    id: `log-${Date.now()}`,
-                    timestamp: formattedDate,
-                    author: currentUser?.name || 'Staff',
-                    note: '⚠️ Finished Device Notice: Marked as Finished without completed 21-point diagnostic inspection.',
-                    statusChange: targetStatus
-                  };
-                  const updatedWo: WorkOrder = {
-                    ...targetWo,
-                    status: targetStatus,
-                    repairLogs: [newLog, ...(targetWo.repairLogs || [])],
-                    updatedAt: new Date().toISOString()
-                  };
-
-                  if (onSaveWorkOrder) onSaveWorkOrder(updatedWo);
-                  onUpdateWorkOrderStatus(targetWo.id, targetStatus);
-                }}
-                className="w-full sm:w-auto py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold rounded-xl text-xs border border-slate-200 transition-all cursor-pointer"
-              >
-                Mark Finished (Soft Override)
-              </Button>
-            </div>
-          </div>
-        </div>
+        <DiagnosticSoftAlert
+          tone="danger"
+          title="Finished Device Diagnostic Alert"
+          subtitle="Mandatory Diagnostic Checklist Pending"
+          body={(
+            <p className="leading-relaxed">
+              You are attempting to move Ticket{' '}
+              <strong className="font-mono text-brand font-black bg-brand-soft px-2 py-0.5 rounded border border-brand/20">
+                {pendingDiagAlertWo.wo.orderNumber}
+              </strong>{' '}
+              ({pendingDiagAlertWo.wo.deviceModel}) to <strong className="text-success-deep font-bold">"Finished"</strong>.
+            </p>
+          )}
+          noticeLabel="Finished Device Protocol Notice:"
+          noticeBody="Marking Finished without a completed 21-point diagnostic."
+          inspectLabel="Complete Diagnostic First"
+          overrideLabel="Mark Finished (Soft Override)"
+          onClose={() => setPendingDiagAlertWo(null)}
+          onInspect={() => {
+            const woToInspect = pendingDiagAlertWo.wo;
+            setPendingDiagAlertWo(null);
+            setDetailModalWo(woToInspect);
+          }}
+          onOverride={() => {
+            const targetWo = pendingDiagAlertWo.wo;
+            const targetStatus = pendingDiagAlertWo.newStatus;
+            setPendingDiagAlertWo(null);
+            const formattedDate = new Date().toLocaleString('en-US', {
+              month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true
+            });
+            const newLog: RepairLogEntry = {
+              id: `log-${Date.now()}`,
+              timestamp: formattedDate,
+              author: currentUser?.name || 'Staff',
+              note: '⚠️ Finished Device Notice: Marked as Finished without completed 21-point diagnostic inspection.',
+              statusChange: targetStatus
+            };
+            const updatedWo: WorkOrder = {
+              ...targetWo,
+              status: targetStatus,
+              repairLogs: [newLog, ...(targetWo.repairLogs || [])],
+              updatedAt: new Date().toISOString()
+            };
+            if (onSaveWorkOrder) onSaveWorkOrder(updatedWo);
+            onUpdateWorkOrderStatus(targetWo.id, targetStatus);
+          }}
+        />
       )}
     </div>
   );

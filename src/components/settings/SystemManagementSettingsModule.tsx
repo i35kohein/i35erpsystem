@@ -825,9 +825,9 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
     <div className="space-y-3 pb-20 lg:pb-0">
       {/* Save Toast Notification */}
       {isSavedBanner && (
-        <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-bold flex items-center justify-between animate-fade-in">
+        <div className="p-3 bg-success/10 border border-success/30 rounded-xl text-success-deep text-xs font-bold flex items-center justify-between animate-fadeIn">
           <div className="flex items-center space-x-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
             <span>Settings saved to Supabase. The header database icon shows the live connection status.</span>
           </div>
         </div>
@@ -886,7 +886,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             Business: 'bg-brand-soft text-brand',
             Staff: 'bg-success/10 text-success-deep',
             Operations: 'bg-purple/10 text-purple',
-            System: 'bg-warning/10 text-amber-500',
+            System: 'bg-warning/10 text-warning',
           };
           const q = settingsTabQuery.trim().toLowerCase();
           let visibleCount = 0;
@@ -919,7 +919,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                         className={`relative flex flex-row md:flex-col items-center justify-start md:justify-center gap-2.5 md:gap-2 px-3 py-2.5 md:px-2 md:py-4 w-full text-left md:text-center text-xs md:text-xs font-extrabold rounded-xl md:rounded-2xl transition-all cursor-pointer border select-none active:scale-95 shrink-0 ${
                           isActive
                             ? 'bg-brand text-white border-brand shadow-xs'
-                            : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
+                            : 'bg-white hover:bg-surface text-faint hover:text-ink border-line'
                         }`}
                       >
                         {/* Work-desk app-icon tile */}
@@ -975,7 +975,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             <span>Back to Settings Menu</span>
           </Button>
           {isDirty && (
-            <span className="flex items-center gap-1.5 text-xs font-extrabold text-amber-600">
+            <span className="flex items-center gap-1.5 text-xs font-extrabold text-warning">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
               Unsaved changes
             </span>
@@ -1037,11 +1037,11 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
         </Suspense>
       )}{/* Add / Edit Technician Modal */}
       {techModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl max-w-xl w-full p-6 space-y-5 border border-line-strong shadow-2xl animate-scale-in my-8">
             <div className="flex items-center justify-between border-b border-line pb-3">
               <div className="flex items-center space-x-2">
-                <span className="p-1.5 bg-purple-50 text-purple rounded-lg">
+                <span className="p-1.5 bg-purple/10 text-purple rounded-lg">
                   <Award className="w-5 h-5" />
                 </span>
                 <div>
@@ -1202,9 +1202,9 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
 
       {/* Delete Technician Confirmation Modal */}
       {deleteConfirmId && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-sm w-full p-5 space-y-4 border border-line-strong shadow-xl animate-scale-in">
-            <div className="flex items-center space-x-3 text-rose-600">
+            <div className="flex items-center space-x-3 text-danger">
               <AlertCircle className="w-6 h-6 shrink-0" />
               <h3 className="font-extrabold text-sm text-ink">Delete Technician?</h3>
             </div>
@@ -1220,7 +1220,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               <Button
                 type="button"
                 onClick={() => handleConfirmDeleteTech(deleteConfirmId)}
-                className="text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white"
+                className="text-xs font-bold bg-danger hover:bg-danger-deep text-white"
               >
                 Confirm Delete
               </Button>
@@ -1231,11 +1231,11 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
 
       {/* Add / Edit User Modal */}
       {userModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-5 border border-line-strong shadow-2xl animate-scale-in my-8">
             <div className="flex items-center justify-between border-b border-line pb-3">
               <div className="flex items-center space-x-2">
-                <span className="p-1.5 bg-blue-50 text-brand rounded-lg">
+                <span className="p-1.5 bg-brand-soft text-brand rounded-lg">
                   <UserPlus className="w-5 h-5" />
                 </span>
                 <h3 className="font-extrabold text-base text-ink">
@@ -1256,7 +1256,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="font-bold text-ink block">
-                    Full Name <span className="text-rose-500">*</span>
+                    Full Name <span className="text-danger">*</span>
                   </label>
                   <Input
                     type="text"
@@ -1308,7 +1308,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
               {/* Role Selector */}
               <div className="space-y-2 pt-2 border-t border-line">
                 <label className="font-extrabold text-ink block">
-                  Select User Role <span className="text-rose-500">*</span>
+                  Select User Role <span className="text-danger">*</span>
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   <Button
@@ -1330,8 +1330,8 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                     }}
                     className={`p-2.5 rounded-xl border text-center font-extrabold transition-all cursor-pointer ${
                       userFormData.role === 'Admin'
-                        ? 'bg-purple-100 border-purple-600 text-purple-900 shadow-2xs'
-                        : 'bg-white border-line-strong text-ink hover:bg-purple-50/50'
+                        ? 'bg-purple/15 border-purple-600 text-purple shadow-2xs'
+                        : 'bg-white border-line-strong text-ink hover:bg-purple/50'
                     }`}
                   >
                     <div className="text-base mb-0.5">👑</div>
@@ -1357,8 +1357,8 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                     }}
                     className={`p-2.5 rounded-xl border text-center font-extrabold transition-all cursor-pointer ${
                       userFormData.role === 'Technician'
-                        ? 'bg-blue-100 border-blue-600 text-blue-900 shadow-2xs'
-                        : 'bg-white border-line-strong text-ink hover:bg-blue-50/50'
+                        ? 'bg-brand/15 border-blue-600 text-brand-deep shadow-2xs'
+                        : 'bg-white border-line-strong text-ink hover:bg-brand-soft/50'
                     }`}
                   >
                     <div className="text-base mb-0.5">🔧</div>
@@ -1384,8 +1384,8 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                     }}
                     className={`p-2.5 rounded-xl border text-center font-extrabold transition-all cursor-pointer ${
                       userFormData.role === 'Reception'
-                        ? 'bg-amber-100 border-amber-600 text-amber-900 shadow-2xs'
-                        : 'bg-white border-line-strong text-ink hover:bg-amber-50/50'
+                        ? 'bg-warning/15 border-amber-600 text-warning shadow-2xs'
+                        : 'bg-white border-line-strong text-ink hover:bg-warning/50'
                     }`}
                   >
                     <div className="text-base mb-0.5">📋</div>
@@ -1396,14 +1396,14 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
 
               {/* Technician Link (If Technician Role selected) */}
               {userFormData.role === 'Technician' && (
-                <div className="space-y-1 p-3 bg-blue-50/60 rounded-xl border border-blue-200">
-                  <label className="font-extrabold text-blue-900 block">
+                <div className="space-y-1 p-3 bg-brand-soft/60 rounded-xl border border-brand/30">
+                  <label className="font-extrabold text-brand-deep block">
                     Link to Technician Profile (For Ticket Assignment & Payouts)
                   </label>
                   <select aria-label="-- Select Technician Staff Profile --"
                     value={userFormData.technicianId}
                     onChange={(e) => setUserFormData({ ...userFormData, technicianId: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-blue-300 focus:outline-none focus:border-brand font-bold bg-white text-blue-950"
+                    className="w-full px-3 py-2 rounded-xl border border-brand/30 focus:outline-none focus:border-brand font-bold bg-white text-blue-950"
                   >
                     <option value="">-- Select Technician Staff Profile --</option>
                     {technicians.map((tech) => (
@@ -1567,7 +1567,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
 
       {/* Sticky mobile save bar — appears only when the settings draft is dirty */}
       {isDirty && (
-        <div className="lg:hidden fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/95 backdrop-blur-sm px-4 pt-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
+        <div className="lg:hidden fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/95 backdrop-blur-sm px-4 pt-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] shadow-raised-top">
           <div className="flex items-center gap-2">
             <Button
               type="button"

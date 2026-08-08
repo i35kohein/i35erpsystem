@@ -516,7 +516,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
   };
 
   return (
-    <div className="printable-print-root fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+    <div className="printable-print-root fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
       {/* Printable CSS style block with Black & White / Grayscale print overrides */}
       <style>{`
         @media print {

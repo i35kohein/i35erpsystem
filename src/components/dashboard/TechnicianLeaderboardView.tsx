@@ -33,7 +33,7 @@ export const TechnicianLeaderboardView: React.FC<TechnicianLeaderboardViewProps>
   return (
     <div className="space-y-3">
       {/* Leaderboard Header */}
-      <div className="bg-gradient-to-r from-amber-500/10 via-amber-50/60 to-orange-500/10 border border-amber-300/60 p-5 rounded-2xl shadow-2xs">
+      <div className="bg-gradient-to-r from-amber-500/10 via-amber-50/60 to-orange-500/10 border border-warning/30/60 p-5 rounded-2xl shadow-2xs">
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div className="space-y-1">
             <div className="flex items-center space-x-2">
@@ -43,7 +43,7 @@ export const TechnicianLeaderboardView: React.FC<TechnicianLeaderboardViewProps>
               <h2 className="text-lg font-black text-ink tracking-tight">
                 Technician Repair Leaderboard
               </h2>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 border border-amber-300 shrink-0">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 border border-warning/30 shrink-0">
                 {periodLabel || 'This period'}
               </span>
             </div>
@@ -120,7 +120,7 @@ export const TechnicianLeaderboardView: React.FC<TechnicianLeaderboardViewProps>
                         <span className={`w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center ${
                           rank === 1 ? 'bg-amber-400 text-amber-950 font-black shadow-xs' :
                           rank === 2 ? 'bg-slate-300 text-slate-900 font-extrabold' :
-                          rank === 3 ? 'bg-amber-700/20 text-amber-900 font-bold' :
+                          rank === 3 ? 'bg-warning/20 text-amber-900 font-bold' :
                           'bg-surface text-muted'
                         }`}>
                           #{rank}

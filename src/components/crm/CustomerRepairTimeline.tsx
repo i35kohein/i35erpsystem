@@ -62,7 +62,7 @@ const getOutcomeMeta = (status: string) => {
       return {
         label: 'Intaken & Diagnosing',
         badgeClass: 'bg-purple-50 text-purple-700 border-purple-200',
-        nodeBg: 'bg-purple-600 text-white ring-4 ring-purple-100',
+        nodeBg: 'bg-purple text-white ring-4 ring-purple-100',
         icon: PackageCheck,
         bgGradient: 'from-purple-50/50 to-transparent',
         borderLeft: 'border-l-4 border-l-purple-600',

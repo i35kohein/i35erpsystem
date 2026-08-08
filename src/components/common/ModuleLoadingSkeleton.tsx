@@ -6,7 +6,8 @@ import React from 'react';
  */
 export const ModuleLoadingSkeleton: React.FC = () => {
   return (
-    <div className="flex-1 min-h-0 overflow-hidden p-4 sm:p-5 animate-pulse" aria-hidden="true">
+    <div className="flex-1 min-h-0 overflow-hidden p-4 sm:p-5 animate-pulse" role="status" aria-label="Loading module…">
+      <span className="sr-only">Loading…</span>
       {/* Header row */}
       <div className="flex items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-2.5">

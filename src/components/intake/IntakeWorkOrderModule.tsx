@@ -81,7 +81,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
     if (window.innerWidth < 768) setViewMode('cards');
   }, []);
   const [localFilterStatus, setLocalFilterStatus] = useState<string>('ALL');
-  const [localDateFilter] = useState<DateFilterState>({ preset: 'all' });
+  const localDateFilter: DateFilterState = { preset: 'all' };
 
   const filterStatus = propFilterStatus !== undefined ? propFilterStatus : localFilterStatus;
   const setFilterStatus = propSetFilterStatus || setLocalFilterStatus;
@@ -104,10 +104,10 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   const getPriorityStyle = (priority: string) => {
     switch (priority) {
       case 'Urgent':
-      case 'Rush': return 'border-rose-300 bg-rose-50/40 hover:border-rose-400';
-      case 'Warranty Redo': return 'border-purple-300 bg-purple-50/40 hover:border-purple-400';
-      case 'B2B Priority': return 'border-amber-300 bg-amber-50/40 hover:border-amber-400';
-      default: return 'border-line bg-white hover:border-slate-300';
+      case 'Rush': return 'border-danger/30 bg-danger/10 hover:border-danger/50';
+      case 'Warranty Redo': return 'border-purple/30 bg-purple/10 hover:border-purple/50';
+      case 'B2B Priority': return 'border-warning/30 bg-warning/10 hover:border-warning/50';
+      default: return 'border-line bg-white hover:border-line';
     }
   };
 
@@ -228,12 +228,12 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
         {/* Quick Stats Filter Chips */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10 gap-3.5">
           {[
-            { id: 'ALL', label: 'All Active Tickets', count: counts.total, color: 'text-brand', bg: 'bg-blue-50/60', border: 'border-blue-200' },
-            { id: 'Receive', label: 'Intake (Receive)', count: counts.receive, color: 'text-brand', bg: 'bg-blue-50/60', border: 'border-blue-200' },
-            { id: 'In Progress', label: 'In Progress', count: counts.inProgress, color: 'text-teal', bg: 'bg-teal-50/60', border: 'border-teal-200' },
-            { id: 'Pending', label: 'Pending Approval', count: counts.pending, color: 'text-warning', bg: 'bg-orange-50/60', border: 'border-orange-200' },
-            { id: 'Finished', label: 'Ready (Finished)', count: counts.finished, color: 'text-emerald-700', bg: 'bg-emerald-50/60', border: 'border-emerald-200' },
-            { id: 'RUSH', label: 'Urgent Priority', count: counts.rush, color: 'text-rose-600', bg: 'bg-rose-50/60', border: 'border-rose-200' },
+            { id: 'ALL', label: 'All Active Tickets', count: counts.total, color: 'text-brand', bg: 'bg-brand-soft/60', border: 'border-brand/30' },
+            { id: 'Receive', label: 'Intake (Receive)', count: counts.receive, color: 'text-brand', bg: 'bg-brand-soft/60', border: 'border-brand/30' },
+            { id: 'In Progress', label: 'In Progress', count: counts.inProgress, color: 'text-teal', bg: 'bg-teal/10/60', border: 'border-teal-200' },
+            { id: 'Pending', label: 'Pending Approval', count: counts.pending, color: 'text-warning', bg: 'bg-warning/10/60', border: 'border-orange-200' },
+            { id: 'Finished', label: 'Ready (Finished)', count: counts.finished, color: 'text-success-deep', bg: 'bg-success/10/60', border: 'border-success/30' },
+            { id: 'RUSH', label: 'Urgent Priority', count: counts.rush, color: 'text-danger', bg: 'bg-danger/10/60', border: 'border-danger/30' },
           ].map((st) => {
             const isSelected = st.id === 'RUSH' ? sortByPriority : filterStatus === st.id;
             return (
@@ -303,10 +303,10 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                     setSelectedWorkOrder(null);
                   }
                 }}
-                className="h-8 px-3 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold rounded-lg transition-all inline-flex items-center space-x-1.5 cursor-pointer shadow-2xs"
+                className="h-8 px-3 bg-danger/10 hover:bg-danger/15 text-danger border border-danger/30 text-xs font-bold rounded-lg transition-all inline-flex items-center space-x-1.5 cursor-pointer shadow-2xs"
                 title="Remove all tickets"
               >
-                <Trash2 className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                <Trash2 className="w-3.5 h-3.5 text-danger shrink-0" />
                 <span>Clear All ({workOrders.length})</span>
               </Button>
             )}
@@ -318,7 +318,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
               className={`h-8 px-3 border text-xs font-bold rounded-lg transition-all inline-flex items-center space-x-1.5 cursor-pointer ${
                 sortByPriority 
                   ? 'bg-brand text-white border-brand shadow-2xs' 
-                  : 'bg-surface text-ink border-line hover:bg-slate-100'
+                  : 'bg-surface text-ink border-line hover:bg-surface'
               }`}
             >
               <SlidersHorizontal className="w-3.5 h-3.5 shrink-0" />
@@ -396,7 +396,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                       tabIndex={0}
                       role="link"
                       aria-label={`Open ticket ${wo.orderNumber || wo.id}`}
-                      className="hover:bg-slate-50/80 transition-colors cursor-pointer group focus:outline-none focus-visible:bg-brand-soft"
+                      className="hover:bg-surface/80 transition-colors cursor-pointer group focus:outline-none focus-visible:bg-brand-soft"
                     >
                       {/* Ticket # & Date */}
                       <td className="px-2 py-2">
@@ -439,7 +439,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                       {/* Assigned Tech */}
                       <td className="px-2 py-2 text-ink hidden lg:table-cell">
                         <div className="flex items-center space-x-1.5">
-                          <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-200 text-xs font-bold text-slate-700">
+                          <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-line text-xs font-bold text-muted">
                             {(wo.assignedTechName || 'U').charAt(0)}
                           </div>
                           <span className="max-w-[100px] truncate text-xs font-semibold">{wo.assignedTechName || 'Unassigned'}</span>
@@ -458,7 +458,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                       <td className="px-2 py-2">
                         <p className="whitespace-nowrap font-sans text-xs font-semibold text-success-deep">{totalAmount.toLocaleString()} MMK</p>
                         <span className={`mt-0.5 inline-flex rounded-md border px-1.5 py-0.5 text-xs font-extrabold ${
-                          wo.isPaid ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-rose-200 bg-rose-50 text-rose-800'
+                          wo.isPaid ? 'border-success/30 bg-success/10 text-success-deep' : 'border-danger/30 bg-danger/10 text-danger'
                         }`}>
                           {wo.isPaid ? 'Paid' : 'Unpaid'}
                         </span>
@@ -470,7 +470,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                           <Button
                             type="button"
                             onClick={() => handleOpenTicketDetail(wo)}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors hover:border-brand hover:bg-blue-50 hover:text-brand"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors hover:border-brand hover:bg-brand-soft hover:text-brand"
                             title="View Ticket Status"
                             aria-label={`View status for ${wo.orderNumber || wo.id}`}
                           >
@@ -550,7 +550,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                       <Button
                         type="button"
                         onClick={() => handleOpenTicketDetail(wo)}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--blue-tint)] text-[var(--primary)] transition-colors hover:bg-brand hover:text-white"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-brand-soft text-brand transition-colors hover:bg-brand hover:text-white"
                         title="View Ticket Status"
                         aria-label={`View status for ${wo.orderNumber || wo.id}`}
                       >
