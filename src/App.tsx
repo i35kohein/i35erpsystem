@@ -79,6 +79,7 @@ const DashboardOverview = lazy(() => import('./components/dashboard/DashboardOve
 const IntakeWorkOrderModule = lazy(() => import('./components/intake/IntakeWorkOrderModule').then((m) => ({ default: m.IntakeWorkOrderModule })));
 const CreateTicketSoloPage = lazy(() => import('./components/intake/CreateTicketSoloPage').then((m) => ({ default: m.CreateTicketSoloPage })));
 const StatusPipelineView = lazy(() => import('./components/pipeline/StatusPipelineView').then((m) => ({ default: m.StatusPipelineView })));
+const TrelloBoardModule = lazy(() => import('./components/trello/TrelloBoardModule').then((m) => ({ default: m.TrelloBoardModule })));
 const InventoryManagementModule = lazy(() => import('./components/inventory/InventoryManagementModule').then((m) => ({ default: m.InventoryManagementModule })));
 const SupplierRmaModule = lazy(() => import('./components/suppliers/SupplierRmaModule').then((m) => ({ default: m.SupplierRmaModule })));
 const PosInvoicingModule = lazy(() => import('./components/pos/PosInvoicingModule').then((m) => ({ default: m.PosInvoicingModule })));
@@ -118,7 +119,7 @@ export default function App() {
     // Restore tab from URL hash (#/pipeline) so deep links & reloads land correctly
     if (typeof window !== 'undefined') {
       const h = window.location.hash.replace(/^#\/?/, '');
-      if (h && ['dashboard','intake','pipeline','qa','follow-up','price-catalog','pos','finance','inventory','suppliers','crm','settings','create-ticket'].includes(h)) return h;
+      if (h && ['dashboard','intake','pipeline','trello','qa','follow-up','price-catalog','pos','finance','inventory','suppliers','crm','settings','create-ticket'].includes(h)) return h;
     }
     return 'dashboard';
   });
@@ -228,7 +229,7 @@ export default function App() {
     setCurrentUser(user);
     addToast(`Switched active profile to ${user.name} (${user.role})`, 'info', 'Role Switch');
     if (user.role === 'Technician') {
-      const allowedTechTabs = ['pipeline', 'qa', 'crm'];
+      const allowedTechTabs = ['pipeline', 'trello', 'qa', 'crm'];
       if (!allowedTechTabs.includes(activeTab)) {
         setActiveTab('pipeline');
       }
@@ -1511,6 +1512,7 @@ export default function App() {
       case 'create-ticket': return { category: t('navRepair'), title: t('navCreateTicket') };
       case 'intake': return { category: t('navRepair'), title: t('navIntakeFull') };
       case 'pipeline': return { category: t('navRepair'), title: t('navPipeline') };
+      case 'trello': return { category: t('navRepair'), title: 'Repair Ticket Board' };
       case 'inventory': return { category: t('navInventory'), title: t('navPartsMatrix') };
       case 'suppliers': return { category: t('navInventory'), title: t('navSuppliers') };
       case 'price-catalog': return { category: t('navRepair'), title: t('navPriceList') };
@@ -2323,6 +2325,19 @@ export default function App() {
                   setShowBottlenecksOnly={setShowBottlenecksOnly}
                   onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
                   onOpenNewWorkOrder={(prefill) => handleOpenNewWorkOrder(prefill)}
+                />
+              )}
+
+              {activeTab === 'trello' && (
+                <TrelloBoardModule
+                  workOrders={activeWorkOrders}
+                  technicians={technicians}
+                  systemSettings={systemSettings}
+                  currentUser={currentUser}
+                  onUpdateWorkOrderStatus={handleUpdateWorkOrderStatus}
+                  onSaveWorkOrder={handleSaveWorkOrder}
+                  onDeleteWorkOrder={handleDeleteWorkOrder}
+                  onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
                 />
               )}
 

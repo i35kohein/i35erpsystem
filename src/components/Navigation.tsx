@@ -16,7 +16,8 @@ import {LogOut,
   Tag,
   Settings,
   PhoneCall,
-  DollarSign} from 'lucide-react';
+  DollarSign,
+  Trello} from 'lucide-react';
 import { WorkOrder, SystemSettings, AppUser } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { UserRoleSwitcher } from './common/UserRoleSwitcher';
@@ -104,6 +105,11 @@ export const Navigation: React.FC<NavigationProps> = ({
           badgeColor: 'bg-success text-white',
         },
         {
+          id: 'trello',
+          label: 'Ticket Board (Trello)',
+          icon: Trello,
+        },
+        {
           id: 'qa',
           label: t('navQa'),
           icon: ShieldCheck,
@@ -181,7 +187,7 @@ export const Navigation: React.FC<NavigationProps> = ({
         }
         if (role === 'Technician') {
           // Technician can see Pipeline (assigned only), QA, CRM, and Price List.
-          const allowedTechItems = ['pipeline', 'qa', 'crm', 'price-catalog'];
+          const allowedTechItems = ['pipeline', 'trello', 'qa', 'crm', 'price-catalog'];
           if (allowedTechItems.includes(item.id)) return true;
           if (item.id === 'finance') return currentUser?.permissions?.canAccessFinance === true;
           if (item.id === 'settings') return currentUser?.permissions?.canAccessSettings === true;
