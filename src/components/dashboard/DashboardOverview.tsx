@@ -24,7 +24,7 @@ import {Coins,
   RefreshCw,
   Printer,
   Kanban,
-  Ticket} from 'lucide-react';
+  Eye} from 'lucide-react';
 import { WorkOrder, PartItem, RmaItem, Technician, WorkOrderStatus } from '../../types';
 import { Button , Input } from '../ui';
 
@@ -1200,21 +1200,21 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             ) : (
               <div className="relative">
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead className="sticky top-0 z-10 border-b border-line bg-surface font-mono text-xs uppercase text-muted shadow-2xs">
-                    <tr>
-                      <th className="w-[92px] xl:w-[132px] px-2 py-2 bg-surface">Ticket # & Date</th>
-                      <th className="w-[148px] px-2 py-2 bg-surface">Customer & Contact</th>
-                      <th className="w-[158px] px-2 py-2 bg-surface">Device & Serial/IMEI</th>
-                      <th className="px-2 py-2 bg-surface hidden lg:table-cell">Symptoms / Service</th>
-                      <th className="w-[112px] px-2 py-2 bg-surface hidden lg:table-cell">Assigned Tech</th>
-                      <th className="w-[92px] px-2 py-2 bg-surface hidden lg:table-cell">Priority</th>
-                      <th className="w-[114px] px-2 py-2 bg-surface">Stage & Status</th>
-                      <th className="w-[112px] px-2 py-2 bg-surface text-right">Amount</th>
-                      <th className="w-[44px] px-2 py-2 text-right bg-surface hidden xl:table-cell">Detail</th>
+                <table className="w-full text-left text-xs">
+                  <thead className="sticky top-0 z-10">
+                    <tr className="border-b border-line text-muted font-bold text-xs uppercase tracking-wider bg-surface">
+                      <th className="py-2.5 px-3">Ticket # & Date</th>
+                      <th className="py-2.5 px-3">Customer & Contact</th>
+                      <th className="py-2.5 px-3">Device & Serial/IMEI</th>
+                      <th className="py-2.5 px-3 hidden lg:table-cell">Symptoms / Service</th>
+                      <th className="py-2.5 px-3 hidden lg:table-cell">Assigned Tech</th>
+                      <th className="py-2.5 px-3 hidden xl:table-cell">Priority</th>
+                      <th className="py-2.5 px-3">Stage & Status</th>
+                      <th className="py-2.5 px-3">Amount</th>
+                      <th className="py-2.5 px-3 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-line text-xs">
+                  <tbody className="divide-y divide-line">
                     {statusQueueWorkOrders.map((wo) => {
                       const createdDate = timeAgoShort(wo.createdAt);
                       const createdDateFull = new Date(wo.createdAt || Date.now()).toLocaleDateString('en-US', {
@@ -1224,96 +1224,97 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                       const totalAmt = wo.totalAmount || wo.subtotal || 0;
 
                       return (
-                        <tr
-                          key={wo.id}
-                          onClick={() => setRosterTicket(wo)}
-                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setRosterTicket(wo); } }}
-                          tabIndex={0}
-                          role="link"
-                          aria-label={`Open ticket ${wo.orderNumber || wo.id}`}
-                          className="hover:bg-surface/80 transition-colors cursor-pointer group focus:outline-none focus-visible:bg-brand-soft"
-                        >
+                        <tr key={wo.id} className="hover:bg-surface transition-colors">
                           {/* Ticket # & Date */}
-                          <td className="px-2 py-2">
-                            <div className="flex items-center space-x-2">
-                              <div className="shrink-0 rounded-md bg-brand/10 p-1 text-brand-deep">
-                                <Ticket className="h-3 w-3" />
-                              </div>
-                              <div className="min-w-0">
-                                <p className="font-mono text-xs font-extrabold leading-snug text-brand">{wo.orderNumber || wo.id}</p>
-                                <p className="mt-0.5 text-xs font-medium text-muted hidden xl:block" title={createdDateFull}>{createdDate}</p>
-                              </div>
-                            </div>
+                          <td className="py-3 px-3">
+                            <p className="font-mono font-black text-brand text-xs">{wo.orderNumber || wo.id}</p>
+                            <span className="text-xs text-muted" title={createdDateFull}>{createdDate}</span>
                           </td>
 
-                          {/* Customer & Contact */}
-                          <td className="px-2 py-2 text-ink">
-                            <div className="space-y-0.5">
-                              <span className="block max-w-[140px] truncate text-xs font-extrabold leading-snug">{wo.customerName}</span>
-                              <span className="block font-mono text-xs font-medium text-muted">{wo.customerPhone}</span>
-                            </div>
+                          {/* Customer */}
+                          <td className="py-3 px-3">
+                            <p className="font-bold text-ink truncate max-w-[140px]">{wo.customerName}</p>
+                            <p className="text-xs text-muted font-mono">{wo.customerPhone}</p>
                           </td>
 
                           {/* Device & Serial */}
-                          <td className="px-2 py-2 text-ink">
-                            <div className="space-y-0.5">
-                              <span className="block max-w-[150px] truncate text-xs font-extrabold leading-snug">{wo.deviceModel}</span>
-                              <span className="block max-w-[150px] truncate font-mono text-xs font-medium text-muted">
-                                {wo.serialNumber || wo.imei ? `SN: ${wo.serialNumber || wo.imei}` : 'No Serial'}
-                              </span>
-                            </div>
+                          <td className="py-3 px-3">
+                            <p className="font-semibold text-ink truncate max-w-[150px]">{wo.deviceModel}</p>
+                            <p className="text-xs font-mono text-muted truncate max-w-[150px]">
+                              {wo.serialNumber || wo.imei ? `SN: ${wo.serialNumber || wo.imei}` : 'No Serial'}
+                            </p>
                           </td>
 
                           {/* Symptoms / Service */}
-                          <td className="px-2 py-2 text-ink hidden lg:table-cell">
-                            <p className="line-clamp-2 max-w-[190px] text-xs font-semibold leading-snug" title={wo.symptomsReported || wo.serviceType}>
+                          <td className="py-3 px-3 hidden lg:table-cell">
+                            <p className="text-xs text-ink line-clamp-1 max-w-[180px]" title={wo.symptomsReported || wo.serviceType}>
                               {wo.symptomsReported || wo.serviceType || 'General Repair'}
                             </p>
                           </td>
 
                           {/* Assigned Tech */}
-                          <td className="px-2 py-2 text-ink hidden lg:table-cell">
+                          <td className="py-3 px-3 hidden lg:table-cell">
                             <div className="flex items-center space-x-1.5">
-                              <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-line text-xs font-bold text-muted">
+                              <div className="w-5 h-5 rounded-full bg-line text-muted font-bold text-xs flex items-center justify-center shrink-0">
                                 {(wo.assignedTechName || 'U').charAt(0)}
                               </div>
-                              <span className="max-w-[100px] truncate text-xs font-semibold">{wo.assignedTechName || 'Unassigned'}</span>
+                              <span className="text-xs text-ink font-medium truncate max-w-[100px]">
+                                {wo.assignedTechName || 'Unassigned'}
+                              </span>
                             </div>
                           </td>
 
                           {/* Priority */}
-                          <td className="px-2 py-2 hidden lg:table-cell">
-                            <PriorityBadge priority={wo.priority} size="xs" showNormal />
+                          <td className="py-3 px-3 hidden xl:table-cell">
+                            <PriorityBadge priority={wo.priority} />
                           </td>
 
-                          {/* Stage & Status */}
-                          <td className="px-2 py-2">
-                            <StatusBadge status={wo.status} size="xs" />
+                          {/* Stage & Status (Read-Only Badge) */}
+                          <td className="py-3 px-3">
+                            <StatusBadge status={wo.status} />
                           </td>
 
-                          {/* Amount & payment */}
-                          <td className="px-2 py-2 text-right">
-                            <p className="whitespace-nowrap font-sans text-xs font-semibold text-success-deep">{totalAmt.toLocaleString()} MMK</p>
-                            <span className={`mt-0.5 inline-flex rounded-md border px-1.5 py-0.5 text-xs font-extrabold ${
-                              wo.isPaid ? 'border-success/30 bg-success/10 text-success-deep' : 'border-danger/30 bg-danger/10 text-danger'
+                          {/* Financial Amount */}
+                          <td className="py-3 px-3">
+                            <p className="font-mono font-extrabold text-xs text-ink">
+                              {totalAmt.toLocaleString()} MMK
+                            </p>
+                            <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
+                              wo.isPaid ? 'bg-success/15 text-success-deep' : 'bg-danger/15 text-danger'
                             }`}>
                               {wo.isPaid ? 'Paid' : 'Unpaid'}
                             </span>
                           </td>
 
-                          {/* Detail — row click opens inspector; print tag stays one tap away */}
-                          <td className="px-2 py-2 text-right hidden xl:table-cell" onClick={(e) => e.stopPropagation()}>
-                            {onSelectPrintTag && (
-                              <button
+                          {/* Ticket status inspector and label export */}
+                          <td className="py-3 px-3 text-right">
+                            <div className="inline-flex items-center justify-end gap-1.5">
+                              <Button
+  variant="secondary" size="sm"
+  
+                                type="button"
+                                onClick={() => setRosterTicket(wo)}
+                                className="border border-line bg-brand-soft px-2.5 text-brand hover:bg-white"
+                                title="View Ticket Status"
+                                aria-label={`View status for ${wo.orderNumber || wo.id}`}
+                              >
+                                <Eye className="h-3.5 w-3.5" />
+                                <span>View</span>
+                              </Button>
+                              {onSelectPrintTag && (
+                              <Button
+  variant="secondary" size="sm"
+  
                                 type="button"
                                 onClick={() => onSelectPrintTag(wo)}
+                                className="px-2.5 hover:bg-line border border-line"
                                 title="Print Device Label Tag"
-                                aria-label={`Print tag for ${wo.orderNumber || wo.id}`}
-                                className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-line bg-surface text-muted transition-colors hover:border-brand hover:bg-brand-soft hover:text-brand"
                               >
-                                <Printer className="w-3 h-3" />
-                              </button>
-                            )}
+                                <Printer className="w-3.5 h-3.5 text-brand" />
+                                <span>Tag</span>
+                              </Button>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       );
