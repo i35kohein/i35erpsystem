@@ -939,6 +939,15 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                           {isDirty && isActive && (
                             <span className="w-1.5 h-1.5 rounded-full bg-warning shrink-0" title="Unsaved changes" />
                           )}
+                          {tab.id === 'recycle' && tab.badge !== undefined && tab.badge > 0 && (
+                            <span
+                              className={`px-1.5 rounded-full text-[11px] font-mono font-bold leading-[14px] ${
+                                isActive ? 'bg-white/20 text-white' : 'bg-danger/15 text-danger'
+                              }`}
+                            >
+                              {tab.badge}
+                            </span>
+                          )}
                         </span>
                       </Button>
                     );
