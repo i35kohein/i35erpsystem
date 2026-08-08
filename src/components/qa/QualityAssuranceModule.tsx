@@ -451,14 +451,12 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           <span className="text-[10px] font-bold text-ink truncate">{idx + 1}. {item.name}</span>
                         </div>
 
-                        {/* Comment icon — click to show note input */}
+                        {/* Comment icon — neutral, click to show note input */}
                         <Button
                           type="button"
                           onClick={() => toggleNote(item.id)}
                           className={`!h-5 !min-h-5 w-5 px-0 rounded shrink-0 transition-colors ${
-                            (item.note || '').trim() || noteOpenIds.has(item.id)
-                              ? 'text-brand bg-brand/10'
-                              : 'text-muted hover:text-brand hover:bg-brand/5'
+                            noteOpenIds.has(item.id) ? 'bg-line text-muted' : 'text-muted hover:bg-line/60 hover:text-ink'
                           }`}
                           title={item.note ? `Note: ${item.note}` : 'Add note'}
                           aria-label={`Add note for ${item.name}`}
@@ -478,11 +476,11 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           />
                         )}
 
-                        {/* Status — single pill, click to cycle Pass/Fail/NA */}
+                        {/* Status — single pill, fixed width (no layout shift) */}
                         <Button
                           type="button"
                           onClick={() => cycleStatus(item.id, item.status)}
-                          className={`!h-5 !min-h-5 px-1.5 rounded shrink-0 text-[9px] font-black leading-none transition-all border ${
+                          className={`!h-5 !min-h-5 w-12 px-0 rounded shrink-0 text-[9px] font-black leading-none transition-all border flex items-center justify-center ${
                             isPass
                               ? 'bg-success text-white border-success shadow-2xs'
                               : isFail
