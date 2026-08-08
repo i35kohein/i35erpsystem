@@ -7,7 +7,8 @@ import {ShieldCheck,
   MoreHorizontal,
   Camera,
   UserCheck,
-  StickyNote} from 'lucide-react';
+  StickyNote,
+  DollarSign} from 'lucide-react';
 import { WorkOrder, PostRepairChecklist, Technician, DiagnosticItemResult, DiagnosticStatus, AppUser, SystemSettings } from '../../types';
 import { Button , Input } from '../ui';
 import { DIAGNOSTIC_NAMES, getDiagnosticIcon } from '../intake/deviceData';
@@ -29,6 +30,7 @@ interface QualityAssuranceModuleProps {
   setSearchQuery?: (q: string) => void;
   statusFilter?: string;
   setStatusFilter?: (s: string) => void;
+  onNavigateToTab?: (tab: string) => void;
 }
 
 export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
@@ -39,6 +41,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
   onSavePostRepairChecklist,
   searchQuery = '',
   statusFilter = 'ALL',
+  onNavigateToTab,
 }) => {
   // Only finished tasks are shown in QA & Warranty Inspection module
   const finishedWorkOrders = workOrders.filter(
@@ -374,9 +377,21 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                         <p className="font-mono font-extrabold text-xs text-ink">{wo.totalAmount.toLocaleString()} MMK</p>
                       </td>
 
-                      {/* Actions — Inspect only */}
+                      {/* Actions — Inspect + checkout */}
                       <td className="py-3 px-3 text-right">
                         <div className="inline-flex items-center justify-end gap-1">
+                          {(wo.status === 'Finished' || wo.status === 'Taken Out') && (
+                            <Button
+                              variant="ghost"
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); onNavigateToTab?.('pos'); }}
+                              className="!h-7 !min-h-7 w-7 px-0 rounded-full bg-success text-white hover:bg-success/90 border border-success"
+                              title="Go to POS checkout"
+                              aria-label={`Checkout ${wo.orderNumber}`}
+                            >
+                              <DollarSign className="w-3.5 h-3.5" />
+                            </Button>
+                          )}
                           <Button
                             variant="ghost"
                             type="button"

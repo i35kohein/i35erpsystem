@@ -2330,6 +2330,7 @@ export default function App() {
                     if (prefill) setTicketPrefill(prefill);
                     setActiveTab('create-ticket');
                   }}
+                  onNavigateToTab={(tab) => setActiveTab(tab as any)}
                 />
               )}
 
@@ -2566,6 +2567,7 @@ export default function App() {
                   setSearchQuery={setSearchQuery}
                   statusFilter={statusFilter}
                   setStatusFilter={setStatusFilter}
+                  onNavigateToTab={(tab) => setActiveTab(tab as any)}
                 />
               )}
 

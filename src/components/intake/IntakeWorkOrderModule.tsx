@@ -29,7 +29,7 @@ import {ClipboardList,
   CheckCircle2,
   MoveDiagonal2,
   Printer,
-  Flame} from 'lucide-react';
+  Flame, DollarSign } from 'lucide-react';
 import {WorkOrder, 
   PartItem, 
   Customer, 
@@ -58,6 +58,7 @@ interface IntakeWorkOrderModuleProps {
   dateFilter?: DateFilterState;
   setDateFilter?: (d: DateFilterState) => void;
   onNavigateToCreateTicket?: (prefill?: TicketPrefillData) => void;
+  onNavigateToTab?: (tab: string) => void;
 }
 
 
@@ -74,6 +75,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   setFilterStatus: propSetFilterStatus,
   dateFilter: propDateFilter,
   onNavigateToCreateTicket,
+  onNavigateToTab,
 }) => {
   const [selectedWorkOrder, setSelectedWorkOrder] = useState<WorkOrder | null>(null);
   const isIpad = useIsIpad();
@@ -478,6 +480,18 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                       {/* Ticket status inspector and label export — icon-only actions */}
                       <td className="py-3 px-3 text-right">
                         <div className="inline-flex items-center justify-end gap-1">
+                          {(wo.status === 'Finished' || wo.status === 'Taken Out') && (
+                            <Button
+                              variant="ghost"
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); onNavigateToTab?.('pos'); }}
+                              className="!h-7 !min-h-7 w-7 px-0 rounded-full bg-success text-white hover:bg-success/90 border border-success"
+                              title="Go to POS checkout"
+                              aria-label={`Checkout ${wo.orderNumber || wo.id}`}
+                            >
+                              <DollarSign className="w-3.5 h-3.5" />
+                            </Button>
+                          )}
                           <Button
                             variant="ghost"
                             type="button"
