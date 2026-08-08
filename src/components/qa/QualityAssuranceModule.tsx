@@ -4,8 +4,7 @@ import {ShieldCheck,
   CheckCircle2, 
   X,
   ClipboardCheck,
-  MoreHorizontal,
-  MessageSquare} from 'lucide-react';
+  MoreHorizontal} from 'lucide-react';
 import { WorkOrder, PostRepairChecklist, Technician, DiagnosticItemResult, AppUser } from '../../types';
 import { Button , Input } from '../ui';
 import { DIAGNOSTIC_NAMES, getDiagnosticIcon } from '../intake/deviceData';
@@ -106,7 +105,6 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
   // 21-Point Post-Repair Diagnostic Checklist State
   const [qaDiagnostics, setQaDiagnostics] = useState<DiagnosticItemResult[]>([]);
   // Which checklist rows have the note input open (comment icon toggle)
-  const [noteOpenIds, setNoteOpenIds] = useState<Set<string>>(new Set());
   // Which card's ⋮ menu popup is open
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   // Cycle status: Pass -> Fail -> N/A -> Pass
@@ -118,7 +116,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
   const pressTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const startNotePress = (id: string) => {
     pressTimer.current = setTimeout(() => {
-      setNoteOpenIds((prev) => { const next = new Set(prev); next.add(id); return next; });
+      setMenuOpenId(id);
     }, 450);
   };
   const cancelNotePress = () => {
@@ -502,35 +500,34 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                               <MoreHorizontal className="w-3.5 h-3.5" />
                             </button>
 
-                            {/* ⋮ popup menu */}
+                            {/* ⋮ popup — comment box */}
                             {menuOpenId === item.id && (
-                              <div className="absolute right-0 top-6 z-20 w-36 bg-white border border-line rounded-lg shadow-lg py-1" onClick={(e) => e.stopPropagation()}>
-                                <button
+                              <div
+                                className="absolute right-0 top-6 z-30 w-52 bg-white border border-line rounded-xl shadow-xl p-2 space-y-1.5"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <p className="text-[10px] font-extrabold text-muted uppercase tracking-wider px-0.5">
+                                  Comment — {item.name}
+                                </p>
+                                <Input
+                                  type="text"
+                                  value={item.note || ''}
+                                  onChange={(e) => handleDiagnosticNoteChange(item.id, e.target.value)}
+                                  placeholder="Type a note..."
+                                  autoFocus
+                                  className="!h-7 !min-h-7 w-full rounded-md bg-surface border border-line px-2 text-[11px] text-ink focus:bg-white focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/20"
+                                />
+                                <Button
                                   type="button"
-                                  onClick={() => {
-                                    setNoteOpenIds((prev) => { const next = new Set(prev); next.add(item.id); return next; });
-                                    setMenuOpenId(null);
-                                  }}
-                                  className="w-full px-2.5 py-1.5 text-left text-[11px] font-bold text-ink hover:bg-surface flex items-center gap-1.5"
+                                  onClick={() => setMenuOpenId(null)}
+                                  className="!h-6 !min-h-6 w-full rounded-md bg-brand text-white text-[10px] font-bold hover:bg-brand-deep"
                                 >
-                                  <MessageSquare className="w-3 h-3 text-muted" />
-                                  Comment
-                                </button>
+                                  Done
+                                </Button>
                               </div>
                             )}
                         </div>
 
-                        {/* Note input — long-press to open; stays when note exists */}
-                        {(noteOpenIds.has(item.id) || (item.note || '').trim()) && (
-                          <Input
-                            type="text"
-                            value={item.note || ''}
-                            onChange={(e) => handleDiagnosticNoteChange(item.id, e.target.value)}
-                            placeholder="Note..."
-                            autoFocus
-                            className="!h-6 !min-h-6 mt-1.5 w-full rounded-md bg-surface border border-line px-1.5 text-[10px] text-ink focus:bg-white focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/20"
-                          />
-                        )}
                       </div>
                     );
                   })}
