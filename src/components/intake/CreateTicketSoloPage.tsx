@@ -142,6 +142,10 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
   const [phoneSuggestOpen, setPhoneSuggestOpen] = useState(false);
   // Intake 21-point comment modal (QA-style ⋮)
   const [diagCommentId, setDiagCommentId] = useState<string | null>(null);
+  // Custom confirm for Mark All Pass (no browser default dialog)
+  const [showMarkAllPassConfirm, setShowMarkAllPassConfirm] = useState(false);
+  // Custom confirm for duplicate device (no browser default dialog)
+  const [dupConfirm, setDupConfirm] = useState<{ proceed: () => void; label: string } | null>(null);
 
   // Modals inside form
   const [isModelModalOpen, setIsModelModalOpen] = useState(false);
@@ -389,17 +393,21 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
     const dupTicket = dupImei || dupSerial;
     if (dupTicket) {
       const dupKey = dupImei ? `IMEI ${imei.trim()}` : `serial ${serialNumber.trim()}`;
-      const proceed = window.confirm(
-        `⚠️ Duplicate device detected!\n\n${dupKey} already has an open ticket:\n  ${dupTicket.orderNumber} — ${dupTicket.deviceModel} (${dupTicket.customerName})\n\nCreate this new intake anyway?`
-      );
-      if (!proceed) {
-        setIsRegistering(false);
-        return;
-      }
+      setDupConfirm({
+        label: `${dupKey} already has an open ticket: ${dupTicket.orderNumber} — ${dupTicket.deviceModel} (${dupTicket.customerName})`,
+        proceed: () => {
+          setDupConfirm(null);
+          setIsRegistering(true);
+          handleRegisterDeviceInner();
+        },
+      });
+      return;
     }
-
     setIsRegistering(true);
+    handleRegisterDeviceInner();
+  };
 
+  const handleRegisterDeviceInner = () => {
     const prefix = systemSettings?.ticketPrefix || 'WO-';
     const baseWorkOrder = editWorkOrder || null;
     // Order numbers must never be reused: derive from the highest existing number
@@ -1213,33 +1221,36 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               <span className={`px-1.5 h-5 rounded-full bg-brand text-white flex items-center justify-center text-xs font-black hidden`}>4B</span>
               <span>21-Point Post-Repair Hardware Inspection</span>
             </h3>
-            <div className="flex items-center space-x-2">
-              <span className="hidden md:inline-flex items-center space-x-1.5 text-xs font-bold">
-                <span className="bg-success/10 text-success-deep px-2 py-1 rounded-full">✓ {beforeDiagnostics.filter(d => d.status === 'Pass').length} Pass</span>
-                <span className="bg-danger/10 text-danger px-2 py-1 rounded-full">✕ {beforeDiagnostics.filter(d => d.status === 'Fail').length} Fail</span>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="hidden md:inline-flex items-center gap-1 text-xs font-bold">
+                <span className="!h-7 !min-h-7 inline-flex items-center px-2 rounded-full bg-success/10 text-success-deep border border-success/20">✓ {beforeDiagnostics.filter(d => d.status === 'Pass').length} Pass</span>
+                <span className="!h-7 !min-h-7 inline-flex items-center px-2 rounded-full bg-danger/10 text-danger border border-danger/20">✕ {beforeDiagnostics.filter(d => d.status === 'Fail').length} Fail</span>
               </span>
-              <Button 
+              <Button
+                type="button"
                 onClick={() => {
                   if (beforeDiagnostics.some(d => d.status === 'Pass' || d.status === 'Fail')) {
-                    // Never silently overwrite a technician's Pass/Fail verdicts with a bulk Pass.
-                    if (!window.confirm('Mark ALL 21 items as Pass? This will overwrite existing Pass/Fail verdicts.')) return;
+                    setShowMarkAllPassConfirm(true);
+                    return;
                   }
                   setBeforeDiagnostics(prev => prev.map(d => ({ ...d, status: 'Pass' })));
                 }}
-                className="text-xs text-white font-bold bg-success hover:bg-success/90 px-3 py-2 min-h-10 rounded-full shadow-xs transition-colors"
+                className="!h-7 !min-h-7 text-[11px] text-white font-bold bg-success hover:bg-success/90 px-2.5 rounded-full shadow-2xs transition-colors"
               >
                 Mark All Pass
               </Button>
-              <Button 
+              <Button
+                type="button"
                 onClick={() => setBeforeDiagnostics(prev => prev.map(d => ({ ...d, status: 'N/A' })))}
-                className="text-xs text-ink font-bold bg-surface hover:bg-line px-3 py-2 min-h-10 rounded-full shadow-xs transition-colors border border-line-strong"
+                className="!h-7 !min-h-7 text-[11px] text-ink font-bold bg-surface hover:bg-line px-2.5 rounded-full transition-colors border border-line-strong"
               >
                 Mark All N/A
               </Button>
-              <Button 
+              <Button
+                type="button"
                 onClick={() => setBeforeDiagnostics(prev => prev.map(d => ({ ...d, status: 'N/A' as const, note: '' })))}
                 title="Reset all statuses and comments"
-                className="text-xs text-muted font-bold bg-white hover:bg-line px-3 py-2 min-h-10 rounded-full transition-colors border border-line-strong"
+                className="!h-7 !min-h-7 text-[11px] text-muted font-bold bg-white hover:bg-line px-2.5 rounded-full transition-colors border border-line-strong"
               >
                 Reset
               </Button>
@@ -1317,6 +1328,87 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           </div>
 
 
+
+          {/* Mark All Pass custom confirm */}
+          {showMarkAllPassConfirm && (
+            <div
+              className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/40 p-4"
+              onClick={() => setShowMarkAllPassConfirm(false)}
+            >
+              <div
+                className="w-full max-w-xs bg-white border border-line rounded-2xl shadow-2xl p-4 space-y-3"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-start gap-2.5">
+                  <span className="w-8 h-8 rounded-lg bg-success/10 text-success-deep flex items-center justify-center shrink-0">
+                    <CheckCircle2 className="w-4 h-4" />
+                  </span>
+                  <div>
+                    <p className="text-xs font-extrabold text-ink">Mark All as Pass?</p>
+                    <p className="text-[11px] text-muted mt-0.5">This will overwrite existing Pass/Fail verdicts on all 21 items.</p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    onClick={() => setShowMarkAllPassConfirm(false)}
+                    className="!h-7 !min-h-7 flex-1 rounded-lg border border-line-strong bg-surface text-[11px] font-bold text-ink hover:bg-line"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setBeforeDiagnostics(prev => prev.map(d => ({ ...d, status: 'Pass' })));
+                      setShowMarkAllPassConfirm(false);
+                    }}
+                    className="!h-7 !min-h-7 flex-1 rounded-lg bg-success text-[11px] font-bold text-white hover:bg-success/90"
+                  >
+                    Mark All Pass
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Duplicate device custom confirm */}
+          {dupConfirm && (
+            <div
+              className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/40 p-4"
+              onClick={() => setDupConfirm(null)}
+            >
+              <div
+                className="w-full max-w-sm bg-white border border-line rounded-2xl shadow-2xl p-4 space-y-3"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-start gap-2.5">
+                  <span className="w-8 h-8 rounded-lg bg-warning/10 text-warning flex items-center justify-center shrink-0">
+                    <AlertTriangle className="w-4 h-4" />
+                  </span>
+                  <div>
+                    <p className="text-xs font-extrabold text-ink">Duplicate Device Detected</p>
+                    <p className="text-[11px] text-muted mt-0.5">{dupConfirm.label}</p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    onClick={() => setDupConfirm(null)}
+                    className="!h-7 !min-h-7 flex-1 rounded-lg border border-line-strong bg-surface text-[11px] font-bold text-ink hover:bg-line"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={dupConfirm.proceed}
+                    className="!h-7 !min-h-7 flex-1 rounded-lg bg-brand text-[11px] font-bold text-white hover:bg-brand-deep"
+                  >
+                    Create Anyway
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Intake comment modal */}
           {diagCommentItem && (
