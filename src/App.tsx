@@ -1395,7 +1395,8 @@ export default function App() {
   const handleSavePostRepairChecklist = (
     workOrderId: string,
     checklist: PostRepairChecklist,
-    afterDiagnostics?: DiagnosticItemResult[]
+    afterDiagnostics?: DiagnosticItemResult[],
+    photos?: { before: string[]; after: string[] }
   ) => {
     setWorkOrders((prev) =>
       prev.map((w) => {
@@ -1404,6 +1405,8 @@ export default function App() {
             ...w,
             postRepairChecklist: checklist,
             ...(afterDiagnostics ? { afterDiagnostics } : {}),
+            intakePhotos: photos?.before?.length ? photos.before : w.intakePhotos,
+            afterRepairPhotos: photos?.after?.length ? photos.after : w.afterRepairPhotos,
             status: 'Finished' as WorkOrderStatus,
             completedAt: w.completedAt || new Date().toISOString(),
             updatedAt: new Date().toISOString(),

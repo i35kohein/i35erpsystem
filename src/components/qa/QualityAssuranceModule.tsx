@@ -4,7 +4,8 @@ import {ShieldCheck,
   CheckCircle2, 
   X,
   ClipboardCheck,
-  MoreHorizontal} from 'lucide-react';
+  MoreHorizontal,
+  Camera} from 'lucide-react';
 import { WorkOrder, PostRepairChecklist, Technician, DiagnosticItemResult, AppUser } from '../../types';
 import { Button , Input } from '../ui';
 import { DIAGNOSTIC_NAMES, getDiagnosticIcon } from '../intake/deviceData';
@@ -18,7 +19,8 @@ interface QualityAssuranceModuleProps {
   onSavePostRepairChecklist: (
     workOrderId: string, 
     checklist: PostRepairChecklist, 
-    afterDiagnostics?: DiagnosticItemResult[]
+    afterDiagnostics?: DiagnosticItemResult[],
+    photos?: { before: string[]; after: string[] }
   ) => void;
   searchQuery?: string;
   setSearchQuery?: (q: string) => void;
@@ -107,6 +109,19 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
   // Which checklist rows have the note input open (comment icon toggle)
   // Which card's ⋮ menu popup is open
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
+  // Before / After repair photos (uploaded in QA modal)
+  const [qaBeforePhotos, setQaBeforePhotos] = useState<string[]>([]);
+  const [qaAfterPhotos, setQaAfterPhotos] = useState<string[]>([]);
+  const beforePhotoInputRef = React.useRef<HTMLInputElement>(null);
+  const afterPhotoInputRef = React.useRef<HTMLInputElement>(null);
+  const handlePhotoFiles = (files: FileList | null, setter: React.Dispatch<React.SetStateAction<string[]>>) => {
+    Array.from(files || []).forEach((file) => {
+      if (file.size > 4_000_000) return;
+      const reader = new FileReader();
+      reader.onload = () => setter((prev) => [...prev, String(reader.result || '')]);
+      reader.readAsDataURL(file);
+    });
+  };
   // Cycle status: Pass -> Fail -> N/A -> Pass
   const cycleStatus = (id: string, current: string) => {
     const next = current === 'Pass' ? 'Fail' : current === 'Fail' ? 'N/A' : 'Pass';
@@ -180,6 +195,8 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
         }))
       );
     }
+    setQaBeforePhotos(selectedWo.intakePhotos || []);
+    setQaAfterPhotos(selectedWo.afterRepairPhotos || []);
   }, [selectedWoId, selectedWo, technicians]);
 
   
@@ -211,7 +228,10 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
 
   const handleSaveQaPass = () => {
     if (!selectedWo) return;
-    onSavePostRepairChecklist(selectedWo.id, qaData, qaDiagnostics);
+    onSavePostRepairChecklist(selectedWo.id, qaData, qaDiagnostics, {
+      before: qaBeforePhotos,
+      after: qaAfterPhotos,
+    });
     setQaSavedNotice(true);
     setTimeout(() => setQaSavedNotice(false), 4000);
   };
@@ -418,8 +438,94 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
               </div>
             </div>
 
-            {/* Modal body: 21-point checklist + inspector */}
+            {/* Modal body: photos + 21-point checklist + inspector */}
             <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-3">
+              {/* Before / After repair photos */}
+              <div className="space-y-2 rounded-xl border border-line bg-surface p-3">
+                <div className="flex flex-wrap gap-4">
+                  {/* Before */}
+                  <div className="flex-1 min-w-[200px] space-y-1.5">
+                    <h4 className="text-[11px] font-extrabold text-ink flex items-center gap-1.5">
+                      <Camera className="w-3.5 h-3.5 text-brand" />
+                      <span>Before-Repair Photos</span>
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {qaBeforePhotos.map((photo, idx) => (
+                        <div key={idx} className="relative w-16 h-16 rounded-lg overflow-hidden border border-line group">
+                          <img src={photo} alt={`Before photo ${idx + 1}`} className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => setQaBeforePhotos((prev) => prev.filter((_, i) => i !== idx))}
+                            className="absolute top-0.5 right-0.5 bg-black/70 text-white p-0.5 rounded-full"
+                            aria-label={`Remove before photo ${idx + 1}`}
+                          >
+                            <X className="w-2.5 h-2.5" />
+                          </button>
+                        </div>
+                      ))}
+                      <input
+                        ref={beforePhotoInputRef}
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        multiple
+                        className="hidden"
+                        onChange={(e) => { handlePhotoFiles(e.target.files, setQaBeforePhotos); e.target.value = ''; }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => beforePhotoInputRef.current?.click()}
+                        className="w-16 h-16 rounded-lg border-2 border-dashed border-line hover:border-brand flex flex-col items-center justify-center text-muted hover:text-brand text-[9px] gap-0.5 bg-white transition-all"
+                        title="Add before photo"
+                      >
+                        <Camera className="w-4 h-4" />
+                        <span>Add</span>
+                      </button>
+                    </div>
+                  </div>
+                  {/* After */}
+                  <div className="flex-1 min-w-[200px] space-y-1.5">
+                    <h4 className="text-[11px] font-extrabold text-ink flex items-center gap-1.5">
+                      <Camera className="w-3.5 h-3.5 text-success-deep" />
+                      <span>After-Repair Photos</span>
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {qaAfterPhotos.map((photo, idx) => (
+                        <div key={idx} className="relative w-16 h-16 rounded-lg overflow-hidden border border-line group">
+                          <img src={photo} alt={`After photo ${idx + 1}`} className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => setQaAfterPhotos((prev) => prev.filter((_, i) => i !== idx))}
+                            className="absolute top-0.5 right-0.5 bg-black/70 text-white p-0.5 rounded-full"
+                            aria-label={`Remove after photo ${idx + 1}`}
+                          >
+                            <X className="w-2.5 h-2.5" />
+                          </button>
+                        </div>
+                      ))}
+                      <input
+                        ref={afterPhotoInputRef}
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        multiple
+                        className="hidden"
+                        onChange={(e) => { handlePhotoFiles(e.target.files, setQaAfterPhotos); e.target.value = ''; }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => afterPhotoInputRef.current?.click()}
+                        className="w-16 h-16 rounded-lg border-2 border-dashed border-line hover:border-success flex flex-col items-center justify-center text-muted hover:text-success-deep text-[9px] gap-0.5 bg-white transition-all"
+                        title="Add after photo"
+                      >
+                        <Camera className="w-4 h-4" />
+                        <span>Add</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="space-y-2.5 rounded-xl border border-line bg-surface p-3">
                 <div className="flex items-center justify-between border-b border-line pb-2">
                   <h3 className="text-[11px] font-bold text-ink flex items-center space-x-1.5">
