@@ -469,7 +469,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           title={`Status: ${item.status} — click to change`}
                           aria-label={`Change status for ${item.name}`}
                         >
-                          <IconComp className="w-6 h-6" />
+                          <IconComp className="w-8 h-8" />
                         </button>
 
                         {/* Name — click to mark Pass */}
@@ -485,18 +485,8 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           {idx + 1}. {item.name}
                         </button>
 
-                        {/* Footer: status pill + 3-dot menu (Comment) */}
-                        <div className="flex items-center justify-between gap-1 mt-1.5">
-                          <span className={`px-1.5 py-px rounded text-[9px] font-black leading-none ${
-                            isPass
-                              ? 'bg-success text-white'
-                              : isFail
-                              ? 'bg-danger text-white'
-                              : 'bg-slate-100 text-slate-500'
-                          }`}>
-                            {isPass ? '✓ PASS' : isFail ? '✕ FAIL' : 'NA'}
-                          </span>
-                          <div className="relative">
+                        {/* ⋮ menu (Comment) */}
+                        <div className="flex items-center justify-end mt-1">
                             <button
                               type="button"
                               onClick={(e) => { e.stopPropagation(); setNoteOpenIds((prev) => { const next = new Set(prev); next.add(item.id); return next; }); }}
@@ -506,7 +496,6 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                             >
                               <MoreHorizontal className="w-3.5 h-3.5" />
                             </button>
-                          </div>
                         </div>
 
                         {/* Note input — long-press to open; stays when note exists */}
