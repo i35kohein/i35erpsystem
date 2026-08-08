@@ -1,0 +1,78 @@
+/**
+ * carbon-coat.css v2 — Carbon Design System coat for the tokenized ERP.
+ *
+ * The app now uses @theme design tokens (bg-brand, text-ink, border-line… —
+ * Ko Hein's token pass). Re-theming = overriding the tokens below. No
+ * component changes; flip/remove this file to revert to the Apple palette.
+ *
+ * Add: import './carbon-coat.css'; in src/main.tsx (after './index.css').
+ */
+
+/* ---- IBM Plex Sans (Carbon typeface) ---- */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap');
+
+/* ---- Token override: Apple palette → Carbon (IBM Design Language) ---- */
+:root {
+  --color-brand: #0f62fe;            /* was #0071E3 */
+  --color-brand-deep: #0b53e0;       /* hover (Carbon blue-70 #0f62fe → 70) */
+  --color-brand-soft: #edf4ff;       /* tinted blue bg (Carbon blue-10) */
+  --color-ink: #161616;              /* was #1D1D1F (Carbon gray-100) */
+  --color-muted: #616161;            /* was #86868B (Carbon gray-70) */
+  --color-faint: #616161;            /* was #6E6E73 */
+  --color-line: #e0e0e0;             /* was #E5E5EA (Carbon gray-30) */
+  --color-line-strong: #c6c6c6;      /* was #D2D2D7 (Carbon gray-40) */
+  --color-surface: #f4f4f4;          /* was #F5F5F7 (Carbon gray-10) */
+  --color-success: #166534;          /* was #34C759 (Carbon green-60) */
+  --color-success-deep: #188038;     /* Carbon green-70 — success TEXT on light (AA) */
+  --color-purple: #8a3ffc;           /* Carbon purple-60 (was #AF52DE / #7360F2 / #7C3AED) */
+  --color-warning: #ff9500;          /* was #FF9500 (Apple orange) — app warning accent */
+  --color-danger: #da1e28;           /* was #FF3B30 (Carbon red-60) */
+}
+
+/* Font: whole app → IBM Plex */
+body, .basic-ui, button, input, select, textarea, [class*="font-sans"] {
+  font-family: 'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif;
+}
+[class*="font-mono"] {
+  font-family: 'IBM Plex Mono', 'SF Mono', monospace;
+}
+
+/* ---- Straggler raw hexes (one-offs not yet tokenized) ---- */
+.text-\[\#16A34A\], .text-\[\#28A745\], .text-\[\#1E7E34\], .text-\[\#30B753\] { color: var(--color-success) !important; }
+.text-\[\#188038\] { color: var(--color-success-deep) !important; }
+.text-\[\#AF52DE\], .text-\[\#7360F2\], .text-\[\#7C3AED\] { color: var(--color-purple) !important; }
+.bg-\[\#7360F2\], .bg-\[\#AF52DE\] { background-color: var(--color-purple) !important; }
+.text-\[\#FF9500\] { color: var(--color-warning) !important; }
+.bg-\[\#FF9500\] { background-color: var(--color-warning) !important; }
+.bg-\[\#FAFAFA\] { background-color: var(--color-surface) !important; }
+.text-\[\#DC2626\] { color: var(--color-danger) !important; }
+.bg-\[\#DC2626\] { background-color: var(--color-danger) !important; }
+.text-\[\#111111\] { color: var(--color-ink) !important; }
+.text-\[\#7F7F7F\], .text-\[\#526375\], .text-\[\#424245\] { color: var(--color-muted) !important; }
+.text-\[\#C7C7CC\] { color: var(--color-muted) !important; }
+.border-\[\#C7C7CC\], .border-\[\#D8E5ED\] { border-color: var(--color-line) !important; }
+.text-\[\#229ED9\] { color: var(--color-brand) !important; }
+.text-\[\#2C3E50\] { color: #393939 !important; }        /* Carbon gray-80 */
+.text-\[\#136F9A\], .text-\[\#0077ED\] { color: var(--color-brand) !important; }
+.bg-\[\#136F9A\] { background-color: var(--color-brand) !important; }
+.bg-\[\#EAF8ED\] { background-color: color-mix(in srgb, var(--color-success) 12%, white) !important; }
+.bg-\[\#F8F9FA\], .bg-\[\#F8FBFD\], .bg-\[\#F0F6FF\] { background-color: var(--color-surface) !important; }
+.bg-\[\#F0F6FF\] { background-color: var(--color-brand-soft) !important; }
+
+/* ---- Dark Mode Overrides for Carbon Tokens ---- */
+html[data-theme="dark-slate"] {
+  --color-brand: #78a9ff;            /* Carbon blue-40 */
+  --color-brand-deep: #4589ff;       /* Carbon blue-50 */
+  --color-brand-soft: #001141;       /* Carbon blue-90 */
+  --color-ink: #f4f4f4;              /* Carbon gray-10 */
+  --color-muted: #a8a8a8;            /* Carbon gray-50 */
+  --color-faint: #6f6f6f;            /* Carbon gray-60 */
+  --color-line: #393939;             /* Carbon gray-80 */
+  --color-line-strong: #525252;      /* Carbon gray-70 */
+  --color-surface: #262626;          /* Carbon gray-90 */
+  --color-success: #42be65;          /* Carbon green-40 */
+  --color-success-deep: #24a148;     /* Carbon green-50 */
+  --color-purple: #be95ff;           /* Carbon purple-40 */
+  --color-warning: #f1c21b;          /* Carbon yellow-30 */
+  --color-danger: #ff8389;           /* Carbon red-40 */
+}

@@ -1,0 +1,37 @@
+# i35 ERP — Button Policy Migration Log
+
+**Policy (2026-08-06):** every interactive button MUST use `<Button>` from `src/components/ui`.
+Raw `<button>` banned outside the ui kit + 3 primitives (CustomDropdownMenu, DrawerSelect,
+UserRoleSwitcher). Enforced by `scripts/check-button-policy.mjs` (fails when count exceeds
+baseline; baseline drops as migration progresses). Details in README "Button policy".
+
+**Baseline at adoption: 477 raw buttons.** Guard: `npm run lint` → `tsc --noEmit && node scripts/check-button-policy.mjs`
+
+## Migration status
+
+| Date | Count | Converted |
+|---|---|---|
+| 2026-08-06 (adoption) | 477 | — |
+| 2026-08-06 (round 1, commit `8db2c32`) | **448** | Navigation (2), ActiveFilterChips (1), TechnicianLeaderboardView (1), TechnicianPerformanceTab (1), TabAi (1), TabTheme (1), LanguageSwitcher (4), ConfirmDeleteModal (2), DeviceTagPrinterModal (6), DateFilterSelector (6) |
+| 2026-08-06 (round 2, commits `c0b85df` + `680e16e`) | **389** | **App.tsx (35 — drawer rows/toggles)**, **DashboardOverview (20 — tabs incl. role=tab, queue/warranty filters, roster View/Print, Copy Notice, search ×)**, POS (12 — Pay&Print, quick amounts, numpad, account copy, confirm X), StatusPipelineView tag fix (accidental h3→div mismatch reverted), dashboard tab 40px guard (`lg:h-10`) |
+| 2026-08-06 (round 3, commit `6d857a7`) | **0** 🎉 | **Batch tag-swap all remaining 41 files (311 buttons)** — Inventory(78), Pipeline(27), CreateTicket(26), PriceSettings(20), TabInventory(18), portal(13), PriceCatalog(12), POS(12), SystemSettings(11), SupplierRma(11), CrmPortal(11), Intake(11), QuickPrice(10), CameraQr(9), Timeline(9), follow-up(8), finance(7), QA(6), + 17 more. **Button default size → `h-10` (40px everywhere)** — fixes the silent `lg:h-9` (36px) shrink that hit every `h-10`-className button at lg. Guard now **strict: baseline 0** — any raw `<button>` fails lint. |
+
+## ✅ MIGRATION COMPLETE (2026-08-06) — 0 raw buttons remaining.
+Guard is strict (baseline 0): adding a raw `<button>` anywhere outside the ui kit now fails `npm run lint`.
+  PriceCatalogModule **12** · SupplierRmaModule **11** · SystemManagementSettingsModule **11** ·
+  CrmCustomerPortalModule **11** · IntakeWorkOrderModule **11** · QuickPriceCalculatorModal **10** …
+- Note: many remaining are legitimately tricky (dynamic role/state colors, table cell micro-buttons,
+  calendar day grids, dropdown options) — decide per case: convert to Button where it fits,
+  or move into a small reusable local component that uses Button internally.
+
+## Rules of thumb for migration
+1. Standard action/label buttons → `<Button variant="default|outline|secondary|ghost" size="sm|default">`
+2. Icon-only (h-9/10 w-9/10) → `<Button variant="iconGhost" size="icon">` (40px standard)
+3. In-table tiny icons (h-7/8) → `<Button variant="iconGhost" size="iconSm">`
+4. Chips/filter pills → `<Button variant="chip">` (h-8 pill; color overrides via className)
+5. Segmented controls → `<Button variant="ghost" size="sm">` inside the p-1 container
+6. Listbox options / calendar day cells → keep raw (semantic roles, not buttons)
+7. className overrides merge via tailwind-merge — put conditional colors in className, keep base in variant
+
+After each round: run lint, update BASELINE in `scripts/check-button-policy.mjs` to the new count,
+commit + deploy.

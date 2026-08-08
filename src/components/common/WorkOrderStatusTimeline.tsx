@@ -1,0 +1,644 @@
+import React, { useState, useMemo } from 'react';
+import { Button , Input } from '../ui';
+import {Clock, 
+  CheckCircle2, 
+  Cog, 
+  PackageCheck, 
+  AlertCircle, 
+  AlertTriangle,
+  ArrowRight, 
+  User, 
+  Plus, 
+  Send, 
+  Copy, 
+  Check, 
+  Search, 
+  ShieldCheck, 
+  DollarSign, 
+  Activity} from 'lucide-react';
+import { WorkOrder, WorkOrderStatus, RepairLogEntry } from '../../types';
+import { useLanguage } from '../../context/LanguageContext';
+import { checkIsBeforeDiagnosticCompleted, checkIsAfterDiagnosticCompleted } from '../../utils/diagnosticUtils';
+
+interface WorkOrderStatusTimelineProps {
+  workOrder: WorkOrder;
+  onSaveWorkOrder?: (updatedWorkOrder: WorkOrder) => void;
+  onUpdateStatus?: (workOrderId: string, newStatus: WorkOrderStatus) => void;
+  compact?: boolean;
+}
+
+export const MAIN_STATUS_PIPELINE: { status: WorkOrderStatus; label: string; desc: string; icon: any; color: string; badge: string }[] = [
+  { status: 'Receive', label: 'Received', desc: 'Ticket Intake & Inspection', icon: PackageCheck, color: 'text-purple border-purple/50 bg-purple/20', badge: 'bg-purple/15 text-purple border-purple/30' },
+  { status: 'In Progress', label: 'In Progress', desc: 'Active Hardware Repair', icon: Cog, color: 'text-brand border-brand/60 bg-brand/25', badge: 'bg-brand/15 text-brand-deep border-brand/30' },
+  { status: 'Pending', label: 'Pending', desc: 'Awaiting Parts or Client Approval', icon: Clock, color: 'text-warning border-warning/50 bg-warning/20', badge: 'bg-warning/15 text-warning border-warning/30' },
+  { status: 'Finished', label: 'Finished', desc: 'QA Passed & Ready for Pickup', icon: CheckCircle2, color: 'text-success border-success/50 bg-success/20', badge: 'bg-success/15 text-success-deep border-success/30' },
+  { status: 'Taken Out', label: 'Taken Out', desc: 'Paid & Returned to Customer', icon: ShieldCheck, color: 'text-muted border-slate-700 bg-ink/80', badge: 'bg-line text-ink border-line' },
+];
+
+export interface FormattedAuditItem {
+  id: string;
+  rawTimestamp: string;
+  formattedDate: string;
+  formattedTime: string;
+  timeDelta?: string;
+  author: string;
+  type: 'STATUS_TRANSITION' | 'TECH_NOTE' | 'ASSIGNMENT' | 'QA_CHECK' | 'PAYMENT' | 'INTAKE';
+  fromStatus?: WorkOrderStatus;
+  toStatus?: WorkOrderStatus;
+  note: string;
+  isInitialIntake?: boolean;
+}
+
+export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = ({
+  workOrder,
+  onSaveWorkOrder,
+  onUpdateStatus,
+  compact = false,
+}) => {
+  const { t } = useLanguage();
+  const [filterType, setFilterType] = useState<string>('ALL');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedStageFilter, setSelectedStageFilter] = useState<WorkOrderStatus | 'ALL'>('ALL');
+  
+  // New Transition / Log Input State
+  const [isAddingLog, setIsAddingLog] = useState<boolean>(false);
+  const [newLogNote, setNewLogNote] = useState<string>('');
+  const [newLogAuthor, setNewLogAuthor] = useState<string>(workOrder.assignedTechName || 'Technician');
+  const [targetStatus, setTargetStatus] = useState<WorkOrderStatus>(workOrder.status);
+  
+  const [isCopied, setIsCopied] = useState<boolean>(false);
+
+  // Calculate status transition timeline data
+  const { auditItems, stageDurationMap, currentStageIndex } = useMemo(() => {
+    const rawLogs = workOrder.repairLogs || [];
+    const items: FormattedAuditItem[] = [];
+
+    // Helper to attempt parsing dates
+    const parseDateMs = (str: string): number => {
+      const d = new Date(str);
+      return isNaN(d.getTime()) ? Date.now() : d.getTime();
+    };
+
+    // 1. Initial Intake Event
+    const createdAtMs = parseDateMs(workOrder.createdAt);
+    const initDate = new Date(createdAtMs);
+    items.push({
+      id: `intake-init-${workOrder.id}`,
+      rawTimestamp: workOrder.createdAt,
+      formattedDate: initDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      formattedTime: initDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+      author: workOrder.assignedTechName ? `Intake Tech: ${workOrder.assignedTechName}` : 'Intake System',
+      type: 'INTAKE',
+      toStatus: 'Receive',
+      note: `Ticket created for ${workOrder.deviceCategory} ${workOrder.deviceModel}. Reported Issue: ${workOrder.symptomsReported || 'Standard intake checklist.'}`,
+      isInitialIntake: true,
+    });
+
+    // 2. Process Repair Logs
+    let previousStatus: WorkOrderStatus = 'Receive';
+
+    rawLogs.forEach((log, idx) => {
+      let eventType: FormattedAuditItem['type'] = 'TECH_NOTE';
+      let fromS: WorkOrderStatus | undefined;
+      let toS: WorkOrderStatus | undefined;
+
+      const noteLower = log.note.toLowerCase();
+
+      // Detect if this log is a status transition
+      if (log.statusChange) {
+        eventType = 'STATUS_TRANSITION';
+        fromS = previousStatus;
+        toS = log.statusChange as WorkOrderStatus;
+        previousStatus = log.statusChange as WorkOrderStatus;
+      } else if (noteLower.includes('status') || noteLower.includes('transition') || noteLower.includes('moved to') || noteLower.includes('changed to')) {
+        eventType = 'STATUS_TRANSITION';
+        fromS = previousStatus;
+      } else if (noteLower.includes('assigned') || noteLower.includes('tech')) {
+        eventType = 'ASSIGNMENT';
+      } else if (noteLower.includes('qa') || noteLower.includes('diagnostic') || noteLower.includes('inspection')) {
+        eventType = 'QA_CHECK';
+      } else if (noteLower.includes('payment') || noteLower.includes('checkout') || noteLower.includes('paid') || noteLower.includes('invoice')) {
+        eventType = 'PAYMENT';
+      }
+
+      const logDateMs = parseDateMs(log.timestamp);
+      const logDate = new Date(logDateMs);
+
+      items.push({
+        id: log.id || `log-${idx}`,
+        rawTimestamp: log.timestamp,
+        formattedDate: logDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        formattedTime: logDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+        author: log.author || 'Technician',
+        type: eventType,
+        fromStatus: fromS,
+        toStatus: toS || (log.statusChange as WorkOrderStatus),
+        note: log.note,
+      });
+    });
+
+    // Sort items chronologically (newest first for timeline view)
+    items.sort((a, b) => parseDateMs(b.rawTimestamp) - parseDateMs(a.rawTimestamp));
+
+    // Calculate time deltas between chronological steps
+    for (let i = items.length - 1; i >= 0; i--) {
+      if (i < items.length - 1) {
+        const currentMs = parseDateMs(items[i].rawTimestamp);
+        const prevMs = parseDateMs(items[i + 1].rawTimestamp);
+        const diffMinutes = Math.max(0, Math.floor((currentMs - prevMs) / (1000 * 60)));
+
+        if (diffMinutes < 60) {
+          items[i].timeDelta = `${diffMinutes}m after previous step`;
+        } else if (diffMinutes < 1440) {
+          const hrs = (diffMinutes / 60).toFixed(1);
+          items[i].timeDelta = `${hrs}h after previous step`;
+        } else {
+          const days = (diffMinutes / 1440).toFixed(1);
+          items[i].timeDelta = `${days}d after previous step`;
+        }
+      }
+    }
+
+    // Determine current pipeline stage index
+    const currentIdx = MAIN_STATUS_PIPELINE.findIndex((p) => p.status === workOrder.status);
+
+    // Map duration or count of logs per stage
+    const durationMap: Record<string, number> = {};
+    items.forEach((item) => {
+      const st = item.toStatus || item.fromStatus || workOrder.status;
+      durationMap[st] = (durationMap[st] || 0) + 1;
+    });
+
+    return {
+      auditItems: items,
+      stageDurationMap: durationMap,
+      currentStageIndex: currentIdx >= 0 ? currentIdx : 0,
+    };
+  }, [workOrder]);
+
+  // Filter audit items by type, search query, or stage
+  const filteredAuditItems = useMemo(() => {
+    return auditItems.filter((item) => {
+      const q = searchQuery.toLowerCase().trim();
+      const matchesSearch =
+        !q ||
+        item.note.toLowerCase().includes(q) ||
+        item.author.toLowerCase().includes(q) ||
+        (item.fromStatus && item.fromStatus.toLowerCase().includes(q)) ||
+        (item.toStatus && item.toStatus.toLowerCase().includes(q));
+
+      const matchesType =
+        filterType === 'ALL' ||
+        (filterType === 'TRANSITION' && (item.type === 'STATUS_TRANSITION' || item.type === 'INTAKE')) ||
+        (filterType === 'NOTES' && item.type === 'TECH_NOTE') ||
+        (filterType === 'QA' && item.type === 'QA_CHECK');
+
+      const matchesStage =
+        selectedStageFilter === 'ALL' ||
+        item.toStatus === selectedStageFilter ||
+        item.fromStatus === selectedStageFilter;
+
+      return matchesSearch && matchesType && matchesStage;
+    });
+  }, [auditItems, searchQuery, filterType, selectedStageFilter]);
+
+  // Toggle log expansion
+  
+
+  // Handle adding new status transition or log entry
+  const handleAddNewTransitionLog = () => {
+    if (!newLogNote.trim()) return;
+
+    const formattedDate = new Date().toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+
+    const isStatusChanged = targetStatus !== workOrder.status;
+    const noteText = isStatusChanged
+      ? `Status transitioned from [${workOrder.status}] to [${targetStatus}]. ${newLogNote.trim()}`
+      : newLogNote.trim();
+
+    const newLog: RepairLogEntry = {
+      id: `log-${Date.now()}`,
+      timestamp: formattedDate,
+      author: newLogAuthor.trim() || 'Technician',
+      note: noteText,
+      statusChange: isStatusChanged ? targetStatus : undefined,
+    };
+
+    const updatedWo: WorkOrder = {
+      ...workOrder,
+      status: targetStatus,
+      repairLogs: [newLog, ...(workOrder.repairLogs || [])],
+      updatedAt: new Date().toISOString(),
+    };
+
+    if (onSaveWorkOrder) {
+      onSaveWorkOrder(updatedWo);
+    }
+    if (isStatusChanged && onUpdateStatus) {
+      onUpdateStatus(workOrder.id, targetStatus);
+    }
+
+    setNewLogNote('');
+    setIsAddingLog(false);
+  };
+
+  // Copy plain text summary of status transition audit trail
+  const handleCopyAuditSummary = () => {
+    let summaryText = `AUDIT TRAIL & STATUS TRANSITIONS REPORT\n`;
+    summaryText += `Ticket: ${workOrder.orderNumber || workOrder.id} | Device: ${workOrder.deviceCategory} ${workOrder.deviceModel}\n`;
+    summaryText += `Current Status: ${workOrder.status} | Technician: ${workOrder.assignedTechName || 'Unassigned'}\n`;
+    summaryText += `--------------------------------------------------\n`;
+
+    auditItems.forEach((item) => {
+      summaryText += `[${item.formattedDate} ${item.formattedTime}] (${item.author}): `;
+      if (item.fromStatus && item.toStatus) {
+        summaryText += `TRANSITION: ${item.fromStatus} ➔ ${item.toStatus} -- `;
+      }
+      summaryText += `${item.note}\n`;
+    });
+
+    navigator.clipboard.writeText(summaryText);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2500);
+  };
+
+  return (
+    <div className="space-y-5 text-xs">
+      {/* SECTION 1: Interactive Status Progression Pipeline Header Bar */}
+      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white rounded-2xl p-4 sm:p-5 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="space-y-0.5">
+            <div className="flex items-center space-x-2">
+              <span className="font-mono font-bold text-xs bg-brand text-white px-2.5 py-0.5 rounded-lg">
+                {workOrder.orderNumber || workOrder.id}
+              </span>
+              <h3 className="font-extrabold text-sm sm:text-base text-white tracking-tight">
+                {t('timelineTitle')}
+              </h3>
+            </div>
+            <p className="text-xs text-slate-300">
+              {workOrder.deviceCategory} {workOrder.deviceModel} • {t('assignedTech')}:{' '}
+              <strong className="text-white">{workOrder.assignedTechName || 'Unassigned'}</strong>
+            </p>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Button
+              type="button"
+              onClick={handleCopyAuditSummary}
+              className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white font-bold text-xs rounded-xl border border-white/20 transition-all flex items-center space-x-1.5 cursor-pointer shadow-2xs active:scale-95"
+              title="Copy Complete Audit Trail Text"
+            >
+              {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{isCopied ? t('copied') : t('copy')}</span>
+            </Button>
+
+            <Button
+              type="button"
+              onClick={() => setIsAddingLog(!isAddingLog)}
+              className="px-3 py-1.5 bg-brand hover:bg-brand-deep text-white font-bold text-xs rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer shadow-md active:scale-95"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>{t('logStatus')}</span>
+            </Button>
+          </div>
+        </div>
+
+        {/* 5-Stage Interactive Status Pipeline Tracker */}
+        <div className="pt-2 border-t border-white/10">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            {MAIN_STATUS_PIPELINE.map((stage, idx) => {
+              const StageIcon = stage.icon;
+              const isCurrent = workOrder.status === stage.status;
+              const isPassed = idx < currentStageIndex;
+              const logCount = stageDurationMap[stage.status] || 0;
+
+              return (
+                <div
+                  key={stage.status}
+                  onClick={() => setSelectedStageFilter(selectedStageFilter === stage.status ? 'ALL' : stage.status)}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={selectedStageFilter === stage.status}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedStageFilter(selectedStageFilter === stage.status ? 'ALL' : stage.status); }
+                  }}
+                  className={`p-2.5 rounded-xl border transition-all cursor-pointer relative overflow-hidden ${
+                    selectedStageFilter === stage.status
+                      ? 'ring-2 ring-white border-white bg-white/20'
+                      : isCurrent
+                      ? 'bg-white/15 border-white/40 shadow-inner'
+                      : isPassed
+                      ? 'bg-white/5 border-white/10 hover:bg-white/10'
+                      : 'bg-black/20 border-white/5 opacity-60 hover:opacity-100'
+                  }`}
+                >
+                  {/* Top line indicator */}
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center space-x-1.5">
+                      <div className={`p-1 rounded-lg ${isCurrent ? stage.color : isPassed ? 'bg-success/20 text-emerald-300' : 'bg-ink/80 text-slate-300'}`}>
+                        <StageIcon className="w-3.5 h-3.5" />
+                      </div>
+                      <span className="font-extrabold text-xs text-white truncate">{stage.label}</span>
+                    </div>
+
+                    {isCurrent && (
+                      <span aria-hidden="true" className="w-2 h-2 rounded-full bg-success animate-ping" title="Active Status" />
+                    )}
+                  </div>
+
+                  <p className="text-xs text-slate-300 line-clamp-1 leading-tight">{stage.desc}</p>
+
+                  <div className="flex justify-between items-center mt-2 pt-1 border-t border-white/10 text-xs text-muted">
+                    <span>{isCurrent ? 'Current Stage' : isPassed ? 'Completed' : 'Upcoming'}</span>
+                    {logCount > 0 && (
+                      <span className="font-mono font-bold bg-white/20 text-white px-1.5 rounded">
+                        {logCount} Event{logCount > 1 ? 's' : ''}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Special Terminal State Indicator if Cant Repair / Customer Cancelled */}
+          {(workOrder.status === 'Cant Repair' || workOrder.status === 'Customer Not Repair') && (
+            <div className="mt-2 p-2 bg-danger/20 border border-rose-500/40 rounded-xl flex items-center justify-between text-xs text-rose-200">
+              <div className="flex items-center space-x-2 font-bold">
+                <AlertCircle className="w-4 h-4 text-rose-400" />
+                <span>Ticket Outcome: {workOrder.status === 'Cant Repair' ? "Unrepairable / Can't Repair" : 'Cancelled / Customer Not Repair'}</span>
+              </div>
+              <span className="text-xs font-mono bg-rose-900/60 text-rose-100 px-2 py-0.5 rounded-md">
+                Terminal Exception Stage
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* SECTION 2: Add New Transition / Log Panel (inline expanding panel) */}
+      {isAddingLog && (
+        <div className="p-4 bg-surface border border-brand/30 rounded-2xl shadow-xs space-y-3 animate-fadeIn">
+          <div className="flex justify-between items-center pb-2 border-b border-line">
+            <span className="font-black text-xs text-ink flex items-center space-x-1.5">
+              <Activity className="w-4 h-4 text-brand" />
+              <span>Record Status Transition or Technical Audit Entry</span>
+            </span>
+            <Button
+              type="button"
+              onClick={() => setIsAddingLog(false)}
+              className="text-xs text-muted hover:text-ink font-bold"
+            >
+              Cancel ✕
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div>
+              <label className="block font-bold text-ink mb-1">Target Status Transition</label>
+              <select
+                value={targetStatus}
+                onChange={(e) => setTargetStatus(e.target.value as WorkOrderStatus)}
+                className="w-full bg-white border border-line rounded-xl px-3 py-1.5 text-xs font-bold text-ink focus:border-brand focus:outline-none"
+              >
+                <option value="Receive">Receive (Intake & Inspection)</option>
+                <option value="In Progress">In Progress (Active Repair)</option>
+                <option value="Pending">Pending (Waiting Parts / Client)</option>
+                <option value="Finished">Finished (QA Passed / Ready)</option>
+                <option value="Taken Out">Taken Out (Paid & Picked Up)</option>
+                <option value="Cant Repair">Can't Repair (Unfixable)</option>
+                <option value="Customer Not Repair">Customer Not Repair (Declined)</option>
+              </select>
+              {targetStatus !== workOrder.status && (
+                <p className="text-xs text-brand font-bold mt-1">
+                  ⚡ Status will update from <span className="underline">{workOrder.status}</span> ➔ <span className="underline">{targetStatus}</span>
+                </p>
+              )}
+              {['Receive', 'In Progress', 'Pending'].includes(targetStatus) && !checkIsBeforeDiagnosticCompleted(workOrder) && (
+                <div className="p-2.5 bg-warning/10 border border-warning/30 rounded-xl text-warning text-xs space-y-1 mt-2">
+                  <div className="flex items-center space-x-1.5 font-extrabold text-warning">
+                    <AlertTriangle className="w-3.5 h-3.5 text-warning shrink-0 animate-pulse" />
+                    <span>Initial Diagnostic Alert:</span>
+                  </div>
+                  <p className="text-warning leading-tight">Initial 21-point diagnostic not completed.</p>
+                </div>
+              )}
+              {targetStatus === 'Finished' && !checkIsAfterDiagnosticCompleted(workOrder) && (
+                <div className="p-2.5 bg-danger/10 border border-danger/30 rounded-xl text-danger text-xs space-y-1 mt-2">
+                  <div className="flex items-center space-x-1.5 font-extrabold text-danger">
+                    <AlertCircle className="w-3.5 h-3.5 text-danger shrink-0 animate-pulse" />
+                    <span>Finished Device Diagnostic Alert:</span>
+                  </div>
+                  <p className="text-danger leading-tight">Marking Finished without post-repair diagnostic.</p>
+                </div>
+              )}
+              {targetStatus === 'Taken Out' && (
+                <div className="p-2.5 bg-purple/10 border border-purple/30 rounded-xl text-purple text-xs space-y-1 mt-2">
+                  <div className="flex items-center space-x-1.5 font-extrabold text-purple">
+                    <AlertCircle className="w-3.5 h-3.5 text-purple shrink-0 animate-pulse" />
+                    <span>POS Cashout Required for Taken Out:</span>
+                  </div>
+                  <p className="text-purple leading-tight">Taken Out opens the POS checkout to collect payment.</p>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="block font-bold text-ink mb-1">Technician / Author Name</label>
+              <Input
+                type="text"
+                value={newLogAuthor}
+                onChange={(e) => setNewLogAuthor(e.target.value)}
+                placeholder="e.g. Elena Rostova"
+                className="w-full bg-white border border-line rounded-xl px-3 py-1.5 text-xs text-ink focus:border-brand focus:outline-none font-semibold"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block font-bold text-ink mb-1">Audit Log Note & Repair Evidence *</label>
+            <textarea
+              rows={3}
+              value={newLogNote}
+              onChange={(e) => setNewLogNote(e.target.value)}
+              placeholder="e.g. Replaced display panel and completed 21-point touch & TrueTone calibration. Moving to QA testing."
+              className="w-full bg-white border border-line rounded-xl p-3 text-xs text-ink focus:border-brand focus:outline-none"
+            />
+          </div>
+
+          <div className="flex justify-end space-x-2 pt-1">
+            <Button
+              type="button"
+              onClick={() => setIsAddingLog(false)}
+              className="px-3.5 py-1.5 bg-white border border-line hover:bg-surface text-ink font-bold text-xs rounded-xl transition-all cursor-pointer"
+            >
+              Discard
+            </Button>
+            <Button
+              type="button"
+              onClick={handleAddNewTransitionLog}
+              className="px-4 py-1.5 bg-brand hover:bg-brand-deep text-white font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center space-x-1 cursor-pointer"
+            >
+              <Send className="w-3.5 h-3.5" />
+              <span>Save & Publish Transition Log</span>
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* SECTION 3: Timeline Search & Filter Toolbar */}
+      {!compact && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 bg-surface p-2.5 rounded-2xl border border-line">
+          {/* Search Bar */}
+          <div className="relative w-full sm:w-72">
+            <Search className="w-3.5 h-3.5 text-muted absolute left-3 top-2.5" />
+            <Input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search transitions, notes, tech..."
+              className="w-full bg-white border border-line rounded-xl pl-8 pr-3 py-1.5 text-xs text-ink focus:border-brand focus:outline-none font-medium"
+            />
+          </div>
+
+          {/* Filter Pills */}
+          <div className="flex items-center space-x-1 overflow-x-auto no-scrollbar w-full sm:w-auto">
+            <span className="text-xs font-bold text-muted uppercase tracking-wider pr-1">Filter:</span>
+            {([
+              { id: 'ALL' as const, label: `All Events (${auditItems.length})` },
+              { id: 'TRANSITION' as const, label: 'Transitions Only' },
+              { id: 'NOTES' as const, label: 'Tech Notes' },
+              { id: 'QA' as const, label: 'QA & Diagnostics' },
+            ]).map((pill) => (
+              <Button
+                key={pill.id}
+                type="button"
+                onClick={() => setFilterType(pill.id)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  filterType === pill.id ? 'bg-brand text-white' : 'bg-white text-ink hover:bg-line'
+                }`}
+              >
+                {pill.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* SECTION 4: Interactive Chronological Audit Timeline */}
+      {filteredAuditItems.length > 0 ? (
+        <div className="relative pl-6 sm:pl-8 space-y-5 before:absolute before:left-3 sm:before:left-4 before:top-3 before:bottom-3 before:w-0.5 before:bg-gradient-to-b before:from-brand before:via-purple before:to-success">
+          {filteredAuditItems.map((item) => {
+
+            // Determine Icon & Styling by Event Type
+            let iconBg = 'bg-brand text-white';
+            let IconComponent = Activity;
+            let categoryLabel = 'Repair Audit Log';
+            let categoryBadge = 'bg-brand-soft text-brand border-brand/30';
+
+            if (item.type === 'INTAKE') {
+              iconBg = 'bg-purple text-white ring-4 ring-purple/20';
+              IconComponent = PackageCheck;
+              categoryLabel = 'Work Order Created & Intaken';
+              categoryBadge = 'bg-purple/10 text-purple border-purple/30';
+            } else if (item.type === 'STATUS_TRANSITION') {
+              iconBg = 'bg-brand text-white ring-4 ring-brand/20';
+              IconComponent = ArrowRight;
+              categoryLabel = 'Status Transition Mapped';
+              categoryBadge = 'bg-brand-soft text-brand border-brand/30';
+            } else if (item.type === 'QA_CHECK') {
+              iconBg = 'bg-purple text-white ring-4 ring-purple/20';
+              IconComponent = ShieldCheck;
+              categoryLabel = 'QA 21-Point Inspection';
+              categoryBadge = 'bg-purple/10 text-purple border-purple/30';
+            } else if (item.type === 'PAYMENT') {
+              iconBg = 'bg-success text-white ring-4 ring-success/20';
+              IconComponent = DollarSign;
+              categoryLabel = 'POS Payment & Checkout';
+              categoryBadge = 'bg-success/10 text-success-deep border-success/30';
+            } else if (item.type === 'ASSIGNMENT') {
+              iconBg = 'bg-warning text-white ring-4 ring-warning/20';
+              IconComponent = User;
+              categoryLabel = 'Technician Assignment';
+              categoryBadge = 'bg-warning/10 text-warning border-warning/30';
+            }
+
+            return (
+              <div key={item.id} className="relative group">
+                {/* Node Point on Left Line */}
+                <div className={`absolute -left-6 sm:-left-8 top-3 w-6 h-6 rounded-full flex items-center justify-center ${iconBg} shadow-sm z-10 transition-transform group-hover:scale-110`}>
+                  <IconComponent className="w-3.5 h-3.5" />
+                </div>
+
+                {/* Timeline Card */}
+                <div className="bg-white border border-line hover:border-brand/60 rounded-2xl p-3.5 sm:p-4 space-y-2.5 shadow-2xs transition-all">
+                  {/* Card Header */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 border-b border-line pb-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className={`px-2 py-0.5 text-xs font-extrabold rounded-full border ${categoryBadge}`}>
+                        {categoryLabel}
+                      </span>
+
+                      {/* Display Status Transition Pair if present */}
+                      {item.fromStatus && item.toStatus && (
+                        <div className="flex items-center space-x-1.5 font-mono text-xs font-extrabold bg-surface px-2.5 py-0.5 rounded-lg border border-line">
+                          <span className="text-muted">{item.fromStatus}</span>
+                          <ArrowRight className="w-3 h-3 text-brand" />
+                          <span className="text-brand underline">{item.toStatus}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex items-center space-x-2 text-xs text-muted">
+                      {item.timeDelta && (
+                        <span className="bg-surface text-muted font-mono font-bold px-1.5 py-0.5 rounded inline-flex items-center">
+                          <Clock className="w-3 h-3 text-muted shrink-0 mr-1" />
+                          <span>{item.timeDelta}</span>
+                        </span>
+                      )}
+                      <span className="font-semibold text-ink">{item.formattedDate}</span>
+                      <span>at {item.formattedTime}</span>
+                    </div>
+                  </div>
+
+                  {/* Body Content */}
+                  <div className="space-y-1">
+                    <p className="text-xs text-ink font-semibold leading-relaxed">
+                      {item.note}
+                    </p>
+
+                    <div className="flex items-center justify-between pt-1 text-xs text-muted">
+                      <span>
+                        Logged by: <strong className="text-ink font-bold">{item.author}</strong>
+                      </span>
+
+                      {item.isInitialIntake && (
+                        <span className="text-xs font-mono font-bold text-purple bg-purple/10 px-2 py-0.5 rounded border border-purple/30">
+                          Intake Baseline Timestamp
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="p-8 text-center text-muted bg-surface rounded-2xl border border-dashed border-line">
+          <Search className="w-8 h-8 text-muted/40 mx-auto mb-2" />
+          <p className="font-extrabold text-xs text-ink">No Status Transition Events Found</p>
+          <p className="text-xs text-muted mt-0.5">Adjust keywords or filters.</p>
+        </div>
+      )}
+    </div>
+  );
+};

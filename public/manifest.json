@@ -1,0 +1,25 @@
+{
+  "short_name": "i35 ERP",
+  "name": "i35 Apple Service ERP",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "scope": "/",
+  "background_color": "#F5F5F7",
+  "theme_color": "#0071E3",
+  "display": "standalone",
+  "orientation": "any",
+  "description": "i35 Apple Service Repair Management ERP with Offline Support and Automatic Data Sync"
+}

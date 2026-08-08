@@ -1,0 +1,1279 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+/* Official app fonts (2026-08-06): IBM Plex Sans for UI text, IBM Plex Mono for numbers/codes */
+@theme {
+  --font-sans: 'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', 'SF Mono', monospace;
+}
+
+body {
+  font-family: 'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif;
+}
+[class*="font-mono"] {
+  font-family: 'IBM Plex Mono', 'SF Mono', monospace;
+}
+
+/* Ultra-wide breakpoints (beyond Tailwind's 2xl=1536):
+   3xl = 1920px, 4xl = 2560px — used for extra grid density on big monitors. */
+@theme {
+  --breakpoint-3xl: 120rem;
+  --breakpoint-4xl: 160rem;
+
+  /* Design tokens — canonical i35 palette (replaces raw hex in utilities) */
+  --color-brand: #0071E3;        /* primary action blue */
+  --color-brand-deep: #0051B3;   /* hover/pressed blue */
+  --color-brand-soft: #F0F6FF;   /* tinted blue background */
+  --color-ink: #1D1D1F;          /* primary text */
+  --color-muted: #616161; /* AA-passing muted (was #86868B 3.9:1) */        /* secondary text */
+  --color-faint: #6E6E73;        /* tertiary text */
+  --color-line: #E5E5EA;         /* hairline border */
+
+  /* P0 font + button-height scale (2026-08-06) — floor raised 10/11px → 12px text-xs:
+       text-xs 12px = meta/badges (FLOOR) · text-sm 14px = body · text-base 16px = emphasis
+       Button heights (desktop): sm 32 (h-8) / md 36 (h-9) / lg 40 (h-10) — see ui/button.tsx */
+  --text-floor: 0.75rem;      /* 12px — nothing smaller, ever */
+
+  /* Radius scale (P3 2026-08-06) — semantic usage:
+       rounded-md    6px   tags / chips / badges
+       rounded-lg    8px   inputs, selects, compact controls
+       rounded-xl   12px   buttons, cards (DEFAULT)
+       rounded-2xl  16px   panels, modals, big cards
+       rounded-full  ∞     pills, avatars, icons
+     Surface scale:
+       bg-surface (#F8F9FA) = inset panels / wells
+       bg-white   (#FFFFFF) = elevated cards on the surface */
+  --color-line-strong: #D2D2D7;  /* stronger border */
+  --color-surface: #F5F5F7;      /* subtle panel bg */
+  --color-success: #34C759;      /* positive/green */
+  --color-success-deep: #188038; /* success TEXT on light (WCAG AA) */
+  --color-danger: #FF3B30;       /* destructive/red */
+  --color-purple: #AF52DE;       /* secondary accent — base utilities (carbon-coat overrides to #8a3ffc) */
+  --color-warning: #FF9500;      /* warning accent — base utilities (matches carbon-coat) */
+  --color-teal: #27B1AE;         /* teal accent — theme presets, In Progress status */
+  --color-sky: #229ED9;          /* sky blue — Telegram/notification channel accent */
+  --color-danger-deep: #D70015;  /* danger hover/pressed red */
+}
+
+/* Global focus ring — consistent visible keyboard focus across the app. */
+:where(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid #0071E3;
+  outline-offset: 2px;
+}
+
+@font-face {
+  font-family: "MyanmarChatu";
+  src: local('Myanmar Chatu'), url('https://cdn.jsdelivr.net/gh/saturngod/myanmar-unicode-fonts@master/docs/KhmerType/MyanmarChatu.ttf') format('truetype');
+  font-display: swap;
+}
+
+/* Myanmar Language Font Overrides - Apply MyanmarChatu ONLY when in Myanmar UI */
+html[lang="mm"],
+html[data-lang="mm"],
+body.lang-mm,
+.lang-mm {
+  font-family: "MyanmarChatu", var(--font-family), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+html[lang="mm"] body,
+html[data-lang="mm"] body {
+  font-family: "MyanmarChatu", var(--font-family), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+/* Keep Burmese glyphs consistent inside controls, tables, modals, and print
+   layouts instead of falling back to a different font per component. */
+html[data-lang="mm"] :where(button, input, textarea, select, label, p, span, div, h1, h2, h3, h4, h5, h6, td, th),
+body.lang-mm :where(button, input, textarea, select, label, p, span, div, h1, h2, h3, h4, h5, h6, td, th) {
+  font-family: "MyanmarChatu", var(--font-family), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+/* Preserve monospaced font for codes and numbers in Myanmar mode */
+html[lang="mm"] .font-mono,
+html[data-lang="mm"] .font-mono,
+body.lang-mm .font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+}
+
+:root {
+  /* ONE palette source: the Tailwind tokens, which carbon-coat.css overrides
+     to the IBM Carbon palette. The .basic-ui theme vars below are aliases so
+     legacy var() consumers follow the same single system (F5 2026-08-06). */
+  --font-family: 'IBM Plex Sans', -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --bg: var(--color-surface);
+  --sidebar: #FFFFFF;
+  --card-bg: #FFFFFF;
+  --primary: var(--color-brand);
+  --primary-hover: var(--color-brand-deep);
+  --turquoise: var(--color-success);
+  --orange: var(--color-warning);
+  --dark-blue: var(--color-ink);
+  --text-main: var(--color-ink);
+  --text-secondary: var(--color-muted);
+  --text-muted: var(--color-muted);
+  --border: var(--color-line);
+  --border-subtle: var(--color-line);
+  --success: var(--color-success);
+  --warning: var(--color-warning);
+  --danger: var(--color-danger);
+  --purple: var(--color-purple);
+  --blue-tint: var(--color-brand-soft);
+}
+
+/* data-theme="minimalist-clean" is the legacy id for the default light theme —
+   it now just inherits :root (aliases resolve to the carbon palette). */
+html[data-theme="minimalist-clean"],
+html:not([data-theme]) {
+  --font-family: 'IBM Plex Sans', -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+html[data-theme="dark-slate"] {
+  --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --bg: #090D16;
+  --sidebar: #131B2E;
+  --card-bg: #131B2E;
+  --primary: #38BDF8;
+  --primary-hover: #0284C7;
+  --turquoise: #2DD4BF;
+  --orange: #FB923C;
+  --dark-blue: #F8FAFC;
+  --text-main: #FFFFFF;
+  --text-secondary: #E2E8F0;
+  --text-muted: #CBD5E1;
+  --border: #26334D;
+  --border-subtle: #192238;
+  --success: #34D399;
+  --warning: #FBBF24;
+  --danger: #F87171;
+  --purple: #A78BFA;
+  --blue-tint: #1E293B;
+}
+
+/* F5: logos always sit on a white chip so dark/black logos stay visible in dark mode */
+html[data-theme="dark-slate"] .logo-chip {
+  background-color: #FFFFFF !important;
+}
+
+/* F5: dark-slate also overrides the carbon TOKEN colors so modern token-based
+   classes (bg-surface, text-ink, border-line, bg-brand-soft…) go dark too. */
+html[data-theme="dark-slate"] {
+  --color-surface: #131B2E;
+  --color-line: #26334D;
+  --color-line-strong: #33415E;
+  --color-ink: #F8FAFC;
+  --color-muted: #CBD5E1;
+  --color-faint: #94A3B8;
+  --color-brand-soft: #1E293B;
+  --color-success-deep: #34D399;
+}
+
+
+
+/* F7: dark-slate CONTRAST overrides — text colors remapped for dark surfaces.
+   Text rules sit in @layer utilities AFTER generated utilities so they also beat
+   important-variant utilities like `!text-brand` (for !important, layered wins).
+   bg/border overrides stay unlayered (unlayered normal beats layered normal). */
+html[data-theme="dark-slate"] .text-brand { color: #6EA8FE !important; }
+html[data-theme="dark-slate"] .text-brand-deep { color: #6EA8FE !important; }
+html[data-theme="dark-slate"] .text-success { color: #4ADE80 !important; }
+html[data-theme="dark-slate"] .text-success-deep { color: #4ADE80 !important; }
+html[data-theme="dark-slate"] .text-danger { color: #F87171 !important; }
+html[data-theme="dark-slate"] .text-purple { color: #C4B5FD !important; }
+html[data-theme="dark-slate"] .text-warning { color: #FBBF24 !important; }
+html[data-theme="dark-slate"] [class~="text-[#15803D]"] { color: #4ADE80 !important; }
+html[data-theme="dark-slate"] [class~="text-[#16A34A]"] { color: #4ADE80 !important; }
+html[data-theme="dark-slate"] [class~="text-[#166534]"] { color: #4ADE80 !important; }
+html[data-theme="dark-slate"] [class~="text-teal"] { color: #2DD4BF !important; }
+html[data-theme="dark-slate"] .text-slate-700 { color: #E2E8F0 !important; }
+html[data-theme="dark-slate"] .text-slate-600 { color: #CBD5E1 !important; }
+html[data-theme="dark-slate"] .text-emerald-700 { color: #34D399 !important; }
+html[data-theme="dark-slate"] .text-emerald-600 { color: #34D399 !important; }
+html[data-theme="dark-slate"] .text-emerald-800 { color: #4ADE80 !important; }
+html[data-theme="dark-slate"] .text-emerald-900 { color: #4ADE80 !important; }
+html[data-theme="dark-slate"] .text-rose-600 { color: #FB7185 !important; }
+html[data-theme="dark-slate"] .text-rose-700 { color: #FDA4AF !important; }
+html[data-theme="dark-slate"] .text-rose-800 { color: #FDA4AF !important; }
+html[data-theme="dark-slate"] .text-rose-950 { color: #FDA4AF !important; }
+html[data-theme="dark-slate"] .text-red-700 { color: #F87171 !important; }
+html[data-theme="dark-slate"] .text-red-800 { color: #FCA5A5 !important; }
+html[data-theme="dark-slate"] .text-violet-700 { color: #C4B5FD !important; }
+html[data-theme="dark-slate"] .text-violet-800 { color: #C4B5FD !important; }
+html[data-theme="dark-slate"] .text-violet-900 { color: #C4B5FD !important; }
+html[data-theme="dark-slate"] .text-amber-700, html[data-theme="dark-slate"] .text-amber-600, html[data-theme="dark-slate"] .text-amber-500 { color: #FBBF24 !important; }
+html[data-theme="dark-slate"] .text-amber-800 { color: #FBBF24 !important; }
+html[data-theme="dark-slate"] .text-amber-900 { color: #FBBF24 !important; }
+html[data-theme="dark-slate"] .text-orange-700 { color: #FDBA74 !important; }
+html[data-theme="dark-slate"] .text-orange-800 { color: #FDBA74 !important; }
+html[data-theme="dark-slate"] .text-teal-700 { color: #2DD4BF !important; }
+html[data-theme="dark-slate"] .text-blue-800 { color: #93C5FD !important; }
+html[data-theme="dark-slate"] .bg-amber-50\/20 { background-color: rgba(245, 158, 11, 0.10) !important; }
+html[data-theme="dark-slate"] .bg-amber-50\/40 { background-color: rgba(245, 158, 11, 0.12) !important; }
+html[data-theme="dark-slate"] .bg-amber-50\/50 { background-color: rgba(245, 158, 11, 0.13) !important; }
+html[data-theme="dark-slate"] .bg-amber-50\/60 { background-color: rgba(245, 158, 11, 0.14) !important; }
+html[data-theme="dark-slate"] .bg-amber-50\/80 { background-color: rgba(245, 158, 11, 0.15) !important; }
+html[data-theme="dark-slate"] .bg-amber-50 { background-color: rgba(245, 158, 11, 0.13) !important; }
+html[data-theme="dark-slate"] .bg-amber-200\/80 { background-color: rgba(245, 158, 11, 0.18) !important; }
+html[data-theme="dark-slate"] .bg-amber-200 { background-color: rgba(245, 158, 11, 0.18) !important; }
+html[data-theme="dark-slate"] .bg-amber-500 { background-color: #92400E !important; }
+html[data-theme="dark-slate"] .border-amber-600 { border-color: rgba(245, 158, 11, 0.40) !important; }
+html[data-theme="dark-slate"] .bg-yellow-50 { background-color: rgba(234, 179, 8, 0.13) !important; }
+html[data-theme="dark-slate"] .bg-blue-50\/60 { background-color: rgba(59, 130, 246, 0.16) !important; }
+html[data-theme="dark-slate"] .bg-blue-50 { background-color: rgba(59, 130, 246, 0.16) !important; }
+html[data-theme="dark-slate"] .bg-teal-50\/60 { background-color: rgba(20, 184, 166, 0.14) !important; }
+html[data-theme="dark-slate"] .bg-teal-50 { background-color: rgba(20, 184, 166, 0.14) !important; }
+html[data-theme="dark-slate"] .bg-orange-50\/60 { background-color: rgba(249, 115, 22, 0.14) !important; }
+html[data-theme="dark-slate"] .bg-orange-50 { background-color: rgba(249, 115, 22, 0.14) !important; }
+html[data-theme="dark-slate"] .bg-emerald-50\/60 { background-color: rgba(16, 185, 129, 0.14) !important; }
+html[data-theme="dark-slate"] .bg-emerald-50\/50 { background-color: rgba(16, 185, 129, 0.13) !important; }
+html[data-theme="dark-slate"] .bg-emerald-50 { background-color: rgba(16, 185, 129, 0.14) !important; }
+html[data-theme="dark-slate"] .bg-rose-50\/60 { background-color: rgba(244, 63, 94, 0.14) !important; }
+html[data-theme="dark-slate"] .bg-rose-50 { background-color: rgba(244, 63, 94, 0.14) !important; }
+html[data-theme="dark-slate"] .bg-red-50 { background-color: rgba(239, 68, 68, 0.14) !important; }
+html[data-theme="dark-slate"] .bg-violet-50\/80 { background-color: rgba(139, 92, 246, 0.15) !important; }
+html[data-theme="dark-slate"] .bg-violet-50 { background-color: rgba(139, 92, 246, 0.15) !important; }
+html[data-theme="dark-slate"] .bg-purple-50 { background-color: rgba(139, 92, 246, 0.15) !important; }
+html[data-theme="dark-slate"] .bg-slate-100 { background-color: rgba(100, 116, 139, 0.18) !important; }
+html[data-theme="dark-slate"] .bg-slate-50 { background-color: rgba(100, 116, 139, 0.12) !important; }
+html[data-theme="dark-slate"] .bg-white\/50 { background-color: rgba(19, 27, 46, 0.7) !important; }
+html[data-theme="dark-slate"] .bg-ink { background-color: #26334D !important; }
+html[data-theme="dark-slate"] [class~="bg-brand-soft"] { background-color: rgba(21, 89, 166, 0.25) !important; }
+html[data-theme="dark-slate"] [class~="border-brand/30"] { border-color: rgba(107, 150, 205, 0.45) !important; }
+html[data-theme="dark-slate"] [class~="bg-[#7360F2]/10"] { background-color: rgba(115, 96, 242, 0.16) !important; }
+html[data-theme="dark-slate"] [class~="bg-surface"] { background-color: rgba(19, 27, 46, 0.55) !important; }
+html[data-theme="dark-slate"] [class~="bg-[#F8FAFC]"] { background-color: rgba(19, 27, 46, 0.55) !important; }
+html[data-theme="dark-slate"] [class~="bg-sky-400"] { background-color: #0284C7 !important; }
+html[data-theme="dark-slate"] .border-amber-200 { border-color: rgba(253, 230, 138, 0.3) !important; }
+html[data-theme="dark-slate"] .border-rose-200 { border-color: rgba(253, 164, 175, 0.3) !important; }
+html[data-theme="dark-slate"] .border-red-200 { border-color: rgba(252, 165, 165, 0.3) !important; }
+/* Component Geometry: Square / Rectangular Design System vs Curved Soft Geometry */
+html[data-geometry="square"] *,
+html[data-geometry="square"] ::before,
+html[data-geometry="square"] ::after,
+html:not([data-geometry]) *,
+html:not([data-geometry]) ::before,
+html:not([data-geometry]) ::after {
+  border-radius: 0px !important;
+}
+
+html {
+  text-size-adjust: 100%;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  min-width: 320px;
+}
+
+/* Basic production UI: compact, predictable, and intentionally undecorated. */
+.basic-ui {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.basic-ui .lucide {
+  stroke-width: 1.8;
+}
+
+.basic-ui *,
+.basic-ui *::before,
+.basic-ui *::after {
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  scroll-behavior: auto !important;
+}
+
+.basic-ui [class*="transition"],
+.basic-ui [class*="duration-"],
+.basic-ui [class*="animate-"] {
+  transition-duration: 100ms !important;
+  animation: none !important;
+}
+
+.basic-ui [class*="bg-gradient"],
+.basic-ui [class*="from-"],
+.basic-ui [class*="via-"],
+.basic-ui [class*="to-"] {
+  background-image: none !important;
+}
+
+.basic-ui header {
+  background: var(--card-bg) !important;
+  border-color: var(--border) !important;
+}
+
+.basic-ui aside {
+  background: var(--sidebar) !important;
+  border-color: var(--border) !important;
+}
+
+.basic-ui main,
+.basic-ui #main-content-scroll {
+  background: var(--bg);
+}
+
+.basic-ui button {
+  font: inherit;
+}
+
+/* Remove iOS tap-highlight delay on all buttons — instant tap response */
+button {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Form controls: inherit family but NOT size — lets Tailwind text-sm/text-xs utilities win
+   (font: inherit on inputs silently overrode text-sm, leaving every input at 12px). */
+.basic-ui input,
+.basic-ui select,
+.basic-ui textarea {
+  font-family: inherit;
+}
+
+.basic-ui button {
+  letter-spacing: 0;
+}
+
+.basic-ui input,
+.basic-ui select,
+.basic-ui textarea {
+  border-color: var(--border) !important;
+  background-color: var(--card-bg) !important;
+  color: var(--text-main) !important;
+}
+
+.basic-ui select {
+  appearance: none;
+  min-width: 112px;
+  min-height: 40px; /* 40px touch floor — matches Input spec (P2 audit 2026-08-08) */
+  padding-right: 34px !important;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--text-muted) 50%),
+    linear-gradient(135deg, var(--text-muted) 50%, transparent 50%),
+    linear-gradient(to right, var(--border), var(--border)) !important;
+  background-position:
+    calc(100% - 15px) 50%,
+    calc(100% - 11px) 50%,
+    calc(100% - 29px) 50% !important;
+  background-size: 4px 4px, 4px 4px, 1px 18px !important;
+  background-repeat: no-repeat !important;
+  border-radius: 8px;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.basic-ui select:hover {
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border)) !important;
+  background-color: var(--blue-tint) !important;
+}
+
+.basic-ui select:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.basic-ui input:focus,
+.basic-ui select:focus,
+.basic-ui textarea:focus,
+.basic-ui button:focus-visible {
+  outline: 2px solid #8bb8e8 !important;
+  outline-offset: 1px;
+}
+
+.basic-ui table {
+  border-collapse: collapse;
+}
+
+.basic-ui th {
+  background: var(--border-subtle) !important;
+  color: var(--text-secondary) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+}
+
+.basic-ui td,
+.basic-ui th {
+  border-color: var(--border) !important;
+}
+
+.basic-ui tbody tr:hover {
+  background: var(--blue-tint) !important;
+}
+
+.basic-ui .group:hover [class*="scale-"],
+.basic-ui [class*="hover:scale-"]:hover,
+.basic-ui [class*="active:scale-"]:active {
+  transform: none !important;
+}
+
+/* The app header already names the active module; keep module toolbars action-only. */
+.basic-ui .module-subheader {
+  display: none !important;
+}
+
+.basic-ui .module-toolbar {
+  min-height: 44px;
+  padding: 6px !important;
+  background: var(--border-subtle) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px;
+  /* visible so dropdown menus (absolute-positioned) are not clipped */
+  overflow: visible;
+  scrollbar-width: none;
+}
+
+.basic-ui .module-toolbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Dashboard top controls are the canonical control language across modules. */
+.basic-ui .module-toolbar button,
+.basic-ui .app-control,
+.basic-ui [role="tab"] {
+  min-height: 32px;
+  flex-shrink: 0;
+  border-color: var(--border);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.basic-ui .app-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card-bg);
+  color: var(--text-secondary);
+}
+
+.basic-ui .app-control:hover {
+  background: var(--blue-tint);
+  color: var(--text-main);
+}
+
+.basic-ui .app-control-primary {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #fff;
+}
+
+.basic-ui .app-control-primary:hover {
+  background: var(--primary-hover);
+  color: #fff;
+}
+
+.basic-ui .app-panel {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card-bg);
+}
+
+@media (min-width: 1024px) {
+  .basic-ui aside.lg\:w-56 {
+    width: 224px !important;
+  }
+
+  .basic-ui aside.lg\:w-14 {
+    width: 56px !important;
+  }
+}
+
+@media (max-width: 639px) {
+  .basic-ui header > div:first-child {
+    flex: 1 1 auto;
+  }
+
+  .basic-ui header h1 {
+    max-width: 220px;
+  }
+
+  .basic-ui header > div:last-child {
+    flex: 0 0 auto;
+    overflow: visible;
+  }
+}
+
+/* iPad/tablet topbar: keep every action reachable without horizontal overflow. */
+@media (min-width: 640px) and (max-width: 1100px) {
+  .basic-ui .app-topbar {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    gap: 6px;
+  }
+
+  .basic-ui .app-topbar h1 {
+    max-width: 180px;
+  }
+
+  .basic-ui .app-topbar-actions {
+    gap: 4px !important;
+  }
+
+  .basic-ui .app-topbar-actions button {
+    width: 34px;
+    min-width: 34px;
+    max-width: 34px;
+    height: 34px;
+    padding: 0 !important;
+    justify-content: center;
+    gap: 0 !important;
+    overflow: hidden;
+  }
+
+  .basic-ui .app-topbar-actions button > span:not(:has(svg)) {
+    display: none !important;
+  }
+
+  .basic-ui .app-topbar-actions button svg {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+  }
+
+  .basic-ui .app-topbar-actions > div,
+  .basic-ui .app-topbar-actions > span {
+    flex-shrink: 0;
+  }
+
+  /* Module toolbars (Inventory, CRM, Finance, Create Ticket) switch to a wide
+     nowrap flex row at md — on iPad portrait the action row (Add Part / Print
+     Tags / Edit / view toggles) is ~1000px wide and overflow:visible let it
+     get clipped by the app's overflow-x:clip seatbelt with no way to reach
+     the trailing buttons. Scroll it instead; all dropdowns are portaled or
+     popup modals now, so nothing depends on overflow:visible here. */
+  .basic-ui .module-toolbar {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .basic-ui .module-toolbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Prevent Header, Main Content & Navbar layout shifts */
+header {
+  height: 52px;
+  min-height: 52px;
+  max-height: 52px;
+  contain: layout style;
+}
+
+#main-content-scroll {
+  scrollbar-gutter: stable;
+  overflow-anchor: none;
+  min-height: 0;
+  overscroll-behavior: contain;
+  /* Seatbelt: no child may ever push the page sideways (e.g. sticky steppers) */
+  overflow-x: clip;
+}
+
+/* Media can never grow wider than its reserved container. */
+img {
+  display: block;
+  max-width: 100%;
+}
+
+/* Ensure main container flexes properly */
+main {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* Fix Header Top Navbar in Dark Mode & General Themes */
+html[data-theme="dark-slate"] header,
+html[data-theme="dark-slate"] .bg-white\/95,
+html[data-theme="dark-slate"] .bg-white\/90 {
+  background-color: rgba(19, 27, 46, 0.95) !important;
+  border-color: #26334D !important;
+}
+
+html[data-theme] .bg-white\/95,
+html[data-theme] .bg-white\/90 {
+  background-color: var(--card-bg) !important;
+}
+
+/* Enhanced Font Color & Visual High-Contrast Rules for Midnight Dark Slate Theme */
+html[data-theme="dark-slate"] input,
+html[data-theme="dark-slate"] select,
+html[data-theme="dark-slate"] textarea {
+  background-color: #0D1527 !important;
+  color: #FFFFFF !important;
+  border-color: #2E3E5E !important;
+}
+
+html[data-theme="dark-slate"] input::placeholder,
+html[data-theme="dark-slate"] textarea::placeholder {
+  color: #94A3B8 !important;
+}
+
+/* Invalid-input borders must stay red even in dark mode (Input invalid prop).
+   MUST live in @layer base: the dark-slate input rule above is also in a layer,
+   and layered !important beats unlayered !important regardless of specificity. */
+@layer base {
+  html[data-theme="dark-slate"] input.border-rose-500,
+  html[data-theme="dark-slate"] input[aria-invalid="true"] {
+    border-color: #F87171 !important;
+  }
+}
+
+html[data-theme="dark-slate"] .bg-gray-50,
+html[data-theme="dark-slate"] .bg-slate-50,
+html[data-theme="dark-slate"] [class~="bg-[#F5F5F7]"],
+html[data-theme="dark-slate"] [class~="bg-[#F8FBFD]"],
+html[data-theme="dark-slate"] [class~="bg-[#F9F9FB]"] {
+  background-color: #090D16 !important;
+}
+
+html[data-theme="dark-slate"] [class~="hover:bg-[#F5F5F7]"]:hover,
+html[data-theme="dark-slate"] .hover\:bg-gray-50:hover,
+html[data-theme="dark-slate"] .hover\:bg-slate-50:hover {
+  background-color: #1E293B !important;
+}
+
+/* Side Menu Text & General Text Colors in Dark Mode */
+html[data-theme="dark-slate"] [class~="text-[#2C3E50]"],
+html[data-theme="dark-slate"] [class~="text-[#1D1D1F]"],
+html[data-theme="dark-slate"] [class~="text-[#424245]"],
+html[data-theme="dark-slate"] .text-slate-900,
+html[data-theme="dark-slate"] .text-slate-800,
+html[data-theme="dark-slate"] .text-gray-900,
+html[data-theme="dark-slate"] .text-gray-800 {
+  color: #FFFFFF !important;
+}
+
+html[data-theme="dark-slate"] [class~="text-[#7F7F7F]"],
+html[data-theme="dark-slate"] [class~="text-[#86868B]"],
+html[data-theme="dark-slate"] [class~="text-[#526375]"],
+html[data-theme="dark-slate"] [class~="text-[#6E6E73]"],
+html[data-theme="dark-slate"] .text-slate-500,
+html[data-theme="dark-slate"] .text-gray-500 {
+  color: #CBD5E1 !important;
+}
+
+/* Dynamic Theme Overrides so hardcoded utility classes respond to active theme */
+html[data-theme] [class~="bg-[#0071E3]"],
+html[data-theme] [class~="bg-[#136F9A]"],
+html[data-theme] [class~="bg-[#0062CC]"] {
+  background-color: var(--primary) !important;
+}
+
+html[data-theme] [class~="bg-[#F5F5F7]"],
+html[data-theme] [class~="bg-[#F8FBFD]"],
+html[data-theme] [class~="bg-[#F9F9FB]"] {
+  background-color: var(--bg) !important;
+}
+
+html[data-theme] .bg-white {
+  background-color: var(--card-bg) !important;
+}
+
+html[data-theme] [class~="text-[#1D1D1F]"],
+html[data-theme] [class~="text-[#2C3E50]"],
+html[data-theme] [class~="text-[#424245]"] {
+  color: var(--text-main) !important;
+}
+
+html[data-theme] [class~="text-[#86868B]"],
+html[data-theme] [class~="text-[#7F7F7F]"],
+html[data-theme] [class~="text-[#6E6E73]"],
+html[data-theme] [class~="text-[#526375]"] {
+  color: var(--text-muted) !important;
+}
+
+html[data-theme] [class~="text-[#0071E3]"],
+html[data-theme] [class~="text-[#136F9A]"] {
+  color: var(--primary) !important;
+}
+
+html[data-theme] [class~="border-[#E5E5EA]"],
+html[data-theme] [class~="border-[#D8E5ED]"],
+html[data-theme] [class~="border-[#D2D2D7]"] {
+  border-color: var(--border) !important;
+}
+
+html[data-theme] [class~="bg-teal"] {
+  background-color: var(--turquoise) !important;
+}
+
+html[data-theme] [class~="bg-[#ED7132]"] {
+  background-color: var(--orange) !important;
+}
+
+/* Keep every primary workspace module stable: full-width by default, but
+   let module roots that opt into max-w-* + mx-auto keep their designed width
+   (intake form 3xl, roster/follow-up 7xl, customer portal 6xl). */
+.app-module-content > * {
+  width: 100%;
+  min-width: 0;
+}
+
+.app-module-content {
+  min-width: 0;
+  min-height: 0;
+  contain: inline-size;
+}
+
+.app-module-content > :where(div, section) {
+  overflow-anchor: none;
+}
+
+/*
+ * Stable data workspaces
+ *
+ * Lists, empty states and pagination share one fixed viewport area.  Data can
+ * grow inside the scrolling region without moving the surrounding page or its
+ * footer.  Use the modifier that matches the amount of content above a table.
+ */
+.workspace-panel {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.workspace-panel--standard {
+  height: clamp(400px, calc(100dvh - 220px), 920px);
+}
+
+.workspace-panel--with-toolbar {
+  height: clamp(380px, calc(100dvh - 400px), 760px);
+}
+
+.workspace-panel--with-summary {
+  /* Give matrix/list workspaces the remaining screen height while keeping
+     their own data region scrollable. */
+  height: clamp(520px, calc(100dvh - 170px), 1100px);
+}
+
+.workspace-panel__scroll {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+/* Fade the bottom edge of tall scrollable tables on touch devices so a
+   half-visible row reads as "more below" instead of a clipping bug. */
+@media (hover: none), (pointer: coarse) {
+  .workspace-panel__scroll.scroll-shadow-bottom {
+    -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 22px), transparent 100%);
+    mask-image: linear-gradient(to bottom, black calc(100% - 22px), transparent 100%);
+  }
+  /* keep the existing right-edge fade when both apply */
+  .workspace-panel__scroll.scroll-shadow-right.scroll-shadow-bottom {
+    -webkit-mask-image: linear-gradient(to right, transparent 0, black 18px), linear-gradient(to bottom, black calc(100% - 22px), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, black 18px), linear-gradient(to bottom, black calc(100% - 22px), transparent 100%);
+  }
+}
+
+/* Fade the right edge of wide (horizontally scrollable) tables on mobile
+   until the user scrolls to the end. Class toggled by the modules that
+   render .workspace-panel__scroll. Only active on touch-sized screens so
+   desktop keeps a crisp edge. */
+@media (max-width: 767px) {
+  .workspace-panel__scroll.scroll-shadow-right {
+    -webkit-mask-image: linear-gradient(to left, transparent 0, black 18px);
+    mask-image: linear-gradient(to left, transparent 0, black 18px);
+  }
+}
+
+/* Landscape phones (e.g. 844x390): the fixed bottom nav eats ~13% of the
+   short viewport height. Hide it — the hamburger drawer still reaches every
+   module — and let <main> reclaim its clearance padding. */
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 1023px) {
+  .basic-ui nav.lg\:hidden {
+    display: none;
+  }
+
+  .basic-ui main {
+    padding-bottom: 1.25rem;
+  }
+}
+
+.workspace-panel__footer {
+  flex: 0 0 auto;
+}
+
+.workspace-grid {
+  min-height: 0;
+  height: clamp(420px, calc(100dvh - 200px), 920px);
+}
+
+@media (max-width: 767px) {
+  .workspace-panel--standard,
+  .workspace-panel--with-summary {
+    height: clamp(360px, calc(100dvh - 190px), 720px);
+  }
+
+  .workspace-panel--with-toolbar {
+    height: clamp(360px, calc(100dvh - 240px), 640px);
+  }
+
+  .workspace-grid {
+    height: clamp(400px, calc(100dvh - 150px), 760px);
+  }
+}
+
+/* Keep controls stable while counts, loading labels, and async status text update.
+   Lives in @layer base so Tailwind utilities (min-h-10 etc., later layer) can
+   override this 32px floor where a larger touch target is wanted. */
+@layer base {
+  :where(.basic-ui) button,
+  :where(.basic-ui) [role="button"],
+  :where(.basic-ui) input,
+  :where(.basic-ui) select {
+    min-height: 32px;
+  }
+}
+
+.basic-ui table {
+  width: 100%;
+}
+
+.basic-ui th,
+.basic-ui td {
+  vertical-align: middle;
+}
+
+/*
+ * Normalize legacy non-semantic accent utilities to the active theme.
+ * Status colors (success, warning, danger) intentionally remain semantic.
+ */
+html[data-theme] :is(
+  [class~="bg-blue-500"],
+  [class~="bg-blue-600"],
+  [class~="bg-purple-400"],
+  [class~="bg-purple-500"],
+  [class~="bg-purple-600"],
+  [class~="bg-purple-700"],
+  [class~="bg-indigo-600"],
+  [class~="bg-teal-500"],
+  [class~="bg-teal-600"],
+  [class~="bg-[#AF52DE]"],
+  [class~="bg-[#7360F2]"],
+  [class~="bg-[#0077ED]"]
+) {
+  background-color: var(--primary) !important;
+}
+
+html[data-theme] :is(
+  [class~="bg-blue-50"],
+  [class~="bg-blue-50/40"],
+  [class~="bg-blue-50/50"],
+  [class~="bg-blue-50/60"],
+  [class~="bg-blue-50/70"],
+  [class~="bg-blue-50/80"],
+  [class~="bg-blue-100"],
+  [class~="bg-blue-100/50"],
+  [class~="bg-blue-100/90"],
+  [class~="bg-purple-50"],
+  [class~="bg-purple-50/20"],
+  [class~="bg-purple-50/40"],
+  [class~="bg-purple-50/50"],
+  [class~="bg-purple-50/60"],
+  [class~="bg-purple-50/70"],
+  [class~="bg-purple-50/80"],
+  [class~="bg-purple-100"],
+  [class~="bg-purple-100/70"],
+  [class~="bg-purple-100/90"],
+  [class~="bg-indigo-50"],
+  [class~="bg-indigo-50/70"],
+  [class~="bg-indigo-50/90"],
+  [class~="bg-indigo-100"],
+  [class~="bg-teal-50"],
+  [class~="bg-teal-50/60"],
+  [class~="bg-teal-50/80"],
+  [class~="bg-[#F0F6FF]"],
+  [class~="bg-[#E5F1FF]"]
+) {
+  background-color: var(--blue-tint) !important;
+}
+
+html[data-theme] :is(
+  [class~="text-blue-300"],
+  [class~="text-blue-400"],
+  [class~="text-blue-600"],
+  [class~="text-blue-700"],
+  [class~="text-blue-800"],
+  [class~="text-blue-900"],
+  [class~="text-blue-950"],
+  [class~="text-purple-600"],
+  [class~="text-purple-700"],
+  [class~="text-purple-800"],
+  [class~="text-purple-900"],
+  [class~="text-purple-950"],
+  [class~="text-indigo-600"],
+  [class~="text-indigo-700"],
+  [class~="text-indigo-800"],
+  [class~="text-indigo-900"],
+  [class~="text-teal-600"],
+  [class~="text-teal-700"],
+  [class~="text-[#AF52DE]"],
+  [class~="text-[#7360F2]"],
+  [class~="text-[#0077ED]"],
+  [class~="text-[#0051B3]"]
+) {
+  color: var(--primary) !important;
+}
+
+html[data-theme] :is(
+  [class~="border-blue-100"],
+  [class~="border-blue-200"],
+  [class~="border-blue-200/80"],
+  [class~="border-blue-300"],
+  [class~="border-purple-100"],
+  [class~="border-purple-200"],
+  [class~="border-purple-200/80"],
+  [class~="border-purple-300"],
+  [class~="border-purple-300/40"],
+  [class~="border-indigo-200"],
+  [class~="border-indigo-200/80"],
+  [class~="border-indigo-300"],
+  [class~="border-teal-200"]
+) {
+  border-color: var(--border) !important;
+}
+
+/* Finance uses the active theme instead of a separate rainbow palette. */
+.finance-module .bg-blue-50\/60,
+.finance-module .bg-blue-50\/80,
+.finance-module .bg-purple-50,
+.finance-module .bg-purple-50\/80,
+.finance-module .bg-emerald-50,
+.finance-module .bg-emerald-50\/60 {
+  background-color: var(--border-subtle) !important;
+}
+
+.finance-module .border-blue-200,
+.finance-module .border-purple-200,
+.finance-module .border-emerald-200,
+.finance-module .border-emerald-300 {
+  border-color: var(--border) !important;
+}
+
+.finance-module .text-blue-800,
+.finance-module .text-blue-900,
+.finance-module .text-blue-950,
+.finance-module .text-purple-800,
+.finance-module .text-purple-900,
+.finance-module .text-purple-950 {
+  color: var(--primary) !important;
+}
+
+.finance-module .text-emerald-300,
+.finance-module .text-emerald-400,
+.finance-module .text-emerald-700,
+.finance-module .text-emerald-800,
+.finance-module .text-emerald-900,
+.finance-module .text-emerald-950,
+.finance-module [class~="text-[#16A34A]"],
+.finance-module [class~="text-[#34C759]"] {
+  color: var(--success) !important;
+}
+
+/* Custom smooth scrollbar styling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ================= GLOBAL PRINT STYLES & OVERRIDES ================= */
+@media print {
+  /* 1. Hide non-printable app containers & navigation bars */
+  nav, header, footer, aside, .no-print, [role="navigation"], button.no-print {
+    display: none !important;
+  }
+
+  /* 2. Reset html, body, root and scroll containers so content isn't clipped or scroll-locked */
+  html, body, #root, #main-content-scroll, main, .no-print-bg {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    width: 100% !important;
+    position: static !important;
+    box-shadow: none !important;
+  }
+
+  /* 3. Reset modal overlay backdrops */
+  .fixed, .inset-0, .backdrop-blur-sm {
+    position: static !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    width: 100% !important;
+    box-shadow: none !important;
+  }
+
+  /* 4. Ensure target printable modal containers take full A4 or label dimensions without max-height limits */
+  .printable-invoice-modal,
+  .printable-area,
+  .printable-pos-receipt,
+  .printable-portal-voucher {
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 8mm !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+    display: block !important;
+  }
+
+  /* 5. Force background colors and borders to show accurately when printed */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* 6. Standard page margins */
+  @page {
+    size: auto;
+    margin: 6mm;
+  }
+}
+
+/* ==========================================================================
+   Readability floor (UI/UX audit P0): technicians use this app 8h+/day.
+   - 9px and below  → bumped to 11px (they were eye-strain territory)
+   - 10px / 11px    → bumped to 12px (label floor per audit)
+   - text-xs (12px) stays as-is; body/table text should use text-sm (13-14px)
+   Print styles are exempt so receipts/tags keep compact layouts.
+   ========================================================================== */
+@media screen {
+  .text-\[7px\] { font-size: 12px !important; line-height: 1.35 !important; }
+  .text-\[8px\] { font-size: 12px !important; line-height: 1.35 !important; }
+  .text-\[9px\] { font-size: 12px !important; line-height: 1.35 !important; }
+  .text-\[10px\] { font-size: 12px !important; line-height: 1.4 !important; }
+  .text-\[11px\] { font-size: 12px !important; line-height: 1.4 !important; }
+.text-\[7\.5px\] { font-size: 12px !important; line-height: 1.4 !important; }
+.text-\[9\.5px\] { font-size: 12px !important; line-height: 1.4 !important; }
+  /* Important variants must obey the same floor (e.g. !text-xs dropdown triggers).
+     Must live in @layer base: layered !important beats unlayered !important, and the
+     Tailwind utility class is itself important — so it wins over an unlayered rule. */
+  @layer base {
+    .\!text-\[10px\] { font-size: 12px !important; line-height: 1.4 !important; }
+    .\!text-\[11px\] { font-size: 12px !important; line-height: 1.4 !important; }
+  }
+}
+
+/* Contrast fix (audit P1-5): Apple gray #86868B on white is 3.5:1 — fails WCAG AA
+   for small text (needs 4.5:1). Darken muted text used at 12-13px sizes. */
+@media screen {
+  .text-\[\#86868B\] { color: #6E6E73 !important; }
+}
+
+/* ==========================================================================
+   PWA safe-area insets (viewport-fit=cover is set in index.html).
+   env() resolves to 0 in normal browser tabs, so these are no-ops there;
+   in standalone PWA mode they keep the topbar/drawer clear of the status
+   bar / Dynamic Island and the bottom nav clear of the home indicator.
+   ========================================================================== */
+.app-topbar {
+  height: calc(52px + env(safe-area-inset-top)) !important;
+  min-height: calc(52px + env(safe-area-inset-top)) !important;
+  max-height: calc(52px + env(safe-area-inset-top)) !important;
+  padding-top: env(safe-area-inset-top);
+}
+
+.app-sidebar {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* ==========================================================================
+   Mobile touch floor (UI/UX audit): HIG recommends ≈44px tap targets.
+   Desktop keeps the compact 32px control height; phones/tablets get a
+   40px floor for buttons, inputs and selects, and 36px for table-row
+   icon actions so mis-taps in dense tables are less likely.
+   ========================================================================== */
+@media (max-width: 767px) {
+  .basic-ui button,
+  .basic-ui [role="button"],
+  .basic-ui input,
+  .basic-ui select {
+    min-height: 40px;
+  }
+
+  /* Beat the module-toolbar / app-control 32px rule (higher specificity). */
+  .basic-ui .module-toolbar button,
+  .basic-ui .app-control,
+  .basic-ui [role="tab"] {
+    min-height: 40px;
+  }
+
+  .basic-ui table button {
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  /* Keep tiny text badges/chips from stretching — they are not controls. */
+  .basic-ui button:has(svg:only-child) {
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  /* Icon-only buttons inside table rows stay compact (dense data grids) but
+     no smaller than 36px so they remain tappable. */
+  .basic-ui table button:has(svg:only-child) {
+    min-width: 36px;
+    min-height: 36px;
+  }
+}
+
+/* Compact toolbar actions (Print Tags / Edit / Save in Parts Inventory) —
+   keep them at the standard 40px mobile touch floor, matching the view toggle
+   height so the whole row is uniform. */
+.basic-ui .module-toolbar .toolbar-compact-btn {
+  min-height: 40px;
+}
+
+/* iOS Safari auto-zoom prevention: Safari zooms into any editable field
+   focused at <16px font-size (desktop Chrome/Edge zoom too). 16px on touch
+   devices kills the zoom for every input/select/textarea app-wide — the
+   one-rule fix for the audit's P1-E finding. Desktop (fine pointer) keeps
+   the compact sizes. */
+@media (pointer: coarse) {
+  .basic-ui input,
+  .basic-ui textarea,
+  .basic-ui select {
+    font-size: 16px !important;
+  }
+}
+
+/* Inner buttons of the segmented Card/Table toggle — the container itself is
+   exactly 40px, so drop the floor inside it to keep the whole row uniform. */
+.basic-ui .module-toolbar .toolbar-compact-btn--inner {
+  min-height: 0;
+}
+
+/* AI chat widget — slides up from the bottom-right corner (desktop) / bottom sheet (mobile) */
+@keyframes i35-slide-up {
+  from { opacity: 0; transform: translateY(20px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-i35-slide-up {
+  animation: i35-slide-up 0.26s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+/* Fade-in used by popovers, sheets and modal overlays */
+@keyframes i35-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fadeIn {
+  animation: i35-fade-in 0.18s ease-out both;
+}
+
+/* Kanban pipeline horizontal scroll — thin visible scrollbar on phones so the
+   far-right columns (Cant Repair / Customer Not Repair) are obviously reachable. */
+@media (max-width: 767px) {
+  .kanban-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #D2D2D7 transparent;
+  }
+  .kanban-scroll::-webkit-scrollbar {
+    height: 6px;
+  }
+  .kanban-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .kanban-scroll::-webkit-scrollbar-thumb {
+    background: #D2D2D7;
+    border-radius: 999px;
+  }
+}
+
+/* Topbar action buttons must never collapse on narrow screens — the title
+   truncates instead, and the action row scrolls horizontally when needed. */
+.app-topbar-actions {
+  flex-shrink: 0;
+}
+.app-topbar-actions > * {
+  flex-shrink: 0;
+}
+.app-topbar-actions > * > * {
+  flex-shrink: 0;
+}
+
+/* Prevent layout shift when the filter drawer locks body scroll — keep the
+   scrollbar gutter reserved so content doesn't jump when overflow toggles. */
+#main-content-scroll,
+body {
+  scrollbar-gutter: stable;
+}
+
+/* Button backgrounds that map to var(--primary) — in dark --primary is a bright
+   accent (#38BDF8) that fails with white text, so re-map to dark button blues. */
+html[data-theme="dark-slate"] [class~="bg-[#AF52DE]"] { background-color: #6D28D9 !important; }
+html[data-theme="dark-slate"] [class~="bg-[#7360F2]"] { background-color: #5A3FD4 !important; }
+html[data-theme="dark-slate"] [class~="bg-[#0077ED]"] { background-color: #0051B3 !important; }
+html[data-theme="dark-slate"] .bg-purple-500, html[data-theme="dark-slate"] .bg-purple-600, html[data-theme="dark-slate"] .bg-purple-700 { background-color: #6D28D9 !important; }
+html[data-theme="dark-slate"] .bg-indigo-600 { background-color: #4338CA !important; }
+html[data-theme="dark-slate"] .bg-teal-500, html[data-theme="dark-slate"] .bg-teal-600 { background-color: #0F766E !important; }
+html[data-theme="dark-slate"] [class~="text-[#1E7E34]"] { color: #4ADE80 !important; }
+html[data-theme="dark-slate"] .text-amber-950 { color: #FBBF24 !important; }
+
+/* Create-Ticket drawer wells/pills (were raw hexes; now tokens, keep dark parity) */
+html[data-theme="dark-slate"] [class~="bg-[#F8F9FA]"] { background-color: rgba(19, 27, 46, 0.55) !important; }
+html[data-theme="dark-slate"] [class~="bg-[#E5F1FF]"] { background-color: rgba(21, 89, 166, 0.22) !important; }
+
+html[data-theme="dark-slate"] .bg-amber-100 { background-color: rgba(245, 158, 11, 0.16) !important; }
+html[data-theme="dark-slate"] .bg-rose-100 { background-color: rgba(244, 63, 94, 0.16) !important; }
+html[data-theme="dark-slate"] .bg-red-100 { background-color: rgba(239, 68, 68, 0.16) !important; }
+html[data-theme="dark-slate"] .bg-emerald-100 { background-color: rgba(16, 185, 129, 0.16) !important; }
+html[data-theme="dark-slate"] .bg-blue-100 { background-color: rgba(59, 130, 246, 0.18) !important; }
+html[data-theme="dark-slate"] .bg-violet-100 { background-color: rgba(139, 92, 246, 0.17) !important; }
+html[data-theme="dark-slate"] .bg-orange-100 { background-color: rgba(249, 115, 22, 0.16) !important; }
+html[data-theme="dark-slate"] .bg-teal-100 { background-color: rgba(20, 184, 166, 0.16) !important; }
+html[data-theme="dark-slate"] .bg-yellow-100 { background-color: rgba(234, 179, 8, 0.16) !important; }
+
+/* Shared raised-surface shadow for mobile sticky bottom bars (unifies arbitrary
+   shadow-[0_-4px_12px…] utilities — P2 audit 2026-08-08) */
+.shadow-raised-top {
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.06);
+}
+html[data-theme="dark-slate"] .shadow-raised-top {
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.45);
+}
