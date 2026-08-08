@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import {
   UserCheck,
+  DollarSign,
 } from 'lucide-react';
 import { WorkOrder, Technician, SystemSettings, WorkOrderStatus } from '../../types';
 import { PriorityBadge } from '../common/PriorityBadge';
@@ -16,6 +17,7 @@ interface TrelloBoardProps {
   onDeleteWorkOrder?: (id: string) => void;
   onSelectPrintTag?: (wo: WorkOrder) => void;
   onOpenAiAssistant?: () => void;
+  onNavigateToTab?: (tab: string) => void;
   techFilter?: string;
   setTechFilter?: (t: string) => void;
   dateFilter?: any;
@@ -41,6 +43,7 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
   onSaveWorkOrder,
   onDeleteWorkOrder,
   onSelectPrintTag,
+  onNavigateToTab,
   techFilter: propTechFilter,
   dateFilter: propDateFilter,
 }) => {
@@ -262,7 +265,23 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
                             </div>
                           )}
                         </div>
-                        <span className="font-mono text-[11px] font-black text-success-deep">{totalAmt.toLocaleString()} MMK</span>
+                        <div className="flex items-center gap-1.5">
+                          {(wo.status === 'Finished' || wo.status === 'Taken Out') && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (onNavigateToTab) onNavigateToTab('pos');
+                              }}
+                              title="Go to POS checkout"
+                              aria-label={`Checkout ${wo.orderNumber}`}
+                              className="!h-6 !min-h-6 w-6 rounded-full bg-success text-white flex items-center justify-center shadow-2xs hover:bg-success/90 transition-colors shrink-0"
+                            >
+                              <DollarSign className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                          <span className="font-mono text-[11px] font-black text-success-deep">{totalAmt.toLocaleString()} MMK</span>
+                        </div>
                       </div>
                     </div>
                   );

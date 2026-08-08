@@ -2368,6 +2368,7 @@ export default function App() {
                   onSaveWorkOrder={handleSaveWorkOrder}
                   onDeleteWorkOrder={handleDeleteWorkOrder}
                   onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
+                  onNavigateToTab={(tab) => setActiveTab(tab as any)}
                   techFilter={techFilter}
                   setTechFilter={setTechFilter}
                   dateFilter={dateFilter}
