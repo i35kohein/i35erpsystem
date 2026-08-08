@@ -925,28 +925,24 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
 
       {/* SUBTAB 2: REPAIR DATA */}
       {activeDashboardSubTab === 'repair-data' && (
-        <div role="tabpanel" id="dash-panel-repair-data" aria-labelledby="dash-tab-repair-data" className="space-y-6">
+        <div role="tabpanel" id="dash-panel-repair-data" aria-labelledby="dash-tab-repair-data" className="grid grid-cols-1 xl:grid-cols-2 gap-3.5">
           {/* Top Repair Devices */}
-          <div className="bg-white border border-line rounded-2xl p-5 shadow-xs space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-line">
-              <div className="space-y-0.5">
-                <div className="flex items-center space-x-2">
-                  <div className="p-2 bg-purple/10 text-purple rounded-xl border border-purple/20">
-                    <Smartphone className="w-5 h-5" />
-                  </div>
-                  <h3 className="text-base font-extrabold text-ink">Top Repair Devices</h3>
+          <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-3">
+            <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-line">
+              <div className="flex items-center space-x-2">
+                <div className="p-1.5 bg-purple/10 text-purple rounded-lg border border-purple/20">
+                  <Smartphone className="w-4 h-4" />
                 </div>
-                <p className="text-xs text-muted">Most-repaired device models ranked by ticket volume</p>
+                <h3 className="text-xs font-extrabold text-ink">Top Repair Devices</h3>
               </div>
-              <span className="text-xs font-extrabold bg-brand-soft text-brand px-3.5 py-1.5 rounded-full border border-brand/20 flex items-center space-x-1.5 shrink-0">
-                <Smartphone className="w-4 h-4" />
-                <span>{topRepairDevices.length} Models · {filteredWorkOrders.length} Tickets</span>
+              <span className="text-xs font-extrabold bg-brand-soft text-brand px-2.5 py-0.5 rounded-full border border-brand/20 shrink-0">
+                {topRepairDevices.length} Models
               </span>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               {topRepairDevices.length === 0 ? (
-                <div className="p-8 text-center text-xs text-muted bg-surface rounded-xl border border-dashed border-line-strong">
+                <div className="p-6 text-center text-xs text-muted bg-surface rounded-xl border border-dashed border-line-strong">
                   No repair tickets in the selected date range.
                 </div>
               ) : (
@@ -955,20 +951,20 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
                   const barPct = Math.max(8, Math.round((dev.count / maxCount) * 100));
                   const medal = idx === 0 ? 'bg-warning/20 text-warning border-warning/50' : idx === 1 ? 'bg-surface text-muted border-line' : idx === 2 ? 'bg-warning/10 text-warning border-warning/30' : 'bg-surface text-muted border-line';
                   return (
-                    <div key={dev.name} className="p-3 bg-surface border border-line rounded-xl space-y-2">
+                    <div key={dev.name} className="p-2.5 bg-surface border border-line rounded-xl space-y-1.5">
                       <div className="flex items-center justify-between gap-2 text-xs">
                         <div className="flex items-center space-x-2 min-w-0">
-                          <span className={`w-6 h-6 rounded-full border flex items-center justify-center font-black text-xs shrink-0 ${medal}`}>
+                          <span className={`w-5 h-5 rounded-full border flex items-center justify-center font-black text-xs shrink-0 ${medal}`}>
                             {idx + 1}
                           </span>
                           <span className="font-extrabold text-ink truncate">{dev.name}</span>
                         </div>
-                        <div className="flex items-center space-x-3 shrink-0">
-                          <span className="font-mono font-bold text-ink">{dev.count} Repairs</span>
+                        <div className="flex items-center space-x-2 shrink-0">
+                          <span className="font-mono font-bold text-ink">{dev.count}</span>
                           <span className="font-mono font-bold text-brand">{dev.revenue.toLocaleString()} MMK</span>
                         </div>
                       </div>
-                      <div className="w-full bg-line rounded-full h-2 overflow-hidden">
+                      <div className="w-full bg-line rounded-full h-1.5 overflow-hidden">
                         <div className="h-full rounded-full bg-purple" style={{ width: `${barPct}%` }} />
                       </div>
                     </div>
@@ -979,25 +975,19 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
           </div>
 
           {/* Top Repair Categories with Income */}
-          <div className="bg-white border border-line rounded-2xl p-5 shadow-xs space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-line">
-              <div className="space-y-0.5">
-                <div className="flex items-center space-x-2">
-                  <div className="p-2 bg-brand/10 text-brand-deep rounded-xl border border-brand/20">
-                    <BarChart3 className="w-5 h-5" />
-                  </div>
-                  <h3 className="text-base font-extrabold text-ink truncate">
-                    <span className="hidden sm:inline">Top Repair Categories with Income</span>
-                    <span className="sm:hidden">Top Categories (Income)</span>
-                  </h3>
+          <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-3">
+            <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-line">
+              <div className="flex items-center space-x-2">
+                <div className="p-1.5 bg-brand/10 text-brand-deep rounded-lg border border-brand/20">
+                  <BarChart3 className="w-4 h-4" />
                 </div>
-                <p className="text-xs text-muted">Repair category breakdown by tickets and revenue</p>
+                <h3 className="text-xs font-extrabold text-ink">Repair Categories</h3>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <div className="space-y-2">
               {topRepairCategories.length === 0 ? (
-                <div className="p-8 text-center text-xs text-muted bg-surface rounded-xl border border-dashed border-line-strong md:col-span-2">
+                <div className="p-6 text-center text-xs text-muted bg-surface rounded-xl border border-dashed border-line-strong">
                   No repair tickets in the selected date range.
                 </div>
               ) : (
@@ -1006,21 +996,21 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
                   const maxRevenue = topRepairCategories[0]?.revenue || 1;
                   const barPct = Math.max(8, Math.round((cat.revenue / maxRevenue) * 100));
                   return (
-                    <div key={cat.id} className="p-3.5 bg-surface border border-line rounded-xl space-y-2.5">
+                    <div key={cat.id} className="p-2.5 bg-surface border border-line rounded-xl space-y-1.5">
                       <div className="flex items-center justify-between text-xs">
                         <div className="flex items-center space-x-2">
                           <div className={`p-1.5 rounded-md ${cat.bgLight} ${cat.textCol}`}>
                             <IconComp className="w-3.5 h-3.5" />
                           </div>
-                          <span className="font-extrabold text-ink">{cat.label}</span>
+                          <span className="font-extrabold text-ink truncate">{cat.label}</span>
                         </div>
-                        <span className="text-xs font-bold text-muted bg-white border border-line px-2 py-0.5 rounded-full">{cat.count} Tickets</span>
+                        <span className="text-xs font-bold text-muted bg-white border border-line px-2 py-0.5 rounded-full shrink-0">{cat.count} Tickets</span>
                       </div>
                       <div className="flex items-baseline justify-between">
-                        <span className="font-mono font-black text-lg text-ink">{cat.revenue.toLocaleString()} MMK</span>
-                        <span className={`font-bold text-xs ${cat.textCol}`}>{cat.percentage}% of income</span>
+                        <span className="font-mono font-black text-ink">{cat.revenue.toLocaleString()} MMK</span>
+                        <span className={`font-bold text-xs ${cat.textCol}`}>{cat.percentage}%</span>
                       </div>
-                      <div className="w-full bg-line rounded-full h-2 overflow-hidden">
+                      <div className="w-full bg-line rounded-full h-1.5 overflow-hidden">
                         <div className={`h-full rounded-full ${cat.color}`} style={{ width: `${barPct}%` }} />
                       </div>
                     </div>
