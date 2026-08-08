@@ -368,18 +368,20 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
       {/* SUB-VIEW 1: FINANCIAL OVERVIEW DASHBOARD */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
-          {/* Key P&L Summary Metric Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 3xl:grid-cols-6 4xl:grid-cols-8 gap-4">
+          {/* Key P&L Summary Metric Cards — full-width responsive: 1 → 2 → 4 cols */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
             {/* Total Gross Revenue Card */}
-            <div className="bg-white p-5 rounded-2xl border border-line shadow-2xs space-y-2">
-              <div className="flex items-center justify-between text-muted">
-                <span className="text-xs font-bold uppercase tracking-wider">Gross Revenue</span>
-                <TrendingUp className="w-4 h-4 text-success" />
+            <div className="flex min-h-[168px] flex-col bg-white p-5 rounded-2xl border border-line shadow-2xs space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-muted leading-4 pt-1">Gross Revenue</span>
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-success/10 text-success">
+                  <TrendingUp className="h-4 w-4" />
+                </span>
               </div>
-              <div className="text-2xl font-black text-ink font-mono">
+              <div className="text-2xl font-black text-ink font-mono leading-none">
                 {financialSummary.totalRevenue.toLocaleString()} {currency}
               </div>
-              <div className="pt-2 border-t border-surface text-xs font-bold space-y-0.5">
+              <div className="mt-auto pt-2 border-t border-surface text-xs font-bold space-y-0.5">
                 <div className="flex justify-between text-brand">
                   <span>Labor Income:</span>
                   <span>{financialSummary.laborIncome.toLocaleString()} {currency}</span>
@@ -392,16 +394,18 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
             </div>
 
             {/* COGS & Gross Profit Card */}
-            <div className="bg-white p-5 rounded-2xl border border-line shadow-2xs space-y-2">
-              <div className="flex items-center justify-between text-muted">
-                <span className="text-xs font-bold uppercase tracking-wider">Gross Profit (Margin)</span>
-                <Coins className="w-4 h-4 text-brand" />
+            <div className="flex min-h-[168px] flex-col bg-white p-5 rounded-2xl border border-line shadow-2xs space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-muted leading-4 pt-1">Gross Profit (Margin)</span>
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-brand">
+                  <Coins className="h-4 w-4" />
+                </span>
               </div>
-              <div className="flex items-baseline justify-between">
-                <span className="text-2xl font-black text-brand font-mono">
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="text-2xl font-black text-brand font-mono leading-none">
                   {financialSummary.grossProfit.toLocaleString()} {currency}
                 </span>
-                <span className={`text-xs font-black px-2 py-0.5 rounded-full ${
+                <span className={`shrink-0 text-xs font-black px-2 py-0.5 rounded-full ${
                   financialSummary.grossMarginPercent >= 50
                     ? 'bg-success/10 text-success-deep'
                     : 'bg-warning/15 text-warning'
@@ -409,7 +413,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                   {financialSummary.grossMarginPercent}% Gross
                 </span>
               </div>
-              <div className="pt-2 border-t border-surface text-xs font-bold space-y-0.5">
+              <div className="mt-auto pt-2 border-t border-surface text-xs font-bold space-y-0.5">
                 <div className="flex justify-between text-muted">
                   <span>Parts COGS Cost:</span>
                   <span className="text-danger font-mono">-{financialSummary.cogsTotal.toLocaleString()} {currency}</span>
@@ -422,35 +426,39 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
             </div>
 
             {/* OpEx Overhead Card */}
-            <div className="bg-white p-5 rounded-2xl border border-line shadow-2xs space-y-2">
-              <div className="flex items-center justify-between text-muted">
-                <span className="text-xs font-bold uppercase tracking-wider">Operating Expenses (OpEx)</span>
-                <Receipt className="w-4 h-4 text-danger" />
+            <div className="flex min-h-[168px] flex-col bg-white p-5 rounded-2xl border border-line shadow-2xs space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-muted leading-4 pt-1">Operating Expenses (OpEx)</span>
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-danger/10 text-danger">
+                  <Receipt className="h-4 w-4" />
+                </span>
               </div>
-              <div className="text-2xl font-black text-danger font-mono">
+              <div className="text-2xl font-black text-danger font-mono leading-none">
                 {financialSummary.totalOpEx.toLocaleString()} {currency}
               </div>
-              <div className="pt-2 border-t border-surface text-xs font-bold text-muted flex justify-between">
+              <div className="mt-auto pt-2 border-t border-surface text-xs font-bold text-muted flex justify-between gap-2">
                 <span>Shop Rent, Utils, Tools, Mktg</span>
-                <span className="text-ink">{expenses.length} Expense Records</span>
+                <span className="text-ink shrink-0">{expenses.length} Expense Records</span>
               </div>
             </div>
 
             {/* Net Profit Card */}
-            <div className="bg-white p-5 rounded-2xl border border-line shadow-2xs space-y-2">
-              <div className="flex items-center justify-between text-muted">
-                <span className="text-xs font-bold uppercase tracking-wider">Net Profit</span>
-                <Sparkles className="w-4 h-4 text-brand" />
+            <div className="flex min-h-[168px] flex-col bg-white p-5 rounded-2xl border border-line shadow-2xs space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-muted leading-4 pt-1">Net Profit</span>
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-brand">
+                  <Sparkles className="h-4 w-4" />
+                </span>
               </div>
-              <div className="flex items-baseline justify-between">
-                <span className="text-2xl font-black text-brand font-mono">
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="text-2xl font-black text-brand font-mono leading-none">
                   {financialSummary.netProfit.toLocaleString()} {currency}
                 </span>
-                <span className="text-xs font-black bg-surface text-ink px-2 py-0.5 rounded-full border border-line">
+                <span className="shrink-0 text-xs font-black bg-surface text-ink px-2 py-0.5 rounded-full border border-line">
                   {financialSummary.netMarginPercent}% Net
                 </span>
               </div>
-              <div className="pt-2 border-t border-surface text-xs text-muted flex justify-between font-bold">
+              <div className="mt-auto pt-2 border-t border-surface text-xs text-muted flex justify-between font-bold gap-2">
                 <span>Net Formula:</span>
                 <span>Gross Profit - OpEx</span>
               </div>
