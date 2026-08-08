@@ -417,7 +417,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                   </div>
                 </div>
 
-                <div className="divide-y divide-line rounded-xl border border-line bg-white overflow-hidden">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-px rounded-xl border border-line bg-line overflow-hidden">
                   {qaDiagnostics.map((item, idx) => {
                     const IconComp = getDiagnosticIcon(item.name);
                     const isPass = item.status === 'Pass';
@@ -425,17 +425,17 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     const isNa = item.status === 'N/A';
 
                     return (
-                      <div key={item.id} className={`flex items-center gap-2 px-2.5 py-1.5 text-xs transition-colors ${
+                      <div key={item.id} className={`flex items-center gap-1.5 px-2 py-1 text-[11px] transition-colors ${
                         isFail ? 'bg-danger/5' : isPass ? 'bg-success/5' : 'bg-white hover:bg-surface'
                       }`}>
                         {/* Number + icon + name */}
-                        <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                          <span className={`w-4 h-4 rounded flex items-center justify-center shrink-0 ${
+                        <div className="flex items-center gap-1 min-w-0 flex-1">
+                          <span className={`w-3.5 h-3.5 rounded flex items-center justify-center shrink-0 ${
                             isFail ? 'bg-danger/10 text-danger' : isPass ? 'bg-success/10 text-success-deep' : 'bg-surface text-muted'
                           }`}>
-                            <IconComp className="w-2.5 h-2.5" />
+                            <IconComp className="w-2 h-2" />
                           </span>
-                          <span className="text-[11px] font-bold text-ink truncate">{idx + 1}. {item.name}</span>
+                          <span className="text-[10px] font-bold text-ink truncate">{idx + 1}. {item.name}</span>
                         </div>
 
                         {/* Comment */}
@@ -443,17 +443,17 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           type="text"
                           value={item.note || ''}
                           onChange={(e) => handleDiagnosticNoteChange(item.id, e.target.value)}
-                          placeholder="Note..."
-                          className="!h-6 !min-h-6 w-28 sm:w-36 shrink-0 rounded-md bg-surface border border-line px-1.5 text-[11px] text-ink focus:bg-white focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/20"
+                          placeholder="Note"
+                          className="!h-5 !min-h-5 w-16 shrink-0 rounded bg-surface border border-line px-1 text-[10px] text-ink focus:bg-white focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/20"
                         />
 
-                        {/* Status segmented — compact */}
-                        <div className="flex gap-0.5 shrink-0">
+                        {/* Status segmented — minimal */}
+                        <div className="flex gap-px shrink-0">
                           <Button
                             type="button"
                             onClick={() => handleDiagnosticStatusChange(item.id, 'Pass')}
-                            className={`!h-6 !min-h-6 px-1.5 rounded-l-md text-[10px] font-black transition-all border border-r-0 ${
-                              isPass ? 'bg-success text-white border-success shadow-2xs' : 'bg-surface text-ink border-line hover:bg-success/15'
+                            className={`!h-5 !min-h-5 w-5 px-0 rounded-sm text-[9px] font-black transition-all ${
+                              isPass ? 'bg-success text-white shadow-2xs' : 'bg-surface text-ink hover:bg-success/15'
                             }`}
                           >
                             ✓
@@ -461,8 +461,8 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           <Button
                             type="button"
                             onClick={() => handleDiagnosticStatusChange(item.id, 'Fail')}
-                            className={`!h-6 !min-h-6 px-1.5 text-[10px] font-black transition-all border ${
-                              isFail ? 'bg-danger text-white border-danger shadow-2xs' : 'bg-surface text-ink border-line hover:bg-danger/15'
+                            className={`!h-5 !min-h-5 w-5 px-0 rounded-sm text-[9px] font-black transition-all ${
+                              isFail ? 'bg-danger text-white shadow-2xs' : 'bg-surface text-ink hover:bg-danger/15'
                             }`}
                           >
                             ✕
@@ -470,8 +470,8 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           <Button
                             type="button"
                             onClick={() => handleDiagnosticStatusChange(item.id, 'N/A')}
-                            className={`!h-6 !min-h-6 px-1.5 rounded-r-md text-[10px] font-black transition-all border border-l-0 ${
-                              isNa ? 'bg-slate-500 text-white border-slate-500 shadow-2xs' : 'bg-surface text-ink border-line hover:bg-slate-200'
+                            className={`!h-5 !min-h-5 px-1 rounded-sm text-[9px] font-black transition-all ${
+                              isNa ? 'bg-slate-500 text-white shadow-2xs' : 'bg-surface text-ink hover:bg-slate-200'
                             }`}
                           >
                             N/A
