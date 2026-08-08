@@ -7,7 +7,6 @@ import {PhoneCall,
   UserCheck, 
   Search, 
   X, 
-  Smartphone, 
   Phone,
   History,
   Check,
@@ -393,187 +392,122 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
             </div>
           </div>
         ) : (
-          <div className="divide-y divide-line">
-            {filteredWorkOrders.map((wo) => {
-              const records = wo.followUpRecords || [];
-              const lastRecord = records.length > 0 ? records[records.length - 1] : null;
-              const daysElapsed = getDaysSinceCompletion(wo);
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="sticky top-0 z-10">
+                <tr className="border-b border-line text-muted font-bold text-xs uppercase tracking-wider bg-surface">
+                  <th className="py-2.5 px-3">Ticket # & Date</th>
+                  <th className="py-2.5 px-3">Customer & Contact</th>
+                  <th className="py-2.5 px-3">Device & Serial/IMEI</th>
+                  <th className="py-2.5 px-3">Days Due</th>
+                  <th className="py-2.5 px-3">Follow-Up Status</th>
+                  <th className="py-2.5 px-3">Amount</th>
+                  <th className="py-2.5 px-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-line">
+                {filteredWorkOrders.map((wo) => {
+                  const records = wo.followUpRecords || [];
+                  const daysElapsed = getDaysSinceCompletion(wo);
+                  const completedDate = new Date(wo.completedAt || wo.updatedAt || wo.createdAt).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                  });
 
-              return (
-                <div
-                  key={wo.id}
-                  className="p-4 hover:bg-surface transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4"
-                >
-                  {/* Customer & Ticket Info */}
-                  <div className="space-y-1.5 flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono font-extrabold text-xs text-brand">
-                        {wo.orderNumber}
-                      </span>
-                      <span className="text-xs font-extrabold text-ink">
-                        {wo.customerName}
-                      </span>
-                      <span className="text-xs text-muted">
-                        ({wo.customerPhone})
-                      </span>
-                      <div className="flex items-center space-x-1 ml-auto md:ml-0 flex-wrap gap-1">
-                        {getStatusBadge(wo.followUpStatus)}
-                        <span className="px-1.5 py-0.5 rounded-md text-xs font-extrabold bg-success/15 text-success-deep">
-                          Delivered / Taken Out
-                        </span>
+                  return (
+                    <tr key={wo.id} className="hover:bg-surface transition-colors">
+                      {/* Ticket # & Date */}
+                      <td className="py-3 px-3">
+                        <p className="font-mono font-black text-brand text-xs">{wo.orderNumber}</p>
+                        <span className="text-xs text-muted">{completedDate}</span>
+                      </td>
 
+                      {/* Customer & Contact */}
+                      <td className="py-3 px-3">
+                        <p className="font-bold text-ink truncate max-w-[140px]">{wo.customerName}</p>
+                        <p className="text-xs text-muted font-mono">{wo.customerPhone}</p>
+                      </td>
+
+                      {/* Device & Serial */}
+                      <td className="py-3 px-3">
+                        <p className="font-semibold text-ink truncate max-w-[150px]">{wo.deviceModel}</p>
+                        <p className="text-xs font-mono text-muted truncate max-w-[150px]">
+                          {wo.serialNumber ? `SN: ${wo.serialNumber}` : wo.imei ? `IMEI: ${wo.imei}` : 'No Serial'}
+                          {wo.assignedTechName ? ` · ${wo.assignedTechName}` : ''}
+                        </p>
+                      </td>
+
+                      {/* Days Due */}
+                      <td className="py-3 px-3">
                         {daysElapsed >= 60 ? (
                           <span className="px-1.5 py-0.5 rounded-md text-xs font-extrabold bg-violet-100 text-violet-900 border border-violet-300">
-                            2 Months Due ({daysElapsed}d)
+                            2 Mo ({daysElapsed}d)
                           </span>
                         ) : daysElapsed >= 30 ? (
                           <span className="px-1.5 py-0.5 rounded-md text-xs font-extrabold bg-purple/15 text-purple border border-purple/30">
-                            1 Month Due ({daysElapsed}d)
+                            1 Mo ({daysElapsed}d)
                           </span>
                         ) : daysElapsed >= 7 ? (
                           <span className="px-1.5 py-0.5 rounded-md text-xs font-extrabold bg-brand/15 text-brand-deep border border-brand/30">
-                            7 Days Due ({daysElapsed}d)
+                            7d ({daysElapsed}d)
                           </span>
                         ) : (
                           <span className="px-1.5 py-0.5 rounded-md text-xs font-semibold bg-gray-100 text-gray-700">
-                            {daysElapsed === 0 ? 'Completed Today' : `${daysElapsed}d Post Delivery`}
+                            {daysElapsed === 0 ? 'Today' : `${daysElapsed}d`}
                           </span>
                         )}
-                      </div>
-                    </div>
+                      </td>
 
-                    <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-muted">
-                      <span className="flex items-center space-x-1 font-semibold text-ink">
-                        <Smartphone className="w-3.5 h-3.5 text-brand" />
-                        <span>{wo.deviceModel}</span>
-                      </span>
-                      {wo.serialNumber && (
-                        <span>S/N: <span className="font-mono text-ink">{wo.serialNumber}</span></span>
-                      )}
-                      <span>
-                        Completed:{' '}
-                        <span className="font-medium text-ink">
-                          {new Date(wo.completedAt || wo.updatedAt || wo.createdAt).toLocaleDateString()}
-                        </span>
-                      </span>
-                      {wo.assignedTechName && (
-                        <span>Tech: <span className="font-semibold text-ink">{wo.assignedTechName}</span></span>
-                      )}
-                      <span>Warranty: <span className="font-semibold text-ink">{wo.warrantyDays} Days</span></span>
-                      <span>Total: <span className="font-extrabold text-success">{systemSettings.currencySymbol}{wo.totalAmount || 0}</span></span>
-                    </div>
+                      {/* Follow-Up Status */}
+                      <td className="py-3 px-3">
+                        {getStatusBadge(wo.followUpStatus)}
+                      </td>
 
-                    {/* What Was Repaired Banner */}
-                    <div className="bg-brand-soft border border-line rounded-xl p-3 text-xs space-y-1.5 mt-2">
-                      <div className="flex items-center justify-between">
-                        <span className="font-extrabold text-brand flex items-center space-x-1.5">
-                          <History className="w-3.5 h-3.5 text-brand" />
-                          <span>Repaired Services & Replaced Components:</span>
-                        </span>
-                        <span className="text-xs font-extrabold text-brand bg-brand-soft px-2 py-0.5 rounded-md border border-brand/30">
-                          {systemSettings.currencySymbol}{wo.totalAmount || 0}
-                        </span>
-                      </div>
+                      {/* Amount */}
+                      <td className="py-3 px-3">
+                        <p className="font-mono font-extrabold text-xs text-ink">{systemSettings.currencySymbol}{wo.totalAmount || 0}</p>
+                        <span className="text-[11px] text-muted">Warranty {wo.warrantyDays} Days</span>
+                      </td>
 
-                      <div className="flex flex-wrap gap-1.5 pt-0.5">
-                        {wo.selectedRepairs && wo.selectedRepairs.length > 0 ? (
-                          wo.selectedRepairs.map((rep, idx) => (
-                            <span key={idx} className="px-2.5 py-1 bg-white border border-line text-ink font-extrabold text-xs rounded-lg shadow-2xs flex items-center space-x-1">
-                              <CheckCircle2 className="w-3.5 h-3.5 text-success shrink-0" />
-                              <span>{rep.name}</span>
-                            </span>
-                          ))
-                        ) : wo.lineItems && wo.lineItems.length > 0 ? (
-                          wo.lineItems.map((item, idx) => (
-                            <span key={idx} className="px-2.5 py-1 bg-white border border-line text-ink font-extrabold text-xs rounded-lg shadow-2xs flex items-center space-x-1">
-                              <CheckCircle2 className="w-3.5 h-3.5 text-success shrink-0" />
-                              <span>{item.description || item.partName}</span>
-                            </span>
-                          ))
-                        ) : (
-                          <span className="px-2.5 py-1 bg-white border border-line text-ink font-extrabold text-xs rounded-lg flex items-center space-x-1">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-success shrink-0" />
-                            <span>{wo.symptomsReported || 'Standard Repair & Servicing'}</span>
-                          </span>
-                        )}
-
-                        {wo.microSolderingLog?.icReplaced && wo.microSolderingLog.icReplaced.length > 0 && (
-                          <span className="px-2.5 py-1 bg-purple/10 border border-purple/30 text-purple font-extrabold text-xs rounded-lg flex items-center space-x-1">
-                            <Cpu className="w-3.5 h-3.5 text-purple shrink-0" />
-                            <span>IC Replaced: {wo.microSolderingLog.icReplaced.join(', ')}</span>
-                          </span>
-                        )}
-                      </div>
-
-                      {(wo.afterRepairSummary || wo.symptomsReported || wo.diagnosticResult) && (
-                        <div className="text-xs text-muted space-y-1 pt-1 border-t border-brand/10">
-                          {wo.afterRepairSummary && (
-                            <p><strong className="text-ink">Tech Repair Notes:</strong> {wo.afterRepairSummary}</p>
+                      {/* Actions — Call / Logs / Log Follow-Up */}
+                      <td className="py-3 px-3 text-right">
+                        <div className="inline-flex items-center justify-end gap-1">
+                          <a
+                            href={`tel:${wo.customerPhone}`}
+                            aria-label={`Call ${wo.customerName || 'customer'}`}
+                            className="!h-7 !min-h-7 w-7 rounded-lg bg-surface hover:bg-line text-ink border border-line transition-colors cursor-pointer inline-flex items-center justify-center"
+                            title="Call Phone"
+                          >
+                            <Phone className="w-3.5 h-3.5 text-brand" />
+                          </a>
+                          {records.length > 0 && (
+                            <Button
+                              type="button"
+                              onClick={() => setHistoryModalWo(wo)}
+                              variant="ghost"
+                              className="!h-7 !min-h-7 w-7 px-0 border border-line text-muted hover:bg-surface rounded-lg"
+                              title={`View logs (${records.length})`}
+                              aria-label={`View follow-up logs for ${wo.orderNumber}`}
+                            >
+                              <History className="w-3.5 h-3.5" />
+                            </Button>
                           )}
-                          {wo.symptomsReported && (
-                            <p><strong className="text-ink">Reported Symptom:</strong> {wo.symptomsReported}</p>
-                          )}
+                          <Button
+                            type="button"
+                            onClick={() => handleOpenLogModal(wo)}
+                            className="!h-7 !min-h-7 px-2 bg-brand hover:bg-brand-deep text-white flex items-center space-x-1 rounded-lg"
+                            title="Log Follow-Up"
+                          >
+                            <PhoneCall className="w-3.5 h-3.5" />
+                            <span className="text-[11px] font-bold">Log</span>
+                          </Button>
                         </div>
-                      )}
-                    </div>
-
-                    {/* Last Log preview */}
-                    {lastRecord && (
-                      <div className="bg-surface border border-line rounded-xl p-2.5 text-xs text-ink space-y-1 mt-1">
-                        <div className="flex items-center justify-between text-xs text-muted">
-                          <span className="font-bold text-ink flex items-center space-x-1">
-                            <span>Last Logged by {lastRecord.author}</span>
-                            {lastRecord.satisfactionRating && (
-                              <span className="flex items-center text-warning font-bold ml-2">
-                                {'★'.repeat(lastRecord.satisfactionRating)}
-                              </span>
-                            )}
-                          </span>
-                          <span>{new Date(lastRecord.timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
-                        </div>
-                        <p className="text-xs text-ink">{lastRecord.notes}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Actions Bar */}
-                  <div className="flex items-center space-x-2 shrink-0 border-t md:border-t-0 pt-2 md:pt-0 border-line">
-                    {/* Direct Contact Buttons */}
-                    <a
-                      href={`tel:${wo.customerPhone}`}
-                      aria-label={`Call ${wo.customerName || 'customer'}`}
-                      className="p-2 min-h-10 min-w-10 rounded-xl bg-surface hover:bg-line text-ink border border-line transition-colors cursor-pointer inline-flex items-center justify-center"
-                      title="Call Phone"
-                    >
-                      <Phone className="w-3.5 h-3.5 text-brand" />
-                    </a>
-
-                    {records.length > 0 && (
-                      <Button
-                        type="button"
-                        onClick={() => setHistoryModalWo(wo)}
-                        variant="secondary"
-                        size="sm"
-                        className="flex items-center space-x-1"
-                      >
-                        <History className="w-3.5 h-3.5 text-muted" />
-                        <span>Logs ({records.length})</span>
-                      </Button>
-                    )}
-
-                    <Button
-                      type="button"
-                      onClick={() => handleOpenLogModal(wo)}
-                      size="sm"
-                      className="bg-brand hover:bg-brand-deep text-white flex items-center space-x-1.5"
-                    >
-                      <PhoneCall className="w-3.5 h-3.5" />
-                      <span>Log Follow-Up</span>
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
