@@ -21,7 +21,6 @@ import {ClipboardList,
   SlidersHorizontal,
   LayoutGrid,
   Table as TableIcon,
-  ChevronRight,
   User,
   Wrench,
   Clock,
@@ -475,9 +474,9 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                         </span>
                       </td>
 
-                      {/* Action — row is fully clickable; passive chevron affordance */}
+                      {/* Row is fully clickable — no separate affordance needed */}
                       <td className="px-2 py-2 text-right hidden xl:table-cell">
-                        <ChevronRight className="w-4 h-4 text-muted group-hover:text-brand transition-colors" />
+                        <span className="w-4 h-4" />
                       </td>
                     </tr>
                   );
@@ -502,45 +501,46 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                   }}
                   className={`relative p-4 rounded-2xl border text-xs cursor-pointer transition-all space-y-3 hover:shadow-md ${getPriorityStyle(wo.priority)}`}
                 >
-                  <div className="flex justify-between items-center pb-2 border-b border-line">
-                    <span className="font-mono font-black text-brand bg-brand/10 px-2.5 py-1 rounded-md text-xs">
-                      {wo.orderNumber}
-                    </span>
-
-                    <div className="flex items-center space-x-1.5">
-                      <PriorityBadge priority={wo.priority} size="xs" />
-                      <StatusBadge status={wo.status} size="xs" />
-                    </div>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-2xl bg-brand/10 text-brand flex items-center justify-center group-hover:scale-110 group-hover:bg-brand group-hover:text-white transition-all">
+                    <Ticket className="w-5 h-5" />
                   </div>
+                  <div className="pr-12">
+                    <div className="flex justify-between items-center pb-2 border-b border-line">
+                      <span className="font-mono font-black text-brand bg-brand/10 px-2.5 py-1 rounded-md text-xs">
+                        {wo.orderNumber}
+                      </span>
 
-                  <div className="space-y-1">
-                    <div className="flex justify-between items-center font-extrabold text-sm text-ink">
-                      <span>{wo.deviceModel}</span>
                       <div className="flex items-center space-x-1.5">
-                        <span className="text-xs text-muted font-medium">{wo.deviceColor || 'Standard'}</span>
-                        <span 
-                          className={`w-3.5 h-3.5 rounded-full border border-white shadow-2xs ${woColorStyle.border}`}
-                          style={{ background: woColorStyle.gradient }}
-                        />
+                        <PriorityBadge priority={wo.priority} size="xs" />
+                        <StatusBadge status={wo.status} size="xs" />
                       </div>
                     </div>
-                    <p className="text-xs text-muted">
-                      <strong className="text-ink">{wo.customerName}</strong> · {wo.customerPhone}
-                    </p>
-                  </div>
 
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-ink flex items-center space-x-1.5">
-                      <User className="w-3.5 h-3.5 text-brand" />
-                      {wo.assignedTechName || 'Unassigned'}
-                    </span>
-                    <span className="font-mono font-black text-sm text-brand">
-                      {(wo.totalAmount || wo.subtotal || 0).toLocaleString()} MMK
-                    </span>
-                  </div>
+                    <div className="space-y-1 pt-2">
+                      <div className="flex justify-between items-center font-extrabold text-sm text-ink">
+                        <span>{wo.deviceModel}</span>
+                        <div className="flex items-center space-x-1.5">
+                          <span className="text-xs text-muted font-medium">{wo.deviceColor || 'Standard'}</span>
+                          <span 
+                            className={`w-3.5 h-3.5 rounded-full border border-white shadow-2xs ${woColorStyle.border}`}
+                            style={{ background: woColorStyle.gradient }}
+                          />
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted">
+                        <strong className="text-ink">{wo.customerName}</strong> · {wo.customerPhone}
+                      </p>
+                    </div>
 
-                  <div className="absolute top-1/2 right-3 -translate-y-1/2 text-muted/40 group-hover:text-brand transition-colors">
-                    <ChevronRight className="w-4 h-4" />
+                    <div className="flex items-center justify-between text-xs pt-2">
+                      <span className="font-bold text-ink flex items-center space-x-1.5">
+                        <User className="w-3.5 h-3.5 text-brand" />
+                        {wo.assignedTechName || 'Unassigned'}
+                      </span>
+                      <span className="font-mono font-black text-sm text-brand">
+                        {(wo.totalAmount || wo.subtotal || 0).toLocaleString()} MMK
+                      </span>
+                    </div>
                   </div>
                 </div>
               );

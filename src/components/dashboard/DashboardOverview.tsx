@@ -653,21 +653,18 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           aria-label="View active repairs queue"
           className="group relative bg-white p-4 rounded-2xl border border-line shadow-2xs hover:shadow-md hover:border-brand/50 transition-all cursor-pointer overflow-hidden select-none"
         >
-          <div className="flex items-center justify-between">
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-2xl bg-brand-soft text-brand flex items-center justify-center group-hover:scale-110 group-hover:bg-brand group-hover:text-white transition-all">
+            <ClipboardList className="w-6 h-6" />
+          </div>
+          <div className="pr-14">
             <span className="text-xs font-extrabold uppercase tracking-wider text-muted">
               Active Repairs
             </span>
-            <div className="w-8 h-8 rounded-xl bg-brand-soft text-brand flex items-center justify-center group-hover:scale-110 transition-transform">
-              <ClipboardList className="w-4 h-4" />
+            <div className="mt-2">
+              <span className="text-2xl sm:text-3xl font-black text-ink tracking-tight">
+                {activeRepairs.length}
+              </span>
             </div>
-          </div>
-          <div className="mt-2.5">
-            <span className="text-2xl sm:text-3xl font-black text-ink tracking-tight">
-              {activeRepairs.length}
-            </span>
-          </div>
-          <div className="absolute top-1/2 right-4 -translate-y-1/2 text-muted/50 group-hover:text-brand transition-colors">
-            <ChevronRight className="w-4 h-4" />
           </div>
         </div>
 
@@ -683,21 +680,18 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           aria-label="View ready for pickup"
           className="group relative bg-white p-4 rounded-2xl border border-line shadow-2xs hover:shadow-md hover:border-emerald-500/50 transition-all cursor-pointer overflow-hidden select-none"
         >
-          <div className="flex items-center justify-between">
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-2xl bg-success/10 text-success flex items-center justify-center group-hover:scale-110 group-hover:bg-success group-hover:text-white transition-all">
+            <CheckCircle2 className="w-6 h-6" />
+          </div>
+          <div className="pr-14">
             <span className="text-xs font-extrabold uppercase tracking-wider text-muted">
               Ready for Pickup
             </span>
-            <div className="w-8 h-8 rounded-xl bg-success/10 text-success flex items-center justify-center group-hover:scale-110 transition-transform">
-              <CheckCircle2 className="w-4 h-4" />
+            <div className="mt-2">
+              <span className="text-2xl sm:text-3xl font-black text-ink tracking-tight">
+                {readyForPickup.length}
+              </span>
             </div>
-          </div>
-          <div className="mt-2.5">
-            <span className="text-2xl sm:text-3xl font-black text-ink tracking-tight">
-              {readyForPickup.length}
-            </span>
-          </div>
-          <div className="absolute top-1/2 right-4 -translate-y-1/2 text-muted/50 group-hover:text-success-deep transition-colors">
-            <ChevronRight className="w-4 h-4" />
           </div>
         </div>
 
@@ -710,21 +704,18 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           aria-label="View finance overview"
           className="group relative bg-white p-4 rounded-2xl border border-line shadow-2xs hover:shadow-md hover:border-indigo-500/50 transition-all cursor-pointer overflow-hidden select-none"
         >
-          <div className="flex items-center justify-between">
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-2xl bg-brand-soft text-brand flex items-center justify-center group-hover:scale-110 group-hover:bg-brand group-hover:text-white transition-all">
+            <Coins className="w-6 h-6" />
+          </div>
+          <div className="pr-14">
             <span className="text-xs font-extrabold uppercase tracking-wider text-muted">
               Total Revenue
             </span>
-            <div className="w-8 h-8 rounded-xl bg-brand-soft text-brand flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Coins className="w-4 h-4" />
+            <div className="mt-2">
+              <span className="text-xl sm:text-2xl font-black text-ink tracking-tight truncate block">
+                {totalRevenue.toLocaleString()} <span className="text-xs font-bold text-muted">MMK</span>
+              </span>
             </div>
-          </div>
-          <div className="mt-2.5">
-            <span className="text-xl sm:text-2xl font-black text-ink tracking-tight truncate block">
-              {totalRevenue.toLocaleString()} <span className="text-xs font-bold text-muted">MMK</span>
-            </span>
-          </div>
-          <div className="absolute top-1/2 right-4 -translate-y-1/2 text-muted/50 group-hover:text-brand transition-colors">
-            <ChevronRight className="w-4 h-4" />
           </div>
         </div>
 
@@ -737,25 +728,22 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           aria-label="View technician KPI"
           className="group relative bg-white p-4 rounded-2xl border border-line shadow-2xs hover:shadow-md hover:border-teal-500/50 transition-all cursor-pointer overflow-hidden select-none"
         >
-          <div className="flex items-center justify-between">
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-2xl bg-teal/10 text-teal flex items-center justify-center group-hover:scale-110 group-hover:bg-teal group-hover:text-white transition-all">
+            <Clock className="w-6 h-6" />
+          </div>
+          <div className="pr-14">
             <span className="text-xs font-extrabold uppercase tracking-wider text-muted">
               Avg Turnaround
             </span>
-            <div className="w-8 h-8 rounded-xl bg-teal/10 text-teal flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Clock className="w-4 h-4" />
+            <div className="mt-2">
+              <span className="text-2xl sm:text-3xl font-black text-ink tracking-tight">
+                {avgTurnaroundHours > 0
+                  ? avgTurnaroundHours >= 24
+                    ? `${(avgTurnaroundHours / 24).toFixed(1)}d`
+                    : `${avgTurnaroundHours}h`
+                  : '—'}
+              </span>
             </div>
-          </div>
-          <div className="mt-2.5">
-            <span className="text-2xl sm:text-3xl font-black text-ink tracking-tight">
-              {avgTurnaroundHours > 0
-                ? avgTurnaroundHours >= 24
-                  ? `${(avgTurnaroundHours / 24).toFixed(1)}d`
-                  : `${avgTurnaroundHours}h`
-                : '—'}
-            </span>
-          </div>
-          <div className="absolute top-1/2 right-4 -translate-y-1/2 text-muted/50 group-hover:text-teal transition-colors">
-            <ChevronRight className="w-4 h-4" />
           </div>
         </div>
       </div>
@@ -1087,10 +1075,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     </div>
                     <div className="flex justify-between items-center text-xs text-muted">
                       <span>{pct}% of active queue</span>
-                      <span className="font-bold text-brand flex items-center space-x-0.5">
-                        <span>Filter Queue</span>
-                        <ChevronRight className="w-3 h-3" />
-                      </span>
                     </div>
                   </div>
                 );
