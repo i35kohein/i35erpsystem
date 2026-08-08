@@ -441,15 +441,23 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                       <div key={item.id} className={`flex items-center gap-1.5 px-2 py-1 text-[11px] rounded-lg border transition-colors ${
                         isFail ? 'bg-danger/5 border-danger/15' : isPass ? 'bg-success/5 border-success/15' : 'bg-white border-line hover:border-brand/30'
                       }`}>
-                        {/* Number + icon + name */}
-                        <div className="flex items-center gap-1 min-w-0 flex-1">
-                          <span className={`w-3.5 h-3.5 rounded flex items-center justify-center shrink-0 ${
-                            isFail ? 'bg-danger/10 text-danger' : isPass ? 'bg-success/10 text-success-deep' : 'bg-surface text-muted'
+                        {/* Number + icon + name — click to mark Pass */}
+                        <button
+                          type="button"
+                          onClick={() => handleDiagnosticStatusChange(item.id, 'Pass')}
+                          className="flex items-center gap-1 min-w-0 flex-1 text-left group"
+                          title={`Mark ${item.name} as Pass`}
+                          aria-label={`Mark ${item.name} as Pass`}
+                        >
+                          <span className={`w-3.5 h-3.5 rounded flex items-center justify-center shrink-0 transition-colors ${
+                            isFail ? 'bg-danger/10 text-danger' : isPass ? 'bg-success/10 text-success-deep' : 'bg-surface text-muted group-hover:bg-success/15 group-hover:text-success-deep'
                           }`}>
                             <IconComp className="w-2 h-2" />
                           </span>
-                          <span className="text-[10px] font-bold text-ink truncate">{idx + 1}. {item.name}</span>
-                        </div>
+                          <span className={`text-[10px] font-bold truncate transition-colors ${
+                            isPass ? 'text-success-deep' : 'text-ink group-hover:text-success-deep'
+                          }`}>{idx + 1}. {item.name}</span>
+                        </button>
 
                         {/* Comment icon — neutral, click to show note input */}
                         <Button
