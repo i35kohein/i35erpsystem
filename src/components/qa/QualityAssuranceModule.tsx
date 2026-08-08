@@ -295,7 +295,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
 
                       {/* Priority */}
                       <td className="py-3 px-3 hidden xl:table-cell">
-                        <PriorityBadge priority={wo.priority} />
+                        <PriorityBadge priority={wo.priority} showNormal />
                       </td>
 
                       {/* Stage & Status */}
