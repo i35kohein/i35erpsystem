@@ -612,7 +612,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
             {showAllStages ? (
               <><EyeOff className="w-3 h-3 shrink-0" /><span>Hide Exceptions</span></>
             ) : (
-              <><Eye className="w-3 h-3 shrink-0" /><span>Show All{hiddenStageCounts.some((h) => h.count > 0) ? ` (${hiddenStageCounts.filter((h) => h.count > 0).map((h) => `${h.id.split(' ')[0]}:${h.count}`).join(' ')})` : ''}</span></>
+              <><Eye className="w-3 h-3 shrink-0" /><span>Show Exceptions{hiddenStageCounts.some((h) => h.count > 0) ? ` (${hiddenStageCounts.filter((h) => h.count > 0).map((h) => `${h.id}:${h.count}`).join(' · ')})` : ''}</span></>
             )}
           </Button>
 
@@ -653,22 +653,6 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
               <Timer className="h-3 w-3 shrink-0" />
               <span>Filtering Bottlenecks (&gt;48h)</span>
             </span>
-          )}
-
-          {onClearAllWorkOrders && workOrders.length > 0 && (
-            <Button
-              type="button"
-              onClick={() => {
-                if (window.confirm(`Are you sure you want to clear all ${workOrders.length} tickets from the system?`)) {
-                  onClearAllWorkOrders();
-                }
-              }}
-              className="inline-flex h-7 items-center gap-1 rounded-md border border-danger/30 bg-danger/10 px-2 text-xs font-bold text-danger shadow-2xs transition-colors hover:bg-danger/15"
-              title="⚠️ Permanently delete ALL tickets from the system (Admin only)"
-            >
-              <Trash2 className="h-3 w-3 shrink-0 text-danger" />
-              <span>Delete All Tickets ({workOrders.length})</span>
-            </Button>
           )}
         </div>
       </div>
@@ -1485,6 +1469,26 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
             onUpdateWorkOrderStatus(targetWo.id, targetStatus);
           }}
         />
+      )}
+
+      {/* Danger zone — destructive admin actions kept out of the main toolbar */}
+      {onClearAllWorkOrders && workOrders.length > 0 && (
+        <div className="mt-4 pt-3 border-t border-line/60 flex items-center justify-between gap-3 text-xs">
+          <span className="text-muted font-medium">Admin tools</span>
+          <Button
+            type="button"
+            onClick={() => {
+              if (window.confirm(`Are you sure you want to clear all ${workOrders.length} tickets from the system? This cannot be undone.`)) {
+                onClearAllWorkOrders();
+              }
+            }}
+            className="inline-flex h-7 items-center gap-1 rounded-md border border-danger/30 bg-surface px-2 text-xs font-bold text-danger/70 shadow-2xs transition-colors hover:bg-danger/10 hover:text-danger"
+            title="⚠️ Permanently delete ALL tickets from the system (Admin only)"
+          >
+            <Trash2 className="h-3 w-3 shrink-0" />
+            <span>Delete All Tickets ({workOrders.length})</span>
+          </Button>
+        </div>
       )}
     </div>
   );

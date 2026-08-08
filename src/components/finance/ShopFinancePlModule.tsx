@@ -336,13 +336,13 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
       <div className="bg-surface p-1.5 rounded-2xl border border-line flex items-center space-x-1.5 overflow-x-auto no-scrollbar w-full text-xs shadow-2xs">
         {[
           { id: 'overview', label: 'Financial Overview', icon: PieChart },
-          { id: 'revenue', label: '1. Revenue & Payment Methods', icon: TrendingUp },
-          { id: 'expenses', label: '2. OpEx & COGS Costs', icon: Receipt },
-          { id: 'inventory-asset', label: '3. Parts Asset Valuation', icon: Boxes },
-          { id: 'commissions', label: '4. Tech Commissions', icon: Users },
-          { id: 'accounts-payable', label: '5. Accounts Payable / Debts', icon: Truck, badge: financialSummary.overdueDebtsCount > 0 ? `${financialSummary.overdueDebtsCount} Overdue` : undefined },
-          { id: 'inventory-fund', label: '6. Inventory Fund', icon: Coins, badge: pendingFundCount > 0 ? `${pendingFundCount} To Settle` : undefined },
-          { id: 'parts-revenue', label: '7. Parts Revenue & Profit', icon: Boxes, badge: financialSummary.partsUnitsSold > 0 ? `${financialSummary.partsUnitsSold} Sold` : undefined },
+          { id: 'revenue', label: 'Revenue & Payment Methods', icon: TrendingUp },
+          { id: 'expenses', label: 'OpEx & COGS Costs', icon: Receipt },
+          { id: 'inventory-asset', label: 'Parts Asset Valuation', icon: Boxes },
+          { id: 'commissions', label: 'Tech Commissions', icon: Users },
+          { id: 'accounts-payable', label: 'Accounts Payable / Debts', icon: Truck, badge: financialSummary.overdueDebtsCount > 0 ? `${financialSummary.overdueDebtsCount} Overdue` : undefined },
+          { id: 'inventory-fund', label: 'Inventory Fund', icon: Coins, badge: pendingFundCount > 0 ? `${pendingFundCount} To Settle` : undefined },
+          { id: 'parts-revenue', label: 'Parts Revenue & Profit', icon: Boxes, badge: financialSummary.partsUnitsSold > 0 ? `${financialSummary.partsUnitsSold} Sold` : undefined },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
