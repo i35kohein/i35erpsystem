@@ -749,23 +749,17 @@ export default function App() {
           </>
         )}
 
-        {(tab === 'intake' || tab === 'pipeline' || tab === 'pos' || tab === 'suppliers' || tab === 'qa') && (
+        {(tab === 'intake' || tab === 'pipeline' || tab === 'suppliers' || tab === 'qa') && (
           <div>
             <label className={labelCls}>
-              {tab === 'pos' ? 'Checkout Status' : tab === 'suppliers' ? 'RMA Status' : tab === 'qa' ? 'QA Status' : 'Status'}
+              {tab === 'suppliers' ? 'RMA Status' : tab === 'qa' ? 'QA Status' : 'Status'}
             </label>
             <DrawerSelect
-              label={tab === 'pos' ? 'Checkout Status' : tab === 'suppliers' ? 'RMA Status' : tab === 'qa' ? 'QA Status' : 'Status'}
+              label={tab === 'suppliers' ? 'RMA Status' : tab === 'qa' ? 'QA Status' : 'Status'}
               value={statusFilter}
               onChange={(v) => setStatusFilter(v as any)}
               options={
-                tab === 'pos'
-                  ? [
-                      { value: 'ALL', label: 'All Checkout Status' },
-                      { value: 'Pending Payment', label: 'Unpaid / Ready' },
-                      { value: 'Paid', label: 'Paid' },
-                    ]
-                  : tab === 'suppliers'
+                tab === 'suppliers'
                     ? [
                         { value: 'ALL', label: 'All RMA Statuses' },
                         { value: 'Draft', label: 'Draft' },
@@ -917,7 +911,7 @@ export default function App() {
           </div>
         )}
 
-        {(tab === 'intake' || tab === 'pipeline' || tab === 'inventory' || tab === 'pos' || tab === 'crm' || tab === 'suppliers' || tab === 'qa' || tab === 'finance' || tab === 'dashboard') && (
+        {(tab === 'intake' || tab === 'pipeline' || tab === 'inventory' || tab === 'crm' || tab === 'suppliers' || tab === 'qa' || tab === 'finance' || tab === 'dashboard') && (
           <div>
             <DrawerSelect
               label="Date"
@@ -2018,25 +2012,6 @@ export default function App() {
                 />
 
                 <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact iconOnly />
-
-                </div>              </>
-            )}
-
-            {activeTab === 'pos' && (
-              <>
-                <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
-                <CustomDropdownMenu
-                  value={statusFilter}
-                  onChange={(val) => setStatusFilter(val)}
-                  buttonClassName="!px-2.5 !py-1.5 !h-10 text-xs"
-                  options={[
-                    { value: 'ALL', label: 'All Checkout Status' },
-                    { value: 'Pending Payment', label: 'Unpaid / Ready' },
-                    { value: 'Paid', label: 'Paid' },
-                  ]}
-                />
-
-                <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
 
                 </div>              </>
             )}

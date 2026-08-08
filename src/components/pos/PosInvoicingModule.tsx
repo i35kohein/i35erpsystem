@@ -574,13 +574,15 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     key={wo.id}
                     type="button"
                     onClick={() => setSelectedWoId(wo.id)}
-                    className={`w-full p-1.5 rounded-lg flex flex-col items-center gap-0.5 transition-colors ${
-                      isSel ? 'bg-brand text-white' : 'bg-surface text-ink hover:bg-line'
+                    className={`w-full py-1.5 rounded-lg flex flex-col items-center gap-1 transition-colors ${
+                      isSel ? 'bg-brand text-white shadow-2xs' : 'bg-white text-ink border border-line hover:bg-brand-soft hover:border-brand/30'
                     }`}
                     title={`${wo.orderNumber} · ${wo.deviceModel} · ${wo.customerName}`}
                     aria-label={`Select ${wo.orderNumber} ${wo.deviceModel}`}
                   >
-                    <DeviceIcon className={`w-4 h-4 ${isSel ? 'text-white' : 'text-brand'}`} />
+                    <span className={`w-6 h-6 rounded-full flex items-center justify-center ${isSel ? 'bg-white/20' : 'bg-brand-soft'}`}>
+                      <DeviceIcon className={`w-4 h-4 ${isSel ? 'text-white' : 'text-brand'}`} />
+                    </span>
                     <span className={`text-[8px] font-black leading-none ${isSel ? 'text-white' : 'text-muted'}`}>
                       {wo.isPaid ? '✓' : '$'}
                     </span>
