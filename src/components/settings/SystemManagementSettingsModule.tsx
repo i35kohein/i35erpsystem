@@ -932,7 +932,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                         </span>
                         <span className="truncate leading-tight md:leading-snug">{tab.label}</span>
                         {isDirty && isActive && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0 absolute top-1.5 right-1.5" title="Unsaved changes" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-warning shrink-0 absolute top-1.5 right-1.5" title="Unsaved changes" />
                         )}
                         {tab.badge !== undefined && (
                           <span
@@ -976,7 +976,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
           </Button>
           {isDirty && (
             <span className="flex items-center gap-1.5 text-xs font-extrabold text-warning">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              <span className="w-1.5 h-1.5 rounded-full bg-warning" />
               Unsaved changes
             </span>
           )}
@@ -1403,7 +1403,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                   <select aria-label="-- Select Technician Staff Profile --"
                     value={userFormData.technicianId}
                     onChange={(e) => setUserFormData({ ...userFormData, technicianId: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-brand/30 focus:outline-none focus:border-brand font-bold bg-white text-blue-950"
+                    className="w-full px-3 py-2 rounded-xl border border-brand/30 focus:outline-none focus:border-brand font-bold bg-white text-brand-deep"
                   >
                     <option value="">-- Select Technician Staff Profile --</option>
                     {technicians.map((tech) => (

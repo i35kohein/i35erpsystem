@@ -48,7 +48,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                     <Button
                       type="button"
                       onClick={() => setFormData({ ...formData, shopLogoUrl: '' })}
-                      className="text-xs font-bold text-red-500 hover:text-red-700 flex items-center space-x-1 cursor-pointer"
+                      className="text-xs font-bold text-red-500 hover:text-danger flex items-center space-x-1 cursor-pointer"
                     >
                       <Trash2 className="w-3 h-3" />
                       <span>Remove Logo</span>
@@ -232,7 +232,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                               shopPhone: currentPhones[0] || '',
                             });
                           }}
-                          className="p-2 text-muted hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all cursor-pointer"
+                          className="p-2 text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-all cursor-pointer"
                           title="Remove Phone Line"
                         >
                           <Trash2 className="w-3.5 h-3.5" />

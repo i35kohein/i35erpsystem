@@ -21,7 +21,7 @@ type ResultItem =
 
 const KIND_META = {
   ticket: { icon: TicketCheck, label: 'Tickets', tab: 'intake', color: 'text-brand bg-brand-soft' },
-  part: { icon: Package, label: 'Parts', tab: 'inventory', color: 'text-purple bg-purple-50' },
+  part: { icon: Package, label: 'Parts', tab: 'inventory', color: 'text-purple bg-purple/10' },
   customer: { icon: Users, label: 'Customers', tab: 'crm', color: 'text-success bg-success/10' },
 } as const;
 

@@ -131,7 +131,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                   <Button
                     type="button"
                     onClick={() => { if (window.confirm(`Delete category “${category}”? It will no longer appear for new inventory parts.`)) { const nextCategories = inventoryCategories.filter((item) => item !== category); onUpdateInventoryCategories?.(nextCategories); setFormData((current) => ({ ...current, inventoryCategories: nextCategories })); } }}
-                    className="text-xs font-extrabold text-rose-600"
+                    className="text-xs font-extrabold text-danger"
                   >
                     Delete
                   </Button>
@@ -158,11 +158,11 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
             </form>
 
             {editingInventorySupplier && (
-              <form onSubmit={(event) => { event.preventDefault(); onUpdateSupplier?.(editingInventorySupplier); setEditingInventorySupplier(null); }} className="grid grid-cols-1 gap-2 rounded-xl border border-blue-200 bg-blue-50/60 p-3 sm:grid-cols-2 lg:grid-cols-5">
-                <Input required value={editingInventorySupplier.name} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, name: event.target.value })} className="h-9 rounded-lg border border-blue-200 bg-white px-2.5 text-xs font-semibold outline-none focus:border-brand" />
-                <Input required value={editingInventorySupplier.code} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, code: event.target.value })} className="h-9 rounded-lg border border-blue-200 bg-white px-2.5 font-mono text-xs outline-none focus:border-brand" />
-                <Input value={editingInventorySupplier.phone} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, phone: event.target.value })} className="h-9 rounded-lg border border-blue-200 bg-white px-2.5 text-xs outline-none focus:border-brand" />
-                <Input type="number" min="1" value={editingInventorySupplier.avgRmaTurnaroundDays} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, avgRmaTurnaroundDays: Number(event.target.value) })} className="h-9 rounded-lg border border-blue-200 bg-white px-2.5 text-xs outline-none focus:border-brand" />
+              <form onSubmit={(event) => { event.preventDefault(); onUpdateSupplier?.(editingInventorySupplier); setEditingInventorySupplier(null); }} className="grid grid-cols-1 gap-2 rounded-xl border border-brand/30 bg-brand-soft/60 p-3 sm:grid-cols-2 lg:grid-cols-5">
+                <Input required value={editingInventorySupplier.name} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, name: event.target.value })} className="h-9 rounded-lg border border-brand/30 bg-white px-2.5 text-xs font-semibold outline-none focus:border-brand" />
+                <Input required value={editingInventorySupplier.code} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, code: event.target.value })} className="h-9 rounded-lg border border-brand/30 bg-white px-2.5 font-mono text-xs outline-none focus:border-brand" />
+                <Input value={editingInventorySupplier.phone} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, phone: event.target.value })} className="h-9 rounded-lg border border-brand/30 bg-white px-2.5 text-xs outline-none focus:border-brand" />
+                <Input type="number" min="1" value={editingInventorySupplier.avgRmaTurnaroundDays} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, avgRmaTurnaroundDays: Number(event.target.value) })} className="h-9 rounded-lg border border-brand/30 bg-white px-2.5 text-xs outline-none focus:border-brand" />
                 <div className="flex gap-2"><Button type="submit" className="h-9 flex-1 rounded-lg bg-brand text-xs font-extrabold text-white">Save</Button><Button type="button" onClick={() => setEditingInventorySupplier(null)} className="h-9 rounded-lg border border-line-strong px-3 text-xs font-bold">Cancel</Button></div>
               </form>
             )}
@@ -175,7 +175,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                   <span className="font-mono text-xs text-muted">{supplier.code}</span>
                   <span className="hidden text-xs text-muted sm:inline">{supplier.avgRmaTurnaroundDays} days</span>
                   <Button type="button" onClick={() => setEditingInventorySupplier(supplier)} className="text-xs font-extrabold text-brand">Edit</Button>
-                  <Button type="button" onClick={() => { if (window.confirm(`Delete supplier “${supplier.name}”?`)) onDeleteSupplier?.(supplier.id); }} className="text-xs font-extrabold text-rose-600">Delete</Button>
+                  <Button type="button" onClick={() => { if (window.confirm(`Delete supplier “${supplier.name}”?`)) onDeleteSupplier?.(supplier.id); }} className="text-xs font-extrabold text-danger">Delete</Button>
                 </div>
               )) : <p className="px-3 py-4 text-center text-xs text-muted">No suppliers yet.</p>}
             </div>
@@ -187,7 +187,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                 <h4 className="text-xs font-extrabold text-ink">Quality Tiers</h4>
                 <p className="text-xs text-muted">Shared quality options for every physical inventory part.</p>
               </div>
-              <span className="rounded-full bg-purple-100 px-2 py-0.5 font-mono text-xs font-bold text-purple-700">{inventoryQualityTiers.length} tiers</span>
+              <span className="rounded-full bg-purple/15 px-2 py-0.5 font-mono text-xs font-bold text-purple">{inventoryQualityTiers.length} tiers</span>
             </div>
             <div className="flex gap-2">
               <Input value={qualityTierDraft} onChange={(event) => setQualityTierDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleAddInventoryQualityTier(); } }} placeholder="New quality tier" className="h-9 min-w-0 flex-1 rounded-lg border border-line-strong bg-surface px-3 text-xs font-medium outline-none focus:border-brand focus:bg-white" />
@@ -196,11 +196,11 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
             <div className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
               {inventoryQualityTiers.map((tier) => (
                 <div key={tier} className="flex items-center gap-2 px-3 py-2">
-                  <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-purple-600" />
+                  <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-purple" />
                   {editingQualityTier === tier ? <Input autoFocus value={editingQualityTierLabel} onChange={(event) => setEditingQualityTierLabel(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') handleSaveInventoryQualityTier(tier); if (event.key === 'Escape') setEditingQualityTier(null); }} className="h-7 min-w-0 flex-1 rounded-lg border border-purple/30 bg-white px-2 text-xs font-semibold outline-none" /> : <span className="min-w-0 flex-1 truncate text-xs font-semibold text-ink">{tier}</span>}
                   <span className="rounded-full bg-white px-2 py-0.5 text-xs font-bold text-muted">{parts.filter((part) => part.qualityTier === tier).length} parts</span>
-                  {editingQualityTier === tier ? <Button type="button" onClick={() => handleSaveInventoryQualityTier(tier)} className="text-xs font-extrabold text-purple-700">Save</Button> : <Button type="button" onClick={() => { setEditingQualityTier(tier); setEditingQualityTierLabel(tier); }} className="text-xs font-extrabold text-brand">Edit</Button>}
-                  <Button type="button" onClick={() => handleDeleteInventoryQualityTier(tier)} className="text-xs font-extrabold text-rose-600">Delete</Button>
+                  {editingQualityTier === tier ? <Button type="button" onClick={() => handleSaveInventoryQualityTier(tier)} className="text-xs font-extrabold text-purple">Save</Button> : <Button type="button" onClick={() => { setEditingQualityTier(tier); setEditingQualityTierLabel(tier); }} className="text-xs font-extrabold text-brand">Edit</Button>}
+                  <Button type="button" onClick={() => handleDeleteInventoryQualityTier(tier)} className="text-xs font-extrabold text-danger">Delete</Button>
                 </div>
               ))}
             </div>
@@ -234,7 +234,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                         <Button type="button" onClick={() => setExpandedBinName((current) => current === bin ? null : bin)} className="rounded-lg p-1 text-muted hover:bg-surface" aria-label={isOpen ? `Collapse ${bin}` : `Expand ${bin}`}>
                           <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180 text-brand' : ''}`} />
                         </Button>
-                        <Button type="button" onClick={() => onUpdateSettings({ ...settings, inventoryBinNames: inventoryBinNames.filter((item) => item !== bin) })} className="text-rose-600" aria-label={`Delete ${bin}`}>×</Button>
+                        <Button type="button" onClick={() => onUpdateSettings({ ...settings, inventoryBinNames: inventoryBinNames.filter((item) => item !== bin) })} className="text-danger" aria-label={`Delete ${bin}`}>×</Button>
                       </div>
                     </div>
                     {isOpen && (

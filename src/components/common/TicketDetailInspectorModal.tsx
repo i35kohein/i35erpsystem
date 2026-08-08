@@ -136,8 +136,8 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
               <span className="truncate">{workOrder.orderNumber}</span>
             </span>
             {workOrder.priority === 'Urgent' && (
-              <span className="inline-flex h-6 shrink-0 items-center gap-1.5 rounded-md border border-rose-200 bg-rose-50 px-2 text-xs font-extrabold uppercase tracking-[0.08em] text-rose-700">
-                <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+              <span className="inline-flex h-6 shrink-0 items-center gap-1.5 rounded-md border border-danger/30 bg-danger/10 px-2 text-xs font-extrabold uppercase tracking-[0.08em] text-danger">
+                <span className="h-1.5 w-1.5 rounded-full bg-danger/100" />
                 Urgent
               </span>
             )}
@@ -318,14 +318,14 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
 
           <section className="min-w-0 space-y-4 p-4 sm:p-5">
             {cleanNotes && (
-              <div className="rounded-lg border border-amber-200 bg-amber-50/80 p-3 text-xs shadow-sm">
+              <div className="rounded-lg border border-warning/30 bg-warning/10/80 p-3 text-xs shadow-sm">
                 <div className="flex items-start gap-2.5">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-warning/15 text-warning">
                     <MessageSquareWarning className="h-4 w-4" />
                   </span>
                   <div className="min-w-0">
-                    <span className="block text-xs font-black uppercase tracking-wide text-amber-900">Reported issue / Comment</span>
-                    <p className="mt-1 whitespace-pre-wrap font-semibold leading-relaxed text-amber-950">{cleanNotes}</p>
+                    <span className="block text-xs font-black uppercase tracking-wide text-warning">Reported issue / Comment</span>
+                    <p className="mt-1 whitespace-pre-wrap font-semibold leading-relaxed text-warning">{cleanNotes}</p>
                   </div>
                 </div>
               </div>
@@ -351,13 +351,13 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                   {diagnosticRows.map(({ beforeItem, afterItem }, index) => {
                     const hasFail = beforeItem.status === 'Fail' || afterItem.status === 'Fail';
                     const statusText = (status: string) =>
-                      status === 'Pass' ? 'text-emerald-600'
-                      : status === 'Fail' ? 'text-rose-600 font-extrabold'
+                      status === 'Pass' ? 'text-success'
+                      : status === 'Fail' ? 'text-danger font-extrabold'
                       : 'text-muted';
                     return (
                       <div
                         key={beforeItem.id || beforeItem.name}
-                        className={`grid grid-cols-[24px_minmax(0,1fr)_auto_auto] items-baseline gap-x-3 px-3 py-1.5 ${hasFail ? 'bg-rose-50/50' : ''}`}
+                        className={`grid grid-cols-[24px_minmax(0,1fr)_auto_auto] items-baseline gap-x-3 px-3 py-1.5 ${hasFail ? 'bg-danger/10/50' : ''}`}
                       >
                         <span className="font-mono text-xs text-muted">{index + 1}</span>
                         <span className="min-w-0 text-xs font-semibold text-ink">

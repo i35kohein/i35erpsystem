@@ -34,8 +34,8 @@ const getOutcomeMeta = (status: string) => {
     case 'Finished':
       return {
         label: 'Resolved & Completed',
-        badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-        nodeBg: 'bg-emerald-500 text-white ring-4 ring-emerald-100',
+        badgeClass: 'bg-success/10 text-success-deep border-success/30',
+        nodeBg: 'bg-success/100 text-white ring-4 ring-emerald-100',
         icon: CheckCircle2,
         bgGradient: 'from-emerald-50/50 to-transparent',
         borderLeft: 'border-l-4 border-l-emerald-500',
@@ -43,7 +43,7 @@ const getOutcomeMeta = (status: string) => {
     case 'In Progress':
       return {
         label: 'Under Active Repair',
-        badgeClass: 'bg-blue-50 text-blue-700 border-blue-200',
+        badgeClass: 'bg-brand-soft text-brand border-brand/30',
         nodeBg: 'bg-brand text-white ring-4 ring-blue-100',
         icon: Cog,
         bgGradient: 'from-blue-50/50 to-transparent',
@@ -52,8 +52,8 @@ const getOutcomeMeta = (status: string) => {
     case 'Pending':
       return {
         label: 'Awaiting Parts / Approval',
-        badgeClass: 'bg-amber-50 text-amber-700 border-amber-200',
-        nodeBg: 'bg-amber-500 text-white ring-4 ring-amber-100',
+        badgeClass: 'bg-warning/10 text-warning border-warning/30',
+        nodeBg: 'bg-warning/100 text-white ring-4 ring-amber-100',
         icon: Clock,
         bgGradient: 'from-amber-50/50 to-transparent',
         borderLeft: 'border-l-4 border-l-amber-500',
@@ -61,7 +61,7 @@ const getOutcomeMeta = (status: string) => {
     case 'Receive':
       return {
         label: 'Intaken & Diagnosing',
-        badgeClass: 'bg-purple-50 text-purple-700 border-purple-200',
+        badgeClass: 'bg-purple/10 text-purple border-purple/30',
         nodeBg: 'bg-purple text-white ring-4 ring-purple-100',
         icon: PackageCheck,
         bgGradient: 'from-purple-50/50 to-transparent',
@@ -70,7 +70,7 @@ const getOutcomeMeta = (status: string) => {
     case 'Taken Out':
       return {
         label: 'Collected / Delivered',
-        badgeClass: 'bg-slate-100 text-slate-700 border-slate-200',
+        badgeClass: 'bg-surface text-muted border-line',
         nodeBg: 'bg-slate-600 text-white ring-4 ring-slate-100',
         icon: CheckCircle2,
         bgGradient: 'from-slate-50/50 to-transparent',
@@ -79,8 +79,8 @@ const getOutcomeMeta = (status: string) => {
     case 'Cant Repair':
       return {
         label: 'Unrepairable / No Fix',
-        badgeClass: 'bg-rose-50 text-rose-700 border-rose-200',
-        nodeBg: 'bg-rose-500 text-white ring-4 ring-rose-100',
+        badgeClass: 'bg-danger/10 text-danger border-danger/30',
+        nodeBg: 'bg-danger/100 text-white ring-4 ring-rose-100',
         icon: XCircle,
         bgGradient: 'from-rose-50/50 to-transparent',
         borderLeft: 'border-l-4 border-l-rose-500',
@@ -88,8 +88,8 @@ const getOutcomeMeta = (status: string) => {
     case 'Customer Not Repair':
       return {
         label: 'Declined by Customer',
-        badgeClass: 'bg-orange-50 text-orange-700 border-orange-200',
-        nodeBg: 'bg-orange-500 text-white ring-4 ring-orange-100',
+        badgeClass: 'bg-warning/10 text-warning border-warning/30',
+        nodeBg: 'bg-warning/100 text-white ring-4 ring-orange-100',
         icon: AlertCircle,
         bgGradient: 'from-orange-50/50 to-transparent',
         borderLeft: 'border-l-4 border-l-orange-500',
@@ -285,7 +285,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                       )}
 
                       {wo.priority && wo.priority !== 'Normal' && (
-                        <span className="px-2 py-0.5 text-xs font-extrabold bg-rose-100 text-rose-800 rounded-md">
+                        <span className="px-2 py-0.5 text-xs font-extrabold bg-danger/15 text-danger rounded-md">
                           ⚡ {wo.priority}
                         </span>
                       )}
@@ -339,9 +339,9 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                           <span className="text-muted">Find My: </span>
                           <span className={`font-bold px-1.5 py-0.5 rounded text-xs ${
                             wo.findMyStatus === 'OFF' 
-                              ? 'bg-emerald-100 text-emerald-800' 
+                              ? 'bg-success/15 text-success-deep' 
                               : wo.findMyStatus === 'ON' 
-                              ? 'bg-amber-100 text-amber-800' 
+                              ? 'bg-warning/15 text-warning' 
                               : 'bg-gray-100 text-gray-700'
                           }`}>
                             {wo.findMyStatus}
@@ -360,7 +360,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                           <span>Repair Outcome Summary & Diagnosis</span>
                         </span>
                         {wo.postRepairChecklist && (
-                          <span className="text-xs font-extrabold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full flex items-center space-x-1">
+                          <span className="text-xs font-extrabold bg-success/15 text-success-deep px-2 py-0.5 rounded-full flex items-center space-x-1">
                             <ShieldCheck className="w-3 h-3" />
                             <span>QA Checklist Passed</span>
                           </span>
@@ -411,7 +411,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                         <Button
                           type="button"
                           onClick={() => onPrintInvoice(wo)}
-                          className="px-3 py-1.5 bg-white hover:bg-blue-50 border border-line hover:border-brand text-brand font-bold text-xs rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer shadow-2xs active:scale-95"
+                          className="px-3 py-1.5 bg-white hover:bg-brand-soft border border-line hover:border-brand text-brand font-bold text-xs rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer shadow-2xs active:scale-95"
                           title="Print Customer Invoice"
                         >
                           <Printer className="w-3.5 h-3.5" />

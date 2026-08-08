@@ -174,7 +174,7 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
               <div className="space-y-3 pb-3 border-b border-line">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center space-x-3">
-                    <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-100 to-indigo-100 text-purple font-black text-lg flex items-center justify-center border border-purple-200 shadow-2xs shrink-0">
+                    <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-100 to-indigo-100 text-purple font-black text-lg flex items-center justify-center border border-purple/30 shadow-2xs shrink-0">
                       {tech.name.charAt(0)}
                     </div>
                     <div>
@@ -187,9 +187,9 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
                   </div>
 
                   <span className={`text-xs font-extrabold px-2.5 py-1 rounded-lg border shadow-2xs shrink-0 ${
-                    tech.level === 'Level 3 Master' ? 'bg-purple-50 text-purple border-purple-200' :
-                    tech.level === 'Level 2 Spareparts + Hardware' ? 'bg-blue-50 text-brand border-blue-200' :
-                    'bg-emerald-50 text-success-deep border-emerald-200'
+                    tech.level === 'Level 3 Master' ? 'bg-purple/10 text-purple border-purple/30' :
+                    tech.level === 'Level 2 Spareparts + Hardware' ? 'bg-brand-soft text-brand border-brand/30' :
+                    'bg-success/10 text-success-deep border-success/30'
                   }`}>
                     {tech.level}
                   </span>
@@ -222,7 +222,7 @@ export const TechnicianPerformanceTab: React.FC<TechnicianPerformanceTabProps> =
                   <span className="block text-lg font-extrabold text-ink">
                     {avgDurationHours !== null ? `${avgDurationHours}h` : '—'}
                   </span>
-                  <span className="block text-xs text-purple-600 font-bold">Turnaround</span>
+                  <span className="block text-xs text-purple font-bold">Turnaround</span>
                 </div>
 
                 {/* 3. Successful Repairs */}

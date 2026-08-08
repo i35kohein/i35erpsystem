@@ -51,13 +51,13 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-line flex items-center justify-between bg-surface">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600">
+            <div className="w-10 h-10 rounded-xl bg-danger/10 border border-danger/30 flex items-center justify-center text-danger">
               <Trash2 className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
                 <h2 className="font-extrabold text-base sm:text-lg text-ink">Recycle Bin & Archive</h2>
-                <span className="px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700 text-xs font-bold">
+                <span className="px-2.5 py-0.5 rounded-full bg-danger/15 text-danger text-xs font-bold">
                   {archivedWorkOrders.length} {archivedWorkOrders.length === 1 ? 'ticket' : 'tickets'}
                 </span>
               </div>
@@ -73,7 +73,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
                   onClick={onRestoreAll}
                   variant="secondary"
                   size="sm"
-                  className="hidden sm:flex items-center space-x-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200"
+                  className="hidden sm:flex items-center space-x-1.5 bg-success/10 hover:bg-success/15 text-success-deep border-success/30"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>Restore All</span>
@@ -84,7 +84,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
                   onClick={() => setConfirmEmptyOpen(true)}
                   variant="secondary"
                   size="sm"
-                  className="hidden sm:flex items-center space-x-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border-rose-200"
+                  className="hidden sm:flex items-center space-x-1.5 bg-danger/10 hover:bg-danger/15 text-danger border-danger/30"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>Empty Bin</span>
@@ -121,7 +121,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
               <Button
                 type="button"
                 onClick={onRestoreAll}
-                className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold"
+                className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-success/10 text-success-deep border border-success/30 text-xs font-bold"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>Restore All</span>
@@ -129,7 +129,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
               <Button
                 type="button"
                 onClick={() => setConfirmEmptyOpen(true)}
-                className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-rose-50 text-rose-600 border border-rose-200 text-xs font-bold"
+                className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-danger/10 text-danger border border-danger/30 text-xs font-bold"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Empty Bin</span>
@@ -142,7 +142,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
         <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 bg-surface">
           {archivedWorkOrders.length === 0 ? (
             <div className="py-16 text-center space-y-3 bg-white rounded-2xl border border-line p-8 shadow-2xs">
-              <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
+              <div className="w-16 h-16 rounded-full bg-surface flex items-center justify-center mx-auto text-muted">
                 <Trash2 className="w-8 h-8" />
               </div>
               <h3 className="font-bold text-base text-ink">Recycle Bin is Empty</h3>
@@ -178,7 +178,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
                   </div>
 
                   {wo.archivedAt && (
-                    <div className="text-xs text-rose-500 font-medium">
+                    <div className="text-xs text-danger font-medium">
                       Archived on {new Date(wo.archivedAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
                     </div>
                   )}
@@ -199,7 +199,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
                     type="button"
                     onClick={() => setSingleToDelete(wo)}
                     variant="outline"
-                    className="flex-1 sm:flex-initial bg-rose-50 hover:bg-rose-100 text-rose-600 border-rose-200"
+                    className="flex-1 sm:flex-initial bg-danger/10 hover:bg-danger/15 text-danger border-danger/30"
                     title="Permanently Delete"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -230,12 +230,12 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
         {confirmEmptyOpen && (
           <div className="fixed inset-0 bg-slate-900/50 z-60 flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl border border-line shadow-2xl p-6 max-w-md w-full space-y-4">
-              <div className="flex items-center space-x-3 text-rose-600">
+              <div className="flex items-center space-x-3 text-danger">
                 <ShieldAlert className="w-7 h-7" />
                 <h3 className="font-extrabold text-base text-ink">Empty Recycle Bin?</h3>
               </div>
               <p className="text-xs text-muted leading-relaxed">
-                This will permanently remove all <span className="font-bold text-rose-600">{archivedWorkOrders.length}</span> archived repair tickets from the database. This action cannot be undone.
+                This will permanently remove all <span className="font-bold text-danger">{archivedWorkOrders.length}</span> archived repair tickets from the database. This action cannot be undone.
               </p>
               <div className="flex items-center justify-end space-x-2 pt-2">
                 <Button

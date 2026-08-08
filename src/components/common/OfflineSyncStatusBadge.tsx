@@ -59,8 +59,8 @@ export const OfflineSyncStatusBadge: React.FC = () => {
         aria-expanded={open}
         className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-all cursor-pointer active:scale-95 hover:brightness-95 ${
           unavailable
-            ? 'border-rose-200 bg-rose-50 text-rose-700'
-            : 'border-emerald-200/80 bg-emerald-50 text-emerald-700'
+            ? 'border-danger/30 bg-danger/10 text-danger'
+            : 'border-success/30/80 bg-success/10 text-success-deep'
         }`}
         title={`${label} — click for details`}
         aria-label={`${label} — click for details`}
@@ -115,7 +115,7 @@ export const OfflineSyncStatusBadge: React.FC = () => {
 const StatusRow: React.FC<{ ok: boolean; label: string; value: string }> = ({ ok, label, value }) => (
   <div className="flex items-center justify-between">
     <span className="text-muted font-medium">{label}</span>
-    <span className={`flex items-center space-x-1 font-bold ${ok ? 'text-success-deep' : 'text-rose-600'}`}>
+    <span className={`flex items-center space-x-1 font-bold ${ok ? 'text-success-deep' : 'text-danger'}`}>
       {ok ? <CheckCircle2 className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
       <span>{value}</span>
     </span>

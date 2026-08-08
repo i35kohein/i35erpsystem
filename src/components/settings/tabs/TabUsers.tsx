@@ -40,30 +40,30 @@ const UsersTab: React.FC<UsersTabProps> = ({ users, currentUser, handleOpenAddUs
 
             {/* Role Rules Banner */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 bg-purple-50/80 rounded-2xl border border-purple-200 space-y-2">
+              <div className="p-4 bg-purple/10/80 rounded-2xl border border-purple/30 space-y-2">
                 <div className="flex items-center space-x-2">
-                  <span className="p-1.5 bg-purple-100 text-purple-700 rounded-lg">👑</span>
-                  <span className="font-extrabold text-sm text-purple-900">Admin Role</span>
+                  <span className="p-1.5 bg-purple/15 text-purple rounded-lg">👑</span>
+                  <span className="font-extrabold text-sm text-purple">Admin Role</span>
                 </div>
-                <p className="text-xs text-purple-800 leading-relaxed">
+                <p className="text-xs text-purple leading-relaxed">
                   Full control over system settings, finance, price catalog, user management, and <strong>sole permission to delete items</strong> (tickets, parts, logs).
                 </p>
               </div>
 
-              <div className="p-4 bg-blue-50/80 rounded-2xl border border-blue-200 space-y-2">
+              <div className="p-4 bg-brand-soft/80 rounded-2xl border border-brand/30 space-y-2">
                 <div className="flex items-center space-x-2">
-                  <span className="p-1.5 bg-blue-100 text-blue-700 rounded-lg">🔧</span>
-                  <span className="font-extrabold text-sm text-blue-900">Technician Role</span>
+                  <span className="p-1.5 bg-brand/15 text-brand rounded-lg">🔧</span>
+                  <span className="font-extrabold text-sm text-brand-deep">Technician Role</span>
                 </div>
-                <p className="text-xs text-blue-800 leading-relaxed">Mobile view: pipeline, QA checklists, logs, status changes.</p>
+                <p className="text-xs text-brand-deep leading-relaxed">Mobile view: pipeline, QA checklists, logs, status changes.</p>
               </div>
 
-              <div className="p-4 bg-amber-50/80 rounded-2xl border border-amber-200 space-y-2">
+              <div className="p-4 bg-warning/10/80 rounded-2xl border border-warning/30 space-y-2">
                 <div className="flex items-center space-x-2">
-                  <span className="p-1.5 bg-amber-100 text-amber-800 rounded-lg">📋</span>
-                  <span className="font-extrabold text-sm text-amber-900">Reception Role</span>
+                  <span className="p-1.5 bg-warning/15 text-warning rounded-lg">📋</span>
+                  <span className="font-extrabold text-sm text-warning">Reception Role</span>
                 </div>
-                <p className="text-xs text-amber-800 leading-relaxed">Full access except system settings.</p>
+                <p className="text-xs text-warning leading-relaxed">Full access except system settings.</p>
               </div>
             </div>
 
@@ -84,7 +84,7 @@ const UsersTab: React.FC<UsersTabProps> = ({ users, currentUser, handleOpenAddUs
                       key={usr.id}
                       className={`p-4 rounded-2xl border transition-all space-y-3 ${
                         usr.id === currentUser?.id
-                          ? 'bg-blue-50/40 border-brand shadow-xs'
+                          ? 'bg-brand-soft/40 border-brand shadow-xs'
                           : 'bg-white border-line hover:border-line-strong'
                       }`}
                     >
@@ -92,10 +92,10 @@ const UsersTab: React.FC<UsersTabProps> = ({ users, currentUser, handleOpenAddUs
                         <div className="flex items-center space-x-3 min-w-0">
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-base font-black shrink-0 ${
                             isAdmin
-                              ? 'bg-purple-100 text-purple-700 border border-purple-200'
+                              ? 'bg-purple/15 text-purple border border-purple/30'
                               : isTech
-                              ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                              : 'bg-amber-100 text-amber-800 border border-amber-200'
+                              ? 'bg-brand/15 text-brand border border-brand/30'
+                              : 'bg-warning/15 text-warning border border-warning/30'
                           }`}>
                             {isAdmin ? '👑' : isTech ? '🔧' : '📋'}
                           </div>
@@ -116,7 +116,7 @@ const UsersTab: React.FC<UsersTabProps> = ({ users, currentUser, handleOpenAddUs
                           <Button
                             type="button"
                             onClick={() => handleOpenEditUser(usr)}
-                            className="p-1.5 text-brand hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                            className="p-1.5 text-brand hover:bg-brand-soft rounded-lg transition-colors cursor-pointer"
                             title="Edit User & Permissions"
                           >
                             <Edit2 className="w-4 h-4" />
@@ -129,7 +129,7 @@ const UsersTab: React.FC<UsersTabProps> = ({ users, currentUser, handleOpenAddUs
                                   onDeleteUser?.(usr.id);
                                 }
                               }}
-                              className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                              className="p-1.5 text-danger hover:bg-danger/10 rounded-lg transition-colors cursor-pointer"
                               title="Delete User Account"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -141,10 +141,10 @@ const UsersTab: React.FC<UsersTabProps> = ({ users, currentUser, handleOpenAddUs
                       <div className="pt-2 border-t border-line/80 flex flex-wrap items-center justify-between text-xs gap-2">
                         <span className={`px-2 py-0.5 rounded-lg text-xs font-extrabold border ${
                           isAdmin
-                            ? 'bg-purple-50 text-purple-700 border-purple-200'
+                            ? 'bg-purple/10 text-purple border-purple/30'
                             : isTech
-                            ? 'bg-blue-50 text-blue-700 border-blue-200'
-                            : 'bg-amber-50 text-amber-800 border-amber-200'
+                            ? 'bg-brand-soft text-brand border-brand/30'
+                            : 'bg-warning/10 text-warning border-warning/30'
                         }`}>
                           Role: {usr.role}
                         </span>
@@ -160,14 +160,14 @@ const UsersTab: React.FC<UsersTabProps> = ({ users, currentUser, handleOpenAddUs
                       <div className="bg-surface p-2 rounded-xl text-xs text-faint space-y-1">
                         <div className="font-extrabold text-ink flex items-center justify-between">
                           <span>Key Permissions:</span>
-                          <span className={usr.permissions?.canDeleteWorkOrders ? 'text-emerald-600 font-bold' : 'text-slate-400'}>
+                          <span className={usr.permissions?.canDeleteWorkOrders ? 'text-success font-bold' : 'text-muted'}>
                             {usr.permissions?.canDeleteWorkOrders ? 'Can Delete Items' : 'No Delete Access'}
                           </span>
                         </div>
                         <div className="flex flex-wrap gap-1 pt-0.5">
-                          {isAdmin && <span className="bg-purple-100 text-purple-800 px-1.5 py-0.2 rounded">All Settings</span>}
-                          {isReception && <span className="bg-amber-100 text-amber-900 px-1.5 py-0.2 rounded">All Ops Except Settings</span>}
-                          {isTech && <span className="bg-blue-100 text-blue-800 px-1.5 py-0.2 rounded">Assigned Pipeline & QA Only</span>}
+                          {isAdmin && <span className="bg-purple/15 text-purple px-1.5 py-0.2 rounded">All Settings</span>}
+                          {isReception && <span className="bg-warning/15 text-warning px-1.5 py-0.2 rounded">All Ops Except Settings</span>}
+                          {isTech && <span className="bg-brand/15 text-brand-deep px-1.5 py-0.2 rounded">Assigned Pipeline & QA Only</span>}
                         </div>
                       </div>
                     </div>

@@ -76,7 +76,7 @@ const TechniciansTab: React.FC<TechniciansTabProps> = ({ formData, setFormData, 
             {/* Technicians Grid / Empty State */}
             {technicians.length === 0 ? (
               <div className="p-8 bg-surface border-2 border-dashed border-line-strong rounded-2xl text-center space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-blue-100 text-brand flex items-center justify-center mx-auto">
+                <div className="w-12 h-12 rounded-2xl bg-brand/15 text-brand flex items-center justify-center mx-auto">
                   <Users className="w-6 h-6" />
                 </div>
                 <div>
@@ -111,7 +111,7 @@ const TechniciansTab: React.FC<TechniciansTabProps> = ({ formData, setFormData, 
                           <h4 className="font-extrabold text-xs text-ink flex items-center space-x-1.5 truncate">
                             <span className="truncate">{tech.name || 'Unnamed Tech'}</span>
                             {formData.defaultTechnicianId === tech.id && (
-                              <span className="px-1.5 py-0.2 bg-blue-100 text-brand text-xs font-extrabold rounded-md shrink-0">
+                              <span className="px-1.5 py-0.2 bg-brand/15 text-brand text-xs font-extrabold rounded-md shrink-0">
                                 DEFAULT
                               </span>
                             )}
@@ -135,7 +135,7 @@ const TechniciansTab: React.FC<TechniciansTabProps> = ({ formData, setFormData, 
                         <Button
                           type="button"
                           onClick={() => setDeleteConfirmId(tech.id)}
-                          className="p-1.5 text-muted hover:text-rose-600 hover:bg-white rounded-lg transition-all cursor-pointer"
+                          className="p-1.5 text-muted hover:text-danger hover:bg-white rounded-lg transition-all cursor-pointer"
                           title="Delete Technician"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -155,7 +155,7 @@ const TechniciansTab: React.FC<TechniciansTabProps> = ({ formData, setFormData, 
                           <Mail className="w-3 h-3 text-muted shrink-0" />
                           <span className="truncate">{tech.email}</span>
                         </span>
-                        <span className="font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 shrink-0">
+                        <span className="font-extrabold text-success bg-success/10 px-2 py-0.5 rounded-full border border-success/30 shrink-0">
                           {tech.status || 'Active'}
                         </span>
                       </div>

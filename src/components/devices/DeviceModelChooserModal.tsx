@@ -122,7 +122,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                       ? 'bg-brand text-white border-brand shadow-xs'
                       : count === 0 && fam.key !== 'All'
                       ? 'bg-surface text-muted border-line cursor-not-allowed'
-                      : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
+                      : 'bg-white hover:bg-surface text-faint hover:text-ink border-line'
                   }`}
                 >
                   <IconComp className="w-4 h-4" />

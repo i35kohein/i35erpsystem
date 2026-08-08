@@ -177,7 +177,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
               type="button"
               onClick={handlePopoutPrint}
               title="Open print in new window if direct print is blocked"
-              className="px-3 py-1.5 bg-white border border-line-strong hover:bg-slate-50 text-ink font-bold text-xs rounded-xl shadow-2xs transition-all flex items-center space-x-1 cursor-pointer active:scale-95"
+              className="px-3 py-1.5 bg-white border border-line-strong hover:bg-surface text-ink font-bold text-xs rounded-xl shadow-2xs transition-all flex items-center space-x-1 cursor-pointer active:scale-95"
             >
               <ExternalLink className="w-3.5 h-3.5 text-brand" />
               <span className="hidden sm:inline">Popout Print</span>
@@ -250,12 +250,12 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
                 {/* Payment Status Badge */}
                 <div className="pt-1.5">
                   {workOrder.isPaid ? (
-                    <span className="inline-flex items-center space-x-1 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-extrabold text-xs">
+                    <span className="inline-flex items-center space-x-1 px-3 py-1 rounded-full bg-success/10 border border-success/30 text-success-deep font-extrabold text-xs">
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       <span>PAID FULLY ({workOrder.paymentMethod || 'Settled'})</span>
                     </span>
                   ) : (
-                    <span className="inline-flex items-center space-x-1 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 font-extrabold text-xs">
+                    <span className="inline-flex items-center space-x-1 px-3 py-1 rounded-full bg-warning/10 border border-warning/30 text-warning font-extrabold text-xs">
                       <Clock className="w-3.5 h-3.5" />
                       <span>UNPAID / BALANCE DUE</span>
                     </span>
@@ -303,8 +303,8 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
 
           {/* Reported Problem Note */}
           {workOrder.symptomsReported && (
-            <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
-              <span className="font-extrabold text-xs uppercase text-slate-500 tracking-wider flex items-center space-x-1">
+            <div className="p-3 bg-surface border border-line rounded-xl space-y-1">
+              <span className="font-extrabold text-xs uppercase text-muted tracking-wider flex items-center space-x-1">
                 <FileText className="w-3 h-3 text-brand" />
                 <span>Reported Symptoms & Repair Scope</span>
               </span>
@@ -333,7 +333,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
                 <tbody className="divide-y divide-line">
                   {workOrder.lineItems && workOrder.lineItems.length > 0 ? (
                     workOrder.lineItems.map((item, idx) => (
-                      <tr key={item.id || idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
+                      <tr key={item.id || idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-surface/50'}>
                         <td className="p-3">
                           <p className="font-bold text-ink">{item.description}</p>
                           {item.partQuality && (
@@ -342,7 +342,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
                         </td>
                         <td className="p-3">
                           <span className={`inline-block px-2 py-0.5 text-xs font-bold rounded ${
-                            item.isLabor ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-purple-50 text-purple-700 border border-purple-200'
+                            item.isLabor ? 'bg-brand-soft text-brand border border-brand/30' : 'bg-purple/10 text-purple border border-purple/30'
                           }`}>
                             {item.isLabor ? 'LABOR' : 'PART'}
                           </span>
@@ -361,7 +361,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
                         {workOrder.deviceCategory} Hardware Repair Service ({workOrder.deviceModel})
                       </td>
                       <td className="p-3">
-                        <span className="px-2 py-0.5 text-xs font-bold rounded bg-blue-50 text-blue-700 border border-blue-200">
+                        <span className="px-2 py-0.5 text-xs font-bold rounded bg-brand-soft text-brand border border-brand/30">
                           SERVICE
                         </span>
                       </td>
@@ -480,7 +480,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
             <Button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-white border border-line-strong text-ink font-semibold text-xs rounded-xl hover:bg-slate-100 transition-colors cursor-pointer"
+              className="px-4 py-2 bg-white border border-line-strong text-ink font-semibold text-xs rounded-xl hover:bg-surface transition-colors cursor-pointer"
             >
               Close
             </Button>

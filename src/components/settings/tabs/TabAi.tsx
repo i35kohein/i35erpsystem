@@ -111,7 +111,7 @@ const AiTab: React.FC<AiTabProps> = ({ formData, setFormData, aiRescanning, aiRe
             {formData.aiProvider === 'deepseek' ? (
               <div className="space-y-1.5 text-xs font-bold text-ink">
                 <span>DeepSeek API Key</span>
-                <div className="min-h-[42px] px-3 py-2.5 border border-emerald-200 bg-emerald-50 text-emerald-800 rounded-xl flex items-center">
+                <div className="min-h-[42px] px-3 py-2.5 border border-success/30 bg-success/10 text-success-deep rounded-xl flex items-center">
                   Server environment key in use — no browser key required.
                 </div>
               </div>

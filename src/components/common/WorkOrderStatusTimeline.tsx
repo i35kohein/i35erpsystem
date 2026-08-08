@@ -32,7 +32,7 @@ export const MAIN_STATUS_PIPELINE: { status: WorkOrderStatus; label: string; des
   { status: 'In Progress', label: 'In Progress', desc: 'Active Hardware Repair', icon: Cog, color: 'text-brand border-brand/60 bg-brand/25', badge: 'bg-brand/15 text-brand-deep border-brand/30' },
   { status: 'Pending', label: 'Pending', desc: 'Awaiting Parts or Client Approval', icon: Clock, color: 'text-warning border-warning/50 bg-warning/20', badge: 'bg-warning/15 text-warning border-warning/30' },
   { status: 'Finished', label: 'Finished', desc: 'QA Passed & Ready for Pickup', icon: CheckCircle2, color: 'text-success border-success/50 bg-success/20', badge: 'bg-success/15 text-success-deep border-success/30' },
-  { status: 'Taken Out', label: 'Taken Out', desc: 'Paid & Returned to Customer', icon: ShieldCheck, color: 'text-muted border-slate-700 bg-ink/80', badge: 'bg-line text-slate-800 border-line' },
+  { status: 'Taken Out', label: 'Taken Out', desc: 'Paid & Returned to Customer', icon: ShieldCheck, color: 'text-muted border-slate-700 bg-ink/80', badge: 'bg-line text-ink border-line' },
 ];
 
 export interface FormattedAuditItem {
@@ -440,8 +440,8 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
                 </div>
               )}
               {targetStatus === 'Taken Out' && (
-                <div className="p-2.5 bg-purple/10 border border-purple/30 rounded-xl text-purple-950 text-xs space-y-1 mt-2">
-                  <div className="flex items-center space-x-1.5 font-extrabold text-purple-950">
+                <div className="p-2.5 bg-purple/10 border border-purple/30 rounded-xl text-purple text-xs space-y-1 mt-2">
+                  <div className="flex items-center space-x-1.5 font-extrabold text-purple">
                     <AlertCircle className="w-3.5 h-3.5 text-purple shrink-0 animate-pulse" />
                     <span>POS Cashout Required for Taken Out:</span>
                   </div>

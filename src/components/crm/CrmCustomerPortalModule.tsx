@@ -52,7 +52,7 @@ const getStatusBadgeStyle = (status: string) => {
     case 'Cant Repair':
       return 'bg-danger/10 text-danger border-danger/30';
     case 'Customer Not Repair':
-      return 'bg-warning/10 text-warning border-orange-200';
+      return 'bg-warning/10 text-warning border-warning/30';
     default:
       return 'bg-gray-50 text-gray-700 border-gray-200';
   }

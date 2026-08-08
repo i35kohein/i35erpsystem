@@ -43,14 +43,14 @@ export const TechnicianLeaderboardView: React.FC<TechnicianLeaderboardViewProps>
               <h2 className="text-lg font-black text-ink tracking-tight">
                 Technician Repair Leaderboard
               </h2>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 border border-warning/30 shrink-0">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-warning/15 text-warning border border-warning/30 shrink-0">
                 {periodLabel || 'This period'}
               </span>
             </div>
             <p className="text-xs text-muted">Ranked by verified completed repairs — live.</p>
           </div>
           {totalShopCompleted > 0 && (
-            <span className="text-xs text-muted font-semibold bg-white/70 px-3 py-1.5 rounded-xl border border-amber-200 shadow-2xs shrink-0">
+            <span className="text-xs text-muted font-semibold bg-white/70 px-3 py-1.5 rounded-xl border border-warning/30 shadow-2xs shrink-0">
               Total {totalShopCompleted} Completed Repairs
             </span>
           )}
@@ -61,7 +61,7 @@ export const TechnicianLeaderboardView: React.FC<TechnicianLeaderboardViewProps>
       <div className="bg-white border border-line rounded-2xl p-5 shadow-2xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line pb-3">
           <div className="flex items-center space-x-2">
-            <span className="p-1.5 bg-amber-50 text-amber-600 rounded-lg">
+            <span className="p-1.5 bg-warning/10 text-warning rounded-lg">
               <Trophy className="w-4 h-4" />
             </span>
             <h3 className="font-extrabold text-sm text-ink">
@@ -118,9 +118,9 @@ export const TechnicianLeaderboardView: React.FC<TechnicianLeaderboardViewProps>
                     >
                       <td className="py-3 px-3">
                         <span className={`w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center ${
-                          rank === 1 ? 'bg-amber-400 text-amber-950 font-black shadow-xs' :
-                          rank === 2 ? 'bg-slate-300 text-slate-900 font-extrabold' :
-                          rank === 3 ? 'bg-warning/20 text-amber-900 font-bold' :
+                          rank === 1 ? 'bg-warning text-warning font-black shadow-xs' :
+                          rank === 2 ? 'bg-slate-300 text-ink font-extrabold' :
+                          rank === 3 ? 'bg-warning/20 text-warning font-bold' :
                           'bg-surface text-muted'
                         }`}>
                           #{rank}
@@ -135,7 +135,7 @@ export const TechnicianLeaderboardView: React.FC<TechnicianLeaderboardViewProps>
                           <div>
                             <p className="font-extrabold text-ink flex items-center space-x-1">
                               <span>{item.tech.name}</span>
-                              {rank === 1 && <Crown className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />}
+                              {rank === 1 && <Crown className="w-3.5 h-3.5 text-warning fill-amber-400" />}
                             </p>
                             <p className="text-xs text-brand font-bold hidden md:block">{item.tech.level}</p>
                           </div>
@@ -144,7 +144,7 @@ export const TechnicianLeaderboardView: React.FC<TechnicianLeaderboardViewProps>
 
                       <td className="py-3 px-3 text-center">
                         <span className="font-black text-ink text-sm">{item.liveCompleted}</span>
-                        <span className="text-xs text-emerald-600 font-bold block">completed</span>
+                        <span className="text-xs text-success font-bold block">completed</span>
                       </td>
 
                       <td className="py-3 px-3 text-center hidden sm:table-cell">
@@ -177,7 +177,7 @@ export const TechnicianLeaderboardView: React.FC<TechnicianLeaderboardViewProps>
                         )}
                       </td>
 
-                      <td className="py-3 px-3 text-center hidden lg:table-cell font-bold text-purple-700">
+                      <td className="py-3 px-3 text-center hidden lg:table-cell font-bold text-purple">
                         {item.avgDurationHours !== null ? `${item.avgDurationHours} Hours` : '—'}
                       </td>
 

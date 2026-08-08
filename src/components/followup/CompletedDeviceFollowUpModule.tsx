@@ -219,8 +219,8 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
       case 'Pending Call':
       default:
         return (
-          <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200 flex items-center space-x-1 w-max">
-            <Clock className="w-3 h-3 text-sky-600" />
+          <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-sky/10 text-sky border border-sky-200 flex items-center space-x-1 w-max">
+            <Clock className="w-3 h-3 text-sky" />
             <span>Pending Follow-up</span>
           </span>
         );
@@ -280,8 +280,8 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
           </div>
 
           <div className="bg-brand-soft/70 border border-indigo-200 rounded-xl p-3 space-y-1">
-            <span className="text-xs font-bold text-indigo-900">7-Day Check</span>
-            <div className="text-xl font-extrabold text-indigo-800">{count7Days}</div>
+            <span className="text-xs font-bold text-brand-deep">7-Day Check</span>
+            <div className="text-xl font-extrabold text-brand-deep">{count7Days}</div>
             <p className="text-xs text-brand-deep font-medium">≥ 7 days post-repair</p>
           </div>
 
@@ -422,7 +422,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                             1 Month Due ({daysElapsed}d)
                           </span>
                         ) : daysElapsed >= 7 ? (
-                          <span className="px-1.5 py-0.5 rounded-md text-xs font-extrabold bg-indigo-100 text-indigo-900 border border-indigo-300">
+                          <span className="px-1.5 py-0.5 rounded-md text-xs font-extrabold bg-brand/15 text-brand-deep border border-brand/30">
                             7 Days Due ({daysElapsed}d)
                           </span>
                         ) : (
@@ -692,11 +692,11 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                         key={star}
                         type="button"
                         onClick={() => setFormRating(star)}
-                        className="p-1 text-amber-400 hover:scale-110 transition-transform cursor-pointer"
+                        className="p-1 text-warning hover:scale-110 transition-transform cursor-pointer"
                       >
                         <Star
                           className={`w-6 h-6 ${
-                            star <= formRating ? 'fill-amber-400 text-amber-400' : 'text-slate-300'
+                            star <= formRating ? 'fill-amber-400 text-warning' : 'text-slate-300'
                           }`}
                         />
                       </Button>

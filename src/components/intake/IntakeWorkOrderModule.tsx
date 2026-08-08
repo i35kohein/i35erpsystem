@@ -231,7 +231,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
             { id: 'ALL', label: 'All Active Tickets', count: counts.total, color: 'text-brand', bg: 'bg-brand-soft/60', border: 'border-brand/30' },
             { id: 'Receive', label: 'Intake (Receive)', count: counts.receive, color: 'text-brand', bg: 'bg-brand-soft/60', border: 'border-brand/30' },
             { id: 'In Progress', label: 'In Progress', count: counts.inProgress, color: 'text-teal', bg: 'bg-teal/10/60', border: 'border-teal-200' },
-            { id: 'Pending', label: 'Pending Approval', count: counts.pending, color: 'text-warning', bg: 'bg-warning/10/60', border: 'border-orange-200' },
+            { id: 'Pending', label: 'Pending Approval', count: counts.pending, color: 'text-warning', bg: 'bg-warning/10/60', border: 'border-warning/30' },
             { id: 'Finished', label: 'Ready (Finished)', count: counts.finished, color: 'text-success-deep', bg: 'bg-success/10/60', border: 'border-success/30' },
             { id: 'RUSH', label: 'Urgent Priority', count: counts.rush, color: 'text-danger', bg: 'bg-danger/10/60', border: 'border-danger/30' },
           ].map((st) => {

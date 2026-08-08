@@ -125,7 +125,7 @@ export const RightFilterDrawer: React.FC<RightFilterDrawerProps> = ({
               type="button"
               onClick={onReset}
               disabled={resetDisabled}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2.5 text-xs font-extrabold text-rose-700 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-danger/30 bg-danger/10 px-3 py-2.5 text-xs font-extrabold text-danger transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
             >
               <RotateCcw className="w-4 h-4" />
               Reset All

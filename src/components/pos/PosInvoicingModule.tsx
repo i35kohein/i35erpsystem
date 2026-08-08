@@ -447,7 +447,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
           <div className={`space-y-2 overflow-y-auto ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:flex-1 md:max-h-none' : 'min-h-[360px] max-h-[calc(100dvh-280px)]'}`}>
             {filteredWorkOrders.length === 0 ? (
               <div className="flex min-h-0 flex-1 flex-col items-center justify-center p-8 text-center text-muted space-y-2 bg-surface rounded-xl border border-dashed border-line-strong my-4">
-                <CheckCircle2 className="w-8 h-8 mx-auto text-emerald-500 opacity-70" />
+                <CheckCircle2 className="w-8 h-8 mx-auto text-success opacity-70" />
                 <p className="font-extrabold text-ink text-xs">No Devices with Finished Diagnostics</p>
                 <p className="text-xs text-muted">Appears here automatically after diagnostics.</p>
               </div>

@@ -443,7 +443,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
               className={`px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
                 activeSubTab === 'model-editor'
                   ? 'bg-brand text-white border-brand shadow-xs'
-                  : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
+                  : 'bg-white hover:bg-surface text-faint hover:text-ink border-line'
               }`}
             >
               <Smartphone className="w-4 h-4" />
@@ -456,7 +456,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
               className={`px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
                 activeSubTab === 'categories-editor'
                   ? 'bg-brand text-white border-brand shadow-xs'
-                  : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
+                  : 'bg-white hover:bg-surface text-faint hover:text-ink border-line'
               }`}
             >
               <Tag className="w-4 h-4" />
@@ -469,7 +469,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
               className={`px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
                 activeSubTab === 'folder-visibility'
                   ? 'bg-brand text-white border-brand shadow-xs'
-                  : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
+                  : 'bg-white hover:bg-surface text-faint hover:text-ink border-line'
               }`}
             >
               <Folder className="w-4 h-4" />
@@ -482,7 +482,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
               className={`px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
                 activeSubTab === 'global-settings'
                   ? 'bg-brand text-white border-brand shadow-xs'
-                  : 'bg-white hover:bg-slate-100 text-faint hover:text-ink border-line'
+                  : 'bg-white hover:bg-surface text-faint hover:text-ink border-line'
               }`}
             >
               <Globe className="w-4 h-4" />
@@ -501,7 +501,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
             <Button
               type="button"
               onClick={() => importInputRef.current?.click()}
-              className="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-brand font-bold text-xs transition-all flex items-center space-x-1.5 border border-blue-200 cursor-pointer"
+              className="px-3 py-1.5 rounded-lg bg-brand-soft hover:bg-brand/15 text-brand font-bold text-xs transition-all flex items-center space-x-1.5 border border-brand/30 cursor-pointer"
               title="Import a Price List CSV exported from this ERP"
             >
               <FileUp className="w-3.5 h-3.5" />
@@ -522,7 +522,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                   triggerToast('Price catalog and preferences reset to factory defaults.');
                 }
               }}
-              className="px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs transition-all flex items-center space-x-1.5 border border-red-200 cursor-pointer"
+              className="px-3 py-1.5 rounded-lg bg-danger/10 hover:bg-danger/15 text-danger font-bold text-xs transition-all flex items-center space-x-1.5 border border-red-200 cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Reset Defaults</span>
@@ -570,7 +570,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                           <Button
                             type="button"
                             onClick={handleDeleteModelClick}
-                            className="text-xs font-bold text-red-600 hover:underline flex items-center space-x-1"
+                            className="text-xs font-bold text-danger hover:underline flex items-center space-x-1"
                           >
                             <Trash2 className="w-3 h-3" />
                             <span>Delete</span>
@@ -859,7 +859,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                                   <Button
                                     type="button"
                                     onClick={() => handleDeleteCategoryClick(cat.key, cat.label)}
-                                    className="p-1.5 hover:bg-red-50 text-red-600 rounded-lg transition-all cursor-pointer"
+                                    className="p-1.5 hover:bg-danger/10 text-danger rounded-lg transition-all cursor-pointer"
                                     title="Delete Category"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
@@ -907,7 +907,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                       onClick={() => setAllFoldersEnabled(false)}
                       variant="outline"
                       size="sm"
-                      className="text-muted hover:bg-red-500 hover:text-white hover:border-red-500"
+                      className="text-muted hover:bg-danger/100 hover:text-white hover:border-red-500"
                     >
                       Hide All
                     </Button>
@@ -1066,7 +1066,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                     <TrendingUp className="w-4 h-4 text-brand" />
                     <span>Global Bulk Price Markup & Adjustment Tool</span>
                   </h3>
-                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-brand border border-blue-200">
+                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-brand-soft text-brand border border-brand/30">
                     Apply to All or Selected Folder
                   </span>
                 </div>
@@ -1207,7 +1207,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                       onClick={() => setCurrencySymbol(curr.sym)}
                       className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
                         currencySymbol === curr.sym
-                          ? 'border-brand bg-blue-50/60 text-brand font-extrabold shadow-2xs'
+                          ? 'border-brand bg-brand-soft/60 text-brand font-extrabold shadow-2xs'
                           : 'border-line hover:border-muted text-ink font-semibold'
                       }`}
                     >

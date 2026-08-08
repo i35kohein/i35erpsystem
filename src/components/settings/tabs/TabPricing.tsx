@@ -74,9 +74,9 @@ const PricingTab: React.FC<PricingTabProps> = ({ formData, setFormData, setActiv
           </div>
 
           {/* Quick Jump Banner for Payment Methods */}
-          <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-between">
+          <div className="p-4 bg-brand-soft border border-brand/30 rounded-xl flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <span className="p-2 bg-blue-100 text-brand rounded-xl">
+              <span className="p-2 bg-brand/15 text-brand rounded-xl">
                 <CreditCard className="w-5 h-5" />
               </span>
               <div>

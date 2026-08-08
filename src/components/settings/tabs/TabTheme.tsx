@@ -139,7 +139,7 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
                 className={`p-5 rounded-none border-2 transition-all cursor-pointer flex flex-col justify-between space-y-3 ${
                   geometry === 'square'
                     ? 'border-brand bg-brand-soft ring-2 ring-brand/20 shadow-xs'
-                    : 'border-line bg-white hover:border-slate-300'
+                    : 'border-line bg-white hover:border-line'
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -164,7 +164,7 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
                 className={`p-5 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-3 ${
                   geometry === 'curved'
                     ? 'border-brand bg-brand-soft ring-2 ring-brand/20 shadow-xs'
-                    : 'border-line bg-white hover:border-slate-300'
+                    : 'border-line bg-white hover:border-line'
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -207,7 +207,7 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
                 className={`p-4 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-between ${
                   language === 'en'
                     ? 'border-brand bg-brand-soft ring-2 ring-brand/20'
-                    : 'border-line bg-white hover:border-slate-300'
+                    : 'border-line bg-white hover:border-line'
                 }`}
               >
                 <div className="flex items-center space-x-3">
@@ -230,7 +230,7 @@ const ThemeTab: React.FC<ThemeTabProps> = ({  }) => {
                 className={`p-4 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-between ${
                   language === 'mm'
                     ? 'border-brand bg-brand-soft ring-2 ring-brand/20'
-                    : 'border-line bg-white hover:border-slate-300'
+                    : 'border-line bg-white hover:border-line'
                 }`}
               >
                 <div className="flex items-center space-x-3">

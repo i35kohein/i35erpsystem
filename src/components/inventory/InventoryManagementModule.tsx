@@ -1417,7 +1417,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       <span>{part.qualityTier}</span>
                     </span>
                   ) : (
-                    <span className="inline-flex max-w-[130px] items-center gap-1 truncate rounded-md border border-line bg-surface px-1.5 py-0.5 text-xs font-extrabold text-slate-800">
+                    <span className="inline-flex max-w-[130px] items-center gap-1 truncate rounded-md border border-line bg-surface px-1.5 py-0.5 text-xs font-extrabold text-ink">
                       <Tag className="h-3 w-3 shrink-0 text-muted" />
                       <span>{part.qualityTier}</span>
                     </span>
@@ -1632,7 +1632,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                               <span>{part.qualityTier}</span>
                             </span>
                           ) : (
-                            <span className="inline-flex max-w-[112px] items-center gap-1 truncate rounded-md border border-line bg-surface px-1.5 py-0.5 text-xs font-extrabold text-slate-800">
+                            <span className="inline-flex max-w-[112px] items-center gap-1 truncate rounded-md border border-line bg-surface px-1.5 py-0.5 text-xs font-extrabold text-ink">
                               <Tag className="h-3 w-3 shrink-0 text-muted" />
                               <span>{part.qualityTier}</span>
                             </span>

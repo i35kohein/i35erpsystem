@@ -32,8 +32,8 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
   }[size];
 
   // Specific configuration per status
-  let badgeStyle = 'bg-slate-100 text-slate-700 border border-slate-200';
-  let dotColor = 'bg-slate-500';
+  let badgeStyle = 'bg-surface text-muted border border-line';
+  let dotColor = 'bg-surface0';
   let pingColor = 'bg-slate-400';
   let isPulsing = false;
 
@@ -41,7 +41,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'In Progress':
     case 'In Repair':
     case 'Diagnosing':
-      badgeStyle = 'bg-purple-50 text-purple-700 border border-purple-200';
+      badgeStyle = 'bg-purple/10 text-purple border border-purple/30';
       dotColor = 'bg-purple';
       pingColor = 'bg-purple-400';
       isPulsing = false;
@@ -51,16 +51,16 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'Pending Parts':
     case 'Awaiting Parts':
     case 'Pending Client':
-      badgeStyle = 'bg-amber-50 text-amber-800 border border-amber-200';
-      dotColor = 'bg-amber-500';
-      pingColor = 'bg-amber-400';
+      badgeStyle = 'bg-warning/10 text-warning border border-warning/30';
+      dotColor = 'bg-warning/100';
+      pingColor = 'bg-warning';
       isPulsing = false;
       break;
 
     case 'Receive':
     case 'Intake':
     case 'New Intake':
-      badgeStyle = 'bg-blue-50 text-brand border border-blue-200';
+      badgeStyle = 'bg-brand-soft text-brand border border-brand/30';
       dotColor = 'bg-brand';
       pingColor = 'bg-blue-400';
       isPulsing = false;
@@ -69,7 +69,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'Finished':
     case 'Ready for Pickup':
     case 'QA Passed':
-      badgeStyle = 'bg-emerald-50 text-emerald-800 border border-emerald-200';
+      badgeStyle = 'bg-success/10 text-success-deep border border-success/30';
       dotColor = 'bg-success';
       pingColor = 'bg-emerald-400';
       isPulsing = false;
@@ -78,7 +78,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'Cant Repair':
     case 'Declined':
     case 'Unfixable':
-      badgeStyle = 'bg-rose-50 text-rose-700 border border-rose-200';
+      badgeStyle = 'bg-danger/10 text-danger border border-danger/30';
       dotColor = 'bg-danger';
       pingColor = 'bg-rose-400';
       isPulsing = false;
@@ -87,7 +87,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'Customer Not Repair':
     case 'Customer No Repair':
     case 'No Repair':
-      badgeStyle = 'bg-orange-50 text-orange-800 border border-orange-200';
+      badgeStyle = 'bg-warning/10 text-warning border border-warning/30';
       dotColor = 'bg-warning';
       pingColor = 'bg-orange-400';
       isPulsing = false;
@@ -96,15 +96,15 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'Taken Out':
     case 'Paid':
     case 'Returned':
-      badgeStyle = 'bg-slate-100 text-slate-700 border border-slate-300';
-      dotColor = 'bg-slate-500';
+      badgeStyle = 'bg-surface text-muted border border-line';
+      dotColor = 'bg-surface0';
       pingColor = 'bg-slate-400';
       isPulsing = false;
       break;
 
     default:
-      badgeStyle = 'bg-slate-100 text-slate-700 border border-slate-200';
-      dotColor = 'bg-slate-500';
+      badgeStyle = 'bg-surface text-muted border border-line';
+      dotColor = 'bg-surface0';
       pingColor = 'bg-slate-400';
       isPulsing = false;
       break;

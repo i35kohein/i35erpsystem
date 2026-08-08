@@ -10,9 +10,9 @@ const buttonVariants = cva(
       variant: {
         default: "bg-brand text-white hover:bg-brand-deep shadow-xs",
         destructive: "bg-danger text-white hover:bg-danger-deep shadow-xs",
-        outline: "border border-line bg-white text-ink hover:bg-slate-50 hover:text-slate-900",
-        secondary: "bg-surface text-ink hover:bg-slate-200",
-        ghost: "hover:bg-slate-100 text-ink",
+        outline: "border border-line bg-white text-ink hover:bg-surface hover:text-ink",
+        secondary: "bg-surface text-ink hover:bg-line",
+        ghost: "hover:bg-surface text-ink",
         link: "text-brand underline-offset-4 hover:underline",
         success: "bg-success text-white hover:bg-success/90 shadow-xs",
         chip: "h-8 rounded-full border border-line bg-white px-3 text-xs font-bold text-ink hover:bg-surface",

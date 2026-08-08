@@ -294,7 +294,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
       case 'Customer Not Repair':
         return 'bg-white border border-line shadow-2xs hover:border-orange-400 hover:ring-2 hover:ring-orange-400/20 transition-all duration-200';
       default:
-        return 'bg-white border border-line shadow-2xs hover:border-slate-400 hover:ring-2 hover:ring-slate-400/20 transition-all duration-200';
+        return 'bg-white border border-line shadow-2xs hover:border-line-strong hover:ring-2 hover:ring-slate-400/20 transition-all duration-200';
     }
   };
 

@@ -295,7 +295,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                   <h2 className="font-extrabold text-base sm:text-lg text-ink">
                     Quick Price Calculator & Estimate Generator
                   </h2>
-                  <span className="px-2 py-0.5 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                  <span className="px-2 py-0.5 rounded-full text-xs font-extrabold bg-success/15 text-success-deep border border-success/30">
                     On-the-Spot Customer Quote
                   </span>
                 </div>
@@ -442,7 +442,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
 
                         <div className="flex items-end justify-between mt-2 pt-2 border-t border-current/10">
                           <div className="flex items-center space-x-1">
-                            <ShieldCheck className={`w-3 h-3 ${isSelected ? 'text-white' : 'text-emerald-600'}`} />
+                            <ShieldCheck className={`w-3 h-3 ${isSelected ? 'text-white' : 'text-success'}`} />
                             <span
                               className={`text-xs font-semibold ${
                                 isSelected ? 'text-white/90' : 'text-muted'
@@ -469,7 +469,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                 {/* Live Estimate Header */}
                 <div className="flex items-center justify-between border-b border-line pb-3">
                   <div className="flex items-center space-x-2">
-                    <Sparkles className="w-4 h-4 text-emerald-600" />
+                    <Sparkles className="w-4 h-4 text-success" />
                     <h3 className="font-extrabold text-sm text-ink">Live Total Estimate</h3>
                   </div>
                   <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-brand text-white">
@@ -495,8 +495,8 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                           <span className="font-extrabold text-xs text-ink truncate leading-tight min-w-0">
                             {item.label}
                           </span>
-                          <span className="text-xs font-extrabold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-200 flex items-center space-x-0.5 shrink-0">
-                            <ShieldCheck className="w-2.5 h-2.5 text-emerald-600 shrink-0 inline" />
+                          <span className="text-xs font-extrabold text-success-deep bg-success/10 px-1.5 py-0.5 rounded-full border border-success/30 flex items-center space-x-0.5 shrink-0">
+                            <ShieldCheck className="w-2.5 h-2.5 text-success shrink-0 inline" />
                             <span>{item.warranty}</span>
                           </span>
                         </div>
@@ -509,7 +509,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                             onClick={() =>
                               handleToggleService(item.key, item.label, item.price, item.warranty)
                             }
-                            className="text-muted hover:text-danger hover:bg-rose-50 p-0.5 rounded-md transition-all cursor-pointer"
+                            className="text-muted hover:text-danger hover:bg-danger/10 p-0.5 rounded-md transition-all cursor-pointer"
                             title="Remove service"
                           >
                             <X className="w-3.5 h-3.5" />
@@ -678,7 +678,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                       type="button"
                       onClick={handleReset}
                       variant="outline"
-                      className="text-rose-600 hover:bg-rose-50 hover:border-rose-200"
+                      className="text-danger hover:bg-danger/10 hover:border-danger/30"
                     >
                       <RotateCcw className="w-3.5 h-3.5" />
                       <span>Reset</span>

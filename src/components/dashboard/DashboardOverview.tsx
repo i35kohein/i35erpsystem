@@ -732,7 +732,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <span className="text-xs font-extrabold uppercase tracking-wider text-muted">
               Total Revenue
             </span>
-            <div className="w-8 h-8 rounded-xl bg-brand-soft text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <div className="w-8 h-8 rounded-xl bg-brand-soft text-brand flex items-center justify-center group-hover:scale-110 transition-transform">
               <Coins className="w-4 h-4" />
             </div>
           </div>
@@ -748,7 +748,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
           <div className="mt-3 pt-2.5 border-t border-surface flex items-center justify-between text-xs text-muted">
             <span>Avg: {avgTicketValue.toLocaleString()} MMK</span>
-            <span className="font-bold text-indigo-600 group-hover:underline flex items-center space-x-0.5">
+            <span className="font-bold text-brand group-hover:underline flex items-center space-x-0.5">
               <span>Finance</span>
               <ChevronRight className="w-3 h-3" />
             </span>
@@ -768,7 +768,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <span className="text-xs font-extrabold uppercase tracking-wider text-muted">
               Avg Turnaround
             </span>
-            <div className="w-8 h-8 rounded-xl bg-teal/10 text-teal-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <div className="w-8 h-8 rounded-xl bg-teal/10 text-teal flex items-center justify-center group-hover:scale-110 transition-transform">
               <Clock className="w-4 h-4" />
             </div>
           </div>
@@ -780,13 +780,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   : `${avgTurnaroundHours}h`
                 : '—'}
             </span>
-            <span className="text-xs font-bold text-teal-700 bg-teal/10 px-2 py-0.5 rounded-full border border-teal-200">
+            <span className="text-xs font-bold text-teal bg-teal/10 px-2 py-0.5 rounded-full border border-teal-200">
               Intake → Ready
             </span>
           </div>
           <div className="mt-3 pt-2.5 border-t border-surface flex items-center justify-between text-xs text-muted">
             <span>{completedWorkOrders.length} completed tickets</span>
-            <span className="font-bold text-teal-600 group-hover:underline flex items-center space-x-0.5">
+            <span className="font-bold text-teal group-hover:underline flex items-center space-x-0.5">
               <span>Tech KPIs</span>
               <ChevronRight className="w-3 h-3" />
             </span>
@@ -1098,7 +1098,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 { stage: 'Receive', title: 'Intake / Receive', count: statusQueueCounts['Receive'], color: 'bg-brand-soft0', bg: 'bg-brand-soft', text: 'text-brand' },
                 { stage: 'In Progress', title: 'In Progress (Active)', count: statusQueueCounts['In Progress'], color: 'bg-success/100', bg: 'bg-success/10', text: 'text-success-deep' },
                 { stage: 'Pending', title: 'Pending Approval / Parts', count: statusQueueCounts['Pending'], color: 'bg-warning/100', bg: 'bg-warning/10', text: 'text-warning' },
-                { stage: 'Finished', title: 'Finished / Ready for Pickup', count: statusQueueCounts['Finished'], color: 'bg-teal/100', bg: 'bg-teal/10', text: 'text-teal-700' },
+                { stage: 'Finished', title: 'Finished / Ready for Pickup', count: statusQueueCounts['Finished'], color: 'bg-teal/100', bg: 'bg-teal/10', text: 'text-teal' },
               ].map((item) => {
                 const total = filteredWorkOrders.length || 1;
                 const pct = Math.round((item.count / total) * 100);
@@ -1106,7 +1106,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   <div key={item.stage} className={`p-4 rounded-xl border border-line/80 ${item.bg} space-y-2`}>
                     <div className="flex items-center justify-between">
                       <span className={`text-xs font-bold ${item.text}`}>{item.title}</span>
-                      <span className="font-mono text-xs font-black text-slate-800">{item.count} <span className="hidden xl:inline">tickets</span></span>
+                      <span className="font-mono text-xs font-black text-ink">{item.count} <span className="hidden xl:inline">tickets</span></span>
                     </div>
                     <div className="w-full h-2.5 bg-line rounded-full overflow-hidden">
                       <div className={`h-full ${item.color} rounded-full transition-all duration-500`} style={{ width: `${pct}%` }} />
@@ -1143,7 +1143,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     {statusQueueWorkOrders.length} <span className="hidden md:inline">{statusQueueWorkOrders.length === 1 ? 'Ticket' : 'Tickets'}</span>
                   </span>
                   {statusQueueFilter !== 'ALL' && (
-                    <span className="px-2.5 py-0.5 bg-indigo-100 text-indigo-800 rounded-full text-xs font-mono font-bold">
+                    <span className="px-2.5 py-0.5 bg-brand/15 text-brand-deep rounded-full text-xs font-mono font-bold">
                       {statusQueueFilter === 'PIPELINE' ? 'Pipeline Data Only' : `Stage: ${statusQueueFilter}`}
                     </span>
                   )}
@@ -1409,7 +1409,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 topRepairDevices.map((dev, idx) => {
                   const maxCount = topRepairDevices[0]?.count || 1;
                   const barPct = Math.max(8, Math.round((dev.count / maxCount) * 100));
-                  const medal = idx === 0 ? 'bg-warning/20 text-warning border-warning/50' : idx === 1 ? 'bg-surface text-muted border-line' : idx === 2 ? 'bg-warning/10 text-warning border-orange-200' : 'bg-surface text-muted border-line';
+                  const medal = idx === 0 ? 'bg-warning/20 text-warning border-warning/50' : idx === 1 ? 'bg-surface text-muted border-line' : idx === 2 ? 'bg-warning/10 text-warning border-warning/30' : 'bg-surface text-muted border-line';
                   return (
                     <div key={dev.name} className="p-3 bg-surface border border-line rounded-xl space-y-2">
                       <div className="flex items-center justify-between gap-2 text-xs">

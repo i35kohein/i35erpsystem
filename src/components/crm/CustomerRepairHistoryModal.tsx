@@ -67,7 +67,7 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
               <div className="flex items-center space-x-2">
                 <h2 className="text-lg font-black text-ink">{customer.name}</h2>
                 <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
-                  customer.type === 'B2B Corporate' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                  customer.type === 'B2B Corporate' ? 'bg-purple/10 text-purple border-purple/30' :
                   customer.type === 'Wholesale Mail-In' ? 'bg-brand-soft text-brand border-brand/20' :
                   'bg-white text-ink border-line'
                 }`}>
@@ -80,7 +80,7 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
 
           <Button
             onClick={onClose}
-            className="p-2 text-muted hover:text-ink hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
+            className="p-2 text-muted hover:text-ink hover:bg-line rounded-xl transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </Button>
@@ -137,17 +137,17 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
 
             <div className="bg-white p-3.5 rounded-2xl border border-line shadow-2xs">
               <span className="text-xs font-bold text-muted uppercase">Completed</span>
-              <div className="text-lg font-black text-emerald-600 mt-0.5 flex items-center justify-between">
+              <div className="text-lg font-black text-success mt-0.5 flex items-center justify-between">
                 <span>{completedCount}</span>
-                <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                <CheckCircle2 className="w-5 h-5 text-success" />
               </div>
             </div>
 
             <div className="bg-white p-3.5 rounded-2xl border border-line shadow-2xs">
               <span className="text-xs font-bold text-muted uppercase">Active Repairs</span>
-              <div className="text-lg font-black text-amber-600 mt-0.5 flex items-center justify-between">
+              <div className="text-lg font-black text-warning mt-0.5 flex items-center justify-between">
                 <span>{inProgressCount}</span>
-                <Clock className="w-5 h-5 text-amber-500" />
+                <Clock className="w-5 h-5 text-warning" />
               </div>
             </div>
 

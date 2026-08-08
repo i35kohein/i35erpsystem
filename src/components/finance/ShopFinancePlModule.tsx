@@ -501,7 +501,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                     <span className="font-extrabold text-brand-deep block">📱 KBZPay / WavePay / Mobile Banking</span>
                     <span className="text-xs text-brand-deep">Direct wallet transfers & bank QR payments</span>
                   </div>
-                  <span className="font-mono font-black text-blue-950 text-sm">
+                  <span className="font-mono font-black text-brand-deep text-sm">
                     {financialSummary.paymentMethodsBreakdown.mobileBanking.toLocaleString()} {currency}
                   </span>
                 </div>
@@ -512,7 +512,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                     <span className="font-extrabold text-purple block">💳 Credit Card / POS Terminal</span>
                     <span className="text-xs text-purple">Bank merchant card settlement transfers</span>
                   </div>
-                  <span className="font-mono font-black text-purple-950 text-sm">
+                  <span className="font-mono font-black text-purple text-sm">
                     {financialSummary.paymentMethodsBreakdown.cardPos.toLocaleString()} {currency}
                   </span>
                 </div>
@@ -565,7 +565,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                 <div className="p-3.5 bg-success/10 border border-success/30 rounded-xl flex items-center justify-between">
                   <div>
                     <span className="block text-xs font-extrabold text-success-deep uppercase">Technician Commission Payouts</span>
-                    <span className="font-extrabold text-emerald-950 text-xs">Verified QA Pass Bounties & Rates</span>
+                    <span className="font-extrabold text-success-deep text-xs">Verified QA Pass Bounties & Rates</span>
                   </div>
                   <div className="text-right">
                     <span className="font-mono font-black text-success-deep text-sm block">

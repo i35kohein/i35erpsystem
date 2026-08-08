@@ -31,7 +31,7 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ currentPaymentMethods, handleTo
               <Button
                 type="button"
                 onClick={() => handleSetAllPaymentMethodsState(true)}
-                className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl border border-emerald-200 transition-all flex items-center space-x-1 cursor-pointer"
+                className="px-3 py-1.5 bg-success/10 hover:bg-success/15 text-success-deep font-bold text-xs rounded-xl border border-success/30 transition-all flex items-center space-x-1 cursor-pointer"
               >
                 <CheckSquare className="w-3.5 h-3.5" />
                 <span>Enable All</span>
@@ -61,22 +61,22 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ currentPaymentMethods, handleTo
               {
                 title: 'Total Configured',
                 count: currentPaymentMethods.length,
-                color: 'bg-blue-50 text-brand border-blue-200',
+                color: 'bg-brand-soft text-brand border-brand/30',
               },
               {
                 title: 'Active Gateways',
                 count: currentPaymentMethods.filter((m) => m.enabled).length,
-                color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                color: 'bg-success/10 text-success-deep border-success/30',
               },
               {
                 title: 'Myanmar Mobile & MMQR',
                 count: currentPaymentMethods.filter((m) => m.category === 'Myanmar Mobile Pay').length,
-                color: 'bg-purple-50 text-purple-700 border-purple-200',
+                color: 'bg-purple/10 text-purple border-purple/30',
               },
               {
                 title: 'Myanmar Bank Accounts',
                 count: currentPaymentMethods.filter((m) => m.category === 'Myanmar Banks').length,
-                color: 'bg-amber-50 text-amber-700 border-amber-200',
+                color: 'bg-warning/10 text-warning border-warning/30',
               },
             ].map((stat, idx) => (
               <div key={idx} className={`p-3 rounded-xl border ${stat.color} flex items-center justify-between`}>
@@ -133,7 +133,7 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ currentPaymentMethods, handleTo
                               <span className="font-extrabold text-xs text-ink block">{method.name}</span>
                             </div>
                             <span className={`text-xs font-extrabold uppercase px-1.5 py-0.2 rounded-md ${
-                              method.enabled ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500'
+                              method.enabled ? 'bg-success/10 text-success-deep border border-success/30' : 'bg-surface text-muted'
                             }`}>
                               {method.enabled ? 'ENABLED globally' : 'DISABLED'}
                             </span>
@@ -145,15 +145,15 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ currentPaymentMethods, handleTo
                               onClick={() => handleTogglePaymentMethod(method.id)}
                               className={`p-1.5 rounded-xl transition-colors cursor-pointer ${
                                 method.enabled
-                                  ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
-                                  : 'bg-slate-200 text-slate-500 hover:bg-slate-300'
+                                  ? 'bg-success/15 text-success-deep hover:bg-emerald-200'
+                                  : 'bg-line text-muted hover:bg-line'
                               }`}
                               title={method.enabled ? 'Click to Disable' : 'Click to Enable'}
                             >
                               {method.enabled ? (
-                                <ToggleRight className="w-5 h-5 text-emerald-600" />
+                                <ToggleRight className="w-5 h-5 text-success" />
                               ) : (
-                                <ToggleLeft className="w-5 h-5 text-slate-400" />
+                                <ToggleLeft className="w-5 h-5 text-muted" />
                               )}
                             </Button>
 
@@ -163,8 +163,8 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ currentPaymentMethods, handleTo
                               onClick={() => handleTogglePaymentMethod(method.id)}
                               className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                                 method.enabled
-                                  ? 'bg-rose-50 text-rose-600 hover:bg-rose-100'
-                                  : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                                  ? 'bg-danger/10 text-danger hover:bg-danger/15'
+                                  : 'bg-success/10 text-success-deep hover:bg-success/15'
                               }`}
                             >
                               {method.enabled ? 'Disable' : 'Enable'}

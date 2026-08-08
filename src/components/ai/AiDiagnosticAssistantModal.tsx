@@ -462,7 +462,7 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
             <div className="w-8 h-8 bg-brand text-white flex items-center justify-center rounded-lg"><Bot className="w-4 h-4" /></div>
             <div className="min-w-0">
               <h2 className="text-sm font-extrabold text-ink">Operations Copilot</h2>
-              <p className="text-xs text-muted truncate flex items-center gap-1"><span className={`w-1.5 h-1.5 rounded-full ${isExternalAi ? 'bg-emerald-500' : 'bg-brand'}`} />{providerLabel}</p>
+              <p className="text-xs text-muted truncate flex items-center gap-1"><span className={`w-1.5 h-1.5 rounded-full ${isExternalAi ? 'bg-success/100' : 'bg-brand'}`} />{providerLabel}</p>
             </div>
           </div>
           <div className="flex items-center gap-1">
@@ -489,7 +489,7 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-surface [scrollbar-gutter:stable]">
           {messages.map((message) => (
             message.role === 'system' ? (
-              <div key={message.id} className="mx-auto max-w-[92%] px-2.5 py-1.5 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg text-center">{message.content}</div>
+              <div key={message.id} className="mx-auto max-w-[92%] px-2.5 py-1.5 text-xs text-warning bg-warning/10 border border-warning/30 rounded-lg text-center">{message.content}</div>
             ) : (
             <div key={message.id} className={`group flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`relative max-w-[90%] px-3 py-2.5 text-xs leading-relaxed whitespace-pre-wrap border ${

@@ -54,16 +54,16 @@ export const TechnicianDetailModal: React.FC<TechnicianDetailModalProps> = ({
         {/* Header */}
         <div className="sticky top-0 bg-white/95 backdrop-blur-md border-b border-line px-5 py-4 flex items-start justify-between gap-3 z-10">
           <div className="flex items-center space-x-3 min-w-0">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-100 to-indigo-100 text-purple font-black text-xl flex items-center justify-center border border-purple-200 shadow-2xs shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-100 to-indigo-100 text-purple font-black text-xl flex items-center justify-center border border-purple/30 shadow-2xs shrink-0">
               {tech.name.charAt(0)}
             </div>
             <div className="min-w-0">
               <h3 className="font-extrabold text-base text-ink truncate">{tech.name}</h3>
               <div className="flex items-center space-x-2 mt-0.5 flex-wrap gap-y-1">
                 <span className={`text-xs font-extrabold px-2 py-0.5 rounded-lg border ${
-                  tech.level === 'Level 3 Master' ? 'bg-purple-50 text-purple border-purple-200' :
-                  tech.level === 'Level 2 Spareparts + Hardware' ? 'bg-blue-50 text-brand border-blue-200' :
-                  'bg-emerald-50 text-success-deep border-emerald-200'
+                  tech.level === 'Level 3 Master' ? 'bg-purple/10 text-purple border-purple/30' :
+                  tech.level === 'Level 2 Spareparts + Hardware' ? 'bg-brand-soft text-brand border-brand/30' :
+                  'bg-success/10 text-success-deep border-success/30'
                 }`}>
                   {tech.level}
                 </span>
@@ -244,7 +244,7 @@ export const TechnicianDetailModal: React.FC<TechnicianDetailModalProps> = ({
                         <span
                           className={`text-xs font-black px-1.5 py-0.5 rounded-md border flex items-center space-x-0.5 ${
                             isHardware
-                              ? 'bg-purple-50 text-purple border-purple-200'
+                              ? 'bg-purple/10 text-purple border-purple/30'
                               : 'bg-brand-soft text-brand border-brand/20'
                           }`}
                           title={source === 'AI' ? 'Classified by AI' : 'Classified by keyword rules'}

@@ -30,19 +30,19 @@ export const StatusChip: React.FC<{ status: WorkOrderStatus; size?: 'xs' | 'sm' 
   const tone = (() => {
     if (/finished|taken out|completed|done/i.test(s)) {
       return /taken out/i.test(s)
-        ? 'bg-slate-100 text-slate-700 border-slate-300'
-        : 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        ? 'bg-surface text-muted border-line'
+        : 'bg-success/10 text-success-deep border-success/30';
     }
     if (/cant repair|customer not repair|cancel|reject|fail|issue/i.test(s)) {
-      return 'bg-rose-50 text-rose-700 border-rose-200';
+      return 'bg-danger/10 text-danger border-danger/30';
     }
     if (/approved/i.test(s)) {
-      return 'bg-purple-50 text-purple-700 border-purple-200';
+      return 'bg-purple/10 text-purple border-purple/30';
     }
     if (/waiting|pending|approval|unpaid|diagnostic/i.test(s)) {
-      return 'bg-amber-50 text-amber-700 border-amber-200';
+      return 'bg-warning/10 text-warning border-warning/30';
     }
-    return 'bg-blue-50 text-blue-700 border-blue-200';
+    return 'bg-brand-soft text-brand border-brand/30';
   })();
   return (
     <span

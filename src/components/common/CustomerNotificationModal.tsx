@@ -146,7 +146,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
                 className={`py-2.5 px-3 rounded-2xl border font-extrabold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer ${
                   channel === 'Viber'
                     ? 'bg-purple text-white border-purple shadow-sm'
-                    : 'bg-surface text-ink border-line hover:bg-slate-200'
+                    : 'bg-surface text-ink border-line hover:bg-line'
                 }`}
               >
                 <MessageSquare className="w-4 h-4" />
@@ -159,7 +159,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
                 className={`py-2.5 px-3 rounded-2xl border font-extrabold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer ${
                   channel === 'SMS'
                     ? 'bg-success text-white border-success shadow-sm'
-                    : 'bg-surface text-ink border-line hover:bg-slate-200'
+                    : 'bg-surface text-ink border-line hover:bg-line'
                 }`}
               >
                 <Phone className="w-4 h-4" />
@@ -172,7 +172,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
                 className={`py-2.5 px-3 rounded-2xl border font-extrabold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer ${
                   channel === 'Telegram'
                     ? 'bg-sky text-white border-sky shadow-sm'
-                    : 'bg-surface text-ink border-line hover:bg-slate-200'
+                    : 'bg-surface text-ink border-line hover:bg-line'
                 }`}
               >
                 <Send className="w-4 h-4" />
@@ -197,7 +197,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
                     className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                       isSel
                         ? 'bg-brand text-white shadow-xs'
-                        : 'bg-slate-100 text-ink hover:bg-slate-200 border border-slate-200'
+                        : 'bg-surface text-ink hover:bg-line border border-line'
                     }`}
                   >
                     {tmpl.title}
@@ -224,7 +224,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
           </div>
 
           {/* Recipient summary info badge */}
-          <div className="bg-blue-50 border border-blue-200 p-3 rounded-2xl flex items-center justify-between text-xs text-ink">
+          <div className="bg-brand-soft border border-brand/30 p-3 rounded-2xl flex items-center justify-between text-xs text-ink">
             <div>
               <span className="text-xs text-muted block">Recipient Phone:</span>
               <span className="font-mono font-extrabold text-brand">{workOrder.customerPhone || 'N/A'}</span>
@@ -240,12 +240,12 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
             <Button
               type="button"
               onClick={handleCopy}
-              className="flex-1 py-3 bg-surface hover:bg-slate-200 text-ink font-extrabold text-xs rounded-2xl transition-all flex items-center justify-center space-x-1.5 cursor-pointer active:scale-95 border border-line-strong"
+              className="flex-1 py-3 bg-surface hover:bg-line text-ink font-extrabold text-xs rounded-2xl transition-all flex items-center justify-center space-x-1.5 cursor-pointer active:scale-95 border border-line-strong"
             >
               {copied ? (
                 <>
-                  <Check className="w-4 h-4 text-emerald-600" />
-                  <span className="text-emerald-700">Copied!</span>
+                  <Check className="w-4 h-4 text-success" />
+                  <span className="text-success-deep">Copied!</span>
                 </>
               ) : (
                 <>
