@@ -1473,7 +1473,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     </div>
 
                     {inlineEditMode ? (
-                      <div className="flex items-center justify-between gap-2 rounded-xl border border-warning/30 bg-warning/10/60 p-2.5">
+                      <div className="flex items-center justify-between gap-2 rounded-xl border border-warning/30 bg-warning/10 p-2.5">
                         <span className="text-xs font-extrabold uppercase tracking-wide text-warning">Adjust Stock</span>
                         <div className="flex items-center gap-1.5">
                           <Button
@@ -1518,7 +1518,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
                     {/* Selling price edit — mobile card edit mode (step 1,000 MMK, instant save) */}
                     {inlineEditMode && (
-                      <div className="flex items-center justify-between gap-2 rounded-xl border border-success/30 bg-success/10/60 p-2.5">
+                      <div className="flex items-center justify-between gap-2 rounded-xl border border-success/30 bg-success/10 p-2.5">
                         <span className="text-xs font-extrabold uppercase tracking-wide text-success-deep">Selling Price</span>
                         <div className="flex items-center gap-1.5">
                           <Button

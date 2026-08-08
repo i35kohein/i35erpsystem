@@ -686,7 +686,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
 
               {/* Star Rating if Satisfied */}
               {formStatus === 'Satisfied' && (
-                <div className="space-y-1 bg-warning/10/60 border border-warning/30 rounded-xl p-3">
+                <div className="space-y-1 bg-warning/10 border border-warning/30 rounded-xl p-3">
                   <label className="font-bold text-warning block">Customer Satisfaction Rating</label>
                   <div className="flex items-center space-x-2 pt-1">
                     {[1, 2, 3, 4, 5].map((star) => (

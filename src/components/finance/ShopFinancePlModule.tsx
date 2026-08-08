@@ -609,7 +609,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
             </div>
 
             {/* Parts Sales Income Card */}
-            <div className="p-4 bg-success/10/60 border border-success/30 rounded-2xl space-y-2">
+            <div className="p-4 bg-success/10 border border-success/30 rounded-2xl space-y-2">
               <span className="text-xs font-bold text-success-deep uppercase tracking-wider block">📱 Replacement Parts Sales Revenue</span>
               <div className="text-2xl font-black text-success-deep font-mono">
                 {financialSummary.partsSalesIncome.toLocaleString()} {currency}

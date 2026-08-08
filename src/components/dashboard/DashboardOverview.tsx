@@ -783,7 +783,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   : `${avgTurnaroundHours}h`
                 : '—'}
             </span>
-            <span className="text-xs font-bold text-teal bg-teal/10 px-2 py-0.5 rounded-full border border-teal-200">
+            <span className="text-xs font-bold text-teal bg-teal/10 px-2 py-0.5 rounded-full border border-teal/30">
               Intake → Ready
             </span>
           </div>
