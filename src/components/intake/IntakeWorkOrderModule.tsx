@@ -22,7 +22,11 @@ import {ClipboardList,
   LayoutGrid,
   Table as TableIcon,
   Maximize2,
-  User} from 'lucide-react';
+  User,
+  Wrench,
+  Clock,
+  CheckCircle2,
+  Flame} from 'lucide-react';
 import {WorkOrder, 
   PartItem, 
   Customer, 
@@ -225,16 +229,17 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           </div>
         </div>
 
-        {/* Quick Stats Filter Chips */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10 gap-3.5">
+        {/* Quick Stats Filter Chips — full-width responsive: 2 cols mobile → 3 tablet → 6 desktop */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3">
           {[
-            { id: 'ALL', label: 'All Active Tickets', count: counts.total, color: 'text-brand', bg: 'bg-brand-soft/60', border: 'border-brand/30' },
-            { id: 'Receive', label: 'Intake (Receive)', count: counts.receive, color: 'text-brand', bg: 'bg-brand-soft/60', border: 'border-brand/30' },
-            { id: 'In Progress', label: 'In Progress', count: counts.inProgress, color: 'text-teal', bg: 'bg-teal/10', border: 'border-teal/30' },
-            { id: 'Pending', label: 'Pending Approval', count: counts.pending, color: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/30' },
-            { id: 'Finished', label: 'Ready (Finished)', count: counts.finished, color: 'text-success-deep', bg: 'bg-success/10', border: 'border-success/30' },
-            { id: 'RUSH', label: 'Urgent Priority', count: counts.rush, color: 'text-danger', bg: 'bg-danger/10', border: 'border-danger/30' },
+            { id: 'ALL', label: 'All Active Tickets', count: counts.total, color: 'text-brand', bg: 'bg-brand-soft/60', border: 'border-brand/30', icon: ClipboardList, chipBg: 'bg-brand/10 text-brand' },
+            { id: 'Receive', label: 'Intake (Receive)', count: counts.receive, color: 'text-brand', bg: 'bg-brand-soft/60', border: 'border-brand/30', icon: Inbox, chipBg: 'bg-brand/10 text-brand' },
+            { id: 'In Progress', label: 'In Progress', count: counts.inProgress, color: 'text-teal', bg: 'bg-teal/10', border: 'border-teal/30', icon: Wrench, chipBg: 'bg-teal/10 text-teal' },
+            { id: 'Pending', label: 'Pending Approval', count: counts.pending, color: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/30', icon: Clock, chipBg: 'bg-warning/10 text-warning' },
+            { id: 'Finished', label: 'Ready (Finished)', count: counts.finished, color: 'text-success-deep', bg: 'bg-success/10', border: 'border-success/30', icon: CheckCircle2, chipBg: 'bg-success/10 text-success-deep' },
+            { id: 'RUSH', label: 'Urgent Priority', count: counts.rush, color: 'text-danger', bg: 'bg-danger/10', border: 'border-danger/30', icon: Flame, chipBg: 'bg-danger/10 text-danger' },
           ].map((st) => {
+            const Icon = st.icon;
             const isSelected = st.id === 'RUSH' ? sortByPriority : filterStatus === st.id;
             return (
               <Button
@@ -247,16 +252,22 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                     setFilterStatus(st.id);
                   }
                 }}
-                className={`min-h-[84px] px-4 py-3.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                aria-pressed={isSelected}
+                className={`group relative !min-h-[96px] w-full overflow-hidden rounded-xl border p-3.5 text-left transition-all cursor-pointer flex flex-col justify-between ${
                   isSelected
-                    ? `${st.bg} ${st.border} ring-1 ring-brand/20`
-                    : `${st.bg} ${st.border} hover:border-brand/45`
+                    ? `${st.bg} ${st.border} ring-2 ring-brand/25 shadow-xs`
+                    : `${st.bg} ${st.border} hover:border-brand/45 hover:shadow-xs`
                 }`}
               >
-                <span className="text-xs font-bold text-muted uppercase tracking-[0.06em] block leading-4">
-                  {st.label}
-                </span>
-                <span className={`text-xl font-extrabold mt-2 leading-none ${st.color}`}>
+                <div className="flex items-start justify-between gap-2">
+                  <span className="text-xs font-bold text-muted uppercase tracking-[0.06em] leading-4 pr-1 line-clamp-2">
+                    {st.label}
+                  </span>
+                  <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${st.chipBg} transition-transform group-hover:scale-105`}>
+                    <Icon className="h-3.5 w-3.5" />
+                  </span>
+                </div>
+                <span className={`text-2xl font-extrabold leading-none mt-2 ${st.color}`}>
                   {st.count}
                 </span>
               </Button>
