@@ -668,10 +668,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
           <div className="mt-3 pt-2.5 border-t border-surface flex items-center justify-between text-xs text-muted">
             <span>In-shop workload</span>
-            <span className="font-bold text-brand group-hover:underline flex items-center space-x-0.5">
-              <span>View</span>
-              <ChevronRight className="w-3 h-3" />
-            </span>
+            <ChevronRight className="w-3.5 h-3.5 text-muted group-hover:text-brand transition-colors" />
           </div>
         </div>
 
@@ -702,10 +699,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
           <div className="mt-3 pt-2.5 border-t border-surface flex items-center justify-between text-xs text-muted">
             <span>Awaiting customer</span>
-            <span className="font-bold text-success-deep group-hover:underline flex items-center space-x-0.5">
-              <span>View</span>
-              <ChevronRight className="w-3 h-3" />
-            </span>
+            <ChevronRight className="w-3.5 h-3.5 text-muted group-hover:text-success-deep transition-colors" />
           </div>
         </div>
 
@@ -733,10 +727,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
           <div className="mt-3 pt-2.5 border-t border-surface flex items-center justify-between text-xs text-muted">
             <span>{marginPercent}% margin</span>
-            <span className="font-bold text-brand group-hover:underline flex items-center space-x-0.5">
-              <span>Finance</span>
-              <ChevronRight className="w-3 h-3" />
-            </span>
+            <ChevronRight className="w-3.5 h-3.5 text-muted group-hover:text-brand transition-colors" />
           </div>
         </div>
 
@@ -768,10 +759,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
           <div className="mt-3 pt-2.5 border-t border-surface flex items-center justify-between text-xs text-muted">
             <span>{completedWorkOrders.length} done</span>
-            <span className="font-bold text-teal group-hover:underline flex items-center space-x-0.5">
-              <span>Tech KPIs</span>
-              <ChevronRight className="w-3 h-3" />
-            </span>
+            <ChevronRight className="w-3.5 h-3.5 text-muted group-hover:text-teal transition-colors" />
           </div>
         </div>
       </div>
