@@ -1,12 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import {
-  Trello,
   UserCheck,
-  Search,
-  X,
 } from 'lucide-react';
 import { WorkOrder, Technician, SystemSettings, WorkOrderStatus } from '../../types';
-import { Input } from '../ui';
 import { PriorityBadge } from '../common/PriorityBadge';
 import { TicketDetailInspectorModal } from '../common/TicketDetailInspectorModal';
 
@@ -42,7 +38,6 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
   onDeleteWorkOrder,
   onSelectPrintTag,
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
   const [detailWo, setDetailWo] = useState<WorkOrder | null>(null);
   const [draggedWoId, setDraggedWoId] = useState<string | null>(null);
   const [dragOverStage, setDragOverStage] = useState<WorkOrderStatus | null>(null);
@@ -54,7 +49,6 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
   const myTechName = currentUser?.technicianName || currentUser?.name || '';
 
   const visibleWorkOrders = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
     return workOrders
       .filter((wo) => {
         if (isTechnicianUser) {
@@ -63,18 +57,10 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
             (myTechName && (wo.assignedTechName || '').toLowerCase() === myTechName.toLowerCase());
           if (!isMine) return false;
         }
-        if (!q) return true;
-        return (
-          wo.orderNumber.toLowerCase().includes(q) ||
-          wo.customerName.toLowerCase().includes(q) ||
-          wo.customerPhone.toLowerCase().includes(q) ||
-          wo.deviceModel.toLowerCase().includes(q) ||
-          wo.serialNumber.toLowerCase().includes(q) ||
-          (wo.imei || '').toLowerCase().includes(q)
-        );
+        return true;
       })
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }, [workOrders, searchQuery, isTechnicianUser, myTechId, myTechName]);
+  }, [workOrders, isTechnicianUser, myTechId, myTechName]);
 
   const columns = useMemo(() => {
     return STAGE_COLUMNS.map((col) => ({
@@ -82,10 +68,6 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
       orders: visibleWorkOrders.filter((wo) => wo.status === col.id),
     }));
   }, [visibleWorkOrders]);
-
-  const totalActive = visibleWorkOrders.filter(
-    (wo) => !['Taken Out', 'Finished', 'Cant Repair', 'Customer Not Repair'].includes(wo.status)
-  ).length;
 
   const isStagnant = (wo: WorkOrder) => {
     const created = new Date(wo.createdAt).getTime();
@@ -124,49 +106,16 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
   };
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col space-y-3">
-      {/* Header — search + summary */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white border border-line rounded-2xl p-3.5 shadow-2xs">
-        <div className="flex items-center space-x-2.5 min-w-0">
-          <span className="p-2 bg-brand/10 text-brand rounded-xl shrink-0">
-            <Trello className="w-5 h-5" />
-          </span>
-          <div className="min-w-0">
-            <h2 className="text-sm font-extrabold text-ink tracking-tight truncate">Repair Ticket Board</h2>
-            <p className="text-xs text-muted truncate">{totalActive} active · {visibleWorkOrders.length} tickets</p>
-          </div>
-        </div>
-        <div className="relative w-full sm:w-72 shrink-0">
-          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-          <Input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search ticket, customer, device..."
-            className="w-full h-10 bg-surface text-xs text-ink placeholder-muted pl-8 pr-8 rounded-xl border border-line focus:bg-white focus:outline-none focus:border-brand transition-all"
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => setSearchQuery('')}
-              aria-label="Clear search"
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-ink"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Board columns — responsive: stack on mobile, full-width grid on desktop */}
-      <div className="grid min-h-0 flex-1 auto-rows-min grid-cols-1 gap-3 overflow-y-auto pb-2 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 content-start">
+    <div className="flex min-h-0 flex-1 flex-col">
+      {/* Board columns — horizontal scroll (kanban style, no grid) */}
+      <div className="flex min-h-0 flex-1 gap-3 overflow-x-auto pb-2 no-scrollbar">
         {columns.map((col) => (
           <div
             key={col.id}
             onDragOver={(e) => { e.preventDefault(); setDragOverStage(col.id); }}
             onDragLeave={() => setDragOverStage((s) => (s === col.id ? null : s))}
             onDrop={(e) => { e.preventDefault(); handleDrop(col.id); }}
-            className={`flex min-h-[140px] flex-col rounded-2xl border bg-surface/60 transition-colors ${
+            className={`flex min-h-[140px] w-[300px] shrink-0 flex-col rounded-2xl border bg-surface/60 transition-colors ${
               dragOverStage === col.id ? 'border-brand/60 bg-brand/5' : 'border-line'
             }`}
           >
