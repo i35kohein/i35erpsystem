@@ -449,9 +449,16 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           title={`Mark ${item.name} as Pass`}
                           aria-label={`Mark ${item.name} as Pass`}
                         >
-                          <span className={`w-3.5 h-3.5 rounded flex items-center justify-center shrink-0 transition-colors ${
-                            isFail ? 'bg-danger/10 text-danger' : isPass ? 'bg-success/10 text-success-deep' : 'bg-surface text-muted group-hover:bg-success/15 group-hover:text-success-deep'
-                          }`}>
+                          <span
+                            role="button"
+                            tabIndex={0}
+                            onClick={(e) => { e.stopPropagation(); cycleStatus(item.id, item.status); }}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); cycleStatus(item.id, item.status); } }}
+                            className={`w-3.5 h-3.5 rounded flex items-center justify-center shrink-0 transition-colors cursor-pointer ${
+                              isFail ? 'bg-danger/10 text-danger' : isPass ? 'bg-success/10 text-success-deep' : 'bg-surface text-muted group-hover:bg-success/15 group-hover:text-success-deep'
+                            }`}
+                            title={`Cycle status: ${item.status} → next`}
+                          >
                             <IconComp className="w-2 h-2" />
                           </span>
                           <span className={`text-[10px] font-bold truncate transition-colors ${
