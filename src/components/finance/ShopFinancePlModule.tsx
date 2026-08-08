@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useImperativeHandle, forwardRef } from 'react';
 import {DollarSign, 
   TrendingUp, 
   Receipt, 
@@ -44,7 +44,11 @@ interface ShopFinancePlModuleProps {
   setDateFilter: (filter: string) => void;
 }
 
-export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
+export interface ShopFinancePlModuleHandle {
+  openAddExpense: () => void;
+}
+
+export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFinancePlModuleProps>(({
   workOrders,
   parts,
   expenses,
@@ -56,12 +60,17 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
   onUpdatePayoutStatus,
   onSettleInventoryFund,
   dateFilter,
-}) => {
+}, ref) => {
   const currency = systemSettings?.currencySymbol || 'MMK';
   const activePaymentMethods = getActivePaymentMethods(systemSettings).filter((m) => m.enabled);
   const [activeTab, setActiveTab] = useState<'overview' | 'revenue' | 'expenses' | 'inventory-asset' | 'commissions' | 'accounts-payable' | 'inventory-fund' | 'parts-revenue'>('overview');
   const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
   const [selectedDebtForPayment, setSelectedDebtForPayment] = useState<SupplierDebtRecord | null>(null);
+
+  // Expose openAddExpense to the app navbar (Record Expense button moved there 2026-08-08)
+  useImperativeHandle(ref, () => ({
+    openAddExpense: () => setShowAddExpenseModal(true),
+  }));
 
   // New Expense State
   const [newExpense, setNewExpense] = useState({
@@ -310,13 +319,12 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
           </div>
         </div>
 
-        {/* Action Controls */}
+        {/* Action Controls — desktop: Record Expense lives in the app navbar (2026-08-08); mobile keeps it here since the navbar button is lg-only */}
         <div className="flex items-center space-x-2 w-full md:w-auto">
-          {/* Quick Add Expense Button */}
           <Button
             type="button"
             onClick={() => setShowAddExpenseModal(true)}
-            className="w-full md:w-auto bg-brand hover:opacity-90 text-white flex items-center justify-center md:justify-start space-x-1.5"
+            className="md:hidden w-full bg-brand hover:opacity-90 text-white flex items-center justify-center space-x-1.5"
           >
             <Plus className="w-4 h-4" />
             <span>Record Expense</span>
@@ -1413,4 +1421,4 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
       )}
     </div>
   );
-};
+});

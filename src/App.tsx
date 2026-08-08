@@ -147,6 +147,9 @@ export default function App() {
   // Modal triggers from top bar
   const [inventoryAddModalOpen, setInventoryAddModalOpen] = useState(false);
   const [rmaModalOpen, setRmaModalOpen] = useState(false);
+
+  // Finance: Record Expense button lives in the top navbar — module exposes openAddExpense via ref
+  const financeModuleRef = useRef<{ openAddExpense: () => void } | null>(null);
   
   // Price Catalog top navigation controls state
   const [priceCatalogQuickCalcOpen, setPriceCatalogQuickCalcOpen] = useState(false);
@@ -2071,6 +2074,14 @@ export default function App() {
             {activeTab === 'finance' && (
               <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
                 <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
+                <Button
+                  type="button"
+                  onClick={() => financeModuleRef.current?.openAddExpense()}
+                  className="inline-flex items-center space-x-1.5 bg-brand hover:bg-brand-deep text-white font-extrabold text-xs rounded-xl px-3.5 min-h-10 transition-all shadow-2xs active:scale-95 cursor-pointer shrink-0"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Record Expense</span>
+                </Button>
               </div>
             )}
 
@@ -2444,6 +2455,7 @@ export default function App() {
 
               {activeTab === 'finance' && (
                 <ShopFinancePlModule
+                  ref={financeModuleRef}
                   workOrders={activeWorkOrders}
                   parts={parts}
                   technicians={technicians}
