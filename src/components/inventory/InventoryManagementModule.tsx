@@ -1201,42 +1201,45 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       {viewMode === 'profit' && (
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Total Stock Items Card */}
-        <div className="bg-white p-4 rounded-2xl border border-line shadow-2xs space-y-2">
-          <div className="flex items-center justify-between text-muted">
-            <span className="text-xs font-bold uppercase tracking-wider">Total Active SKUs</span>
-            <PackageCheck className="w-4 h-4 text-brand" />
+        <div className="relative bg-white p-4 rounded-2xl border border-line shadow-2xs space-y-2">
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-2xl bg-brand/10 text-brand flex items-center justify-center">
+            <PackageCheck className="w-6 h-6" />
           </div>
-          <div className="flex items-baseline justify-between">
-            <span className="text-2xl font-black text-ink font-mono">{metrics.totalCount}</span>
-            <span className="text-xs font-bold text-brand-deep bg-brand/10 px-2 py-0.5 rounded-full">
-              {categories.length} Categories
-            </span>
+          <div className="pr-14">
+            <span className="text-xs font-bold uppercase tracking-wider text-muted">Total Active SKUs</span>
+            <div className="flex items-baseline justify-between mt-2">
+              <span className="text-2xl font-black text-ink font-mono">{metrics.totalCount}</span>
+              <span className="text-xs font-bold text-brand-deep bg-brand/10 px-2 py-0.5 rounded-full">
+                {categories.length} Categories
+              </span>
+            </div>
           </div>
-          <p className="text-xs text-muted">Unique Apple hardware part SKUs registered</p>
         </div>
 
         {/* Total Inventory Stock Valuation */}
-        <div className="bg-white p-4 rounded-2xl border border-line shadow-2xs space-y-2">
-          <div className="flex items-center justify-between text-muted">
-            <span className="text-xs font-bold uppercase tracking-wider">Inventory Valuation</span>
-            <DollarSign className="w-4 h-4 text-success" />
+        <div className="relative bg-white p-4 rounded-2xl border border-line shadow-2xs space-y-2">
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-2xl bg-success/10 text-success flex items-center justify-center">
+            <DollarSign className="w-6 h-6" />
           </div>
-          <div className="space-y-0.5">
-            <div className="flex justify-between text-xs">
-              <span className="text-muted font-medium">Cost Asset:</span>
-              <span className="font-mono font-bold text-ink">
-                {metrics.totalCostValuation.toLocaleString()} MMK
-              </span>
+          <div className="pr-14">
+            <span className="text-xs font-bold uppercase tracking-wider text-muted">Inventory Valuation</span>
+            <div className="space-y-0.5 mt-2">
+              <div className="flex justify-between text-xs">
+                <span className="text-muted font-medium">Cost Asset:</span>
+                <span className="font-mono font-bold text-ink">
+                  {metrics.totalCostValuation.toLocaleString()} MMK
+                </span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-success-deep font-bold">Retail Yield:</span>
+                <span className="font-mono font-black text-success">
+                  {metrics.totalRetailValuation.toLocaleString()} MMK
+                </span>
+              </div>
             </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-success-deep font-bold">Retail Yield:</span>
-              <span className="font-mono font-black text-success">
-                {metrics.totalRetailValuation.toLocaleString()} MMK
-              </span>
+            <div className="text-xs text-brand font-extrabold text-right pt-1 border-t border-surface mt-1">
+              Margin: +{metrics.totalPotentialProfit.toLocaleString()} MMK
             </div>
-          </div>
-          <div className="text-xs text-brand font-extrabold text-right pt-1 border-t border-surface">
-            Projected Margin: +{metrics.totalPotentialProfit.toLocaleString()} MMK
           </div>
         </div>
 
@@ -1244,7 +1247,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         <Button
           type="button"
           onClick={() => setShowLowStockOnly(!showLowStockOnly)}
-          className={`p-4 rounded-2xl border text-left transition-all cursor-pointer shadow-2xs ${
+          className={`relative p-4 rounded-2xl border text-left transition-all cursor-pointer shadow-2xs ${
             showLowStockOnly
               ? 'bg-warning text-white border-amber-600 ring-2 ring-amber-400'
               : metrics.lowStockCount > 0
@@ -1252,25 +1255,25 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               : 'bg-white text-ink border-line'
           }`}
         >
-          <div className="flex items-center justify-between">
+          <div className={`absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-2xl flex items-center justify-center ${
+            showLowStockOnly ? 'bg-white text-warning' : 'bg-warning/15 text-warning'
+          }`}>
+            <AlertTriangle className="w-6 h-6" />
+          </div>
+          <div className="pr-14">
             <span className="text-xs font-bold uppercase tracking-wider">Low Stock Reorders</span>
-            <AlertTriangle className={`w-4 h-4 ${showLowStockOnly ? 'text-white' : 'text-warning'}`} />
+            <div className="flex items-baseline justify-between mt-2">
+              <span className="text-2xl font-black font-mono">
+                {metrics.lowStockCount} <span className="text-xs font-bold">SKUs</span>
+              </span>
+              <span className={`text-xs font-black px-2 py-0.5 rounded-full ${
+                showLowStockOnly ? 'bg-white text-warning' : 'bg-warning/25/80 text-warning'
+              }`}>
+                {showLowStockOnly ? 'Filter Active' : 'Audit'}
+              </span>
+            </div>
           </div>
-          <div className="flex items-baseline justify-between mt-1">
-            <span className="text-2xl font-black font-mono">
-              {metrics.lowStockCount} <span className="text-xs font-bold">SKUs</span>
-            </span>
-            <span className={`text-xs font-black px-2 py-0.5 rounded-full ${
-              showLowStockOnly ? 'bg-white text-warning' : 'bg-warning/25/80 text-warning'
-            }`}>
-              {showLowStockOnly ? 'Filter Active' : 'Click to Audit'}
-            </span>
-          </div>
-          <p className="text-xs mt-1 opacity-80">
-            {metrics.outOfStockCount > 0 ? `${metrics.outOfStockCount} completely out of stock` : 'Items at or below reorder threshold'}
-          </p>
         </Button>
-
       </div>
       )}
 

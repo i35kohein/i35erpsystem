@@ -379,15 +379,15 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
           {/* Key P&L Summary Metric Cards — full-width responsive: 1 → 2 → 4 cols */}
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
             {/* Total Gross Revenue Card */}
-            <div className="flex min-h-[168px] flex-col bg-white p-5 rounded-2xl border border-line shadow-2xs space-y-2">
-              <div className="flex items-start justify-between gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-muted leading-4 pt-1">Gross Revenue</span>
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-success/10 text-success">
-                  <TrendingUp className="h-4 w-4" />
-                </span>
+            <div className="relative flex min-h-[168px] flex-col bg-white p-5 rounded-2xl border border-line shadow-2xs space-y-2">
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-2xl bg-success/10 text-success flex items-center justify-center">
+                <TrendingUp className="w-6 h-6" />
               </div>
-              <div className="text-2xl font-black text-ink font-mono leading-none">
-                {financialSummary.totalRevenue.toLocaleString()} {currency}
+              <div className="pr-14">
+                <span className="text-xs font-bold uppercase tracking-wider text-muted leading-4">Gross Revenue</span>
+                <div className="text-2xl font-black text-ink font-mono leading-none mt-2">
+                  {financialSummary.totalRevenue.toLocaleString()} {currency}
+                </div>
               </div>
               <div className="mt-auto pt-2 border-t border-surface text-xs font-bold space-y-0.5">
                 <div className="flex justify-between text-brand">
@@ -402,24 +402,24 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
             </div>
 
             {/* COGS & Gross Profit Card */}
-            <div className="flex min-h-[168px] flex-col bg-white p-5 rounded-2xl border border-line shadow-2xs space-y-2">
-              <div className="flex items-start justify-between gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-muted leading-4 pt-1">Gross Profit (Margin)</span>
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-brand">
-                  <Coins className="h-4 w-4" />
-                </span>
+            <div className="relative flex min-h-[168px] flex-col bg-white p-5 rounded-2xl border border-line shadow-2xs space-y-2">
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-2xl bg-brand-soft text-brand flex items-center justify-center">
+                <Coins className="w-6 h-6" />
               </div>
-              <div className="flex items-baseline justify-between gap-2">
-                <span className="text-2xl font-black text-brand font-mono leading-none">
-                  {financialSummary.grossProfit.toLocaleString()} {currency}
-                </span>
-                <span className={`shrink-0 text-xs font-black px-2 py-0.5 rounded-full ${
-                  financialSummary.grossMarginPercent >= 50
-                    ? 'bg-success/10 text-success-deep'
-                    : 'bg-warning/15 text-warning'
-                }`}>
-                  {financialSummary.grossMarginPercent}% Gross
-                </span>
+              <div className="pr-14">
+                <span className="text-xs font-bold uppercase tracking-wider text-muted leading-4">Gross Profit (Margin)</span>
+                <div className="flex items-baseline justify-between gap-2 mt-2">
+                  <span className="text-2xl font-black text-brand font-mono leading-none">
+                    {financialSummary.grossProfit.toLocaleString()} {currency}
+                  </span>
+                  <span className={`shrink-0 text-xs font-black px-2 py-0.5 rounded-full ${
+                    financialSummary.grossMarginPercent >= 50
+                      ? 'bg-success/10 text-success-deep'
+                      : 'bg-warning/15 text-warning'
+                  }`}>
+                    {financialSummary.grossMarginPercent}% Gross
+                  </span>
+                </div>
               </div>
               <div className="mt-auto pt-2 border-t border-surface text-xs font-bold space-y-0.5">
                 <div className="flex justify-between text-muted">
@@ -434,15 +434,15 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
             </div>
 
             {/* OpEx Overhead Card */}
-            <div className="flex min-h-[168px] flex-col bg-white p-5 rounded-2xl border border-line shadow-2xs space-y-2">
-              <div className="flex items-start justify-between gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-muted leading-4 pt-1">Operating Expenses (OpEx)</span>
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-danger/10 text-danger">
-                  <Receipt className="h-4 w-4" />
-                </span>
+            <div className="relative flex min-h-[168px] flex-col bg-white p-5 rounded-2xl border border-line shadow-2xs space-y-2">
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-2xl bg-danger/10 text-danger flex items-center justify-center">
+                <Receipt className="w-6 h-6" />
               </div>
-              <div className="text-2xl font-black text-danger font-mono leading-none">
-                {financialSummary.totalOpEx.toLocaleString()} {currency}
+              <div className="pr-14">
+                <span className="text-xs font-bold uppercase tracking-wider text-muted leading-4">Operating Expenses (OpEx)</span>
+                <div className="text-2xl font-black text-danger font-mono leading-none mt-2">
+                  {financialSummary.totalOpEx.toLocaleString()} {currency}
+                </div>
               </div>
               <div className="mt-auto pt-2 border-t border-surface text-xs font-bold text-muted flex justify-between gap-2">
                 <span>Shop Rent, Utils, Tools, Mktg</span>
@@ -451,20 +451,20 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
             </div>
 
             {/* Net Profit Card */}
-            <div className="flex min-h-[168px] flex-col bg-white p-5 rounded-2xl border border-line shadow-2xs space-y-2">
-              <div className="flex items-start justify-between gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-muted leading-4 pt-1">Net Profit</span>
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-brand">
-                  <Sparkles className="h-4 w-4" />
-                </span>
+            <div className="relative flex min-h-[168px] flex-col bg-white p-5 rounded-2xl border border-line shadow-2xs space-y-2">
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-2xl bg-brand-soft text-brand flex items-center justify-center">
+                <Sparkles className="w-6 h-6" />
               </div>
-              <div className="flex items-baseline justify-between gap-2">
-                <span className="text-2xl font-black text-brand font-mono leading-none">
-                  {financialSummary.netProfit.toLocaleString()} {currency}
-                </span>
-                <span className="shrink-0 text-xs font-black bg-surface text-ink px-2 py-0.5 rounded-full border border-line">
-                  {financialSummary.netMarginPercent}% Net
-                </span>
+              <div className="pr-14">
+                <span className="text-xs font-bold uppercase tracking-wider text-muted leading-4">Net Profit</span>
+                <div className="flex items-baseline justify-between gap-2 mt-2">
+                  <span className="text-2xl font-black text-brand font-mono leading-none">
+                    {financialSummary.netProfit.toLocaleString()} {currency}
+                  </span>
+                  <span className="shrink-0 text-xs font-black bg-surface text-ink px-2 py-0.5 rounded-full border border-line">
+                    {financialSummary.netMarginPercent}% Net
+                  </span>
+                </div>
               </div>
               <div className="mt-auto pt-2 border-t border-surface text-xs text-muted flex justify-between font-bold gap-2">
                 <span>Net Formula:</span>

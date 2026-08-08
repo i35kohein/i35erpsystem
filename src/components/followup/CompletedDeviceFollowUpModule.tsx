@@ -11,6 +11,7 @@ import {PhoneCall,
   Phone,
   History,
   Check,
+  CalendarDays,
   Cpu} from 'lucide-react';
 import { WorkOrder, FollowUpStatus, FollowUpRecord, SystemSettings } from '../../types';
 import { Button , Input } from '../ui';
@@ -275,38 +276,63 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
 
         {/* Analytics Key Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3 pt-2">
-          <div className="bg-surface border border-line rounded-xl p-3 space-y-1">
-            <span className="text-xs font-semibold text-muted">Total Completed</span>
-            <div className="text-xl font-extrabold text-ink">{totalCompleted}</div>
+          <div className="relative bg-surface border border-line rounded-xl p-3 space-y-1">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-white border border-line text-muted flex items-center justify-center">
+              <UserCheck className="w-4 h-4" />
+            </div>
+            <div className="pr-10">
+              <span className="text-xs font-semibold text-muted">Total Completed</span>
+              <div className="text-xl font-extrabold text-ink">{totalCompleted}</div>
+            </div>
           </div>
 
-          <div className="bg-brand-soft/70 border border-indigo-200 rounded-xl p-3 space-y-1">
-            <span className="text-xs font-bold text-brand-deep">7-Day Check</span>
-            <div className="text-xl font-extrabold text-brand-deep">{count7Days}</div>
+          <div className="relative bg-brand-soft/70 border border-indigo-200 rounded-xl p-3 space-y-1">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-white text-brand-deep flex items-center justify-center">
+              <Clock className="w-4 h-4" />
+            </div>
+            <div className="pr-10">
+              <span className="text-xs font-bold text-brand-deep">7-Day Check</span>
+              <div className="text-xl font-extrabold text-brand-deep">{count7Days}</div>
+            </div>
           </div>
 
-          <div className="bg-purple/10/70 border border-purple/30 rounded-xl p-3 space-y-1">
-            <span className="text-xs font-bold text-purple">1-Month Check</span>
-            <div className="text-xl font-extrabold text-purple">{count30Days}</div>
+          <div className="relative bg-purple/10/70 border border-purple/30 rounded-xl p-3 space-y-1">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-white text-purple flex items-center justify-center">
+              <CalendarDays className="w-4 h-4" />
+            </div>
+            <div className="pr-10">
+              <span className="text-xs font-bold text-purple">1-Month Check</span>
+              <div className="text-xl font-extrabold text-purple">{count30Days}</div>
+            </div>
           </div>
 
-          <div className="bg-violet-50/80 border border-violet-200 rounded-xl p-3 space-y-1">
-            <span className="text-xs font-bold text-violet-900">2-Month Check</span>
-            <div className="text-xl font-extrabold text-violet-800">{count60Days}</div>
+          <div className="relative bg-violet-50/80 border border-violet-200 rounded-xl p-3 space-y-1">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-white text-violet-800 flex items-center justify-center">
+              <CalendarDays className="w-4 h-4" />
+            </div>
+            <div className="pr-10">
+              <span className="text-xs font-bold text-violet-900">2-Month Check</span>
+              <div className="text-xl font-extrabold text-violet-800">{count60Days}</div>
+            </div>
           </div>
 
-          <div className="bg-success/50 border border-success/30 rounded-xl p-3 space-y-1">
-            <span className="text-xs font-semibold text-success-deep">Satisfied</span>
-            <div className="text-xl font-extrabold text-success-deep">{satisfiedCount}</div>
+          <div className="relative bg-success/50 border border-success/30 rounded-xl p-3 space-y-1">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-white text-success-deep flex items-center justify-center">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
+            <div className="pr-10">
+              <span className="text-xs font-semibold text-success-deep">Satisfied</span>
+              <div className="text-xl font-extrabold text-success-deep">{satisfiedCount}</div>
+            </div>
           </div>
 
-          <div className="bg-warning/50 border border-warning/30 rounded-xl p-3 space-y-1 col-span-2 sm:col-span-1">
-            <span className="text-xs font-semibold text-warning">Avg Rating</span>
-            <div className="flex items-center space-x-1.5">
-              <span className="text-xl font-extrabold text-warning">{avgRating}</span>
-              <div className="flex items-center text-warning">
-                <Star className="w-4 h-4 fill-amber-400 text-warning" />
-              </div>
+          <div className="relative bg-warning/50 border border-warning/30 rounded-xl p-3 space-y-1 col-span-2 sm:col-span-1">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-white text-warning flex items-center justify-center">
+              <Star className="w-4 h-4 fill-amber-400 text-warning" />
+            </div>
+            <div className="pr-10">
+              <span className="text-xs font-semibold text-warning">Avg Rating</span>
+              <div className="text-xl font-extrabold text-warning">{avgRating}</div>
             </div>
           </div>
         </div>
