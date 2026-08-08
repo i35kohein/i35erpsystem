@@ -431,55 +431,71 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {qaDiagnostics.map((item, idx) => {
                     const IconComp = getDiagnosticIcon(item.name);
                     const isPass = item.status === 'Pass';
                     const isFail = item.status === 'Fail';
 
                     return (
-                      <div key={item.id} className={`flex items-center gap-1.5 px-2 py-1 text-[11px] rounded-lg border transition-colors ${
-                        isFail ? 'bg-danger/5 border-danger/15' : isPass ? 'bg-success/5 border-success/15' : 'bg-white border-line hover:border-brand/30'
+                      <div key={item.id} className={`rounded-xl border p-2.5 transition-colors ${
+                        isFail ? 'bg-danger/5 border-danger/20' : isPass ? 'bg-success/5 border-success/20' : 'bg-white border-line hover:border-brand/30'
                       }`}>
-                        {/* Number + icon + name — click to mark Pass */}
+                        {/* Big icon — click to cycle status */}
+                        <button
+                          type="button"
+                          onClick={() => cycleStatus(item.id, item.status)}
+                          className={`w-full h-11 rounded-lg flex items-center justify-center transition-all ${
+                            isFail
+                              ? 'bg-danger/15 text-danger'
+                              : isPass
+                              ? 'bg-success/15 text-success-deep'
+                              : 'bg-brand-soft text-brand hover:bg-brand/15'
+                          }`}
+                          title={`Status: ${item.status} — click to change`}
+                          aria-label={`Change status for ${item.name}`}
+                        >
+                          <IconComp className="w-5 h-5" />
+                        </button>
+
+                        {/* Name — click to mark Pass */}
                         <button
                           type="button"
                           onClick={() => handleDiagnosticStatusChange(item.id, 'Pass')}
-                          className="flex items-center gap-1 min-w-0 flex-1 text-left group"
+                          className={`w-full mt-1.5 text-[11px] font-bold truncate text-left transition-colors ${
+                            isPass ? 'text-success-deep' : 'text-ink hover:text-success-deep'
+                          }`}
                           title={`Mark ${item.name} as Pass`}
                           aria-label={`Mark ${item.name} as Pass`}
                         >
-                          <span
-                            role="button"
-                            tabIndex={0}
-                            onClick={(e) => { e.stopPropagation(); cycleStatus(item.id, item.status); }}
-                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); cycleStatus(item.id, item.status); } }}
-                            className={`w-3.5 h-3.5 rounded flex items-center justify-center shrink-0 transition-colors cursor-pointer ${
-                              isFail ? 'bg-danger/10 text-danger' : isPass ? 'bg-success/10 text-success-deep' : 'bg-surface text-muted group-hover:bg-success/15 group-hover:text-success-deep'
-                            }`}
-                            title={`Cycle status: ${item.status} → next`}
-                          >
-                            <IconComp className="w-2 h-2" />
-                          </span>
-                          <span className={`text-[10px] font-bold truncate transition-colors ${
-                            isPass ? 'text-success-deep' : 'text-ink group-hover:text-success-deep'
-                          }`}>{idx + 1}. {item.name}</span>
+                          {idx + 1}. {item.name}
                         </button>
 
-                        {/* Comment icon — neutral, click to show note input */}
-                        <Button
-                          type="button"
-                          onClick={() => toggleNote(item.id)}
-                          className={`!h-5 !min-h-5 w-5 px-0 rounded shrink-0 transition-colors ${
-                            noteOpenIds.has(item.id) ? 'bg-line text-muted' : 'text-muted hover:bg-line/60 hover:text-ink'
-                          }`}
-                          title={item.note ? `Note: ${item.note}` : 'Add note'}
-                          aria-label={`Add note for ${item.name}`}
-                        >
-                          <MessageSquare className="w-3 h-3" />
-                        </Button>
+                        {/* Footer: status pill + comment icon */}
+                        <div className="flex items-center justify-between gap-1 mt-1.5">
+                          <span className={`px-1.5 py-px rounded text-[9px] font-black leading-none ${
+                            isPass
+                              ? 'bg-success text-white'
+                              : isFail
+                              ? 'bg-danger text-white'
+                              : 'bg-slate-100 text-slate-500'
+                          }`}>
+                            {isPass ? '✓ PASS' : isFail ? '✕ FAIL' : 'NA'}
+                          </span>
+                          <Button
+                            type="button"
+                            onClick={() => toggleNote(item.id)}
+                            className={`!h-5 !min-h-5 w-5 px-0 rounded shrink-0 transition-colors ${
+                              noteOpenIds.has(item.id) ? 'bg-line text-muted' : 'text-muted hover:bg-line/60 hover:text-ink'
+                            }`}
+                            title={item.note ? `Note: ${item.note}` : 'Add note'}
+                            aria-label={`Add note for ${item.name}`}
+                          >
+                            <MessageSquare className="w-3 h-3" />
+                          </Button>
+                        </div>
 
-                        {/* Note input — only when open or has a note */}
+                        {/* Note input — only when open */}
                         {noteOpenIds.has(item.id) && (
                           <Input
                             type="text"
@@ -487,25 +503,9 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                             onChange={(e) => handleDiagnosticNoteChange(item.id, e.target.value)}
                             placeholder="Note..."
                             autoFocus
-                            className="!h-5 !min-h-5 w-24 shrink-0 rounded bg-surface border border-line px-1.5 text-[10px] text-ink focus:bg-white focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/20"
+                            className="!h-6 !min-h-6 mt-1.5 w-full rounded-md bg-surface border border-line px-1.5 text-[10px] text-ink focus:bg-white focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/20"
                           />
                         )}
-
-                        {/* Status — single pill, fixed width (no layout shift) */}
-                        <Button
-                          type="button"
-                          onClick={() => cycleStatus(item.id, item.status)}
-                          className={`!h-5 !min-h-5 w-12 px-0 rounded shrink-0 text-[9px] font-black leading-none transition-all border flex items-center justify-center ${
-                            isPass
-                              ? 'bg-success text-white border-success shadow-2xs'
-                              : isFail
-                              ? 'bg-danger text-white border-danger shadow-2xs'
-                              : 'bg-slate-100 text-slate-500 border-line hover:bg-slate-200'
-                          }`}
-                          title={`Current: ${item.status} — click to change`}
-                        >
-                          {isPass ? '✓ PASS' : isFail ? '✕ FAIL' : 'NA'}
-                        </Button>
                       </div>
                     );
                   })}
