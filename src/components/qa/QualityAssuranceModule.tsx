@@ -417,7 +417,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div className="divide-y divide-line rounded-xl border border-line bg-white overflow-hidden">
                   {qaDiagnostics.map((item, idx) => {
                     const IconComp = getDiagnosticIcon(item.name);
                     const isPass = item.status === 'Pass';
@@ -425,69 +425,58 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     const isNa = item.status === 'N/A';
 
                     return (
-                      <div key={item.id} className={`rounded-xl border p-2 text-xs transition-all ${
-                        isFail
-                          ? 'border-danger/40 bg-danger/5 shadow-2xs'
-                          : isPass
-                          ? 'border-success/40 bg-success/5 shadow-2xs'
-                          : 'border-line bg-white hover:border-brand/40'
+                      <div key={item.id} className={`flex items-center gap-2 px-2.5 py-1.5 text-xs transition-colors ${
+                        isFail ? 'bg-danger/5' : isPass ? 'bg-success/5' : 'bg-white hover:bg-surface'
                       }`}>
-                        {/* Header row: icon + name + status dot */}
-                        <div className="flex items-center justify-between gap-1.5">
-                          <div className="flex items-center space-x-1.5 min-w-0">
-                            <div className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 ${
-                              isFail ? 'bg-danger/10 text-danger' : isPass ? 'bg-success/10 text-success-deep' : 'bg-surface text-brand'
-                            }`}>
-                              <IconComp className="w-3 h-3" />
-                            </div>
-                            <span className="text-[11px] font-bold text-ink truncate">{idx + 1}. {item.name}</span>
-                          </div>
-                          <span className={`text-[10px] font-black px-1.5 py-px rounded tracking-wider uppercase shrink-0 ${
-                            isPass ? 'bg-success text-white' : isFail ? 'bg-danger text-white' : 'bg-slate-400 text-white'
+                        {/* Number + icon + name */}
+                        <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                          <span className={`w-4 h-4 rounded flex items-center justify-center shrink-0 ${
+                            isFail ? 'bg-danger/10 text-danger' : isPass ? 'bg-success/10 text-success-deep' : 'bg-surface text-muted'
                           }`}>
-                            {isPass ? 'PASS' : isFail ? 'FAIL' : 'N/A'}
+                            <IconComp className="w-2.5 h-2.5" />
                           </span>
+                          <span className="text-[11px] font-bold text-ink truncate">{idx + 1}. {item.name}</span>
                         </div>
 
-                        {/* Segmented Pass/Fail/N/A toggle — compact */}
-                        <div className="flex gap-1 mt-1.5">
+                        {/* Comment */}
+                        <Input
+                          type="text"
+                          value={item.note || ''}
+                          onChange={(e) => handleDiagnosticNoteChange(item.id, e.target.value)}
+                          placeholder="Note..."
+                          className="!h-6 !min-h-6 w-28 sm:w-36 shrink-0 rounded-md bg-surface border border-line px-1.5 text-[11px] text-ink focus:bg-white focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/20"
+                        />
+
+                        {/* Status segmented — compact */}
+                        <div className="flex gap-0.5 shrink-0">
                           <Button
                             type="button"
                             onClick={() => handleDiagnosticStatusChange(item.id, 'Pass')}
-                            className={`!h-6 !min-h-6 flex-1 rounded-md text-[10px] font-black transition-all ${
-                              isPass ? 'bg-success text-white shadow-2xs' : 'bg-surface text-ink hover:bg-success/15'
+                            className={`!h-6 !min-h-6 px-1.5 rounded-l-md text-[10px] font-black transition-all border border-r-0 ${
+                              isPass ? 'bg-success text-white border-success shadow-2xs' : 'bg-surface text-ink border-line hover:bg-success/15'
                             }`}
                           >
-                            ✓ Pass
+                            ✓
                           </Button>
                           <Button
                             type="button"
                             onClick={() => handleDiagnosticStatusChange(item.id, 'Fail')}
-                            className={`!h-6 !min-h-6 flex-1 rounded-md text-[10px] font-black transition-all ${
-                              isFail ? 'bg-danger text-white shadow-2xs' : 'bg-surface text-ink hover:bg-danger/15'
+                            className={`!h-6 !min-h-6 px-1.5 text-[10px] font-black transition-all border ${
+                              isFail ? 'bg-danger text-white border-danger shadow-2xs' : 'bg-surface text-ink border-line hover:bg-danger/15'
                             }`}
                           >
-                            ✕ Fail
+                            ✕
                           </Button>
                           <Button
                             type="button"
                             onClick={() => handleDiagnosticStatusChange(item.id, 'N/A')}
-                            className={`!h-6 !min-h-6 flex-1 rounded-md text-[10px] font-black transition-all ${
-                              isNa ? 'bg-slate-500 text-white shadow-2xs' : 'bg-surface text-ink hover:bg-slate-200'
+                            className={`!h-6 !min-h-6 px-1.5 rounded-r-md text-[10px] font-black transition-all border border-l-0 ${
+                              isNa ? 'bg-slate-500 text-white border-slate-500 shadow-2xs' : 'bg-surface text-ink border-line hover:bg-slate-200'
                             }`}
                           >
                             N/A
                           </Button>
                         </div>
-
-                        {/* Comment box — compact */}
-                        <Input
-                          type="text"
-                          value={item.note || ''}
-                          onChange={(e) => handleDiagnosticNoteChange(item.id, e.target.value)}
-                          placeholder={`Comment ${idx + 1}...`}
-                          className="!h-6 !min-h-6 mt-1.5 w-full rounded-md bg-surface border border-line px-2 text-[11px] text-ink focus:bg-white focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/20"
-                        />
                       </div>
                     );
                   })}
