@@ -16,25 +16,19 @@ import {Coins,
   ArrowUpRight,
   Boxes,
   ClipboardList,
-  Inbox,
   ListFilter,
   Copy,
   Search,
-  RefreshCw,
-  Printer,
-  Eye} from 'lucide-react';
+  RefreshCw} from 'lucide-react';
 import { WorkOrder, PartItem, RmaItem, Technician, WorkOrderStatus } from '../../types';
 import { Button , Input } from '../ui';
 
 import { DateFilterState, filterByDateRange} from '../common/DateFilterSelector';
-import { timeAgoShort } from '../../utils/timeAgo';
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend } from 'recharts';
 import { TechnicianPerformanceTab } from './TechnicianPerformanceTab';
 import { TechnicianLeaderboardView } from './TechnicianLeaderboardView';
 import { TechnicianDetailModal } from './TechnicianDetailModal';
 import { computeTechStats } from '../../utils/techAnalytics';
-import { StatusBadge } from '../common/StatusBadge';
-import { PriorityBadge } from '../common/PriorityBadge';
 import { TicketDetailInspectorModal } from '../common/TicketDetailInspectorModal';
 
 interface DashboardOverviewProps {
@@ -164,13 +158,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const [detailTechId, setDetailTechId] = useState<string | null>(null);
   const detailTech = detailTechId ? technicians.find((t) => t.id === detailTechId) || null : null;
 
-  const [statusQueueFilter, setStatusQueueFilter] = useState<string>('ALL');
-  const [queueSearchQuery, setQueueSearchQuery] = useState<string>('');
-  const [queueTechFilter, setQueueTechFilter] = useState<string>('ALL');
-  const [queuePriorityFilter, setQueuePriorityFilter] = useState<string>('ALL');
-
-  const pipelineStatuses = useMemo(() => ['Receive', 'In Progress', 'Pending', 'Finished'], []);
-
   // Warranty Watch Subtab Controls
   const [warrantySearchQuery, setWarrantySearchQuery] = useState<string>('');
   const [warrantyFilterTab, setWarrantyFilterTab] = useState<'ALL_EXPIRING' | 'CRITICAL' | 'WARNING' | 'EXPIRED' | 'ALL'>('ALL_EXPIRING');
@@ -265,44 +252,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     (wo) => wo.inventoryConsumptionAmount && wo.inventorySettlementStatus !== 'settled'
   );
   const pendingFundTotal = pendingFundTickets.reduce((sum, wo) => sum + (wo.inventoryConsumptionAmount || 0), 0);
-  const statusQueueWorkOrders = useMemo(() => {
-    return filteredWorkOrders.filter((wo) => {
-      // 1. Filter by Status Chip / Mode
-      if (statusQueueFilter === 'PIPELINE') {
-        if (!pipelineStatuses.includes(wo.status)) return false;
-      } else if (statusQueueFilter !== 'ALL') {
-        if (wo.status !== statusQueueFilter) return false;
-      }
-
-      // 2. Filter by Technician
-      if (queueTechFilter !== 'ALL') {
-        if (queueTechFilter === 'unassigned' && wo.assignedTechId) return false;
-        if (queueTechFilter !== 'unassigned' && wo.assignedTechId !== queueTechFilter) return false;
-      }
-
-      // 3. Filter by Priority
-      if (queuePriorityFilter !== 'ALL') {
-        if (queuePriorityFilter === 'Urgent') {
-          if (wo.priority !== 'Urgent' && wo.priority !== 'Rush') return false;
-        } else if (wo.priority !== queuePriorityFilter) {
-          return false;
-        }
-      }
-
-      // 4. Filter by Search Query
-      if (queueSearchQuery.trim()) {
-        const q = queueSearchQuery.toLowerCase();
-        const matchOrder = (wo.orderNumber || wo.id).toLowerCase().includes(q);
-        const matchCust = (wo.customerName || '').toLowerCase().includes(q) || (wo.customerPhone || '').toLowerCase().includes(q);
-        const matchDevice = (wo.deviceModel || '').toLowerCase().includes(q) || (wo.serialNumber || '').toLowerCase().includes(q) || (wo.imei || '').toLowerCase().includes(q);
-        const matchIssue = (wo.symptomsReported || '').toLowerCase().includes(q) || (wo.serviceType || '').toLowerCase().includes(q);
-        if (!matchOrder && !matchCust && !matchDevice && !matchIssue) return false;
-      }
-
-      return true;
-    });
-  }, [filteredWorkOrders, statusQueueFilter, queueTechFilter, queuePriorityFilter, queueSearchQuery, pipelineStatuses]);
-
   // Revenue-eligible statuses only: quoted subtotals on tickets that were
   // never repaired (Cant Repair / Customer Not Repair) are NOT revenue, and
   // unpaid-but-finished work is still billed revenue (collected is tracked
@@ -614,11 +563,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         <div
           role="button"
           tabIndex={0}
-          onClick={() => {
-            setActiveDashboardSubTab('status-queue');
-            setStatusQueueFilter('ALL');
-          }}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveDashboardSubTab('status-queue'); setStatusQueueFilter('ALL'); } }}
+          onClick={() => setActiveDashboardSubTab('status-queue')}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveDashboardSubTab('status-queue'); } }}
           aria-label="View active repairs queue"
           className="group relative bg-white p-4 rounded-2xl border border-line shadow-2xs hover:shadow-md hover:border-brand/50 transition-all cursor-pointer overflow-hidden select-none"
         >
@@ -641,11 +587,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         <div 
           role="button"
           tabIndex={0}
-          onClick={() => {
-            setActiveDashboardSubTab('status-queue');
-            setStatusQueueFilter('Finished');
-          }}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveDashboardSubTab('status-queue'); setStatusQueueFilter('Finished'); } }}
+          onClick={() => setActiveDashboardSubTab('status-queue')}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveDashboardSubTab('status-queue'); } }}
           aria-label="View ready for pickup"
           className="group relative bg-white p-4 rounded-2xl border border-line shadow-2xs hover:shadow-md hover:border-emerald-500/50 transition-all cursor-pointer overflow-hidden select-none"
         >
@@ -963,252 +906,211 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       {/* SUBTAB 1: STATUS QUEUE */}
       {activeDashboardSubTab === 'status-queue' && (
         <div role="tabpanel" id="dash-panel-status-queue" aria-labelledby="dash-tab-status-queue" className="space-y-6">
-          {/* Live Work Order Status Analytics Queue Roster Table */}
-          <div className="bg-white border border-line rounded-2xl p-5 shadow-xs space-y-4">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-line">
-              <div className="space-y-0.5">
-                <div className="flex items-center space-x-2">
-                  <ClipboardList className="w-4 h-4 text-brand" />
-                  <h3 className="text-sm font-extrabold text-ink truncate">
-                    <span className="hidden md:inline">Live Work Order Status Analytics Queue Roster</span>
-                    <span className="md:hidden">Queue Roster</span>
-                  </h3>
-                  <span className="px-2.5 py-0.5 bg-brand/10 text-brand-deep rounded-full text-xs font-mono font-bold whitespace-nowrap">
-                    {statusQueueWorkOrders.length} <span className="hidden md:inline">{statusQueueWorkOrders.length === 1 ? 'Ticket' : 'Tickets'}</span>
-                  </span>
-                  {statusQueueFilter !== 'ALL' && (
-                    <span className="px-2.5 py-0.5 bg-brand/15 text-brand-deep rounded-full text-xs font-mono font-bold">
-                      {statusQueueFilter === 'PIPELINE' ? 'Pipeline Data Only' : `Stage: ${statusQueueFilter}`}
-                    </span>
-                  )}
-                </div>
-                <p className="hidden sm:block text-xs text-muted">Analytic roster filtered by stage, tech, priority</p>
+          {/* Analytics Grid — stage, devices, categories, finance, inventory, tech, warranty */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3.5">
+
+            {/* Stage Distribution */}
+            <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs">
+              <div className="flex items-center space-x-2 mb-3">
+                <ListFilter className="w-4 h-4 text-brand" />
+                <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Stage Distribution</h3>
+              </div>
+              <div className="space-y-2.5">
+                {[
+                  { label: 'Received', count: filteredWorkOrders.filter((w) => w.status === 'Receive').length, bar: 'bg-brand', text: 'text-brand' },
+                  { label: 'In Progress', count: filteredWorkOrders.filter((w) => w.status === 'In Progress').length, bar: 'bg-purple', text: 'text-purple' },
+                  { label: 'Pending', count: filteredWorkOrders.filter((w) => w.status === 'Pending').length, bar: 'bg-warning', text: 'text-warning' },
+                  { label: 'Finished', count: filteredWorkOrders.filter((w) => w.status === 'Finished').length, bar: 'bg-success', text: 'text-success-deep' },
+                  { label: 'Taken Out', count: filteredWorkOrders.filter((w) => w.status === 'Taken Out').length, bar: 'bg-slate-400', text: 'text-muted' },
+                ].map((s) => {
+                  const pct = filteredWorkOrders.length > 0 ? Math.round((s.count / filteredWorkOrders.length) * 100) : 0;
+                  return (
+                    <div key={s.label} className="space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-bold text-ink">{s.label}</span>
+                        <span className={`font-mono font-black ${s.text}`}>{s.count} · {pct}%</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-line rounded-full overflow-hidden">
+                        <div className={`h-full ${s.bar} rounded-full transition-all duration-500`} style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Queue Search & Quick Filter Controls */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface p-3 rounded-xl border border-line">
-              <div className="relative flex-1 min-w-[200px]">
-                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-                <Input
-                  type="text"
-                  value={queueSearchQuery}
-                  onChange={(e) => setQueueSearchQuery(e.target.value)}
-                  placeholder="Search analytics queue by order #, customer, model, serial..."
-                  className="w-full h-10 bg-white text-sm text-ink placeholder-muted pl-8 pr-7 rounded-xl border border-line focus:outline-none focus:border-brand transition-all"
-                />
-                {queueSearchQuery && (
-                  <Button
-  variant="ghost" size="iconSm"
-  
-                    type="button"
-                    onClick={() => setQueueSearchQuery('')}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-muted hover:text-ink"
-                  >
-                    ×
-                  </Button>
-                )}
+            {/* Top Repair Devices */}
+            <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs">
+              <div className="flex items-center space-x-2 mb-3">
+                <Smartphone className="w-4 h-4 text-purple" />
+                <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Top Repair Devices</h3>
               </div>
+              {topRepairDevices.length === 0 ? (
+                <p className="text-xs text-muted text-center py-8">No tickets in range</p>
+              ) : (
+                <div className="space-y-2">
+                  {topRepairDevices.slice(0, 5).map((dev, idx) => {
+                    const maxCount = topRepairDevices[0]?.count || 1;
+                    const barPct = Math.max(8, Math.round((dev.count / maxCount) * 100));
+                    return (
+                      <div key={dev.name} className="space-y-1">
+                        <div className="flex items-center justify-between gap-2 text-xs">
+                          <span className="font-bold text-ink truncate">{idx + 1}. {dev.name}</span>
+                          <span className="font-mono font-black text-ink shrink-0">{dev.count} tickets</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-line rounded-full overflow-hidden">
+                          <div className="h-full bg-purple rounded-full" style={{ width: `${barPct}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
-              <div className="flex items-center space-x-2 flex-wrap">
-                {/* Tech Filter Select */}
-                <select
-                  aria-label="Filter by technician"
-                  value={queueTechFilter}
-                  onChange={(e) => setQueueTechFilter(e.target.value)}
-                  className="min-h-10 bg-white text-xs text-ink font-semibold px-2.5 py-1.5 rounded-lg border border-line focus:outline-none focus:border-brand"
-                >
-                  <option value="ALL">All Technicians</option>
-                  <option value="unassigned">Unassigned</option>
-                  {technicians.map((t) => (
-                    <option key={t.id} value={t.id}>{t.name}</option>
+            {/* Repair Categories */}
+            <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs">
+              <div className="flex items-center space-x-2 mb-3">
+                <Activity className="w-4 h-4 text-brand" />
+                <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Repair Categories</h3>
+              </div>
+              {topRepairCategories.length === 0 ? (
+                <p className="text-xs text-muted text-center py-8">No data</p>
+              ) : (
+                <div className="space-y-2.5">
+                  {topRepairCategories.slice(0, 4).map((cat) => (
+                    <div key={cat.id} className="flex items-center justify-between gap-2">
+                      <div className="flex items-center space-x-2 min-w-0">
+                        <span className={`w-7 h-7 rounded-lg ${cat.bgLight} ${cat.textCol} flex items-center justify-center shrink-0`}>
+                          <cat.icon className="w-3.5 h-3.5" />
+                        </span>
+                        <span className="text-xs font-bold text-ink truncate">{cat.label}</span>
+                      </div>
+                      <div className="flex items-center space-x-2 shrink-0">
+                        <span className="font-mono text-xs font-black text-ink">{cat.count}</span>
+                        <span className="text-[11px] font-bold text-muted w-11 text-right">{cat.percentage}%</span>
+                      </div>
+                    </div>
                   ))}
-                </select>
+                </div>
+              )}
+            </div>
 
-                {/* Priority Filter Select */}
-                <select
-                  aria-label="Filter by priority"
-                  value={queuePriorityFilter}
-                  onChange={(e) => setQueuePriorityFilter(e.target.value)}
-                  className="min-h-10 bg-white text-xs text-ink font-semibold py-1.5 px-2.5 rounded-lg border border-line focus:outline-none focus:border-brand"
-                >
-                  <option value="ALL">All Priorities</option>
-                  <option value="Urgent">Urgent</option>
-                  <option value="B2B Priority">B2B Priority</option>
-                  <option value="Normal">Normal</option>
-                  <option value="Warranty Redo">Warranty Redo</option>
-                </select>
-
-                {(statusQueueFilter !== 'ALL' || queueTechFilter !== 'ALL' || queuePriorityFilter !== 'ALL' || queueSearchQuery) && (
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      setStatusQueueFilter('ALL');
-                      setQueueTechFilter('ALL');
-                      setQueuePriorityFilter('ALL');
-                      setQueueSearchQuery('');
-                    }}
-                    className="min-h-10 bg-line hover:bg-line text-muted text-xs font-bold rounded-lg transition-all cursor-pointer shrink-0 px-2.5"
-                  >
-                    Reset Filters
-                  </Button>
-                )}
+            {/* Financial Snapshot */}
+            <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs">
+              <div className="flex items-center space-x-2 mb-3">
+                <Coins className="w-4 h-4 text-success" />
+                <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Financial Snapshot</h3>
+              </div>
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted font-medium">Collected</span>
+                  <span className="font-mono font-black text-success-deep">{financialAnalytics.totalCollected.toLocaleString()} MMK</span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted font-medium">Unpaid Balance</span>
+                  <span className="font-mono font-black text-danger">{financialAnalytics.totalUnpaidBalance.toLocaleString()} MMK</span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted font-medium">Paid Tickets</span>
+                  <span className="font-mono font-black text-ink">{financialAnalytics.paidCount}</span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted font-medium">Unpaid Tickets</span>
+                  <span className="font-mono font-black text-ink">{financialAnalytics.unpaidCount}</span>
+                </div>
+                <div className="pt-2 border-t border-line">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted font-medium">Margin</span>
+                    <span className={`font-mono font-black ${marginPercent < 0 ? 'text-danger' : 'text-success-deep'}`}>{marginPercent}%</span>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Work Orders Queue Table */}
-            {statusQueueWorkOrders.length === 0 ? (
-              <div className="p-8 text-center text-xs text-muted space-y-2 bg-surface rounded-xl border border-dashed border-line-strong">
-                <Inbox className="w-8 h-8 text-muted mx-auto opacity-60" />
-                <p className="font-extrabold text-sm text-ink">No Work Orders in Queue Matching Selection</p>
-                <p className="text-xs">
-                  {statusQueueFilter !== 'ALL'
-                    ? `There are currently no tickets matching stage filter "${statusQueueFilter}".`
-                    : 'Try adjusting your search query or reset status filters.'}
-                </p>
-                <div className="pt-2 flex items-center justify-center space-x-2">
-                  {statusQueueFilter !== 'ALL' && (
-                    <Button
-  variant="default" size="sm"
-  
-                      type="button"
-                      onClick={() => setStatusQueueFilter('ALL')}
-                      className="px-3 py-1.5 bg-brand text-white text-xs font-bold rounded-lg hover:bg-brand-deep transition-all cursor-pointer"
-                    >
-                      Show All Stages
-                    </Button>
-                  )}
+            {/* Inventory Snapshot */}
+            <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs">
+              <div className="flex items-center space-x-2 mb-3">
+                <Boxes className="w-4 h-4 text-warning" />
+                <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Inventory</h3>
+              </div>
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted font-medium">Total Items</span>
+                  <span className="font-mono font-black text-ink">{inventoryAnalytics.totalItems}</span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted font-medium">Stock Value</span>
+                  <span className="font-mono font-black text-ink">{inventoryAnalytics.totalValuation.toLocaleString()} MMK</span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted font-medium">Low Stock</span>
+                  <span className={`font-mono font-black ${inventoryAnalytics.lowStockCount > 0 ? 'text-warning' : 'text-success-deep'}`}>
+                    {inventoryAnalytics.lowStockCount} SKUs
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted font-medium">Repair Parts Low</span>
+                  <span className={`font-mono font-black ${repairLowStockParts.length > 0 ? 'text-danger' : 'text-success-deep'}`}>
+                    {repairLowStockParts.length}
+                  </span>
                 </div>
               </div>
-            ) : (
-              <div className="relative">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="sticky top-0 z-10">
-                    <tr className="border-b border-line text-muted font-bold text-xs uppercase tracking-wider bg-surface">
-                      <th className="py-2.5 px-3">Ticket # & Date</th>
-                      <th className="py-2.5 px-3">Customer & Contact</th>
-                      <th className="py-2.5 px-3">Device & Serial/IMEI</th>
-                      <th className="py-2.5 px-3 hidden lg:table-cell">Symptoms / Service</th>
-                      <th className="py-2.5 px-3 hidden lg:table-cell">Assigned Tech</th>
-                      <th className="py-2.5 px-3 hidden xl:table-cell">Priority</th>
-                      <th className="py-2.5 px-3">Stage & Status</th>
-                      <th className="py-2.5 px-3">Amount</th>
-                      <th className="py-2.5 px-3 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-line">
-                    {statusQueueWorkOrders.map((wo) => {
-                      const createdDate = timeAgoShort(wo.createdAt);
-                      const createdDateFull = new Date(wo.createdAt || Date.now()).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                      });
-                      const totalAmt = wo.totalAmount || wo.subtotal || 0;
+            </div>
 
-                      return (
-                        <tr key={wo.id} className="hover:bg-surface transition-colors">
-                          {/* Ticket # & Date */}
-                          <td className="py-3 px-3">
-                            <p className="font-mono font-black text-brand text-xs">{wo.orderNumber || wo.id}</p>
-                            <span className="text-xs text-muted" title={createdDateFull}>{createdDate}</span>
-                          </td>
-
-                          {/* Customer */}
-                          <td className="py-3 px-3">
-                            <p className="font-bold text-ink truncate max-w-[140px]">{wo.customerName}</p>
-                            <p className="text-xs text-muted font-mono">{wo.customerPhone}</p>
-                          </td>
-
-                          {/* Device & Serial */}
-                          <td className="py-3 px-3">
-                            <p className="font-semibold text-ink truncate max-w-[150px]">{wo.deviceModel}</p>
-                            <p className="text-xs font-mono text-muted truncate max-w-[150px]">
-                              {wo.serialNumber || wo.imei ? `SN: ${wo.serialNumber || wo.imei}` : 'No Serial'}
-                            </p>
-                          </td>
-
-                          {/* Symptoms / Service */}
-                          <td className="py-3 px-3 hidden lg:table-cell">
-                            <p className="text-xs text-ink line-clamp-1 max-w-[180px]" title={wo.symptomsReported || wo.serviceType}>
-                              {wo.symptomsReported || wo.serviceType || 'General Repair'}
-                            </p>
-                          </td>
-
-                          {/* Assigned Tech */}
-                          <td className="py-3 px-3 hidden lg:table-cell">
-                            <div className="flex items-center space-x-1.5">
-                              <div className="w-5 h-5 rounded-full bg-line text-muted font-bold text-xs flex items-center justify-center shrink-0">
-                                {(wo.assignedTechName || 'U').charAt(0)}
-                              </div>
-                              <span className="text-xs text-ink font-medium truncate max-w-[100px]">
-                                {wo.assignedTechName || 'Unassigned'}
-                              </span>
-                            </div>
-                          </td>
-
-                          {/* Priority */}
-                          <td className="py-3 px-3 hidden xl:table-cell">
-                            <PriorityBadge priority={wo.priority} />
-                          </td>
-
-                          {/* Stage & Status (Read-Only Badge) */}
-                          <td className="py-3 px-3">
-                            <StatusBadge status={wo.status} />
-                          </td>
-
-                          {/* Financial Amount */}
-                          <td className="py-3 px-3">
-                            <p className="font-mono font-extrabold text-xs text-ink">
-                              {totalAmt.toLocaleString()} MMK
-                            </p>
-                            <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
-                              wo.isPaid ? 'bg-success/15 text-success-deep' : 'bg-danger/15 text-danger'
-                            }`}>
-                              {wo.isPaid ? 'Paid' : 'Unpaid'}
-                            </span>
-                          </td>
-
-                          {/* Ticket status inspector and label export */}
-                          <td className="py-3 px-3 text-right">
-                            <div className="inline-flex items-center justify-end gap-1.5">
-                              <Button
-  variant="secondary" size="sm"
-  
-                                type="button"
-                                onClick={() => setRosterTicket(wo)}
-                                className="border border-line bg-brand-soft px-2.5 text-brand hover:bg-white"
-                                title="View Ticket Status"
-                                aria-label={`View status for ${wo.orderNumber || wo.id}`}
-                              >
-                                <Eye className="h-3.5 w-3.5" />
-                                <span>View</span>
-                              </Button>
-                              {onSelectPrintTag && (
-                              <Button
-  variant="secondary" size="sm"
-  
-                                type="button"
-                                onClick={() => onSelectPrintTag(wo)}
-                                className="px-2.5 hover:bg-line border border-line"
-                                title="Print Device Label Tag"
-                              >
-                                <Printer className="w-3.5 h-3.5 text-brand" />
-                                <span>Tag</span>
-                              </Button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+            {/* Technician Load */}
+            <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs">
+              <div className="flex items-center space-x-2 mb-3">
+                <Users className="w-4 h-4 text-brand" />
+                <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Technician Load</h3>
               </div>
-              {/* Right-edge fade on scrollable roster (below xl) */}
-              <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-6 rounded-r-xl bg-gradient-to-l from-surface/80 to-transparent xl:hidden" />
+              {techLoadData.length === 0 ? (
+                <p className="text-xs text-muted text-center py-8">No technicians</p>
+              ) : (
+                <div className="space-y-2.5">
+                  {techLoadData.map(({ tech, activeCount }) => {
+                    const maxLoad = Math.max(...techLoadData.map((t) => t.activeCount), 1);
+                    const pct = Math.max(8, Math.round((activeCount / maxLoad) * 100));
+                    return (
+                      <div key={tech.id} className="space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-bold text-ink truncate">{tech.name}</span>
+                          <span className="font-mono font-black text-ink">{activeCount} jobs</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-line rounded-full overflow-hidden">
+                          <div className="h-full bg-brand rounded-full" style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Warranty Watch */}
+            <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs">
+              <div className="flex items-center space-x-2 mb-3">
+                <ShieldAlert className="w-4 h-4 text-purple" />
+                <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Warranty Watch</h3>
               </div>
-            )}
+              {expiringSoonWorkOrders.length === 0 ? (
+                <p className="text-xs text-muted text-center py-8">No warranties expiring soon</p>
+              ) : (
+                <div className="space-y-2">
+                  {expiringSoonWorkOrders.slice(0, 4).map((item) => (
+                    <div key={item.wo.id} className="flex items-center justify-between gap-2 text-xs">
+                      <div className="min-w-0">
+                        <p className="font-bold text-ink truncate">{item.wo.customerName}</p>
+                        <p className="text-[11px] text-muted truncate">{item.wo.deviceModel}</p>
+                      </div>
+                      <span className={`font-mono font-black shrink-0 ${item.isCritical ? 'text-danger' : 'text-warning'}`}>
+                        {item.remainingDays}d
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
