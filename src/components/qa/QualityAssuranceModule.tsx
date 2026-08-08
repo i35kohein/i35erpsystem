@@ -417,7 +417,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-px rounded-xl border border-line bg-line overflow-hidden">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
                   {qaDiagnostics.map((item, idx) => {
                     const IconComp = getDiagnosticIcon(item.name);
                     const isPass = item.status === 'Pass';
@@ -425,8 +425,8 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     const isNa = item.status === 'N/A';
 
                     return (
-                      <div key={item.id} className={`flex items-center gap-1.5 px-2 py-1 text-[11px] transition-colors ${
-                        isFail ? 'bg-danger/5' : isPass ? 'bg-success/5' : 'bg-white hover:bg-surface'
+                      <div key={item.id} className={`flex items-center gap-1.5 px-2 py-1 text-[11px] rounded-lg border transition-colors ${
+                        isFail ? 'bg-danger/5 border-danger/15' : isPass ? 'bg-success/5 border-success/15' : 'bg-white border-line hover:border-brand/30'
                       }`}>
                         {/* Number + icon + name */}
                         <div className="flex items-center gap-1 min-w-0 flex-1">
