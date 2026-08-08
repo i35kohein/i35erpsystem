@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import {ChevronsRight,
+  ChevronDown,
   Eye,
-  EyeOff, 
   Clock, 
   Timer,
   AlertCircle,
@@ -17,7 +17,9 @@ import {ChevronsRight,
   BellRing,
   Stethoscope,
   GitBranch,
-  MoreHorizontal} from 'lucide-react';
+  MoreHorizontal,
+  SlidersHorizontal,
+  Check} from 'lucide-react';
 import {WorkOrder, 
   WorkOrderStatus, 
   Technician, 
@@ -191,6 +193,8 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
   const [localTechFilter, setLocalTechFilter] = useState<string>('ALL');
   // Mobile kanban horizontal-scroll affordance (Cant Repair / Customer Not Repair live at the far right)
   const [kanbanAtEnd, setKanbanAtEnd] = useState(false);
+  const [isViewMenuOpen, setIsViewMenuOpen] = useState(false);
+  const viewMenuRef = useRef<HTMLDivElement>(null);
   // Hide the exception columns (Cant Repair / Customer Not Repair) by default — Show All reveals them
   const [localDateFilter, setLocalDateFilter] = useState<DateFilterState>({ preset: 'all' });
   const [localShowBottlenecksOnly, setLocalShowBottlenecksOnly] = useState<boolean>(false);
@@ -599,87 +603,192 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
         </div>
 
         <div className="hidden lg:grid lg:grid-cols-2 xl:flex xl:flex-wrap xl:items-center xl:justify-end gap-1.5">
-          <Button
-            type="button"
-            onClick={() => setShowAllStages((v) => !v)}
-            className={`inline-flex w-full sm:w-auto h-8 sm:h-7 items-center justify-center gap-1 rounded-md border px-2 text-xs font-bold transition-colors cursor-pointer ${
-              showAllStages
-                ? 'bg-ink text-white border-ink shadow-2xs'
-                : 'bg-white text-ink border-line hover:bg-surface'
-            }`}
-            title={showAllStages ? 'Hide the exception columns again' : 'Show Cant Repair and Customer Not Repair columns'}
-          >
-            {showAllStages ? (
-              <><EyeOff className="w-3 h-3 shrink-0" /><span>Hide Exceptions</span></>
-            ) : (
-              <><Eye className="w-3 h-3 shrink-0" /><span>Show Exceptions{hiddenStageCounts.some((h) => h.count > 0) ? ` (${hiddenStageCounts.filter((h) => h.count > 0).map((h) => `${h.id}:${h.count}`).join(' · ')})` : ''}</span></>
-            )}
-          </Button>
-
-          <Button
-            type="button"
-            onClick={() => {
-              setShowBeforeNeedsDiagOnly(!showBeforeNeedsDiagOnly);
-              setShowNeedsDiagOnly(false);
-            }}
-                className={`inline-flex w-full sm:w-auto h-8 sm:h-7 items-center justify-center gap-1 rounded-md border px-2 text-xs font-bold transition-colors cursor-pointer ${
-                  showBeforeNeedsDiagOnly
-                    ? 'bg-brand text-white border-blue-700 shadow-2xs'
-                    : 'bg-brand-soft text-brand border-brand/30 hover:bg-brand/15'
-                }`}
-          >
-            <Stethoscope className="h-3 w-3 shrink-0" />
-            <span>Before-Diag Pending ({beforeNeedsDiagTotalCount})</span>
-          </Button>
-
-          <Button
-            type="button"
-            onClick={() => {
-              setShowNeedsDiagOnly(!showNeedsDiagOnly);
-              setShowBeforeNeedsDiagOnly(false);
-            }}
-              className={`inline-flex w-full sm:w-auto h-8 sm:h-7 items-center justify-center gap-1 rounded-md border px-2 text-xs font-bold transition-colors cursor-pointer ${
-                showNeedsDiagOnly
-                  ? 'bg-purple text-white border-purple-700 shadow-2xs'
-                  : 'bg-purple/10 text-purple border-purple/30 hover:bg-purple/15'
-              }`}
-          >
-            <ShieldCheck className="h-3 w-3 shrink-0" />
-            <span>After-Diag Pending ({afterNeedsDiagTotalCount})</span>
-          </Button>
-
           {showBottlenecksOnly && (
             <span className="inline-flex h-7 items-center gap-1 rounded-md border border-red-600 bg-danger/100 px-2 text-xs font-bold text-white shadow-2xs">
               <Timer className="h-3 w-3 shrink-0" />
               <span>Filtering Bottlenecks (&gt;48h)</span>
             </span>
           )}
+
+          {/* View Options — one menu for all view toggles (decluttered toolbar) */}
+          <div className="relative" ref={viewMenuRef}>
+            <Button
+              type="button"
+              onClick={() => setIsViewMenuOpen((v) => !v)}
+              aria-expanded={isViewMenuOpen}
+              aria-haspopup="menu"
+              className="inline-flex h-7 items-center justify-center gap-1 rounded-md border px-2 text-xs font-bold transition-colors cursor-pointer bg-white text-ink border-line hover:bg-surface"
+            >
+              <SlidersHorizontal className="w-3 h-3 shrink-0 text-brand" />
+              <span>View Options</span>
+              {(showAllStages || showBeforeNeedsDiagOnly || showNeedsDiagOnly) && (
+                <span className="rounded-full bg-brand/15 text-brand px-1.5 py-0.5 text-xs font-black">
+                  {[showAllStages, showBeforeNeedsDiagOnly, showNeedsDiagOnly].filter(Boolean).length}
+                </span>
+              )}
+              <ChevronDown className="w-3 h-3 shrink-0 text-muted" />
+            </Button>
+
+            {isViewMenuOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setIsViewMenuOpen(false)}
+                  role="presentation"
+                  aria-hidden="true"
+                />
+                <div
+                  role="menu"
+                  className="absolute right-0 top-full mt-1.5 z-50 w-60 rounded-xl border border-line bg-white p-1.5 shadow-xl"
+                >
+                  <p className="px-2.5 pt-1.5 pb-1 text-xs font-extrabold uppercase tracking-wider text-muted">Board View</p>
+                  <button
+                    type="button"
+                    role="menuitemcheckbox"
+                    aria-checked={showAllStages}
+                    onClick={() => { setShowAllStages((v) => !v); }}
+                    className="w-full flex items-center justify-between gap-2 px-2.5 py-2 text-xs font-bold rounded-lg hover:bg-surface transition-colors cursor-pointer text-left"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Eye className="w-3.5 h-3.5 text-brand" />
+                      Show Exception Stages
+                      {hiddenStageCounts.some((h) => h.count > 0) && (
+                        <span className="rounded-full px-1.5 py-0.5 text-xs font-black bg-danger/15 text-danger">
+                          {hiddenStageCounts.filter((h) => h.count > 0).reduce((acc, h) => acc + h.count, 0)}
+                        </span>
+                      )}
+                    </span>
+                    {showAllStages && <Check className="w-3.5 h-3.5 text-brand shrink-0" />}
+                  </button>
+
+                  <p className="px-2.5 pt-2 pb-1 text-xs font-extrabold uppercase tracking-wider text-muted">Diagnostics</p>
+                  <button
+                    type="button"
+                    role="menuitemcheckbox"
+                    aria-checked={showBeforeNeedsDiagOnly}
+                    onClick={() => { setShowBeforeNeedsDiagOnly(!showBeforeNeedsDiagOnly); setShowNeedsDiagOnly(false); }}
+                    className="w-full flex items-center justify-between gap-2 px-2.5 py-2 text-xs font-bold rounded-lg hover:bg-surface transition-colors cursor-pointer text-left"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Stethoscope className="w-3.5 h-3.5 text-brand" />
+                      Before-Diag Pending
+                      {beforeNeedsDiagTotalCount > 0 && (
+                        <span className="rounded-full px-1.5 py-0.5 text-xs font-black bg-brand/15 text-brand">{beforeNeedsDiagTotalCount}</span>
+                      )}
+                    </span>
+                    {showBeforeNeedsDiagOnly && <Check className="w-3.5 h-3.5 text-brand shrink-0" />}
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitemcheckbox"
+                    aria-checked={showNeedsDiagOnly}
+                    onClick={() => { setShowNeedsDiagOnly(!showNeedsDiagOnly); setShowBeforeNeedsDiagOnly(false); }}
+                    className="w-full flex items-center justify-between gap-2 px-2.5 py-2 text-xs font-bold rounded-lg hover:bg-surface transition-colors cursor-pointer text-left"
+                  >
+                    <span className="flex items-center gap-2">
+                      <ShieldCheck className="w-3.5 h-3.5 text-purple" />
+                      After-Diag Pending
+                      {afterNeedsDiagTotalCount > 0 && (
+                        <span className="rounded-full px-1.5 py-0.5 text-xs font-black bg-purple/15 text-purple">{afterNeedsDiagTotalCount}</span>
+                      )}
+                    </span>
+                    {showNeedsDiagOnly && <Check className="w-3.5 h-3.5 text-brand shrink-0" />}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Mobile stage toggles — phones only (drawer covers iPad) */}
+      {/* Mobile stage toggles — phones only (drawer covers iPad); compact View Options menu */}
       <div className="lg:hidden flex items-center gap-1.5 overflow-x-auto no-scrollbar -mx-0.5 px-0.5">
-        <Button
-          type="button"
-          onClick={() => setShowAllStages((v) => !v)}
-          className={`inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-xl border px-3 text-xs font-bold transition-colors cursor-pointer active:scale-95 ${
-            showAllStages
-              ? 'bg-ink text-white border-ink shadow-2xs'
-              : 'bg-white text-ink border-line-strong hover:bg-surface'
-          }`}
-          aria-pressed={showAllStages}
-        >
-          {showAllStages ? <EyeOff className="w-3.5 h-3.5 shrink-0" /> : <Eye className="w-3.5 h-3.5 shrink-0 text-brand" />}
-          <span>{showAllStages ? 'Hide Exception Stages' : 'Show Exception Stages'}</span>
-          {hiddenStageCounts.some((h) => h.count > 0) && (
-            <span className={`rounded-full px-1.5 py-0.5 text-xs font-black ${showAllStages ? 'bg-black/25 text-white' : 'bg-danger/15 text-danger'}`}>
-              {hiddenStageCounts.filter((h) => h.count > 0).reduce((acc, h) => acc + h.count, 0)}
-            </span>
+        <div className="relative shrink-0" ref={viewMenuRef}>
+          <Button
+            type="button"
+            onClick={() => setIsViewMenuOpen((v) => !v)}
+            aria-expanded={isViewMenuOpen}
+            aria-haspopup="menu"
+            className="inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-xl border px-3 text-xs font-bold transition-colors cursor-pointer active:scale-95 bg-white text-ink border-line-strong hover:bg-surface"
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5 shrink-0 text-brand" />
+            <span>View Options</span>
+            {(showAllStages || showBeforeNeedsDiagOnly || showNeedsDiagOnly) && (
+              <span className="rounded-full bg-brand/15 text-brand px-1.5 py-0.5 text-xs font-black">
+                {[showAllStages, showBeforeNeedsDiagOnly, showNeedsDiagOnly].filter(Boolean).length}
+              </span>
+            )}
+          </Button>
+
+          {isViewMenuOpen && (
+            <>
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setIsViewMenuOpen(false)}
+                role="presentation"
+                aria-hidden="true"
+              />
+              <div
+                role="menu"
+                className="absolute left-0 top-full mt-1.5 z-50 w-60 rounded-xl border border-line bg-white p-1.5 shadow-xl"
+              >
+                <p className="px-2.5 pt-1.5 pb-1 text-xs font-extrabold uppercase tracking-wider text-muted">Board View</p>
+                <button
+                  type="button"
+                  role="menuitemcheckbox"
+                  aria-checked={showAllStages}
+                  onClick={() => { setShowAllStages((v) => !v); }}
+                  className="w-full flex items-center justify-between gap-2 px-2.5 py-2 text-xs font-bold rounded-lg hover:bg-surface transition-colors cursor-pointer text-left"
+                >
+                  <span className="flex items-center gap-2">
+                    <Eye className="w-3.5 h-3.5 text-brand" />
+                    Show Exception Stages
+                    {hiddenStageCounts.some((h) => h.count > 0) && (
+                      <span className="rounded-full px-1.5 py-0.5 text-xs font-black bg-danger/15 text-danger">
+                        {hiddenStageCounts.filter((h) => h.count > 0).reduce((acc, h) => acc + h.count, 0)}
+                      </span>
+                    )}
+                  </span>
+                  {showAllStages && <Check className="w-3.5 h-3.5 text-brand shrink-0" />}
+                </button>
+
+                <p className="px-2.5 pt-2 pb-1 text-xs font-extrabold uppercase tracking-wider text-muted">Diagnostics</p>
+                <button
+                  type="button"
+                  role="menuitemcheckbox"
+                  aria-checked={showBeforeNeedsDiagOnly}
+                  onClick={() => { setShowBeforeNeedsDiagOnly(!showBeforeNeedsDiagOnly); setShowNeedsDiagOnly(false); }}
+                  className="w-full flex items-center justify-between gap-2 px-2.5 py-2 text-xs font-bold rounded-lg hover:bg-surface transition-colors cursor-pointer text-left"
+                >
+                  <span className="flex items-center gap-2">
+                    <Stethoscope className="w-3.5 h-3.5 text-brand" />
+                    Before-Diag Pending
+                    {beforeNeedsDiagTotalCount > 0 && (
+                      <span className="rounded-full px-1.5 py-0.5 text-xs font-black bg-brand/15 text-brand">{beforeNeedsDiagTotalCount}</span>
+                    )}
+                  </span>
+                  {showBeforeNeedsDiagOnly && <Check className="w-3.5 h-3.5 text-brand shrink-0" />}
+                </button>
+                <button
+                  type="button"
+                  role="menuitemcheckbox"
+                  aria-checked={showNeedsDiagOnly}
+                  onClick={() => { setShowNeedsDiagOnly(!showNeedsDiagOnly); setShowBeforeNeedsDiagOnly(false); }}
+                  className="w-full flex items-center justify-between gap-2 px-2.5 py-2 text-xs font-bold rounded-lg hover:bg-surface transition-colors cursor-pointer text-left"
+                >
+                  <span className="flex items-center gap-2">
+                    <ShieldCheck className="w-3.5 h-3.5 text-purple" />
+                    After-Diag Pending
+                    {afterNeedsDiagTotalCount > 0 && (
+                      <span className="rounded-full px-1.5 py-0.5 text-xs font-black bg-purple/15 text-purple">{afterNeedsDiagTotalCount}</span>
+                    )}
+                  </span>
+                  {showNeedsDiagOnly && <Check className="w-3.5 h-3.5 text-brand shrink-0" />}
+                </button>
+              </div>
+            </>
           )}
-        </Button>
-        {!showAllStages && (
-          <p className="shrink-0 text-xs font-medium text-muted">Cant Repair · Customer Not Repair</p>
-        )}
+        </div>
       </div>
         </>
       )}
