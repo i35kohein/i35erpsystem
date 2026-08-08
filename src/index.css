@@ -759,7 +759,9 @@ html[data-theme] [class~="bg-[#ED7132]"] {
 }
 
 .workspace-panel--with-toolbar {
-  height: clamp(380px, calc(100dvh - 400px), 760px);
+  /* Panel with a controls bar above the data region — fills most of the
+     screen like --standard so tables reach near the bottom on desktop. */
+  height: clamp(420px, calc(100dvh - 260px), 900px);
 }
 
 .workspace-panel--with-summary {

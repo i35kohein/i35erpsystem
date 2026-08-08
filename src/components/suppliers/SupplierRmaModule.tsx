@@ -274,7 +274,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
           </div>
 
           {filteredRmas.length === 0 ? (
-            <div className="flex min-h-[200px] flex-col items-center justify-center p-12 text-center space-y-3 bg-white border border-line rounded-2xl">
+            <div className="flex min-h-[280px] flex-col items-center justify-center p-12 text-center space-y-3 bg-white border border-line rounded-2xl">
               <RotateCcw className="w-8 h-8 text-muted mx-auto" />
               <div className="space-y-1">
                 <p className="text-sm font-bold text-ink">No RMAs match your search or status filter</p>
@@ -432,7 +432,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
             ))}
           </div>
           {purchaseOrders.length === 0 && (
-            <div className="flex min-h-[200px] flex-col items-center justify-center p-12 text-center space-y-3 bg-white border border-line rounded-2xl">
+            <div className="flex min-h-[280px] flex-col items-center justify-center p-12 text-center space-y-3 bg-white border border-line rounded-2xl">
               <FileText className="w-8 h-8 text-muted mx-auto" />
               <div className="space-y-1">
                 <p className="text-sm font-bold text-ink">No purchase orders yet</p>
@@ -510,7 +510,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
             })}
           </div>
           {suppliers.length === 0 && (
-            <div className="flex min-h-[200px] flex-col items-center justify-center p-12 text-center space-y-3 bg-white border border-line rounded-2xl">
+            <div className="flex min-h-[280px] flex-col items-center justify-center p-12 text-center space-y-3 bg-white border border-line rounded-2xl">
               <Truck className="w-8 h-8 text-muted mx-auto" />
               <div className="space-y-1">
                 <p className="text-sm font-bold text-ink">No suppliers registered yet</p>

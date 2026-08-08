@@ -392,9 +392,9 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
         </div>
 
         {filteredWorkOrders.length === 0 ? (
-          <div className="p-12 text-center space-y-3">
-            <div className="w-12 h-12 rounded-full bg-surface flex items-center justify-center mx-auto text-muted">
-              <UserCheck className="w-6 h-6" />
+          <div className="flex min-h-[280px] flex-col items-center justify-center p-12 text-center space-y-3">
+            <div className="w-14 h-14 rounded-full bg-surface flex items-center justify-center mx-auto text-muted">
+              <UserCheck className="w-7 h-7" />
             </div>
             <div>
               <p className="text-sm font-bold text-ink">No completed tickets found</p>

@@ -354,13 +354,13 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
 
         {/* View Content: Table or Grid Cards */}
         {filteredOrders.length === 0 ? (
-          <div className="flex min-h-0 flex-1 flex-col items-center justify-center p-12 text-center text-xs space-y-4 bg-surface rounded-2xl border border-dashed border-line my-4">
-            <div className="w-14 h-14 bg-brand/10 text-brand rounded-2xl flex items-center justify-center mx-auto shadow-2xs">
-              <Inbox className="w-7 h-7" />
+          <div className="flex flex-1 min-h-[320px] flex-col items-center justify-center p-10 text-center text-xs space-y-4 bg-surface/60 rounded-2xl border border-dashed border-line">
+            <div className="w-16 h-16 bg-brand/10 text-brand rounded-2xl flex items-center justify-center mx-auto shadow-2xs">
+              <Inbox className="w-8 h-8" />
             </div>
-            <div className="space-y-1 max-w-sm mx-auto">
+            <div className="space-y-1.5 max-w-sm mx-auto">
               <p className="font-extrabold text-base text-ink">No Repair Tickets Found</p>
-              <p className="text-xs text-muted">
+              <p className="text-xs text-muted leading-relaxed">
                 {workOrders.length === 0 
                   ? "There are currently no active repair tickets in the database."
                   : "No tickets match your active status filter or search query."}
