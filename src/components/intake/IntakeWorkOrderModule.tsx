@@ -456,7 +456,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
 
                       {/* Stage & Status (Read-Only Badge) */}
                       <td className="py-3 px-3">
-                        <StatusBadge status={wo.status} />
+                        <StatusBadge status={wo.status} size="xs" />
                       </td>
 
                       {/* Financial Amount */}
@@ -471,32 +471,29 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                         </span>
                       </td>
 
-                      {/* Ticket status inspector and label export */}
+                      {/* Ticket status inspector and label export — icon-only actions */}
                       <td className="py-3 px-3 text-right">
-                        <div className="inline-flex items-center justify-end gap-1.5">
+                        <div className="inline-flex items-center justify-end gap-1">
                           <Button
-  variant="secondary" size="sm"
-  
+                            variant="ghost"
                             type="button"
                             onClick={() => handleOpenTicketDetail(wo)}
-                            className="border border-line bg-brand-soft px-2.5 text-brand hover:bg-white"
+                            className="!h-7 !min-h-7 w-7 px-0 border border-line bg-brand-soft text-brand hover:bg-white rounded-lg"
                             title="View Ticket Status"
                             aria-label={`View status for ${wo.orderNumber || wo.id}`}
                           >
                             <Eye className="h-3.5 w-3.5" />
-                            <span>View</span>
                           </Button>
                           {onSelectPrintTag && (
                           <Button
-  variant="secondary" size="sm"
-  
+                            variant="ghost"
                             type="button"
                             onClick={() => onSelectPrintTag(wo)}
-                            className="px-2.5 hover:bg-line border border-line"
+                            className="!h-7 !min-h-7 w-7 px-0 hover:bg-line border border-line rounded-lg"
                             title="Print Device Label Tag"
+                            aria-label={`Print label for ${wo.orderNumber || wo.id}`}
                           >
                             <Printer className="w-3.5 h-3.5 text-brand" />
-                            <span>Tag</span>
                           </Button>
                           )}
                         </div>
