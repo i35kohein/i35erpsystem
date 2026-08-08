@@ -246,7 +246,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
 
         {/* Main Login Box */}
         <main className="max-w-md mx-auto w-full my-auto py-8">
-          <div className="bg-white rounded-3xl border border-line p-6 sm:p-8 shadow-md space-y-6">
+          <div className="bg-white rounded-2xl border border-line p-6 sm:p-8 shadow-md space-y-6">
             <div className="text-center space-y-2">
               <div className="w-12 h-12 rounded-2xl bg-brand-soft text-brand border border-brand/20 flex items-center justify-center mx-auto">
                 <Smartphone className="w-6 h-6" />
@@ -375,7 +375,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
         {(currentWorkOrder.estimateStatus === 'Pending Approval' || (currentWorkOrder.status === 'Receive' && !currentWorkOrder.estimateStatus)) && (
           <div className="p-4 bg-warning/10 border border-warning/30 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-start space-x-3">
-              <div className="w-10 h-10 rounded-xl bg-warning/100 text-white flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-warning text-white flex items-center justify-center shrink-0">
                 <AlertTriangle className="w-5 h-5" />
               </div>
               <div className="space-y-0.5">
@@ -413,7 +413,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
         )}
 
         {/* Work Order Header Summary Banner */}
-        <div className="bg-white rounded-3xl border border-line p-5 sm:p-6 shadow-2xs space-y-5">
+        <div className="bg-white rounded-2xl border border-line p-5 sm:p-6 shadow-2xs space-y-5">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-line pb-5">
             <div>
               <div className="flex items-center space-x-2">
@@ -568,7 +568,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             <FileText className="w-4 h-4" />
             <span>Itemized Quote Estimate</span>
             {currentWorkOrder.estimateStatus === 'Pending Approval' && (
-              <span className="w-2 h-2 rounded-full bg-warning animate-ping" />
+              <span aria-hidden="true" className="w-2 h-2 rounded-full bg-warning animate-ping" />
             )}
           </Button>
 
@@ -597,7 +597,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             <MessageSquare className="w-4 h-4" />
             <span>Message Shop & Technician</span>
             {currentWorkOrder.customerInquiries && currentWorkOrder.customerInquiries.length > 0 && (
-              <span className="bg-brand text-white text-xs font-bold px-1.5 py-0.2 rounded-full">
+              <span className="bg-brand text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
                 {currentWorkOrder.customerInquiries.length}
               </span>
             )}
@@ -610,7 +610,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             {/* Left Column: Device & Tech Details */}
             <div className="md:col-span-7 space-y-6">
               {/* Reported Issues & Technical Findings */}
-              <div className="bg-white rounded-3xl border border-line p-5 shadow-2xs space-y-4">
+              <div className="bg-white rounded-2xl border border-line p-5 shadow-2xs space-y-4">
                 <h3 className="font-extrabold text-sm text-ink flex items-center space-x-2">
                   <ClipboardCheck className="w-4 h-4 text-brand" />
                   <span>Reported Symptoms & Diagnostic Findings</span>
@@ -642,7 +642,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
               </div>
 
               {/* Live Activity & Status Log */}
-              <div className="bg-white rounded-3xl border border-line p-5 shadow-2xs space-y-4">
+              <div className="bg-white rounded-2xl border border-line p-5 shadow-2xs space-y-4">
                 <h3 className="font-extrabold text-sm text-ink flex items-center space-x-2">
                   <Clock className="w-4 h-4 text-brand" />
                   <span>Real-Time Repair History & Logs</span>
@@ -669,7 +669,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             {/* Right Column: Warranty & Financial Overview */}
             <div className="md:col-span-5 space-y-6">
               {/* Financial Quick Card */}
-              <div className="bg-white rounded-3xl border border-line p-5 shadow-2xs space-y-4">
+              <div className="bg-white rounded-2xl border border-line p-5 shadow-2xs space-y-4">
                 <h3 className="font-extrabold text-sm text-ink flex items-center space-x-2">
                   <CreditCard className="w-4 h-4 text-brand" />
                   <span>Payment & Financial Summary</span>
@@ -713,7 +713,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
               </div>
 
               {/* Warranty Coverage Card */}
-              <div className="bg-white rounded-3xl border border-line p-5 shadow-2xs space-y-3">
+              <div className="bg-white rounded-2xl border border-line p-5 shadow-2xs space-y-3">
                 <div className="flex items-center space-x-2 text-success">
                   <Award className="w-5 h-5" />
                   <h3 className="font-extrabold text-sm text-ink">Warranty Coverage Guarantee</h3>
@@ -735,7 +735,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
 
         {/* Tab 2: ESTIMATE */}
         {activeTab === 'ESTIMATE' && (
-          <div className="bg-white rounded-3xl border border-line p-6 shadow-2xs space-y-6">
+          <div className="bg-white rounded-2xl border border-line p-6 shadow-2xs space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line pb-4">
               <div>
                 <h3 className="text-base font-extrabold text-ink">Itemized Repair Quote Estimate</h3>
@@ -749,7 +749,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                     ? 'bg-success/15 text-success border-success/30'
                     : currentWorkOrder.estimateStatus === 'Rejected'
                     ? 'bg-danger/15 text-danger border-danger/30'
-                    : 'bg-warning/15 text-warning border-warning/30 animate-pulse'
+                    : 'bg-warning/15 text-warning border-warning/30'
                 }`}>
                   {currentWorkOrder.estimateStatus || 'Awaiting Approval'}
                 </span>
@@ -850,7 +850,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
 
         {/* Tab 3: DIAGNOSTICS */}
         {activeTab === 'DIAGNOSTICS' && (
-          <div className="bg-white rounded-3xl border border-line p-6 shadow-2xs space-y-6">
+          <div className="bg-white rounded-2xl border border-line p-6 shadow-2xs space-y-6">
             <div>
               <h3 className="text-base font-extrabold text-ink">21-Point Hardware Diagnostic Checklist</h3>
               <p className="text-xs text-muted">Full transparency report recorded during initial device intake inspection</p>
@@ -888,7 +888,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
 
         {/* Tab 4: MESSAGES */}
         {activeTab === 'MESSAGES' && (
-          <div className="bg-white rounded-3xl border border-line p-6 shadow-2xs space-y-6">
+          <div className="bg-white rounded-2xl border border-line p-6 shadow-2xs space-y-6">
             <div>
               <h3 className="text-base font-extrabold text-ink">Direct Shop Communication Channel</h3>
               <p className="text-xs text-muted">Send a direct message to our technical team regarding work order {currentWorkOrder.orderNumber}</p>
@@ -944,7 +944,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
       {/* APPROVAL CONFIRMATION MODAL */}
       {approvalModalOpen && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-5 shadow-2xl border border-line animate-in fade-in zoom-in duration-150">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl border border-line animate-in fade-in zoom-in duration-150">
             <div className="flex items-center justify-between border-b border-line pb-3">
               <div className="flex items-center space-x-2 text-success">
                 <CheckCircle2 className="w-5 h-5" />
@@ -991,11 +991,11 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
               </div>
 
               <label className="flex items-start space-x-2 cursor-pointer pt-1">
-                <Input
+                <input
                   type="checkbox"
                   checked={agreedToTerms}
                   onChange={(e) => setAgreedToTerms(e.target.checked)}
-                  className="mt-0.5 rounded text-brand"
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-line text-brand accent-brand"
                 />
                 <span className="text-xs text-muted">I authorize the shop to install components and accept the estimates.</span>
               </label>
@@ -1026,7 +1026,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
       {/* REJECTION / CALL REQUEST MODAL */}
       {rejectionModalOpen && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-5 shadow-2xl border border-line animate-in fade-in zoom-in duration-150">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl border border-line animate-in fade-in zoom-in duration-150">
             <div className="flex items-center justify-between border-b border-line pb-3">
               <div className="flex items-center space-x-2 text-danger">
                 <ThumbsDown className="w-5 h-5" />
@@ -1131,7 +1131,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
               }
             }
           `}</style>
-          <div className="printable-portal-voucher bg-white rounded-3xl max-w-xl w-full p-6 space-y-6 shadow-2xl border border-line my-auto">
+          <div className="printable-portal-voucher bg-white rounded-2xl max-w-xl w-full p-6 space-y-6 shadow-2xl border border-line my-auto">
             <div className="flex items-center justify-between border-b border-line pb-3 print:hidden">
               <h3 className="font-extrabold text-sm text-ink">Digital Service Voucher & Estimate Receipt</h3>
               <div className="flex items-center space-x-2">

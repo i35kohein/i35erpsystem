@@ -182,7 +182,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
           <Button
             type="button"
             onClick={() => setActiveSubTab('RMA')}
-            className={`w-full md:w-auto px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center justify-center md:justify-start space-x-2 cursor-pointer border select-none active:scale-95 ${
+            className={`w-full md:w-auto px-3.5 min-h-10 text-xs font-extrabold rounded-xl transition-all flex items-center justify-center md:justify-start space-x-2 cursor-pointer border select-none active:scale-95 ${
               activeSubTab === 'RMA'
                 ? 'bg-brand text-white border-brand shadow-xs'
                 : 'bg-white hover:bg-surface text-faint hover:text-ink border-line'
@@ -200,7 +200,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
           <Button
             type="button"
             onClick={() => setActiveSubTab('PO')}
-            className={`w-full md:w-auto px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center justify-center md:justify-start space-x-2 cursor-pointer border select-none active:scale-95 ${
+            className={`w-full md:w-auto px-3.5 min-h-10 text-xs font-extrabold rounded-xl transition-all flex items-center justify-center md:justify-start space-x-2 cursor-pointer border select-none active:scale-95 ${
               activeSubTab === 'PO'
                 ? 'bg-brand text-white border-brand shadow-xs'
                 : 'bg-white hover:bg-surface text-faint hover:text-ink border-line'
@@ -218,7 +218,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
           <Button
             type="button"
             onClick={() => setActiveSubTab('SUPPLIERS')}
-            className={`w-full md:w-auto px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center justify-center md:justify-start space-x-2 cursor-pointer border select-none active:scale-95 ${
+            className={`w-full md:w-auto px-3.5 min-h-10 text-xs font-extrabold rounded-xl transition-all flex items-center justify-center md:justify-start space-x-2 cursor-pointer border select-none active:scale-95 ${
               activeSubTab === 'SUPPLIERS'
                 ? 'bg-brand text-white border-brand shadow-xs'
                 : 'bg-white hover:bg-surface text-faint hover:text-ink border-line'
@@ -248,7 +248,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                   onClick={() => setRmaView('table')}
                   title="Table view"
                   aria-label="RMA table view"
-                  className={`inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors ${rmaView === 'table' ? 'bg-brand text-white' : 'text-faint hover:bg-surface'}`}
+                  className={`inline-flex min-h-10 min-w-10 items-center justify-center rounded-md transition-colors ${rmaView === 'table' ? 'bg-brand text-white' : 'text-faint hover:bg-surface'}`}
                 >
                   <List className="h-3.5 w-3.5" />
                 </Button>
@@ -257,7 +257,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                   onClick={() => setRmaView('cards')}
                   title="Card view"
                   aria-label="RMA card view"
-                  className={`inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors ${rmaView === 'cards' ? 'bg-brand text-white' : 'text-faint hover:bg-surface'}`}
+                  className={`inline-flex min-h-10 min-w-10 items-center justify-center rounded-md transition-colors ${rmaView === 'cards' ? 'bg-brand text-white' : 'text-faint hover:bg-surface'}`}
                 >
                   <Grid className="h-3.5 w-3.5" />
                 </Button>

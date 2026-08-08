@@ -462,7 +462,7 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
             <div className="w-8 h-8 bg-brand text-white flex items-center justify-center rounded-lg"><Bot className="w-4 h-4" /></div>
             <div className="min-w-0">
               <h2 className="text-sm font-extrabold text-ink">Operations Copilot</h2>
-              <p className="text-xs text-muted truncate flex items-center gap-1"><span className={`w-1.5 h-1.5 rounded-full ${isExternalAi ? 'bg-success/100' : 'bg-brand'}`} />{providerLabel}</p>
+              <p className="text-xs text-muted truncate flex items-center gap-1"><span className={`w-1.5 h-1.5 rounded-full ${isExternalAi ? 'bg-success' : 'bg-brand'}`} />{providerLabel}</p>
             </div>
           </div>
           <div className="flex items-center gap-1">

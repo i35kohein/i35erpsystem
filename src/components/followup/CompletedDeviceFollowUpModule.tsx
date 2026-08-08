@@ -118,6 +118,8 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
   const issueReportedCount = followUpEligible.filter(
     (wo) => wo.followUpStatus === 'Issue Reported'
   ).length;
+  const noAnswerCount = followUpEligible.filter((wo) => wo.followUpStatus === 'No Answer').length;
+  const callbackScheduledCount = followUpEligible.filter((wo) => wo.followUpStatus === 'Callback Scheduled').length;
 
   // Average Rating calculation
   const ratedOrders = followUpEligible.filter((wo) => {
@@ -326,8 +328,8 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
             { id: 'Pending Call', label: `Pending Call (${pendingCallsCount})` },
             { id: 'Satisfied', label: `Satisfied (${satisfiedCount})` },
             { id: 'Issue Reported', label: `Issue Reported (${issueReportedCount})` },
-            { id: 'No Answer', label: 'No Answer' },
-            { id: 'Callback Scheduled', label: 'Callback Scheduled' },
+            { id: 'No Answer', label: `No Answer (${noAnswerCount})` },
+            { id: 'Callback Scheduled', label: `Callback Scheduled (${callbackScheduledCount})` },
           ].map((tab) => (
             <Button
               key={tab.id}

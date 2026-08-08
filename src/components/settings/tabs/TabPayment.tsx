@@ -132,7 +132,7 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ currentPaymentMethods, handleTo
                             <div className="flex items-center space-x-1.5">
                               <span className="font-extrabold text-xs text-ink block">{method.name}</span>
                             </div>
-                            <span className={`text-xs font-extrabold uppercase px-1.5 py-0.2 rounded-md ${
+                            <span className={`text-xs font-extrabold uppercase px-1.5 py-0.5 rounded-md ${
                               method.enabled ? 'bg-success/10 text-success-deep border border-success/30' : 'bg-surface text-muted'
                             }`}>
                               {method.enabled ? 'ENABLED globally' : 'DISABLED'}

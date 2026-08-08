@@ -52,7 +52,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'Awaiting Parts':
     case 'Pending Client':
       badgeStyle = 'bg-warning/10 text-warning border border-warning/30';
-      dotColor = 'bg-warning/100';
+      dotColor = 'bg-warning';
       pingColor = 'bg-warning';
       isPulsing = false;
       break;

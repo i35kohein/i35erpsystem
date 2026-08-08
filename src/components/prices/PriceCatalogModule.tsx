@@ -143,7 +143,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
   onRegisterExportHandler,
 }) => {
   // State
-  const [selectedDevice, setSelectedDevice] = useState<string>(catalog[0]?.model || 'iPhone 15 Pro Max');
+  const [selectedDevice, setSelectedDevice] = useState<string>(catalog[0]?.model || '');
   const isIpad = useIsIpad();
   
   // Controlled / Uncontrolled state synchronization
@@ -857,7 +857,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
         </div>
 
         {/* Desktop: full device card (lg+) */}
-        <div className="hidden lg:flex bg-white border border-line p-4 sm:p-5 rounded-3xl shadow-2xs flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="hidden lg:flex bg-white border border-line p-4 sm:p-5 rounded-2xl shadow-2xs flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-brand text-white flex items-center justify-center font-black shrink-0">
               <Smartphone className="w-6 h-6 sm:w-7 sm:h-7" />

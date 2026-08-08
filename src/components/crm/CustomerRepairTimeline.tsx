@@ -35,7 +35,7 @@ const getOutcomeMeta = (status: string) => {
       return {
         label: 'Resolved & Completed',
         badgeClass: 'bg-success/10 text-success-deep border-success/30',
-        nodeBg: 'bg-success/100 text-white ring-4 ring-emerald-100',
+        nodeBg: 'bg-success text-white ring-4 ring-emerald-100',
         icon: CheckCircle2,
         bgGradient: 'from-emerald-50/50 to-transparent',
         borderLeft: 'border-l-4 border-l-emerald-500',
@@ -53,7 +53,7 @@ const getOutcomeMeta = (status: string) => {
       return {
         label: 'Awaiting Parts / Approval',
         badgeClass: 'bg-warning/10 text-warning border-warning/30',
-        nodeBg: 'bg-warning/100 text-white ring-4 ring-amber-100',
+        nodeBg: 'bg-warning text-white ring-4 ring-amber-100',
         icon: Clock,
         bgGradient: 'from-amber-50/50 to-transparent',
         borderLeft: 'border-l-4 border-l-amber-500',
@@ -89,7 +89,7 @@ const getOutcomeMeta = (status: string) => {
       return {
         label: 'Declined by Customer',
         badgeClass: 'bg-warning/10 text-warning border-warning/30',
-        nodeBg: 'bg-warning/100 text-white ring-4 ring-orange-100',
+        nodeBg: 'bg-warning text-white ring-4 ring-orange-100',
         icon: AlertCircle,
         bgGradient: 'from-orange-50/50 to-transparent',
         borderLeft: 'border-l-4 border-l-orange-500',

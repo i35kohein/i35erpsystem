@@ -103,7 +103,7 @@ const UsersTab: React.FC<UsersTabProps> = ({ users, currentUser, handleOpenAddUs
                             <div className="flex items-center space-x-1.5">
                               <h5 className="font-extrabold text-sm text-ink truncate">{usr.name}</h5>
                               {usr.id === currentUser?.id && (
-                                <span className="px-1.5 py-0.2 bg-brand text-white text-xs font-extrabold rounded-md">
+                                <span className="px-1.5 py-0.5 bg-brand text-white text-xs font-extrabold rounded-md">
                                   YOU
                                 </span>
                               )}
@@ -165,9 +165,9 @@ const UsersTab: React.FC<UsersTabProps> = ({ users, currentUser, handleOpenAddUs
                           </span>
                         </div>
                         <div className="flex flex-wrap gap-1 pt-0.5">
-                          {isAdmin && <span className="bg-purple/15 text-purple px-1.5 py-0.2 rounded">All Settings</span>}
-                          {isReception && <span className="bg-warning/15 text-warning px-1.5 py-0.2 rounded">All Ops Except Settings</span>}
-                          {isTech && <span className="bg-brand/15 text-brand-deep px-1.5 py-0.2 rounded">Assigned Pipeline & QA Only</span>}
+                          {isAdmin && <span className="bg-purple/15 text-purple px-1.5 py-0.5 rounded">All Settings</span>}
+                          {isReception && <span className="bg-warning/15 text-warning px-1.5 py-0.5 rounded">All Ops Except Settings</span>}
+                          {isTech && <span className="bg-brand/15 text-brand-deep px-1.5 py-0.5 rounded">Assigned Pipeline & QA Only</span>}
                         </div>
                       </div>
                     </div>

@@ -591,7 +591,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                 setShowNeedsDiagOnly(false);
                 setShowBeforeNeedsDiagOnly(false);
               }}
-              className="px-2 py-0.5 text-xs bg-surface hover:bg-line text-brand font-bold rounded-lg transition-all cursor-pointer border border-line"
+              className="px-2 min-h-10 text-xs bg-surface hover:bg-line text-brand font-bold rounded-lg transition-all cursor-pointer border border-line flex items-center"
             >
               Reset Filters ↺
             </Button>
@@ -793,7 +793,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   <div className="flex items-center space-x-1">
                     {stageStagnantOrders.length > 0 && (
                       <span
-                        className="text-xs font-extrabold px-1.5 py-0.5 rounded-full bg-warning/15 text-warning border border-warning/30/80 flex items-center space-x-0.5"
+                        className="text-xs font-extrabold px-1.5 py-0.5 rounded-full bg-warning/15 text-warning border border-warning/30 flex items-center space-x-0.5"
                         title={`${stageStagnantOrders.length} ticket(s) stationary >48h in this stage`}
                       >
                         <AlertTriangle className="w-2.5 h-2.5 text-warning shrink-0" />
@@ -817,7 +817,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                     // Age chip: neutral <24h · amber 24–48h · red ≥48h (red only matters for
                     // terminal stages — active stages already get the red Bottleneck banner)
                     const ageChipClass = hoursInStatus >= 48
-                      ? 'text-danger bg-danger/10 border border-red-200 rounded-md px-1.5 py-0.5'
+                      ? 'text-danger bg-danger/10 border border-danger/30 rounded-md px-1.5 py-0.5'
                       : hoursInStatus >= 24
                       ? 'text-warning bg-warning/10 border border-warning/30 rounded-md px-1.5 py-0.5'
                       : 'text-muted';
@@ -876,7 +876,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
 
                         {/* Stagnant Bottleneck Alert Banner / Age Chip (amber ≥24h, red ≥48h) */}
                         {isStagnant ? (
-                          <div className="flex items-center justify-between px-2 py-1 rounded-lg bg-danger/10 border border-red-200 text-danger text-xs font-extrabold">
+                          <div className="flex items-center justify-between px-2 py-1 rounded-lg bg-danger/10 border border-danger/30 text-danger text-xs font-extrabold">
                             <span className="flex items-center space-x-1">
                               <Timer className="w-3.5 h-3.5 text-danger animate-pulse shrink-0" />
                               <span>Bottleneck (&gt;48h)</span>
@@ -1019,7 +1019,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   key={s.id}
                   type="button"
                   onClick={() => scrollToStage(s.id)}
-                  className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-3 text-xs font-extrabold transition-colors cursor-pointer active:scale-95 ${
+                  className={`inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-full border px-3 text-xs font-extrabold transition-colors cursor-pointer active:scale-95 ${
                     count > 0 ? 'bg-white text-ink border-line-strong hover:bg-surface' : 'bg-transparent text-muted border-dashed border-line'
                   }`}
                   title={`Scroll to ${s.title} column`}
@@ -1263,7 +1263,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
             </div>
 
             {/* Quick Actions & Pass/Fail Counts */}
-            <div className="flex items-center justify-between p-2.5 bg-purple/10/60 rounded-xl border border-purple/30 text-xs">
+            <div className="flex items-center justify-between p-2.5 bg-purple/10 rounded-xl border border-purple/30 text-xs">
               <div className="flex items-center space-x-2 font-bold text-ink">
                 <span className="px-2 py-0.5 rounded bg-success/15 text-success-deep text-xs">
                   Pass: {afterDiagnostics.filter(d => d.status === 'Pass').length}
@@ -1282,7 +1282,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   onClick={() => {
                     setAfterDiagnostics(afterDiagnostics.map(d => ({ ...d, status: 'Pass', note: d.note || 'QA Passed' })));
                   }}
-                  className="px-2.5 py-1 bg-success text-white font-extrabold rounded-lg text-xs hover:bg-success/90 shadow-2xs"
+                  className="px-2.5 min-h-10 bg-success text-white font-extrabold rounded-lg text-xs hover:bg-success/90 shadow-2xs flex items-center"
                 >
                   Mark All Pass
                 </Button>
@@ -1295,7 +1295,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                 <div key={item.id || item.name} className="p-2 bg-surface border border-line rounded-xl space-y-1.5">
                   <div className="flex justify-between items-center text-xs font-bold text-ink">
                     <span className="truncate pr-1">{idx + 1}. {item.name}</span>
-                    <span className={`text-xs font-extrabold px-1.5 py-0.2 rounded ${
+                    <span className={`text-xs font-extrabold px-1.5 py-0.5 rounded ${
                       item.status === 'Pass' ? 'bg-success/15 text-success-deep' :
                       item.status === 'Fail' ? 'bg-danger/15 text-danger' : 'bg-line text-muted'
                     }`}>

@@ -297,13 +297,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                 return (
                   <div
                     key={cust.id}
-                    onClick={() => setSelectedCustomer(cust)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedCustomer(cust); }
-                    }}
-                    className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
+                    className={`p-2.5 rounded-xl border transition-all ${
                       isSelected
                         ? 'bg-brand-soft border-brand shadow-xs'
                         : 'bg-surface border-line hover:bg-surface'
@@ -315,6 +309,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
+                          setSelectedCustomer(cust);
                           handleOpenHistoryModal(cust);
                         }}
                         className={`font-bold text-ink hover:text-brand hover:underline cursor-pointer text-left flex items-center space-x-1 group ${FOCUS}`}

@@ -1034,7 +1034,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                             onChange={(e) => updateRepairDiscount(repair.id, Number(e.target.value))}
                             className="w-16 bg-surface border border-line-strong rounded-lg px-2 py-1.5 font-bold text-center text-ink focus:border-brand focus:ring-1 focus:ring-brand focus:outline-none transition-all"
                           />
-                          <span className="absolute right-2 top-1.5 text-muted text-xs font-bold pointer-events-none">%</span>
+                          <span className="absolute inset-y-0 right-2 flex items-center text-muted text-xs font-bold pointer-events-none">%</span>
                         </div>
                       </div>
 
@@ -1060,19 +1060,19 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
 
               {/* Discount & Estimate Summary Box in MMK */}
               <div className="bg-brand-soft/60 border border-brand/30 rounded-xl p-4 grid grid-cols-2 md:grid-cols-3 gap-3 text-center text-xs shadow-sm">
-                <div className="bg-white/60 p-2 rounded-lg">
+                <div className="bg-white/70 p-2 rounded-lg">
                   <span className="block text-xs text-muted font-semibold">Repairs Count</span>
                   <span className="font-extrabold text-ink text-sm">{repairCount} items</span>
                 </div>
-                <div className="bg-white/60 p-2 rounded-lg">
+                <div className="bg-white/70 p-2 rounded-lg">
                   <span className="block text-xs text-muted font-semibold">Base Total</span>
                   <span className="font-extrabold text-ink text-sm">{baseTotal.toLocaleString()} MMK</span>
                 </div>
-                <div className="bg-white/60 p-2 rounded-lg">
+                <div className="bg-white/70 p-2 rounded-lg">
                   <span className="block text-xs text-muted font-semibold">Saved Amount</span>
                   <span className="font-extrabold text-success text-sm">{savedAmount.toLocaleString()} MMK</span>
                 </div>
-                <div className="bg-white/60 p-2 rounded-lg">
+                <div className="bg-white/70 p-2 rounded-lg">
                   <span className="block text-xs text-muted font-semibold">Overall Discount</span>
                   <span className="font-extrabold text-purple text-sm">{overallDiscountPercent}%</span>
                 </div>
@@ -1321,7 +1321,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               type="button"
               onClick={handleRegisterDevice}
               disabled={isRegistering}
-              className={`h-10 w-full sm:w-auto sm:min-w-72 font-black text-sm ${
+              className={`h-10 w-full sm:w-auto sm:w-72 font-black text-sm ${
                 isRegistering
                   ? 'bg-muted text-white opacity-80'
                   : 'bg-brand hover:bg-brand-deep text-white'
@@ -1550,7 +1550,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                         <div>
                           <span className="block font-extrabold text-ink text-xs">{item.name}</span>
                           <div className="flex items-center space-x-2 text-xs text-muted pt-0.5 font-medium">
-                            <span className="px-1.5 py-0.2 bg-surface rounded text-ink font-semibold">{item.group}</span>
+                            <span className="px-1.5 py-0.5 bg-surface rounded text-ink font-semibold">{item.group}</span>
                             <span>Warranty: {item.warranty}</span>
                           </div>
                         </div>

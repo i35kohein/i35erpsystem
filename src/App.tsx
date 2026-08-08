@@ -2240,6 +2240,7 @@ export default function App() {
                   onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
                   dateFilter={dateFilter}
                   setDateFilter={setDateFilter}
+                  currencySymbol={systemSettings?.currencySymbol}
                   onSettleInventoryFund={handleSettleInventoryFund}
                 />
               )}

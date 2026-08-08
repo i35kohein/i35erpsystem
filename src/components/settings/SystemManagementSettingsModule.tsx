@@ -157,7 +157,10 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   const [isSavedBanner, setIsSavedBanner] = useState(false);
   // Settings tab navigation: search + dirty tracking
   const [settingsTabQuery, setSettingsTabQuery] = useState('');
-  const isDirty = JSON.stringify(formData) !== JSON.stringify(settings);
+  const isDirty = useMemo(
+    () => JSON.stringify(formData) !== JSON.stringify(settings),
+    [formData, settings]
+  );
   // Collapsible long sections (mobile-friendly) — keyed by section id, default open
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
   const toggleSection = (key: string) =>

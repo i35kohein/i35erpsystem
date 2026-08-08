@@ -51,6 +51,7 @@ interface DashboardOverviewProps {
   onSelectPrintTag?: (wo: WorkOrder) => void;
   dateFilter?: DateFilterState;
   setDateFilter?: (filter: DateFilterState) => void;
+  currencySymbol?: string;
   onSettleInventoryFund?: (ids: string[]) => void;
 }
 
@@ -67,7 +68,8 @@ const TrendChart: React.FC<{
   repairs: number[];
   maxRevenue: number;
   maxRepairs: number;
-}> = ({ buckets, revenue, repairs, maxRevenue, maxRepairs }) => {
+  currencySymbol?: string;
+}> = ({ buckets, revenue, repairs, maxRevenue, maxRepairs, currencySymbol = 'MMK' }) => {
   const W = 640;
   const H = 170;
   const TOP = 12;
@@ -128,19 +130,19 @@ const TrendChart: React.FC<{
           )}
           {buckets.map((b, i) =>
             i % labelStep === 0 || i === n - 1 ? (
-              <text key={i} x={slot * i + slot / 2} y={H - 8} textAnchor="middle" fontSize={10} fill="var(--color-muted)">
+              <text key={i} x={slot * i + slot / 2} y={H - 8} textAnchor="middle" fontSize={11} fill="var(--color-muted)">
                 {b.label}
               </text>
             ) : null
           )}
         </svg>
       </div>
-      <div className="flex items-center space-x-4 pt-2 text-xs font-bold text-muted">
-        <span className="flex items-center space-x-1.5">
+      <div className="flex items-center space-x-4 overflow-x-auto no-scrollbar pt-2 text-xs font-bold text-muted">
+        <span className="flex shrink-0 items-center space-x-1.5">
           <span className="inline-block h-2.5 w-2.5 rounded-sm bg-brand/85" />
-          Revenue (MMK)
+          Revenue ({currencySymbol})
         </span>
-        <span className="flex items-center space-x-1.5">
+        <span className="flex shrink-0 items-center space-x-1.5">
           <span className="inline-block h-0.5 w-3 rounded-full bg-success" />
           Completed repairs
         </span>
@@ -157,6 +159,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   onNavigateToTab,
   onOpenNewWorkOrder,
   onSelectPrintTag,
+  currencySymbol,
   dateFilter: externalDateFilter,
   onSettleInventoryFund,
 }) => {
@@ -809,7 +812,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           className={`px-3.5 h-10 lg:h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'status-queue'
               ? 'bg-brand text-white border-brand shadow-xs'
-              : 'bg-white hover:bg-surface text-faint hover:text-ink border-line'
+              : 'bg-white hover:bg-surface text-muted hover:text-ink border-line'
           }`}
         >
           <ListFilter className="w-4 h-4" />
@@ -835,7 +838,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           className={`px-3.5 h-10 lg:h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'repair-data'
               ? 'bg-brand text-white border-brand shadow-xs'
-              : 'bg-white hover:bg-surface text-faint hover:text-ink border-line'
+              : 'bg-white hover:bg-surface text-muted hover:text-ink border-line'
           }`}
         >
           <Activity className="w-4 h-4" />
@@ -861,7 +864,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           className={`px-3.5 h-10 lg:h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'tech-kpi'
               ? 'bg-brand text-white border-brand shadow-xs'
-              : 'bg-white hover:bg-surface text-faint hover:text-ink border-line'
+              : 'bg-white hover:bg-surface text-muted hover:text-ink border-line'
           }`}
         >
           <Users className="w-4 h-4" />
@@ -887,7 +890,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           className={`px-3.5 h-10 lg:h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'inventory'
               ? 'bg-brand text-white border-brand shadow-xs'
-              : 'bg-white hover:bg-surface text-faint hover:text-ink border-line'
+              : 'bg-white hover:bg-surface text-muted hover:text-ink border-line'
           }`}
         >
           <Boxes className="w-4 h-4" />
@@ -923,7 +926,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           className={`px-3.5 h-10 lg:h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'finance'
               ? 'bg-brand text-white border-brand shadow-xs'
-              : 'bg-white hover:bg-surface text-faint hover:text-ink border-line'
+              : 'bg-white hover:bg-surface text-muted hover:text-ink border-line'
           }`}
         >
           <Coins className="w-4 h-4" />
@@ -950,7 +953,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           className={`px-3.5 h-10 lg:h-10 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
             activeDashboardSubTab === 'warranty-watch'
               ? 'bg-brand text-white border-brand shadow-xs'
-              : 'bg-white hover:bg-surface text-faint hover:text-ink border-line'
+              : 'bg-white hover:bg-surface text-muted hover:text-ink border-line'
           }`}
         >
           <ShieldAlert className="w-4 h-4" />
@@ -1026,7 +1029,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <span className="font-mono font-bold text-brand">{item.wo.orderNumber}</span>
                 <span className="font-bold text-ink">{item.wo.customerName}</span>
                 <span className="text-muted">({item.wo.deviceModel})</span>
-                <span className={`px-1.5 py-0.2 rounded font-extrabold text-xs ${
+                <span className={`px-1.5 py-0.5 rounded font-extrabold text-xs ${
                   item.remainingDays <= 3 ? 'bg-danger text-white' : 'bg-warning/15 text-warning'
                 }`}>
                   ⏳ {item.remainingDays}d left
@@ -1093,11 +1096,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </div>
 
             {/* Visual Stage Progress Bars Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 3xl:grid-cols-6 4xl:grid-cols-8 gap-4 pt-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
               {[
-                { stage: 'Receive', title: 'Intake / Receive', count: statusQueueCounts['Receive'], color: 'bg-brand-soft0', bg: 'bg-brand-soft', text: 'text-brand' },
-                { stage: 'In Progress', title: 'In Progress (Active)', count: statusQueueCounts['In Progress'], color: 'bg-success/100', bg: 'bg-success/10', text: 'text-success-deep' },
-                { stage: 'Pending', title: 'Pending Approval / Parts', count: statusQueueCounts['Pending'], color: 'bg-warning/100', bg: 'bg-warning/10', text: 'text-warning' },
+                { stage: 'Receive', title: 'Intake / Receive', count: statusQueueCounts['Receive'], color: 'bg-brand-soft', bg: 'bg-brand-soft', text: 'text-brand' },
+                { stage: 'In Progress', title: 'In Progress (Active)', count: statusQueueCounts['In Progress'], color: 'bg-success', bg: 'bg-success/10', text: 'text-success-deep' },
+                { stage: 'Pending', title: 'Pending Approval / Parts', count: statusQueueCounts['Pending'], color: 'bg-warning', bg: 'bg-warning/10', text: 'text-warning' },
                 { stage: 'Finished', title: 'Finished / Ready for Pickup', count: statusQueueCounts['Finished'], color: 'bg-teal/100', bg: 'bg-teal/10', text: 'text-teal' },
               ].map((item) => {
                 const total = filteredWorkOrders.length || 1;
@@ -1328,7 +1331,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                             <p className="font-mono font-extrabold text-xs text-ink">
                               {totalAmt.toLocaleString()} MMK
                             </p>
-                            <span className={`text-xs font-bold px-1.5 py-0.2 rounded ${
+                            <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
                               wo.isPaid ? 'bg-success/15 text-success-deep' : 'bg-danger/15 text-danger'
                             }`}>
                               {wo.isPaid ? 'Paid' : 'Unpaid'}
@@ -1679,6 +1682,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 repairs={trendSeries.currentRepairs}
                 maxRevenue={trendSeries.maxRevenue}
                 maxRepairs={trendSeries.maxRepairs}
+                currencySymbol={currencySymbol}
               />
             )}
           </div>
@@ -1751,7 +1755,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   <h2 className="text-lg font-black tracking-tight text-white flex items-center space-x-2">
                     <span>90-Day Warranty Background Telemetry</span>
                   </h2>
-                  <span className="px-2.5 py-0.5 bg-success/100/20 text-emerald-300 border border-emerald-500/30 font-mono text-xs font-bold rounded-full flex items-center space-x-1">
+                  <span className="px-2.5 py-0.5 bg-success/20 text-emerald-300 border border-emerald-500/30 font-mono text-xs font-bold rounded-full flex items-center space-x-1">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block mr-1" />
                     <span>Background Scanner Active</span>
                   </span>
@@ -1778,7 +1782,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <p className="text-xs text-muted">Total with warranty</p>
               </div>
 
-              <div className="p-3 bg-danger/100/20 border border-rose-500/40 rounded-xl space-y-0.5">
+              <div className="p-3 bg-danger/20 border border-rose-500/40 rounded-xl space-y-0.5">
                 <span className="text-xs text-rose-200 font-bold uppercase">Nearing Expiry (&le;14d)</span>
                 <p className="text-xl font-black text-rose-300">{expiringSoonWorkOrders.length}</p>
                 <p className="text-xs text-rose-200">Flagged by monitor</p>
@@ -1790,13 +1794,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <p className="text-xs text-rose-300">Requires attention</p>
               </div>
 
-              <div className="p-3 bg-warning/100/20 border border-amber-500/40 rounded-xl space-y-0.5">
+              <div className="p-3 bg-warning/20 border border-amber-500/40 rounded-xl space-y-0.5">
                 <span className="text-xs text-amber-200 font-bold uppercase">Warning Window (8-14d)</span>
                 <p className="text-xl font-black text-amber-300">{warningWarrantyCount}</p>
                 <p className="text-xs text-amber-200">Nearing end period</p>
               </div>
 
-              <div className="p-3 bg-success/100/20 border border-emerald-500/40 rounded-xl space-y-0.5 col-span-2 lg:col-span-1">
+              <div className="p-3 bg-success/20 border border-emerald-500/40 rounded-xl space-y-0.5 col-span-2 lg:col-span-1">
                 <span className="text-xs text-emerald-200 font-bold uppercase">Active & Protected</span>
                 <p className="text-xl font-black text-emerald-300">{activeWarrantyCount}</p>
                 <p className="text-xs text-emerald-200">&gt;14 days remaining</p>
@@ -1971,7 +1975,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                                       item.remainingDays <= 3
                                         ? 'bg-danger'
                                         : item.remainingDays <= 14
-                                        ? 'bg-warning/100'
+                                        ? 'bg-warning'
                                         : 'bg-success'
                                     }`}
                                     style={{ width: `${item.percentElapsed}%` }}

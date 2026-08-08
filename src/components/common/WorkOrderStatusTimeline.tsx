@@ -326,6 +326,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
                   onClick={() => setSelectedStageFilter(selectedStageFilter === stage.status ? 'ALL' : stage.status)}
                   role="button"
                   tabIndex={0}
+                  aria-pressed={selectedStageFilter === stage.status}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedStageFilter(selectedStageFilter === stage.status ? 'ALL' : stage.status); }
                   }}
@@ -349,7 +350,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
                     </div>
 
                     {isCurrent && (
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" title="Active Status" />
+                      <span aria-hidden="true" className="w-2 h-2 rounded-full bg-success animate-ping" title="Active Status" />
                     )}
                   </div>
 
@@ -370,7 +371,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
 
           {/* Special Terminal State Indicator if Cant Repair / Customer Cancelled */}
           {(workOrder.status === 'Cant Repair' || workOrder.status === 'Customer Not Repair') && (
-            <div className="mt-2 p-2 bg-danger/100/20 border border-rose-500/40 rounded-xl flex items-center justify-between text-xs text-rose-200">
+            <div className="mt-2 p-2 bg-danger/20 border border-rose-500/40 rounded-xl flex items-center justify-between text-xs text-rose-200">
               <div className="flex items-center space-x-2 font-bold">
                 <AlertCircle className="w-4 h-4 text-rose-400" />
                 <span>Ticket Outcome: {workOrder.status === 'Cant Repair' ? "Unrepairable / Can't Repair" : 'Cancelled / Customer Not Repair'}</span>
@@ -383,7 +384,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
         </div>
       </div>
 
-      {/* SECTION 2: Add New Transition / Log Panel (Drawer Modal) */}
+      {/* SECTION 2: Add New Transition / Log Panel (inline expanding panel) */}
       {isAddingLog && (
         <div className="p-4 bg-surface border border-brand/30 rounded-2xl shadow-xs space-y-3 animate-fadeIn">
           <div className="flex justify-between items-center pb-2 border-b border-line">

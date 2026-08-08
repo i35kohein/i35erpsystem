@@ -115,6 +115,21 @@ interface InventoryManagementModuleProps {
   setShowAddModal?: (s: boolean) => void;
 }
 
+/** Shared print shell-reset — hides the app chrome so only the print overlay survives.
+    Extracted from the matrix + tags print sheets (P3 audit 2026-08-08). */
+const PRINT_SHELL_RESET = `
+            @media print {
+              html, body, #root, #main-content-scroll, main, .basic-ui {
+                background: #ffffff !important;
+                color: #000000 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                min-width: 0 !important;
+                max-width: 100% !important;
+                overflow: visible !important;
+              }`;
+
 /** Renders a scannable CODE128 barcode for a part (SKU fallback id). */
 const PartBarcode: React.FC<{ value: string; height?: number }> = ({ value, height = 22 }) => {
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -394,7 +409,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   // iPad: navbar owns the barcode input — keep the module's submit handler registered.
   useEffect(() => {
     onRegisterScanHandler?.(handleScanSubmit);
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onRegisterScanHandler]);
   const [isDeviceModelChooserOpen, setIsDeviceModelChooserOpen] = useState(false);
   const [isLocationBinMenuOpen, setIsLocationBinMenuOpen] = useState(false);
   const [isEditLocationBinMenuOpen, setIsEditLocationBinMenuOpen] = useState(false);
@@ -1230,7 +1246,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           onClick={() => setShowLowStockOnly(!showLowStockOnly)}
           className={`p-4 rounded-2xl border text-left transition-all cursor-pointer shadow-2xs ${
             showLowStockOnly
-              ? 'bg-warning/100 text-white border-amber-600 ring-2 ring-amber-400'
+              ? 'bg-warning text-white border-amber-600 ring-2 ring-amber-400'
               : metrics.lowStockCount > 0
               ? 'bg-warning/10 hover:bg-warning/15/80 text-warning border-warning/30'
               : 'bg-white text-ink border-line'
@@ -1354,7 +1370,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             onClick={() => setShowLowStockOnly(!showLowStockOnly)}
             className={`w-full flex items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-xs transition-all cursor-pointer active:scale-[0.99] ${
               showLowStockOnly
-                ? 'bg-warning/100 border-amber-600 text-white'
+                ? 'bg-warning border-amber-600 text-white'
                 : 'bg-warning/10 hover:bg-warning/15/80 border-warning/30 text-warning'
             }`}
           >
@@ -1401,7 +1417,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 const isLow = part.quantityInStock <= part.reorderPoint;
                 const isOut = part.quantityInStock === 0;
                 const qualityBadge =
-                  part.qualityTier === 'Original' || part.qualityTier.includes('Original') ? (
+                  part.qualityTier === 'Original' || part.qualityTier?.includes('Original') ? (
                     <span className="inline-flex max-w-[130px] items-center gap-1 truncate rounded-md border border-brand/30 bg-brand-soft px-1.5 py-0.5 text-xs font-extrabold text-brand-deep">
                       <ShieldCheck className="h-3 w-3 shrink-0 text-brand" />
                       <span>{part.qualityTier}</span>
@@ -1486,14 +1502,14 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         {isOut ? (
                           <span className="animate-pulse rounded bg-danger px-1.5 py-0.5 text-xs font-black uppercase leading-none tracking-[0.1em] text-white">OUT OF STOCK</span>
                         ) : isLow ? (
-                          <span className="rounded bg-warning/100 px-1.5 py-0.5 text-xs font-black uppercase leading-none tracking-[0.1em] text-white">REORDER</span>
+                          <span className="rounded bg-warning px-1.5 py-0.5 text-xs font-black uppercase leading-none tracking-[0.1em] text-white">REORDER</span>
                         ) : (
                           <span className="text-xs font-bold text-muted">Min: {part.reorderPoint}</span>
                         )}
                       </div>
                       <div className="h-1.5 w-full overflow-hidden rounded-full bg-line">
                         <div
-                          className={`h-full transition-all duration-300 ${isOut ? 'w-0 bg-danger' : isLow ? 'bg-warning/100' : 'bg-success'}`}
+                          className={`h-full transition-all duration-300 ${isOut ? 'w-0 bg-danger' : isLow ? 'bg-warning' : 'bg-success'}`}
                           style={isOut ? undefined : { width: `${Math.min(100, Math.max(8, (part.quantityInStock / (part.reorderPoint * 3)) * 100))}%` }}
                         />
                       </div>
@@ -1616,7 +1632,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
                         {/* Quality Tier */}
                         <td className="w-[108px] px-2 py-2 hidden md:table-cell">
-                          {part.qualityTier === 'Original' || part.qualityTier.includes('Original') ? (
+                          {part.qualityTier === 'Original' || part.qualityTier?.includes('Original') ? (
                             <span className="inline-flex max-w-[112px] items-center gap-1 truncate rounded-md border border-brand/30 bg-brand-soft px-1.5 py-0.5 text-xs font-extrabold text-brand-deep">
                               <ShieldCheck className="h-3 w-3 shrink-0 text-brand" />
                               <span>{part.qualityTier}</span>
@@ -1661,7 +1677,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                                   OUT OF STOCK
                                 </span>
                               ) : !inlineEditMode && isLow ? (
-                                <span className="bg-warning/100 text-white text-xs font-black px-1 py-0.5 rounded uppercase tracking-[0.1em] leading-none">
+                                <span className="bg-warning text-white text-xs font-black px-1 py-0.5 rounded uppercase tracking-[0.1em] leading-none">
                                   REORDER
                                 </span>
                               ) : !inlineEditMode ? (
@@ -1675,7 +1691,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                             {!inlineEditMode && <div className="w-full h-1.5 bg-line rounded-full overflow-hidden">
                               <div
                                 className={`h-full transition-all duration-300 ${
-                                  isOut ? 'bg-danger w-0' : isLow ? 'bg-warning/100' : 'bg-success'
+                                  isOut ? 'bg-danger w-0' : isLow ? 'bg-warning' : 'bg-success'
                                 }`}
                                 style={{ width: `${Math.min(100, Math.max(8, (part.quantityInStock / (part.reorderPoint * 3)) * 100))}%` }}
                               />
@@ -3012,18 +3028,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       {/* PRINT: Ground Stock Checking Matrix Sheet */}
       {isMatrixPrintOpen && (
         <div className="printable-print-root fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 p-2 backdrop-blur-sm sm:p-4">
-          <style>{`
-            @media print {
-              html, body, #root, #main-content-scroll, main, .basic-ui {
-                background: #ffffff !important;
-                color: #000000 !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                width: 100% !important;
-                min-width: 0 !important;
-                max-width: 100% !important;
-                overflow: visible !important;
-              }
+          <style>{`${PRINT_SHELL_RESET}
               /* Hide the whole app shell, keep only the print overlay. */
               body:has(.printable-print-root) .basic-ui > *:not(:has(.printable-print-root)):not(.printable-print-root):not(.printable-print-root *),
               body:has(.printable-print-root) .basic-ui main *:not(:has(.printable-print-root)):not(.printable-print-root):not(.printable-print-root *) {
@@ -3205,18 +3210,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       {/* PRINT: A4 Spare Parts Tags */}
       {isTagsPrintOpen && (
         <div className="printable-print-root fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 p-2 backdrop-blur-sm sm:p-4">
-          <style>{`
-            @media print {
-              html, body, #root, #main-content-scroll, main, .basic-ui {
-                background: #ffffff !important;
-                color: #000000 !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                width: 100% !important;
-                min-width: 0 !important;
-                max-width: 100% !important;
-                overflow: visible !important;
-              }
+          <style>{`${PRINT_SHELL_RESET}
               body:has(.printable-print-root) .basic-ui > *:not(:has(.printable-print-root)):not(.printable-print-root):not(.printable-print-root *),
               body:has(.printable-print-root) .basic-ui main *:not(:has(.printable-print-root)):not(.printable-print-root):not(.printable-print-root *) {
                 display: none !important;

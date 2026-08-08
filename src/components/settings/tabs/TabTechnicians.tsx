@@ -111,7 +111,7 @@ const TechniciansTab: React.FC<TechniciansTabProps> = ({ formData, setFormData, 
                           <h4 className="font-extrabold text-xs text-ink flex items-center space-x-1.5 truncate">
                             <span className="truncate">{tech.name || 'Unnamed Tech'}</span>
                             {formData.defaultTechnicianId === tech.id && (
-                              <span className="px-1.5 py-0.2 bg-brand/15 text-brand text-xs font-extrabold rounded-md shrink-0">
+                              <span className="px-1.5 py-0.5 bg-brand/15 text-brand text-xs font-extrabold rounded-md shrink-0">
                                 DEFAULT
                               </span>
                             )}

@@ -400,7 +400,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
 
                           <span className={`text-xs font-black px-2 py-0.5 rounded-md tracking-wider uppercase shrink-0 shadow-2xs ${
                             item.status === 'Pass' ? 'bg-success text-white' :
-                            item.status === 'Fail' ? 'bg-danger text-white animate-pulse' : 'bg-slate-600 text-white'
+                            item.status === 'Fail' ? 'bg-danger text-white' : 'bg-slate-600 text-white'
                           }`}>
                             {item.status === 'Pass' ? '✓ PASS' : item.status === 'Fail' ? '✕ FAIL' : 'N/A'}
                           </span>

@@ -354,7 +354,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
               {tab.badge && (
                 <span
                   className={`px-2 py-0.5 rounded-full text-xs font-mono font-bold ${
-                    isActive ? 'bg-white/20 text-white' : 'bg-danger/100 text-white animate-pulse'
+                    isActive ? 'bg-white/20 text-white' : 'bg-danger text-white'
                   }`}
                 >
                   {tab.badge}
@@ -927,7 +927,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
                       </td>
                       <td className="p-3 font-mono text-xs">
                         <span className="block text-muted">Issued: {debt.issueDate}</span>
-                        <span className={`font-bold ${isOverdue ? 'text-danger animate-pulse' : 'text-ink'}`}>
+                        <span className={`font-bold ${isOverdue ? 'text-danger' : 'text-ink'}`}>
                           Due: {debt.dueDate}
                         </span>
                       </td>
@@ -1306,7 +1306,7 @@ export const ShopFinancePlModule: React.FC<ShopFinancePlModuleProps> = ({
               <p className="text-xl font-black text-danger mt-1">-{financialSummary.cogsTotal.toLocaleString()} {currency}</p>
               <span className="text-xs text-muted font-bold">unit cost</span>
             </div>
-            <div className="p-3.5 bg-gradient-to-br from-emerald-50 to-white border border-success/30 rounded-xl shadow-2xs">
+            <div className="p-3.5 bg-gradient-to-br from-success/10 to-surface border border-success/30 rounded-xl shadow-2xs">
               <span className="text-xs font-bold text-muted uppercase block">Parts Profit</span>
               <div className="flex items-baseline justify-between mt-1">
                 <p className="text-xl font-black text-success-deep">+{financialSummary.partsProfit.toLocaleString()} {currency}</p>
