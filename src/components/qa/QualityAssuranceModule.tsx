@@ -3,8 +3,7 @@ import { useIsIpad } from '../../hooks/useIsIpad';
 import {ShieldCheck, 
   CheckCircle2, 
   X,
-  ClipboardCheck,
-  MessageSquare} from 'lucide-react';
+  ClipboardCheck} from 'lucide-react';
 import { WorkOrder, PostRepairChecklist, Technician, DiagnosticItemResult, AppUser } from '../../types';
 import { Button , Input } from '../ui';
 import { DIAGNOSTIC_NAMES, getDiagnosticIcon } from '../intake/deviceData';
@@ -106,16 +105,20 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
   const [qaDiagnostics, setQaDiagnostics] = useState<DiagnosticItemResult[]>([]);
   // Which checklist rows have the note input open (comment icon toggle)
   const [noteOpenIds, setNoteOpenIds] = useState<Set<string>>(new Set());
-  const toggleNote = (id: string) =>
-    setNoteOpenIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
   // Cycle status: Pass -> Fail -> N/A -> Pass
   const cycleStatus = (id: string, current: string) => {
     const next = current === 'Pass' ? 'Fail' : current === 'Fail' ? 'N/A' : 'Pass';
     handleDiagnosticStatusChange(id, next as 'Pass' | 'Fail' | 'N/A');
+  };
+  // Long-press on a card opens its note input (no comment icon)
+  const pressTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const startNotePress = (id: string) => {
+    pressTimer.current = setTimeout(() => {
+      setNoteOpenIds((prev) => { const next = new Set(prev); next.add(id); return next; });
+    }, 450);
+  };
+  const cancelNotePress = () => {
+    if (pressTimer.current) { clearTimeout(pressTimer.current); pressTimer.current = null; }
   };
   // Update QA form & 21-point checklist whenever selectedWoId changes
   useEffect(() => {
@@ -438,9 +441,19 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     const isFail = item.status === 'Fail';
 
                     return (
-                      <div key={item.id} className={`rounded-xl border p-2.5 transition-colors ${
-                        isFail ? 'bg-danger/5 border-danger/20' : isPass ? 'bg-success/5 border-success/20' : 'bg-white border-line hover:border-brand/30'
-                      }`}>
+                      <div
+                        key={item.id}
+                        onMouseDown={() => startNotePress(item.id)}
+                        onMouseUp={cancelNotePress}
+                        onMouseLeave={cancelNotePress}
+                        onTouchStart={() => startNotePress(item.id)}
+                        onTouchEnd={cancelNotePress}
+                        onContextMenu={(e) => e.preventDefault()}
+                        className={`rounded-xl border p-2.5 transition-colors select-none ${
+                          isFail ? 'bg-danger/5 border-danger/20' : isPass ? 'bg-success/5 border-success/20' : 'bg-white border-line hover:border-brand/30'
+                        }`}
+                        title="Hold to add note"
+                      >
                         {/* Big icon — click to cycle status */}
                         <button
                           type="button"
@@ -482,21 +495,10 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           }`}>
                             {isPass ? '✓ PASS' : isFail ? '✕ FAIL' : 'NA'}
                           </span>
-                          <Button
-                            type="button"
-                            onClick={() => toggleNote(item.id)}
-                            className={`!h-5 !min-h-5 w-5 px-0 rounded shrink-0 transition-colors ${
-                              noteOpenIds.has(item.id) ? 'bg-line text-muted' : 'text-muted hover:bg-line/60 hover:text-ink'
-                            }`}
-                            title={item.note ? `Note: ${item.note}` : 'Add note'}
-                            aria-label={`Add note for ${item.name}`}
-                          >
-                            <MessageSquare className="w-3 h-3" />
-                          </Button>
                         </div>
 
-                        {/* Note input — only when open */}
-                        {noteOpenIds.has(item.id) && (
+                        {/* Note input — long-press to open; stays when note exists */}
+                        {(noteOpenIds.has(item.id) || (item.note || '').trim()) && (
                           <Input
                             type="text"
                             value={item.note || ''}
