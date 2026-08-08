@@ -248,7 +248,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                   onClick={() => setRmaView('table')}
                   title="Table view"
                   aria-label="RMA table view"
-                  className={`inline-flex min-h-10 min-w-10 items-center justify-center rounded-md transition-colors ${rmaView === 'table' ? 'bg-brand text-white' : 'text-faint hover:bg-surface'}`}
+                  className={`inline-flex min-h-10 min-w-10 items-center justify-center rounded-md transition-colors ${rmaView === 'table' ? 'bg-purple text-white' : 'text-faint hover:bg-surface'}`}
                 >
                   <List className="h-3.5 w-3.5" />
                 </Button>
@@ -257,7 +257,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                   onClick={() => setRmaView('cards')}
                   title="Card view"
                   aria-label="RMA card view"
-                  className={`inline-flex min-h-10 min-w-10 items-center justify-center rounded-md transition-colors ${rmaView === 'cards' ? 'bg-brand text-white' : 'text-faint hover:bg-surface'}`}
+                  className={`inline-flex min-h-10 min-w-10 items-center justify-center rounded-md transition-colors ${rmaView === 'cards' ? 'bg-purple text-white' : 'text-faint hover:bg-surface'}`}
                 >
                   <Grid className="h-3.5 w-3.5" />
                 </Button>

@@ -274,7 +274,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
         </div>
 
         {/* Analytics Key Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10 gap-2.5 pt-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3 pt-2">
           <div className="bg-surface border border-line rounded-xl p-3 space-y-1">
             <span className="text-xs font-semibold text-muted">Total Completed</span>
             <div className="text-xl font-extrabold text-ink">{totalCompleted}</div>
@@ -305,7 +305,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
             <p className="text-xs text-success-deep">Positive feedback</p>
           </div>
 
-          <div className="bg-warning/50 border border-warning/30 rounded-xl p-3 space-y-1 col-span-2 md:col-span-1">
+          <div className="bg-warning/50 border border-warning/30 rounded-xl p-3 space-y-1 col-span-2 sm:col-span-1">
             <span className="text-xs font-semibold text-warning">Avg Rating</span>
             <div className="flex items-center space-x-1.5">
               <span className="text-xl font-extrabold text-warning">{avgRating}</span>

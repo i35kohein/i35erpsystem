@@ -987,12 +987,12 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         <div className="flex flex-col md:flex-row md:items-center gap-2 w-full lg:w-auto lg:ml-auto min-w-0">
           {/* Dual View Switcher — desktop toolbar; iPad: lives in the filter drawer */}
           {!isIpad && (
-          <div className="bg-surface rounded-xl border border-line flex items-center p-1 w-full md:w-auto md:shrink-0">
+          <div className="bg-surface rounded-xl border border-line flex items-center p-1 w-full md:w-auto md:shrink-0 h-10">
             <Button
               variant="ghost"
               type="button"
               onClick={() => setViewMode('stock')}
-              className={`flex-1 md:flex-none h-10 lg:h-8 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
+              className={`flex-1 md:flex-none h-8 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
                 viewMode === 'stock'
                   ? 'bg-white text-brand shadow-xs border border-brand/20'
                   : 'text-muted hover:text-ink'
@@ -1005,7 +1005,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               variant="ghost"
               type="button"
               onClick={() => setViewMode('profit')}
-              className={`flex-1 md:flex-none h-10 lg:h-8 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
+              className={`flex-1 md:flex-none h-8 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
                 viewMode === 'profit'
                   ? 'bg-white text-brand shadow-xs border border-brand/20'
                   : 'text-muted hover:text-ink'
@@ -1018,7 +1018,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               variant="ghost"
               type="button"
               onClick={() => setViewMode('matrix')}
-              className={`flex-1 md:flex-none h-10 lg:h-8 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
+              className={`flex-1 md:flex-none h-8 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
                 viewMode === 'matrix'
                   ? 'bg-white text-brand shadow-xs border border-brand/20'
                   : 'text-muted hover:text-ink'
@@ -1033,7 +1033,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           {/* Filters — desktop only (iPad: side drawer) */}
           {!isIpad && (
             <div className="hidden md:flex items-stretch md:items-center gap-1.5 md:shrink-0">
-              <div className="flex h-10 lg:h-8 items-center gap-1 rounded-lg bg-surface p-1 flex-1 min-w-0 md:flex-none">
+              <div className="flex h-10 items-center gap-1 rounded-xl bg-surface p-1 flex-1 min-w-0 md:flex-none">
                 <div className="flex items-center gap-1 w-full">
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white text-brand">
                     <Smartphone className="h-3 w-3" />
@@ -1050,7 +1050,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 </div>
               </div>
 
-              <div className="flex h-10 lg:h-8 items-center gap-1 rounded-lg bg-surface p-1 flex-1 min-w-0 md:flex-none">
+              <div className="flex h-10 items-center gap-1 rounded-xl bg-surface p-1 flex-1 min-w-0 md:flex-none">
                 <div className="flex items-center gap-1 w-full">
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white text-brand">
                     <Layers className="h-3 w-3" />
@@ -1067,7 +1067,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 </div>
               </div>
 
-              <div className="flex h-10 lg:h-8 items-center gap-1 rounded-lg bg-surface p-1 flex-1 min-w-0 md:flex-none">
+              <div className="flex h-10 items-center gap-1 rounded-xl bg-surface p-1 flex-1 min-w-0 md:flex-none">
                 <div className="flex items-center gap-1 w-full">
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white text-brand">
                     <Filter className="h-3 w-3" />
@@ -1087,111 +1087,111 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           )}
 
           {viewMode === 'stock' && (
-            <div className={`grid items-center gap-1 w-full md:flex md:w-auto md:ml-auto md:shrink-0 md:pl-1 ${inlineEditMode ? 'grid-cols-3' : 'grid-cols-5'}`}>
-              {/* Quick Add Part — desktop toolbar; iPad: navbar has Add Part */}
+            <div className={`flex flex-wrap items-center justify-end gap-2 w-full md:w-auto md:ml-auto md:shrink-0`}>
+              {/* Table / Card view toggle (iOS segmented control style) */}
               {!isIpad && !inlineEditMode && (
-                <Button
-                  type="button"
-                  onClick={() => setShowAddModal(true)}
-                  className="toolbar-compact-btn flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 rounded-lg bg-brand px-2.5 py-1.5 text-xs font-bold text-white shadow-xs transition-colors hover:bg-brand-deep active:scale-95 cursor-pointer"
-                  title="Add a new part"
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Add Part</span>
-                </Button>
+                <div className="flex bg-surface p-1 rounded-xl shadow-inner border border-line-strong/50 w-full sm:w-auto h-10">
+                  <Button
+                    variant="ghost"
+                    type="button"
+                    onClick={() => setStockView('table')}
+                    title="Table view"
+                    className={`flex-1 sm:flex-none h-8 w-12 flex items-center justify-center rounded-lg transition-all ${
+                      stockView === 'table'
+                        ? 'bg-white text-brand shadow-xs border border-brand/20'
+                        : 'text-muted hover:text-ink'
+                    }`}
+                  >
+                    <List className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    type="button"
+                    onClick={() => setStockView('cards')}
+                    title="Card view"
+                    className={`flex-1 sm:flex-none h-8 w-12 flex items-center justify-center rounded-lg transition-all ${
+                      stockView === 'cards'
+                        ? 'bg-white text-brand shadow-xs border border-brand/20'
+                        : 'text-muted hover:text-ink'
+                    }`}
+                  >
+                    <LayoutGrid className="h-4 w-4" />
+                  </Button>
+                </div>
               )}
 
-              {/* Table view — desktop toolbar; iPad: navbar toggle */}
-              {!isIpad && !inlineEditMode && (
-                <Button
-                  type="button"
-                  onClick={() => setStockView('table')}
-                  title="Table view"
-                  aria-label="Stock table view"
-                  className={`toolbar-compact-btn flex-1 min-w-0 inline-flex items-center justify-center rounded-l-lg border transition-colors ${
-                    stockView === 'table'
-                      ? 'bg-brand text-white border-brand'
-                      : 'bg-white text-faint border-line-strong hover:bg-surface'
-                  }`}
-                >
-                  <List className="h-3.5 w-3.5" />
-                </Button>
-              )}
-              {/* Card view — joined pair with Table (desktop toolbar; iPad: navbar toggle) */}
-              {!isIpad && !inlineEditMode && (
-                <Button
-                  type="button"
-                  onClick={() => setStockView('cards')}
-                  title="Card view"
-                  aria-label="Stock card view"
-                  className={`toolbar-compact-btn flex-1 min-w-0 inline-flex items-center justify-center rounded-r-lg border transition-colors ${
-                    stockView === 'cards'
-                      ? 'bg-brand text-white border-brand'
-                      : 'bg-white text-faint border-line-strong hover:bg-surface'
-                  }`}
-                >
-                  <LayoutGrid className="h-3.5 w-3.5" />
-                </Button>
-              )}
+              <div className="flex items-center gap-1.5 w-full sm:w-auto">
+                {/* Print Tags */}
+                {!isIpad && (
+                  <Button
+                    type="button"
+                    onClick={() => { setIsTagsPrintOpen(true); setSelectedTagIds(new Set()); }}
+                    className="flex-1 sm:flex-none inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-line bg-white px-3 text-xs font-bold text-ink shadow-2xs transition-colors hover:border-brand hover:text-brand"
+                    title="Print spare parts tags (A4)"
+                  >
+                    <Printer className="h-3.5 w-3.5" />
+                    <span className="hidden xl:inline">Print Tags</span>
+                  </Button>
+                )}
 
-              {/* Print Tags — desktop toolbar; iPad: right drawer action */}
-              {!isIpad && (
-              <Button
-                type="button"
-                onClick={() => { setIsTagsPrintOpen(true); setSelectedTagIds(new Set()); }}
-                className="toolbar-compact-btn flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 rounded-lg border border-line bg-white px-2 py-1.5 text-xs font-bold text-ink transition-colors hover:border-brand hover:text-brand"
-                title="Print spare parts tags (A4)"
-              >
-                <Printer className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Print Tags</span>
-              </Button>
-              )}
-
-              {/* Edit / Done toggle — desktop toolbar; iPad: lives in the filter drawer */}
-              {!isIpad && (
-              <Button
-                type="button"
-                onClick={() => {
-                  if (inlineEditMode && inlineSaveReview.length) {
-                    setShowInlineSaveConfirm(true);
-                    return;
-                  }
-                  setInlineEditMode((value) => !value);
-                  setInlineDrafts({});
-                }}
-                className={`toolbar-compact-btn flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 rounded-lg border px-2 py-1.5 text-xs font-bold transition-colors ${
-                  inlineEditMode
-                    ? 'border-warning/30 bg-warning/10 text-warning hover:border-amber-400'
-                    : 'border-warning/30 bg-warning/10 text-warning hover:border-amber-400 hover:bg-warning/15'
-                }`}
-                title={inlineEditMode ? 'Cancel inline edit mode' : 'Edit stock rows'}
-              >
-                <Edit2 className="h-3.5 w-3.5" />
-                <span>{inlineEditMode ? 'Done' : 'Edit'}</span>
-              </Button>
-              )}
-
-              {/* Save — far right end, only while editing */}
-              {inlineEditMode && (
-                <Button
-                  type="button"
-                  onClick={() => {
-                    // Nothing changed → skip the confirm modal, just exit edit mode.
-                    if (!inlineSaveReview.length) {
-                      setInlineEditMode(false);
+                {/* Edit / Done toggle */}
+                {!isIpad && (
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      if (inlineEditMode && inlineSaveReview.length) {
+                        setShowInlineSaveConfirm(true);
+                        return;
+                      }
+                      setInlineEditMode((value) => !value);
                       setInlineDrafts({});
-                      toast.info('No changes to save', 'Nothing Changed');
-                      return;
-                    }
-                    setShowInlineSaveConfirm(true);
-                  }}
-                  className="toolbar-compact-btn flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 rounded-lg border border-brand bg-brand px-3 py-1.5 text-xs font-bold text-white shadow-xs transition-colors hover:bg-brand-deep"
-                  title="Save all inline edits"
-                >
-                  <Check className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Save</span>
-                </Button>
-              )}
+                    }}
+                    className={`flex-1 sm:flex-none inline-flex h-10 items-center justify-center gap-1.5 rounded-xl px-3 text-xs font-bold shadow-2xs transition-all ${
+                      inlineEditMode
+                        ? 'border border-warning/30 bg-warning/10 text-warning hover:border-amber-400'
+                        : 'border border-line bg-white text-ink hover:border-warning hover:text-warning'
+                    }`}
+                    title={inlineEditMode ? 'Cancel inline edit mode' : 'Edit stock rows'}
+                  >
+                    <Edit2 className="h-3.5 w-3.5" />
+                    <span className={inlineEditMode ? "inline" : "hidden xl:inline"}>{inlineEditMode ? 'Done' : 'Edit'}</span>
+                  </Button>
+                )}
+
+                {/* Quick Add Part */}
+                {!isIpad && !inlineEditMode && (
+                  <Button
+                    type="button"
+                    onClick={() => setShowAddModal(true)}
+                    className="flex-1 sm:flex-none inline-flex h-10 items-center justify-center gap-1.5 rounded-xl bg-brand px-4 text-xs font-extrabold text-white shadow-xs transition-all hover:bg-brand-deep active:scale-95 cursor-pointer"
+                    title="Add a new part"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    <span className="hidden md:inline">Add Part</span>
+                  </Button>
+                )}
+
+                {/* Save edits */}
+                {inlineEditMode && (
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      if (!inlineSaveReview.length) {
+                        setInlineEditMode(false);
+                        setInlineDrafts({});
+                        toast.info('No changes to save', 'Nothing Changed');
+                        return;
+                      }
+                      setShowInlineSaveConfirm(true);
+                    }}
+                    className="flex-1 sm:flex-none inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-brand bg-brand px-4 text-xs font-extrabold text-white shadow-xs transition-all hover:bg-brand-deep active:scale-95"
+                    title="Save all inline edits"
+                  >
+                    <Check className="h-4 w-4" />
+                    <span>Save {inlineSaveReview.length} Edits</span>
+                  </Button>
+                )}
+              </div>
             </div>
           )}
         </div>

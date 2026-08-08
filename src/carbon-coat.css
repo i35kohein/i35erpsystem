@@ -58,3 +58,21 @@ body, .basic-ui, button, input, select, textarea, [class*="font-sans"] {
 .bg-\[\#EAF8ED\] { background-color: color-mix(in srgb, var(--color-success) 12%, white) !important; }
 .bg-\[\#F8F9FA\], .bg-\[\#F8FBFD\], .bg-\[\#F0F6FF\] { background-color: var(--color-surface) !important; }
 .bg-\[\#F0F6FF\] { background-color: var(--color-brand-soft) !important; }
+
+/* ---- Dark Mode Overrides for Carbon Tokens ---- */
+html[data-theme="dark-slate"] {
+  --color-brand: #78a9ff;            /* Carbon blue-40 */
+  --color-brand-deep: #4589ff;       /* Carbon blue-50 */
+  --color-brand-soft: #001141;       /* Carbon blue-90 */
+  --color-ink: #f4f4f4;              /* Carbon gray-10 */
+  --color-muted: #a8a8a8;            /* Carbon gray-50 */
+  --color-faint: #6f6f6f;            /* Carbon gray-60 */
+  --color-line: #393939;             /* Carbon gray-80 */
+  --color-line-strong: #525252;      /* Carbon gray-70 */
+  --color-surface: #262626;          /* Carbon gray-90 */
+  --color-success: #42be65;          /* Carbon green-40 */
+  --color-success-deep: #24a148;     /* Carbon green-50 */
+  --color-purple: #be95ff;           /* Carbon purple-40 */
+  --color-warning: #f1c21b;          /* Carbon yellow-30 */
+  --color-danger: #ff8389;           /* Carbon red-40 */
+}

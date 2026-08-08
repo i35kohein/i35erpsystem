@@ -30,6 +30,7 @@ import { Button , Input } from '../ui';
 
 import { DateFilterState, filterByDateRange} from '../common/DateFilterSelector';
 import { timeAgoShort } from '../../utils/timeAgo';
+import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend } from 'recharts';
 import { TechnicianPerformanceTab } from './TechnicianPerformanceTab';
 import { TechnicianLeaderboardView } from './TechnicianLeaderboardView';
 import { TechnicianDetailModal } from './TechnicianDetailModal';
@@ -70,83 +71,76 @@ const TrendChart: React.FC<{
   maxRepairs: number;
   currencySymbol?: string;
 }> = ({ buckets, revenue, repairs, maxRevenue, maxRepairs, currencySymbol = 'MMK' }) => {
-  const W = 640;
-  const H = 170;
-  const TOP = 12;
-  const BOTTOM = 26;
-  const plotH = H - TOP - BOTTOM;
-  const n = Math.max(buckets.length, 1);
-  const slot = W / n;
-  const barW = Math.max(3, slot * 0.55);
-  const yFor = (v: number, max: number) => TOP + plotH - (max > 0 ? (v / max) * plotH : 0);
-  const linePoints = repairs
-    .map((v, i) => `${(slot * i + slot / 2).toFixed(1)},${yFor(v, maxRepairs).toFixed(1)}`)
-    .join(' ');
-  const labelStep = Math.max(1, Math.ceil(n / 6));
   const hasAny = revenue.some((v) => v > 0) || repairs.some((v) => v > 0);
 
   if (!hasAny) return null;
 
+  const data = buckets.map((b, i) => ({
+    name: b.label,
+    revenue: revenue[i] || 0,
+    repairs: repairs[i] || 0,
+  }));
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white border border-line rounded-lg shadow-lg p-3 text-sm">
+          <p className="font-bold text-ink mb-2">{label}</p>
+          <div className="space-y-1">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 rounded-sm bg-brand" />
+              <span className="text-muted">Revenue:</span>
+              <span className="font-bold text-brand-deep">{payload[0].value.toLocaleString()} {currencySymbol}</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 rounded-full bg-success" />
+              <span className="text-muted">Repairs:</span>
+              <span className="font-bold text-success-deep">{payload[1].value}</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
-    <div>
-      <div className="overflow-x-auto">
-        <svg
-          viewBox={`0 0 ${W} ${H}`}
-          className="block w-full min-w-[460px]"
-          role="img"
-          aria-label="Revenue bars and completed repairs line over the selected period"
-        >
-          {[0, 0.25, 0.5, 0.75, 1].map((f) => (
-            <line
-              key={f}
-              x1={0}
-              x2={W}
-              y1={TOP + plotH * f}
-              y2={TOP + plotH * f}
-              stroke="var(--color-line)"
-              strokeWidth={1}
-              strokeDasharray={f === 1 ? undefined : '3 3'}
-            />
-          ))}
-          {revenue.map((v, i) => (
-            <rect
-              key={i}
-              x={slot * i + (slot - barW) / 2}
-              y={yFor(v, maxRevenue)}
-              width={barW}
-              height={Math.max(0, TOP + plotH - yFor(v, maxRevenue))}
-              rx={2}
-              fill={v > 0 ? 'var(--color-brand)' : 'var(--color-line)'}
-              opacity={v > 0 ? 0.85 : 0.35}
-            />
-          ))}
-          {repairs.some((v) => v > 0) && (
-            <polyline points={linePoints} fill="none" stroke="var(--color-success)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-          )}
-          {repairs.map((v, i) =>
-            v > 0 ? (
-              <circle key={i} cx={slot * i + slot / 2} cy={yFor(v, maxRepairs)} r={3} fill="var(--color-success)" />
-            ) : null
-          )}
-          {buckets.map((b, i) =>
-            i % labelStep === 0 || i === n - 1 ? (
-              <text key={i} x={slot * i + slot / 2} y={H - 8} textAnchor="middle" fontSize={11} fill="var(--color-muted)">
-                {b.label}
-              </text>
-            ) : null
-          )}
-        </svg>
-      </div>
-      <div className="flex items-center space-x-4 overflow-x-auto no-scrollbar pt-2 text-xs font-bold text-muted">
-        <span className="flex shrink-0 items-center space-x-1.5">
-          <span className="inline-block h-2.5 w-2.5 rounded-sm bg-brand/85" />
-          Revenue ({currencySymbol})
-        </span>
-        <span className="flex shrink-0 items-center space-x-1.5">
-          <span className="inline-block h-0.5 w-3 rounded-full bg-success" />
-          Completed repairs
-        </span>
-      </div>
+    <div className="w-full h-80 mt-4 -ml-4">
+      <ResponsiveContainer width="100%" height="100%">
+        <ComposedChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-line)" />
+          <XAxis 
+            dataKey="name" 
+            tickLine={false} 
+            axisLine={false} 
+            tick={{ fontSize: 11, fill: 'var(--color-muted)' }} 
+            dy={10} 
+            interval="preserveStartEnd" 
+            minTickGap={20}
+          />
+          <YAxis 
+            yAxisId="left" 
+            tickLine={false} 
+            axisLine={false} 
+            tick={{ fontSize: 11, fill: 'var(--color-muted)' }} 
+            tickFormatter={(value) => value >= 1000 ? `${(value / 1000).toFixed(value >= 10000 ? 0 : 1)}k` : value}
+          />
+          <YAxis 
+            yAxisId="right" 
+            orientation="right" 
+            tickLine={false} 
+            axisLine={false} 
+            tick={{ fontSize: 11, fill: 'var(--color-muted)' }} 
+          />
+          <RechartsTooltip content={<CustomTooltip />} cursor={{ fill: 'var(--color-surface)', opacity: 0.4 }} />
+          <Legend 
+            wrapperStyle={{ fontSize: '12px', paddingTop: '20px', paddingLeft: '16px' }} 
+            iconType="circle"
+          />
+          <Bar yAxisId="left" dataKey="revenue" name={`Revenue (${currencySymbol})`} fill="var(--color-brand)" radius={[4, 4, 0, 0]} maxBarSize={40} opacity={0.85} />
+          <Line yAxisId="right" type="monotone" dataKey="repairs" name="Completed Repairs" stroke="var(--color-success)" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: 'var(--color-surface)', stroke: 'var(--color-success)' }} activeDot={{ r: 6, fill: 'var(--color-success)', stroke: 'var(--color-surface)' }} />
+        </ComposedChart>
+      </ResponsiveContainer>
     </div>
   );
 };
