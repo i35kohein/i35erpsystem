@@ -3,12 +3,12 @@ import { useIsIpad } from '../../hooks/useIsIpad';
 import {ShieldCheck, 
   CheckCircle2, 
   X,
-  Wrench,
   ClipboardCheck} from 'lucide-react';
 import { WorkOrder, PostRepairChecklist, Technician, DiagnosticItemResult, AppUser } from '../../types';
 import { Button , Input } from '../ui';
 import { DIAGNOSTIC_NAMES, getDiagnosticIcon } from '../intake/deviceData';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
+import { PriorityBadge } from '../common/PriorityBadge';
 
 interface QualityAssuranceModuleProps {
   workOrders: WorkOrder[];
@@ -229,6 +229,8 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                   <th className="py-2.5 px-3">Customer & Contact</th>
                   <th className="py-2.5 px-3">Device & Serial/IMEI</th>
                   <th className="py-2.5 px-3 hidden lg:table-cell">Symptoms / Service</th>
+                  <th className="py-2.5 px-3 hidden lg:table-cell">Assigned Tech</th>
+                  <th className="py-2.5 px-3 hidden xl:table-cell">Priority</th>
                   <th className="py-2.5 px-3">Stage & Status</th>
                   <th className="py-2.5 px-3">Amount</th>
                   <th className="py-2.5 px-3 text-right">Actions</th>
@@ -241,7 +243,6 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     day: 'numeric',
                   });
                   const isQaPassed = !!wo.postRepairChecklist;
-                  const repairs = (wo.selectedRepairs || []).filter((r) => r && r.name);
                   const openQa = () => {
                     setSelectedWoId(wo.id);
                     setIsQaModalOpen(true);
@@ -275,17 +276,26 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
 
                       {/* Symptoms / Service */}
                       <td className="py-3 px-3 hidden lg:table-cell">
-                        <div className="flex flex-wrap items-center gap-1 max-w-[240px]">
-                          {repairs.slice(0, 2).map((r, i) => (
-                            <span key={i} className="inline-flex items-center gap-1 rounded-md border border-brand/20 bg-brand/10 px-1.5 py-0.5 text-xs font-extrabold text-brand">
-                              <Wrench className="h-2.5 w-2.5" />
-                              {r.name}
-                            </span>
-                          ))}
-                          {repairs.length > 2 && (
-                            <span className="text-xs font-bold text-muted">+{repairs.length - 2}</span>
-                          )}
+                        <p className="text-xs text-ink line-clamp-1 max-w-[180px]" title={wo.symptomsReported || wo.serviceType}>
+                          {wo.symptomsReported || wo.serviceType || 'General Repair'}
+                        </p>
+                      </td>
+
+                      {/* Assigned Tech */}
+                      <td className="py-3 px-3 hidden lg:table-cell">
+                        <div className="flex items-center space-x-1.5">
+                          <div className="w-5 h-5 rounded-full bg-line text-muted font-bold text-xs flex items-center justify-center shrink-0">
+                            {(wo.assignedTechName || 'U').charAt(0)}
+                          </div>
+                          <span className="text-xs text-ink font-medium truncate max-w-[100px]">
+                            {wo.assignedTechName || 'Unassigned'}
+                          </span>
                         </div>
+                      </td>
+
+                      {/* Priority */}
+                      <td className="py-3 px-3 hidden xl:table-cell">
+                        <PriorityBadge priority={wo.priority} />
                       </td>
 
                       {/* Stage & Status */}
