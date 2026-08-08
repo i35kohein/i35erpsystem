@@ -158,15 +158,15 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
         </div>
       </div>
 
-      {/* Board columns */}
-      <div className="flex min-h-0 flex-1 gap-3 overflow-x-auto pb-2 no-scrollbar">
+      {/* Board columns — responsive: stack on mobile, full-width grid on desktop */}
+      <div className="grid min-h-0 flex-1 auto-rows-min grid-cols-1 gap-3 overflow-y-auto pb-2 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 content-start">
         {columns.map((col) => (
           <div
             key={col.id}
             onDragOver={(e) => { e.preventDefault(); setDragOverStage(col.id); }}
             onDragLeave={() => setDragOverStage((s) => (s === col.id ? null : s))}
             onDrop={(e) => { e.preventDefault(); handleDrop(col.id); }}
-            className={`flex w-[240px] shrink-0 flex-col rounded-2xl border bg-surface/60 transition-colors ${
+            className={`flex min-h-[140px] flex-col rounded-2xl border bg-surface/60 transition-colors ${
               dragOverStage === col.id ? 'border-brand/60 bg-brand/5' : 'border-line'
             }`}
           >
@@ -200,7 +200,7 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
                       role="button"
                       tabIndex={0}
                       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setDetailWo(wo); } }}
-                      className={`group cursor-pointer rounded-xl border bg-white p-2.5 shadow-2xs transition-all hover:shadow-md hover:border-brand/50 select-none ${
+                      className={`group cursor-pointer rounded-xl border bg-white p-3 shadow-2xs transition-all hover:shadow-md hover:border-brand/50 select-none ${
                         stagnant ? 'border-l-4 border-l-danger' : 'border-line'
                       }`}
                     >
