@@ -25,6 +25,9 @@ import {CreditCard,
   UserCheck,
   ChevronsLeft,
   ChevronsRight,
+  Tablet,
+  Watch,
+  Laptop,
   type LucideIcon,
 } from 'lucide-react';
 import { WorkOrder, Customer, SystemSettings, PartItem, WorkOrderLineItem } from '../../types';
@@ -163,6 +166,14 @@ interface PosInvoicingModuleProps {
   setStatusFilter?: (s: string) => void;
   onOpenSettings?: () => void;
 }
+
+const deviceIconOf = (model: string): LucideIcon => {
+  const m = (model || '').toLowerCase();
+  if (m.includes('ipad') || m.includes('tablet')) return Tablet;
+  if (m.includes('watch')) return Watch;
+  if (m.includes('mac') || m.includes('macbook') || m.includes('laptop') || m.includes('imac')) return Laptop;
+  return Smartphone;
+};
 
 const repairSummaryOf = (wo: WorkOrder): string => {
   const repairs = (wo.selectedRepairs || []).filter((r) => r && r.name);
@@ -554,20 +565,28 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
           )}
 
           {isQueueCollapsed && filteredWorkOrders.length > 0 && (
-            <div className="space-y-1.5">
-              {filteredWorkOrders.map((wo) => (
-                <button
-                  key={wo.id}
-                  type="button"
-                  onClick={() => setSelectedWoId(wo.id)}
-                  className={`w-full px-2 py-1.5 rounded-lg text-[10px] font-bold text-left truncate transition-colors ${
-                    wo.id === selectedWoId ? 'bg-brand text-white' : 'bg-surface text-ink hover:bg-line'
-                  }`}
-                  title={wo.orderNumber}
-                >
-                  {wo.orderNumber} · {wo.deviceModel}
-                </button>
-              ))}
+            <div className={`space-y-1.5 ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:flex-1 md:max-h-none' : 'min-h-[360px] max-h-[calc(100dvh-280px)] overflow-y-auto'}`}>
+              {filteredWorkOrders.map((wo) => {
+                const DeviceIcon = deviceIconOf(wo.deviceModel);
+                const isSel = wo.id === selectedWoId;
+                return (
+                  <button
+                    key={wo.id}
+                    type="button"
+                    onClick={() => setSelectedWoId(wo.id)}
+                    className={`w-full p-1.5 rounded-lg flex flex-col items-center gap-0.5 transition-colors ${
+                      isSel ? 'bg-brand text-white' : 'bg-surface text-ink hover:bg-line'
+                    }`}
+                    title={`${wo.orderNumber} · ${wo.deviceModel} · ${wo.customerName}`}
+                    aria-label={`Select ${wo.orderNumber} ${wo.deviceModel}`}
+                  >
+                    <DeviceIcon className={`w-4 h-4 ${isSel ? 'text-white' : 'text-brand'}`} />
+                    <span className={`text-[8px] font-black leading-none ${isSel ? 'text-white' : 'text-muted'}`}>
+                      {wo.isPaid ? '✓' : '$'}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
