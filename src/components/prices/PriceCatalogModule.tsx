@@ -34,12 +34,14 @@ import {
   FolderConfig, 
   DEFAULT_DEVICE_FOLDERS} from '../../types/priceCatalog';
 import { PriceSettingsModal } from './PriceSettingsModal';
+import { SystemSettings } from '../../types';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
 import { Button , Input } from '../ui';
 import { toast } from '../../lib/toast';
 
 interface PriceCatalogModuleProps {
   catalog: ModelRepairPrice[];
+  systemSettings?: SystemSettings;
   updatePriceAndWarranty: (modelName: string, categoryKey: string, newPrice: number | null, newWarranty: string) => void;
   importCatalogRows?: (
     rows: PriceCatalogImportRow[],
@@ -108,6 +110,7 @@ function WarrantyPill({ warranty, size = 'sm' }: { warranty: string; size?: 'sm'
 
 export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
   catalog,
+  systemSettings,
   updatePriceAndWarranty,
   importCatalogRows,
   addModel,
@@ -261,11 +264,12 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
     return catalog.find((c) => c.model === selectedDevice) || catalog[0];
   }, [catalog, selectedDevice]);
 
-  // If the selected model disappears from the catalog (import/reset), the
-  // fallback above would quote catalog[0]'s prices under a dead model name —
-  // sync the selector to the actual fallback (audit P2).
+  // If the selected model disappears from the catalog (import/reset) or the
+  // catalog loads after mount, sync the selector to a real model — otherwise
+  // quotes/headers show an empty device (audit P2 + quote fix).
   useEffect(() => {
-    if (selectedDevice && !catalog.some((c) => c.model === selectedDevice)) {
+    if (catalog.length === 0) return;
+    if (!selectedDevice || !catalog.some((c) => c.model === selectedDevice)) {
       setSelectedDevice(catalog[0]?.model || '');
     }
   }, [catalog, selectedDevice]);
@@ -386,18 +390,21 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
   const handleCopyCustomerQuote = () => {
     const dateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const shopName = systemSettings?.shopName?.trim() || 'i35 Apple Service';
+    const slogan = systemSettings?.shopInfo?.trim() || '';
     if (cart.size === 0) {
       // Copy single estimated service or active device total
       const text = [
-        '🔧 i35 Apple Repair Quote',
+        `${shopName} — Repair Quote`,
         `Device: ${selectedDevice}`,
         `Date: ${dateStr}`,
         'Status: Available Today',
+        ...(slogan ? [slogan] : []),
       ].join('\n');
       navigator.clipboard.writeText(text);
     } else {
       const lines: string[] = [
-        '🔧 i35 Apple Repair Quote',
+        `${shopName} — Repair Quote`,
         `Device: ${selectedDevice}`,
         `Date: ${dateStr}`,
         '',
@@ -412,7 +419,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
       });
       lines.push('');
       lines.push(`Total Estimated: ${formatPrice(cartSummary.totalDue)}`);
-      lines.push('📍 i35 Service Center — Express Same-Day Repair');
+      if (slogan) lines.push(slogan);
       navigator.clipboard.writeText(lines.join('\n'));
     }
     setQuoteCopied(true);

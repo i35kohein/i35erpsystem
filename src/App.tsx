@@ -2397,6 +2397,7 @@ export default function App() {
               {activeTab === 'price-catalog' && (
                 <PriceCatalogModule
                   catalog={priceCatalog.catalog}
+                  systemSettings={systemSettings}
                   updatePriceAndWarranty={priceCatalog.updatePriceAndWarranty}
                   importCatalogRows={priceCatalog.importCatalogRows}
                   addModel={priceCatalog.addModel}
