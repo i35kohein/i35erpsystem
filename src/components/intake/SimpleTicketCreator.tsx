@@ -565,38 +565,50 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                   )}
                 </div>
 
-                {/* Selected repairs + discount + summary (like New Intake Ticket) */}
-                <div className="max-h-44 space-y-1.5 overflow-y-auto border-t border-line px-4 py-3">
+                {/* Selected repairs + discount (2-line rows — roomy discount editing) */}
+                <div className="max-h-52 space-y-2 overflow-y-auto border-t border-line px-4 py-3">
                   {form.repairs.length === 0 && (
                     <p className="py-2 text-center text-xs font-medium text-muted">No repairs selected yet — tap items above to add them.</p>
                   )}
                   {form.repairs.map((r) => (
-                    <div key={r.id} className="flex items-center gap-2 text-xs">
-                      <span className="min-w-0 flex-1 truncate font-extrabold text-ink">{r.name}</span>
-                      <span className="font-mono text-muted">{r.basePrice.toLocaleString()}</span>
-                      <div className="relative shrink-0">
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={r.discountPercent}
-                          onChange={(e) => updateRepairDiscount(r.id, Number(e.target.value))}
-                          aria-label={`${r.name} discount percent`}
-                          className="w-14 rounded-lg border border-line bg-white px-2 py-1 text-center font-mono font-bold text-ink outline-none focus:border-brand focus:ring-1 focus:ring-brand"
-                        />
-                        <span className="pointer-events-none absolute inset-y-0 right-1.5 flex items-center text-[10px] font-bold text-muted">%</span>
+                    <div key={r.id} className="rounded-xl border border-line bg-surface/60 p-2.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="min-w-0 truncate text-xs font-extrabold text-ink">{r.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => setForm((f) => ({ ...f, repairs: f.repairs.filter((x) => x.id !== r.id) }))}
+                          className="shrink-0 rounded-md px-1.5 text-muted hover:text-danger"
+                          aria-label={`Remove ${r.name}`}
+                        >
+                          ✕
+                        </button>
                       </div>
-                      <span className={`w-20 shrink-0 text-right font-mono font-black ${r.finalPrice < r.basePrice ? 'text-brand' : 'text-ink'}`}>
-                        {r.finalPrice.toLocaleString()}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => setForm((f) => ({ ...f, repairs: f.repairs.filter((x) => x.id !== r.id) }))}
-                        className="shrink-0 rounded-md px-1 text-muted hover:text-danger"
-                        aria-label={`Remove ${r.name}`}
-                      >
-                        ✕
-                      </button>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs">
+                        <span className="text-muted">
+                          Base <span className="font-mono font-bold text-ink">{r.basePrice.toLocaleString()}</span>
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <span className="font-semibold text-muted">Discount</span>
+                          <div className="relative">
+                            <input
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={r.discountPercent}
+                              onChange={(e) => updateRepairDiscount(r.id, Number(e.target.value))}
+                              aria-label={`${r.name} discount percent`}
+                              className="w-16 rounded-lg border border-line bg-white py-1.5 pl-2 pr-6 text-center font-mono font-bold text-ink outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+                            />
+                            <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-[11px] font-bold text-muted">%</span>
+                          </div>
+                        </span>
+                        <span className="ml-auto text-right">
+                          <span className="text-muted">Final </span>
+                          <span className={`font-mono text-sm font-black ${r.finalPrice < r.basePrice ? 'text-brand' : 'text-ink'}`}>
+                            {r.finalPrice.toLocaleString()} MMK
+                          </span>
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>
