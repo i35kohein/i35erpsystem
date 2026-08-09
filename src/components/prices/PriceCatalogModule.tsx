@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { useIsIpad } from '../../hooks/useIsIpad';
 import { motion } from 'motion/react';
 import { 
@@ -553,18 +552,20 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
                             {/* Compact Discount button — opens a centered modal popup, no layout shift */}
                             <div className="mt-2 flex items-center justify-between gap-2">
-                              <Button
-                                type="button"
-                                onClick={() => setDiscountMenuOpenFor(discountMenuOpenFor === item.categoryKey ? null : item.categoryKey)}
-                                title={item.discountPercent > 0 ? `${item.discountPercent}% discount applied` : 'Add discount'}
-                                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
-                                  item.discountPercent > 0
-                                    ? 'bg-brand text-white border border-brand shadow-2xs'
-                                    : 'bg-white text-muted border border-line hover:border-brand hover:text-brand'
-                                }`}
-                              >
-                                <BadgePercent className="w-4 h-4" />
-                              </Button>
+                              {discountMenuOpenFor === item.categoryKey ? renderDiscountChips(item) : (
+                                <Button
+                                  type="button"
+                                  onClick={() => setDiscountMenuOpenFor(item.categoryKey)}
+                                  title={item.discountPercent > 0 ? `${item.discountPercent}% discount applied` : 'Add discount'}
+                                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
+                                    item.discountPercent > 0
+                                      ? 'bg-brand text-white border border-brand shadow-2xs'
+                                      : 'bg-white text-muted border border-line hover:border-brand hover:text-brand'
+                                  }`}
+                                >
+                                  <BadgePercent className="w-4 h-4" />
+                                </Button>
+                              )}
 
                               <span className="text-xs font-semibold text-muted">
                                 {item.discountPercent > 0
@@ -573,7 +574,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                               </span>
                             </div>
 
-                            {renderDiscountPopup(item)}
+                            
 
                           </div>
                         );
@@ -622,18 +623,20 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
                             <div className="flex items-center justify-between bg-surface px-2 py-1 rounded-lg">
                               <div className="flex items-center space-x-1.5">
-                                <Button
-                                  type="button"
-                                  onClick={() => setDiscountMenuOpenFor(discountMenuOpenFor === item.categoryKey ? null : item.categoryKey)}
-                                  title={item.discountPercent > 0 ? `${item.discountPercent}% discount applied` : 'Add discount'}
-                                  className={`w-7 h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
-                                    item.discountPercent > 0
-                                      ? 'bg-brand text-white border border-brand shadow-2xs'
-                                      : 'bg-white text-muted border border-line hover:border-brand hover:text-brand'
-                                  }`}
-                                >
-                                  <BadgePercent className="w-4 h-4" />
-                                </Button>
+                                {discountMenuOpenFor === item.categoryKey ? renderDiscountChips(item) : (
+                                  <Button
+                                    type="button"
+                                    onClick={() => setDiscountMenuOpenFor(item.categoryKey)}
+                                    title={item.discountPercent > 0 ? `${item.discountPercent}% discount applied` : 'Add discount'}
+                                    className={`w-7 h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
+                                      item.discountPercent > 0
+                                        ? 'bg-brand text-white border border-brand shadow-2xs'
+                                        : 'bg-white text-muted border border-line hover:border-brand hover:text-brand'
+                                    }`}
+                                  >
+                                    <BadgePercent className="w-4 h-4" />
+                                  </Button>
+                                )}
                                 {item.discountPercent > 0 && (
                                   <span className="text-[11px] font-extrabold text-success">{item.discountPercent}% Off</span>
                                 )}
@@ -650,7 +653,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                 </span>
                               </div>
                             </div>
-                            {renderDiscountPopup(item)}
+                            
                           </div>
                         );
                       }
@@ -708,18 +711,20 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
                         <div className="flex items-center justify-between bg-surface px-2 py-1 rounded-lg">
                           <div className="flex items-center space-x-1.5">
-                            <Button
-                              type="button"
-                              onClick={() => setDiscountMenuOpenFor(discountMenuOpenFor === item.categoryKey ? null : item.categoryKey)}
-                              title={item.discountPercent > 0 ? `${item.discountPercent}% discount applied` : 'Add discount'}
-                              className={`w-7 h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
-                                item.discountPercent > 0
-                                  ? 'bg-brand text-white border border-brand shadow-2xs'
-                                  : 'bg-white text-muted border border-line hover:border-brand hover:text-brand'
-                              }`}
-                            >
-                              <BadgePercent className="w-4 h-4" />
-                            </Button>
+                            {discountMenuOpenFor === item.categoryKey ? renderDiscountChips(item) : (
+                              <Button
+                                type="button"
+                                onClick={() => setDiscountMenuOpenFor(item.categoryKey)}
+                                title={item.discountPercent > 0 ? `${item.discountPercent}% discount applied` : 'Add discount'}
+                                className={`w-7 h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
+                                  item.discountPercent > 0
+                                    ? 'bg-brand text-white border border-brand shadow-2xs'
+                                    : 'bg-white text-muted border border-line hover:border-brand hover:text-brand'
+                                }`}
+                              >
+                                <BadgePercent className="w-4 h-4" />
+                              </Button>
+                            )}
                             {item.discountPercent > 0 && (
                               <span className="text-[11px] font-extrabold text-success">{item.discountPercent}% Off</span>
                             )}
@@ -736,7 +741,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                             </span>
                           </div>
                         </div>
-                          {renderDiscountPopup(item)}
+                          
                       </div>
                     );
                   })}
@@ -746,97 +751,50 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
           </div>
   );
 
-  // Shared discount picker — small popup modal with preset chips + custom %
-  // (Ko Hein: Discount circle icon → popup with 5..50 presets + custom).
-  const renderDiscountPopup = (item: CartItem) => {
-    if (discountMenuOpenFor !== item.categoryKey) return null;
-    return createPortal(
-      <div
-        className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm animate-fadeIn"
-        onClick={() => setDiscountMenuOpenFor(null)}
-        role="presentation"
-      >
-        <div
-          className="w-72 rounded-2xl border border-line bg-white p-3 shadow-2xl animate-i35-slide-up"
-          onClick={(e) => e.stopPropagation()}
+  // Discount control: clicking the circle expands a row of preset % circles to
+  // the right (Ko Hein) — picking one collapses back to a single circle.
+  const renderDiscountChips = (item: CartItem) => (
+    <div className="flex items-center gap-1 overflow-x-auto no-scrollbar" style={{ maxWidth: 190 }}>
+      {DISCOUNT_OPTIONS.map((p) => (
+        <button
+          key={p}
+          type="button"
+          onClick={() => {
+            handleUpdateItemDiscount(item.categoryKey, p);
+            setDiscountMenuOpenFor(null);
+          }}
+          className={`w-6 h-6 rounded-full text-[10px] font-extrabold flex items-center justify-center shrink-0 transition-all cursor-pointer active:scale-90 ${
+            item.discountPercent === p
+              ? 'bg-brand text-white border border-brand'
+              : 'bg-white text-ink border border-line hover:border-brand hover:text-brand'
+          }`}
+          title={`${p}% off`}
         >
-          <div className="flex items-center justify-between px-1 pb-2 gap-2">
-            <p className="text-xs font-extrabold text-ink">Discount</p>
-            <span className="text-xs font-bold text-muted truncate max-w-[140px]">{item.label}</span>
-          </div>
-          <div className="grid grid-cols-5 gap-1.5">
-            {DISCOUNT_OPTIONS.map((p) => (
-              <Button
-                key={p}
-                type="button"
-                autoFocus={item.discountPercent === p}
-                onClick={() => {
-                  handleUpdateItemDiscount(item.categoryKey, p);
-                  setDiscountMenuOpenFor(null);
-                }}
-                className={`py-1.5 rounded-lg text-xs font-extrabold border transition-all cursor-pointer active:scale-95 ${
-                  item.discountPercent === p
-                    ? 'bg-brand text-white border-brand shadow-2xs'
-                    : 'bg-white text-ink border-line hover:border-brand/50'
-                }`}
-              >
-                {p}%
-              </Button>
-            ))}
-          </div>
-          {/* Custom % */}
-          <div className="mt-2.5 pt-2 border-t border-line flex items-center gap-1.5">
-            <Input
-              type="number"
-              min={1}
-              max={100}
-              placeholder="Custom %"
-              value={customDiscountInput}
-              onChange={(e) => setCustomDiscountInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  const v = Number(customDiscountInput);
-                  if (v >= 1 && v <= 100) {
-                    handleUpdateItemDiscount(item.categoryKey, v);
-                    setDiscountMenuOpenFor(null);
-                    setCustomDiscountInput('');
-                  }
-                }
-              }}
-              className="flex-1 bg-surface border border-line rounded-lg px-2 py-1.5 text-xs text-ink"
-            />
-            <Button
-              type="button"
-              onClick={() => {
-                const v = Number(customDiscountInput);
-                if (v >= 1 && v <= 100) {
-                  handleUpdateItemDiscount(item.categoryKey, v);
-                  setDiscountMenuOpenFor(null);
-                  setCustomDiscountInput('');
-                }
-              }}
-              className="px-2.5 py-1.5 bg-brand text-white text-xs font-extrabold rounded-lg"
-            >
-              Apply
-            </Button>
-          </div>
-          {item.discountPercent > 0 && (
-            <button
-              type="button"
-              onClick={() => {
-                handleUpdateItemDiscount(item.categoryKey, 0);
-                setDiscountMenuOpenFor(null);
-              }}
-              className="mt-2 w-full text-center text-[11px] font-bold text-danger hover:underline cursor-pointer"
-            >
-              Remove discount
-            </button>
-          )}
-        </div>
-      </div>,
-      document.body
-    );
-  };
+          {p}
+        </button>
+      ))}
+      <input
+        type="number"
+        min={1}
+        max={100}
+        placeholder="%"
+        value={customDiscountInput}
+        onChange={(e) => setCustomDiscountInput(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            const v = Number(customDiscountInput);
+            if (v >= 1 && v <= 100) {
+              handleUpdateItemDiscount(item.categoryKey, v);
+              setDiscountMenuOpenFor(null);
+              setCustomDiscountInput('');
+            }
+          }
+        }}
+        className="w-9 h-6 rounded-full bg-surface border border-line text-[10px] font-bold text-center text-ink outline-none focus:border-brand shrink-0"
+        title="Custom discount %"
+      />
+    </div>
+  );
 
   const renderCartTotals = () => (
     <div className="shrink-0 bg-white border-t border-line px-3.5 pt-3 pb-[calc(0.875rem+env(safe-area-inset-bottom))] space-y-2.5">
