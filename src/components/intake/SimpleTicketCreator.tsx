@@ -404,7 +404,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                     type="button"
                     onClick={() => cycleCheck(i)}
                     title={form.checks[i].status === 'N/A' ? 'Not checked — tap for Pass' : form.checks[i].status === 'Pass' ? 'Pass — tap for Fail' : 'Fail — tap for N/A'}
-                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border text-[10px] font-black transition-colors cursor-pointer ${
+                    className={`flex !h-4 !w-4 !min-h-4 !min-w-4 shrink-0 items-center justify-center rounded-full border text-[10px] font-black leading-none transition-colors cursor-pointer ${
                       form.checks[i].status === 'Pass'
                         ? 'border-success bg-success text-white'
                         : form.checks[i].status === 'Fail'
