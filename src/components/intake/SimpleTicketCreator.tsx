@@ -256,6 +256,11 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
         <form onSubmit={handleSubmit} onReset={resetForm} className="px-4 py-4 sm:px-7 sm:py-5">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-6">
           <div className="divide-y divide-line">
+            {/* LEFT header — mirrors the checklist header (Ko Hein) */}
+            <div className="flex items-center justify-between border-b border-line pb-2">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted">Customer Data</span>
+              <span className="shrink-0 font-mono text-[11px] font-black text-brand">{form.repairs.length > 0 ? `${form.repairs.length} repair${form.repairs.length > 1 ? 's' : ''}` : '—'}</span>
+            </div>
             {/* Phone */}
             <label className="flex items-center gap-3 py-2">
               <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Phone</span>
