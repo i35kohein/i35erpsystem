@@ -91,7 +91,7 @@ interface CartItem {
 }
 
 /** Shared warranty pill (extracted 2026-08-08 — was duplicated 4× verbatim) */
-const DISCOUNT_OPTIONS = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
+const DISCOUNT_OPTIONS = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
 
 function WarrantyPill({ warranty, size = 'sm' }: { warranty: string; size?: 'sm' | 'md' }) {
   const icon = size === 'md' ? 'w-2.5 h-2.5' : 'w-2 h-2';
@@ -774,20 +774,27 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                   ? 'bg-brand text-white border border-brand'
                   : 'bg-white text-ink border border-line hover:border-brand hover:text-brand'
               }`}
-              title={`${p}% off`}
+              title={p === 0 ? 'No discount' : `${p}% off`}
             >
-              {p}
+              {p === 0 ? '0' : p}
             </button>
           ))}
         </div>
-        <div className="mt-2 pt-1.5 border-t border-line flex items-center gap-1">
+        <div className="mt-2 pt-1.5 border-t border-line flex items-center justify-between gap-1.5">
           <input
             type="number"
             min={1}
             max={100}
-            placeholder="%"
+            placeholder="Custom %"
             value={customDiscountInput}
             onChange={(e) => setCustomDiscountInput(e.target.value)}
+            onBlur={() => {
+              const v = Number(customDiscountInput);
+              if (v >= 1 && v <= 100) {
+                handleUpdateItemDiscount(item.categoryKey, v);
+                setCustomDiscountInput('');
+              }
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 const v = Number(customDiscountInput);
@@ -798,23 +805,10 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                 }
               }
             }}
-            className="!w-8 !h-8 !min-h-8 rounded-full bg-surface border border-line text-[10px] font-bold text-center text-ink outline-none focus:border-brand shrink-0 px-0"
-            title="Custom %"
+            className="!w-10 !h-8 !min-h-8 rounded-full bg-surface border border-line text-[11px] font-bold text-center text-ink outline-none focus:border-brand shrink-0 px-0"
+            title="Custom discount % — type and press Enter"
           />
-          <button
-            type="button"
-            onClick={() => {
-              const v = Number(customDiscountInput);
-              if (v >= 1 && v <= 100) {
-                handleUpdateItemDiscount(item.categoryKey, v);
-                setDiscountMenuOpenFor(null);
-                setCustomDiscountInput('');
-              }
-            }}
-            className="flex-1 !h-7 !min-h-7 rounded-full bg-brand text-white text-[10px] font-extrabold transition-all cursor-pointer active:scale-95"
-          >
-            Apply
-          </button>
+          <span className="text-[9px] font-bold text-muted">Type % + Enter</span>
         </div>
       </div>
     );
