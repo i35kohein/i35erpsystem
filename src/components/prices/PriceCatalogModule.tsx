@@ -786,12 +786,11 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
             </button>
           ))}
         </div>
-        <div className="mt-2 pt-1.5 border-t border-line flex items-center justify-between gap-1.5">
+        <div className="mt-2 pt-2 border-t border-line">
           <input
             type="number"
-            min={1}
-            max={100}
-            placeholder="Custom %"
+            inputMode="numeric"
+            placeholder="Custom % — press Enter"
             value={customDiscountInput}
             onChange={(e) => setCustomDiscountInput(e.target.value)}
             onBlur={() => {
@@ -811,10 +810,9 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                 }
               }
             }}
-            className="!w-16 !h-8 !min-h-8 rounded-full bg-surface border border-line text-[11px] font-bold text-center text-ink outline-none focus:border-brand shrink-0 px-1"
+            className="w-full !h-9 !min-h-9 rounded-full bg-surface border border-line px-3.5 text-xs font-bold text-ink placeholder-muted outline-none focus:border-brand transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             title="Custom discount % — type and press Enter"
           />
-          <span className="text-[9px] font-bold text-muted">Type % + Enter</span>
         </div>
       </div>
     );
