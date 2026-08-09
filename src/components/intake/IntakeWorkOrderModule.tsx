@@ -12,7 +12,7 @@ import { ConfirmDeleteModal } from '../common/ConfirmDeleteModal';
 import { Button } from '../ui';
 import { TicketDetailInspectorModal } from '../common/TicketDetailInspectorModal';
 import type { TicketPrefillData } from './CreateTicketSoloPage';
-import {ClipboardList, 
+import {ClipboardList, ClipboardCheck, 
   Camera,
   Inbox,
   Ticket,
@@ -250,6 +250,19 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
               <Camera className="w-3.5 h-3.5 text-white shrink-0" />
               <span className="hidden sm:inline">Scan Barcode / QR</span>
               <span className="sm:hidden">Scan</span>
+            </Button>
+
+            {/* Simple Ticket — quick link to the paper intake form (Ko Hein) */}
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => onNavigateToTab?.('simple-ticket')}
+              className="w-full md:w-auto border-line bg-white text-ink hover:border-brand hover:text-brand flex items-center justify-center md:justify-start space-x-1.5"
+              title="Open Simple Ticket form"
+            >
+              <ClipboardCheck className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">Simple Ticket</span>
+              <span className="sm:hidden">Simple</span>
             </Button>
           </div>
         </div>
