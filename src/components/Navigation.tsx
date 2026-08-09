@@ -16,7 +16,7 @@ import {LogOut,
   Settings,
   PhoneCall,
   DollarSign,
-  Trello} from 'lucide-react';
+  Trello, ClipboardCheck} from 'lucide-react';
 import { WorkOrder, SystemSettings, AppUser } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { UserRoleSwitcher } from './common/UserRoleSwitcher';
@@ -92,6 +92,11 @@ export const Navigation: React.FC<NavigationProps> = ({
           id: 'intake',
           label: t('navIntake'),
           icon: ClipboardList,
+        },
+        {
+          id: 'simple-ticket',
+          label: 'Simple Ticket',
+          icon: ClipboardCheck,
         },
         {
           id: 'trello',

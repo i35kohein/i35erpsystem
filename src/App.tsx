@@ -83,6 +83,7 @@ import { Navigation } from './components/Navigation';
 // Heavy modules are code-split (React.lazy) so the initial bundle stays lean.
 const DashboardOverview = lazy(() => import('./components/dashboard/DashboardOverview').then((m) => ({ default: m.DashboardOverview })));
 const IntakeWorkOrderModule = lazy(() => import('./components/intake/IntakeWorkOrderModule').then((m) => ({ default: m.IntakeWorkOrderModule })));
+const SimpleTicketCreator = lazy(() => import('./components/intake/SimpleTicketCreator'));
 const CreateTicketSoloPage = lazy(() => import('./components/intake/CreateTicketSoloPage').then((m) => ({ default: m.CreateTicketSoloPage })));
 const TrelloBoardModule = lazy(() => import('./components/trello/TrelloBoardModule').then((m) => ({ default: m.TrelloBoardModule })));
 const InventoryManagementModule = lazy(() => import('./components/inventory/InventoryManagementModule').then((m) => ({ default: m.InventoryManagementModule })));
@@ -190,7 +191,7 @@ export default function App() {
     // Restore tab from URL hash (#/pipeline) so deep links & reloads land correctly
     if (typeof window !== 'undefined') {
       const h = window.location.hash.replace(/^#\/?/, '');
-      if (h && ['dashboard','intake','trello','qa','follow-up','price-catalog','pos','finance','inventory','suppliers','crm','settings','create-ticket'].includes(h)) return h;
+      if (h && ['dashboard','intake','simple-ticket','trello','qa','follow-up','price-catalog','pos','finance','inventory','suppliers','crm','settings','create-ticket'].includes(h)) return h;
     }
     return 'dashboard';
   });
@@ -218,6 +219,7 @@ export default function App() {
       warmedRef.current = true;
       void import('./components/dashboard/DashboardOverview');
       void import('./components/intake/IntakeWorkOrderModule');
+      void import('./components/intake/SimpleTicketCreator');
       void import('./components/trello/TrelloBoardModule');
       void import('./components/inventory/InventoryManagementModule');
       void import('./components/suppliers/SupplierRmaModule');
@@ -1567,6 +1569,7 @@ export default function App() {
       case 'dashboard': return { category: t('navRepair'), title: 'Dashboard' };
       case 'create-ticket': return { category: t('navRepair'), title: t('navCreateTicket') };
       case 'intake': return { category: t('navRepair'), title: t('navIntakeFull') };
+      case 'simple-ticket': return { category: t('navRepair'), title: 'Simple Ticket' };
       case 'trello': return { category: t('navRepair'), title: 'Ticket Board' };
       case 'inventory': return { category: t('navInventory'), title: t('navPartsMatrix') };
       case 'suppliers': return { category: t('navInventory'), title: t('navSuppliers') };
@@ -2221,6 +2224,15 @@ export default function App() {
                   sortByPriority={intakeSortByPriority}
                   setSortByPriority={setIntakeSortByPriority}
                   scanRequested={intakeScanRequest}
+                />
+              )}
+
+              {activeTab === 'simple-ticket' && (
+                <SimpleTicketCreator
+                  workOrders={activeWorkOrders}
+                  onSaveWorkOrder={handleSaveWorkOrder}
+                  onDeleteWorkOrder={handleDeleteWorkOrder}
+                  onNavigateToTab={(tab) => setActiveTab(tab as any)}
                 />
               )}
 
