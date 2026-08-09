@@ -1036,14 +1036,16 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                         : 'border-line hover:border-brand/50'
                     }`}
                   >
-                    {/* Row 1: icon + service name + warranty (right) */}
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl border flex items-center justify-center shrink-0 ${config.bg}`}>
-                        <IconComp className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${config.color}`} />
+                    {/* Row 1: icon + service name (left) + warranty (far right) */}
+                    <div className="flex items-center justify-between gap-2 min-w-0">
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                        <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl border flex items-center justify-center shrink-0 ${config.bg}`}>
+                          <IconComp className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${config.color}`} />
+                        </div>
+                        <h3 className="font-extrabold text-xs sm:text-sm text-ink min-w-0 leading-snug" title={item.label}>
+                          {item.label}
+                        </h3>
                       </div>
-                      <h3 className="font-extrabold text-xs sm:text-sm text-ink min-w-0 leading-snug" title={item.label}>
-                        {item.label}
-                      </h3>
                       <WarrantyPill warranty={item.warranty} />
                     </div>
 
