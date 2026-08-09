@@ -1063,7 +1063,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
             <Button
               type="button"
               onClick={() => setCategoryFilter('ALL')}
-              className={`shrink-0 px-2.5 !h-7 !min-h-0 rounded-full text-[11px] font-extrabold border transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:bg-brand focus-visible:text-white focus-visible:border-brand ${
+              className={`shrink-0 px-2.5 !h-7 !min-h-0 sm:!h-10 sm:!min-h-10 sm:px-3 rounded-full text-xs font-extrabold border transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:bg-brand focus-visible:text-white focus-visible:border-brand ${
                 effectiveCategoryFilter === 'ALL'
                   ? 'bg-brand text-white border-brand shadow-2xs'
                   : 'bg-white text-ink border-line hover:border-brand/50'
@@ -1076,7 +1076,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                 key={group}
                 type="button"
                 onClick={() => setCategoryFilter(group)}
-                className={`shrink-0 px-2.5 !h-7 !min-h-0 rounded-full text-[11px] font-extrabold border transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:bg-brand focus-visible:text-white focus-visible:border-brand ${
+                className={`shrink-0 px-2.5 !h-7 !min-h-0 sm:!h-10 sm:!min-h-10 sm:px-3 rounded-full text-xs font-extrabold border transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:bg-brand focus-visible:text-white focus-visible:border-brand ${
                   effectiveCategoryFilter === group
                     ? 'bg-brand text-white border-brand shadow-2xs'
                     : 'bg-white text-ink border-line hover:border-brand/50'
