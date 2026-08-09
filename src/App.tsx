@@ -1,6 +1,6 @@
 import  {useState, useRef, useEffect, useMemo, lazy, Suspense} from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import {Sparkles, Plus, Search, Filter, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, Timer, SlidersHorizontal, Eye, Stethoscope, Edit2, List, LayoutGrid, Printer, Smartphone, Layers, ScanLine, ListFilter, Activity, Users, Boxes, Coins, ShieldAlert} from 'lucide-react';
+import {Sparkles, Plus, Search, Filter, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, RotateCcw, Save, Timer, SlidersHorizontal, Eye, Stethoscope, Edit2, List, LayoutGrid, Printer, Smartphone, Layers, ScanLine, ListFilter, Activity, Users, Boxes, Coins, ShieldAlert} from 'lucide-react';
 import {subscribeToCollection, fetchCloudCollection, saveDocument, deleteDocument, clearCollection} from './lib/supabase';
 import { setActiveUserId, notifyAccountChanged } from './utils/accountSettings';
 
@@ -1964,26 +1964,7 @@ export default function App() {
               </div>
             )}
 
-            {/* Quick Access Recycle Bin Button (Only shown in Work Intake & Status Pipeline) */}
-            {(activeTab === 'intake' || activeTab === 'pipeline') && (
-              <Button
-                onClick={() => setIsRecycleBinOpen(true)}
-                className={`${isIpad ? 'hidden' : 'hidden lg:flex'} items-center space-x-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all active:scale-95 cursor-pointer shrink-0 ${
-                  archivedWorkOrders.length > 0
-                    ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200 shadow-2xs'
-                    : 'bg-surface hover:bg-line text-ink border-line'
-                }`}
-                title="Recycle Bin & Archived Tickets"
-              >
-                <Trash2 className={`w-3.5 h-3.5 ${archivedWorkOrders.length > 0 ? 'text-rose-600' : 'text-muted'}`} />
-                <span className="hidden sm:inline">{t('recycleBin')}</span>
-                {archivedWorkOrders.length > 0 && (
-                  <span className="px-1.5 py-0.5 rounded-full bg-rose-600 text-white text-xs font-bold">
-                    {archivedWorkOrders.length}
-                  </span>
-                )}
-              </Button>
-            )}
+
 
             {/* Contextual Action Button */}
             {activeTab === 'inventory' ? (
