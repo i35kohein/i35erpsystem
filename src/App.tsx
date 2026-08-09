@@ -1,8 +1,10 @@
 import  {useState, useRef, useEffect, useMemo, lazy, Suspense} from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import {Sparkles, Plus, Search, Filter, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, RotateCcw, Save, Timer, SlidersHorizontal, Eye, Stethoscope, Edit2, List,
+import {Sparkles, Plus, Search, Filter, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, RotateCcw, Save, Timer, SlidersHorizontal, Eye, Stethoscope, Edit2,
+  MoreHorizontal,
+  Printer, List,
   TrendingUp,
-  Grid, Printer, Smartphone, Layers, ScanLine, ListFilter, Activity, Users, Boxes, Coins, ShieldAlert} from 'lucide-react';
+  Grid, Smartphone, Layers, ScanLine, ListFilter, Activity, Users, Boxes, Coins, ShieldAlert} from 'lucide-react';
 import {subscribeToCollection, fetchCloudCollection, saveDocument, deleteDocument, clearCollection} from './lib/supabase';
 import { setActiveUserId, notifyAccountChanged } from './utils/accountSettings';
 
@@ -138,6 +140,7 @@ export default function App() {
   const [inventoryEditMode, setInventoryEditMode] = useState(false);
   const [inventoryStockView, setInventoryStockView] = useState<'table' | 'cards'>('table');
   const [inventoryTagsPrintOpen, setInventoryTagsPrintOpen] = useState(false);
+  const [inventoryMoreOpen, setInventoryMoreOpen] = useState(false);
   const [inventoryScanQuery, setInventoryScanQuery] = useState('');
   const inventoryScanSubmitRef = useRef<(() => void) | null>(null);
   const [customerTypeFilter, setCustomerTypeFilter] = useState<string>('ALL');
@@ -1859,6 +1862,7 @@ export default function App() {
             )}
 
             {activeTab === 'inventory' && (
+              <>
               <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2 shrink-0'}>
                 {(['stock', 'profit', 'matrix'] as const).map((v) => (
                   <button
@@ -1876,6 +1880,45 @@ export default function App() {
                   </button>
                 ))}
               </div>
+
+              {/* More actions — Print Tags + Edit (⋯) */}
+              <div className={isIpad ? 'hidden' : 'relative hidden lg:block shrink-0'}>
+                <button
+                  type="button"
+                  onClick={() => setInventoryMoreOpen(!inventoryMoreOpen)}
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-white text-ink hover:border-brand hover:text-brand transition-colors cursor-pointer focus:outline-none"
+                  title="More actions"
+                  aria-label="More actions"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </button>
+                {inventoryMoreOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setInventoryMoreOpen(false)} role="presentation" aria-hidden="true" />
+                    <div className="absolute right-0 top-full mt-1.5 z-50 w-48 rounded-xl border border-line bg-white p-1.5 shadow-xl">
+                      <button
+                        type="button"
+                        onClick={() => { setInventoryTagsPrintOpen(true); setInventoryMoreOpen(false); }}
+                        className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg hover:bg-surface transition-colors cursor-pointer text-left focus:outline-none"
+                      >
+                        <Printer className="w-4 h-4 text-brand shrink-0" />
+                        Print Tags
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setInventoryEditMode((m) => !m); setInventoryMoreOpen(false); }}
+                        className={`w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg transition-colors cursor-pointer text-left focus:outline-none ${
+                          inventoryEditMode ? 'text-warning hover:bg-warning/10' : 'hover:bg-surface'
+                        }`}
+                      >
+                        <Edit2 className="w-4 h-4 shrink-0" />
+                        {inventoryEditMode ? 'Done Editing' : 'Edit Stock'}
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+              </>
             )}
 
             {activeTab === 'crm' && (

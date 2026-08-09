@@ -233,7 +233,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const [isInlineSaving, setIsInlineSaving] = useState(false);
   const [showLowStockOnly, setShowLowStockOnly] = useState(false);
   const [skuFilterOpen, setSkuFilterOpen] = useState(false);
-  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
 
   // Supplier & Quality Tier Edit States
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
@@ -999,54 +998,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           {viewMode === 'stock' && (
             <div className={`flex flex-wrap items-center justify-end gap-2 w-full md:w-auto md:ml-auto md:shrink-0`}>
               <div className="flex items-center gap-1.5 w-full sm:w-auto">
-                {/* More actions — Print Tags + Edit (⋯) */}
-                {!isIpad && (
-                  <div className="relative">
-                    <Button
-                      type="button"
-                      onClick={() => setMoreMenuOpen(!moreMenuOpen)}
-                      className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-white text-ink hover:border-brand hover:text-brand transition-colors cursor-pointer"
-                      title="More actions"
-                      aria-label="More actions"
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                    {moreMenuOpen && (
-                      <>
-                        <div className="fixed inset-0 z-40" onClick={() => setMoreMenuOpen(false)} role="presentation" aria-hidden="true" />
-                        <div className="absolute right-0 top-full mt-1.5 z-50 w-48 rounded-xl border border-line bg-white p-1.5 shadow-xl">
-                          <button
-                            type="button"
-                            onClick={() => { setIsTagsPrintOpen(true); setSelectedTagIds(new Set()); setMoreMenuOpen(false); }}
-                            className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg hover:bg-surface transition-colors cursor-pointer text-left focus:outline-none"
-                          >
-                            <Printer className="w-4 h-4 text-brand shrink-0" />
-                            Print Tags
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (inlineEditMode && inlineSaveReview.length) {
-                                setShowInlineSaveConfirm(true);
-                                setMoreMenuOpen(false);
-                                return;
-                              }
-                              setInlineEditMode((value) => !value);
-                              setInlineDrafts({});
-                              setMoreMenuOpen(false);
-                            }}
-                            className={`w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg transition-colors cursor-pointer text-left focus:outline-none ${
-                              inlineEditMode ? 'text-warning hover:bg-warning/10' : 'hover:bg-surface'
-                            }`}
-                          >
-                            <Edit2 className="w-4 h-4 shrink-0" />
-                            {inlineEditMode ? 'Done Editing' : 'Edit Stock'}
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
 
                 {/* Save edits */}
                 {inlineEditMode && (
