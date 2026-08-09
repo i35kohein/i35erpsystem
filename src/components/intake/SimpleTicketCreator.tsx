@@ -555,10 +555,9 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                             isSelected ? 'border-brand bg-brand/5' : 'border-line hover:border-brand/50'
                           }`}
                         >
-                          {/* Row 1: name + ✓ (✓ space always reserved → no shift) */}
+                          {/* Row 1: name (selection shown by border + discount circle) */}
                           <div className="flex min-w-0 items-center justify-between gap-2">
                             <h3 className="min-w-0 truncate text-[11px] font-extrabold text-ink leading-snug" title={item.name}>{item.name}</h3>
-                            <span className={`shrink-0 rounded-full bg-brand px-1.5 py-0.5 text-[9px] font-black text-white ${isSelected ? 'visible' : 'invisible'}`}>✓</span>
                           </div>
                           {/* Row 2: category plain text + warranty pill (price-list style) */}
                           <div className="flex min-w-0 items-center justify-between gap-2">
