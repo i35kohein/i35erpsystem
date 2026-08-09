@@ -146,7 +146,6 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   const [inventoryPartId, setInventoryPartId] = useState<string>('');
   const [inventoryPartQty, setInventoryPartQty] = useState<number>(1);
   const [isAddPartOpen, setIsAddPartOpen] = useState(false);
-  const [isManualPartSelectOpen, setIsManualPartSelectOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isMobileCheckoutFullOpen, setIsMobileCheckoutFullOpen] = useState(false);
   // Left (ticket queue) panel collapse toggle
@@ -1327,35 +1326,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               </button>
             </div>
 
-            {/* Manual select — 'Select from inventory' text button (Ko Hein) */}
+            {/* Automatic — visual part list (Ko Hein) */}
             <div>
-              <button
-                type="button"
-                onClick={() => setIsManualPartSelectOpen(!isManualPartSelectOpen)}
-                className="text-[11px] font-bold text-brand hover:underline transition-colors cursor-pointer focus:outline-none"
-              >
-                {isManualPartSelectOpen ? 'Hide manual select' : 'Select from inventory'}
-              </button>
-              {isManualPartSelectOpen && (
-                <select
-                  value={inventoryPartId || ''}
-                  onChange={(e) => setInventoryPartId(e.target.value)}
-                  className="mt-1.5 w-full rounded-lg border border-line bg-white px-2.5 py-2 text-xs font-semibold text-ink outline-none focus:border-brand"
-                >
-                  <option value="">— Choose a part —</option>
-                  {filteredInventoryParts
-                    .filter((part) => part.quantityInStock > 0)
-                    .map((part) => (
-                      <option key={part.id} value={part.id}>
-                        {part.name} • Stock: {part.quantityInStock}
-                      </option>
-                    ))}
-                </select>
-              )}
-            </div>
-
-            {/* Part list */}
-            <div className="space-y-1.5">
+              <p className="text-[11px] font-bold text-muted mb-1.5">Automatic — tap a part</p>
+              <div className="space-y-1.5">
               {filteredInventoryParts.filter((part) => part.quantityInStock > 0).length === 0 ? (
                 <div className="p-8 text-center text-muted text-xs space-y-1">
                   <PackageCheck className="w-8 h-8 mx-auto opacity-40 text-brand" />
@@ -1388,6 +1362,26 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   );
                 })
               )}
+              </div>
+            </div>
+
+            {/* Manual — choose from inventory (Ko Hein) */}
+            <div>
+              <p className="text-[11px] font-bold text-muted mb-1.5">Manual — choose from inventory</p>
+              <select
+                value={inventoryPartId || ''}
+                onChange={(e) => setInventoryPartId(e.target.value)}
+                className="w-full rounded-lg border border-line bg-white px-2.5 py-2 text-xs font-semibold text-ink outline-none focus:border-brand"
+              >
+                <option value="">— Choose a part —</option>
+                {filteredInventoryParts
+                  .filter((part) => part.quantityInStock > 0)
+                  .map((part) => (
+                    <option key={part.id} value={part.id}>
+                      {part.name} • Stock: {part.quantityInStock}
+                    </option>
+                  ))}
+              </select>
             </div>
 
             {/* Qty + Add */}
