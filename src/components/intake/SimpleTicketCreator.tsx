@@ -372,7 +372,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
             </label>
             {/* Intake note */}
             <label className="flex items-start gap-3 py-2">
-              <span className="w-32 shrink-0 pt-1 text-[11px] font-extrabold uppercase tracking-wider text-muted">Note</span>
+              <span className="w-32 shrink-0 pt-2.5 text-[11px] font-extrabold uppercase tracking-wider text-muted">Intake Note</span>
               <textarea
                 value={form.reply}
                 onChange={(e) => set('reply', e.target.value)}
