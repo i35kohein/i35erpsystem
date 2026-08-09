@@ -1263,22 +1263,22 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
               </div>
               <div className="flex items-center gap-0.5 shrink-0">
                 {cart.size > 0 && (
-                  <Button
+                  <button
                     type="button"
                     onClick={handleClearCart}
-                    className="px-2.5 py-2 text-xs font-extrabold text-danger hover:bg-danger/10 rounded-lg transition-colors cursor-pointer"
+                    className="text-xs font-extrabold text-danger hover:text-danger/80 transition-colors cursor-pointer p-1.5 -m-1.5 focus:outline-none"
                   >
                     Clear All
-                  </Button>
+                  </button>
                 )}
-                <Button
+                <button
                   type="button"
                   onClick={() => setIsCartSheetOpen(false)}
                   aria-label="Close cart"
-                  className="w-8 h-8 rounded-full text-muted hover:text-ink hover:bg-surface transition-colors flex items-center justify-center cursor-pointer"
+                  className="text-muted hover:text-ink transition-colors cursor-pointer p-1.5 -m-1.5 focus:outline-none"
                 >
                   <X className="w-4 h-4" />
-                </Button>
+                </button>
               </div>
             </div>
 
