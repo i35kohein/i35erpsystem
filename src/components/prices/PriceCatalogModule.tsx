@@ -580,7 +580,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                   setDiscountMenuOpenFor(item.categoryKey);
                                 }}
                                 title={item.discountPercent > 0 ? `${item.discountPercent}% discount applied — tap to change` : 'Tap to add discount'}
-                                className="text-right min-w-0 rounded-lg px-1 -mx-1 py-0.5 transition-colors cursor-pointer focus:outline-none active:scale-[0.98] hover:bg-success/5"
+                                className="text-right min-w-0 !min-h-0 rounded-lg px-1 -mx-1 py-0.5 transition-colors cursor-pointer focus:outline-none active:scale-[0.98] hover:bg-success/5"
                               >
                                 <p className="font-mono text-xs font-black text-ink whitespace-nowrap tabular-nums">{formatPrice(finalItemPrice)}</p>
                                 {item.discountPercent > 0 && (
