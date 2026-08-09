@@ -1030,7 +1030,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                     initial={false}
                     whileTap={{ scale: 0.98 }}
                     transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                    className={`group relative bg-white border-2 rounded-2xl p-2.5 sm:p-4 cursor-pointer transition-colors duration-200 flex items-center gap-2.5 sm:flex-col sm:items-stretch sm:justify-between select-none shadow-2xs min-h-[64px] sm:min-h-0 sm:h-[152px] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60 focus-visible:border-brand ${
+                    className={`group relative bg-white border-2 rounded-2xl p-2.5 sm:p-4 cursor-pointer transition-colors duration-200 flex items-center gap-2.5 sm:flex-col sm:items-stretch sm:justify-between select-none shadow-2xs min-h-[84px] sm:min-h-0 sm:h-[152px] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60 focus-visible:border-brand ${
                       isSelected
                         ? 'border-brand bg-brand/5 shadow-md'
                         : 'border-line hover:border-brand/50'
@@ -1043,13 +1043,13 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                       </div>
                       <div className="min-w-0 flex-1 sm:pr-8">
                         <div className="flex items-center gap-1.5 min-w-0">
-                          <h3 className="font-extrabold text-xs sm:text-sm text-ink truncate min-w-0" title={item.label}>
+                          <h3 className="font-extrabold text-xs sm:text-sm text-ink min-w-0 leading-snug" title={item.label}>
                             {item.label}
                           </h3>
                           {/* Warranty pill — small, beside the service name */}
                           <WarrantyPill warranty={item.warranty} />
                         </div>
-                        <span className="hidden sm:block text-xs font-extrabold text-muted uppercase tracking-wider mt-0.5">
+                        <span className="block text-[10px] sm:text-xs font-extrabold text-muted uppercase tracking-wider mt-0.5 truncate">
                           {item.group}
                         </span>
                       </div>
