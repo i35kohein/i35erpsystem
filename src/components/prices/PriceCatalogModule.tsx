@@ -379,16 +379,22 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
     });
   };
 
+  // Bottom-center discount notification (Ko Hein: show briefly at bottom-center)
+  const [discountNotice, setDiscountNotice] = useState<string | null>(null);
+  const discountNoticeTimer = useRef<number | null>(null);
+
   const handleUpdateItemDiscount = (categoryKey: string, discountPercent: number) => {
+    const existing = cart.get(categoryKey) as CartItem | undefined;
+    const savings = existing ? Math.round(existing.price * (discountPercent / 100)) : 0;
     setCart((prev) => {
       const next = new Map(prev);
-      const existing = next.get(categoryKey) as CartItem | undefined;
-      if (existing) {
+      const cur = next.get(categoryKey) as CartItem | undefined;
+      if (cur) {
         next.set(categoryKey, {
-          categoryKey: existing.categoryKey,
-          label: existing.label,
-          price: existing.price,
-          warranty: existing.warranty,
+          categoryKey: cur.categoryKey,
+          label: cur.label,
+          price: cur.price,
+          warranty: cur.warranty,
           discountPercent,
         });
       }
@@ -396,9 +402,13 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
     });
     if (discountPercent > 0) {
       toast.success(`${discountPercent}% discount applied`, 'Discount');
+      setDiscountNotice(existing ? `${discountPercent}% Off — save ${formatPrice(savings)}` : `${discountPercent}% discount applied`);
     } else {
       toast.info('Discount removed', 'Discount');
+      setDiscountNotice('Discount removed');
     }
+    if (discountNoticeTimer.current) window.clearTimeout(discountNoticeTimer.current);
+    discountNoticeTimer.current = window.setTimeout(() => setDiscountNotice(null), 2200);
   };
 
   const handleClearCart = () => {
@@ -579,17 +589,14 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                               <div className="relative">
                                 <Button
                                   type="button"
-                                  onClick={() => {
-  const rect = discountTriggerRefs.current[item.categoryKey]?.getBoundingClientRect();
-  if (rect) {
+                                  onClick={(e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
     const pw = 176;
     let l = rect.left;
     l = Math.max(8, Math.min(l, window.innerWidth - pw - 8));
     setDiscountPopupAnchor({ top: rect.bottom + 6, left: l });
-  }
-  setDiscountMenuOpenFor(item.categoryKey);
-}}
-ref={(el) => { discountTriggerRefs.current[item.categoryKey] = el; }}
+    setDiscountMenuOpenFor(item.categoryKey);
+  }}
                                   title={item.discountPercent > 0 ? `${item.discountPercent}% discount applied` : 'Add discount'}
                                   className={`discount-trigger !w-8 !h-8 !min-h-8 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
                                     item.discountPercent > 0
@@ -663,17 +670,14 @@ ref={(el) => { discountTriggerRefs.current[item.categoryKey] = el; }}
                                 <div className="relative">
                                   <Button
                                     type="button"
-                                    onClick={() => {
-  const rect = discountTriggerRefs.current[item.categoryKey]?.getBoundingClientRect();
-  if (rect) {
+                                    onClick={(e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
     const pw = 176;
     let l = rect.left;
     l = Math.max(8, Math.min(l, window.innerWidth - pw - 8));
     setDiscountPopupAnchor({ top: rect.bottom + 6, left: l });
-  }
-  setDiscountMenuOpenFor(item.categoryKey);
-}}
-ref={(el) => { discountTriggerRefs.current[item.categoryKey] = el; }}
+    setDiscountMenuOpenFor(item.categoryKey);
+  }}
                                     title={item.discountPercent > 0 ? `${item.discountPercent}% discount applied` : 'Add discount'}
                                     className={`discount-trigger !w-7 !h-7 !min-h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
                                       item.discountPercent > 0
@@ -764,17 +768,14 @@ ref={(el) => { discountTriggerRefs.current[item.categoryKey] = el; }}
                             <div className="relative">
                               <Button
                                 type="button"
-                                onClick={() => {
-  const rect = discountTriggerRefs.current[item.categoryKey]?.getBoundingClientRect();
-  if (rect) {
+                                onClick={(e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
     const pw = 176;
     let l = rect.left;
     l = Math.max(8, Math.min(l, window.innerWidth - pw - 8));
     setDiscountPopupAnchor({ top: rect.bottom + 6, left: l });
-  }
-  setDiscountMenuOpenFor(item.categoryKey);
-}}
-ref={(el) => { discountTriggerRefs.current[item.categoryKey] = el; }}
+    setDiscountMenuOpenFor(item.categoryKey);
+  }}
                                 title={item.discountPercent > 0 ? `${item.discountPercent}% discount applied` : 'Add discount'}
                                 className={`discount-trigger !w-7 !h-7 !min-h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
                                   item.discountPercent > 0
@@ -814,9 +815,6 @@ ref={(el) => { discountTriggerRefs.current[item.categoryKey] = el; }}
 
   // Discount popup — small box anchored right under the circle button, with
   // circular preset options + custom % (Ko Hein: no rightward expansion).
-  // Trigger refs so the portal popup can position itself exactly at the circle.
-  const discountTriggerRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-
   const renderDiscountPopup = (item: CartItem) => {
     if (discountMenuOpenFor !== item.categoryKey || !discountPopupAnchor) return null;
     const { top, left } = discountPopupAnchor;
@@ -824,7 +822,12 @@ ref={(el) => { discountTriggerRefs.current[item.categoryKey] = el; }}
       <div
         className="discount-popup fixed z-[80] w-44 rounded-2xl border border-line bg-white p-2 shadow-xl"
         style={{ top, left }}
+        onClick={(e) => e.stopPropagation()}
       >
+        <div className="flex items-center justify-between px-1 pb-2 gap-2">
+          <p className="text-xs font-extrabold text-ink">Discount</p>
+          <span className="text-xs font-bold text-muted truncate max-w-[120px]">{item.label}</span>
+        </div>
         <div className="grid grid-cols-4 gap-1.5">
           {DISCOUNT_OPTIONS.map((p) => (
             <button
@@ -1113,26 +1116,32 @@ ref={(el) => { discountTriggerRefs.current[item.categoryKey] = el; }}
                             </span>
                           )}
                         </div>
+                        {/* Applied discount amount — shown right on the card (Ko Hein) */}
+                        {discountPct > 0 && (
+                          <div className="text-[10px] sm:text-[11px] font-extrabold text-success mt-0.5">
+                            −{formatPrice(Math.round(item.price! - finalPrice))} · {discountPct}% Off
+                          </div>
+                        )}
                       </div>
 
                       {/* Mobile: discount circle — replaces the selection checkmark on phones (Ko Hein) */}
                       <div className="relative sm:hidden shrink-0">
                         <Button
                           type="button"
-                          onClick={() => {
+                          onClick={(e) => {
+                            // Don't let the click bubble to the card's toggle handler
+                            // (it would add + immediately remove the item).
+                            e.stopPropagation();
                             if (!cart.has(item.key)) {
                               handleToggleCartItem(item.key, item.label, item.price!, item.warranty);
                             }
-                            const rect = discountTriggerRefs.current[item.key]?.getBoundingClientRect();
-                            if (rect) {
-                              const pw = 176;
-                              let l = rect.right - pw;
-                              l = Math.max(8, Math.min(l, window.innerWidth - pw - 8));
-                              setDiscountPopupAnchor({ top: rect.bottom + 6, left: l });
-                            }
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            const pw = 176;
+                            let l = rect.right - pw;
+                            l = Math.max(8, Math.min(l, window.innerWidth - pw - 8));
+                            setDiscountPopupAnchor({ top: rect.bottom + 6, left: l });
                             setDiscountMenuOpenFor(item.key);
                           }}
-                          ref={(el) => { discountTriggerRefs.current[item.key] = el; }}
                           title={discountPct > 0 ? `${discountPct}% discount applied` : 'Add discount'}
                           className={`discount-trigger !w-7 !h-7 !min-h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
                             discountPct > 0
@@ -1337,6 +1346,12 @@ ref={(el) => { discountTriggerRefs.current[item.categoryKey] = el; }}
         formatPrice={formatPrice}
       />
 
+      {/* Bottom-center discount notification (Ko Hein) */}
+      {discountNotice && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[90] px-4 py-2 rounded-full bg-ink text-white text-xs font-bold shadow-xl animate-i35-slide-up whitespace-nowrap">
+          {discountNotice}
+        </div>
+      )}
     </div>
   );
 };
