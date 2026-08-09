@@ -1575,7 +1575,7 @@ export default function App() {
       {/* Main Right Content Column */}
       <div id="main-content-scroll" className={`relative flex h-full h-dvh min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-gutter:stable] transition-[padding] duration-300 ${isIpad ? '' : isCollapsed ? 'lg:pl-14' : 'lg:pl-64'}`}>
         {/* Top Navigation Bar Header */}
-        <header className="app-topbar flex flex-row items-center justify-between px-3 sm:px-5 h-[52px] min-h-[52px] bg-white border-b border-line sticky top-0 z-40 gap-2 shrink-0">
+        <header className="app-topbar flex flex-row flex-wrap items-center justify-between px-3 sm:px-5 min-h-[52px] py-1 bg-white border-b border-line sticky top-0 z-40 gap-x-2 gap-y-1 shrink-0">
           {/* Active Tab Title & Mobile Toggle */}
           <div className="flex items-center space-x-2 sm:space-x-3 shrink-0 min-w-0 flex-1">
             <Button
@@ -1863,8 +1863,9 @@ export default function App() {
 
             {activeTab === 'inventory' && (
               <>
+              <div className={`flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar max-w-full shrink-0 ${isIpad ? 'hidden' : ''}`}>
               {/* Scan / search — leftmost */}
-              <div className={isIpad ? 'hidden' : 'hidden lg:block shrink-0'}>
+              <div className="shrink-0">
                 <div className="relative">
                   <ScanLine className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-brand" />
                   <Input
@@ -1881,13 +1882,13 @@ export default function App() {
                     }}
                     placeholder="Scan barcode or search part..."
                     autoComplete="off"
-                    className="h-10 w-40 xl:w-56 rounded-lg border border-line bg-white pl-8 pr-2 font-mono text-xs text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
+                    className="h-10 w-32 sm:w-40 xl:w-56 rounded-lg border border-line bg-white pl-8 pr-2 font-mono text-xs text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
                   />
                 </div>
               </div>
 
               {/* Stock / Profit / Matrix */}
-              <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2 shrink-0'}>
+              <div className={isIpad ? 'hidden' : 'flex items-center gap-1.5 sm:gap-2 shrink-0'}>
                 {(['stock', 'profit', 'matrix'] as const).map((v) => (
                   <button
                     key={v}
@@ -1909,14 +1910,14 @@ export default function App() {
               <Button
                 type="button"
                 onClick={() => setInventoryAddModalOpen(true)}
-                className="hidden lg:inline-flex h-10 items-center gap-1.5 px-3.5 bg-brand hover:bg-brand-deep text-white text-xs font-bold rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+                className="inline-flex h-10 items-center gap-1.5 px-3 sm:px-3.5 bg-brand hover:bg-brand-deep text-white text-xs font-bold rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Part</span>
               </Button>
 
               {/* More actions — Print Tags + Edit (⋯) */}
-              <div className={isIpad ? 'hidden' : 'relative hidden lg:block shrink-0'}>
+              <div className={isIpad ? 'hidden' : 'relative block shrink-0'}>
                 <button
                   type="button"
                   onClick={() => setInventoryMoreOpen(!inventoryMoreOpen)}
@@ -1951,6 +1952,7 @@ export default function App() {
                     </div>
                   </>
                 )}
+              </div>
               </div>
               </>
             )}
