@@ -641,13 +641,13 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                               </Button>
                             </div>
 
-                            <div className="flex items-center justify-between bg-surface px-2 py-1 rounded-lg text-xs">
+                            <div className="flex items-center justify-between bg-surface px-2 py-1 rounded-lg">
                               <div className="flex items-center space-x-1">
-                                <span className="text-xs font-extrabold text-muted">Discount:</span>
+                                <span className="text-[11px] font-extrabold text-muted">Discount:</span>
                                 <select
                                   value={item.discountPercent}
                                   onChange={(e) => handleUpdateItemDiscount(item.categoryKey, Number(e.target.value))}
-                                  className="bg-white border border-line rounded-md px-1 py-0.5 text-xs font-extrabold text-brand outline-none cursor-pointer hover:border-brand"
+                                  className="bg-white border border-line rounded-md px-1 py-0.5 text-[11px] font-extrabold text-brand outline-none cursor-pointer hover:border-brand"
                                 >
                                   {DISCOUNT_OPTIONS.map((p) => (
                                     <option key={p} value={p}>{p}% Off</option>
@@ -661,7 +661,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                     {formatPrice(item.price)}
                                   </span>
                                 )}
-                                <span className="font-extrabold font-mono text-xs text-ink">
+                                <span className="font-black font-mono text-sm text-ink">
                                   {formatPrice(finalItemPrice)}
                                 </span>
                               </div>
@@ -721,13 +721,13 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                           </Button>
                         </div>
 
-                        <div className="flex items-center justify-between bg-surface px-2 py-1 rounded-lg text-xs">
+                        <div className="flex items-center justify-between bg-surface px-2 py-1 rounded-lg">
                           <div className="flex items-center space-x-1">
-                            <span className="text-xs font-extrabold text-muted">Discount:</span>
+                            <span className="text-[11px] font-extrabold text-muted">Discount:</span>
                             <select
                               value={item.discountPercent}
                               onChange={(e) => handleUpdateItemDiscount(item.categoryKey, Number(e.target.value))}
-                              className="bg-white border border-line rounded-md px-1 py-0.5 text-xs font-extrabold text-brand outline-none cursor-pointer hover:border-brand"
+                              className="bg-white border border-line rounded-md px-1 py-0.5 text-[11px] font-extrabold text-brand outline-none cursor-pointer hover:border-brand"
                             >
                               {DISCOUNT_OPTIONS.map((p) => (
                                 <option key={p} value={p}>{p}% Off</option>
@@ -741,7 +741,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                 {formatPrice(item.price)}
                               </span>
                             )}
-                            <span className="font-extrabold font-mono text-xs text-ink">
+                            <span className="font-black font-mono text-sm text-ink">
                               {formatPrice(finalItemPrice)}
                             </span>
                           </div>
