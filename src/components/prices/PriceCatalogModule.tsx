@@ -640,7 +640,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                               <div className="min-w-0">
                                 <p className="text-xs font-bold text-ink leading-snug">
                                   {item.label}
-                                  <span className="ml-1.5 text-[11px] font-semibold text-muted whitespace-nowrap">{shortWarranty(item.warranty)}</span>
+                                  <span className="ml-1 text-[11px] font-semibold text-muted whitespace-nowrap">({shortWarranty(item.warranty).replace(/[()]/g, '').replace(/\s+/g, ' ').trim()})</span>
                                 </p>
                               </div>
                               {/* Price — TAP to set/change discount (Ko Hein) */}
