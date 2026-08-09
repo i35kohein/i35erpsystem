@@ -525,8 +525,8 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                   </div>
                 </div>
 
-                {/* Repair list — small price-list style cards with discount circle (Ko Hein) */}
-                <div className="min-h-[180px] flex-1 overflow-y-auto px-4 py-3">
+                {/* Repair list — small price-list style cards, ~4 cards visible then scroll (Ko Hein) */}
+                <div className="h-[248px] overflow-y-auto px-4 py-3">
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     {catalogItemsForModel.filter((item) => {
                       const matchesSearch =
