@@ -2078,7 +2078,6 @@ export default function App() {
             ) : null}
 
             {/* Live Supabase connection indicator — dev-mode only (VITE_DEV_MODE or localhost); hidden in production & iPad */}
-            {!isIpad && import.meta.env.DEV && <OfflineSyncStatusBadge />}
           </div>
         </header>
 
