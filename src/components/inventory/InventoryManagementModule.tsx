@@ -1750,7 +1750,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                                 <Input aria-label={`Selling price for ${part.name}`} type="text" inputMode="numeric" value={inlineDrafts[part.id]?.sellingPrice ?? String(part.sellingPrice)} onWheel={(e) => e.currentTarget.blur()} onChange={(e) => setInlineDrafts((current) => ({ ...current, [part.id]: { ...current[part.id], sellingPrice: e.target.value } }))} className="w-full min-w-0 rounded-md border border-line-strong bg-white px-2 py-1.5 text-sm font-semibold font-sans tabular-nums tracking-normal text-ink" />
                               </label>
                             </div>
-                          ) : `${part.sellingPrice.toLocaleString()} {currency}`}
+                          ) : <>{part.sellingPrice.toLocaleString()} {currency}</>}
                         </td>
 
                         {inlineEditMode ? (
