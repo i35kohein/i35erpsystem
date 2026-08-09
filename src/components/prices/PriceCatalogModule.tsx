@@ -523,16 +523,18 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                   {idx + 1}
                                 </span>
                                 <h4 className="font-extrabold text-sm text-ink leading-snug truncate min-w-0">{item.label}</h4>
-                                <WarrantyPill warranty={item.warranty} />
                               </div>
-                              <Button
-                                type="button"
-                                onClick={() => handleToggleCartItem(item.categoryKey, item.label, item.price, item.warranty)}
-                                className="text-muted hover:text-danger hover:bg-danger/10 p-1.5 rounded-lg transition-colors cursor-pointer shrink-0"
-                                title="Remove item"
-                              >
-                                <X className="w-4 h-4" />
-                              </Button>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <WarrantyPill warranty={item.warranty} />
+                                <Button
+                                  type="button"
+                                  onClick={() => handleToggleCartItem(item.categoryKey, item.label, item.price, item.warranty)}
+                                  className="text-muted hover:text-danger hover:bg-danger/10 p-1.5 rounded-lg transition-colors cursor-pointer shrink-0"
+                                  title="Remove item"
+                                >
+                                  <X className="w-4 h-4" />
+                                </Button>
+                              </div>
                             </div>
 
                             {/* Price row */}
@@ -609,17 +611,19 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                     {i + 1}
                                   </span>
                                   <h4 className="font-extrabold text-xs text-ink truncate leading-tight min-w-0">{item.label}</h4>
-                                  <WarrantyPill warranty={item.warranty} size="md" />
                                 </div>
                               </div>
-                              <Button
-                                type="button"
-                                onClick={() => handleToggleCartItem(item.categoryKey, item.label, item.price, item.warranty)}
-                                className="text-muted hover:text-danger p-1 rounded transition-colors cursor-pointer shrink-0"
-                                title="Remove item"
-                              >
-                                <X className="w-3.5 h-3.5" />
-                              </Button>
+                              <div className="flex items-center gap-1 shrink-0">
+                                <WarrantyPill warranty={item.warranty} size="md" />
+                                <Button
+                                  type="button"
+                                  onClick={() => handleToggleCartItem(item.categoryKey, item.label, item.price, item.warranty)}
+                                  className="text-muted hover:text-danger p-1 rounded transition-colors cursor-pointer shrink-0"
+                                  title="Remove item"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </Button>
+                              </div>
                             </div>
 
                             <div className="flex items-center justify-between bg-surface px-2 py-1 rounded-lg">
@@ -698,17 +702,19 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                 {idx + 1}
                               </span>
                               <h4 className="font-extrabold text-xs text-ink truncate leading-tight min-w-0">{item.label}</h4>
-                              <WarrantyPill warranty={item.warranty} size="md" />
                             </div>
                           </div>
-                          <Button
-                            type="button"
-                            onClick={() => handleToggleCartItem(item.categoryKey, item.label, item.price, item.warranty)}
-                            className="text-muted hover:text-danger p-1 rounded transition-colors cursor-pointer shrink-0"
-                            title="Remove item"
+                          <div className="flex items-center gap-1 shrink-0">
+                            <WarrantyPill warranty={item.warranty} size="md" />
+                            <Button
+                              type="button"
+                              onClick={() => handleToggleCartItem(item.categoryKey, item.label, item.price, item.warranty)}
+                              className="text-muted hover:text-danger p-1 rounded transition-colors cursor-pointer shrink-0"
+                              title="Remove item"
                           >
                             <X className="w-3.5 h-3.5" />
                           </Button>
+                          </div>
                         </div>
 
                         <div className="flex items-center justify-between bg-surface px-2 py-1 rounded-lg">
