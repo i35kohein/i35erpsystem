@@ -316,7 +316,6 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     month: 'short',
                     day: 'numeric',
                   });
-                  const isQaPassed = !!wo.postRepairChecklist;
                   const openQa = () => {
                     setSelectedWoId(wo.id);
                     setIsQaModalOpen(true);
@@ -378,15 +377,9 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
 
                       {/* Stage & Status */}
                       <td className="py-3 px-3">
-                        {isQaPassed ? (
-                          <span className="text-xs font-extrabold px-1.5 py-0.5 rounded-md border bg-success/10 text-success-deep border-success/20 uppercase">
-                            Ready
-                          </span>
-                        ) : (
-                          <span className="text-xs font-bold px-1.5 py-0.5 rounded-md border bg-warning/10 text-warning border-warning/20 uppercase">
-                            QA Pending
-                          </span>
-                        )}
+                        <span className="text-xs font-bold px-1.5 py-0.5 rounded-md border bg-warning/10 text-warning border-warning/20 uppercase">
+                          QA Pending
+                        </span>
                       </td>
 
                       {/* Amount */}
@@ -470,7 +463,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                   className={`flex items-center space-x-1.5 transition-colors ${
                     canConfirm
                       ? 'bg-success hover:bg-success/90 text-white'
-                      : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                      : 'bg-line text-muted cursor-not-allowed'
                   }`}
                 >
                   <CheckCircle2 className="w-4 h-4" />
@@ -655,11 +648,6 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                             {idx + 1}. {item.name}
                           </button>
                           {/* ⋮ menu (Comment) */}
-                          {isCantTest && (item.note || '').trim() && (
-                            <p className="text-[9px] font-semibold text-warning truncate mt-0.5" title={item.note}>
-                              ⚠ {item.note}
-                            </p>
-                          )}
                           <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); setMenuOpenId(menuOpenId === item.id ? null : item.id); }}
@@ -672,7 +660,12 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                             <MoreHorizontal className="w-3.5 h-3.5" />
                           </button>
                         </div>
-
+                        {/* Cant Test note on its own line — keeps the narrow card row uncluttered */}
+                        {isCantTest && (item.note || '').trim() && (
+                          <p className="text-[9px] font-semibold text-warning truncate mt-0.5" title={item.note}>
+                            ⚠ {item.note}
+                          </p>
+                        )}
                       </div>
                     );
                   })}

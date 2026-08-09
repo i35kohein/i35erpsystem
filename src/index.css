@@ -1006,6 +1006,22 @@ html[data-theme] :is(
   scrollbar-width: none;
 }
 
+/* Slim custom scrollbar for dropdown option lists (CustomDropdownMenu, UserRoleSwitcher) */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-line-strong);
+  border-radius: 9999px;
+}
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+}
+
 /* ================= GLOBAL PRINT STYLES & OVERRIDES ================= */
 @media print {
   /* 1. Hide non-printable app containers & navigation bars */

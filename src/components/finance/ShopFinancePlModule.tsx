@@ -88,18 +88,25 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
   const [paymentMethodInput, setPaymentMethodInput] = useState<string>('Bank Transfer');
   const [paymentNoteInput, setPaymentNoteInput] = useState<string>('Supplier Invoice Payment');
 
+  // Local-time date string (Myanmar +06:30). UTC ISO dates compared via
+  // toISOString().split('T')[0] bucket tickets created 00:00–06:30 MMT under
+  // yesterday — inconsistent with the local THIS_MONTH clock (audit P2).
+  const toLocalDateStr = (iso: string) => {
+    const d = new Date(iso);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+
   // Filtered Work Orders by Date
   const filteredWorkOrders = useMemo(() => {
     return workOrders.filter((wo) => {
       if (dateFilter === 'TODAY') {
-        const today = new Date().toISOString().split('T')[0];
-        return wo.createdAt.startsWith(today);
+        return toLocalDateStr(wo.createdAt) === toLocalDateStr(new Date().toISOString());
       }
       if (dateFilter === 'THIS_WEEK') {
         const woDate = new Date(wo.createdAt);
         const now = new Date();
         const diffDays = (now.getTime() - woDate.getTime()) / (1000 * 3600 * 24);
-        return diffDays <= 7;
+        return diffDays >= 0 && diffDays <= 7;
       }
       if (dateFilter === 'THIS_MONTH') {
         const woDate = new Date(wo.createdAt);
@@ -116,8 +123,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
   const dateFilteredExpenses = useMemo(() => {
     return expenses.filter((exp) => {
       if (dateFilter === 'TODAY') {
-        const today = new Date().toISOString().split('T')[0];
-        return exp.date.startsWith(today);
+        return toLocalDateStr(exp.date) === toLocalDateStr(new Date().toISOString());
       }
       if (dateFilter === 'THIS_WEEK') {
         const expDate = new Date(exp.date).getTime();
@@ -162,6 +168,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
       cashDrawer: 0,
       mobileBanking: 0, // KBZPay / WavePay / Banking
       cardPos: 0,
+      other: 0, // Split Payment / Net 30 / anything unusual (audit P2)
     };
 
     filteredWorkOrders.forEach((wo) => {
@@ -189,10 +196,13 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
       // Payment method breakdown
       if (wo.isPaid || wo.paidAmount && wo.paidAmount > 0) {
         const amount = wo.paidAmount || wo.totalAmount;
-        if (wo.paymentMethod === 'Cash') {
+        const method = (wo.paymentMethod || '').toString();
+        if (method === 'Cash') {
           paymentMethodsBreakdown.cashDrawer += amount;
-        } else if (wo.paymentMethod === 'Credit Card' || wo.paymentMethod === 'Apple Pay') {
+        } else if (method === 'Credit Card' || method === 'Apple Pay') {
           paymentMethodsBreakdown.cardPos += amount;
+        } else if (method.startsWith('Split Payment') || method === 'Net 30') {
+          paymentMethodsBreakdown.other += amount;
         } else {
           paymentMethodsBreakdown.mobileBanking += amount;
         }
@@ -314,6 +324,14 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
 
   const handleConfirmSupplierPayment = () => {
     if (!selectedDebtForPayment || paymentAmountInput <= 0) return;
+    const remaining = selectedDebtForPayment.totalAmount - (selectedDebtForPayment.paidAmount || 0);
+    if (paymentAmountInput > remaining) {
+      toast.error(
+        `Payment of ${paymentAmountInput.toLocaleString()} ${currency} exceeds the remaining balance of ${remaining.toLocaleString()} ${currency}.`,
+        'Overpayment Blocked'
+      );
+      return;
+    }
     onRecordSupplierPayment(
       selectedDebtForPayment.id,
       paymentAmountInput,
@@ -524,7 +542,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
 
               <div className="space-y-3 text-xs">
                 {/* Cash Drawer */}
-                <div className="p-3 bg-warning/10/80 border border-warning/30 rounded-xl flex items-center justify-between">
+                <div className="p-3 bg-warning/10 border border-warning/30 rounded-xl flex items-center justify-between">
                   <div className="space-y-0.5">
                     <span className="font-extrabold text-warning block">💵 Cash In Drawer (Physical Cash)</span>
                     <span className="text-xs text-warning">Must reconcile cleanly with daily opening/closing register</span>
@@ -546,7 +564,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                 </div>
 
                 {/* Card / POS */}
-                <div className="p-3 bg-purple/10/80 border border-purple/30 rounded-xl flex items-center justify-between">
+                <div className="p-3 bg-purple/10 border border-purple/30 rounded-xl flex items-center justify-between">
                   <div className="space-y-0.5">
                     <span className="font-extrabold text-purple block">💳 Credit Card / POS Terminal</span>
                     <span className="text-xs text-purple">Bank merchant card settlement transfers</span>
@@ -555,6 +573,19 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                     {financialSummary.paymentMethodsBreakdown.cardPos.toLocaleString()} {currency}
                   </span>
                 </div>
+
+                {/* Split / Net-30 / Other — only shown when it actually has money (audit P2) */}
+                {financialSummary.paymentMethodsBreakdown.other > 0 && (
+                  <div className="p-3 bg-line/30 border border-line-strong rounded-xl flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <span className="font-extrabold text-muted block">🔀 Split / Net-30 & Other</span>
+                      <span className="text-xs text-muted">Mixed split payments & credit terms</span>
+                    </div>
+                    <span className="font-mono font-black text-muted text-sm">
+                      {financialSummary.paymentMethodsBreakdown.other.toLocaleString()} {currency}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -593,7 +624,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                       {financialSummary.totalSupplierDebt.toLocaleString()} {currency}
                     </span>
                     {financialSummary.overdueDebtsCount > 0 && (
-                      <span className="text-xs font-black text-danger bg-rose-200/80 px-2 py-0.5 rounded-full">
+                      <span className="text-xs font-black text-danger bg-danger/15 px-2 py-0.5 rounded-full">
                         ⚠️ {financialSummary.overdueDebtsCount} Overdue Invoices
                       </span>
                     )}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, lazy, Suspense } from 'react';
+import React, { useEffect, useState, useMemo, lazy, Suspense } from 'react';
 import { DateFilterState, filterByDateRange } from '../common/DateFilterSelector';
 
 import { timeAgoShort } from '../../utils/timeAgo';
@@ -90,7 +90,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
     if (window.innerWidth < 768) setViewMode('cards');
   }, []);
   const [localFilterStatus, setLocalFilterStatus] = useState<string>('ALL');
-  const localDateFilter: DateFilterState = { preset: 'all' };
+  const localDateFilter: DateFilterState = useMemo(() => ({ preset: 'all' }), []);
 
   const filterStatus = propFilterStatus !== undefined ? propFilterStatus : localFilterStatus;
   const setFilterStatus = propSetFilterStatus || setLocalFilterStatus;
@@ -116,7 +116,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
       case 'Rush': return 'border-danger/30 bg-danger/10 hover:border-danger/50';
       case 'Warranty Redo': return 'border-purple/30 bg-purple/10 hover:border-purple/50';
       case 'B2B Priority': return 'border-warning/30 bg-warning/10 hover:border-warning/50';
-      default: return 'border-line bg-white hover:border-line';
+      default: return 'border-line bg-surface hover:border-line-strong';
     }
   };
 
@@ -150,14 +150,29 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
+  // Technician users see only their own tickets — stat chips must match the
+  // roster list, not the global pool (audit P2).
+  const techScopedOrders =
+    currentUser?.role === 'Technician'
+      ? dateFilteredOrders.filter((wo) => {
+          const techName = currentUser.technicianName || currentUser.name || '';
+          const techId = currentUser.technicianId || '';
+          return (
+            (techId && wo.assignedTechId === techId) ||
+            (techName && wo.assignedTechName?.toLowerCase() === techName.toLowerCase()) ||
+            (techName && (wo as any).assignedTechnician?.toLowerCase() === techName.toLowerCase())
+          );
+        })
+      : dateFilteredOrders;
+
   // Summary Counts for Stats Bar
   const counts = {
-    total: dateFilteredOrders.length,
-    receive: dateFilteredOrders.filter(w => w.status === 'Receive').length,
-    inProgress: dateFilteredOrders.filter(w => w.status === 'In Progress').length,
-    pending: dateFilteredOrders.filter(w => w.status === 'Pending').length,
-    finished: dateFilteredOrders.filter(w => w.status === 'Finished').length,
-    rush: dateFilteredOrders.filter(w => w.priority === 'Urgent' || w.priority === 'Warranty Redo').length,
+    total: techScopedOrders.length,
+    receive: techScopedOrders.filter(w => w.status === 'Receive').length,
+    inProgress: techScopedOrders.filter(w => w.status === 'In Progress').length,
+    pending: techScopedOrders.filter(w => w.status === 'Pending').length,
+    finished: techScopedOrders.filter(w => w.status === 'Finished').length,
+    rush: techScopedOrders.filter(w => w.priority === 'Urgent' || w.priority === 'Rush' || w.priority === 'Warranty Redo').length,
   };
 
   // Roster pagination (same pattern as Inventory table)
@@ -387,21 +402,6 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
-                {filteredOrders.length === 0 && (
-                  <tr>
-                    <td colSpan={9} className="px-4 py-14 text-center">
-                      <div className="mx-auto max-w-sm space-y-2">
-                        <Inbox className="mx-auto h-8 w-8 text-line-strong" />
-                        <p className="font-extrabold text-sm text-ink">No Repair Tickets Found</p>
-                        <p className="text-xs text-muted">
-                          {workOrders.length === 0
-                            ? 'There are currently no active repair tickets in the database.'
-                            : 'No tickets match your active status filter or search query.'}
-                        </p>
-                      </div>
-                    </td>
-                  </tr>
-                )}
                 {rosterPageOrders.map((wo) => {
                   const createdDate = timeAgoShort(wo.createdAt);
                   const createdDateFull = new Date(wo.createdAt || Date.now()).toLocaleDateString('en-US', {

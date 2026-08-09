@@ -217,8 +217,29 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [splitPayments, setSplitPayments] = useState<{ method: string; amount: number }[]>([
     { method: 'Cash', amount: 0 },
-    { method: 'KBZPay', amount: 0 },
+    { method: activePaymentMethods[1]?.name || 'KBZPay', amount: 0 },
   ]);
+
+  // Keep split-row methods valid as payment settings load/change (audit P2):
+  // a stale 'KBZPay' row would record an invalid method string on checkout.
+  const activeMethodNames = activePaymentMethods.map((m) => m.name).join('|');
+  useEffect(() => {
+    if (activePaymentMethods.length === 0) return;
+    setSplitPayments((prev) => {
+      let changed = false;
+      const next = prev.map((s, i) => {
+        const valid = activePaymentMethods.some((m) => m.name === s.method);
+        if (valid) return s;
+        changed = true;
+        return {
+          ...s,
+          method: activePaymentMethods[i % activePaymentMethods.length]?.name || activePaymentMethods[0].name,
+        };
+      });
+      return changed ? next : prev;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeMethodNames]);
 
   // Currently selected method config
   const selectedMethodConfig = activePaymentMethods.find((m) => m.name === paymentMethod);
@@ -256,6 +277,25 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   });
 
   const selectedWo = filteredWorkOrders.find((w) => w.id === selectedWoId) || filteredWorkOrders[0] || null;
+
+  // Keep the selection in sync with the list — otherwise the right panel shows
+  // the first ticket while the left queue highlights a stale id (audit P2).
+  useEffect(() => {
+    if (selectedWoId && !filteredWorkOrders.some((w) => w.id === selectedWoId)) {
+      setSelectedWoId(filteredWorkOrders[0]?.id || '');
+    }
+  }, [filteredWorkOrders, selectedWoId]);
+
+  // Per-transaction reset shared by every ticket-selection path (expanded rows
+  // AND the collapsed queue) so a previous customer's cash/split never leaks
+  // into the next checkout (audit P2).
+  const resetTransactionState = () => {
+    setCashTendered(0);
+    setSplitPayments([
+      { method: activePaymentMethods[0]?.name || 'Cash', amount: 0 },
+      { method: activePaymentMethods[1]?.name || 'Cash', amount: 0 },
+    ]);
+  };
   const filteredInventoryParts = useMemo(() => {
     if (!selectedWo) return parts;
 
@@ -454,7 +494,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
       ],
       subtotal: diagFee,
       taxAmount: Math.round(diagFee * taxRate),
-      totalAmount: Math.round(diagFee * (1 + taxRate)) - selectedWo.discountAmount - selectedWo.depositAmount,
+      totalAmount: Math.max(0, Math.round(diagFee * (1 + taxRate)) - (selectedWo.discountAmount || 0) - (selectedWo.depositAmount || 0)),
       updatedAt: new Date().toISOString(),
     };
     onSaveWorkOrder(updatedWo);
@@ -512,13 +552,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 const isSelected = wo.id === selectedWoId;
                 const handleSelectWo = () => {
                   setSelectedWoId(wo.id);
-                  // Reset per-transaction state so a previous customer's cash/split
-                  // amounts never leak into the next checkout.
-                  setCashTendered(0);
-                  setSplitPayments([
-                    { method: activePaymentMethods[0]?.name || 'Cash', amount: 0 },
-                    { method: activePaymentMethods[1]?.name || 'KBZPay', amount: 0 },
-                  ]);
+                  resetTransactionState();
                 };
 
                 return (
@@ -589,7 +623,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   <button
                     key={wo.id}
                     type="button"
-                    onClick={() => setSelectedWoId(wo.id)}
+                    onClick={() => {
+                      setSelectedWoId(wo.id);
+                      resetTransactionState();
+                    }}
                     className={`w-full px-2 py-1.5 rounded-lg flex flex-col items-start transition-colors ${
                       isSel ? 'bg-brand text-white shadow-2xs' : 'bg-white text-ink border border-line hover:bg-brand-soft hover:border-brand/30'
                     }`}
@@ -760,7 +797,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   </table>
                 </div>
                 {/* Right-edge fade for the horizontally-scrolling invoice (below xl) */}
-                <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-6 rounded-r-xl bg-gradient-to-l from-white/70 to-transparent xl:hidden" />
+                <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-6 rounded-r-xl bg-gradient-to-l from-surface/70 to-transparent xl:hidden" />
                 </div>
 
                 <div className="bg-white border border-line rounded-xl p-4 space-y-2">
@@ -944,7 +981,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
                 {/* Split Payment Interactive Breakdown UI */}
                 {paymentMethod === 'Split Payment' && (
-                  <div className="p-3.5 bg-purple/10/80 border border-purple/30 rounded-xl space-y-3 text-xs animate-fadeIn">
+                  <div className="p-3.5 bg-purple/10 border border-purple/30 rounded-xl space-y-3 text-xs animate-fadeIn">
                     <div className="flex items-center justify-between border-b border-purple/30 pb-2">
                       <span className="font-extrabold text-ink flex items-center space-x-1.5">
                         <Split className="w-4 h-4 text-purple" />
@@ -962,7 +999,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
                         return (
                           <div key={idx} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-white p-2.5 rounded-xl border border-purple/20 shadow-2xs">
-                            <span className="font-mono text-xs text-purple font-extrabold px-1.5 py-0.5 bg-purple/15/70 rounded shrink-0 self-start sm:self-auto">
+                            <span className="font-mono text-xs text-purple font-extrabold px-1.5 py-0.5 bg-purple/15 rounded shrink-0 self-start sm:self-auto">
                               #{idx + 1}
                             </span>
 
@@ -1003,7 +1040,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                   updated[idx].amount = remForThis;
                                   setSplitPayments(updated);
                                 }}
-                                className="px-2 py-1.5 bg-purple/15 hover:bg-purple-200 text-purple font-bold text-xs rounded-lg border border-purple/30 shrink-0 cursor-pointer transition-all active:scale-95"
+                                className="px-2 py-1.5 bg-purple/15 hover:bg-purple/15 text-purple font-bold text-xs rounded-lg border border-purple/30 shrink-0 cursor-pointer transition-all active:scale-95"
                                 title="Auto-fill remaining amount"
                               >
                                 Auto-Fill

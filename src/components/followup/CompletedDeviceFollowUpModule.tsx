@@ -91,6 +91,11 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
     const daysElapsed = getDaysSinceCompletion(wo);
 
     let matchesStatus = true;
+    // Closed follow-ups are done — keep them out of the default due list,
+    // findable via the Closed tab (audit P2).
+    if (statusFilter === 'ALL' && currentFollowUpStatus === 'Closed') {
+      return false;
+    }
     if (statusFilter === '7_DAYS') {
       matchesStatus = daysElapsed >= 7;
     } else if (statusFilter === '1_MONTH') {
@@ -101,7 +106,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
       matchesStatus = currentFollowUpStatus === statusFilter;
     }
 
-    const matchesDate = isDateMatchingFilter(wo.updatedAt || wo.createdAt, dateFilter);
+    const matchesDate = isDateMatchingFilter(wo.completedAt || wo.updatedAt || wo.createdAt, dateFilter);
 
     return matchesSearch && matchesStatus && matchesDate;
   });
@@ -120,6 +125,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
   ).length;
   const noAnswerCount = followUpEligible.filter((wo) => wo.followUpStatus === 'No Answer').length;
   const callbackScheduledCount = followUpEligible.filter((wo) => wo.followUpStatus === 'Callback Scheduled').length;
+  const closedCount = followUpEligible.filter((wo) => (wo.followUpStatus || 'Pending Call') === 'Closed').length;
 
   // Average Rating calculation
   const ratedOrders = followUpEligible.filter((wo) => {
@@ -131,7 +137,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
         const r = wo.followUpRecords?.[wo.followUpRecords.length - 1]?.satisfactionRating || 5;
         return acc + r;
       }, 0) / ratedOrders.length).toFixed(1)
-    : '5.0';
+    : '—';
 
   const handleOpenLogModal = (wo: WorkOrder) => {
     setSelectedWo(wo);
@@ -221,7 +227,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
       case 'Pending Call':
       default:
         return (
-          <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-sky/10 text-sky border border-sky-200 flex items-center space-x-1 w-max">
+          <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-sky/10 text-sky border border-sky/30 flex items-center space-x-1 w-max">
             <Clock className="w-3 h-3 text-sky" />
             <span>Pending Follow-up</span>
           </span>
@@ -285,7 +291,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
             </div>
           </div>
 
-          <div className="relative bg-brand-soft/70 border border-indigo-200 rounded-xl p-3 space-y-1">
+          <div className="relative bg-brand-soft/70 border border-brand/30 rounded-xl p-3 space-y-1">
             <div className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-white text-brand-deep flex items-center justify-center">
               <Clock className="w-4 h-4" />
             </div>
@@ -295,7 +301,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
             </div>
           </div>
 
-          <div className="relative bg-purple/10/70 border border-purple/30 rounded-xl p-3 space-y-1">
+          <div className="relative bg-purple/10 border border-purple/30 rounded-xl p-3 space-y-1">
             <div className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-white text-purple flex items-center justify-center">
               <CalendarDays className="w-4 h-4" />
             </div>
@@ -305,8 +311,8 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
             </div>
           </div>
 
-          <div className="relative bg-violet-50/80 border border-violet-200 rounded-xl p-3 space-y-1">
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-white text-violet-800 flex items-center justify-center">
+          <div className="relative bg-purple/10 border border-purple/30 rounded-xl p-3 space-y-1">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-white text-purple flex items-center justify-center">
               <CalendarDays className="w-4 h-4" />
             </div>
             <div className="pr-10">
@@ -327,7 +333,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
 
           <div className="relative bg-warning/50 border border-warning/30 rounded-xl p-3 space-y-1 col-span-2 sm:col-span-1">
             <div className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-white text-warning flex items-center justify-center">
-              <Star className="w-4 h-4 fill-amber-400 text-warning" />
+              <Star className="w-4 h-4 fill-warning text-warning" />
             </div>
             <div className="pr-10">
               <span className="text-xs font-semibold text-warning">Avg Rating</span>
@@ -349,6 +355,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
             { id: 'Issue Reported', label: `Issue Reported (${issueReportedCount})` },
             { id: 'No Answer', label: `No Answer (${noAnswerCount})` },
             { id: 'Callback Scheduled', label: `Callback Scheduled (${callbackScheduledCount})` },
+            { id: 'Closed', label: `Closed (${closedCount})` },
           ].map((tab) => (
             <Button
               key={tab.id}
@@ -440,20 +447,16 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                       {/* Days Due */}
                       <td className="py-3 px-3">
                         {daysElapsed >= 60 ? (
-                          <span className="px-1.5 py-0.5 rounded-md text-xs font-extrabold bg-violet-100 text-violet-900 border border-violet-300">
+                          <span className="px-1.5 py-0.5 rounded-md text-xs font-extrabold bg-purple/15 text-purple border border-purple/30">
                             2 Mo ({daysElapsed}d)
                           </span>
                         ) : daysElapsed >= 30 ? (
                           <span className="px-1.5 py-0.5 rounded-md text-xs font-extrabold bg-purple/15 text-purple border border-purple/30">
                             1 Mo ({daysElapsed}d)
                           </span>
-                        ) : daysElapsed >= 7 ? (
+                        ) : (
                           <span className="px-1.5 py-0.5 rounded-md text-xs font-extrabold bg-brand/15 text-brand-deep border border-brand/30">
                             7d ({daysElapsed}d)
-                          </span>
-                        ) : (
-                          <span className="px-1.5 py-0.5 rounded-md text-xs font-semibold bg-gray-100 text-gray-700">
-                            {daysElapsed === 0 ? 'Today' : `${daysElapsed}d`}
                           </span>
                         )}
                       </td>
@@ -639,7 +642,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                       >
                         <Star
                           className={`w-6 h-6 ${
-                            star <= formRating ? 'fill-amber-400 text-warning' : 'text-slate-300'
+                            star <= formRating ? 'fill-warning text-warning' : 'text-line'
                           }`}
                         />
                       </Button>

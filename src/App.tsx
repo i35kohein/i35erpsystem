@@ -231,7 +231,7 @@ export default function App() {
     setCurrentUser(user);
     addToast(`Switched active profile to ${user.name} (${user.role})`, 'info', 'Role Switch');
     if (user.role === 'Technician') {
-      const allowedTechTabs = ['pipeline', 'trello', 'qa', 'crm'];
+      const allowedTechTabs = ['pipeline', 'trello', 'qa', 'crm', 'price-catalog'];
       if (!allowedTechTabs.includes(activeTab)) {
         setActiveTab('pipeline');
       }
@@ -622,7 +622,7 @@ export default function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Quick Filter Helper States & Resetter
-  const FILTER_TABS = ['intake', 'pipeline', 'inventory', 'pos', 'crm', 'suppliers', 'qa', 'finance', 'dashboard'];
+  const FILTER_TABS = ['intake', 'pipeline', 'inventory', 'crm', 'suppliers', 'qa', 'finance', 'dashboard'];
   const getActiveFilterCount = (tab: string): number => {
     const d = dateFilter.preset !== 'all' ? 1 : 0;
     switch (tab) {
@@ -948,8 +948,12 @@ export default function App() {
     categoryFilter !== 'ALL' ||
     stockFilter !== 'ALL' ||
     customerTypeFilter !== 'ALL' ||
+    modelFilter !== 'ALL' ||
     dateFilter.preset !== 'all' ||
-    showBottlenecksOnly;
+    showBottlenecksOnly ||
+    showAllStages ||
+    showBeforeNeedsDiagOnly ||
+    showNeedsDiagOnly;
 
   const handleResetAllFilters = () => {
     setSearchQuery('');
@@ -958,8 +962,12 @@ export default function App() {
     setCategoryFilter('ALL');
     setStockFilter('ALL');
     setCustomerTypeFilter('ALL');
+    setModelFilter('ALL');
     setDateFilter({ preset: 'all' });
     setShowBottlenecksOnly(false);
+    setShowAllStages(false);
+    setShowBeforeNeedsDiagOnly(false);
+    setShowNeedsDiagOnly(false);
   };
 
   // Active vs Archived Work Orders
@@ -1929,7 +1937,7 @@ export default function App() {
 
             {activeTab === 'dashboard' && (
               <>
-                <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-1.5'}>
+                <div className={isIpad ? 'flex items-center gap-1.5' : 'hidden lg:flex items-center gap-1.5'}>
                   {[
                     { id: 'status-queue', label: 'Status Queue', icon: ListFilter },
                     { id: 'repair-data', label: 'Analytics', icon: Activity },
@@ -2103,7 +2111,7 @@ export default function App() {
                 <Trash2 className={`w-3.5 h-3.5 ${archivedWorkOrders.length > 0 ? 'text-rose-600' : 'text-muted'}`} />
                 <span className="hidden sm:inline">{t('recycleBin')}</span>
                 {archivedWorkOrders.length > 0 && (
-                  <span className="px-1.5 py-0.2 rounded-full bg-rose-600 text-white text-xs font-bold">
+                  <span className="px-1.5 py-0.5 rounded-full bg-rose-600 text-white text-xs font-bold">
                     {archivedWorkOrders.length}
                   </span>
                 )}
@@ -2251,11 +2259,6 @@ export default function App() {
                   rmas={rmas}
                   technicians={technicians}
                   onNavigateToTab={setActiveTab}
-                  onOpenNewWorkOrder={(prefill) => handleOpenNewWorkOrder(prefill)}
-                  onOpenAiAssistant={() => setIsAiAssistantOpen(true)}
-                  onDeleteWorkOrder={handleDeleteWorkOrder}
-                  onUpdateWorkOrderStatus={handleUpdateWorkOrderStatus}
-                  onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
                   dateFilter={dateFilter}
                   setDateFilter={setDateFilter}
                   currencySymbol={systemSettings?.currencySymbol}
@@ -2397,6 +2400,7 @@ export default function App() {
                   rmas={rmas}
                   purchaseOrders={purchaseOrders}
                   parts={parts}
+                  systemSettings={systemSettings}
                   onAddRma={handleAddRma}
                   onAddSupplier={handleAddSupplier}
                   onUpdateSupplier={handleUpdateSupplier}
@@ -2471,10 +2475,6 @@ export default function App() {
                   onSaveWorkOrder={handleSaveWorkOrder}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
-                  dateFilter={dateFilter}
-                  setDateFilter={setDateFilter}
-                  statusFilter={statusFilter}
-                  setStatusFilter={setStatusFilter}
                   onOpenSettings={() => setActiveTab('settings')}
                 />
               )}
@@ -2628,6 +2628,9 @@ export default function App() {
               setIsAiAssistantOpen(false);
               setSettingsInitialSubTab('ai');
               setActiveTab('settings');
+              // One-shot: the next Settings visit must open the launcher,
+              // not drill into the AI tab again (audit P2).
+              window.setTimeout(() => setSettingsInitialSubTab('users'), 0);
             }}
           />
         </Suspense>
@@ -2674,7 +2677,7 @@ export default function App() {
         }}
         resetDisabled={getActiveFilterCount(activeTab) === 0}
         alwaysVisible={isIpad}
-        title={`${activeTab === 'pipeline' ? 'Pipeline' : activeTab === 'pos' ? 'POS' : activeTab === 'crm' ? 'CRM' : activeTab === 'inventory' ? 'Inventory' : activeTab === 'suppliers' ? 'Suppliers' : activeTab === 'qa' ? 'QA' : activeTab === 'finance' ? 'Finance' : activeTab === 'dashboard' ? 'Dashboard' : 'Intake'} Filters`}
+        title={`${activeTab === 'pipeline' ? 'Pipeline' : activeTab === 'crm' ? 'CRM' : activeTab === 'inventory' ? 'Inventory' : activeTab === 'suppliers' ? 'Suppliers' : activeTab === 'qa' ? 'QA' : activeTab === 'finance' ? 'Finance' : activeTab === 'dashboard' ? 'Dashboard' : 'Intake'} Filters`}
       >
         {renderMobileFilters(activeTab)}
       </RightFilterDrawer>

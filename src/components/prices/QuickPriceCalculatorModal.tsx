@@ -594,7 +594,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                         -{formatPrice(totalDiscount)}
                       </span>
                     ) : (
-                      <span className="font-mono text-muted text-xs">0 MMK</span>
+                      <span className="font-mono text-muted text-xs">0 {currencySymbol}</span>
                     )}
                   </div>
 

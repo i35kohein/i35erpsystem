@@ -270,6 +270,15 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
     return catalog.find((c) => c.model === selectedDevice) || catalog[0];
   }, [catalog, selectedDevice]);
 
+  // If the selected model disappears from the catalog (import/reset), the
+  // fallback above would quote catalog[0]'s prices under a dead model name —
+  // sync the selector to the actual fallback (audit P2).
+  useEffect(() => {
+    if (selectedDevice && !catalog.some((c) => c.model === selectedDevice)) {
+      setSelectedDevice(catalog[0]?.model || '');
+    }
+  }, [catalog, selectedDevice]);
+
   // Filtered repair categories for selected active device
   const availableRepairItems = useMemo(() => {
     if (!activeDeviceData) return [];
@@ -431,10 +440,10 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
   // CSV Export
   const handleExportCsv = useCallback(() => {
-    const headers = ['Model', ...REPAIR_CATEGORIES.map((c) => `${c.label} Price`), ...REPAIR_CATEGORIES.map((c) => `${c.label} Warranty`)];
+    const headers = ['Model', ...categories.map((c) => `${c.label} Price`), ...categories.map((c) => `${c.label} Warranty`)];
     const rows = catalog.map((item) => {
-      const priceVals = REPAIR_CATEGORIES.map((c) => item.prices[c.key] ?? '');
-      const warrantyVals = REPAIR_CATEGORIES.map((c) => item.warranties[c.key] ?? '');
+      const priceVals = categories.map((c) => item.prices[c.key] ?? '');
+      const warrantyVals = categories.map((c) => item.warranties[c.key] ?? '');
       return [`"${item.model}"`, ...priceVals, ...warrantyVals].join(',');
     });
 

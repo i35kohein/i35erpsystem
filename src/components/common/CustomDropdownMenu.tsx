@@ -136,7 +136,7 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
       <div
         ref={menuRef}
         role="listbox"
-        className={`fixed z-[96] w-56 max-w-[calc(100vw-1rem)] rounded-xl border border-line bg-white p-1.5 shadow-lg ${menuPos.placeTop ? '-translate-y-full' : ''} ${menuClassName}`}
+        className={`fixed z-[96] w-56 max-w-[calc(100vw-1rem)] rounded-xl border border-line bg-surface p-1.5 shadow-lg ${menuPos.placeTop ? '-translate-y-full' : ''} ${menuClassName}`}
         style={{ top: menuPos.top, left: menuPos.left }}
         onMouseDown={(e) => e.stopPropagation()}
       >
@@ -188,7 +188,7 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
         aria-expanded={isOpen}
         aria-label={ariaLabel || selectedOption?.label || placeholder}
         title={ariaLabel || selectedOption?.label || placeholder}
-        className={`flex items-center justify-between gap-2 rounded-lg border border-line bg-white font-bold text-ink transition-colors cursor-pointer hover:bg-brand-soft focus:outline-none focus:border-brand ${
+        className={`flex items-center justify-between gap-2 rounded-lg border border-line bg-surface font-bold text-ink transition-colors cursor-pointer hover:bg-brand-soft focus:outline-none focus:border-brand ${
           iconOnly
             ? size === 'sm' ? 'h-8 w-8 justify-center' : 'h-10 w-10 justify-center'
             : size === 'sm' ? 'h-8 min-w-32 px-2.5 text-xs' : 'h-10 min-w-32 px-3.5 text-sm'

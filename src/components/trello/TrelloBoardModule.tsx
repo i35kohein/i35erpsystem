@@ -29,7 +29,7 @@ const STAGE_COLUMNS: { id: WorkOrderStatus; title: string; dot: string; border: 
   { id: 'In Progress', title: 'In Progress', dot: 'bg-purple', border: 'border-purple/30', headerBg: 'bg-purple/5' },
   { id: 'Pending', title: 'Pending', dot: 'bg-warning', border: 'border-warning/40', headerBg: 'bg-warning/5' },
   { id: 'Finished', title: 'Finished', dot: 'bg-success-deep', border: 'border-success/40', headerBg: 'bg-success/5' },
-  { id: 'Taken Out', title: 'Taken Out', dot: 'bg-slate-400', border: 'border-line', headerBg: 'bg-surface' },
+  { id: 'Taken Out', title: 'Taken Out', dot: 'bg-line', border: 'border-line', headerBg: 'bg-surface' },
 ];
 
 /** Trello-style board for the Repair Ticket Roster.
@@ -142,7 +142,7 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
   };
 
   const handleDrop = (targetStage: WorkOrderStatus) => {
-    if (draggedWoId && draggedWoId !== targetStage) {
+    if (draggedWoId) {
       const wo = workOrders.find((w) => w.id === draggedWoId);
       if (wo && wo.status !== targetStage) {
         onUpdateWorkOrderStatus(draggedWoId, targetStage);

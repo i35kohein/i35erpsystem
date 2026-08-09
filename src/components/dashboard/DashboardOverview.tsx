@@ -29,7 +29,6 @@ import { TechnicianPerformanceTab } from './TechnicianPerformanceTab';
 import { TechnicianLeaderboardView } from './TechnicianLeaderboardView';
 import { TechnicianDetailModal } from './TechnicianDetailModal';
 import { computeTechStats } from '../../utils/techAnalytics';
-import { TicketDetailInspectorModal } from '../common/TicketDetailInspectorModal';
 
 interface DashboardOverviewProps {
   workOrders: WorkOrder[];
@@ -37,10 +36,6 @@ interface DashboardOverviewProps {
   rmas: RmaItem[];
   technicians: Technician[];
   onNavigateToTab: (tab: string) => void;
-  onOpenNewWorkOrder: (prefill?: any) => void;
-  onOpenAiAssistant: () => void;
-  onDeleteWorkOrder?: (id: string) => void;
-  onUpdateWorkOrderStatus?: (id: string, status: WorkOrderStatus) => void;
   onSelectPrintTag?: (wo: WorkOrder) => void;
   dateFilter?: DateFilterState;
   setDateFilter?: (filter: DateFilterState) => void;
@@ -176,14 +171,13 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
   rmas,
   technicians,
   onNavigateToTab,
-  onOpenNewWorkOrder,
-  onSelectPrintTag,
   currencySymbol,
   dateFilter: externalDateFilter,
   onSettleInventoryFund,
   activeSubTab,
   onSubTabChange,
 }: DashboardOverviewProps, ref) => {
+  const currency = currencySymbol || 'MMK';
   const [internalDateFilter] = useState<DateFilterState>({ preset: 'all' });
   const dateFilter = externalDateFilter || internalDateFilter;
 
@@ -211,7 +205,6 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
   const [warrantySearchQuery, setWarrantySearchQuery] = useState<string>('');
   const [warrantyFilterTab, setWarrantyFilterTab] = useState<'ALL_EXPIRING' | 'CRITICAL' | 'WARNING' | 'EXPIRED' | 'ALL'>('ALL_EXPIRING');
   const [copiedNoticeId, setCopiedNoticeId] = useState<string | null>(null);
-  const [rosterTicket, setRosterTicket] = useState<WorkOrder | null>(null);
 
   // Background Warranty Telemetry & Expiry Check (Flags work orders nearing end of 90-day warranty)
   const warrantyCheckData = useMemo(() => {
@@ -313,7 +306,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
 
   // Financial calculations
   const totalRevenue = useMemo(() => {
-    return revenueWorkOrders.reduce((sum, wo) => sum + (wo.subtotal || 0), 0);
+    return revenueWorkOrders.reduce((sum, wo) => sum + (wo.subtotal || wo.totalAmount || 0), 0);
   }, [revenueWorkOrders]);
 
   const totalPartsCost = useMemo(() => {
@@ -353,8 +346,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
       const isLow = p.quantityInStock <= p.reorderPoint;
       const isRepairPart = REPAIR_CATEGORIES_KEYWORDS.some((cat) => 
         p.category.toLowerCase().includes(cat) ||
-        p.name.toLowerCase().includes(cat) ||
-        (p.deviceCompatibility && p.deviceCompatibility.length > 0)
+        p.name.toLowerCase().includes(cat)
       );
       return isLow && isRepairPart;
     });
@@ -389,7 +381,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
       const model = (wo.deviceModel || 'Unknown Device').trim() || 'Unknown Device';
       const entry = byModel.get(model) || { count: 0, revenue: 0 };
       entry.count += 1;
-      entry.revenue += wo.subtotal || 0;
+      entry.revenue += wo.subtotal || wo.totalAmount || 0;
       byModel.set(model, entry);
     });
     return Array.from(byModel.entries())
@@ -400,7 +392,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
 
   // Top Repair Categories with income — ticket + revenue per repair category
   const topRepairCategories = useMemo(() => {
-    const totalRevenue = filteredWorkOrders.reduce((sum, wo) => sum + (wo.subtotal || 0), 0);
+    const totalRevenue = filteredWorkOrders.reduce((sum, wo) => sum + (wo.subtotal || wo.totalAmount || 0), 0);
     const stats = [
       { id: 'screen', label: 'Screen & Display OLED', icon: Smartphone, color: 'bg-brand', textCol: 'text-brand', bgLight: 'bg-brand-soft', count: 0, revenue: 0 },
       { id: 'battery', label: 'Battery & Charging System', icon: Zap, color: 'bg-success', textCol: 'text-success', bgLight: 'bg-success/10', count: 0, revenue: 0 },
@@ -411,7 +403,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
     filteredWorkOrders.forEach((wo) => {
       const s = (wo.serviceType || '').toLowerCase();
       const desc = (wo.symptomsReported || '').toLowerCase();
-      const rev = wo.subtotal || 0;
+      const rev = wo.subtotal || wo.totalAmount || 0;
 
       if (s.includes('screen') || s.includes('display') || s.includes('oled') || desc.includes('screen') || desc.includes('cracked') || desc.includes('glass')) {
         stats[0].count += 1;
@@ -543,7 +535,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
     workOrders.forEach((wo) => {
       const t = new Date(wo.createdAt || Date.now()).getTime();
       if (isNaN(t)) return;
-      const rev = isRevenueStatus(wo.status) ? wo.subtotal || 0 : 0;
+      const rev = isRevenueStatus(wo.status) ? wo.subtotal || wo.totalAmount || 0 : 0;
       const rep = isRevenueStatus(wo.status) ? 1 : 0;
       if (t >= prevStartMs && t <= prevEndMs) {
         prevRev += rev;
@@ -584,7 +576,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
             <Coins className="w-4 h-4 text-warning shrink-0" />
             <span className="font-bold text-warning min-w-0">
               Inventory fund reminder — {pendingFundTickets.length} ticket{pendingFundTickets.length > 1 ? 's' : ''} used parts worth{' '}
-              <span className="font-black">{pendingFundTotal.toLocaleString()} MMK</span> from stock, not settled yet
+              <span className="font-black">{pendingFundTotal.toLocaleString()} {currency}</span> from stock, not settled yet
             </span>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -707,7 +699,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
           onClick={() => setActiveDashboardSubTab('status-queue')}
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveDashboardSubTab('status-queue'); } }}
           aria-label="View ready for pickup"
-          className="group relative bg-white p-4 rounded-2xl border border-line shadow-2xs hover:shadow-md hover:border-emerald-500/50 transition-all cursor-pointer overflow-hidden select-none"
+          className="group relative bg-white p-4 rounded-2xl border border-line shadow-2xs hover:shadow-md hover:border-success/50 transition-all cursor-pointer overflow-hidden select-none"
         >
           <div className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-2xl bg-success/10 text-success flex items-center justify-center group-hover:scale-110 group-hover:bg-success group-hover:text-white transition-all">
             <CheckCircle2 className="w-6 h-6" />
@@ -731,7 +723,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
           onClick={() => setActiveDashboardSubTab('finance')}
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveDashboardSubTab('finance'); } }}
           aria-label="View finance overview"
-          className="group relative bg-white p-4 rounded-2xl border border-line shadow-2xs hover:shadow-md hover:border-indigo-500/50 transition-all cursor-pointer overflow-hidden select-none"
+          className="group relative bg-white p-4 rounded-2xl border border-line shadow-2xs hover:shadow-md hover:border-purple/50 transition-all cursor-pointer overflow-hidden select-none"
         >
           <div className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-2xl bg-brand-soft text-brand flex items-center justify-center group-hover:scale-110 group-hover:bg-brand group-hover:text-white transition-all">
             <Coins className="w-6 h-6" />
@@ -742,7 +734,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
             </span>
             <div className="mt-2">
               <span className="text-xl sm:text-2xl font-black text-ink tracking-tight truncate block">
-                {totalRevenue.toLocaleString()} <span className="text-xs font-bold text-muted">MMK</span>
+                {totalRevenue.toLocaleString()} <span className="text-xs font-bold text-muted">{currency}</span>
               </span>
             </div>
           </div>
@@ -755,7 +747,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
           onClick={() => setActiveDashboardSubTab('tech-kpi')}
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveDashboardSubTab('tech-kpi'); } }}
           aria-label="View technician KPI"
-          className="group relative bg-white p-4 rounded-2xl border border-line shadow-2xs hover:shadow-md hover:border-teal-500/50 transition-all cursor-pointer overflow-hidden select-none"
+          className="group relative bg-white p-4 rounded-2xl border border-line shadow-2xs hover:shadow-md hover:border-teal/50 transition-all cursor-pointer overflow-hidden select-none"
         >
           <div className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-2xl bg-teal/10 text-teal flex items-center justify-center group-hover:scale-110 group-hover:bg-teal group-hover:text-white transition-all">
             <Clock className="w-6 h-6" />
@@ -792,7 +784,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
                   { label: 'In Progress', count: filteredWorkOrders.filter((w) => w.status === 'In Progress').length, bar: 'bg-purple', text: 'text-purple' },
                   { label: 'Pending', count: filteredWorkOrders.filter((w) => w.status === 'Pending').length, bar: 'bg-warning', text: 'text-warning' },
                   { label: 'Finished', count: filteredWorkOrders.filter((w) => w.status === 'Finished').length, bar: 'bg-success', text: 'text-success-deep' },
-                  { label: 'Taken Out', count: filteredWorkOrders.filter((w) => w.status === 'Taken Out').length, bar: 'bg-slate-400', text: 'text-muted' },
+                  { label: 'Taken Out', count: filteredWorkOrders.filter((w) => w.status === 'Taken Out').length, bar: 'bg-line', text: 'text-muted' },
                 ].map((s) => {
                   const pct = filteredWorkOrders.length > 0 ? Math.round((s.count / filteredWorkOrders.length) * 100) : 0;
                   return (
@@ -876,11 +868,11 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-muted font-medium">Collected</span>
-                  <span className="font-mono font-black text-success-deep">{financialAnalytics.totalCollected.toLocaleString()} MMK</span>
+                  <span className="font-mono font-black text-success-deep">{financialAnalytics.totalCollected.toLocaleString()} {currency}</span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-muted font-medium">Unpaid Balance</span>
-                  <span className="font-mono font-black text-danger">{financialAnalytics.totalUnpaidBalance.toLocaleString()} MMK</span>
+                  <span className="font-mono font-black text-danger">{financialAnalytics.totalUnpaidBalance.toLocaleString()} {currency}</span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-muted font-medium">Paid Tickets</span>
@@ -912,7 +904,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
                 </div>
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-muted font-medium">Stock Value</span>
-                  <span className="font-mono font-black text-ink">{inventoryAnalytics.totalValuation.toLocaleString()} MMK</span>
+                  <span className="font-mono font-black text-ink">{inventoryAnalytics.totalValuation.toLocaleString()} {currency}</span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-muted font-medium">Low Stock</span>
@@ -1024,7 +1016,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
                         </div>
                         <div className="flex items-center space-x-2 shrink-0">
                           <span className="font-mono font-bold text-ink">{dev.count}</span>
-                          <span className="font-mono font-bold text-brand">{dev.revenue.toLocaleString()} MMK</span>
+                          <span className="font-mono font-bold text-brand">{dev.revenue.toLocaleString()} {currency}</span>
                         </div>
                       </div>
                       <div className="w-full bg-line rounded-full h-1.5 overflow-hidden">
@@ -1070,7 +1062,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
                         <span className="text-xs font-bold text-muted bg-white border border-line px-2 py-0.5 rounded-full shrink-0">{cat.count} Tickets</span>
                       </div>
                       <div className="flex items-baseline justify-between">
-                        <span className="font-mono font-black text-ink">{cat.revenue.toLocaleString()} MMK</span>
+                        <span className="font-mono font-black text-ink">{cat.revenue.toLocaleString()} {currency}</span>
                         <span className={`font-bold text-xs ${cat.textCol}`}>{cat.percentage}%</span>
                       </div>
                       <div className="w-full bg-line rounded-full h-1.5 overflow-hidden">
@@ -1125,7 +1117,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-1">
               <span className="text-xs font-bold text-muted uppercase">Total Parts Valuation</span>
-              <p className="text-xl font-extrabold text-ink">{inventoryAnalytics.totalValuation.toLocaleString()} MMK</p>
+              <p className="text-xl font-extrabold text-ink">{inventoryAnalytics.totalValuation.toLocaleString()} {currency}</p>
               <p className="text-xs text-success font-semibold">{inventoryAnalytics.totalItems} Total Replacement Items</p>
             </div>
 
@@ -1179,7 +1171,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
                           <div className="h-full bg-brand rounded-full" style={{ width: `${barPct}%` }} />
                         </div>
                         <span className="text-[11px] font-bold text-muted shrink-0 w-20 text-right">
-                          {part.revenue.toLocaleString()} MMK
+                          {part.revenue.toLocaleString()} {currency}
                         </span>
                       </div>
                     </div>
@@ -1236,7 +1228,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
 
                     <div className="flex items-center justify-between text-xs border-t border-warning/20 pt-2 text-muted">
                       <span>Supplier: <strong className="text-ink">{part.supplierName}</strong></span>
-                      <span className="font-mono font-bold text-brand">{part.costPrice.toLocaleString()} MMK Cost</span>
+                      <span className="font-mono font-bold text-brand">{part.costPrice.toLocaleString()} {currency} Cost</span>
                     </div>
                   </div>
                 ))}
@@ -1253,27 +1245,27 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <KpiCard
               label="Total Revenue"
-              value={`${totalRevenue.toLocaleString()} MMK`}
+              value={`${totalRevenue.toLocaleString()} {currency}`}
               footer={`${marginPercent}% Gross Profit Margin`}
               footerClass={marginPercent < 0 ? 'font-semibold text-danger' : 'font-semibold text-success-deep'}
               footerIcon={marginPercent < 0 ? <AlertTriangle className="w-3 h-3 shrink-0" /> : undefined}
             />
             <KpiCard
               label="Gross Profit (Margin)"
-              value={`${totalMargin.toLocaleString()} MMK`}
+              value={`${totalMargin.toLocaleString()} {currency}`}
               valueClass="text-success"
               footer="Revenue minus parts cost"
             />
             <KpiCard
               label="Total Collected (Paid)"
-              value={`${financialAnalytics.totalCollected.toLocaleString()} MMK`}
+              value={`${financialAnalytics.totalCollected.toLocaleString()} {currency}`}
               valueClass="text-brand"
               footer={`${financialAnalytics.paidCount} Tickets Fully Settled`}
               footerClass="font-semibold text-brand"
             />
             <KpiCard
               label="Unpaid Pending Balance"
-              value={`${financialAnalytics.totalUnpaidBalance.toLocaleString()} MMK`}
+              value={`${financialAnalytics.totalUnpaidBalance.toLocaleString()} {currency}`}
               valueClass="text-danger"
               footer={`${financialAnalytics.unpaidCount} Tickets Outstanding`}
               footerClass="font-semibold text-danger"
@@ -1369,13 +1361,13 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="p-4 bg-surface border border-line rounded-xl space-y-1">
                 <p className="text-xs font-bold text-muted uppercase">Average Ticket Value (ATV)</p>
-                <p className="text-2xl font-extrabold text-ink">{avgTicketValue.toLocaleString()} MMK</p>
+                <p className="text-2xl font-extrabold text-ink">{avgTicketValue.toLocaleString()} {currency}</p>
                 <p className="text-xs text-muted">Per repair work order</p>
               </div>
 
               <div className="p-4 bg-surface border border-line rounded-xl space-y-1">
                 <p className="text-xs font-bold text-muted uppercase">Total Parts Cost</p>
-                <p className="text-2xl font-extrabold text-ink">{totalPartsCost.toLocaleString()} MMK</p>
+                <p className="text-2xl font-extrabold text-ink">{totalPartsCost.toLocaleString()} {currency}</p>
                 <p className="text-xs text-muted">Direct hardware component cost</p>
               </div>
             </div>
@@ -1692,15 +1684,6 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
             })()}
           </div>
         </div>
-      )}
-
-      {rosterTicket && (
-        <TicketDetailInspectorModal
-          workOrder={rosterTicket}
-          onClose={() => setRosterTicket(null)}
-          onPrint={onSelectPrintTag}
-          onEdit={(wo) => onOpenNewWorkOrder({ editWorkOrder: wo })}
-        />
       )}
 
       {detailTech && (

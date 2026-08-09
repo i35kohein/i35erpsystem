@@ -10,7 +10,7 @@ import {Truck,
   Mail,
   Grid,
   List} from 'lucide-react';
-import { Supplier, RmaItem, PurchaseOrder, PartItem, RmaStatus } from '../../types';
+import { Supplier, RmaItem, PurchaseOrder, PartItem, RmaStatus, SystemSettings } from '../../types';
 import { Button , Input } from '../ui';
 import { toast } from '../../lib/toast';
 
@@ -19,6 +19,7 @@ interface SupplierRmaModuleProps {
   rmas: RmaItem[];
   purchaseOrders: PurchaseOrder[];
   parts: PartItem[];
+  systemSettings?: SystemSettings;
   onAddRma: (rma: RmaItem) => void;
   onAddSupplier?: (supplier: Supplier) => void;
   onUpdateSupplier?: (supplier: Supplier) => void;
@@ -37,6 +38,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
   rmas,
   purchaseOrders,
   parts,
+  systemSettings,
   onAddRma,
   onAddSupplier,
   onUpdateSupplier,
@@ -47,6 +49,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
   showNewRmaModal: propShowNewRmaModal,
   setShowNewRmaModal: propSetShowNewRmaModal,
 }) => {
+  const currency = systemSettings?.currencySymbol || 'MMK';
   const [activeSubTab, setActiveSubTab] = useState<'RMA' | 'PO' | 'SUPPLIERS'>('RMA');
   // Phones default to the RMA card grid — the table is unusable below md.
   const [rmaView, setRmaView] = useState<'table' | 'cards'>('table');
@@ -136,7 +139,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
 
     const rma: RmaItem = {
       id: `rma-${Date.now()}`,
-      rmaNumber: `RMA-2026-${Math.floor(100 + Math.random() * 900)}`,
+      rmaNumber: `RMA-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`,
       partId: part.id,
       partName: part.name,
       partQuality: part.qualityTier,
@@ -311,8 +314,8 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
 
                   <div className="flex items-center justify-between gap-2 border-t border-line pt-2">
                     <span className="font-mono text-xs text-muted">{rma.trackingNumber || 'No tracking yet'}</span>
-                    {rma.vendorCreditAmount ? (
-                      <span className="text-xs text-success-deep font-extrabold">+{rma.vendorCreditAmount.toLocaleString()} MMK Credit</span>
+                    {rma.status === 'Credit Approved' ? (
+                      <span className="text-xs text-success-deep font-extrabold">+{(rma.vendorCreditAmount || 0).toLocaleString()} {currency} Credit</span>
                     ) : rma.status === 'Shipped to Vendor' ? (
                       <Button
                         onClick={() => onUpdateRmaStatus(rma.id, 'Credit Approved', rma.unitCost * rma.quantity)}
@@ -371,8 +374,8 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                       }`}>
                         <span>{rma.status}</span>
                       </span>
-                      {rma.vendorCreditAmount && (
-                        <p className="text-xs text-success-deep font-extrabold mt-1">+{rma.vendorCreditAmount.toLocaleString()} MMK Credit</p>
+                      {rma.status === 'Credit Approved' && (
+                        <p className="text-xs text-success-deep font-extrabold mt-1">+{(rma.vendorCreditAmount || 0).toLocaleString()} {currency} Credit</p>
                       )}
                     </td>
 
@@ -419,14 +422,14 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                   {po.items.map((it, idx) => (
                     <div key={idx} className="flex justify-between text-ink">
                       <span>{it.quantity}x {it.partName}</span>
-                      <span className="font-mono">{(it.unitCost * it.quantity).toLocaleString()} MMK</span>
+                      <span className="font-mono">{(it.unitCost * it.quantity).toLocaleString()} {currency}</span>
                     </div>
                   ))}
                 </div>
 
                 <div className="flex justify-between items-center pt-2 border-t border-line font-bold">
                   <span className="text-muted">Total PO Value:</span>
-                  <span className="text-success-deep font-mono text-sm">{po.totalCost.toLocaleString()} MMK</span>
+                  <span className="text-success-deep font-mono text-sm">{po.totalCost.toLocaleString()} {currency}</span>
                 </div>
               </div>
             ))}
@@ -546,7 +549,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                   className="w-full bg-surface border border-line rounded-lg p-2 text-ink focus:border-brand focus:ring-2 focus:ring-brand/20"
                 >
                   {parts.map((p) => (
-                    <option key={p.id} value={p.id}>{p.name} ({p.qualityTier}) - {p.costPrice.toLocaleString()} MMK</option>
+                    <option key={p.id} value={p.id}>{p.name} ({p.qualityTier}) - {p.costPrice.toLocaleString()} {currency}</option>
                   ))}
                 </select>
               </div>
@@ -576,7 +579,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-muted mb-1">Unit Cost (MMK)</label>
+                  <label className="block text-muted mb-1">Unit Cost ({currency})</label>
                   <Input
                     type="number"
                     min={0}

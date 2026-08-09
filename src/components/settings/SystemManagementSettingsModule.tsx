@@ -515,7 +515,11 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
       return;
     }
 
-    const linkedTech = technicians.find((t) => t.id === userFormData.technicianId || t.name.toLowerCase() === userFormData.name.trim().toLowerCase());
+    // Explicit dropdown selection wins; only fall back to name-matching when
+    // no technicianId was chosen. Guards t.name undefined (audit P2).
+    const linkedTech = userFormData.technicianId
+      ? technicians.find((t) => t.id === userFormData.technicianId)
+      : technicians.find((t) => t.name && t.name.toLowerCase() === userFormData.name.trim().toLowerCase());
 
     if (editingUser) {
       const updated: AppUser = {
@@ -1335,7 +1339,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                     }}
                     className={`p-2.5 rounded-xl border text-center font-extrabold transition-all cursor-pointer ${
                       userFormData.role === 'Admin'
-                        ? 'bg-purple/15 border-purple-600 text-purple shadow-2xs'
+                        ? 'bg-purple/15 border-purple/30 text-purple shadow-2xs'
                         : 'bg-white border-line-strong text-ink hover:bg-purple/50'
                     }`}
                   >
@@ -1362,7 +1366,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                     }}
                     className={`p-2.5 rounded-xl border text-center font-extrabold transition-all cursor-pointer ${
                       userFormData.role === 'Technician'
-                        ? 'bg-brand/15 border-blue-600 text-brand-deep shadow-2xs'
+                        ? 'bg-brand/15 border-brand/30 text-brand-deep shadow-2xs'
                         : 'bg-white border-line-strong text-ink hover:bg-brand-soft/50'
                     }`}
                   >
@@ -1389,7 +1393,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                     }}
                     className={`p-2.5 rounded-xl border text-center font-extrabold transition-all cursor-pointer ${
                       userFormData.role === 'Reception'
-                        ? 'bg-warning/15 border-amber-600 text-warning shadow-2xs'
+                        ? 'bg-warning/15 border-warning/30 text-warning shadow-2xs'
                         : 'bg-white border-line-strong text-ink hover:bg-warning/50'
                     }`}
                   >

@@ -52,7 +52,7 @@ const getStatusBadgeStyle = (status: string) => {
     case 'Customer Not Repair':
       return 'bg-warning/10 text-warning border-warning/30';
     default:
-      return 'bg-gray-50 text-gray-700 border-gray-200';
+      return 'bg-surface text-muted border-line';
   }
 };
 
@@ -129,13 +129,14 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
   }, [filteredCustomers, selectedCustomer]);
 
   // Keep detail panel stable when customers are added, removed, or filtered.
-  // A deleted customer must not remain in the detail panel.
+  // A deleted/filtered-out customer must not remain in the detail panel, and
+  // keyboard [] nav must resolve against the CURRENT filtered list (audit P2).
   useEffect(() => {
     setSelectedCustomer((selected) => {
-      if (selected && customers.some((customer) => customer.id === selected.id)) return selected;
-      return customers[0] || null;
+      if (selected && filteredCustomers.some((customer) => customer.id === selected.id)) return selected;
+      return filteredCustomers[0] || null;
     });
-  }, [customers]);
+  }, [filteredCustomers]);
 
   
 

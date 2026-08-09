@@ -384,6 +384,13 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       toast.error(Object.values(errs)[0], 'Please Complete the Form');
       return;
     }
+    // Step-gating enforcement: the wizard step chips allow jumping ahead, so
+    // the register path must re-validate every step (audit P2).
+    if (repairCount === 0) {
+      setWizardStep(3);
+      toast.error('Select at least one repair service before registering.', 'Step 3 Required');
+      return;
+    }
     // Duplicate-device guard: warn if this IMEI/serial already has an open ticket
     const openTickets = workOrders.filter(
       (w) => !w.isArchived && ['Receive', 'In Progress', 'Pending'].includes(w.status) && w.id !== editWorkOrder?.id
@@ -997,7 +1004,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             <Button
               type="button"
               onClick={() => setIsCameraScannerOpen(true)}
-              className="bg-ink hover:bg-black text-white flex items-center space-x-1.5"
+              className="bg-ink hover:bg-ink/90 text-white flex items-center space-x-1.5"
             >
               <Camera className="w-3.5 h-3.5 text-white/90" />
               <span>Scan QR / Barcode</span>
@@ -1084,7 +1091,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           </div>
 
           {!deviceModel ? (
-            <div className="p-8 rounded-2xl border-2 border-dashed border-warning/30 bg-warning/10/80 flex flex-col items-center justify-center text-center space-y-3">
+            <div className="p-8 rounded-2xl border-2 border-dashed border-warning/30 bg-warning/10 flex flex-col items-center justify-center text-center space-y-3">
               <div className="w-12 h-12 rounded-2xl bg-warning/15 text-warning flex items-center justify-center shadow-2xs animate-bounce">
                 <AlertCircle className="w-6 h-6" />
               </div>
@@ -1565,7 +1572,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                   onClick={goNext}
                   disabled={!canNextStep()}
                   className={`h-10 w-full sm:w-52 font-black text-sm ${
-                    canNextStep() ? 'bg-brand hover:bg-brand-deep text-white' : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                    canNextStep() ? 'bg-brand hover:bg-brand-deep text-white' : 'bg-line text-muted cursor-not-allowed'
                   }`}
                 >
                   Next
@@ -1703,10 +1710,12 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 <Button
                   onClick={() => {
                     const days = Number(customWarrantyInput);
-                    if (days >= 0) {
+                    if (days > 0) {
                       setWarrantyDays(days);
                       setWarrantyLabel(`Custom ${days} Days Warranty`);
                       setIsWarrantyModalOpen(false);
+                    } else {
+                      toast.error('Enter a positive number of days.', 'Invalid Warranty');
                     }
                   }}
                   className="px-3 py-2 bg-brand text-white font-bold text-xs rounded-xl"

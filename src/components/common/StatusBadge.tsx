@@ -33,8 +33,8 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
 
   // Specific configuration per status
   let badgeStyle = 'bg-surface text-muted border border-line';
-  let dotColor = 'bg-surface0';
-  let pingColor = 'bg-slate-400';
+  let dotColor = 'bg-faint';
+  let pingColor = 'bg-line';
   let isPulsing = false;
 
   switch (normStatus) {
@@ -43,7 +43,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'Diagnosing':
       badgeStyle = 'bg-purple/10 text-purple border border-purple/30';
       dotColor = 'bg-purple';
-      pingColor = 'bg-purple-400';
+      pingColor = 'bg-purple';
       isPulsing = false;
       break;
 
@@ -62,7 +62,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'New Intake':
       badgeStyle = 'bg-brand-soft text-brand border border-brand/30';
       dotColor = 'bg-brand';
-      pingColor = 'bg-blue-400';
+      pingColor = 'bg-brand';
       isPulsing = false;
       break;
 
@@ -71,7 +71,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'QA Passed':
       badgeStyle = 'bg-success/10 text-success-deep border border-success/30';
       dotColor = 'bg-success';
-      pingColor = 'bg-emerald-400';
+      pingColor = 'bg-success';
       isPulsing = false;
       break;
 
@@ -80,7 +80,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'Unfixable':
       badgeStyle = 'bg-danger/10 text-danger border border-danger/30';
       dotColor = 'bg-danger';
-      pingColor = 'bg-rose-400';
+      pingColor = 'bg-danger';
       isPulsing = false;
       break;
 
@@ -89,7 +89,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'No Repair':
       badgeStyle = 'bg-warning/10 text-warning border border-warning/30';
       dotColor = 'bg-warning';
-      pingColor = 'bg-orange-400';
+      pingColor = 'bg-warning';
       isPulsing = false;
       break;
 
@@ -97,15 +97,15 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'Paid':
     case 'Returned':
       badgeStyle = 'bg-surface text-muted border border-line';
-      dotColor = 'bg-surface0';
-      pingColor = 'bg-slate-400';
+      dotColor = 'bg-faint';
+      pingColor = 'bg-line';
       isPulsing = false;
       break;
 
     default:
       badgeStyle = 'bg-surface text-muted border border-line';
-      dotColor = 'bg-surface0';
-      pingColor = 'bg-slate-400';
+      dotColor = 'bg-faint';
+      pingColor = 'bg-line';
       isPulsing = false;
       break;
   }

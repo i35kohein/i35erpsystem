@@ -224,7 +224,6 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
   // Modals
   const [detailModalWo, setDetailModalWo] = useState<WorkOrder | null>(null);
   const [addLogModalWo, setAddLogModalWo] = useState<WorkOrder | null>(null);
-  const [assignTechModalWo, setAssignTechModalWo] = useState<WorkOrder | null>(null);
   const [moveStageModalWo, setMoveStageModalWo] = useState<WorkOrder | null>(null);
   const [checkoutModalWo, setCheckoutModalWo] = useState<WorkOrder | null>(null);
   const [afterDiagModalWo, setAfterDiagModalWo] = useState<WorkOrder | null>(null);
@@ -278,23 +277,23 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
 
   const getCardStyle = (status: WorkOrderStatus, isStagnant: boolean) => {
     if (isStagnant) {
-      return 'bg-warning/50 border border-warning/30 shadow-2xs hover:border-amber-500 hover:ring-2 hover:ring-amber-400/30 transition-all duration-200';
+      return 'bg-warning/50 border border-warning/30 shadow-2xs hover:border-warning hover:ring-2 hover:ring-warning/30 transition-all duration-200';
     }
     switch (status) {
       case 'Receive':
-        return 'bg-white border border-line shadow-2xs hover:border-brand hover:ring-2 hover:ring-brand/20 transition-all duration-200';
+        return 'bg-surface border border-line shadow-2xs hover:border-brand hover:ring-2 hover:ring-brand/20 transition-all duration-200';
       case 'In Progress':
-        return 'bg-white border border-line shadow-2xs hover:border-purple hover:ring-2 hover:ring-purple/20 transition-all duration-200';
+        return 'bg-surface border border-line shadow-2xs hover:border-purple hover:ring-2 hover:ring-purple/20 transition-all duration-200';
       case 'Pending':
-        return 'bg-white border border-line shadow-2xs hover:border-amber-500 hover:ring-2 hover:ring-amber-500/20 transition-all duration-200';
+        return 'bg-surface border border-line shadow-2xs hover:border-warning hover:ring-2 hover:ring-warning/20 transition-all duration-200';
       case 'Finished':
-        return 'bg-white border border-line shadow-2xs hover:border-success hover:ring-2 hover:ring-success/20 transition-all duration-200';
+        return 'bg-surface border border-line shadow-2xs hover:border-success hover:ring-2 hover:ring-success/20 transition-all duration-200';
       case 'Cant Repair':
-        return 'bg-white border border-line shadow-2xs hover:border-rose-400 hover:ring-2 hover:ring-rose-400/20 transition-all duration-200';
+        return 'bg-surface border border-line shadow-2xs hover:border-danger hover:ring-2 hover:ring-danger/20 transition-all duration-200';
       case 'Customer Not Repair':
-        return 'bg-white border border-line shadow-2xs hover:border-orange-400 hover:ring-2 hover:ring-orange-400/20 transition-all duration-200';
+        return 'bg-surface border border-line shadow-2xs hover:border-warning hover:ring-2 hover:ring-warning/20 transition-all duration-200';
       default:
-        return 'bg-white border border-line shadow-2xs hover:border-line-strong hover:ring-2 hover:ring-slate-400/20 transition-all duration-200';
+        return 'bg-surface border border-line shadow-2xs hover:border-line-strong hover:ring-2 hover:ring-line transition-all duration-200';
     }
   };
 
@@ -406,32 +405,6 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
     setAddLogModalWo(null);
     setLogText('');
     toast.success('Repair log entry saved to ticket.', 'Log Saved');
-  };
-
-  const handleAssignTechnician = (techId: string) => {
-    if (!assignTechModalWo) return;
-    const tech = technicians.find(t => t.id === techId);
-    const formattedDate = new Date().toLocaleString('en-US', {
-      month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true
-    });
-
-    const newLog: RepairLogEntry = {
-      id: `log-${Date.now()}`,
-      timestamp: formattedDate,
-      author: 'System Assignment',
-      note: `Assigned technician updated to ${tech?.name || 'Unassigned'}.`,
-    };
-
-    const updatedWo: WorkOrder = {
-      ...assignTechModalWo,
-      assignedTechId: techId,
-      assignedTechName: tech?.name,
-      repairLogs: [newLog, ...(assignTechModalWo.repairLogs || [])],
-      updatedAt: new Date().toISOString()
-    };
-
-    if (onSaveWorkOrder) onSaveWorkOrder(updatedWo);
-    setAssignTechModalWo(null);
   };
 
   const handleConfirmCheckout = () => {
@@ -596,7 +569,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
             }}
                 className={`inline-flex w-full sm:w-auto h-8 sm:h-7 items-center justify-center gap-1 rounded-md border px-2 text-xs font-bold transition-colors cursor-pointer ${
                   showBeforeNeedsDiagOnly
-                    ? 'bg-brand text-white border-blue-700 shadow-2xs'
+                    ? 'bg-brand text-white border-brand/50 shadow-2xs'
                     : 'bg-brand-soft text-brand border-brand/30 hover:bg-brand/15'
                 }`}
           >
@@ -612,7 +585,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
             }}
               className={`inline-flex w-full sm:w-auto h-8 sm:h-7 items-center justify-center gap-1 rounded-md border px-2 text-xs font-bold transition-colors cursor-pointer ${
                 showNeedsDiagOnly
-                  ? 'bg-purple text-white border-purple-700 shadow-2xs'
+                  ? 'bg-purple text-white border-purple/50 shadow-2xs'
                   : 'bg-purple/10 text-purple border-purple/30 hover:bg-purple/15'
               }`}
           >
@@ -621,7 +594,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
           </Button>
 
           {showBottlenecksOnly && (
-            <span className="inline-flex h-7 items-center gap-1 rounded-md border border-red-600 bg-danger/100 px-2 text-xs font-bold text-white shadow-2xs">
+            <span className="inline-flex h-7 items-center gap-1 rounded-md border border-danger/50 bg-danger/100 px-2 text-xs font-bold text-white shadow-2xs">
               <Timer className="h-3 w-3 shrink-0" />
               <span>Filtering Bottlenecks (&gt;48h)</span>
             </span>
@@ -689,7 +662,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
           setKanbanAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 12);
         }}
       >
-        {KANBAN_STAGES.filter((stage) => (showAllStages || (stage.id !== 'Cant Repair' && stage.id !== 'Customer Not Repair')) && (statusFilter === 'ALL' || stage.id === statusFilter)).map((stage) => {
+        {KANBAN_STAGES.filter((stage) => (showAllStages || stage.id === statusFilter || (stage.id !== 'Cant Repair' && stage.id !== 'Customer Not Repair')) && (statusFilter === 'ALL' || stage.id === statusFilter)).map((stage) => {
           const stageOrders = filteredWorkOrders.filter((w) => w.status === stage.id);
           const stageStagnantOrders = stageOrders.filter((w) => getIsStagnant(w));
 
@@ -714,8 +687,18 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                     setDraggedWoId(null);
                     return;
                   }
-                  if ((stage.id === 'In Progress' || stage.id === 'Pending') && targetWo && !checkIsBeforeDiagnosticCompleted(targetWo)) {
-                    setPendingBeforeDiagAlertWo({ wo: targetWo, newStatus: stage.id });
+                  if (stage.id === 'In Progress' || stage.id === 'Pending') {
+                    if (targetWo && !checkIsBeforeDiagnosticCompleted(targetWo)) {
+                      setPendingBeforeDiagAlertWo({ wo: targetWo, newStatus: stage.id });
+                      setDraggedWoId(null);
+                      return;
+                    }
+                    if (targetWo && targetWo.status === stage.id) {
+                      setDraggedWoId(null);
+                      return;
+                    }
+                  }
+                  if (targetWo && targetWo.status === stage.id) {
                     setDraggedWoId(null);
                     return;
                   }
@@ -811,9 +794,9 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         }}
                         className={`p-3 rounded-xl shadow-xs hover:shadow-md space-y-2 text-xs min-h-[200px] transition-shadow duration-150 ease-out cursor-pointer active:cursor-grabbing group ${
                           isBeforeDiagNeeded 
-                            ? 'border-l-4 border-l-amber-500 bg-warning/10/20' 
+                            ? 'border-l-4 border-l-warning bg-warning/10' 
                             : isAfterDiagNeeded 
-                            ? 'border-l-4 border-l-purple-600 bg-purple/10/20' 
+                            ? 'border-l-4 border-l-purple bg-purple/10' 
                             : ''
                         } ${getCardStyle(
                           wo.status,
@@ -976,7 +959,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
         })}
       </div>
       {/* Right-edge scroll fade (mobile/tablet) — hints there are more stages off-screen */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-10 rounded-r-2xl bg-gradient-to-l from-white/70 to-transparent xl:hidden" />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-10 rounded-r-2xl bg-gradient-to-l from-surface/70 to-transparent xl:hidden" />
       </div>
 
       {/* Stage-jump strip (below xl) — tap a stage chip to scroll the board to it */}
@@ -1051,44 +1034,6 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
             >
               Save Repair Log
             </Button>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL 3: Assign Technician */}
-      {assignTechModalWo && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-line-strong rounded-2xl max-w-sm w-full p-6 space-y-4 text-xs shadow-2xl relative">
-            <Button onClick={() => setAssignTechModalWo(null)} aria-label="Close technician assignment" className="absolute right-4 top-4 text-muted hover:text-ink">
-              <X className="w-5 h-5" />
-            </Button>
-
-            <h3 className="text-sm font-bold text-ink border-b border-line-strong pb-2 flex items-center space-x-2">
-              <UserCheck className="w-4 h-4 text-brand" />
-              <span>Assign Technician ({assignTechModalWo.orderNumber})</span>
-            </h3>
-
-            <div className="space-y-2">
-              {technicians.map(t => (
-                <Button
-                  key={t.id}
-                  onClick={() => handleAssignTechnician(t.id)}
-                  className={`w-full p-3 rounded-xl border text-left flex justify-between items-center transition-all ${
-                    assignTechModalWo.assignedTechId === t.id
-                      ? 'border-brand bg-brand-soft text-brand font-bold'
-                      : 'border-line-strong bg-white text-ink hover:bg-surface'
-                  }`}
-                >
-                  <div>
-                    <p className="font-bold text-xs">{t.name}</p>
-                    <p className="text-xs opacity-70">{t.level}</p>
-                  </div>
-                  <span className="text-xs bg-surface text-ink px-2 py-0.5 rounded-full font-bold">
-                    {t.activeJobsCount} Active Jobs
-                  </span>
-                </Button>
-              ))}
-            </div>
           </div>
         </div>
       )}
@@ -1308,7 +1253,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         copy[idx].status = 'N/A';
                         setAfterDiagnostics(copy);
                       }}
-                      className={`flex-1 min-h-10 py-1 rounded-md font-extrabold transition-all ${item.status === 'N/A' ? 'bg-slate-600 text-white shadow-2xs' : 'bg-line text-ink hover:bg-line'}`}
+                      className={`flex-1 min-h-10 py-1 rounded-md font-extrabold transition-all ${item.status === 'N/A' ? 'bg-ink text-white shadow-2xs' : 'bg-line text-ink hover:bg-line'}`}
                     >
                       N/A
                     </Button>
