@@ -990,63 +990,58 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
-      {/* Keep the chosen device visible while the catalog itself scrolls. */}
-      <div className="z-20 shrink-0 bg-surface pt-1 pb-1">
-        {/* Mobile: compact device strip — sits at the top like a nav-bar element (lg:hidden) */}
-        <div className="lg:hidden bg-white/95 backdrop-blur border border-line rounded-xl px-2.5 py-1.5 flex items-center gap-2 shadow-2xs">
+      {/* Active Device (left) + repair category chips (right) — one row (Ko Hein) */}
+      <div className="flex items-center gap-2.5">
+        <div className="shrink-0 bg-white border border-line rounded-xl px-2.5 py-1.5 flex items-center gap-2 shadow-2xs min-w-0">
           <div className="w-7 h-7 rounded-lg bg-brand text-white flex items-center justify-center shrink-0">
             <Smartphone className="w-3.5 h-3.5" />
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-extrabold uppercase tracking-widest text-brand leading-none">Active Device</p>
-            <p className="text-xs font-black text-ink truncate leading-tight mt-0.5">{selectedDevice}</p>
+          <div className="min-w-0">
+            <p className="text-[10px] font-extrabold uppercase tracking-widest text-brand leading-none">Active Device</p>
+            <p className="text-xs font-black text-ink truncate leading-tight mt-0.5 max-w-[110px] sm:max-w-[180px]">{selectedDevice}</p>
           </div>
-          <span className="text-xs font-bold text-muted shrink-0 whitespace-nowrap">
+          <span className="text-[11px] font-bold text-muted shrink-0 whitespace-nowrap hidden sm:inline">
             {availableRepairItems.filter((i) => i.price && i.price > 0).length} services
           </span>
-          <Button
+          <button
             type="button"
             onClick={() => setDeviceModalOpen(true)}
-            className="shrink-0 min-h-10 px-3 bg-surface hover:bg-line text-brand font-extrabold text-xs rounded-lg border border-line transition-all flex items-center space-x-1 cursor-pointer active:scale-95"
+            className="shrink-0 min-h-9 px-2.5 rounded-lg bg-surface hover:bg-line text-brand font-extrabold text-[11px] border border-line transition-all flex items-center gap-1 cursor-pointer focus:outline-none"
           >
             <Folder className="w-3 h-3" />
             <span>Switch</span>
-          </Button>
+          </button>
         </div>
 
-        {/* Mobile search removed on request (Ko Hein 2026-08-09) */}
-
-        {/* Desktop: full device card (lg+) */}
-        <div className="hidden lg:flex bg-white border border-line p-4 sm:p-5 rounded-2xl shadow-2xs flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-brand text-white flex items-center justify-center font-black shrink-0">
-              <Smartphone className="w-6 h-6 sm:w-7 sm:h-7" />
-            </div>
-            <div>
-              <div className="flex items-center space-x-2">
-                <span className="text-xs font-extrabold uppercase tracking-widest text-brand-deep bg-brand/10 px-2.5 py-0.5 rounded-full">
-                  Active Device
-                </span>
-                <span className="text-xs font-bold text-muted">
-                  {availableRepairItems.filter((i) => i.price && i.price > 0).length} Services Available
-                </span>
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-ink tracking-tight mt-1">
-                {selectedDevice}
-              </h2>
-            </div>
+        {/* Repair category quick-filter chips — beside the device card */}
+          {/* Repair category quick-filter chips — mobile + desktop */}
+          <div className="-mx-1 px-1 overflow-x-auto no-scrollbar flex items-center gap-1.5 pb-0.5">
+            <Button
+              type="button"
+              onClick={() => setCategoryFilter('ALL')}
+              className={`shrink-0 px-2.5 !h-7 !min-h-0 sm:!h-10 sm:!min-h-10 sm:px-3 rounded-full text-xs font-extrabold border transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:bg-brand focus-visible:text-white focus-visible:border-brand ${
+                effectiveCategoryFilter === 'ALL'
+                  ? 'bg-brand text-white border-brand shadow-2xs'
+                  : 'bg-white text-ink border-line hover:border-brand/50'
+              }`}
+            >
+              All ({availableRepairItems.length})
+            </Button>
+            {chipGroups.map(([group, count]) => (
+              <Button
+                key={group}
+                type="button"
+                onClick={() => setCategoryFilter(group)}
+                className={`shrink-0 px-2.5 !h-7 !min-h-0 sm:!h-10 sm:!min-h-10 sm:px-3 rounded-full text-xs font-extrabold border transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:bg-brand focus-visible:text-white focus-visible:border-brand ${
+                  effectiveCategoryFilter === group
+                    ? 'bg-brand text-white border-brand shadow-2xs'
+                    : 'bg-white text-ink border-line hover:border-brand/50'
+                }`}
+              >
+                {group} ({count})
+              </Button>
+            ))}
           </div>
-
-          <Button
-            type="button"
-            onClick={() => setDeviceModalOpen(true)}
-            variant="secondary"
-            className="text-brand rounded-2xl flex items-center space-x-2 shrink-0"
-          >
-            <Folder className="w-4 h-4" />
-            <span>Switch Model</span>
-          </Button>
-        </div>
       </div>
 
       {/* POS Catalog & Cart Main Layout */}
@@ -1120,7 +1115,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                     initial={false}
                     whileTap={{ scale: 0.98 }}
                     transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                    className={`group relative bg-white border-2 rounded-2xl p-2.5 sm:p-4 cursor-pointer transition-colors duration-200 flex flex-col gap-2 sm:gap-2.5 sm:items-stretch sm:justify-between select-none shadow-2xs min-h-[84px] sm:min-h-0 sm:h-[152px] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60 focus-visible:border-brand ${
+                    className={`group relative bg-white border-2 rounded-2xl p-2.5 sm:p-4 cursor-pointer transition-colors duration-200 flex flex-col gap-2 sm:gap-2.5 sm:items-stretch sm:justify-between select-none shadow-2xs min-h-[100px] sm:min-h-0 sm:h-[180px] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60 focus-visible:border-brand ${
                       isSelected
                         ? 'border-brand bg-brand/5 shadow-md'
                         : 'border-line hover:border-brand/50'
