@@ -1859,14 +1859,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <p className="text-xs text-muted">Add components with a device model and category to populate the matrix.</p>
             </div>
           )}
-          {filteredParts.length > 0 && (
-            <div className="workspace-panel__footer p-3.5 bg-white border-t border-line flex items-center justify-between text-xs text-muted">
-              <span className="font-bold">
-                Showing all <strong className="text-ink">{filteredParts.length}</strong> parts
-              </span>
-              <span className="font-bold text-ink">{filteredParts.length} items</span>
-            </div>
-          )}
         </div>
       )}
 
