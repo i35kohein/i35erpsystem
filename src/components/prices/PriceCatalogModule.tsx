@@ -546,12 +546,11 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                     ) : (
                       <>
                       {/* Table header — text-based, clear columns */}
-                      <div className="grid grid-cols-[14px_1fr_auto_auto_28px_20px] gap-x-2 px-0 py-2 border-b border-line">
+                      <div className="grid grid-cols-[14px_1fr_auto_auto_auto] gap-x-2.5 px-0 py-2 border-b border-line">
                         <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted">#</span>
                         <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted">Service</span>
                         <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted">Warranty</span>
                         <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted text-right">Price</span>
-                        <span />
                         <span />
                       </div>
                       {cartItems.map((item, idx) => {
@@ -560,7 +559,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
                         return (
                           <div key={item.categoryKey} className="py-2.5 border-b border-line last:border-0">
-                            <div className="grid grid-cols-[14px_1fr_auto_auto_28px_20px] items-center gap-x-2">
+                            <div className="grid grid-cols-[14px_1fr_auto_auto_auto] items-center gap-x-2.5">
                               {/* # */}
                               <span className="text-[11px] font-extrabold text-muted tabular-nums">{idx + 1}</span>
                               {/* Service — full text, wraps */}
@@ -578,7 +577,8 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                   </p>
                                 )}
                               </div>
-                              {/* Discount circle */}
+                              {/* Discount circle + remove — grouped, spaced */}
+                              <div className="flex items-center justify-end gap-3">
                               <div className="relative">
                                 <Button
                                   type="button"
@@ -605,11 +605,12 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                               <Button
                                 type="button"
                                 onClick={() => handleToggleCartItem(item.categoryKey, item.label, item.price, item.warranty)}
-                                className="text-muted hover:text-danger p-1 -m-1 rounded-lg transition-colors cursor-pointer"
+                                className="text-muted hover:text-danger p-1 rounded-lg transition-colors cursor-pointer"
                                 title="Remove item"
                               >
                                 <X className="w-4 h-4" />
                               </Button>
+                              </div>
                             </div>
                           </div>
                         );
@@ -1266,12 +1267,12 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                   <p className="text-xs font-bold text-muted truncate">{selectedDevice}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-0.5 shrink-0">
+              <div className="flex items-center gap-2 shrink-0">
                 {cart.size > 0 && (
                   <button
                     type="button"
                     onClick={handleClearCart}
-                    className="text-xs font-extrabold text-danger hover:text-danger/80 transition-colors cursor-pointer p-1.5 -m-1.5 focus:outline-none"
+                    className="text-xs font-extrabold text-danger hover:text-danger/80 transition-colors cursor-pointer p-1.5 focus:outline-none"
                   >
                     Clear All
                   </button>
@@ -1280,7 +1281,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                   type="button"
                   onClick={() => setIsCartSheetOpen(false)}
                   aria-label="Close cart"
-                  className="text-muted hover:text-ink transition-colors cursor-pointer p-1.5 -m-1.5 focus:outline-none"
+                  className="text-muted hover:text-ink transition-colors cursor-pointer p-1.5 focus:outline-none"
                 >
                   <X className="w-4 h-4" />
                 </button>
