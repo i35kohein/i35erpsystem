@@ -524,6 +524,29 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     return [...new Set(inventoryCategories.filter(Boolean))];
   }, [inventoryCategories]);
 
+  // Profit breakdown by category (current stock valuation: cost × stock vs retail × stock)
+  const profitByCategory = useMemo(() => {
+    const map = new Map<string, { skus: number; cost: number; retail: number }>();
+    parts.forEach((p) => {
+      const cat = p.category || 'Uncategorized';
+      const e = map.get(cat) || { skus: 0, cost: 0, retail: 0 };
+      e.skus += 1;
+      e.cost += Number(p.costPrice || 0) * Number(p.quantityInStock || 0);
+      e.retail += Number(p.sellingPrice || 0) * Number(p.quantityInStock || 0);
+      map.set(cat, e);
+    });
+    return [...map.entries()]
+      .map(([category, e]) => ({
+        category,
+        skus: e.skus,
+        cost: e.cost,
+        retail: e.retail,
+        profit: e.retail - e.cost,
+        margin: e.retail ? Math.round(((e.retail - e.cost) / e.retail) * 100) : 0,
+      }))
+      .sort((a, b) => b.profit - a.profit);
+  }, [parts]);
+
   // Memoized filter-option lists (badge counts are expensive — computed once per data change, not per tap/render)
   const modelFilterOptions = useMemo(
     () => [
@@ -1650,6 +1673,57 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             </div>
             <span className="font-mono text-xs font-black text-brand">+{metrics.totalPotentialProfit.toLocaleString()} {currency}</span>
           </div>
+
+          {/* Profit by Category — how much the current stock would make, per category */}
+          <div className="overflow-x-auto border-b border-line">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-surface font-mono text-[10px] uppercase tracking-wider text-muted">
+                <tr>
+                  <th className="px-3 py-2">Category</th>
+                  <th className="px-3 py-2 text-right">SKUs</th>
+                  <th className="px-3 py-2 text-right">Cost Asset</th>
+                  <th className="px-3 py-2 text-right">Retail Yield</th>
+                  <th className="px-3 py-2 text-right">Est. Profit</th>
+                  <th className="px-3 py-2 text-right">Margin</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-line">
+                {profitByCategory.map((row) => (
+                  <tr key={row.category} className="hover:bg-surface/60">
+                    <td className="px-3 py-1.5 font-bold text-ink">{row.category}</td>
+                    <td className="px-3 py-1.5 text-right font-mono text-muted">{row.skus}</td>
+                    <td className="px-3 py-1.5 text-right font-mono text-muted">{row.cost.toLocaleString()} {currency}</td>
+                    <td className="px-3 py-1.5 text-right font-mono">{row.retail.toLocaleString()} {currency}</td>
+                    <td className={`px-3 py-1.5 text-right font-mono font-black ${row.profit >= 0 ? 'text-success-deep' : 'text-danger'}`}>
+                      {row.profit >= 0 ? '+' : ''}{row.profit.toLocaleString()} {currency}
+                    </td>
+                    <td className="px-3 py-1.5 text-right">
+                      <span className={`rounded-md px-1.5 py-0.5 font-mono text-[10px] font-black ${
+                        row.margin >= 40 ? 'bg-success/15 text-success-deep' : row.margin >= 20 ? 'bg-success/15 text-success-deep' : row.margin >= 0 ? 'bg-warning/15 text-warning' : 'bg-danger/15 text-danger'
+                      }`}>{row.margin}%</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="border-t-2 border-ink bg-surface font-black">
+                  <td className="px-3 py-2 text-ink">Total</td>
+                  <td className="px-3 py-2 text-right font-mono text-ink">{parts.length}</td>
+                  <td className="px-3 py-2 text-right font-mono text-ink">{metrics.totalCostValuation.toLocaleString()} {currency}</td>
+                  <td className="px-3 py-2 text-right font-mono text-ink">{metrics.totalRetailValuation.toLocaleString()} {currency}</td>
+                  <td className={`px-3 py-2 text-right font-mono text-success-deep`}>
+                    +{metrics.totalPotentialProfit.toLocaleString()} {currency}
+                  </td>
+                  <td className="px-3 py-2 text-right">
+                    <span className="rounded-md bg-success/15 px-1.5 py-0.5 font-mono text-[10px] font-black text-success-deep">
+                      {metrics.totalRetailValuation ? Math.round((metrics.totalPotentialProfit / metrics.totalRetailValuation) * 100) : 0}%
+                    </span>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
           <div className="workspace-panel__scroll">
             {/* PHONE CARD GRID (<sm) — profit view had no card fallback, so the
                 nowrap MMK prices crushed part names on phones (audit P1-B). */}
