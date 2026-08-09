@@ -424,8 +424,6 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
 
           <div className="no-print mt-3 flex items-center justify-between gap-2">
             <p className="min-w-0 truncate text-[11px] font-bold text-muted">
-              {checkedCount}/{DIAGNOSTIC_NAMES.length} passed
-              <span className="mx-1.5 text-line">·</span>
               <span className="font-mono">Items {form.repairs.length}</span>
               <span className="mx-1 text-line">·</span>
               <span className="font-mono">Base {baseTotal.toLocaleString()}</span>
