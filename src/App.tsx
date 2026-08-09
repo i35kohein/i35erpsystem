@@ -1860,16 +1860,16 @@ export default function App() {
             )}
 
             {activeTab === 'inventory' && (
-              <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-1 rounded-xl border border-line bg-surface p-1 shrink-0'}>
+              <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2 shrink-0'}>
                 {(['stock', 'profit', 'matrix'] as const).map((v) => (
                   <button
                     key={v}
                     type="button"
                     onClick={() => setInventoryViewMode(v)}
-                    className={`h-8 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer focus:outline-none ${
+                    className={`h-9 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer focus:outline-none ${
                       inventoryViewMode === v
-                        ? 'bg-white text-brand shadow-xs border border-brand/20'
-                        : 'text-muted hover:text-ink border border-transparent'
+                        ? 'bg-brand text-white shadow-2xs'
+                        : 'bg-white text-ink border border-line hover:border-brand hover:text-brand'
                     }`}
                   >
                     {v === 'stock' ? <List className="w-3.5 h-3.5" /> : v === 'profit' ? <TrendingUp className="w-3.5 h-3.5" /> : <Grid className="w-3.5 h-3.5" />}
