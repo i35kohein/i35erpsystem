@@ -3,7 +3,6 @@ import React, { useEffect, useState, useMemo, useRef } from 'react';
 import {Boxes, 
   Plus, 
   AlertTriangle, 
-  Layers, 
   Tag, 
   ShieldCheck, 
   ShieldAlert,
@@ -238,6 +237,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const [showInlineSaveConfirm, setShowInlineSaveConfirm] = useState(false);
   const [isInlineSaving, setIsInlineSaving] = useState(false);
   const [showLowStockOnly, setShowLowStockOnly] = useState(false);
+  const [skuFilterOpen, setSkuFilterOpen] = useState(false);
 
   // Supplier & Quality Tier Edit States
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
@@ -1045,62 +1045,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           </div>
           )}
 
-          {/* Filters — desktop only (iPad: side drawer) */}
-          {!isIpad && (
-            <div className="hidden md:flex items-stretch md:items-center gap-1.5 md:shrink-0">
-              <div className="flex h-10 items-center gap-1 rounded-xl bg-surface p-1 flex-1 min-w-0 md:flex-none">
-                <div className="flex items-center gap-1 w-full">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white text-brand">
-                    <Smartphone className="h-3 w-3" />
-                  </span>
-                  <CustomDropdownMenu
-                    value={selectedModelFilter}
-                    onChange={setSelectedModelFilter}
-                    options={modelFilterOptions}
-                    className="min-w-0"
-                    buttonClassName="min-w-[110px] lg:min-w-[130px] border-0 bg-transparent hover:bg-white"
-                    size="sm"
-                    menuAlign="group-left"
-                  />
-                </div>
-              </div>
-
-              <div className="flex h-10 items-center gap-1 rounded-xl bg-surface p-1 flex-1 min-w-0 md:flex-none">
-                <div className="flex items-center gap-1 w-full">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white text-brand">
-                    <Layers className="h-3 w-3" />
-                  </span>
-                  <CustomDropdownMenu
-                    value={selectedCategory}
-                    onChange={setSelectedCategory}
-                    options={categoryFilterOptions}
-                    className="min-w-0"
-                    buttonClassName="min-w-[110px] lg:min-w-[130px] border-0 bg-transparent hover:bg-white"
-                    size="sm"
-                    menuAlign="group-left"
-                  />
-                </div>
-              </div>
-
-              <div className="flex h-10 items-center gap-1 rounded-xl bg-surface p-1 flex-1 min-w-0 md:flex-none">
-                <div className="flex items-center gap-1 w-full">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white text-brand">
-                    <Filter className="h-3 w-3" />
-                  </span>
-                  <CustomDropdownMenu
-                    value={selectedQuality}
-                    onChange={setSelectedQuality}
-                    options={tierFilterOptions}
-                    className="min-w-0"
-                    buttonClassName="min-w-[110px] lg:min-w-[120px] border-0 bg-transparent hover:bg-white"
-                    size="sm"
-                    menuAlign="group-left"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
           {viewMode === 'stock' && (
             <div className={`flex flex-wrap items-center justify-end gap-2 w-full md:w-auto md:ml-auto md:shrink-0`}>
               {/* Table / Card view toggle (iOS segmented control style) */}
@@ -1589,12 +1533,77 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       </th>
                     )}
                     <th className="w-[34%] px-2 py-2 bg-surface">
-                      <Button type="button" onClick={() => toggleSort('name')} className="inline-flex items-center gap-1 hover:text-brand transition-colors cursor-pointer uppercase font-mono text-xs" title="Sort by part name">
-                        Part Name & SKU
-                        {sortKey === 'name' && <SortArrow dir={sortDir} />}
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        <Button type="button" onClick={() => toggleSort('name')} className="inline-flex items-center gap-1 hover:text-brand transition-colors cursor-pointer uppercase font-mono text-xs" title="Sort by part name">
+                          Part Name & SKU
+                          {sortKey === 'name' && <SortArrow dir={sortDir} />}
+                        </Button>
+                        <div className="relative">
+                          <button
+                            type="button"
+                            onClick={() => setSkuFilterOpen(!skuFilterOpen)}
+                            className={`p-1 rounded-md transition-colors cursor-pointer focus:outline-none ${(selectedModelFilter !== 'ALL' || selectedCategory !== 'ALL' || showLowStockOnly) ? 'text-brand' : 'text-muted hover:text-brand'}`}
+                            title="Filter by model / category"
+                            aria-label="Filter parts"
+                          >
+                            <Filter className="w-3 h-3" />
+                            {(selectedModelFilter !== 'ALL' || selectedCategory !== 'ALL' || showLowStockOnly) && (
+                              <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-brand" />
+                            )}
+                          </button>
+                          {skuFilterOpen && (
+                            <>
+                              <div className="fixed inset-0 z-40" onClick={() => setSkuFilterOpen(false)} role="presentation" aria-hidden="true" />
+                              <div className="absolute left-0 top-full mt-1 z-50 w-56 rounded-xl border border-line bg-white p-2 space-y-2 shadow-xl">
+                                <div>
+                                  <p className="text-[10px] font-extrabold uppercase tracking-wide text-muted mb-1">Model</p>
+                                  <select
+                                    value={selectedModelFilter}
+                                    onChange={(e) => setSelectedModelFilter(e.target.value)}
+                                    className="w-full rounded-lg border border-line bg-white px-2 py-1.5 text-xs font-semibold text-ink outline-none focus:border-brand"
+                                  >
+                                    {modelFilterOptions.map((opt) => (
+                                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    ))}
+                                  </select>
+                                </div>
+                                <div>
+                                  <p className="text-[10px] font-extrabold uppercase tracking-wide text-muted mb-1">Category</p>
+                                  <select
+                                    value={selectedCategory}
+                                    onChange={(e) => setSelectedCategory(e.target.value)}
+                                    className="w-full rounded-lg border border-line bg-white px-2 py-1.5 text-xs font-semibold text-ink outline-none focus:border-brand"
+                                  >
+                                    {categoryFilterOptions.map((opt) => (
+                                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    ))}
+                                  </select>
+                                </div>
+                                <label className="flex items-center gap-1.5 text-xs font-bold text-ink cursor-pointer pt-1.5 mt-1 border-t border-line">
+                                  <input
+                                    type="checkbox"
+                                    checked={showLowStockOnly}
+                                    onChange={(e) => setShowLowStockOnly(e.target.checked)}
+                                    className="accent-brand w-3.5 h-3.5 cursor-pointer"
+                                  />
+                                  Low stock only
+                                </label>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
                     </th>
-                    <th className="w-[108px] px-2 py-2 bg-surface hidden md:table-cell">Quality</th>
+                    <th className="w-[128px] px-2 py-2 bg-surface hidden md:table-cell">
+                      <CustomDropdownMenu
+                        value={selectedQuality}
+                        onChange={setSelectedQuality}
+                        options={tierFilterOptions}
+                        size="sm"
+                        buttonClassName="uppercase font-mono text-xs text-muted hover:text-brand transition-colors gap-1"
+                        menuAlign="group-left"
+                      />
+                    </th>
                     <th className="w-[96px] px-1.5 py-2 bg-surface">
                       <Button type="button" onClick={() => toggleSort('stock')} className="inline-flex items-center gap-1 hover:text-brand transition-colors cursor-pointer uppercase font-mono text-xs" title="Sort by stock quantity">
                         Stock
