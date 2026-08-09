@@ -871,6 +871,42 @@ export default function App() {
         {tab === 'inventory' && (
           <>
             <div>
+              <label className={labelCls}>Model</label>
+              <DrawerSelect
+                label="Model"
+                value={modelFilter}
+                onChange={(v) => setModelFilter(v as any)}
+                options={[
+                  { value: 'ALL', label: 'All Models' },
+                  ...inventoryDeviceModels.map((m) => ({ value: m, label: m })),
+                ]}
+              />
+            </div>
+            <div>
+              <label className={labelCls}>Category</label>
+              <DrawerSelect
+                label="Category"
+                value={categoryFilter}
+                onChange={(v) => setCategoryFilter(v as any)}
+                options={[
+                  { value: 'ALL', label: 'All Categories' },
+                  ...inventoryCategoryOptions.map((c) => ({ value: c, label: c })),
+                ]}
+              />
+            </div>
+            <div>
+              <label className={labelCls}>Quality</label>
+              <DrawerSelect
+                label="Quality"
+                value={stockFilter}
+                onChange={(v) => setStockFilter(v as any)}
+                options={[
+                  { value: 'ALL', label: 'All Tiers' },
+                  ...inventoryQualityOptions.map((t) => ({ value: t, label: t })),
+                ]}
+              />
+            </div>
+            <div>
               <label className={labelCls}>View</label>
               <div className="grid grid-cols-3 gap-1.5">
                 {(['stock', 'profit', 'matrix'] as const).map((v) => (
@@ -1779,7 +1815,7 @@ export default function App() {
             )}
 
             {/* Generic filters drawer trigger — inventory uses its own side menu on phones */}
-            {FILTER_TABS.includes(activeTab) && !(activeTab === 'inventory' && !isIpad) && (
+            {FILTER_TABS.includes(activeTab) && (
               <Button
                 ref={filtersTriggerRef}
                 type="button"
