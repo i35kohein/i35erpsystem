@@ -1006,16 +1006,16 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
       {/* Financial summary belongs to the Profit view, leaving Stock and Matrix full-height. */}
       {viewMode === 'profit' && (
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
         {/* Total Stock Items Card */}
-        <div className="relative bg-white p-4 rounded-2xl border border-line shadow-2xs space-y-2">
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-2xl bg-brand/10 text-brand flex items-center justify-center">
-            <PackageCheck className="w-6 h-6" />
+        <div className="relative bg-white p-3 sm:p-4 rounded-2xl border border-line shadow-2xs space-y-1.5 sm:space-y-2">
+          <div className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-brand/10 text-brand flex items-center justify-center">
+            <PackageCheck className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div className="pr-14">
             <span className="text-xs font-bold uppercase tracking-wider text-muted">Total Active SKUs</span>
-            <div className="flex items-baseline justify-between mt-2">
-              <span className="text-2xl font-black text-ink font-mono">{metrics.totalCount}</span>
+            <div className="flex items-baseline justify-between mt-1 sm:mt-2">
+              <span className="text-xl sm:text-2xl font-black text-ink font-mono">{metrics.totalCount}</span>
               <span className="text-xs font-bold text-brand-deep bg-brand/10 px-2 py-0.5 rounded-full">
                 {categories.length} Categories
               </span>
@@ -1024,13 +1024,13 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         </div>
 
         {/* Total Inventory Stock Valuation */}
-        <div className="relative bg-white p-4 rounded-2xl border border-line shadow-2xs space-y-2">
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-2xl bg-success/10 text-success flex items-center justify-center">
-            <DollarSign className="w-6 h-6" />
+        <div className="relative bg-white p-3 sm:p-4 rounded-2xl border border-line shadow-2xs space-y-1.5 sm:space-y-2">
+          <div className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-success/10 text-success flex items-center justify-center">
+            <DollarSign className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div className="pr-14">
             <span className="text-xs font-bold uppercase tracking-wider text-muted">Inventory Valuation</span>
-            <div className="space-y-0.5 mt-2">
+            <div className="space-y-0.5 mt-1 sm:mt-2">
               <div className="flex justify-between text-xs">
                 <span className="text-muted font-medium">Cost Asset:</span>
                 <span className="font-mono font-bold text-ink">
@@ -1054,7 +1054,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         <Button
           type="button"
           onClick={() => setShowLowStockOnly(!showLowStockOnly)}
-          className={`relative p-4 rounded-2xl border text-left transition-all cursor-pointer shadow-2xs ${
+          className={`relative p-3 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer shadow-2xs ${
             showLowStockOnly
               ? 'bg-warning text-white border-amber-600 ring-2 ring-amber-400'
               : metrics.lowStockCount > 0
@@ -1062,15 +1062,15 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               : 'bg-white text-ink border-line'
           }`}
         >
-          <div className={`absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-2xl flex items-center justify-center ${
+          <div className={`absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center ${
             showLowStockOnly ? 'bg-white text-warning' : 'bg-warning/15 text-warning'
           }`}>
-            <AlertTriangle className="w-6 h-6" />
+            <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div className="pr-14">
             <span className="text-xs font-bold uppercase tracking-wider">Low Stock Reorders</span>
-            <div className="flex items-baseline justify-between mt-2">
-              <span className="text-2xl font-black font-mono">
+            <div className="flex items-baseline justify-between mt-1 sm:mt-2">
+              <span className="text-xl sm:text-2xl font-black font-mono">
                 {metrics.lowStockCount} <span className="text-xs font-bold">SKUs</span>
               </span>
               <span className={`text-xs font-black px-2 py-0.5 rounded-full ${
@@ -1180,7 +1180,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           ) : stockView === 'cards' ? (
             /* PHONE CARD GRID — read-only; in edit mode cards switch to instant −/+ steppers */
             <div className="workspace-panel__scroll rounded-xl">
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 p-3 content-start">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-3 p-2.5 sm:p-3 content-start">
               {paginatedParts.map((part) => {
                 const isLow = part.quantityInStock <= part.reorderPoint;
                 const isOut = part.quantityInStock === 0;
@@ -1208,14 +1208,14 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   );
 
                 return (
-                  <div key={part.id} className="space-y-3 rounded-2xl border border-line bg-white p-4 text-xs shadow-xs">
+                  <div key={part.id} className="space-y-2 sm:space-y-3 rounded-xl sm:rounded-2xl border border-line bg-white p-3 sm:p-4 text-xs shadow-xs">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex min-w-0 items-start space-x-2">
                         <div className="mt-0.5 shrink-0 rounded-md bg-brand/10 p-1.5 text-brand-deep">
                           <Cpu className="h-3.5 w-3.5" />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-extrabold leading-snug text-ink">{part.name}</p>
+                          <p className="truncate text-sm font-extrabold leading-snug text-ink">{part.name}</p>
                           <p className="mt-0.5 font-mono text-xs font-medium text-muted">SKU {part.sku}</p>
                         </div>
                       </div>
@@ -1224,7 +1224,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         onClick={() => setSelectedPartForDetails(part)}
                         aria-label={`View ${part.name} details`}
                         title="View part details"
-                        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors hover:border-brand hover:bg-brand-soft hover:text-brand"
+                        className="inline-flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors hover:border-brand hover:bg-brand-soft hover:text-brand"
                       >
                         <FileText className="h-3.5 w-3.5" />
                       </Button>
@@ -1241,7 +1241,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     </div>
 
                     {inlineEditMode ? (
-                      <div className="flex items-center justify-between gap-2 rounded-xl border border-warning/30 bg-warning/10 p-2.5">
+                      <div className="flex items-center justify-between gap-2 rounded-xl border border-warning/30 bg-warning/10 p-2 sm:p-2.5">
                         <span className="text-xs font-extrabold uppercase tracking-wide text-warning">Adjust Stock</span>
                         <div className="flex items-center gap-1.5">
                           <Button
@@ -1249,7 +1249,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                             onClick={() => { onUpdatePartStock(part.id, Math.max(0, part.quantityInStock - 1)); toast.info(`${part.name}: ${Math.max(0, part.quantityInStock - 1)} units`, 'Stock −1'); }}
                             aria-label={`Decrease stock for ${part.name}`}
                             title="Decrease stock"
-                            className="flex h-10 w-10 items-center justify-center rounded-lg border border-warning/30 bg-white font-black text-danger active:scale-95"
+                            className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg border border-warning/30 bg-white font-black text-danger active:scale-95"
                           >−</Button>
                           <span className="min-w-10 text-center font-mono text-base font-black text-ink">{part.quantityInStock}</span>
                           <Button
@@ -1257,12 +1257,12 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                             onClick={() => { onUpdatePartStock(part.id, part.quantityInStock + 1); toast.success(`${part.name}: ${part.quantityInStock + 1} units`, 'Stock +1'); }}
                             aria-label={`Increase stock for ${part.name}`}
                             title="Increase stock"
-                            className="flex h-10 w-10 items-center justify-center rounded-lg border border-warning/30 bg-white font-black text-brand active:scale-95"
+                            className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg border border-warning/30 bg-white font-black text-brand active:scale-95"
                           >+</Button>
                         </div>
                       </div>
                     ) : (
-                    <div className="space-y-1.5 rounded-xl border border-line bg-surface p-2.5">
+                    <div className="space-y-1.5 sm:rounded-xl sm:border sm:border-line sm:bg-surface sm:p-2.5">
                       <div className="flex items-center justify-between">
                         <span className={`font-mono text-base font-black tracking-wide ${isOut ? 'text-danger' : isLow ? 'text-warning' : 'text-ink'}`}>
                           {part.quantityInStock} <span className="text-xs font-normal text-muted">units</span>
@@ -1286,7 +1286,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
                     {/* Selling price edit — mobile card edit mode (step 1,000 MMK, instant save) */}
                     {inlineEditMode && (
-                      <div className="flex items-center justify-between gap-2 rounded-xl border border-success/30 bg-success/10 p-2.5">
+                      <div className="flex items-center justify-between gap-2 rounded-xl border border-success/30 bg-success/10 p-2 sm:p-2.5">
                         <span className="text-xs font-extrabold uppercase tracking-wide text-success-deep">Selling Price</span>
                         <div className="flex items-center gap-1.5">
                           <Button
@@ -1294,7 +1294,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                             onClick={() => onUpdatePart?.({ ...part, sellingPrice: Math.max(0, part.sellingPrice - 1000) })}
                             aria-label={`Decrease price for ${part.name}`}
                             title={`Decrease price by 1,000 `}
-                            className="flex h-10 w-10 items-center justify-center rounded-lg border border-success/30 bg-white font-black text-danger active:scale-95"
+                            className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg border border-success/30 bg-white font-black text-danger active:scale-95"
                           >−</Button>
                           <span className="min-w-[70px] text-center font-mono text-sm font-black text-ink">{part.sellingPrice.toLocaleString()}</span>
                           <Button
@@ -1302,15 +1302,15 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                             onClick={() => onUpdatePart?.({ ...part, sellingPrice: part.sellingPrice + 1000 })}
                             aria-label={`Increase price for ${part.name}`}
                             title={`Increase price by 1,000 `}
-                            className="flex h-10 w-10 items-center justify-center rounded-lg border border-success/30 bg-white font-black text-brand active:scale-95"
+                            className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg border border-success/30 bg-white font-black text-brand active:scale-95"
                           >+</Button>
                         </div>
                       </div>
                     )}
 
-                    <div className="flex items-end justify-between gap-2 border-t border-line pt-1">
+                    <div className="flex items-end justify-between gap-2 sm:border-t sm:border-line pt-1">
                       <div>
-                        <span className="block text-xs font-bold uppercase text-muted">Selling Price</span>
+                        <span className="block text-[10px] sm:text-xs font-bold uppercase text-muted">Selling Price</span>
                         <span className="font-mono text-sm font-black text-success-deep">{part.sellingPrice.toLocaleString()} {currency}</span>
                       </div>
                       {part.supplierName && (
@@ -1684,7 +1684,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           <div className="workspace-panel__scroll">
             {/* PHONE CARD GRID (<sm) — profit view had no card fallback, so the
                 nowrap MMK prices crushed part names on phones (audit P1-B). */}
-            <div className="grid grid-cols-1 gap-3 p-3 content-start sm:hidden">
+            <div className="grid grid-cols-1 gap-2 p-2.5 content-start sm:hidden">
               {paginatedParts.map((part) => {
                 const profit = part.sellingPrice - part.costPrice;
                 const margin = part.sellingPrice ? Math.round((profit / part.sellingPrice) * 100) : 0;
@@ -1694,10 +1694,10 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   margin >= 0 ? 'bg-warning/15 text-warning' :
                   'bg-danger/15 text-danger';
                 return (
-                  <div key={part.id} className="space-y-2.5 rounded-2xl border border-line bg-white p-4 text-xs shadow-xs">
+                  <div key={part.id} className="space-y-2 rounded-xl sm:rounded-2xl border border-line bg-white p-3 sm:p-4 text-xs shadow-xs">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <p className="text-sm font-extrabold leading-snug text-ink break-words">{part.name}</p>
+                        <p className="truncate text-sm font-extrabold leading-snug text-ink">{part.name}</p>
                         <p className="mt-0.5 font-mono text-xs font-medium text-muted">SKU {part.sku}</p>
                       </div>
                       <Button
@@ -1705,28 +1705,28 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         onClick={() => setSelectedPartForDetails(part)}
                         aria-label={`View ${part.name} details`}
                         title="View part details"
-                        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors hover:border-brand hover:bg-brand-soft hover:text-brand"
+                        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors hover:border-brand hover:bg-brand-soft hover:text-brand"
                       >
                         <Eye className="h-3.5 w-3.5" />
                       </Button>
                     </div>
-                    <div className="grid grid-cols-3 gap-2 rounded-xl border border-line bg-surface p-3">
+                    <div className="grid grid-cols-3 gap-1.5 sm:gap-2 rounded-lg sm:rounded-xl border border-line bg-surface p-2 sm:p-3">
                       <div>
-                        <p className="text-xs font-extrabold uppercase tracking-wider text-muted">Cost</p>
+                        <p className="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-muted">Cost</p>
                         <p className="mt-0.5 font-mono text-xs font-bold text-faint break-words">{part.costPrice.toLocaleString()}</p>
                       </div>
                       <div>
-                        <p className="text-xs font-extrabold uppercase tracking-wider text-muted">Selling</p>
+                        <p className="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-muted">Selling</p>
                         <p className="mt-0.5 font-mono text-xs font-bold text-success-deep break-words">{part.sellingPrice.toLocaleString()}</p>
                       </div>
                       <div>
-                        <p className="text-xs font-extrabold uppercase tracking-wider text-muted">Profit</p>
+                        <p className="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-muted">Profit</p>
                         <p className={`mt-0.5 font-mono text-xs font-black break-words ${profit >= 0 ? 'text-brand' : 'text-danger'}`}>{profit >= 0 ? '+' : ''}{profit.toLocaleString()}</p>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-muted">Margin / unit</span>
-                      <span className={`rounded-md px-2 py-1 font-mono text-xs font-black ${heat}`}>{margin}%</span>
+                      <span className={`rounded-md px-2 py-0.5 sm:py-1 font-mono text-xs font-black ${heat}`}>{margin}%</span>
                     </div>
                   </div>
                 );
@@ -1842,7 +1842,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                                   setSelectedCategory(category);
                                   setViewMode('stock');
                                 }}
-                                className={`min-w-14 min-h-9 md:min-h-8 rounded-lg border px-2 py-1 font-mono text-xs font-black ${
+                                className={`min-w-12 min-h-8 sm:min-w-14 md:min-h-8 rounded-lg border px-2 py-1 font-mono text-xs font-black ${
                                   quantity === 0 ? 'border-danger/30 bg-danger/10 text-danger' : isLow ? 'border-warning/30 bg-warning/10 text-warning' : 'border-success/30 bg-success/10 text-success-deep'
                                 }`}
                                 title={`${matchingParts.length} SKU${matchingParts.length === 1 ? '' : 's'} · ${quantity} units · Cost ${costValue.toLocaleString()} {currency} · Retail ${retailValue.toLocaleString()} {currency}${sharedLabel}`}
