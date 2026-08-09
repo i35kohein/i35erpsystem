@@ -619,7 +619,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                         return (
                           <div
                             key={item.categoryKey}
-                            className="h-[88px] p-2.5 bg-white border border-line rounded-xl flex flex-col justify-between shadow-2xs transition-all hover:border-brand/40"
+                            className="min-h-[88px] p-2.5 bg-white border border-line rounded-xl flex flex-col justify-between shadow-2xs transition-all hover:border-brand/40"
                           >
                             <div className="flex items-start justify-between gap-1.5">
                               <div className="min-w-0 flex-1">
@@ -674,7 +674,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                       return (
                         <div
                           key={`placeholder-slot-${i}`}
-                          className="h-14 p-2 border-2 border-dashed border-line/80 bg-surface/30 rounded-xl flex items-center gap-2.5 select-none"
+                          className="h-[88px] p-2.5 border-2 border-dashed border-line/80 bg-surface/30 rounded-xl flex items-center gap-2.5 select-none"
                         >
                           <div className="w-6 h-6 rounded-lg bg-white border border-line flex items-center justify-center font-extrabold text-xs text-muted shrink-0">
                             {i + 1}
@@ -691,7 +691,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
               // If MORE than 3 items: render scrollable list of all selected items
               return (
-                <div className="max-h-[280px] overflow-y-auto space-y-2.5 pr-1 no-scrollbar">
+                <div className="overflow-y-auto space-y-2.5 pr-1 no-scrollbar">
                   {cartItems.map((item, idx) => {
                     const discAmt = item.price * (item.discountPercent / 100);
                     const finalItemPrice = item.price - discAmt;
@@ -699,7 +699,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                     return (
                       <div
                         key={item.categoryKey}
-                        className="h-[88px] p-2.5 bg-white border border-line rounded-xl flex flex-col justify-between shadow-2xs transition-all hover:border-brand/40"
+                        className="min-h-[88px] p-2.5 bg-white border border-line rounded-xl flex flex-col justify-between shadow-2xs transition-all hover:border-brand/40"
                       >
                         <div className="flex items-start justify-between gap-1.5">
                           <div className="min-w-0 flex-1">
