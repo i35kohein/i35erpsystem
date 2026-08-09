@@ -991,9 +991,17 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
+      {/* POS Catalog & Cart Main Layout */}
+      {/* Mobile: plain flex column so each child keeps its natural height and the
+          container scrolls (CSS-grid auto rows + stretch were collapsing the catalog
+          section to ~289px so cards overlapped the cart panel). Desktop (lg): grid
+          8/4 split with internal scrolling, unchanged. */}
+      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pb-16 lg:pb-0 md:flex-row [scrollbar-gutter:stable]">
+        {/* Main POS Catalog & Grid Section — left column */}
+        <div className="min-w-0 flex-1 space-y-4 overflow-visible p-2 sm:p-2.5">
       {/* Active Device (left, above) + repair category chips (below, full width) (Ko Hein) */}
       <div className="flex flex-col gap-2.5">
-        <div className="self-start shrink-0 bg-white border border-line rounded-2xl px-3.5 py-3 shadow-2xs flex items-center gap-3 min-w-0">
+        <div className="w-full bg-white border border-line rounded-2xl px-4 py-3 shadow-2xs flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-brand text-white flex items-center justify-center shrink-0">
             <Smartphone className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
@@ -1006,7 +1014,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                 {availableRepairItems.filter((i) => i.price && i.price > 0).length} Services
               </span>
             </div>
-            <h2 className="text-lg sm:text-xl font-black text-ink tracking-tight truncate max-w-[200px] sm:max-w-[280px]">
+            <h2 className="text-xl sm:text-2xl font-black text-ink tracking-tight truncate">
               {selectedDevice}
             </h2>
           </div>
@@ -1051,14 +1059,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
           </div>
       </div>
 
-      {/* POS Catalog & Cart Main Layout */}
-      {/* Mobile: plain flex column so each child keeps its natural height and the
-          container scrolls (CSS-grid auto rows + stretch were collapsing the catalog
-          section to ~289px so cards overlapped the cart panel). Desktop (lg): grid
-          8/4 split with internal scrolling, unchanged. */}
-      <div className="flex min-h-0 flex-1 gap-3 overflow-y-auto pb-16 lg:pb-0 [scrollbar-gutter:stable]">
-        {/* Main POS Catalog & Grid Section — left column */}
-        <div className="min-w-0 flex-1 space-y-4 overflow-visible p-2 sm:p-2.5">
+
 
           {/* Service Grid - Fixed Height Non-shifting Cards */}
           <div className={`grid gap-3.5 pb-8 pt-0.5 px-0.5 ${isIpad ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5'}`}>
@@ -1184,7 +1185,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
         </div>
 
         {/* Right Side Cart — Selected Cart, always visible 2nd column (Ko Hein) */}
-        <div className="shrink-0 w-[168px] sm:w-[280px] md:w-[320px] lg:w-[380px] xl:w-[420px] flex flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-2xs min-h-0">
+        <div className="hidden md:flex shrink-0 w-[280px] md:w-[320px] lg:w-[380px] xl:w-[420px] flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-2xs min-h-0">
           {/* Cart Header */}
           <div className="p-3.5 sm:p-4 border-b border-line flex items-center justify-between bg-surface/80 h-[56px] shrink-0">
             <div className="flex items-center space-x-2.5 min-w-0">
