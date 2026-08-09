@@ -149,6 +149,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   const [inventoryPartQty, setInventoryPartQty] = useState<number>(1);
   const [isAddPartOpen, setIsAddPartOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isMobileCheckoutFullOpen, setIsMobileCheckoutFullOpen] = useState(false);
   // Left (ticket queue) panel collapse toggle
   const [isQueueCollapsed, setIsQueueCollapsed] = useState(false);
 
@@ -448,158 +449,8 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     onSaveWorkOrder(updatedWo);
   };
 
-  return (
-    <div className={`space-y-3 ${isIpad ? 'flex min-h-0 flex-1 flex-col' : ''}`}>
-      <div className={`flex flex-col md:flex-row gap-3 text-xs pb-16 md:pb-0 ${isIpad ? 'md:flex-1 md:min-h-0' : ''}`}>
-        {/* Left Column: Select Work Order to Checkout (collapsible, hugs sidebar) */}
-        <div className={`bg-white border border-line rounded-2xl p-3 space-y-3 shadow-xs shrink-0 ${
-          isQueueCollapsed ? 'md:w-36' : 'md:w-[380px]'
-        } ${isIpad ? 'md:flex md:flex-col md:min-h-0' : 'md:self-start'}`}>
-          <div className="flex justify-between items-center border-b border-line pb-2">
-            {!isQueueCollapsed ? (
-              <>
-                <h2 className="font-bold text-ink text-xs">Ready to Checkout ({filteredWorkOrders.length})</h2>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="text-xs font-mono font-bold bg-success/10 text-success-deep px-2 py-0.5 rounded-full border border-success/20">
-                    Checkout
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setIsQueueCollapsed(true)}
-                    className="!h-6 !min-h-6 w-6 px-0 rounded flex items-center justify-center text-muted hover:bg-surface hover:text-ink transition-colors"
-                    title="Collapse ticket list"
-                    aria-label="Collapse ticket list"
-                  >
-                    <ChevronsLeft className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setIsQueueCollapsed(false)}
-                className="w-full h-8 rounded-lg flex items-center justify-center text-muted hover:bg-surface hover:text-brand transition-colors"
-                title="Expand ticket list"
-                aria-label="Expand ticket list"
-              >
-                <ChevronsRight className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-
-          {!isQueueCollapsed && (
-          <div className={`space-y-2 overflow-y-auto ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:flex-1 md:max-h-none' : 'min-h-[360px] max-h-[calc(100dvh-280px)]'}`}>
-            {filteredWorkOrders.length === 0 ? (
-              <div className="flex min-h-0 flex-1 flex-col items-center justify-center p-8 text-center text-muted space-y-2 bg-surface rounded-xl border border-dashed border-line-strong my-4">
-                <CheckCircle2 className="w-8 h-8 mx-auto text-success opacity-70" />
-                <p className="font-extrabold text-ink text-xs">No Devices with Finished Diagnostics</p>
-                <p className="text-xs text-muted">Appears here automatically after diagnostics.</p>
-              </div>
-            ) : (
-              filteredWorkOrders.map((wo) => {
-                const isSelected = wo.id === selectedWoId;
-                const handleSelectWo = () => {
-                  setSelectedWoId(wo.id);
-                  resetTransactionState();
-                };
-
-                return (
-                  <div
-                    key={wo.id}
-                    role="radio"
-                    tabIndex={0}
-                    aria-checked={isSelected}
-                    aria-label={`Select work order ${wo.orderNumber}`}
-                    onClick={handleSelectWo}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        handleSelectWo();
-                      }
-                    }}
-                    className={`group cursor-pointer rounded-xl border bg-white p-3 shadow-2xs transition-all hover:shadow-md hover:border-brand/50 select-none ${
-                      isSelected ? 'border-brand ring-2 ring-brand/20 bg-brand-soft/40' : 'border-line'
-                    }`}
-                  >
-                    {/* Top row: order # + priority */}
-                    <div className="flex items-center justify-between gap-1.5">
-                      <span className="font-mono text-[11px] font-extrabold text-brand truncate">{wo.orderNumber}</span>
-                      <div className="flex items-center gap-1 shrink-0">
-                        <PriorityBadge priority={wo.priority} size="xs" />
-                        <span className={`text-[9px] font-black px-1.5 py-px rounded uppercase ${
-                          wo.isPaid ? 'bg-success text-white' : 'bg-warning text-white'
-                        }`}>
-                          {wo.isPaid ? 'PAID' : 'DUE'}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Device + customer */}
-                    <p className="mt-1.5 text-xs font-extrabold text-ink truncate">{wo.deviceModel}</p>
-                    <p className="text-[11px] text-muted truncate">{wo.customerName} · {wo.customerPhone}</p>
-
-                    {/* Repair summary */}
-                    <p className="mt-1 line-clamp-2 text-[11px] font-medium text-muted leading-snug">
-                      {repairSummaryOf(wo)}
-                    </p>
-
-                    {/* Footer: tech + amount */}
-                    <div className="mt-2 flex items-center justify-between border-t border-line/60 pt-1.5">
-                      <span className="flex items-center space-x-1 text-[11px] font-bold text-brand min-w-0 truncate">
-                        <UserCheck className="w-3 h-3 shrink-0" />
-                        <span className="truncate max-w-[80px]">{wo.assignedTechName || 'Unassigned'}</span>
-                      </span>
-                      <span className="font-mono text-[11px] font-black text-success-deep">{wo.totalAmount.toLocaleString()} {currency}</span>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-            {filteredWorkOrders.length > 0 && (
-              <p className="text-center text-xs font-mono font-bold text-muted pt-2 pb-1 tracking-widest select-none">
-                — End of queue —
-              </p>
-            )}
-          </div>
-          )}
-
-          {isQueueCollapsed && filteredWorkOrders.length > 0 && (
-            <div className={`space-y-1.5 ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:flex-1 md:max-h-none' : 'min-h-[360px] max-h-[calc(100dvh-280px)] overflow-y-auto'}`}>
-              {filteredWorkOrders.map((wo) => {
-                const isSel = wo.id === selectedWoId;
-                return (
-                  <button
-                    key={wo.id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedWoId(wo.id);
-                      resetTransactionState();
-                    }}
-                    className={`w-full px-2 py-1.5 rounded-lg flex flex-col items-start transition-colors ${
-                      isSel ? 'bg-brand text-white shadow-2xs' : 'bg-white text-ink border border-line hover:bg-brand-soft hover:border-brand/30'
-                    }`}
-                    title={`${wo.orderNumber} · ${wo.deviceModel} · ${wo.customerName}`}
-                    aria-label={`Select ${wo.orderNumber} ${wo.deviceModel}`}
-                  >
-                    <span className={`font-mono text-[10px] font-black leading-tight ${isSel ? 'text-white' : 'text-brand'}`}>
-                      {wo.orderNumber}
-                    </span>
-                    <span className={`text-[9px] font-bold leading-tight truncate w-full ${isSel ? 'text-white/90' : 'text-ink'}`}>
-                      {wo.deviceModel}
-                    </span>
-                    <span className={`text-[8px] font-black leading-tight ${isSel ? 'text-white/80' : 'text-muted'}`}>
-                      {wo.isPaid ? '✓ PAID' : '$ DUE'} · {wo.totalAmount.toLocaleString()}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Right Column: Dynamic Invoice & Terminal Checkout (8 cols) */}
-        <div className={`flex-1 min-w-0 bg-white border border-line rounded-2xl p-5 pb-24 md:pb-5 space-y-5 shadow-xs ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:overflow-y-auto' : ''}`}>
-          {selectedWo ? (
+  const renderCheckoutPanel = () =>
+    selectedWo ? (
             <div className="space-y-5 lg:grid lg:grid-cols-2 lg:gap-5 lg:space-y-0 lg:items-start">
               {/* Desktop: left column — ticket header + items + summary */}
               <div className="space-y-5 lg:min-w-0">
@@ -848,38 +699,6 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   </table>
                 </div>
 
-
-              {/* Print Preview — what Pay & Print will produce (Ko Hein) */}
-              <div className="border border-line-strong rounded-lg overflow-hidden bg-white">
-                <div className="flex items-center justify-between px-2.5 py-2 bg-surface border-b border-line">
-                  <span className="text-xs font-extrabold uppercase tracking-wide text-muted">Print Preview</span>
-                  <FileText className="w-3.5 h-3.5 text-muted" />
-                </div>
-                <div className="m-2.5 rounded-lg border border-dashed border-line-strong bg-white px-3 py-2.5 font-mono text-xs leading-relaxed text-ink">
-                  <div className="text-center font-black uppercase tracking-widest text-xs">i35 Apple Service</div>
-                  <div className="text-center text-muted">No 1031, Pyi Htaung Su Main Rd, North Dagon</div>
-                  <div className="my-1.5 border-t border-dashed border-line-strong" />
-                  <div className="flex justify-between"><span className="text-muted">Invoice</span><span className="font-bold">{selectedWo.orderNumber}</span></div>
-                  <div className="flex justify-between"><span className="text-muted">Device</span><span className="max-w-[55%] truncate font-bold">{selectedWo.deviceModel}</span></div>
-                  <div className="my-1.5 border-t border-dashed border-line-strong" />
-                  {(selectedWo.lineItems || []).slice(0, 3).map((li) => (
-                    <div key={li.id} className="flex justify-between gap-2">
-                      <span className="truncate">{li.description}</span>
-                      <span className="shrink-0">{(Number(li.unitPrice || 0) * (li.quantity || 1)).toLocaleString()}</span>
-                    </div>
-                  ))}
-                  {(selectedWo.lineItems || []).length > 3 && (
-                    <div className="text-muted">… +{(selectedWo.lineItems || []).length - 3} more</div>
-                  )}
-                  <div className="my-1.5 border-t border-dashed border-line-strong" />
-                  <div className="flex justify-between"><span className="text-muted">Discount</span><span>-{(selectedWo.discountAmount || 0).toLocaleString()}</span></div>
-                  <div className="flex justify-between font-black text-xs"><span>TOTAL</span><span>{selectedWo.totalAmount.toLocaleString()} {currency}</span></div>
-                  <div className="text-center text-muted mt-1">Thank you for your business!</div>
-                </div>
-              </div>
-              </div>
-
-              <div className="space-y-5 lg:min-w-0">
 
               {/* Payment Gateway Options */}
               <div className="space-y-3">
@@ -1209,6 +1028,40 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   </div>
                 )}
               </div>
+              </div>
+
+              <div className="space-y-5 lg:min-w-0">
+              {/* Print Preview — what Pay & Print will produce (Ko Hein) */}
+              <div className="border border-line-strong rounded-lg overflow-hidden bg-white">
+                <div className="flex items-center justify-between px-2.5 py-2 bg-surface border-b border-line">
+                  <span className="text-xs font-extrabold uppercase tracking-wide text-muted">Print Preview</span>
+                  <FileText className="w-3.5 h-3.5 text-muted" />
+                </div>
+                <div className="m-2.5 rounded-lg border border-dashed border-line-strong bg-white px-3 py-2.5 font-mono text-xs leading-relaxed text-ink">
+                  <div className="text-center font-black uppercase tracking-widest text-xs">i35 Apple Service</div>
+                  <div className="text-center text-muted">No 1031, Pyi Htaung Su Main Rd, North Dagon</div>
+                  <div className="my-1.5 border-t border-dashed border-line-strong" />
+                  <div className="flex justify-between"><span className="text-muted">Invoice</span><span className="font-bold">{selectedWo.orderNumber}</span></div>
+                  <div className="flex justify-between"><span className="text-muted">Device</span><span className="max-w-[55%] truncate font-bold">{selectedWo.deviceModel}</span></div>
+                  <div className="my-1.5 border-t border-dashed border-line-strong" />
+                  {(selectedWo.lineItems || []).slice(0, 3).map((li) => (
+                    <div key={li.id} className="flex justify-between gap-2">
+                      <span className="truncate">{li.description}</span>
+                      <span className="shrink-0">{(Number(li.unitPrice || 0) * (li.quantity || 1)).toLocaleString()}</span>
+                    </div>
+                  ))}
+                  {(selectedWo.lineItems || []).length > 3 && (
+                    <div className="text-muted">… +{(selectedWo.lineItems || []).length - 3} more</div>
+                  )}
+                  <div className="my-1.5 border-t border-dashed border-line-strong" />
+                  <div className="flex justify-between"><span className="text-muted">Discount</span><span>-{(selectedWo.discountAmount || 0).toLocaleString()}</span></div>
+                  <div className="flex justify-between font-black text-xs"><span>TOTAL</span><span>{selectedWo.totalAmount.toLocaleString()} {currency}</span></div>
+                  <div className="text-center text-muted mt-1">Thank you for your business!</div>
+                </div>
+              </div>
+              </div>
+
+              <div className="space-y-5 lg:min-w-0">
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
@@ -1231,7 +1084,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   type="button"
                   onClick={() => setIsConfirmOpen(true)}
                   disabled={isProcessingPayment || isPaymentShort || selectedWo.isPaid}
-                  className={`hidden md:flex w-full sm:w-1/2 ${
+                  className={`${isMobileCheckoutFullOpen ? 'flex' : 'hidden md:flex'} w-full sm:w-1/2 ${
                     isProcessingPayment
                       ? 'bg-muted text-white opacity-80'
                       : 'bg-success hover:bg-success/90 text-white'
@@ -1258,9 +1111,181 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               <p className="font-extrabold text-sm text-ink">No Finished Device Selected</p>
               <p className="text-xs max-w-xs text-muted">Finished repairs only — select one to process payment.</p>
             </div>
+    );
+
+  return (
+    <div className={`space-y-3 ${isIpad ? 'flex min-h-0 flex-1 flex-col' : ''}`}>
+      <div className={`flex flex-col md:flex-row gap-3 text-xs pb-16 md:pb-0 ${isIpad ? 'md:flex-1 md:min-h-0' : ''}`}>
+        {/* Left Column: Select Work Order to Checkout (collapsible, hugs sidebar) */}
+        <div className={`bg-white border border-line rounded-2xl p-3 space-y-3 shadow-xs shrink-0 ${
+          isQueueCollapsed ? 'md:w-36' : 'md:w-[380px]'
+        } ${isIpad ? 'md:flex md:flex-col md:min-h-0' : 'md:self-start'}`}>
+          <div className="flex justify-between items-center border-b border-line pb-2">
+            {!isQueueCollapsed ? (
+              <>
+                <h2 className="font-bold text-ink text-xs">Ready to Checkout ({filteredWorkOrders.length})</h2>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="text-xs font-mono font-bold bg-success/10 text-success-deep px-2 py-0.5 rounded-full border border-success/20">
+                    Checkout
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setIsQueueCollapsed(true)}
+                    className="!h-6 !min-h-6 w-6 px-0 rounded flex items-center justify-center text-muted hover:bg-surface hover:text-ink transition-colors"
+                    title="Collapse ticket list"
+                    aria-label="Collapse ticket list"
+                  >
+                    <ChevronsLeft className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsQueueCollapsed(false)}
+                className="w-full h-8 rounded-lg flex items-center justify-center text-muted hover:bg-surface hover:text-brand transition-colors"
+                title="Expand ticket list"
+                aria-label="Expand ticket list"
+              >
+                <ChevronsRight className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
+          {!isQueueCollapsed && (
+          <div className={`space-y-2 overflow-y-auto ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:flex-1 md:max-h-none' : 'min-h-[360px] max-h-[calc(100dvh-280px)]'}`}>
+            {filteredWorkOrders.length === 0 ? (
+              <div className="flex min-h-0 flex-1 flex-col items-center justify-center p-8 text-center text-muted space-y-2 bg-surface rounded-xl border border-dashed border-line-strong my-4">
+                <CheckCircle2 className="w-8 h-8 mx-auto text-success opacity-70" />
+                <p className="font-extrabold text-ink text-xs">No Devices with Finished Diagnostics</p>
+                <p className="text-xs text-muted">Appears here automatically after diagnostics.</p>
+              </div>
+            ) : (
+              filteredWorkOrders.map((wo) => {
+                const isSelected = wo.id === selectedWoId;
+                const handleSelectWo = () => {
+                  setSelectedWoId(wo.id);
+                  resetTransactionState();
+                };
+
+                return (
+                  <div
+                    key={wo.id}
+                    role="radio"
+                    tabIndex={0}
+                    aria-checked={isSelected}
+                    aria-label={`Select work order ${wo.orderNumber}`}
+                    onClick={handleSelectWo}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleSelectWo();
+                      }
+                    }}
+                    className={`group cursor-pointer rounded-xl border bg-white p-3 shadow-2xs transition-all hover:shadow-md hover:border-brand/50 select-none ${
+                      isSelected ? 'border-brand ring-2 ring-brand/20 bg-brand-soft/40' : 'border-line'
+                    }`}
+                  >
+                    {/* Top row: order # + priority */}
+                    <div className="flex items-center justify-between gap-1.5">
+                      <span className="font-mono text-[11px] font-extrabold text-brand truncate">{wo.orderNumber}</span>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <PriorityBadge priority={wo.priority} size="xs" />
+                        <span className={`text-[9px] font-black px-1.5 py-px rounded uppercase ${
+                          wo.isPaid ? 'bg-success text-white' : 'bg-warning text-white'
+                        }`}>
+                          {wo.isPaid ? 'PAID' : 'DUE'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Device + customer */}
+                    <p className="mt-1.5 text-xs font-extrabold text-ink truncate">{wo.deviceModel}</p>
+                    <p className="text-[11px] text-muted truncate">{wo.customerName} · {wo.customerPhone}</p>
+
+                    {/* Repair summary */}
+                    <p className="mt-1 line-clamp-2 text-[11px] font-medium text-muted leading-snug">
+                      {repairSummaryOf(wo)}
+                    </p>
+
+                    {/* Footer: tech + amount */}
+                    <div className="mt-2 flex items-center justify-between border-t border-line/60 pt-1.5">
+                      <span className="flex items-center space-x-1 text-[11px] font-bold text-brand min-w-0 truncate">
+                        <UserCheck className="w-3 h-3 shrink-0" />
+                        <span className="truncate max-w-[80px]">{wo.assignedTechName || 'Unassigned'}</span>
+                      </span>
+                      <span className="font-mono text-[11px] font-black text-success-deep">{wo.totalAmount.toLocaleString()} {currency}</span>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+            {filteredWorkOrders.length > 0 && (
+              <p className="text-center text-xs font-mono font-bold text-muted pt-2 pb-1 tracking-widest select-none">
+                — End of queue —
+              </p>
+            )}
+          </div>
+          )}
+
+          {isQueueCollapsed && filteredWorkOrders.length > 0 && (
+            <div className={`space-y-1.5 ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:flex-1 md:max-h-none' : 'min-h-[360px] max-h-[calc(100dvh-280px)] overflow-y-auto'}`}>
+              {filteredWorkOrders.map((wo) => {
+                const isSel = wo.id === selectedWoId;
+                return (
+                  <button
+                    key={wo.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedWoId(wo.id);
+                      resetTransactionState();
+                    }}
+                    className={`w-full px-2 py-1.5 rounded-lg flex flex-col items-start transition-colors ${
+                      isSel ? 'bg-brand text-white shadow-2xs' : 'bg-white text-ink border border-line hover:bg-brand-soft hover:border-brand/30'
+                    }`}
+                    title={`${wo.orderNumber} · ${wo.deviceModel} · ${wo.customerName}`}
+                    aria-label={`Select ${wo.orderNumber} ${wo.deviceModel}`}
+                  >
+                    <span className={`font-mono text-[10px] font-black leading-tight ${isSel ? 'text-white' : 'text-brand'}`}>
+                      {wo.orderNumber}
+                    </span>
+                    <span className={`text-[9px] font-bold leading-tight truncate w-full ${isSel ? 'text-white/90' : 'text-ink'}`}>
+                      {wo.deviceModel}
+                    </span>
+                    <span className={`text-[8px] font-black leading-tight ${isSel ? 'text-white/80' : 'text-muted'}`}>
+                      {wo.isPaid ? '✓ PAID' : '$ DUE'} · {wo.totalAmount.toLocaleString()}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           )}
         </div>
+
+        {/* Right Column: Dynamic Invoice & Terminal Checkout (8 cols) */}
+        <div className={`hidden lg:block flex-1 min-w-0 bg-white border border-line rounded-2xl p-5 pb-24 md:pb-5 space-y-5 shadow-xs ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:overflow-y-auto' : ''}`}>
+                    {renderCheckoutPanel()}
+        </div>
       </div>
+
+      {/* Mobile: full POS checkout popup — Pay tap opens the whole checkout (Ko Hein) */}
+      {isMobileCheckoutFullOpen && selectedWo && (
+        <div className="fixed inset-0 z-50 lg:hidden bg-white overflow-y-auto pt-[calc(env(safe-area-inset-top)+8px)] pb-28">
+          <div className="sticky top-0 z-10 flex justify-end px-3 pt-1.5">
+            <button
+              type="button"
+              onClick={() => setIsMobileCheckoutFullOpen(false)}
+              aria-label="Close checkout"
+              className="text-muted hover:text-ink p-1.5 rounded transition-colors cursor-pointer focus:outline-none"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="p-4">
+            {renderCheckoutPanel()}
+          </div>
+        </div>
+      )}
 
       {/* Mobile sticky checkout bar: keeps Amount Due + Pay visible without
           scrolling past the device list (md:hidden so desktop keeps the
@@ -1279,7 +1304,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
             </div>
             <Button
               type="button"
-              onClick={() => setIsConfirmOpen(true)}
+              onClick={() => setIsMobileCheckoutFullOpen(true)}
               disabled={isProcessingPayment}
               variant="success"
               className="flex-1 max-w-[220px] py-3 hover:bg-success/90"
