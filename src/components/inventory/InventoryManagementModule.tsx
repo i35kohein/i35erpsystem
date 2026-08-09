@@ -1838,9 +1838,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     </tr>
                   ))}
                 </tbody>
-                <tfoot>
-                  <tr className="border-t-2 border-ink bg-surface">
-                    <td className="sticky left-0 z-10 bg-surface p-2.5 font-black text-ink">
+                <tfoot className="sticky bottom-0 z-20">
+                  <tr className="border-t-2 border-ink bg-surface shadow-[0_-4px_8px_-6px_rgba(0,0,0,0.25)]">
+                    <td className="sticky left-0 z-30 bg-surface p-2.5 font-black text-ink">
                       Total ({matrixGrandTotal.toLocaleString()})
                     </td>
                     {matrixCategories.map((category) => (
