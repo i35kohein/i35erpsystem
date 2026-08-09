@@ -1,6 +1,8 @@
 import  {useState, useRef, useEffect, useMemo, lazy, Suspense} from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import {Sparkles, Plus, Search, Filter, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, RotateCcw, Save, Timer, SlidersHorizontal, Eye, Stethoscope, Edit2, List, LayoutGrid, Printer, Smartphone, Layers, ScanLine, ListFilter, Activity, Users, Boxes, Coins, ShieldAlert} from 'lucide-react';
+import {Sparkles, Plus, Search, Filter, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, RotateCcw, Save, Timer, SlidersHorizontal, Eye, Stethoscope, Edit2, List,
+  TrendingUp,
+  Grid, LayoutGrid, Printer, Smartphone, Layers, ScanLine, ListFilter, Activity, Users, Boxes, Coins, ShieldAlert} from 'lucide-react';
 import {subscribeToCollection, fetchCloudCollection, saveDocument, deleteDocument, clearCollection} from './lib/supabase';
 import { setActiveUserId, notifyAccountChanged } from './utils/accountSettings';
 
@@ -1858,8 +1860,23 @@ export default function App() {
             )}
 
             {activeTab === 'inventory' && (
-              <>
-              </>
+              <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-1 rounded-xl border border-line bg-surface p-1 shrink-0'}>
+                {(['stock', 'profit', 'matrix'] as const).map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => setInventoryViewMode(v)}
+                    className={`h-8 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer focus:outline-none ${
+                      inventoryViewMode === v
+                        ? 'bg-white text-brand shadow-xs border border-brand/20'
+                        : 'text-muted hover:text-ink border border-transparent'
+                    }`}
+                  >
+                    {v === 'stock' ? <List className="w-3.5 h-3.5" /> : v === 'profit' ? <TrendingUp className="w-3.5 h-3.5" /> : <Grid className="w-3.5 h-3.5" />}
+                    {v === 'stock' ? 'Stock' : v === 'profit' ? 'Profit' : 'Matrix'}
+                  </button>
+                ))}
+              </div>
             )}
 
             {activeTab === 'crm' && (

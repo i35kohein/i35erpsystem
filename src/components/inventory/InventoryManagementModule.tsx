@@ -999,50 +999,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
         {/* Right cluster — one line on md+ */}
         <div className="flex flex-col md:flex-row md:items-center gap-2 w-full lg:w-auto lg:ml-auto min-w-0">
-          {/* Dual View Switcher — desktop toolbar; iPad: lives in the filter drawer */}
-          {!isIpad && (
-          <div className="bg-surface rounded-xl border border-line flex items-center p-1 w-full md:w-auto md:shrink-0 h-10">
-            <Button
-              variant="ghost"
-              type="button"
-              onClick={() => setViewMode('stock')}
-              className={`flex-1 md:flex-none h-8 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
-                viewMode === 'stock'
-                  ? 'bg-white text-brand shadow-xs border border-brand/20'
-                  : 'text-muted hover:text-ink'
-              }`}
-            >
-              <List className="w-3.5 h-3.5" />
-              <span>Stock</span>
-            </Button>
-            <Button
-              variant="ghost"
-              type="button"
-              onClick={() => setViewMode('profit')}
-              className={`flex-1 md:flex-none h-8 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
-                viewMode === 'profit'
-                  ? 'bg-white text-brand shadow-xs border border-brand/20'
-                  : 'text-muted hover:text-ink'
-              }`}
-            >
-              <TrendingUp className="w-3.5 h-3.5" />
-              <span>Profit</span>
-            </Button>
-            <Button
-              variant="ghost"
-              type="button"
-              onClick={() => setViewMode('matrix')}
-              className={`flex-1 md:flex-none h-8 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
-                viewMode === 'matrix'
-                  ? 'bg-white text-brand shadow-xs border border-brand/20'
-                  : 'text-muted hover:text-ink'
-              }`}
-            >
-              <Grid className="w-3.5 h-3.5" />
-              <span>Matrix</span>
-            </Button>
-          </div>
-          )}
+
 
           {viewMode === 'stock' && (
             <div className={`flex flex-wrap items-center justify-end gap-2 w-full md:w-auto md:ml-auto md:shrink-0`}>
