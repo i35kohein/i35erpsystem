@@ -732,29 +732,29 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 </div>
               </div>
 
-                <div className="bg-white border border-line rounded-xl p-4 space-y-2">
-                  <Button
+                <div className="border border-line-strong rounded-lg overflow-hidden bg-white">
+                  <button
                     type="button"
                     onClick={() => setIsAddPartOpen(!isAddPartOpen)}
                     aria-expanded={isAddPartOpen}
-                    className="w-full min-h-10 flex items-center justify-between gap-2 text-left cursor-pointer"
+                    className="w-full flex items-center justify-between gap-2 px-2.5 py-2 text-left bg-surface hover:bg-line/30 transition-colors cursor-pointer focus:outline-none"
                   >
-                    <span>
-                      <h4 className="text-xs font-extrabold text-white">Add Inventory Part Used</h4>
-                      <p className="text-xs text-white">Pick the stock part used on this ticket before payment.</p>
+                    <span className="text-xs font-extrabold text-ink">Add Inventory Part Used</span>
+                    <span className="flex items-center gap-2">
+                      <span className="text-[11px] font-semibold text-muted">Pick the stock part used on this ticket</span>
+                      <ChevronDown className={`w-3.5 h-3.5 text-muted shrink-0 transition-transform ${isAddPartOpen ? 'rotate-180' : ''}`} />
                     </span>
-                    <ChevronDown className={`w-4 h-4 text-white/70 shrink-0 transition-transform ${isAddPartOpen ? 'rotate-180' : ''}`} />
-                  </Button>
+                  </button>
 
                   {isAddPartOpen && (
-                  <div className="flex items-end gap-2 pt-1">
-                    <label className="block min-w-0 flex-1">
-                      <span className="block text-xs font-bold text-muted mb-1">Inventory part</span>
+                  <div className="p-2.5 space-y-2.5">
+                    <label className="block">
+                      <span className="block text-[11px] font-bold text-muted mb-1">Inventory part</span>
                       <div className="flex items-center gap-2">
                         <select
                           value={inventoryPartId || (selectedInventoryPart ? selectedInventoryPart.id : '')}
                           onChange={(e) => setInventoryPartId(e.target.value)}
-                          className="min-w-0 flex-1 truncate rounded-lg border border-line bg-surface px-2.5 py-2 text-xs font-semibold text-ink outline-none focus:border-brand focus:ring-1 focus:ring-brand/20"
+                          className="min-w-0 flex-1 truncate rounded-lg border border-line bg-white px-2.5 py-2 text-xs font-semibold text-ink outline-none focus:border-brand"
                         >
                           {filteredInventoryParts
                             .filter((part) => part.quantityInStock > 0)
@@ -768,7 +768,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           )}
                         </select>
                         {selectedInventoryPart && selectedInventoryPart.quantityInStock > 0 && (
-                          <span className={`inline-flex shrink-0 items-center gap-1 text-xs font-bold ${
+                          <span className={`inline-flex shrink-0 items-center gap-1 text-[11px] font-bold whitespace-nowrap ${
                             selectedInventoryPart.quantityInStock <= selectedInventoryPart.reorderPoint
                               ? 'text-warning'
                               : 'text-success'
@@ -778,35 +778,34 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                             ) : (
                               <PackageCheck className="h-3 w-3" />
                             )}
-                            Stock: {selectedInventoryPart.quantityInStock}
-                            {selectedInventoryPart.quantityInStock <= selectedInventoryPart.reorderPoint
-                              ? ' — Low'
-                              : ' available'}
+                            {selectedInventoryPart.quantityInStock}
+                            {selectedInventoryPart.quantityInStock <= selectedInventoryPart.reorderPoint ? ' Low' : ' avail'}
                           </span>
                         )}
                       </div>
                     </label>
 
-                    <label className="block shrink-0">
-                      <span className="block text-xs font-bold text-muted mb-1">Qty</span>
-                      <Input
-                        type="number"
-                        min={1}
-                        max={selectedInventoryPart?.quantityInStock || 99}
-                        value={inventoryPartQty || ''}
-                        onChange={(e) => setInventoryPartQty(Math.max(1, Math.floor(Number(e.target.value) || 1)))}
-                        className="w-16 rounded-lg border border-line bg-surface px-2 py-2 text-xs font-mono font-bold text-ink outline-none focus:border-brand focus:ring-1 focus:ring-brand/20"
-                      />
-                    </label>
-
-                    <Button
-                      type="button"
-                      onClick={handleAddInventoryPartToWorkOrder}
-                      disabled={!selectedInventoryPart}
-                      className="inline-flex h-10 shrink-0 items-center justify-center rounded-lg bg-brand px-3.5 text-xs font-extrabold text-white transition-all hover:bg-brand-deep disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      Add Part
-                    </Button>
+                    <div className="flex items-end gap-2">
+                      <label className="block shrink-0">
+                        <span className="block text-[11px] font-bold text-muted mb-1">Qty</span>
+                        <Input
+                          type="number"
+                          min={1}
+                          max={selectedInventoryPart?.quantityInStock || 99}
+                          value={inventoryPartQty || ''}
+                          onChange={(e) => setInventoryPartQty(Math.max(1, Math.floor(Number(e.target.value) || 1)))}
+                          className="w-16 rounded-lg border border-line bg-white px-2 py-2 text-xs font-mono font-bold text-ink outline-none focus:border-brand"
+                        />
+                      </label>
+                      <Button
+                        type="button"
+                        onClick={handleAddInventoryPartToWorkOrder}
+                        disabled={!selectedInventoryPart}
+                        className="inline-flex h-10 shrink-0 items-center justify-center rounded-lg bg-brand px-3.5 text-xs font-extrabold text-white transition-all hover:bg-brand-deep disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        Add Part
+                      </Button>
+                    </div>
                   </div>
                   )}
                 </div>
