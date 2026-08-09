@@ -847,10 +847,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     </tbody>
                   </table>
                 </div>
-              </div>
 
-              {/* Desktop: right column — payment + pay button */}
-              <div className="space-y-5 lg:min-w-0">
               {/* Payment Gateway Options */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-2">
@@ -1179,6 +1176,39 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   </div>
                 )}
               </div>
+              </div>
+
+              {/* Desktop: right column — print preview */}
+              <div className="space-y-5 lg:min-w-0">
+              {/* Print Preview — what Pay & Print will produce (Ko Hein) */}
+              <div className="border border-line-strong rounded-lg overflow-hidden bg-white">
+                <div className="flex items-center justify-between px-2.5 py-2 bg-surface border-b border-line">
+                  <span className="text-xs font-extrabold uppercase tracking-wide text-muted">Print Preview</span>
+                  <FileText className="w-3.5 h-3.5 text-muted" />
+                </div>
+                <div className="m-2.5 rounded-lg border border-dashed border-line-strong bg-white px-3 py-2.5 font-mono text-xs leading-relaxed text-ink">
+                  <div className="text-center font-black uppercase tracking-widest text-xs">i35 Apple Service</div>
+                  <div className="text-center text-muted">No 1031, Pyi Htaung Su Main Rd, North Dagon</div>
+                  <div className="my-1.5 border-t border-dashed border-line-strong" />
+                  <div className="flex justify-between"><span className="text-muted">Invoice</span><span className="font-bold">{selectedWo.orderNumber}</span></div>
+                  <div className="flex justify-between"><span className="text-muted">Device</span><span className="max-w-[55%] truncate font-bold">{selectedWo.deviceModel}</span></div>
+                  <div className="my-1.5 border-t border-dashed border-line-strong" />
+                  {(selectedWo.lineItems || []).slice(0, 3).map((li) => (
+                    <div key={li.id} className="flex justify-between gap-2">
+                      <span className="truncate">{li.description}</span>
+                      <span className="shrink-0">{(Number(li.unitPrice || 0) * (li.quantity || 1)).toLocaleString()}</span>
+                    </div>
+                  ))}
+                  {(selectedWo.lineItems || []).length > 3 && (
+                    <div className="text-muted">… +{(selectedWo.lineItems || []).length - 3} more</div>
+                  )}
+                  <div className="my-1.5 border-t border-dashed border-line-strong" />
+                  <div className="flex justify-between"><span className="text-muted">Discount</span><span>-{(selectedWo.discountAmount || 0).toLocaleString()}</span></div>
+                  <div className="flex justify-between font-black text-xs"><span>TOTAL</span><span>{selectedWo.totalAmount.toLocaleString()} {currency}</span></div>
+                  <div className="text-center text-muted mt-1">Thank you for your business!</div>
+                </div>
+              </div>
+
 
 
 
