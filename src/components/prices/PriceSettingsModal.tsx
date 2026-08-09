@@ -428,7 +428,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
           </div>
           <Button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white hover:bg-line flex items-center justify-center text-muted hover:text-ink transition-all cursor-pointer border border-line"
+            className="w-8 h-8 rounded-full text-muted hover:text-ink hover:bg-surface transition-colors flex items-center justify-center cursor-pointer"
           >
             <X className="w-4 h-4" />
           </Button>

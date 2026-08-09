@@ -1143,7 +1143,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                   type="button"
                   onClick={() => setIsCartSheetOpen(false)}
                   aria-label="Close cart"
-                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface text-ink hover:bg-line transition-colors cursor-pointer"
+                  className="w-8 h-8 rounded-full text-muted hover:text-ink hover:bg-surface transition-colors flex items-center justify-center cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </Button>
