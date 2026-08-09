@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { createPortal } from 'react-dom';
 import {Sparkles, Plus, Search, Filter, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, RotateCcw, Save, Timer, SlidersHorizontal, Eye, Stethoscope, Edit2,
   MoreHorizontal,
-  Printer, List,
+  Printer, List, Menu,
   TrendingUp,
   Grid, Smartphone, Layers, ScanLine, ListFilter, Activity, Users, Boxes, Coins, ShieldAlert} from 'lucide-react';
 import {subscribeToCollection, fetchCloudCollection, saveDocument, deleteDocument, clearCollection} from './lib/supabase';
@@ -195,6 +195,14 @@ export default function App() {
   }, []);
   const [inventoryTagsPrintOpen, setInventoryTagsPrintOpen] = useState(false);
   const [inventoryMoreOpen, setInventoryMoreOpen] = useState(false);
+  const [inventorySideMenuOpen, setInventorySideMenuOpen] = useState(false);
+  // Close the phone side menu on Escape.
+  useEffect(() => {
+    if (!inventorySideMenuOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setInventorySideMenuOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [inventorySideMenuOpen]);
   const inventoryMoreAnchorRef = useRef<HTMLButtonElement | null>(null);
   const [inventoryScanQuery, setInventoryScanQuery] = useState('');
   const inventoryScanSubmitRef = useRef<(() => void) | null>(null);
@@ -1918,7 +1926,8 @@ export default function App() {
 
             {activeTab === 'inventory' && (
               <>
-              <div className={`flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar max-w-full shrink-0 ${isIpad ? 'hidden' : ''}`}>
+              {/* Desktop/tablet row (sm+): search + view switcher + Add Part + ⋯ */}
+              <div className={`hidden sm:flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar max-w-full shrink-0 ${isIpad ? 'hidden' : ''}`}>
               {/* Scan / search — leftmost */}
               <div className="shrink-0">
                 <div className="relative">
@@ -1995,6 +2004,86 @@ export default function App() {
                 )}
               </div>
               </div>
+
+              {/* Phone row (<sm): full-width search + side-menu button */}
+              <div className={`sm:hidden flex items-center gap-1.5 min-w-0 flex-1 ${isIpad ? 'hidden' : ''}`}>
+                <div className="relative flex-1 min-w-0">
+                  <ScanLine className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-brand" />
+                  <Input
+                    value={inventoryScanQuery}
+                    onChange={(e) => {
+                      setInventoryScanQuery(e.target.value);
+                      setSearchQuery(e.target.value);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        inventoryScanSubmitRef.current?.();
+                      }
+                    }}
+                    placeholder="Scan barcode or search part..."
+                    autoComplete="off"
+                    className="h-10 w-full rounded-lg border border-line bg-white pl-8 pr-2 font-mono text-xs text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setInventorySideMenuOpen(true)}
+                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line bg-white text-ink hover:border-brand hover:text-brand transition-colors cursor-pointer focus:outline-none"
+                  title="Inventory menu"
+                  aria-label="Open inventory menu"
+                >
+                  <Menu className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Phone side menu (drawer) */}
+              {inventorySideMenuOpen && (
+                <div className="fixed inset-0 z-[70] sm:hidden" role="dialog" aria-modal="true" aria-label="Inventory menu">
+                  <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => setInventorySideMenuOpen(false)} />
+                  <div className="absolute right-0 top-0 flex h-full w-72 max-w-[85vw] flex-col bg-white shadow-2xl">
+                    <div className="flex items-center justify-between border-b border-line px-4 py-3.5">
+                      <div className="flex items-center gap-2">
+                        <Boxes className="h-4 w-4 text-brand" />
+                        <span className="text-sm font-extrabold text-ink">Parts Inventory</span>
+                      </div>
+                      <button type="button" onClick={() => setInventorySideMenuOpen(false)} aria-label="Close menu" className="rounded-lg p-1.5 text-muted hover:bg-surface hover:text-ink transition-colors cursor-pointer">
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <div className="flex-1 space-y-5 overflow-y-auto p-3">
+                      <div className="space-y-1.5">
+                        <p className="px-2 text-[10px] font-extrabold uppercase tracking-wider text-muted">View</p>
+                        {(['stock', 'profit', 'matrix'] as const).map((v) => (
+                          <button
+                            key={v}
+                            type="button"
+                            onClick={() => { setInventoryViewMode(v); setInventorySideMenuOpen(false); }}
+                            className={`w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-bold transition-colors cursor-pointer text-left ${
+                              inventoryViewMode === v ? 'bg-brand text-white shadow-2xs' : 'text-ink hover:bg-surface'
+                            }`}
+                          >
+                            {v === 'stock' ? <List className="h-4 w-4 shrink-0" /> : v === 'profit' ? <TrendingUp className="h-4 w-4 shrink-0" /> : <Grid className="h-4 w-4 shrink-0" />}
+                            {v === 'stock' ? 'Stock & Quantities' : v === 'profit' ? 'Profit Analysis' : 'Stock Matrix'}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="space-y-1.5">
+                        <p className="px-2 text-[10px] font-extrabold uppercase tracking-wider text-muted">Actions</p>
+                        <button type="button" onClick={() => { setInventoryAddModalOpen(true); setInventorySideMenuOpen(false); }} className="w-full flex items-center gap-2.5 rounded-xl bg-brand/10 px-3 py-2.5 text-xs font-extrabold text-brand hover:bg-brand/15 transition-colors cursor-pointer text-left">
+                          <Plus className="h-4 w-4 shrink-0" /> Add Part
+                        </button>
+                        <button type="button" onClick={() => { setInventoryTagsPrintOpen(true); setInventorySideMenuOpen(false); }} className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-extrabold text-ink hover:bg-surface transition-colors cursor-pointer text-left">
+                          <Printer className="h-4 w-4 shrink-0 text-brand" /> Print Tags
+                        </button>
+                        <button type="button" onClick={() => { setInventoryEditMode((m) => !m); setInventorySideMenuOpen(false); }} className={`w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-extrabold transition-colors cursor-pointer text-left ${inventoryEditMode ? 'bg-warning/10 text-warning hover:bg-warning/15' : 'text-ink hover:bg-surface'}`}>
+                          <Edit2 className="h-4 w-4 shrink-0" /> {inventoryEditMode ? 'Done Editing' : 'Edit Stock'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
               </>
             )}
 
