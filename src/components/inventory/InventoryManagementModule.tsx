@@ -1534,10 +1534,10 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     )}
                     <th className="w-[34%] px-2 py-2 bg-surface">
                       <div className="flex items-center gap-1">
-                        <Button type="button" onClick={() => toggleSort('name')} className="inline-flex items-center gap-1 hover:text-brand transition-colors cursor-pointer uppercase font-mono text-xs" title="Sort by part name">
+                        <button type="button" onClick={() => toggleSort('name')} className="inline-flex items-center gap-1 hover:text-brand transition-colors cursor-pointer uppercase font-mono text-xs focus:outline-none" title="Sort by part name">
                           Part Name & SKU
                           {sortKey === 'name' && <SortArrow dir={sortDir} />}
-                        </Button>
+                        </button>
                         <div className="relative">
                           <button
                             type="button"
@@ -1600,21 +1600,21 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         onChange={setSelectedQuality}
                         options={tierFilterOptions}
                         size="sm"
-                        buttonClassName="uppercase font-mono text-xs text-muted hover:text-brand transition-colors gap-1"
+                        buttonClassName="uppercase font-mono text-xs text-muted hover:text-brand transition-colors gap-1 bg-transparent border-0 p-0 rounded-none min-h-0"
                         menuAlign="group-left"
                       />
                     </th>
                     <th className="w-[96px] px-1.5 py-2 bg-surface">
-                      <Button type="button" onClick={() => toggleSort('stock')} className="inline-flex items-center gap-1 hover:text-brand transition-colors cursor-pointer uppercase font-mono text-xs" title="Sort by stock quantity">
+                      <button type="button" onClick={() => toggleSort('stock')} className="inline-flex items-center gap-1 hover:text-brand transition-colors cursor-pointer uppercase font-mono text-xs focus:outline-none" title="Sort by stock quantity">
                         Stock
                         {sortKey === 'stock' && <SortArrow dir={sortDir} />}
-                      </Button>
+                      </button>
                     </th>
                     <th className="w-[104px] px-1.5 py-2 bg-surface">
-                      <Button type="button" onClick={() => toggleSort('price')} className="inline-flex items-center gap-1 hover:text-brand transition-colors cursor-pointer uppercase font-mono text-xs" title="Sort by selling price">
+                      <button type="button" onClick={() => toggleSort('price')} className="inline-flex items-center gap-1 hover:text-brand transition-colors cursor-pointer uppercase font-mono text-xs focus:outline-none" title="Sort by selling price">
                         Selling Price
                         {sortKey === 'price' && <SortArrow dir={sortDir} />}
-                      </Button>
+                      </button>
                     </th>
                     {inlineEditMode && <th className="w-[150px] px-1.5 py-2 bg-surface">Supplier</th>}
                     <th className="px-2 py-2 bg-surface hidden md:table-cell">Bin</th>
