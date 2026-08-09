@@ -184,7 +184,15 @@ export default function App() {
   // Inventory view/edit — drawer controls these on iPad (module toolbar keeps them on desktop)
   const [inventoryViewMode, setInventoryViewMode] = useState<'stock' | 'profit' | 'matrix'>('stock');
   const [inventoryEditMode, setInventoryEditMode] = useState(false);
-  const [inventoryStockView, setInventoryStockView] = useState<'table' | 'cards'>('table');
+  const [inventoryStockView, setInventoryStockView] = useState<'table' | 'cards'>(() =>
+    typeof window !== 'undefined' && window.innerWidth < 640 ? 'cards' : 'table'
+  );
+  // Phones (<sm) get the compact card grid; sm+ keeps the table (no horizontal scroll on phones).
+  useEffect(() => {
+    const onResize = () => setInventoryStockView(window.innerWidth < 640 ? 'cards' : 'table');
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
   const [inventoryTagsPrintOpen, setInventoryTagsPrintOpen] = useState(false);
   const [inventoryMoreOpen, setInventoryMoreOpen] = useState(false);
   const inventoryMoreAnchorRef = useRef<HTMLButtonElement | null>(null);
