@@ -160,8 +160,9 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
           </div>
         </div>
 
-        {/* Folder / Model Grid Container */}
-        <div className={`min-h-0 overflow-y-auto space-y-4 p-3.5 ${embedded ? 'flex-1' : 'max-h-[58vh]'}`}>
+        {/* Folder / Model Grid Container — each series is a column (Ko Hein) */}
+        <div className={`min-h-0 overflow-y-auto p-3.5 ${embedded ? 'flex-1' : 'max-h-[58vh]'}`}>
+          <div className="grid grid-cols-1 items-start gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
           {(() => {
             const visibleFolders = enabledFolders.filter((f) => {
               if (activeFamilyTab !== 'All' && f.family !== activeFamilyTab) return false;
@@ -180,14 +181,14 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
               renderedFolderCount++;
 
               return (
-                <div key={folder.id}>
+                <div key={folder.id} className="min-w-0">
                   {/* Series text header (plain) */}
-                  <p className="text-[10px] font-black uppercase tracking-wider text-muted pb-1 pt-2 first:pt-0">
+                  <p className="border-b border-line pb-1.5 text-[10px] font-black uppercase tracking-wider text-muted">
                     {folder.name}
                   </p>
 
-                  {/* Model names — plain text, 3 columns (Ko Hein) */}
-                  <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {/* Model names — vertical list inside the series column (Ko Hein) */}
+                  <div>
                     {filteredModels.map((item) => {
                       const isSelected = selectedDevice === item.model;
                       return (
@@ -226,6 +227,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
 
             return folderBlocks;
           })()}
+          </div>
         </div>
 
         {/* Modal Footer */}
