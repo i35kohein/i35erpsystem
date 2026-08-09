@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Printer, ChevronDown, Search, BadgePercent, ShieldCheck } from 'lucide-react';
+import { ChevronDown, Search, BadgePercent, ShieldCheck } from 'lucide-react';
 import { WorkOrder, DiagnosticItemResult, AppleDeviceCategory, SelectedRepairItem } from '../../types';
 import { ModelRepairPrice } from '../../types/priceCatalog';
 import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
@@ -255,14 +255,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               {editingId ? `Edit — ${editTarget?.orderNumber || ''}` : 'Phone Testing & Checking'}
             </h1>
           </div>
-          <button
-            type="button"
-            onClick={() => window.print()}
-            className="no-print inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-line bg-white px-4 text-xs font-bold text-ink transition hover:bg-surface focus:outline-none"
-          >
-            <Printer className="h-3.5 w-3.5" />
-            Print
-          </button>
+
         </header>
 
         <form onSubmit={handleSubmit} onReset={resetForm} className="px-4 py-4 sm:px-7 sm:py-5">
