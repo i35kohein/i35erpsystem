@@ -546,10 +546,9 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                     ) : (
                       <>
                       {/* Table header — text-based, clear columns */}
-                      <div className="grid grid-cols-[14px_1fr_auto_auto_auto] gap-x-2.5 px-0 py-2 border-b border-line">
+                      <div className="grid grid-cols-[14px_1fr_auto_auto] gap-x-2.5 px-0 py-2 border-b border-line">
                         <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted">#</span>
                         <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted">Service</span>
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted">Warranty</span>
                         <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted text-right">Price</span>
                         <span />
                       </div>
@@ -559,15 +558,16 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
                         return (
                           <div key={item.categoryKey} className="py-2.5 border-b border-line last:border-0">
-                            <div className="grid grid-cols-[14px_1fr_auto_auto_auto] items-center gap-x-2.5">
+                            <div className="grid grid-cols-[14px_1fr_auto_auto] items-center gap-x-2.5">
                               {/* # */}
                               <span className="text-[11px] font-extrabold text-muted tabular-nums">{idx + 1}</span>
-                              {/* Service — full text, wraps */}
+                              {/* Service + warranty inline — compact (Ko Hein) */}
                               <div className="min-w-0">
-                                <p className="text-xs font-bold text-ink leading-snug">{item.label}</p>
+                                <p className="text-xs font-bold text-ink leading-snug">
+                                  {item.label}
+                                  <span className="ml-1.5 text-[11px] font-semibold text-muted whitespace-nowrap">{shortWarranty(item.warranty)}</span>
+                                </p>
                               </div>
-                              {/* Warranty — plain text */}
-                              <span className="text-[11px] font-semibold text-muted whitespace-nowrap">{shortWarranty(item.warranty)}</span>
                               {/* Price — TAP to set/change discount (Ko Hein) */}
                               <button
                                 type="button"
