@@ -1047,11 +1047,11 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           </div>
         </div>
 
-        {/* Low Stock Warning Card (Clickable Filter) */}
-        <Button
+        {/* Low Stock Warning Card (Clickable Filter) — native button: <Button> base h-10 collapsed this card */}
+        <button
           type="button"
           onClick={() => handleToggleLowStockOnly()}
-          className={`relative p-3 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer shadow-2xs ${
+          className={`relative w-full !h-auto p-3 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer shadow-2xs focus:outline-none ${
             showLowStockOnly
               ? 'bg-warning text-white border-amber-600 ring-2 ring-amber-400'
               : metrics.lowStockCount > 0
@@ -1077,7 +1077,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               </span>
             </div>
           </div>
-        </Button>
+        </button>
       </div>
       )}
 
