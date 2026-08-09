@@ -412,7 +412,10 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
       let idx = 1;
       cart.forEach((item: CartItem) => {
         const itemFinal = item.price - item.price * (item.discountPercent / 100);
-        const disc = item.discountPercent > 0 ? ` (${item.discountPercent}% Off)` : '';
+        const disc =
+          item.discountPercent > 0
+            ? ` (was ${formatPrice(item.price)} · ${item.discountPercent}% Off)`
+            : '';
         lines.push(`${idx}. ${item.label} — ${formatPrice(itemFinal)}${disc}`);
         lines.push(`   Warranty: ${item.warranty}`);
         idx += 1;
