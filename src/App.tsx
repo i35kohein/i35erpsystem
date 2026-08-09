@@ -2233,8 +2233,6 @@ export default function App() {
                   customers={rosterCustomers}
                   priceCatalog={priceCatalog.catalog}
                   onSaveWorkOrder={handleSaveWorkOrder}
-                  onDeleteWorkOrder={handleDeleteWorkOrder}
-                  onNavigateToTab={(tab) => setActiveTab(tab as any)}
                 />
               )}
 

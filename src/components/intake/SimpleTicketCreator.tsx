@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Printer, PencilLine, Inbox, Trash2 } from 'lucide-react';
+import { Printer } from 'lucide-react';
 import { WorkOrder, DiagnosticItemResult, AppleDeviceCategory, SelectedRepairItem } from '../../types';
 import { ModelRepairPrice } from '../../types/priceCatalog';
 import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
@@ -11,8 +11,6 @@ interface SimpleTicketCreatorProps {
   customers?: Array<{ id: string; name: string; phone: string; type?: string }>;
   priceCatalog?: ModelRepairPrice[];
   onSaveWorkOrder: (wo: WorkOrder) => void;
-  onDeleteWorkOrder?: (id: string) => void;
-  onNavigateToTab?: (tab: string) => void;
 }
 
 interface FormState {
@@ -59,8 +57,6 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   customers = [],
   priceCatalog = [],
   onSaveWorkOrder,
-  onDeleteWorkOrder,
-  onNavigateToTab,
 }) => {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -68,11 +64,6 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   const [isModelModalOpen, setIsModelModalOpen] = useState(false);
   const [isColorOpen, setIsColorOpen] = useState(false);
   const [isRepairsOpen, setIsRepairsOpen] = useState(false);
-
-  // Simple tickets = tagged with simpleTicket flag
-  const simpleTickets = workOrders
-    .filter((wo) => (wo as any).simpleTicket === true)
-    .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
 
   const catalogItemsForModel = getModelPriceCatalogItems(form.model, priceCatalog);
 
@@ -134,29 +125,6 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
       ...f,
       checks: f.checks.map((c, i) => (i === idx ? { ...c, ...patch } : c)),
     }));
-
-  const loadTicket = (wo: WorkOrder) => {
-    const diagnostics = wo.beforeDiagnostics || [];
-    setForm({
-      name: wo.customerName || '',
-      phone: wo.customerPhone || '',
-      model: wo.deviceModel || '',
-      color: wo.deviceColor || '',
-      imei: wo.imei || wo.serialNumber || '',
-      date: (wo.createdAt || '').slice(0, 10) || new Date().toISOString().slice(0, 10),
-      error: '',
-      reply: wo.symptomsReported || '',
-      repairs: wo.selectedRepairs || [],
-      passcode: wo.passcode || '',
-      checks: DIAGNOSTIC_NAMES.map((name) => {
-        const d = diagnostics.find((x) => x.name === name);
-        return { checked: d ? d.status !== 'Fail' : false, note: d?.note || '' };
-      }),
-    });
-    setEditingId(wo.id);
-    setMatchedCustomer(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
 
   const resetForm = () => {
     setForm(EMPTY_FORM);
@@ -249,22 +217,16 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
 
     onSaveWorkOrder(base);
     setSavedFlash(true);
-    setTimeout(() => setSavedFlash(false), 2500);
+    // Same as New Intake Ticket Registration: after saving, print the ticket.
+    setTimeout(() => { window.print(); setSavedFlash(false); }, 600);
     if (!editingId) resetForm();
-  };
-
-  const handleDelete = (id: string) => {
-    if (window.confirm('Delete this simple ticket?')) {
-      onDeleteWorkOrder?.(id);
-      if (editingId === id) resetForm();
-    }
   };
 
   const checkedCount = form.checks.filter((c) => c.checked).length;
   const editTarget = editingId ? workOrders.find((w) => w.id === editingId) : null;
 
   return (
-    <div className="mx-auto max-w-5xl space-y-4">
+    <div className="mx-auto max-w-4xl space-y-4">
       {/* Paper sheet */}
       <div className="print:border-0 print:shadow-none overflow-hidden rounded-2xl border border-line bg-white shadow-xs">
         <header className="flex items-center justify-between gap-4 border-b border-line px-4 py-4 sm:px-7">
@@ -454,7 +416,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 type="submit"
                 className="rounded-xl bg-brand px-5 py-2 text-xs font-black text-white transition hover:bg-brand-deep"
               >
-                {editingId ? 'Update ticket' : 'Save inspection'}
+                {editingId ? 'Update & Print' : 'Save & Print'}
               </button>
             </div>
           </div>
@@ -465,73 +427,6 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
             </p>
           )}
         </form>
-      </div>
-
-      {/* Recent simple tickets — click to edit */}
-      <div className="no-print">
-        <h2 className="mb-2 flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-muted">
-          <Inbox className="h-4 w-4" />
-          Simple Tickets ({simpleTickets.length})
-        </h2>
-        {simpleTickets.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-line bg-surface px-4 py-6 text-center text-xs font-bold text-muted">
-            No simple tickets yet — save your first inspection above.
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {simpleTickets.slice(0, 24).map((wo) => {
-              const diags = wo.beforeDiagnostics || [];
-              const passed = diags.filter((d) => d.status !== 'Fail').length;
-              const dateLabel = (wo.createdAt || '').slice(0, 10);
-              const active = wo.id === editingId;
-              return (
-                <div
-                  key={wo.id}
-                  className={`rounded-xl border bg-white p-3 text-xs shadow-2xs transition-all ${
-                    active ? 'border-[#17201c] ring-2 ring-[#17201c]/20' : 'border-line hover:border-[#17201c]/40'
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-mono font-black text-[#17201c]">{wo.orderNumber}</span>
-                    <span className="text-[10px] font-bold text-muted">{dateLabel}</span>
-                  </div>
-                  <p className="mt-1 truncate font-extrabold text-ink">{wo.deviceModel}</p>
-                  <p className="truncate text-muted">{wo.customerName} · {wo.customerPhone}</p>
-                  <div className="mt-1.5 flex items-center justify-between">
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${
-                      passed === DIAGNOSTIC_NAMES.length ? 'bg-success/15 text-success-deep' : passed > 0 ? 'bg-warning/15 text-warning' : 'bg-danger/15 text-danger'
-                    }`}>
-                      {passed}/{DIAGNOSTIC_NAMES.length} pass
-                    </span>
-                    <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() => loadTicket(wo)}
-                        className="inline-flex h-7 items-center gap-1 rounded-lg border border-line px-2 text-[10px] font-extrabold text-brand hover:bg-brand-soft"
-                      >
-                        <PencilLine className="h-3 w-3" />
-                        Edit
-                      </button>
-                      {onDeleteWorkOrder && (
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(wo.id)}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-line text-muted hover:border-danger hover:text-danger"
-                          aria-label={`Delete ${wo.orderNumber}`}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-        <p className="mt-2 text-[11px] font-bold text-muted">
-          Saved tickets appear in <button type="button" className="text-brand underline" onClick={() => onNavigateToTab?.('intake')}>Work Intake</button> — you can continue there with pricing &amp; checkout.
-        </p>
       </div>
 
       {/* Color picker popup */}
