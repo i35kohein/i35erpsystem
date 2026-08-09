@@ -4,7 +4,6 @@ import { DateFilterState, filterByDateRange } from '../common/DateFilterSelector
 import { timeAgoShort } from '../../utils/timeAgo';
 import { StatusBadge } from '../common/StatusBadge';
 import { PriorityBadge } from '../common/PriorityBadge';
-import { useIsIpad } from '../../hooks/useIsIpad';
 
 // Camera/barcode scanner is code-split: html5-qrcode (~340KB) only downloads
 // when the scanner is actually opened, not when the intake module loads.
@@ -20,8 +19,6 @@ import {ClipboardList,
   SlidersHorizontal,
   LayoutGrid,
   Table as TableIcon,
-  ChevronLeft,
-  ChevronRight,
   User,
   Wrench,
   Clock,
@@ -87,7 +84,6 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   scanRequested = 0,
 }) => {
   const [selectedWorkOrder, setSelectedWorkOrder] = useState<WorkOrder | null>(null);
-  const isIpad = useIsIpad();
   const [isDetailModalOpen, setIsDetailModalOpen] = useState<boolean>(false);
   const [isCameraScannerOpen, setIsCameraScannerOpen] = useState<boolean>(false);
   const [ticketToDelete, setTicketToDelete] = useState<WorkOrder | null>(null);
@@ -184,24 +180,13 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
     rush: techScopedOrders.filter(w => w.priority === 'Urgent' || w.priority === 'Rush' || w.priority === 'Warranty Redo').length,
   };
 
-  // Roster pagination (same pattern as Inventory table)
-  const ROSTER_PAGE_SIZE = 50;
-  const [rosterPage, setRosterPage] = useState(1);
-  const rosterTotalPages = Math.max(1, Math.ceil(filteredOrders.length / ROSTER_PAGE_SIZE));
-  const rosterPageSafe = Math.min(rosterPage, rosterTotalPages);
-  const rosterPageOrders = filteredOrders.slice((rosterPageSafe - 1) * ROSTER_PAGE_SIZE, rosterPageSafe * ROSTER_PAGE_SIZE);
-  // Reset to page 1 when filters change the result set
-  useEffect(() => {
-    setRosterPage(1);
-  }, [filterStatus, searchQuery, dateFilter, sortByPriority]);
-
   const handleOpenTicketDetail = (wo: WorkOrder) => {
     setSelectedWorkOrder(wo);
     setIsDetailModalOpen(true);
   };
 
   return (
-    <div className={`space-y-3 ${isIpad ? 'flex min-h-0 flex-1 flex-col' : ''}`}>
+    <div className="space-y-3 flex min-h-0 flex-1 flex-col">
       {/* Top Header Banner & Actions */}
       <div className="bg-white border border-line rounded-2xl p-5 shadow-xs space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-line">
@@ -309,9 +294,9 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
       </div>
 
       {/* Main Full-Width Section: Controls Bar & Ticket List */}
-      <div className={`workspace-panel workspace-panel--with-toolbar bg-white border border-line rounded-2xl p-5 space-y-4 shadow-xs ${isIpad ? '!h-auto flex-1 min-h-0' : ''}`}>
+      <div className="workspace-panel workspace-panel--with-toolbar !h-auto flex-1 min-h-0 bg-white border border-line rounded-2xl shadow-xs">
         {/* Controls Bar: Items Count, Filters, Clear All, Sort */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-line">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 px-5 pt-4 pb-3 border-b border-line">
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2 font-extrabold text-ink text-sm">
               <Ticket className="w-4 h-4 text-brand" />
@@ -354,7 +339,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
 
         {/* View Content: Table or Grid Cards */}
         {filteredOrders.length === 0 ? (
-          <div className="flex flex-1 min-h-[320px] flex-col items-center justify-center p-10 text-center text-xs space-y-4 bg-surface/60 rounded-2xl border border-dashed border-line">
+          <div className="flex flex-1 min-h-[320px] flex-col items-center justify-center p-10 m-5 text-center text-xs space-y-4 bg-surface/60 rounded-2xl border border-dashed border-line">
             <div className="w-16 h-16 bg-brand/10 text-brand rounded-2xl flex items-center justify-center mx-auto shadow-2xs">
               <Inbox className="w-8 h-8" />
             </div>
@@ -385,7 +370,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
-                {rosterPageOrders.map((wo) => {
+                {filteredOrders.map((wo) => {
                   const createdDate = timeAgoShort(wo.createdAt);
                   const createdDateFull = new Date(wo.createdAt || Date.now()).toLocaleDateString('en-US', {
                     month: 'short',
@@ -504,43 +489,6 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                 })}
               </tbody>
             </table>
-            {/* Roster pagination — same pattern as Inventory table */}
-            {rosterTotalPages > 1 && (
-              <div className="sticky bottom-0 flex items-center justify-between gap-2 border-t border-line bg-white px-3 py-2">
-                <span className="text-xs font-mono font-bold text-muted">
-                  {filteredOrders.length} tickets · Page {rosterPageSafe}/{rosterTotalPages}
-                </span>
-                <div className="flex items-center gap-1.5">
-                  <Button
-                    type="button"
-                    onClick={() => setRosterPage((p) => Math.max(1, p - 1))}
-                    disabled={rosterPageSafe <= 1}
-                    className="flex h-10 lg:h-8 items-center gap-1 rounded-lg border border-line bg-white px-2.5 text-xs font-bold text-ink hover:border-brand hover:text-brand disabled:opacity-40 disabled:hover:border-line disabled:hover:text-ink transition-colors cursor-pointer"
-                  >
-                    <ChevronLeft className="w-3.5 h-3.5" />
-                    Prev
-                  </Button>
-                  <Button
-                    type="button"
-                    onClick={() => setRosterPage((p) => Math.min(rosterTotalPages, p + 1))}
-                    disabled={rosterPageSafe >= rosterTotalPages}
-                    className="flex h-10 lg:h-8 items-center gap-1 rounded-lg border border-line bg-white px-2.5 text-xs font-bold text-ink hover:border-brand hover:text-brand disabled:opacity-40 disabled:hover:border-line disabled:hover:text-ink transition-colors cursor-pointer"
-                  >
-                    Next
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </Button>
-                </div>
-              </div>
-            )}
-            {/* Full list footer — same pattern as Inventory */}
-            {filteredOrders.length > 0 && (
-              <div className="p-3.5 bg-white border-t border-line flex items-center justify-between text-xs text-muted">
-                <span className="font-bold">
-                  Showing <strong className="text-ink">{Math.min(filteredOrders.length, (rosterPageSafe - 1) * ROSTER_PAGE_SIZE + 1)}-{Math.min(rosterPageSafe * ROSTER_PAGE_SIZE, filteredOrders.length)}</strong> of <strong className="text-ink">{filteredOrders.length}</strong> tickets
-                </span>
-                <span className="font-bold text-ink">Page {rosterPageSafe}/{rosterTotalPages}</span>
-              </div>
-            )}
           </div>
         ) : (
           /* GRID CARDS VIEW — POS Ready-to-Checkout style */
@@ -605,6 +553,16 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* Full list footer — always visible with full count (like Inventory) */}
+        {filteredOrders.length > 0 && (
+          <div className="p-3.5 bg-white border-t border-line flex items-center justify-between text-xs text-muted shrink-0">
+            <span className="font-bold">
+              Showing all <strong className="text-ink">{filteredOrders.length}</strong> tickets
+            </span>
+            <span className="font-bold text-ink">{filteredOrders.length} tickets</span>
           </div>
         )}
       </div>
