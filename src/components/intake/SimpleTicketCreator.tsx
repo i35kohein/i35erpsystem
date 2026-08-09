@@ -8,6 +8,7 @@ import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
 
 interface SimpleTicketCreatorProps {
   workOrders: WorkOrder[];
+  customers?: Array<{ id: string; name: string; phone: string; type?: string }>;
   priceCatalog?: ModelRepairPrice[];
   onSaveWorkOrder: (wo: WorkOrder) => void;
   onDeleteWorkOrder?: (id: string) => void;
@@ -43,6 +44,7 @@ const selectLine =
 
 const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   workOrders,
+  customers = [],
   priceCatalog = [],
   onSaveWorkOrder,
   onDeleteWorkOrder,
@@ -90,6 +92,28 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
     });
   };
 
+  const [matchedCustomer, setMatchedCustomer] = useState<string | null>(null);
+
+  const handlePhoneChange = (phone: string) => {
+    setForm((f) => ({ ...f, phone }));
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length >= 7) {
+      const normalize = (p: string) => (p || '').replace(/\D/g, '');
+      const exact = customers.find((c) => normalize(c.phone) === digits);
+      const found = exact || (digits.length >= 9
+        ? customers.find((c) => normalize(c.phone).slice(-9) === digits.slice(-9))
+        : undefined);
+      if (found) {
+        setMatchedCustomer(found.name);
+        setForm((f) => ({ ...f, name: found.name }));
+      } else {
+        setMatchedCustomer(null);
+      }
+    } else {
+      setMatchedCustomer(null);
+    }
+  };
+
   const set = (key: keyof FormState, value: string) => setForm((f) => ({ ...f, [key]: value }));
   const setCheck = (idx: number, patch: Partial<{ checked: boolean; note: string }>) =>
     setForm((f) => ({
@@ -116,12 +140,14 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
       }),
     });
     setEditingId(wo.id);
+    setMatchedCustomer(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const resetForm = () => {
     setForm(EMPTY_FORM);
     setEditingId(null);
+    setMatchedCustomer(null);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -251,12 +277,24 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-6">
           <div className="grid grid-cols-1 gap-y-3">
             <label className="block">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Customer name</span>
-              <input value={form.name} onChange={(e) => set('name', e.target.value)} required className={fieldLine} />
+              <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Phone number</span>
+              <input
+                value={form.phone}
+                onChange={(e) => handlePhoneChange(e.target.value)}
+                inputMode="tel"
+                required
+                placeholder="e.g. 09-123456789"
+                className={fieldLine}
+              />
+              {matchedCustomer && (
+                <span className="mt-1 block text-[11px] font-bold text-success-deep">
+                  ✓ Existing customer: {matchedCustomer}
+                </span>
+              )}
             </label>
             <label className="block">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Phone number</span>
-              <input value={form.phone} onChange={(e) => set('phone', e.target.value)} inputMode="tel" required className={fieldLine} />
+              <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Customer name</span>
+              <input value={form.name} onChange={(e) => set('name', e.target.value)} required className={fieldLine} />
             </label>
             <label className="block">
               <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Model</span>
