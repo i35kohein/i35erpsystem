@@ -881,7 +881,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
               onClick={onClose}
               variant="iconGhost"
               size="icon"
-              className="border border-transparent hover:border-line"
+              className="hover:bg-surface"
             >
               <X className="w-5 h-5" />
             </Button>
