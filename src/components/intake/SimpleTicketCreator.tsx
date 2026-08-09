@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Printer, ChevronDown } from 'lucide-react';
+import { Printer, ChevronDown, Search } from 'lucide-react';
 import { WorkOrder, DiagnosticItemResult, AppleDeviceCategory, SelectedRepairItem } from '../../types';
 import { ModelRepairPrice } from '../../types/priceCatalog';
 import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
@@ -68,6 +68,8 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   const [isModelModalOpen, setIsModelModalOpen] = useState(false);
   const [isColorOpen, setIsColorOpen] = useState(false);
   const [isRepairsOpen, setIsRepairsOpen] = useState(false);
+  const [repairSearch, setRepairSearch] = useState('');
+  const [repairGroup, setRepairGroup] = useState('ALL');
 
   const catalogItemsForModel = getModelPriceCatalogItems(form.model, priceCatalog);
 
@@ -87,7 +89,8 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   const baseTotal = form.repairs.reduce((sum, r) => sum + r.basePrice, 0);
   const finalEstimate = form.repairs.reduce((sum, r) => sum + r.finalPrice, 0);
   const savedAmount = Math.max(0, baseTotal - finalEstimate);
-  const overallDiscountPercent = baseTotal > 0 ? Math.round((savedAmount / baseTotal) * 100) : 0;
+
+  const closeRepairs = () => { setIsRepairsOpen(false); setRepairSearch(''); setRepairGroup('ALL'); };
 
   const toggleRepair = (item: ModelRepairCatalogItem) => {
     setForm((f) => {
@@ -465,95 +468,166 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
         </div>
       )}
 
-      {/* Repairs / Error picker popup */}
+      {/* Repairs / Error picker popup — same picker UI as New Intake Ticket */}
       {isRepairsOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 p-0 sm:items-center sm:p-4" onClick={() => setIsRepairsOpen(false)}>
-          <div className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-t-2xl bg-white p-4 shadow-2xl sm:rounded-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="mb-3 flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-extrabold text-ink">Error / Repair Needed</h3>
-                <p className="text-xs text-muted">{form.model ? `Price list repairs for ${form.model}` : 'Pick a model first'}</p>
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 p-0 sm:items-center sm:p-4" onClick={closeRepairs}>
+          <div className="flex max-h-[88vh] w-full max-w-lg flex-col rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-line px-4 py-3">
+              <div className="min-w-0">
+                <h3 className="text-sm font-extrabold text-ink">Add Repairs & Details</h3>
+                <p className="truncate text-xs text-muted">{form.model ? `Repairs for ${form.model}` : 'Pick a model first'}</p>
               </div>
-              <button type="button" onClick={() => setIsRepairsOpen(false)} className="rounded-lg p-1 text-muted hover:bg-surface hover:text-ink" aria-label="Close">✕</button>
+              <button type="button" onClick={closeRepairs} className="rounded-lg p-1 text-muted hover:bg-surface hover:text-ink" aria-label="Close">✕</button>
             </div>
 
-            {form.model && (
+            {!form.model ? (
+              <div className="flex flex-1 flex-col items-center justify-center gap-2 p-10 text-center">
+                <p className="text-xs font-extrabold text-warning">Choose Device Model First</p>
+                <p className="text-xs text-muted">Pick a model to see its repair services and prices.</p>
+              </div>
+            ) : (
               <>
-                {catalogItemsForModel.length === 0 ? (
-                  <p className="py-6 text-center text-xs font-bold text-muted">No price list entries for this model yet.</p>
-                ) : (
-                  <div className="grid max-h-56 grid-cols-2 gap-1.5 overflow-y-auto pr-1 sm:grid-cols-3">
-                    {catalogItemsForModel.map((item) => {
-                      const on = form.repairs.some((r) => r.id === item.id || r.name.toLowerCase() === item.name.toLowerCase());
-                      return (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => toggleRepair(item)}
-                          className={`flex items-center justify-between gap-1 rounded-lg border px-2 py-1.5 text-[11px] font-bold transition-colors cursor-pointer ${
-                            on ? 'border-brand bg-brand text-white' : 'border-line bg-surface text-ink hover:border-brand/50'
-                          }`}
-                        >
-                          <span className="truncate">{item.name}</span>
-                          <span className={`shrink-0 font-mono ${on ? 'text-white/90' : 'text-muted'}`}>{item.price.toLocaleString()}</span>
-                        </button>
-                      );
-                    })}
+                {/* Search + group pills (like New Intake Ticket) */}
+                <div className="space-y-2 border-b border-line px-4 py-3">
+                  <div className="relative">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+                    <input
+                      type="text"
+                      value={repairSearch}
+                      onChange={(e) => setRepairSearch(e.target.value)}
+                      placeholder={`Search repairs (e.g. Battery, Display, Face ID)...`}
+                      className="w-full rounded-xl border border-line bg-surface py-2.5 pl-9 pr-3 text-sm font-medium outline-none transition-colors focus:border-brand focus:bg-white"
+                    />
                   </div>
-                )}
-
-                {form.repairs.length > 0 && (
-                  <div className="mt-3 max-h-40 space-y-1.5 overflow-y-auto border-t border-line pt-3">
-                    {form.repairs.map((r) => (
-                      <div key={r.id} className="flex items-center gap-2 text-xs">
-                        <span className="min-w-0 flex-1 truncate font-bold text-ink">{r.name}</span>
-                        <span className="font-mono text-muted">{r.basePrice.toLocaleString()}</span>
-                        <div className="relative shrink-0">
-                          <input
-                            type="number"
-                            min="0"
-                            max="100"
-                            value={r.discountPercent}
-                            onChange={(e) => updateRepairDiscount(r.id, Number(e.target.value))}
-                            aria-label={`${r.name} discount percent`}
-                            className="w-14 rounded-lg border border-line bg-white px-2 py-1 text-center font-mono font-bold text-ink outline-none focus:border-brand focus:ring-1 focus:ring-brand"
-                          />
-                          <span className="pointer-events-none absolute inset-y-0 right-1.5 flex items-center text-[10px] font-bold text-muted">%</span>
-                        </div>
-                        <span className={`w-20 shrink-0 text-right font-mono font-black ${r.finalPrice < r.basePrice ? 'text-brand' : 'text-ink'}`}>
-                          {r.finalPrice.toLocaleString()}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => setForm((f) => ({ ...f, repairs: f.repairs.filter((x) => x.id !== r.id) }))}
-                          className="shrink-0 rounded-md px-1 text-muted hover:text-danger"
-                          aria-label={`Remove ${r.name}`}
-                        >
-                          ✕
-                        </button>
-                      </div>
+                  <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
+                    {['ALL', 'Battery', 'Display', 'Housing', 'Charging', 'Audio', 'Logic Board', 'Network', 'Sensors & Keys'].map((grp) => (
+                      <button
+                        key={grp}
+                        type="button"
+                        onClick={() => setRepairGroup(grp)}
+                        className={`shrink-0 rounded-lg px-3 py-1 font-bold transition-all cursor-pointer ${
+                          repairGroup === grp ? 'bg-brand text-white shadow-2xs' : 'bg-surface text-muted hover:bg-line hover:text-ink'
+                        }`}
+                      >
+                        {grp}
+                      </button>
                     ))}
-                    <div className="border-t border-dotted border-line pt-1.5 text-xs font-mono">
-                      <div className="flex justify-between text-muted"><span>Subtotal</span><span>{baseTotal.toLocaleString()} MMK</span></div>
-                      {savedAmount > 0 && (
-                        <div className="flex justify-between text-danger"><span>Discount ({overallDiscountPercent}%)</span><span>-{savedAmount.toLocaleString()} MMK</span></div>
-                      )}
-                      <div className="flex justify-between font-black text-ink"><span>Total</span><span>{finalEstimate.toLocaleString()} MMK</span></div>
-                    </div>
                   </div>
-                )}
+                </div>
+
+                {/* Repair list */}
+                <div className="min-h-[180px] flex-1 space-y-2 overflow-y-auto px-4 py-3">
+                  {catalogItemsForModel.filter((item) => {
+                    const matchesSearch =
+                      !repairSearch ||
+                      item.name.toLowerCase().includes(repairSearch.toLowerCase()) ||
+                      item.group.toLowerCase().includes(repairSearch.toLowerCase());
+                    const matchesGroup = repairGroup === 'ALL' || item.group === repairGroup;
+                    return matchesSearch && matchesGroup;
+                  }).map((item) => {
+                    const isSelected = form.repairs.some((r) => r.id === item.id || r.name.toLowerCase() === item.name.toLowerCase());
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => toggleRepair(item)}
+                        className={`w-full rounded-xl border p-3 text-left text-xs transition-all cursor-pointer ${
+                          isSelected ? 'border-brand bg-brand-soft font-bold shadow-2xs' : 'border-line bg-white text-ink hover:bg-surface'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex min-w-0 items-center space-x-3">
+                            <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-all ${
+                              isSelected ? 'border-brand bg-brand text-white' : 'border-line-strong bg-white'
+                            }`}>
+                              {isSelected && '✓'}
+                            </span>
+                            <div className="min-w-0">
+                              <span className="block truncate font-extrabold text-ink">{item.name}</span>
+                              <div className="flex items-center space-x-2 pt-0.5 text-muted">
+                                <span className="rounded bg-surface px-1.5 py-0.5 font-semibold text-ink">{item.group}</span>
+                                <span>Warranty: {item.warranty}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="shrink-0 text-right">
+                            <span className="font-mono text-sm font-black text-brand">{item.price.toLocaleString()} MMK</span>
+                            {item.isCatalogMatch && (
+                              <span className="block text-[10px] font-bold text-success-deep">Catalog Verified</span>
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                  {catalogItemsForModel.filter((item) => !repairSearch || item.name.toLowerCase().includes(repairSearch.toLowerCase()) || item.group.toLowerCase().includes(repairSearch.toLowerCase())).filter((item) => repairGroup === 'ALL' || item.group === repairGroup).length === 0 && (
+                    <p className="py-8 text-center text-xs font-bold text-muted">No repairs match your search.</p>
+                  )}
+                </div>
+
+                {/* Selected repairs + discount + summary (like New Intake Ticket) */}
+                <div className="max-h-44 space-y-1.5 overflow-y-auto border-t border-line px-4 py-3">
+                  {form.repairs.length === 0 && (
+                    <p className="py-2 text-center text-xs font-medium text-muted">No repairs selected yet — tap items above to add them.</p>
+                  )}
+                  {form.repairs.map((r) => (
+                    <div key={r.id} className="flex items-center gap-2 text-xs">
+                      <span className="min-w-0 flex-1 truncate font-extrabold text-ink">{r.name}</span>
+                      <span className="font-mono text-muted">{r.basePrice.toLocaleString()}</span>
+                      <div className="relative shrink-0">
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={r.discountPercent}
+                          onChange={(e) => updateRepairDiscount(r.id, Number(e.target.value))}
+                          aria-label={`${r.name} discount percent`}
+                          className="w-14 rounded-lg border border-line bg-white px-2 py-1 text-center font-mono font-bold text-ink outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+                        />
+                        <span className="pointer-events-none absolute inset-y-0 right-1.5 flex items-center text-[10px] font-bold text-muted">%</span>
+                      </div>
+                      <span className={`w-20 shrink-0 text-right font-mono font-black ${r.finalPrice < r.basePrice ? 'text-brand' : 'text-ink'}`}>
+                        {r.finalPrice.toLocaleString()}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setForm((f) => ({ ...f, repairs: f.repairs.filter((x) => x.id !== r.id) }))}
+                        className="shrink-0 rounded-md px-1 text-muted hover:text-danger"
+                        aria-label={`Remove ${r.name}`}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Summary box */}
+                <div className="grid grid-cols-2 gap-2 border-t border-line px-4 py-3 text-center text-xs sm:grid-cols-4">
+                  <div className="rounded-lg bg-surface p-2">
+                    <span className="block text-muted font-semibold">Items</span>
+                    <span className="font-extrabold text-ink">{form.repairs.length}</span>
+                  </div>
+                  <div className="rounded-lg bg-surface p-2">
+                    <span className="block text-muted font-semibold">Base</span>
+                    <span className="font-extrabold text-ink">{baseTotal.toLocaleString()}</span>
+                  </div>
+                  <div className="rounded-lg bg-surface p-2">
+                    <span className="block text-muted font-semibold">Discount</span>
+                    <span className="font-extrabold text-danger">{savedAmount > 0 ? `-${savedAmount.toLocaleString()}` : '0'}</span>
+                  </div>
+                  <div className="rounded-lg bg-brand p-2 text-white">
+                    <span className="block text-[10px] font-bold uppercase opacity-90">Final</span>
+                    <span className="font-black">{finalEstimate.toLocaleString()} MMK</span>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 border-t border-line px-4 py-3">
+                  <button type="button" onClick={closeRepairs} className="rounded-xl bg-brand px-5 py-2 text-xs font-black text-white transition hover:bg-brand-deep">
+                    Done
+                  </button>
+                </div>
               </>
             )}
-
-            <div className="mt-4 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setIsRepairsOpen(false)}
-                className="rounded-xl bg-brand px-5 py-2 text-xs font-black text-white transition hover:bg-brand-deep"
-              >
-                Done
-              </button>
-            </div>
           </div>
         </div>
       )}
