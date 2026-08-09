@@ -755,7 +755,10 @@ html[data-theme] [class~="bg-[#ED7132]"] {
 }
 
 .workspace-panel--standard {
-  height: clamp(400px, calc(100dvh - 220px), 920px);
+  /* Auto-height: short filtered lists shrink to content so there is no dead
+     space below the table; long lists cap at max-height and scroll. */
+  min-height: 300px;
+  max-height: clamp(400px, calc(100dvh - 220px), 920px);
 }
 
 .workspace-panel--with-toolbar {
@@ -765,9 +768,10 @@ html[data-theme] [class~="bg-[#ED7132]"] {
 }
 
 .workspace-panel--with-summary {
-  /* Give matrix/list workspaces the remaining screen height while keeping
-     their own data region scrollable. */
-  height: clamp(520px, calc(100dvh - 170px), 1100px);
+  /* Auto-height like --standard: shrink to content when the table is short,
+     cap + scroll when it's tall. */
+  min-height: 320px;
+  max-height: clamp(520px, calc(100dvh - 170px), 1100px);
 }
 
 .workspace-panel__scroll {
@@ -828,7 +832,8 @@ html[data-theme] [class~="bg-[#ED7132]"] {
 @media (max-width: 767px) {
   .workspace-panel--standard,
   .workspace-panel--with-summary {
-    height: clamp(360px, calc(100dvh - 190px), 720px);
+    min-height: 260px;
+    max-height: clamp(360px, calc(100dvh - 190px), 720px);
   }
 
   .workspace-panel--with-toolbar {
