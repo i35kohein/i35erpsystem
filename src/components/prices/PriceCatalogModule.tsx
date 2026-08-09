@@ -164,6 +164,23 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
   const [discountMenuOpenFor, setDiscountMenuOpenFor] = useState<string | null>(null);
   const [customDiscountInput, setCustomDiscountInput] = useState('');
 
+  // Close the discount popup when clicking/tapping outside it (Ko Hein).
+  useEffect(() => {
+    if (!discountMenuOpenFor) return;
+    const onDocClick = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+      if (target.closest('.discount-popup') || target.closest('.discount-trigger')) return;
+      setDiscountMenuOpenFor(null);
+    };
+    document.addEventListener('mousedown', onDocClick);
+    document.addEventListener('touchstart', onDocClick, { passive: true });
+    return () => {
+      document.removeEventListener('mousedown', onDocClick);
+      document.removeEventListener('touchstart', onDocClick);
+    };
+  }, [discountMenuOpenFor]);
+
   // ESC closes the discount modal.
   useEffect(() => {
     if (!discountMenuOpenFor) return;
@@ -559,7 +576,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                   type="button"
                                   onClick={() => setDiscountMenuOpenFor(item.categoryKey)}
                                   title={item.discountPercent > 0 ? `${item.discountPercent}% discount applied` : 'Add discount'}
-                                  className={`!w-8 !h-8 !min-h-8 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
+                                  className={`discount-trigger !w-8 !h-8 !min-h-8 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
                                     item.discountPercent > 0
                                       ? 'bg-brand text-white border border-brand shadow-2xs'
                                       : 'bg-white text-muted border border-line hover:border-brand hover:text-brand'
@@ -633,7 +650,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                     type="button"
                                     onClick={() => setDiscountMenuOpenFor(item.categoryKey)}
                                     title={item.discountPercent > 0 ? `${item.discountPercent}% discount applied` : 'Add discount'}
-                                    className={`!w-7 !h-7 !min-h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
+                                    className={`discount-trigger !w-7 !h-7 !min-h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
                                       item.discountPercent > 0
                                         ? 'bg-brand text-white border border-brand shadow-2xs'
                                         : 'bg-white text-muted border border-line hover:border-brand hover:text-brand'
@@ -724,7 +741,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                 type="button"
                                 onClick={() => setDiscountMenuOpenFor(item.categoryKey)}
                                 title={item.discountPercent > 0 ? `${item.discountPercent}% discount applied` : 'Add discount'}
-                                className={`!w-7 !h-7 !min-h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
+                                className={`discount-trigger !w-7 !h-7 !min-h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
                                   item.discountPercent > 0
                                     ? 'bg-brand text-white border border-brand shadow-2xs'
                                     : 'bg-white text-muted border border-line hover:border-brand hover:text-brand'
@@ -765,7 +782,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
   const renderDiscountPopup = (item: CartItem, align: 'left' | 'right' = 'left') => {
     if (discountMenuOpenFor !== item.categoryKey) return null;
     return (
-      <div className={`absolute top-full z-50 mt-1.5 w-44 rounded-2xl border border-line bg-white p-2 shadow-xl ${align === 'right' ? 'right-0' : 'left-0'}`}>
+      <div className={`discount-popup absolute top-full z-50 mt-1.5 w-44 rounded-2xl border border-line bg-white p-2 shadow-xl ${align === 'right' ? 'right-0' : 'left-0'}`}>
         <div className="grid grid-cols-4 gap-1.5">
           {DISCOUNT_OPTIONS.map((p) => (
             <button
@@ -1086,7 +1103,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                             setDiscountMenuOpenFor(item.key);
                           }}
                           title={discountPct > 0 ? `${discountPct}% discount applied` : 'Add discount'}
-                          className={`!w-7 !h-7 !min-h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
+                          className={`discount-trigger !w-7 !h-7 !min-h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
                             discountPct > 0
                               ? 'bg-brand text-white border border-brand'
                               : 'bg-white text-muted border border-line hover:border-brand hover:text-brand'
