@@ -710,7 +710,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                   className="text-muted hover:text-danger p-1 rounded transition-colors cursor-pointer shrink-0"
                                   title="Remove item"
                                 >
-                                  <X className="w-3.5 h-3.5" />
+                                  <Trash2 className="w-3.5 h-3.5" />
                                 </Button>
                               </div>
                             </div>
@@ -808,7 +808,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                               className="text-muted hover:text-danger p-1 rounded transition-colors cursor-pointer shrink-0"
                               title="Remove item"
                           >
-                            <X className="w-3.5 h-3.5" />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </Button>
                           </div>
                         </div>
@@ -933,20 +933,20 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
   const renderCartTotals = () => (
     <div className="shrink-0 bg-white border-t border-line px-3.5 pt-3 pb-[calc(0.875rem+env(safe-area-inset-bottom))] space-y-2.5">
-      <div className="space-y-1.5 text-xs">
+      <div className="space-y-1.5 text-xs sm:text-sm">
         <div className="flex justify-between items-center">
           <span className="text-muted">Subtotal</span>
-          <span className="font-mono font-bold text-ink">{formatPrice(cartSummary.subtotal)}</span>
+          <span className="font-mono font-bold text-ink sm:text-base">{formatPrice(cartSummary.subtotal)}</span>
         </div>
 
         <div className="flex justify-between items-center">
           <span className="text-muted">Discount Applied</span>
           {cartSummary.totalDiscountAmount > 0 ? (
-            <span className="font-mono font-bold text-success">
+            <span className="font-mono font-bold text-success sm:text-base">
               -{formatPrice(cartSummary.totalDiscountAmount)}
             </span>
           ) : (
-            <span className="font-mono text-muted">{formatPrice(0)}</span>
+            <span className="font-mono text-muted sm:text-base">{formatPrice(0)}</span>
           )}
         </div>
 
