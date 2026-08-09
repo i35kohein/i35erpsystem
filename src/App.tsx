@@ -1643,7 +1643,7 @@ export default function App() {
 
             {/* Price Catalog: top navbar controls hidden — module has its own device switcher,
                 settings live in Settings tab (Ko Hein 2026-08-09) */}
-            {activeTab === 'price-catalog' ? null : ['intake', 'pipeline', 'pos', 'inventory', 'crm', 'suppliers', 'qa'].includes(activeTab) ? (
+            {activeTab === 'price-catalog' || activeTab === 'inventory' ? null : ['intake', 'pipeline', 'pos', 'inventory', 'crm', 'suppliers', 'qa'].includes(activeTab) ? (
               /* Contextual Search Input — desktop only (modules have their own mobile search);
                   also hidden on iPad inventory where the navbar scan box handles search */
               !(isIpad && activeTab === 'inventory') && (
