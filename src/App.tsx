@@ -1,5 +1,6 @@
 import  {useState, useRef, useEffect, useMemo, lazy, Suspense} from 'react';
 import { AnimatePresence, motion } from 'motion/react';
+import { createPortal } from 'react-dom';
 import {Sparkles, Plus, Search, Filter, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, RotateCcw, Save, Timer, SlidersHorizontal, Eye, Stethoscope, Edit2,
   MoreHorizontal,
   Printer, List,
@@ -108,6 +109,51 @@ import { HoverTooltip } from './components/common/HoverTooltip';
 import { registerToastHandler, unregisterToastHandler } from './lib/toast';
 import { LoginPage } from './components/auth/LoginPage';
 
+
+/** ⋯ More menu — fixed-positioned so the header's overflow-x-auto strip can't clip it. */
+function FixedMoreMenu({ anchorRef, isOpen, editMode, onClose, onPrintTags, onToggleEdit }: {
+  anchorRef: React.RefObject<HTMLButtonElement | null>;
+  isOpen: boolean;
+  editMode: boolean;
+  onClose: () => void;
+  onPrintTags: () => void;
+  onToggleEdit: () => void;
+}) {
+  if (!isOpen) return null;
+  const rect = anchorRef.current?.getBoundingClientRect();
+  if (!rect) return null;
+  const menuW = 192;
+  let left = rect.right - menuW;
+  left = Math.max(8, Math.min(left, window.innerWidth - menuW - 8));
+  const top = rect.bottom + 6;
+  return createPortal(
+    <>
+      <div className="fixed inset-0 z-40" onClick={onClose} role="presentation" aria-hidden="true" />
+      <div className="fixed z-50 w-48 rounded-xl border border-line bg-white p-1.5 shadow-xl" style={{ top, left }}>
+        <button
+          type="button"
+          onClick={onPrintTags}
+          className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg hover:bg-surface transition-colors cursor-pointer text-left focus:outline-none"
+        >
+          <Printer className="w-4 h-4 text-brand shrink-0" />
+          Print Tags
+        </button>
+        <button
+          type="button"
+          onClick={onToggleEdit}
+          className={`w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg transition-colors cursor-pointer text-left focus:outline-none ${
+            editMode ? 'text-warning hover:bg-warning/10' : 'hover:bg-surface'
+          }`}
+        >
+          <Edit2 className="w-4 h-4 shrink-0" />
+          {editMode ? 'Done Editing' : 'Edit Stock'}
+        </button>
+      </div>
+    </>,
+    document.body,
+  );
+}
+
 export default function App() {
   const { t } = useLanguage();
   const [isOnline, setIsOnline] = useState(() => typeof navigator === 'undefined' || navigator.onLine);
@@ -141,6 +187,7 @@ export default function App() {
   const [inventoryStockView, setInventoryStockView] = useState<'table' | 'cards'>('table');
   const [inventoryTagsPrintOpen, setInventoryTagsPrintOpen] = useState(false);
   const [inventoryMoreOpen, setInventoryMoreOpen] = useState(false);
+  const inventoryMoreAnchorRef = useRef<HTMLButtonElement | null>(null);
   const [inventoryScanQuery, setInventoryScanQuery] = useState('');
   const inventoryScanSubmitRef = useRef<(() => void) | null>(null);
   const [customerTypeFilter, setCustomerTypeFilter] = useState<string>('ALL');
@@ -1920,6 +1967,7 @@ export default function App() {
               <div className={isIpad ? 'hidden' : 'relative block shrink-0'}>
                 <button
                   type="button"
+                  ref={inventoryMoreAnchorRef}
                   onClick={() => setInventoryMoreOpen(!inventoryMoreOpen)}
                   className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-white text-ink hover:border-brand hover:text-brand transition-colors cursor-pointer focus:outline-none"
                   title="More actions"
@@ -1928,29 +1976,14 @@ export default function App() {
                   <MoreHorizontal className="h-4 w-4" />
                 </button>
                 {inventoryMoreOpen && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setInventoryMoreOpen(false)} role="presentation" aria-hidden="true" />
-                    <div className="absolute right-0 top-full mt-1.5 z-50 w-48 rounded-xl border border-line bg-white p-1.5 shadow-xl">
-                      <button
-                        type="button"
-                        onClick={() => { setInventoryTagsPrintOpen(true); setInventoryMoreOpen(false); }}
-                        className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg hover:bg-surface transition-colors cursor-pointer text-left focus:outline-none"
-                      >
-                        <Printer className="w-4 h-4 text-brand shrink-0" />
-                        Print Tags
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => { setInventoryEditMode((m) => !m); setInventoryMoreOpen(false); }}
-                        className={`w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg transition-colors cursor-pointer text-left focus:outline-none ${
-                          inventoryEditMode ? 'text-warning hover:bg-warning/10' : 'hover:bg-surface'
-                        }`}
-                      >
-                        <Edit2 className="w-4 h-4 shrink-0" />
-                        {inventoryEditMode ? 'Done Editing' : 'Edit Stock'}
-                      </button>
-                    </div>
-                  </>
+                  <FixedMoreMenu
+                    anchorRef={inventoryMoreAnchorRef}
+                    isOpen={inventoryMoreOpen}
+                    editMode={inventoryEditMode}
+                    onClose={() => setInventoryMoreOpen(false)}
+                    onPrintTags={() => { setInventoryTagsPrintOpen(true); setInventoryMoreOpen(false); }}
+                    onToggleEdit={() => { setInventoryEditMode((m) => !m); setInventoryMoreOpen(false); }}
+                  />
                 )}
               </div>
               </div>
