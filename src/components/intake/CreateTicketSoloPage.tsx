@@ -44,7 +44,7 @@ import {
   AlertTriangle, 
   HelpCircle,
   Search,
-  Wrench, UserPlus , MoreHorizontal } from 'lucide-react';
+  Wrench, UserPlus , MoreHorizontal, ClipboardCheck } from 'lucide-react';
 import { 
   WorkOrder, 
   Customer, 
@@ -92,6 +92,8 @@ interface CreateTicketSoloPageProps {
   embedded?: boolean;
   /** After quick-create: reopen the drawer in edit mode to add repairs/diagnostics. */
   onContinueEditing?: (wo: WorkOrder) => void;
+  /** Navigate to another app tab (Simple Ticket link, Ko Hein) */
+  onNavigateToTab?: (tab: string) => void;
 }
 
 const getDiagnosticIcon = (name: string) => {
@@ -132,6 +134,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
   onCancelEdit,
   embedded = false,
   onContinueEditing,
+  onNavigateToTab,
 }) => {
   const [createdTicket, setCreatedTicket] = useState<WorkOrder | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
@@ -683,14 +686,25 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             <p className="text-xs text-muted truncate">{isEditMode ? 'Update customer, device and repair details' : 'Customer, device, repair estimate and intake diagnostics'}</p>
           </div>
         </div>
-        <Button
-          onClick={onViewRepairTickets}
-          className="text-xs text-brand font-bold flex items-center gap-1 hover:bg-brand-soft rounded-lg px-2 py-1.5 shrink-0"
-        >
-          <ArrowLeft className="w-3 h-3" />
-          <span className="hidden sm:inline">{isEditMode ? 'Back to Ticket' : 'Back to Tickets'}</span>
-          <span className="sm:hidden">Back</span>
-        </Button>
+        <div className="flex items-center gap-1 shrink-0">
+          <Button
+            type="button"
+            onClick={() => onNavigateToTab?.('simple-ticket')}
+            className="text-xs text-brand font-bold flex items-center gap-1 hover:bg-brand-soft rounded-lg px-2 py-1.5"
+            title="Open Simple Ticket form"
+          >
+            <ClipboardCheck className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">Simple Ticket</span>
+          </Button>
+          <Button
+            onClick={onViewRepairTickets}
+            className="text-xs text-brand font-bold flex items-center gap-1 hover:bg-brand-soft rounded-lg px-2 py-1.5"
+          >
+            <ArrowLeft className="w-3 h-3" />
+            <span className="hidden sm:inline">{isEditMode ? 'Back to Ticket' : 'Back to Tickets'}</span>
+            <span className="sm:hidden">Back</span>
+          </Button>
+        </div>
       </div>
 
       {/* Main Container */}

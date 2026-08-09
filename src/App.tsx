@@ -2188,6 +2188,10 @@ export default function App() {
                   onSaveWorkOrder={handleSaveWorkOrder}
                   onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
                   onOpenAiAssistant={() => setIsAiAssistantOpen(true)}
+                  onNavigateToTab={(tab) => {
+                    setTicketPrefill(null);
+                    setActiveTab(tab as any);
+                  }}
                   onViewRepairTickets={() => {
                     setTicketPrefill(null);
                     setActiveTab('intake');
