@@ -485,35 +485,50 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 </div>
               </div>
 
-              {/* Special Warning & Diagnostic Fee Quick Action if Cant Repair / Customer Cancelled */}
+              {/* Diagnostic Fee quick action — 5-row Excel table (Ko Hein) */}
               {(selectedWo.status === 'Cant Repair' || selectedWo.status === 'Customer Not Repair') && (
-                <div className="bg-danger/10 border border-danger/30 p-3.5 rounded-2xl space-y-2.5 animate-fadeIn">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-2">
-                      <XCircle className="w-4 h-4 text-danger shrink-0" />
-                      <div>
-                        <span className="font-extrabold text-danger text-xs block">
-                          {selectedWo.status === 'Cant Repair' ? "Unrepairable Device" : "Customer Cancelled"}
-                        </span>
-                        <span className="text-xs text-danger">
-                          Option to charge Diagnostic / Inspection fee only before handing back device.
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-1 border-t border-danger/30">
-                    <span className="text-xs font-extrabold text-danger">
-                      Standard Diagnostic Fee: 5,000 {currency}
-                    </span>
-                    <Button
-                      type="button"
-                      onClick={handleApplyDiagnosticFeeOnly}
-                      className="px-3 py-1 bg-danger hover:bg-danger-deep text-white font-extrabold text-xs rounded-xl transition-all shadow-2xs cursor-pointer active:scale-95"
-                    >
-                      Apply Diagnostic Fee Only (စက်စစ်ခ သာကောက်မည်)
-                    </Button>
-                  </div>
+                <div className="border border-danger/40 rounded-lg overflow-hidden bg-white text-xs animate-fadeIn">
+                  <table className="w-full border-collapse">
+                    <tbody>
+                      <tr className="bg-danger/5">
+                        <td className="border border-danger/20 px-2 py-1.5">
+                          <span className="flex items-center gap-1.5 text-danger font-extrabold">
+                            <XCircle className="w-3.5 h-3.5 shrink-0" />
+                            {selectedWo.status === 'Cant Repair' ? 'Unrepairable Device' : 'Customer Cancelled'}
+                          </span>
+                        </td>
+                        <td className="border border-danger/20 px-2 py-1.5 text-right font-mono font-bold text-danger">
+                          {selectedWo.orderNumber}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="border border-line px-2 py-1.5 text-muted" colSpan={2}>
+                          Option: charge Diagnostic / Inspection fee only before handing back device
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="border border-line px-2 py-1.5 text-muted">Standard Diagnostic Fee</td>
+                        <td className="border border-line px-2 py-1.5 text-right font-mono font-black text-ink tabular-nums">
+                          5,000 {currency}
+                        </td>
+                      </tr>
+                      <tr className="bg-surface/50">
+                        <td className="border border-line px-2 py-1.5 text-muted">Charged Items</td>
+                        <td className="border border-line px-2 py-1.5 text-right text-muted">—</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-line px-2 py-1.5" colSpan={2}>
+                          <button
+                            type="button"
+                            onClick={handleApplyDiagnosticFeeOnly}
+                            className="w-full py-1.5 rounded-md bg-danger hover:bg-danger-deep text-white font-extrabold text-xs transition-all cursor-pointer active:scale-[0.98] focus:outline-none"
+                          >
+                            Apply Diagnostic Fee Only (စက်စစ်ခ သာကောက်မည်)
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               )}
 
