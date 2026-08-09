@@ -762,10 +762,10 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
   // Discount popup — small box anchored right under the circle button, with
   // circular preset options + custom % (Ko Hein: no rightward expansion).
-  const renderDiscountPopup = (item: CartItem) => {
+  const renderDiscountPopup = (item: CartItem, align: 'left' | 'right' = 'left') => {
     if (discountMenuOpenFor !== item.categoryKey) return null;
     return (
-      <div className="absolute left-0 top-full z-50 mt-1.5 w-44 rounded-2xl border border-line bg-white p-2 shadow-xl">
+      <div className={`absolute top-full z-50 mt-1.5 w-44 rounded-2xl border border-line bg-white p-2 shadow-xl ${align === 'right' ? 'right-0' : 'left-0'}`}>
         <div className="grid grid-cols-4 gap-1.5">
           {DISCOUNT_OPTIONS.map((p) => (
             <button
@@ -1077,11 +1077,39 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                         </div>
                       </div>
 
-                      {/* Selection checkmark */}
+                      {/* Mobile: discount circle — replaces the selection checkmark on phones (Ko Hein) */}
+                      <div className="relative sm:hidden shrink-0">
+                        <Button
+                          type="button"
+                          onClick={() => {
+                            if (!cart.has(item.key)) {
+                              handleToggleCartItem(item.key, item.label, item.price!, item.warranty);
+                            }
+                            setDiscountMenuOpenFor(item.key);
+                          }}
+                          title={discountPct > 0 ? `${discountPct}% discount applied` : 'Add discount'}
+                          className={`!w-7 !h-7 !min-h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
+                            discountPct > 0
+                              ? 'bg-brand text-white border border-brand'
+                              : 'bg-white text-muted border border-line hover:border-brand hover:text-brand'
+                          }`}
+                        >
+                          <BadgePercent className="w-4 h-4" />
+                        </Button>
+                        {renderDiscountPopup({
+                          categoryKey: item.key,
+                          label: item.label,
+                          price: item.price!,
+                          warranty: item.warranty,
+                          discountPercent: discountPct,
+                        }, 'right')}
+                      </div>
+
+                      {/* Desktop selection checkmark (absolute top-right) */}
                       <motion.div
                         animate={{ scale: isSelected ? 1 : 0.85 }}
                         transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-                        className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 border transition-all sm:absolute sm:top-3 sm:right-3 ${
+                        className={`flex max-sm:hidden w-5 h-5 rounded-full items-center justify-center shrink-0 border transition-all sm:absolute sm:top-3 sm:right-3 ${
                           isSelected
                             ? 'bg-brand border-brand text-white shadow-2xs'
                             : 'border-line-strong bg-white text-transparent group-hover:border-brand'
