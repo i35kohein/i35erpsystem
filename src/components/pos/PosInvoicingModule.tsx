@@ -653,7 +653,9 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
         {/* Right Column: Dynamic Invoice & Terminal Checkout (8 cols) */}
         <div className={`flex-1 min-w-0 bg-white border border-line rounded-2xl p-5 space-y-5 shadow-xs ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:overflow-y-auto' : ''}`}>
           {selectedWo ? (
-            <div className="space-y-5">
+            <div className="space-y-5 lg:grid lg:grid-cols-2 lg:gap-5 lg:space-y-0 lg:items-start">
+              {/* Desktop: left column — ticket header + items + summary */}
+              <div className="space-y-5 lg:min-w-0">
               <div className="border-b border-line pb-3 space-y-2">
                 {/* Line 1: WO number + status + Notify */}
                 <div className="flex items-center justify-between gap-2">
@@ -897,7 +899,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   )}
                 </div>
               </div>
+              </div>
 
+              {/* Desktop: right column — payment + pay button */}
+              <div className="space-y-5 lg:min-w-0">
               {/* Payment Gateway Options */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -1285,6 +1290,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     </>
                   )}
                 </Button>
+              </div>
               </div>
             </div>
           ) : (
