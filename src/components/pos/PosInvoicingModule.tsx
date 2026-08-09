@@ -3,16 +3,13 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useIsIpad } from '../../hooks/useIsIpad';
 import { DateFilterState, filterByDateRange } from '../common/DateFilterSelector';
 import {CreditCard,
-  DollarSign,
   Receipt,
   Coins,
   CheckCircle2, 
   Printer, 
   ShieldCheck, 
-  Smartphone,
   Plus,
   FileText,
-  QrCode,
   Landmark,
   Copy,
   PackageCheck,
@@ -27,7 +24,6 @@ import {CreditCard,
   UserCheck,
   ChevronsLeft,
   ChevronsRight,
-  type LucideIcon,
 } from 'lucide-react';
 import { WorkOrder, Customer, SystemSettings, PartItem, WorkOrderLineItem } from '../../types';
 import { PriorityBadge } from '../common/PriorityBadge';
@@ -101,53 +97,6 @@ const INVENTORY_CATEGORY_GROUPS: Array<{ match: RegExp; categories: string[] }> 
 
 // Brand meta for payment method tiles (icon + brand color) so the grid is
 // scannable at a glance instead of text-only tiles.
-const PAYMENT_METHOD_META: Record<string, { icon: LucideIcon; color: string }> = {
-  'Cash': { icon: DollarSign, color: '#34C759' },
-  'KBZ Pay': { icon: Smartphone, color: '#E4002B' },
-  'UAB Pay': { icon: Landmark, color: '#0F4C81' },
-  'AYA Pay': { icon: Landmark, color: '#0F7B3E' },
-  'MMQR (National QR)': { icon: QrCode, color: '#0A66C2' },
-  'Wave Money': { icon: Smartphone, color: '#00B5E2' },
-  'CB Bank (CB Pay)': { icon: Landmark, color: '#E4002B' },
-  'Yoma Bank (Next)': { icon: Landmark, color: '#6C1D45' },
-  'KBZ Bank (iBanking)': { icon: Landmark, color: '#E4002B' },
-  'AYA Bank (mBanking)': { icon: Landmark, color: '#0F7B3E' },
-};
-const getPaymentMeta = (name: string) => PAYMENT_METHOD_META[name] || { icon: DollarSign, color: '#0071E3' };
-
-/** Payment method tile — shared by the method grid and Split Payment (was duplicated verbatim, P2 audit 2026-08-08) */
-const tileBase = 'flex-1 min-w-[150px]! md:min-w-[165px]! !min-h-[56px] p-2.5 rounded-xl border text-left font-bold text-xs transition-all cursor-pointer flex items-center space-x-2.5';
-
-function PaymentMethodTile({ selected, selectedClass, icon: Icon, iconColor, name, desc, onClick }: {
-  selected: boolean;
-  selectedClass: string;
-  icon: any;
-  iconColor: string;
-  name: string;
-  desc: string;
-  onClick: () => void;
-}) {
-  return (
-    <Button
-      type="button"
-      onClick={onClick}
-      className={`${tileBase} ${
-        selected ? selectedClass : 'bg-white text-ink border-line hover:bg-surface'
-      }`}
-    >
-      <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface">
-        <Icon className="w-4 h-4" style={{ color: selected ? '#FFFFFF' : iconColor }} />
-      </span>
-      <div className="min-w-0 flex-1">
-        <div className={`leading-tight font-extrabold ${selected ? 'text-white' : 'text-ink'}`}>{name}</div>
-        <div className={`text-xs font-normal leading-tight ${selected ? 'text-white' : 'text-muted'}`}>
-          {desc}
-        </div>
-      </div>
-    </Button>
-  );
-}
-
 // Group a raw IMEI/S/N into readable chunks: 350627792231777 -> 3506 2779 2231 777
 interface PosInvoicingModuleProps {
   workOrders: WorkOrder[];
@@ -720,65 +669,68 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 </div>
               )}
 
-              {/* Itemized Line Items Breakdown — text-based, Review Cart style (Ko Hein) */}
+              {/* Itemized Line Items — Excel-style table (Ko Hein) */}
               <div className="space-y-2">
                 <h3 className="font-bold text-brand text-xs">Itemized Labor & Parts</h3>
-                <div className="border border-line rounded-xl overflow-hidden bg-white">
-                  <div className="grid grid-cols-[18px_1fr_auto] gap-x-2.5 px-2.5 py-2 bg-surface text-[10px] font-extrabold uppercase tracking-wider text-muted border-b border-line">
-                    <span>#</span>
-                    <span>Item</span>
-                    <span className="text-right">Amount</span>
-                  </div>
-                  {selectedWo.lineItems.map((li, idx) => {
-                    // Match line item to its original repair quote so we can
-                    // show the ORIGINAL price (before any discount).
-                    const quote = (selectedWo.selectedRepairs || []).find(
-                      (r) => r && r.name && r.name.toLowerCase() === String(li.description || '').toLowerCase()
-                    );
-                    const originalPrice = quote && typeof quote.basePrice === 'number' && quote.basePrice > 0
-                      ? quote.basePrice
-                      : li.unitPrice;
-                    const hasDiscount = quote && typeof quote.discountPercent === 'number' && quote.discountPercent > 0;
-                    const isPart = li.partId && !li.isLabor;
-                    return (
-                      <div
-                        key={li.id}
-                        className={`grid grid-cols-[18px_1fr_auto] gap-x-2.5 items-center px-2.5 py-2 border-b border-line last:border-0 ${isPart ? 'bg-brand-soft/60' : ''}`}
-                      >
-                        <span className="text-[11px] font-extrabold text-muted tabular-nums">{idx + 1}</span>
-                        <div className="min-w-0">
-                          <p className="text-xs font-bold text-ink leading-snug">{li.description}</p>
-                          <p className="text-[10px] font-semibold text-muted">
-                            Qty {li.quantity}{isPart ? ' · Inventory Part' : ''}
-                          </p>
-                        </div>
-                        <div className="text-right min-w-0 flex items-center justify-end gap-1.5">
-                          <div>
-                            <p className="font-mono text-xs font-black text-ink whitespace-nowrap tabular-nums">
-                              {(li.unitPrice * li.quantity).toLocaleString()} {currency}
-                            </p>
-                            {hasDiscount && quote && (
-                              <p className="text-[10px] font-semibold text-muted whitespace-nowrap tabular-nums">
-                                <s className="font-mono">{(originalPrice * li.quantity).toLocaleString()}</s> · {quote.discountPercent}%
-                              </p>
-                            )}
-                          </div>
-                          {isPart && (
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveInventoryPartFromWorkOrder(li.id)}
-                              aria-label={`Remove ${li.description}`}
-                              title="Remove inventory part"
-                              className="text-muted hover:text-danger p-1 rounded transition-colors cursor-pointer focus:outline-none"
-                            >
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
+                <div className="border border-line-strong rounded-lg overflow-hidden bg-white">
+                  <table className="w-full border-collapse text-xs">
+                    <thead>
+                      <tr className="bg-surface">
+                        <th className="border border-line px-2 py-1.5 text-left font-extrabold text-muted text-[11px] uppercase tracking-wide">Item</th>
+                        <th className="border border-line px-2 py-1.5 text-right font-extrabold text-muted text-[11px] uppercase tracking-wide">Qty</th>
+                        <th className="border border-line px-2 py-1.5 text-right font-extrabold text-muted text-[11px] uppercase tracking-wide">Unit</th>
+                        <th className="border border-line px-2 py-1.5 text-right font-extrabold text-muted text-[11px] uppercase tracking-wide">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedWo.lineItems.map((li) => {
+                        // Match line item to its original repair quote so we can
+                        // show the ORIGINAL price (before any discount).
+                        const quote = (selectedWo.selectedRepairs || []).find(
+                          (r) => r && r.name && r.name.toLowerCase() === String(li.description || '').toLowerCase()
+                        );
+                        const originalPrice = quote && typeof quote.basePrice === 'number' && quote.basePrice > 0
+                          ? quote.basePrice
+                          : li.unitPrice;
+                        const hasDiscount = quote && typeof quote.discountPercent === 'number' && quote.discountPercent > 0;
+                        const isPart = li.partId && !li.isLabor;
+                        return (
+                          <tr key={li.id} className={isPart ? 'bg-brand-soft/60' : 'bg-white'}>
+                            <td className={`border border-line px-2 py-1.5 font-bold text-ink ${hasDiscount ? '' : ''}`}>
+                              {li.description}
+                              {isPart && <span className="ml-1.5 text-[10px] font-semibold text-muted">· Inventory Part</span>}
+                              {hasDiscount && quote && (
+                                <span className="ml-1.5 text-[10px] font-semibold text-success">· {quote.discountPercent}% off</span>
+                              )}
+                            </td>
+                            <td className="border border-line px-2 py-1.5 text-right text-muted tabular-nums">{li.quantity}</td>
+                            <td className="border border-line px-2 py-1.5 text-right font-mono text-muted tabular-nums">
+                              {hasDiscount && <s>{originalPrice.toLocaleString()}</s>}
+                              {!hasDiscount && originalPrice.toLocaleString()}
+                            </td>
+                            <td className="border border-line px-2 py-1.5 text-right font-mono font-black text-ink tabular-nums whitespace-nowrap">
+                              <span className="inline-flex items-center gap-1.5">
+                                {(li.unitPrice * li.quantity).toLocaleString()}
+                                {isPart && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveInventoryPartFromWorkOrder(li.id)}
+                                    aria-label={`Remove ${li.description}`}
+                                    title="Remove inventory part"
+                                    className="text-muted hover:text-danger p-0.5 rounded transition-colors cursor-pointer focus:outline-none"
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                )}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
+              </div>
 
                 <div className="bg-white border border-line rounded-xl p-4 space-y-2">
                   <Button
@@ -859,47 +811,46 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   )}
                 </div>
 
-                {/* Calculation Summary */}
-                <div className="bg-surface/80 p-4 rounded-xl border border-line space-y-1.5 text-right">
-                  <div className="flex justify-between text-muted">
-                    <span>Subtotal:</span>
-                    <span className="font-mono text-ink">{selectedWo.subtotal.toLocaleString()} {currency}</span>
-                  </div>
-                  <div className="flex justify-between text-muted">
-                    <span>Sales Tax ({Math.round(taxRate * 100)}%):</span>
-                    <span className="font-mono text-ink">{selectedWo.taxAmount.toLocaleString()} {currency}</span>
-                  </div>
-                  {selectedWo.discountAmount > 0 && (
-                    <div className="flex justify-between text-success-deep">
-                      <span>Discount:</span>
-                      <span className="font-mono">-{selectedWo.discountAmount.toLocaleString()} {currency}</span>
-                    </div>
-                  )}
-                  {selectedWo.depositAmount > 0 && (
-                    <div className="flex justify-between text-success-deep">
-                      <span>Upfront Deposit Paid:</span>
-                      <span className="font-mono">-{selectedWo.depositAmount.toLocaleString()} {currency}</span>
-                    </div>
-                  )}
-                  <div className="rounded-xl bg-brand-soft border border-brand/20 p-4 flex items-center justify-between">
-                    <span className="text-sm font-extrabold text-ink">Amount Due Now:</span>
-                    <span className="text-brand font-mono text-2xl font-black tracking-tight">
-                      {selectedWo.totalAmount.toLocaleString()} <span className="text-sm font-extrabold">{currency}</span>
-                    </span>
-                  </div>
-                  {selectedWo.inventoryConsumptionAmount > 0 && selectedWo.inventorySettlementStatus !== 'settled' && (
-                    <div className="rounded-xl bg-warning/10 border border-warning/30 px-3 py-2 flex items-center justify-between text-xs">
-                      <span className="font-bold text-warning flex items-center gap-1">
-                        <Coins className="w-3 h-3 text-warning shrink-0" />
-                        Parts cost used from stock — settle Inventory Fund
-                      </span>
-                      <span className="font-mono font-black text-warning">
-                        {selectedWo.inventoryConsumptionAmount.toLocaleString()} {currency}
-                      </span>
-                    </div>
-                  )}
+                {/* Calculation Summary — Excel-style table (Ko Hein) */}
+                <div className="border border-line-strong rounded-lg overflow-hidden bg-white text-xs">
+                  <table className="w-full border-collapse">
+                    <tbody>
+                      <tr>
+                        <td className="border border-line px-2 py-1.5 text-muted">Subtotal</td>
+                        <td className="border border-line px-2 py-1.5 text-right font-mono text-ink tabular-nums">{selectedWo.subtotal.toLocaleString()} {currency}</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-line px-2 py-1.5 text-muted">Sales Tax ({Math.round(taxRate * 100)}%)</td>
+                        <td className="border border-line px-2 py-1.5 text-right font-mono text-ink tabular-nums">{selectedWo.taxAmount.toLocaleString()} {currency}</td>
+                      </tr>
+                      {selectedWo.discountAmount > 0 && (
+                        <tr>
+                          <td className="border border-line px-2 py-1.5 text-success-deep">Discount</td>
+                          <td className="border border-line px-2 py-1.5 text-right font-mono text-success-deep tabular-nums">-{selectedWo.discountAmount.toLocaleString()} {currency}</td>
+                        </tr>
+                      )}
+                      {selectedWo.depositAmount > 0 && (
+                        <tr>
+                          <td className="border border-line px-2 py-1.5 text-success-deep">Upfront Deposit Paid</td>
+                          <td className="border border-line px-2 py-1.5 text-right font-mono text-success-deep tabular-nums">-{selectedWo.depositAmount.toLocaleString()} {currency}</td>
+                        </tr>
+                      )}
+                      <tr className="bg-brand-soft">
+                        <td className="border border-line px-2 py-2 text-sm font-extrabold text-ink">Amount Due Now</td>
+                        <td className="border border-line px-2 py-2 text-right font-mono text-base font-black text-brand tabular-nums">{selectedWo.totalAmount.toLocaleString()} {currency}</td>
+                      </tr>
+                      {selectedWo.inventoryConsumptionAmount > 0 && selectedWo.inventorySettlementStatus !== 'settled' && (
+                        <tr className="bg-warning/5">
+                          <td className="border border-line px-2 py-1.5 text-warning font-bold flex items-center gap-1">
+                            <Coins className="w-3 h-3 text-warning shrink-0" />
+                            Parts cost from stock — settle Inventory Fund
+                          </td>
+                          <td className="border border-line px-2 py-1.5 text-right font-mono font-black text-warning tabular-nums">{selectedWo.inventoryConsumptionAmount.toLocaleString()} {currency}</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
-              </div>
               </div>
 
               {/* Desktop: right column — payment + pay button */}
@@ -924,33 +875,33 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     <p>Enable one in Settings → Payment Methods to accept payment.</p>
                   </div>
                 ) : (
-                <div className="flex flex-wrap gap-2">
+                <div className="border border-line-strong rounded-lg overflow-hidden bg-white">
                   {activePaymentMethods.map((m) => {
                     const isSelected = paymentMethod === m.name;
-                    const meta = getPaymentMeta(m.name);
-                    const Icon = meta.icon;
                     return (
-                      <PaymentMethodTile
+                      <button
                         key={m.id}
-                        selected={isSelected}
-                        selectedClass="bg-brand text-white border-brand shadow-2xs"
-                        icon={Icon}
-                        iconColor={meta.color}
-                        name={m.name}
-                        desc={m.category}
+                        type="button"
                         onClick={() => setPaymentMethod(m.name)}
-                      />
+                        className={`w-full flex items-center justify-between gap-2 px-2.5 py-2 text-left text-xs border-b border-line last:border-0 transition-colors cursor-pointer focus:outline-none ${
+                          isSelected ? 'bg-brand/5 font-extrabold text-brand' : 'text-ink hover:bg-surface'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2 min-w-0">
+                          <span className={`w-3.5 h-3.5 rounded-full border-2 shrink-0 flex items-center justify-center ${isSelected ? 'border-brand' : 'border-line-strong'}`}>
+                            {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-brand" />}
+                          </span>
+                          <span className="truncate">{m.name}</span>
+                          <span className={`text-[11px] font-semibold ${isSelected ? 'text-brand/70' : 'text-muted'}`}>{m.category}</span>
+                        </span>
+                        {isSelected && <Check className="w-3.5 h-3.5 shrink-0" />}
+                      </button>
                     );
                   })}
 
-                  {/* Split Payment Button */}
-                  <PaymentMethodTile
-                    selected={paymentMethod === 'Split Payment'}
-                    selectedClass="bg-purple text-white border-purple shadow-2xs"
-                    icon={Split}
-                    iconColor="#7360F2"
-                    name="Split Payment"
-                    desc="Multi-Method"
+                  {/* Split Payment row */}
+                  <button
+                    type="button"
                     onClick={() => {
                       setPaymentMethod('Split Payment');
                       if (selectedWo && splitPayments[0].amount === 0 && splitPayments[1].amount === 0) {
@@ -961,7 +912,19 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         ]);
                       }
                     }}
-                  />
+                    className={`w-full flex items-center justify-between gap-2 px-2.5 py-2 text-left text-xs border-t border-line transition-colors cursor-pointer focus:outline-none ${
+                      paymentMethod === 'Split Payment' ? 'bg-purple/5 font-extrabold text-purple' : 'text-ink hover:bg-surface'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2 min-w-0">
+                      <span className={`w-3.5 h-3.5 rounded-full border-2 shrink-0 flex items-center justify-center ${paymentMethod === 'Split Payment' ? 'border-purple' : 'border-line-strong'}`}>
+                        {paymentMethod === 'Split Payment' && <span className="w-1.5 h-1.5 rounded-full bg-purple" />}
+                      </span>
+                      <span className="truncate">Split Payment</span>
+                      <span className={`text-[11px] font-semibold ${paymentMethod === 'Split Payment' ? 'text-purple/70' : 'text-muted'}`}>Multi-Method</span>
+                    </span>
+                    {paymentMethod === 'Split Payment' && <Check className="w-3.5 h-3.5 shrink-0" />}
+                  </button>
                 </div>
                 )}
 
