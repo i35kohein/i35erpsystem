@@ -73,6 +73,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [savedFlash, setSavedFlash] = useState(false);
   const [isModelModalOpen, setIsModelModalOpen] = useState(false);
+  const [previewNumber] = useState(() => `WO-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`);
   const [isColorOpen, setIsColorOpen] = useState(false);
   const [isRepairsOpen, setIsRepairsOpen] = useState(false);
   const [repairSearch, setRepairSearch] = useState('');
@@ -261,9 +262,12 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
         <header className="flex items-center justify-between gap-4 border-b border-line px-4 py-4 sm:px-7">
           <div className="min-w-0">
             <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted">
-              {editingId ? `Editing simple ticket — ${editTarget?.orderNumber || ''}` : 'Service intake form'}
+              {editingId ? 'Editing simple ticket' : 'Service intake form'}
             </p>
           </div>
+          <span className="shrink-0 font-mono text-sm font-black tracking-tight text-brand">
+            {editingId ? editTarget?.orderNumber || previewNumber : previewNumber}
+          </span>
 
         </header>
 
