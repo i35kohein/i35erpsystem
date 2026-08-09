@@ -14,7 +14,6 @@ import {CreditCard,
   Copy,
   PackageCheck,
   Check,
-  ChevronDown,
   AlertTriangle, 
   XCircle, 
   X,
@@ -468,6 +467,9 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   <h2 className="text-base font-bold text-ink truncate">{selectedWo.deviceModel}</h2>
                   <div className="text-right shrink-0">
                     <p className="font-bold text-ink text-xs">{selectedWo.customerName}</p>
+                    {selectedWo.customerPhone && (
+                      <p className="text-[11px] font-semibold text-muted mt-0.5">{selectedWo.customerPhone}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -582,83 +584,17 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 </div>
               </div>
 
-                <div className="border border-line-strong rounded-lg overflow-hidden bg-white">
-                  <button
-                    type="button"
-                    onClick={() => setIsAddPartOpen(!isAddPartOpen)}
-                    aria-expanded={isAddPartOpen}
-                    className="w-full flex items-center justify-between gap-2 px-2.5 py-2 text-left bg-surface hover:bg-line/30 transition-colors cursor-pointer focus:outline-none"
-                  >
-                    <span className="text-xs font-extrabold text-ink">Add Inventory Part Used</span>
-                    <span className="flex items-center gap-2">
-                      <span className="text-[11px] font-semibold text-muted">Pick the stock part used on this ticket</span>
-                      <ChevronDown className={`w-3.5 h-3.5 text-muted shrink-0 transition-transform ${isAddPartOpen ? 'rotate-180' : ''}`} />
-                    </span>
-                  </button>
-
-                  {isAddPartOpen && (
-                  <div className="p-2.5 space-y-2.5">
-                    <label className="block">
-                      <span className="block text-[11px] font-bold text-muted mb-1">Inventory part</span>
-                      <div className="flex items-center gap-2">
-                        <select
-                          value={inventoryPartId || (selectedInventoryPart ? selectedInventoryPart.id : '')}
-                          onChange={(e) => setInventoryPartId(e.target.value)}
-                          className="min-w-0 flex-1 truncate rounded-lg border border-line bg-white px-2.5 py-2 text-xs font-semibold text-ink outline-none focus:border-brand"
-                        >
-                          {filteredInventoryParts
-                            .filter((part) => part.quantityInStock > 0)
-                            .map((part) => (
-                              <option key={part.id} value={part.id}>
-                                {part.name} • Stock: {part.quantityInStock}
-                              </option>
-                            ))}
-                          {filteredInventoryParts.filter((part) => part.quantityInStock > 0).length === 0 && (
-                            <option value="">No parts in stock</option>
-                          )}
-                        </select>
-                        {selectedInventoryPart && selectedInventoryPart.quantityInStock > 0 && (
-                          <span className={`inline-flex shrink-0 items-center gap-1 text-[11px] font-bold whitespace-nowrap ${
-                            selectedInventoryPart.quantityInStock <= selectedInventoryPart.reorderPoint
-                              ? 'text-warning'
-                              : 'text-success'
-                          }`}>
-                            {selectedInventoryPart.quantityInStock <= selectedInventoryPart.reorderPoint ? (
-                              <AlertTriangle className="h-3 w-3" />
-                            ) : (
-                              <PackageCheck className="h-3 w-3" />
-                            )}
-                            {selectedInventoryPart.quantityInStock}
-                            {selectedInventoryPart.quantityInStock <= selectedInventoryPart.reorderPoint ? ' Low' : ' avail'}
-                          </span>
-                        )}
-                      </div>
-                    </label>
-
-                    <div className="flex items-end gap-2">
-                      <label className="block shrink-0">
-                        <span className="block text-[11px] font-bold text-muted mb-1">Qty</span>
-                        <Input
-                          type="number"
-                          min={1}
-                          max={selectedInventoryPart?.quantityInStock || 99}
-                          value={inventoryPartQty || ''}
-                          onChange={(e) => setInventoryPartQty(Math.max(1, Math.floor(Number(e.target.value) || 1)))}
-                          className="w-16 rounded-lg border border-line bg-white px-2 py-2 text-xs font-mono font-bold text-ink outline-none focus:border-brand"
-                        />
-                      </label>
-                      <Button
-                        type="button"
-                        onClick={handleAddInventoryPartToWorkOrder}
-                        disabled={!selectedInventoryPart}
-                        className="inline-flex h-10 shrink-0 items-center justify-center rounded-lg bg-brand px-3.5 text-xs font-extrabold text-white transition-all hover:bg-brand-deep disabled:cursor-not-allowed disabled:opacity-40"
-                      >
-                        Add Part
-                      </Button>
-                    </div>
-                  </div>
-                  )}
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsAddPartOpen(true)}
+                  className="w-full flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg border border-line-strong bg-white hover:bg-surface transition-colors cursor-pointer focus:outline-none"
+                >
+                  <span className="flex items-center gap-1.5 text-xs font-extrabold text-ink">
+                    <PackageCheck className="w-3.5 h-3.5 text-brand shrink-0" />
+                    Add Inventory Part Used
+                  </span>
+                  <Plus className="w-3.5 h-3.5 text-muted shrink-0" />
+                </button>
 
                 {/* Calculation Summary — Excel-style table (Ko Hein) */}
                 <div className="border border-line-strong rounded-lg overflow-hidden bg-white text-xs">
@@ -719,7 +655,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     <p>Enable one in Settings → Payment Methods to accept payment.</p>
                   </div>
                 ) : (
-                <div className="border border-line-strong rounded-lg overflow-hidden bg-white">
+                <div className="flex flex-wrap gap-1.5">
                   {activePaymentMethods.map((m) => {
                     const isSelected = paymentMethod === m.name;
                     return (
@@ -727,22 +663,16 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         key={m.id}
                         type="button"
                         onClick={() => setPaymentMethod(m.name)}
-                        className={`w-full flex items-center justify-between gap-2 px-2.5 py-2 text-left text-xs border-b border-line last:border-0 transition-colors cursor-pointer focus:outline-none ${
-                          isSelected ? 'bg-brand/5 font-extrabold text-brand' : 'text-ink hover:bg-surface'
+                        className={`!min-h-0 px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold border transition-all cursor-pointer focus:outline-none active:scale-95 ${
+                          isSelected ? 'bg-brand text-white border-brand shadow-2xs' : 'bg-white text-ink border-line hover:border-brand hover:text-brand'
                         }`}
                       >
-                        <span className="flex items-center gap-2 min-w-0">
-                          <span className={`w-3.5 h-3.5 rounded-full border-2 shrink-0 flex items-center justify-center ${isSelected ? 'border-brand' : 'border-line-strong'}`}>
-                            {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-brand" />}
-                          </span>
-                          <span className="truncate">{m.name}</span>
-                        </span>
-                        {isSelected && <Check className="w-3.5 h-3.5 shrink-0" />}
+                        {m.name}
                       </button>
                     );
                   })}
 
-                  {/* Split Payment row */}
+                  {/* Split Payment pill */}
                   <button
                     type="button"
                     onClick={() => {
@@ -755,17 +685,11 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         ]);
                       }
                     }}
-                    className={`w-full flex items-center justify-between gap-2 px-2.5 py-2 text-left text-xs border-t border-line transition-colors cursor-pointer focus:outline-none ${
-                      paymentMethod === 'Split Payment' ? 'bg-purple/5 font-extrabold text-purple' : 'text-ink hover:bg-surface'
+                    className={`!min-h-0 px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold border transition-all cursor-pointer focus:outline-none active:scale-95 ${
+                      paymentMethod === 'Split Payment' ? 'bg-purple text-white border-purple shadow-2xs' : 'bg-white text-ink border-line hover:border-purple hover:text-purple'
                     }`}
                   >
-                    <span className="flex items-center gap-2 min-w-0">
-                      <span className={`w-3.5 h-3.5 rounded-full border-2 shrink-0 flex items-center justify-center ${paymentMethod === 'Split Payment' ? 'border-purple' : 'border-line-strong'}`}>
-                        {paymentMethod === 'Split Payment' && <span className="w-1.5 h-1.5 rounded-full bg-purple" />}
-                      </span>
-                      <span className="truncate">Split Payment</span>
-                    </span>
-                    {paymentMethod === 'Split Payment' && <Check className="w-3.5 h-3.5 shrink-0" />}
+                    Split Payment
                   </button>
                 </div>
                 )}
@@ -1404,6 +1328,99 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 <span>Confirm & Print</span>
               </Button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Inventory Part — beautiful picker popup (Ko Hein) */}
+      {isAddPartOpen && (
+        <div
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center pt-[env(safe-area-inset-top)]"
+          onClick={() => setIsAddPartOpen(false)}
+          role="presentation"
+        >
+          <div
+            className="bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md h-[85dvh] sm:h-auto p-5 space-y-4 overflow-y-auto shadow-xl animate-i35-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <h3 className="font-extrabold text-sm text-ink">Add Inventory Part Used</h3>
+                <p className="text-xs text-muted truncate">Pick the stock part used on this ticket</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddPartOpen(false)}
+                aria-label="Close add part"
+                className="text-muted hover:text-ink p-1.5 rounded transition-colors cursor-pointer focus:outline-none"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Part list */}
+            <div className="space-y-1.5">
+              {filteredInventoryParts.filter((part) => part.quantityInStock > 0).length === 0 ? (
+                <div className="p-8 text-center text-muted text-xs space-y-1">
+                  <PackageCheck className="w-8 h-8 mx-auto opacity-40 text-brand" />
+                  <p className="font-extrabold text-ink">No parts in stock</p>
+                  <p>Add parts in Inventory first.</p>
+                </div>
+              ) : (
+                filteredInventoryParts.filter((part) => part.quantityInStock > 0).map((part) => {
+                  const isSelected = inventoryPartId === part.id;
+                  const low = part.quantityInStock <= part.reorderPoint;
+                  return (
+                    <button
+                      key={part.id}
+                      type="button"
+                      onClick={() => setInventoryPartId(part.id)}
+                      className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl border text-left transition-all cursor-pointer focus:outline-none active:scale-[0.99] ${
+                        isSelected ? 'border-brand bg-brand/5 ring-1 ring-brand/30' : 'border-line bg-white hover:bg-surface'
+                      }`}
+                    >
+                      <div className="min-w-0">
+                        <p className="text-xs font-extrabold text-ink truncate">{part.name}</p>
+                        <p className={`text-[11px] font-semibold ${low ? 'text-warning' : 'text-muted'}`}>
+                          Stock: {part.quantityInStock}{low ? ' — Low' : ''}
+                        </p>
+                      </div>
+                      <span className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${isSelected ? 'border-brand' : 'border-line-strong'}`}>
+                        {isSelected && <span className="w-2 h-2 rounded-full bg-brand" />}
+                      </span>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Qty + Add */}
+            {selectedInventoryPart && (
+              <div className="flex items-end gap-2 pt-1">
+                <label className="block shrink-0">
+                  <span className="block text-[11px] font-bold text-muted mb-1">Qty</span>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={selectedInventoryPart.quantityInStock || 99}
+                    value={inventoryPartQty || ''}
+                    onChange={(e) => setInventoryPartQty(Math.max(1, Math.floor(Number(e.target.value) || 1)))}
+                    className="w-20 rounded-lg border border-line bg-white px-2 py-2 text-xs font-mono font-bold text-ink outline-none focus:border-brand"
+                  />
+                </label>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    handleAddInventoryPartToWorkOrder();
+                    setIsAddPartOpen(false);
+                  }}
+                  className="flex-1 h-10 bg-brand hover:bg-brand-deep text-white font-extrabold text-xs rounded-lg"
+                >
+                  Add Part to Ticket
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       )}
