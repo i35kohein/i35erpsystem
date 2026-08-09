@@ -1,13 +1,13 @@
 import  {useState, useRef, useEffect, useMemo, lazy, Suspense} from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { createPortal } from 'react-dom';
-import {Sparkles, Plus, Search, Filter, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, RotateCcw, Save, Timer, SlidersHorizontal, Eye, Stethoscope, Edit2,
+import {Sparkles, Plus, Search, Filter, AlertTriangle, CheckCircle2, Info, AlertCircle, X, RotateCcw, Save, SlidersHorizontal, Edit2,
   MoreHorizontal,
   Printer, List,
   TrendingUp,
   Grid, Smartphone, Layers, ScanLine, ListFilter, Activity, Users, Boxes, Coins, ShieldAlert,
   Table as TableIcon, LayoutGrid, Flame, Camera} from 'lucide-react';
-import {subscribeToCollection, fetchCloudCollection, saveDocument, deleteDocument, clearCollection} from './lib/supabase';
+import { subscribeToCollection, fetchCloudCollection, saveDocument, deleteDocument } from './lib/supabase';
 import { setActiveUserId, notifyAccountChanged } from './utils/accountSettings';
 
 // ---- AI repair-type classification (Spareparts Change vs Hardware Repair) ----
@@ -74,7 +74,7 @@ import { DateFilterSelector, DateFilterState } from './components/common/DateFil
 import { RightFilterDrawer } from './components/common/RightFilterDrawer';
 import { ActiveFilterChips } from './components/common/ActiveFilterChips';
 import { DrawerSelect } from './components/common/DrawerSelect';
-import { checkIsBeforeDiagnosticNeeded, checkIsAfterDiagnosticNeeded, checkIsDiagnosticCompleted, checkIsBeforeDiagnosticCompleted, checkIsAfterDiagnosticCompleted } from './utils/diagnosticUtils';
+import { checkIsDiagnosticCompleted, checkIsBeforeDiagnosticCompleted, checkIsAfterDiagnosticCompleted } from './utils/diagnosticUtils';
 import { CustomDropdownMenu } from './components/common/CustomDropdownMenu';
 import { Button , Input } from './components/ui';
 import { ModuleLoadingSkeleton } from './components/common/ModuleLoadingSkeleton';
@@ -84,7 +84,6 @@ import { Navigation } from './components/Navigation';
 const DashboardOverview = lazy(() => import('./components/dashboard/DashboardOverview').then((m) => ({ default: m.DashboardOverview })));
 const IntakeWorkOrderModule = lazy(() => import('./components/intake/IntakeWorkOrderModule').then((m) => ({ default: m.IntakeWorkOrderModule })));
 const CreateTicketSoloPage = lazy(() => import('./components/intake/CreateTicketSoloPage').then((m) => ({ default: m.CreateTicketSoloPage })));
-const StatusPipelineView = lazy(() => import('./components/pipeline/StatusPipelineView').then((m) => ({ default: m.StatusPipelineView })));
 const TrelloBoardModule = lazy(() => import('./components/trello/TrelloBoardModule').then((m) => ({ default: m.TrelloBoardModule })));
 const InventoryManagementModule = lazy(() => import('./components/inventory/InventoryManagementModule').then((m) => ({ default: m.InventoryManagementModule })));
 const SupplierRmaModule = lazy(() => import('./components/suppliers/SupplierRmaModule').then((m) => ({ default: m.SupplierRmaModule })));
@@ -191,7 +190,7 @@ export default function App() {
     // Restore tab from URL hash (#/pipeline) so deep links & reloads land correctly
     if (typeof window !== 'undefined') {
       const h = window.location.hash.replace(/^#\/?/, '');
-      if (h && ['dashboard','intake','pipeline','trello','qa','follow-up','price-catalog','pos','finance','inventory','suppliers','crm','settings','create-ticket'].includes(h)) return h;
+      if (h && ['dashboard','intake','trello','qa','follow-up','price-catalog','pos','finance','inventory','suppliers','crm','settings','create-ticket'].includes(h)) return h;
     }
     return 'dashboard';
   });
@@ -219,7 +218,6 @@ export default function App() {
       warmedRef.current = true;
       void import('./components/dashboard/DashboardOverview');
       void import('./components/intake/IntakeWorkOrderModule');
-      void import('./components/pipeline/StatusPipelineView');
       void import('./components/trello/TrelloBoardModule');
       void import('./components/inventory/InventoryManagementModule');
       void import('./components/suppliers/SupplierRmaModule');
@@ -264,10 +262,6 @@ export default function App() {
   const inventoryScanSubmitRef = useRef<(() => void) | null>(null);
   const [customerTypeFilter, setCustomerTypeFilter] = useState<string>('ALL');
   const [dateFilter, setDateFilter] = useState<DateFilterState>({ preset: 'all' });
-  const [showBottlenecksOnly, setShowBottlenecksOnly] = useState<boolean>(false);
-  const [showAllStages, setShowAllStages] = useState(false);
-  const [showBeforeNeedsDiagOnly, setShowBeforeNeedsDiagOnly] = useState(false);
-  const [showNeedsDiagOnly, setShowNeedsDiagOnly] = useState(false);
 
   // Modal triggers from top bar
   const [inventoryAddModalOpen, setInventoryAddModalOpen] = useState(false);
@@ -352,9 +346,9 @@ export default function App() {
     setCurrentUser(user);
     addToast(`Switched active profile to ${user.name} (${user.role})`, 'info', 'Role Switch');
     if (user.role === 'Technician') {
-      const allowedTechTabs = ['pipeline', 'trello', 'qa', 'crm', 'price-catalog'];
+      const allowedTechTabs = ['trello', 'qa', 'crm', 'price-catalog'];
       if (!allowedTechTabs.includes(activeTab)) {
-        setActiveTab('pipeline');
+        setActiveTab('trello');
       }
     } else if (user.role === 'Reception') {
       if (activeTab === 'settings') {
@@ -746,8 +740,6 @@ export default function App() {
   const getActiveFilterCount = (tab: string): number => {
     const d = dateFilter.preset !== 'all' ? 1 : 0;
     switch (tab) {
-      case 'pipeline':
-        return (statusFilter !== 'ALL' ? 1 : 0) + (techFilter !== 'ALL' ? 1 : 0) + (showBottlenecksOnly ? 1 : 0) + (showAllStages ? 1 : 0) + (showBeforeNeedsDiagOnly ? 1 : 0) + (showNeedsDiagOnly ? 1 : 0) + d;
       case 'trello':
         return (techFilter !== 'ALL' ? 1 : 0) + d;
       case 'intake':
@@ -768,26 +760,12 @@ export default function App() {
   };
 
   const renderMobileFilters = (tab: string) => {
-    const pipelineDiagCounts = tab === 'pipeline'
-      ? {
-          before: workOrders.filter((wo) => checkIsBeforeDiagnosticNeeded(wo)).length,
-          after: workOrders.filter((wo) => checkIsAfterDiagnosticNeeded(wo)).length,
-          cant: workOrders.filter((wo) => wo.status === 'Cant Repair').length,
-          not: workOrders.filter((wo) => wo.status === 'Customer Not Repair').length,
-        }
-      : { before: 0, after: 0, cant: 0, not: 0 };
-    const drawerChips = tab === 'pipeline'
-      ? ([
-          statusFilter !== 'ALL' ? { key: 'stage', label: `Stage: ${statusFilter}`, onClear: () => setStatusFilter('ALL') } : null,
+    const drawerChips = ([
+          statusFilter !== 'ALL' ? { key: 'stage', label: `Status: ${statusFilter}`, onClear: () => setStatusFilter('ALL') } : null,
           techFilter !== 'ALL' ? { key: 'tech', label: `Tech: ${techFilter === 'unassigned' ? 'Unassigned' : techFilter}`, onClear: () => setTechFilter('ALL') } : null,
           dateFilter.preset !== 'all' ? { key: 'date', label: 'Date', onClear: () => setDateFilter({ preset: 'all' }) } : null,
           searchQuery ? { key: 'q', label: `"${searchQuery}"`, onClear: () => setSearchQuery('') } : null,
-          showBottlenecksOnly ? { key: 'btl', label: '>48h', onClear: () => setShowBottlenecksOnly(false) } : null,
-          showAllStages ? { key: 'all', label: 'Show All', onClear: () => setShowAllStages(false) } : null,
-          showBeforeNeedsDiagOnly ? { key: 'bdiag', label: 'Before Diag', onClear: () => setShowBeforeNeedsDiagOnly(false) } : null,
-          showNeedsDiagOnly ? { key: 'ndiag', label: 'Needs Diag', onClear: () => setShowNeedsDiagOnly(false) } : null,
         ].filter(Boolean) as Array<{ key: string; label: string; onClear: () => void }>)
-      : [];
     const labelCls = "mb-1 block text-xs font-extrabold uppercase tracking-wider text-muted";
     const rowCls = "flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-xs font-extrabold transition-colors cursor-pointer";
     return (
@@ -802,74 +780,9 @@ export default function App() {
             No active filters — pick options below to filter the list
           </p>
         )}
-        {tab === 'pipeline' && (
-          <>
-          <Button
-            type="button"
-            onClick={() => setShowBottlenecksOnly(!showBottlenecksOnly)}
-            className={`${rowCls} ${showBottlenecksOnly ? 'bg-red-500 text-white border-red-600 shadow-2xs' : 'bg-white text-ink border-line hover:bg-slate-100'}`}
-          >
-            <span className="flex items-center gap-2">
-              <Timer className={`w-4 h-4 ${showBottlenecksOnly ? 'text-white' : 'text-red-600'}`} />
-              Bottlenecks (&gt;48h)
-            </span>
-            <span className={`text-xs ${showBottlenecksOnly ? 'text-white/80' : 'text-muted'}`}>{showBottlenecksOnly ? 'On' : 'Off'}</span>
-          </Button>
 
-          <Button
-            type="button"
-            onClick={() => setShowAllStages(!showAllStages)}
-            className={`${rowCls} ${showAllStages ? 'bg-ink text-white border-ink shadow-2xs' : 'bg-white text-ink border-line hover:bg-slate-100'}`}
-          >
-            <span className="flex items-center gap-2">
-              <Eye className={`w-4 h-4 ${showAllStages ? 'text-white' : 'text-brand'}`} />
-              Show All Stages
-              {pipelineDiagCounts.cant + pipelineDiagCounts.not > 0 && (
-                <span className={`rounded-full px-1.5 py-0.5 text-xs font-black ${showAllStages ? 'bg-white/20' : 'bg-ink/10 text-ink'}`}>
-                  {pipelineDiagCounts.cant + pipelineDiagCounts.not}
-                </span>
-              )}
-            </span>
-            <span className={`text-xs ${showAllStages ? 'text-white/80' : 'text-muted'}`}>{showAllStages ? 'On' : 'Off'}</span>
-          </Button>
 
-          <Button
-            type="button"
-            onClick={() => { setShowBeforeNeedsDiagOnly(!showBeforeNeedsDiagOnly); setShowNeedsDiagOnly(false); }}
-            className={`${rowCls} ${showBeforeNeedsDiagOnly ? 'bg-blue-600 text-white border-blue-700 shadow-2xs' : 'bg-white text-ink border-line hover:bg-slate-100'}`}
-          >
-            <span className="flex items-center gap-2">
-              <Stethoscope className={`w-4 h-4 ${showBeforeNeedsDiagOnly ? 'text-white' : 'text-blue-600'}`} />
-              Before-Diag Pending
-              {pipelineDiagCounts.before > 0 && (
-                <span className={`rounded-full px-1.5 py-0.5 text-xs font-black ${showBeforeNeedsDiagOnly ? 'bg-white/20' : 'bg-blue-100 text-blue-700'}`}>
-                  {pipelineDiagCounts.before}
-                </span>
-              )}
-            </span>
-            <span className={`text-xs ${showBeforeNeedsDiagOnly ? 'text-white/80' : 'text-muted'}`}>{showBeforeNeedsDiagOnly ? 'On' : 'Off'}</span>
-          </Button>
-
-          <Button
-            type="button"
-            onClick={() => { setShowNeedsDiagOnly(!showNeedsDiagOnly); setShowBeforeNeedsDiagOnly(false); }}
-            className={`${rowCls} ${showNeedsDiagOnly ? 'bg-purple-600 text-white border-purple-700 shadow-2xs' : 'bg-white text-ink border-line hover:bg-slate-100'}`}
-          >
-            <span className="flex items-center gap-2">
-              <ShieldCheck className={`w-4 h-4 ${showNeedsDiagOnly ? 'text-white' : 'text-purple-600'}`} />
-              After-Diag Pending
-              {pipelineDiagCounts.after > 0 && (
-                <span className={`rounded-full px-1.5 py-0.5 text-xs font-black ${showNeedsDiagOnly ? 'bg-white/20' : 'bg-purple-100 text-purple-700'}`}>
-                  {pipelineDiagCounts.after}
-                </span>
-              )}
-            </span>
-            <span className={`text-xs ${showNeedsDiagOnly ? 'text-white/80' : 'text-muted'}`}>{showNeedsDiagOnly ? 'On' : 'Off'}</span>
-          </Button>
-          </>
-        )}
-
-        {(tab === 'intake' || tab === 'pipeline' || tab === 'suppliers' || tab === 'qa') && (
+        {(tab === 'intake' || tab === 'suppliers' || tab === 'qa') && (
           <div>
             <DrawerSelect
               label={tab === 'suppliers' ? 'RMA Status' : tab === 'qa' ? 'QA Status' : 'Status'}
@@ -890,7 +803,7 @@ export default function App() {
                           { value: 'Pending QA', label: 'Pending QA' },
                         ]
                       : [
-                          { value: 'ALL', label: tab === 'pipeline' ? 'All Stages' : 'All Statuses' },
+                          { value: 'ALL', label: 'All Statuses' },
                           { value: 'Receive', label: 'Receive' },
                           { value: 'In Progress', label: 'In Progress' },
                           { value: 'Pending', label: 'Pending' },
@@ -954,21 +867,6 @@ export default function App() {
               </Button>
             </div>
           </>
-        )}
-
-        {tab === 'pipeline' && (
-          <div>
-            <DrawerSelect
-              label="Technician"
-              value={techFilter}
-              onChange={(v) => setTechFilter(v as any)}
-              options={[
-                { value: 'ALL', label: 'All Techs' },
-                { value: 'unassigned', label: 'Unassigned' },
-                ...technicians.map((t) => ({ value: t.id, label: t.name })),
-              ]}
-            />
-          </div>
         )}
 
         {tab === 'inventory' && (
@@ -1089,7 +987,7 @@ export default function App() {
           </div>
         )}
 
-        {(tab === 'intake' || tab === 'pipeline' || tab === 'crm' || tab === 'suppliers' || tab === 'qa' || tab === 'finance' || tab === 'dashboard') && (
+        {(tab === 'intake' || tab === 'crm' || tab === 'suppliers' || tab === 'qa' || tab === 'finance' || tab === 'dashboard') && (
           <div>
             <DrawerSelect
               label="Date"
@@ -1127,11 +1025,7 @@ export default function App() {
     stockFilter !== 'ALL' ||
     customerTypeFilter !== 'ALL' ||
     modelFilter !== 'ALL' ||
-    dateFilter.preset !== 'all' ||
-    showBottlenecksOnly ||
-    showAllStages ||
-    showBeforeNeedsDiagOnly ||
-    showNeedsDiagOnly;
+    dateFilter.preset !== 'all';
 
   const handleResetAllFilters = () => {
     setSearchQuery('');
@@ -1143,10 +1037,6 @@ export default function App() {
     setModelFilter('ALL');
     setInventoryLowStockOnly(false);
     setDateFilter({ preset: 'all' });
-    setShowBottlenecksOnly(false);
-    setShowAllStages(false);
-    setShowBeforeNeedsDiagOnly(false);
-    setShowNeedsDiagOnly(false);
   };
 
   // Active vs Archived Work Orders
@@ -1300,12 +1190,6 @@ export default function App() {
     });
     setWorkOrders((prev) => prev.filter((w) => !w.isArchived));
     addToast(`Permanently deleted ${archived.length} archived work orders`, 'info', 'Recycle Bin Emptied');
-  };
-
-  const handleClearAllWorkOrders = () => {
-    setWorkOrders([]);
-    clearCollection('workOrders').catch(reportSaveError);
-    addToast('All work orders have been cleared', 'info', 'Work Orders Cleared');
   };
 
   const handleSaveWorkOrder = (wo: WorkOrder) => {
@@ -1683,7 +1567,6 @@ export default function App() {
       case 'dashboard': return { category: t('navRepair'), title: 'Dashboard' };
       case 'create-ticket': return { category: t('navRepair'), title: t('navCreateTicket') };
       case 'intake': return { category: t('navRepair'), title: t('navIntakeFull') };
-      case 'pipeline': return { category: t('navRepair'), title: t('navPipeline') };
       case 'trello': return { category: t('navRepair'), title: 'Repair Ticket Board' };
       case 'inventory': return { category: t('navInventory'), title: t('navPartsMatrix') };
       case 'suppliers': return { category: t('navInventory'), title: t('navSuppliers') };
@@ -1824,7 +1707,7 @@ export default function App() {
 
             {/* Price Catalog: top navbar controls hidden — module has its own device switcher,
                 settings live in Settings tab (Ko Hein 2026-08-09) */}
-            {activeTab === 'price-catalog' || activeTab === 'inventory' ? null : ['intake', 'pipeline', 'pos', 'inventory', 'crm', 'suppliers', 'qa'].includes(activeTab) ? (
+            {activeTab === 'price-catalog' || activeTab === 'inventory' ? null : ['intake', 'pos', 'inventory', 'crm', 'suppliers', 'qa'].includes(activeTab) ? (
               /* Contextual Search Input — desktop only (modules have their own mobile search);
                   also hidden on iPad inventory where the navbar scan box handles search */
               !(isIpad && activeTab === 'inventory') && (
@@ -1835,9 +1718,7 @@ export default function App() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={
-                    activeTab === 'pipeline'
-                      ? "Search Model, IMEI, Name, Phone..."
-                      : activeTab === 'intake'
+                    activeTab === 'intake'
                       ? "Search Ticket #, Customer, Phone..."
                       : activeTab === 'inventory'
                       ? "Search Part #, Category, SKU..."
@@ -1892,70 +1773,7 @@ export default function App() {
                 </div>              </>
             )}
 
-            {activeTab === 'pipeline' && (
-              <>
-                <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
-                <Button
-                  type="button"
-                  onClick={() => setShowBottlenecksOnly(!showBottlenecksOnly)}
-                  className={`py-1.5 px-3 min-h-10 rounded-xl border text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 ${
-                    showBottlenecksOnly
-                      ? 'bg-red-500 text-white border-red-600 shadow-2xs'
-                      : 'bg-red-50 hover:bg-red-100 text-red-800 border-red-200'
-                  }`}
-                  title="Toggle Bottlenecks (>48h stationary)"
-                >
-                  <Timer className={`w-3.5 h-3.5 shrink-0 ${showBottlenecksOnly ? 'text-white' : 'text-red-600'}`} />
-                  <span className="hidden sm:inline">
-                    Bottlenecks (&gt;48h)
-                    {workOrders.filter((wo) => {
-                      if (wo.status === 'Taken Out' || wo.status === 'Finished' || wo.status === 'Cant Repair' || wo.status === 'Customer Not Repair') return false;
-                      const refTime = Math.max(Date.now(), new Date('2026-07-22T08:46:00Z').getTime());
-                      const updatedTime = new Date(wo.updatedAt || wo.createdAt).getTime();
-                      if (isNaN(updatedTime)) return false;
-                      return Math.max(0, Math.floor((refTime - updatedTime) / (1000 * 60 * 60))) >= 48;
-                    }).length > 0 ? ` (${workOrders.filter((wo) => {
-                      if (wo.status === 'Taken Out' || wo.status === 'Finished' || wo.status === 'Cant Repair' || wo.status === 'Customer Not Repair') return false;
-                      const refTime = Math.max(Date.now(), new Date('2026-07-22T08:46:00Z').getTime());
-                      const updatedTime = new Date(wo.updatedAt || wo.createdAt).getTime();
-                      if (isNaN(updatedTime)) return false;
-                      return Math.max(0, Math.floor((refTime - updatedTime) / (1000 * 60 * 60))) >= 48;
-                    }).length})` : ''}
-                  </span>
-                  <span className="sm:hidden">&gt;48h</span>
-                </Button>
 
-                <CustomDropdownMenu
-                  value={statusFilter}
-                  onChange={(val) => setStatusFilter(val)}
-                  buttonClassName="!px-2.5 !py-1.5 !h-10 text-xs"
-                  options={[
-                    { value: 'ALL', label: 'All Stages' },
-                    { value: 'Receive', label: 'Receive' },
-                    { value: 'In Progress', label: 'In Progress' },
-                    { value: 'Pending', label: 'Pending' },
-                    { value: 'Finished', label: 'Finished' },
-                    { value: 'Taken Out', label: 'Taken Out' },
-                    { value: 'Cant Repair', label: 'Cant Repair' },
-                    { value: 'Customer Not Repair', label: 'Customer Not Repair' },
-                  ]}
-                />
-
-                <CustomDropdownMenu
-                  value={techFilter}
-                  onChange={(val) => setTechFilter(val)}
-                  buttonClassName="!px-2.5 !py-1.5 !h-10 text-xs"
-                  options={[
-                    { value: 'ALL', label: 'All Techs' },
-                    { value: 'unassigned', label: 'Unassigned' },
-                    ...technicians.map((t) => ({ value: t.id, label: t.name })),
-                  ]}
-                />
-
-                <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
-                </div>
-              </>
-            )}
 
             {activeTab === 'dashboard' && (
               <>
@@ -2406,31 +2224,6 @@ export default function App() {
                 />
               )}
 
-              {activeTab === 'pipeline' && (
-                <StatusPipelineView
-                  workOrders={activeWorkOrders}
-                  technicians={technicians}
-                  systemSettings={systemSettings}
-                  currentUser={currentUser}
-                  onUpdateWorkOrderStatus={handleUpdateWorkOrderStatus}
-                  onSaveWorkOrder={handleSaveWorkOrder}
-                  onDeleteWorkOrder={handleDeleteWorkOrder}
-                  onClearAllWorkOrders={handleClearAllWorkOrders}
-                  searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
-                  statusFilter={statusFilter}
-                  setStatusFilter={setStatusFilter}
-                  techFilter={techFilter}
-                  setTechFilter={setTechFilter}
-                  dateFilter={dateFilter}
-                  setDateFilter={setDateFilter}
-                  showBottlenecksOnly={showBottlenecksOnly}
-                  setShowBottlenecksOnly={setShowBottlenecksOnly}
-                  onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
-                  onOpenNewWorkOrder={(prefill) => handleOpenNewWorkOrder(prefill)}
-                />
-              )}
-
               {activeTab === 'trello' && (
                 <TrelloBoardModule
                   workOrders={activeWorkOrders}
@@ -2779,7 +2572,6 @@ export default function App() {
         </Suspense>
       )}
 
-      {/* Mobile pipeline filter drawer — all navbar filters in one right panel */}
             {/* Mobile filter drawer — per-tab filters in one right panel (dropdowns live here on mobile) */}
       <RightFilterDrawer
         open={isFilterDrawerOpen}
@@ -2787,14 +2579,10 @@ export default function App() {
         triggerRef={filtersTriggerRef}
         onReset={() => {
           handleResetAllFilters();
-          setShowBottlenecksOnly(false);
-          setShowAllStages(false);
-          setShowBeforeNeedsDiagOnly(false);
-          setShowNeedsDiagOnly(false);
         }}
         resetDisabled={getActiveFilterCount(activeTab) === 0}
         alwaysVisible={isIpad}
-        title={`${activeTab === 'pipeline' ? 'Pipeline' : activeTab === 'crm' ? 'CRM' : activeTab === 'inventory' ? 'Inventory' : activeTab === 'suppliers' ? 'Suppliers' : activeTab === 'qa' ? 'QA' : activeTab === 'finance' ? 'Finance' : activeTab === 'dashboard' ? 'Dashboard' : 'Intake'} Filters`}
+        title={`${activeTab === 'crm' ? 'CRM' : activeTab === 'inventory' ? 'Inventory' : activeTab === 'suppliers' ? 'Suppliers' : activeTab === 'qa' ? 'QA' : activeTab === 'finance' ? 'Finance' : activeTab === 'dashboard' ? 'Dashboard' : 'Intake'} Filters`}
       >
         {renderMobileFilters(activeTab)}
       </RightFilterDrawer>

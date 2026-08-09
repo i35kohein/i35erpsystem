@@ -3,7 +3,6 @@ import {LogOut,
   CircleDot,
   LayoutDashboard,
   ClipboardList,
-  Kanban,
   Boxes,
   Truck,
   CreditCard,
@@ -80,10 +79,7 @@ export const Navigation: React.FC<NavigationProps> = ({
       )
     : workOrders;
 
-  // Sidebar counts — only Pipeline & POS keep badges (decluttered sidebar).
-  const activePipelineCount = myWorkOrders.filter(
-    (w) => w.status === 'Receive' || w.status === 'In Progress' || w.status === 'Pending'
-  ).length;
+  // Sidebar counts — only POS keeps a badge (decluttered sidebar).
   // POS-ready = tickets past QA (have a postRepairChecklist). Declined/cant-repair
   // tickets are NOT payable work — don't count them here (P0 #2).
   const posReadyCount = myWorkOrders.filter((w) => Boolean(w.postRepairChecklist)).length;
@@ -96,13 +92,6 @@ export const Navigation: React.FC<NavigationProps> = ({
           id: 'intake',
           label: t('navIntake'),
           icon: ClipboardList,
-        },
-        {
-          id: 'pipeline',
-          label: isTech ? 'My Assigned Jobs' : t('navPipeline'),
-          icon: Kanban,
-          badge: activePipelineCount,
-          badgeColor: 'bg-success text-white',
         },
         {
           id: 'trello',
