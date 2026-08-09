@@ -111,13 +111,15 @@ import { LoginPage } from './components/auth/LoginPage';
 
 
 /** ⋯ More menu — fixed-positioned so the header's overflow-x-auto strip can't clip it. */
-function FixedMoreMenu({ anchorRef, isOpen, editMode, onClose, onPrintTags, onToggleEdit }: {
+function FixedMoreMenu({ anchorRef, isOpen, editMode, onClose, onPrintTags, onToggleEdit, onView, onAddPart }: {
   anchorRef: React.RefObject<HTMLButtonElement | null>;
   isOpen: boolean;
   editMode: boolean;
   onClose: () => void;
   onPrintTags: () => void;
   onToggleEdit: () => void;
+  onView: (v: 'stock' | 'profit' | 'matrix') => void;
+  onAddPart: () => void;
 }) {
   if (!isOpen) return null;
   const rect = anchorRef.current?.getBoundingClientRect();
@@ -130,6 +132,26 @@ function FixedMoreMenu({ anchorRef, isOpen, editMode, onClose, onPrintTags, onTo
     <>
       <div className="fixed inset-0 z-40" onClick={onClose} role="presentation" aria-hidden="true" />
       <div className="fixed z-50 w-48 rounded-xl border border-line bg-white p-1.5 shadow-xl" style={{ top, left }}>
+        {(['stock', 'profit', 'matrix'] as const).map((v) => (
+          <button
+            key={v}
+            type="button"
+            onClick={() => { onView(v); onClose(); }}
+            className="lg:hidden w-full flex items-center gap-2 px-3 py-2 text-xs font-extrabold rounded-lg hover:bg-surface transition-colors cursor-pointer text-left focus:outline-none"
+          >
+            {v === 'stock' ? <List className="w-4 h-4 text-brand shrink-0" /> : v === 'profit' ? <TrendingUp className="w-4 h-4 text-brand shrink-0" /> : <Grid className="w-4 h-4 text-brand shrink-0" />}
+            {v === 'stock' ? 'Stock View' : v === 'profit' ? 'Profit View' : 'Matrix View'}
+          </button>
+        ))}
+        <button
+          type="button"
+          onClick={() => { onAddPart(); onClose(); }}
+          className="lg:hidden w-full flex items-center gap-2 px-3 py-2 text-xs font-extrabold rounded-lg hover:bg-surface transition-colors cursor-pointer text-left focus:outline-none"
+        >
+          <Plus className="w-4 h-4 text-brand shrink-0" />
+          Add Part
+        </button>
+        <div className="lg:hidden my-1 border-t border-line" />
         <button
           type="button"
           onClick={onPrintTags}
@@ -687,7 +709,6 @@ export default function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Quick Filter Helper States & Resetter
-  const FILTER_TABS = ['intake', 'pipeline', 'inventory', 'crm', 'suppliers', 'qa', 'finance', 'dashboard'];
   const getActiveFilterCount = (tab: string): number => {
     const d = dateFilter.preset !== 'all' ? 1 : 0;
     switch (tab) {
@@ -1814,25 +1835,6 @@ export default function App() {
                 </div>              </>
             )}
 
-            {/* Generic filters drawer trigger — inventory uses its own side menu on phones */}
-            {FILTER_TABS.includes(activeTab) && (
-              <Button
-                ref={filtersTriggerRef}
-                type="button"
-                onClick={() => setIsFilterDrawerOpen(true)}
-                className={`${isIpad ? 'inline-flex h-10 w-10' : 'lg:hidden inline-flex h-8 w-8'} items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand transition-all cursor-pointer relative shrink-0`}
-                title="Open filters"
-                aria-label="Open filters"
-              >
-                <SlidersHorizontal className="h-4 w-4" />
-                {getActiveFilterCount(activeTab) > 0 && (
-                  <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-xs font-black text-white">
-                    {getActiveFilterCount(activeTab)}
-                  </span>
-                )}
-              </Button>
-            )}
-
             {activeTab === 'pipeline' && (
               <>
                 <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
@@ -1964,7 +1966,7 @@ export default function App() {
             {activeTab === 'inventory' && (
               <>
               {/* Desktop/tablet row (sm+): search + view switcher + Add Part + ⋯ */}
-              <div className={`flex items-center gap-1.5 sm:gap-2 shrink-0 ${isIpad ? 'hidden' : ''}`}>
+              <div className={`hidden sm:flex items-center gap-1.5 sm:gap-2 shrink-0 ${isIpad ? 'hidden' : ''}`}>
               {/* Scan / search — leftmost */}
               <div className="shrink-0">
                 <div className="relative">
@@ -1988,8 +1990,8 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Stock / Profit / Matrix */}
-              <div className={isIpad ? 'hidden' : 'flex items-center gap-1.5 sm:gap-2 shrink-0'}>
+              {/* Stock / Profit / Matrix — desktop only (mobile: in ⋯ menu) */}
+              <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-1.5 sm:gap-2 shrink-0'}>
                 {(['stock', 'profit', 'matrix'] as const).map((v) => (
                   <button
                     key={v}
@@ -2011,7 +2013,7 @@ export default function App() {
               <Button
                 type="button"
                 onClick={() => setInventoryAddModalOpen(true)}
-                className="inline-flex h-10 items-center gap-1.5 px-3 sm:px-3.5 bg-brand hover:bg-brand-deep text-white text-xs font-bold rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+                className="hidden lg:inline-flex h-10 items-center gap-1.5 px-3 sm:px-3.5 bg-brand hover:bg-brand-deep text-white text-xs font-bold rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Part</span>
@@ -2037,6 +2039,8 @@ export default function App() {
                     onClose={() => setInventoryMoreOpen(false)}
                     onPrintTags={() => { setInventoryTagsPrintOpen(true); setInventoryMoreOpen(false); }}
                     onToggleEdit={() => { setInventoryEditMode((m) => !m); setInventoryMoreOpen(false); }}
+                    onView={(v) => setInventoryViewMode(v)}
+                    onAddPart={() => setInventoryAddModalOpen(true)}
                   />
                 )}
               </div>
@@ -2073,6 +2077,20 @@ export default function App() {
                   <Menu className="h-5 w-5" />
                   {getActiveFilterCount('inventory') > 0 && (
                     <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-xs font-black text-white">
+                      {getActiveFilterCount('inventory')}
+                    </span>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsFilterDrawerOpen(true)}
+                  className="relative inline-flex h-10 w-10 items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand transition-all cursor-pointer shrink-0"
+                  title="Open filters"
+                  aria-label="Open filters"
+                >
+                  <SlidersHorizontal className="h-4 w-4" />
+                  {getActiveFilterCount('inventory') > 0 && (
+                    <span className="absolute -right-1 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-xs font-black text-white">
                       {getActiveFilterCount('inventory')}
                     </span>
                   )}
