@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom';
 import { useIsIpad } from '../../hooks/useIsIpad';
 import { motion } from 'motion/react';
 import { 
-  Search, 
   ShieldCheck, 
   Smartphone, 
   ListChecks, 
@@ -35,7 +34,7 @@ import {
 import { PriceSettingsModal } from './PriceSettingsModal';
 import { SystemSettings } from '../../types';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
-import { Button , Input } from '../ui';
+import { Button } from '../ui';
 import { toast } from '../../lib/toast';
 
 interface PriceCatalogModuleProps {
@@ -132,7 +131,6 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
   formatPrice,
   onOpenNewWorkOrder,
   searchQuery: externalSearchQuery,
-  setSearchQuery: setExternalSearchQuery,
   isDeviceModalOpen: externalDeviceModalOpen,
   setIsDeviceModalOpen: setExternalDeviceModalOpen,
   isSettingsModalOpen: externalSettingsModalOpen,
@@ -143,14 +141,8 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
   const [selectedDevice, setSelectedDevice] = useState<string>(catalog[0]?.model || '');
   const isIpad = useIsIpad();
   
-  // Controlled / Uncontrolled state synchronization
-  const [localSearchQuery, setLocalSearchQuery] = useState('');
-  const queryToUse = externalSearchQuery !== undefined ? externalSearchQuery : localSearchQuery;
-  const handleSearchChange = (value: string) => {
-    if (setExternalSearchQuery) setExternalSearchQuery(value);
-    else setLocalSearchQuery(value);
-  };
-
+  // Search query comes from the app topbar (desktop); mobile in-module search removed (Ko Hein)
+  const queryToUse = externalSearchQuery || '';
   const [localDeviceModalOpen, setLocalDeviceModalOpen] = useState(false);
   const deviceModalOpen = externalDeviceModalOpen !== undefined ? externalDeviceModalOpen : localDeviceModalOpen;
   const setDeviceModalOpen = setExternalDeviceModalOpen || setLocalDeviceModalOpen;
@@ -164,6 +156,9 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
   // Which cart item has its discount picker expanded (mobile sheet only).
   const [discountMenuOpenFor, setDiscountMenuOpenFor] = useState<string | null>(null);
   const [customDiscountInput, setCustomDiscountInput] = useState('');
+  // Popup anchor computed at open time — avoids the 'sometimes top-left corner'
+  // bug from measuring the trigger rect while the page is moving/scrolling.
+  const [discountPopupAnchor, setDiscountPopupAnchor] = useState<{ top: number; left: number } | null>(null);
 
   // Close the discount popup when clicking/tapping outside it (Ko Hein).
   useEffect(() => {
@@ -173,12 +168,21 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
       if (!target) return;
       if (target.closest('.discount-popup') || target.closest('.discount-trigger')) return;
       setDiscountMenuOpenFor(null);
+      setDiscountPopupAnchor(null);
+    };
+    const onScroll = () => {
+      setDiscountMenuOpenFor(null);
+      setDiscountPopupAnchor(null);
     };
     document.addEventListener('mousedown', onDocClick);
     document.addEventListener('touchstart', onDocClick, { passive: true });
+    window.addEventListener('scroll', onScroll, true);
+    window.addEventListener('resize', onScroll);
     return () => {
       document.removeEventListener('mousedown', onDocClick);
       document.removeEventListener('touchstart', onDocClick);
+      window.removeEventListener('scroll', onScroll, true);
+      window.removeEventListener('resize', onScroll);
     };
   }, [discountMenuOpenFor]);
 
@@ -575,7 +579,16 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                               <div className="relative">
                                 <Button
                                   type="button"
-                                  onClick={() => setDiscountMenuOpenFor(item.categoryKey)}
+                                  onClick={() => {
+  const rect = discountTriggerRefs.current[item.categoryKey]?.getBoundingClientRect();
+  if (rect) {
+    const pw = 176;
+    let l = rect.left;
+    l = Math.max(8, Math.min(l, window.innerWidth - pw - 8));
+    setDiscountPopupAnchor({ top: rect.bottom + 6, left: l });
+  }
+  setDiscountMenuOpenFor(item.categoryKey);
+}}
 ref={(el) => { discountTriggerRefs.current[item.categoryKey] = el; }}
                                   title={item.discountPercent > 0 ? `${item.discountPercent}% discount applied` : 'Add discount'}
                                   className={`discount-trigger !w-8 !h-8 !min-h-8 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
@@ -650,7 +663,16 @@ ref={(el) => { discountTriggerRefs.current[item.categoryKey] = el; }}
                                 <div className="relative">
                                   <Button
                                     type="button"
-                                    onClick={() => setDiscountMenuOpenFor(item.categoryKey)}
+                                    onClick={() => {
+  const rect = discountTriggerRefs.current[item.categoryKey]?.getBoundingClientRect();
+  if (rect) {
+    const pw = 176;
+    let l = rect.left;
+    l = Math.max(8, Math.min(l, window.innerWidth - pw - 8));
+    setDiscountPopupAnchor({ top: rect.bottom + 6, left: l });
+  }
+  setDiscountMenuOpenFor(item.categoryKey);
+}}
 ref={(el) => { discountTriggerRefs.current[item.categoryKey] = el; }}
                                     title={item.discountPercent > 0 ? `${item.discountPercent}% discount applied` : 'Add discount'}
                                     className={`discount-trigger !w-7 !h-7 !min-h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
@@ -742,7 +764,16 @@ ref={(el) => { discountTriggerRefs.current[item.categoryKey] = el; }}
                             <div className="relative">
                               <Button
                                 type="button"
-                                onClick={() => setDiscountMenuOpenFor(item.categoryKey)}
+                                onClick={() => {
+  const rect = discountTriggerRefs.current[item.categoryKey]?.getBoundingClientRect();
+  if (rect) {
+    const pw = 176;
+    let l = rect.left;
+    l = Math.max(8, Math.min(l, window.innerWidth - pw - 8));
+    setDiscountPopupAnchor({ top: rect.bottom + 6, left: l });
+  }
+  setDiscountMenuOpenFor(item.categoryKey);
+}}
 ref={(el) => { discountTriggerRefs.current[item.categoryKey] = el; }}
                                 title={item.discountPercent > 0 ? `${item.discountPercent}% discount applied` : 'Add discount'}
                                 className={`discount-trigger !w-7 !h-7 !min-h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
@@ -786,15 +817,9 @@ ref={(el) => { discountTriggerRefs.current[item.categoryKey] = el; }}
   // Trigger refs so the portal popup can position itself exactly at the circle.
   const discountTriggerRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
-  const renderDiscountPopup = (item: CartItem, align: 'left' | 'right' = 'left') => {
-    if (discountMenuOpenFor !== item.categoryKey) return null;
-    const triggerEl = discountTriggerRefs.current[item.categoryKey];
-    if (!triggerEl) return null;
-    const r = triggerEl.getBoundingClientRect();
-    const popupW = 176;
-    let left = align === 'right' ? r.right - popupW : r.left;
-    left = Math.max(8, Math.min(left, window.innerWidth - popupW - 8));
-    const top = r.bottom + 6;
+  const renderDiscountPopup = (item: CartItem) => {
+    if (discountMenuOpenFor !== item.categoryKey || !discountPopupAnchor) return null;
+    const { top, left } = discountPopupAnchor;
     return createPortal(
       <div
         className="discount-popup fixed z-[80] w-44 rounded-2xl border border-line bg-white p-2 shadow-xl"
@@ -824,7 +849,7 @@ ref={(el) => { discountTriggerRefs.current[item.categoryKey] = el; }}
           <input
             type="number"
             inputMode="numeric"
-            placeholder="Custom % — press Enter"
+            placeholder="Custom %"
             value={customDiscountInput}
             onChange={(e) => setCustomDiscountInput(e.target.value)}
             onBlur={() => {
@@ -844,7 +869,7 @@ ref={(el) => { discountTriggerRefs.current[item.categoryKey] = el; }}
                 }
               }
             }}
-            className="w-full !h-9 !min-h-9 rounded-full bg-surface border border-line px-3.5 text-xs font-bold text-ink placeholder-muted outline-none focus:border-brand transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            className="w-full !h-9 !min-h-9 rounded-full bg-surface border border-line px-3.5 text-xs font-bold text-ink/60 placeholder:text-muted/50 outline-none focus:border-brand transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             title="Custom discount % — type and press Enter"
           />
         </div>
@@ -943,27 +968,7 @@ ref={(el) => { discountTriggerRefs.current[item.categoryKey] = el; }}
           </Button>
         </div>
 
-        {/* Mobile: in-module full-width search (lg:hidden) — topbar search is desktop-only */}
-        <div className="lg:hidden relative mt-1.5">
-          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-          <Input
-            type="text"
-            value={queryToUse}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            placeholder="Search services..."
-            className="w-full bg-white border border-line text-xs text-ink placeholder-muted pl-8 pr-8 py-2.5 rounded-xl focus:bg-white focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all shadow-2xs"
-          />
-          {queryToUse && (
-            <Button
-              type="button"
-              onClick={() => handleSearchChange('')}
-              aria-label="Clear search"
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center text-muted hover:text-ink rounded-full hover:bg-surface transition-colors cursor-pointer"
-            >
-              <X className="w-3.5 h-3.5" />
-            </Button>
-          )}
-        </div>
+        {/* Mobile search removed on request (Ko Hein 2026-08-09) */}
 
         {/* Desktop: full device card (lg+) */}
         <div className="hidden lg:flex bg-white border border-line p-4 sm:p-5 rounded-2xl shadow-2xs flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -1118,6 +1123,13 @@ ref={(el) => { discountTriggerRefs.current[item.categoryKey] = el; }}
                             if (!cart.has(item.key)) {
                               handleToggleCartItem(item.key, item.label, item.price!, item.warranty);
                             }
+                            const rect = discountTriggerRefs.current[item.key]?.getBoundingClientRect();
+                            if (rect) {
+                              const pw = 176;
+                              let l = rect.right - pw;
+                              l = Math.max(8, Math.min(l, window.innerWidth - pw - 8));
+                              setDiscountPopupAnchor({ top: rect.bottom + 6, left: l });
+                            }
                             setDiscountMenuOpenFor(item.key);
                           }}
                           ref={(el) => { discountTriggerRefs.current[item.key] = el; }}
@@ -1136,7 +1148,7 @@ ref={(el) => { discountTriggerRefs.current[item.categoryKey] = el; }}
                           price: item.price!,
                           warranty: item.warranty,
                           discountPercent: discountPct,
-                        }, 'right')}
+                        })}
                       </div>
 
                       {/* Desktop selection checkmark (absolute top-right) */}
