@@ -1202,18 +1202,6 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                         })}
                       </div>
 
-                      {/* Desktop selection checkmark (absolute top-right) */}
-                      <motion.div
-                        animate={{ scale: isSelected ? 1 : 0.85 }}
-                        transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-                        className={`flex max-sm:hidden w-5 h-5 rounded-full items-center justify-center shrink-0 border transition-all sm:absolute sm:top-3 sm:right-3 ${
-                          isSelected
-                            ? 'bg-brand border-brand text-white shadow-2xs'
-                            : 'border-line-strong bg-white text-transparent group-hover:border-brand'
-                        }`}
-                      >
-                        <Check className="w-3 h-3 stroke-[3]" />
-                      </motion.div>
                     </div>
                   </motion.div>
                 );
