@@ -1030,7 +1030,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                     initial={false}
                     whileTap={{ scale: 0.98 }}
                     transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                    className={`group relative bg-white border-2 rounded-2xl p-2.5 sm:p-4 cursor-pointer transition-colors duration-200 flex items-center gap-2.5 sm:flex-col sm:items-stretch sm:justify-between select-none shadow-2xs min-h-[84px] sm:min-h-0 sm:h-[152px] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60 focus-visible:border-brand ${
+                    className={`group relative bg-white border-2 rounded-2xl p-2.5 sm:p-4 cursor-pointer transition-colors duration-200 flex flex-col gap-2 sm:gap-2.5 sm:items-stretch sm:justify-between select-none shadow-2xs min-h-[84px] sm:min-h-0 sm:h-[152px] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60 focus-visible:border-brand ${
                       isSelected
                         ? 'border-brand bg-brand/5 shadow-md'
                         : 'border-line hover:border-brand/50'
@@ -1056,7 +1056,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                     </div>
 
                     {/* Price (right on mobile / bottom on desktop) + selection checkmark */}
-                    <div className="flex items-center gap-2 shrink-0 sm:w-full sm:mt-2 sm:pt-2 sm:border-t sm:border-line sm:flex-col sm:items-start sm:gap-0.5">
+                    <div className="flex items-center gap-2 shrink-0 w-full mt-1 pt-2 border-t border-line justify-between sm:mt-2 sm:pt-2 sm:border-t sm:border-line sm:flex-col sm:items-start sm:gap-0.5">
                       <div className="text-right sm:text-left min-w-0">
                         <div className="flex items-baseline space-x-1 sm:mt-0.5">
                           <span className="font-mono text-xs sm:text-sm font-extrabold text-ink">
