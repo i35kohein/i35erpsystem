@@ -15,7 +15,6 @@ import {CreditCard,
   PackageCheck,
   Check,
   ChevronDown,
-  BellRing,
   AlertTriangle, 
   XCircle, 
   X,
@@ -144,7 +143,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   const [printableInvoiceWo, setPrintableInvoiceWo] = useState<WorkOrder | null>(null);
   const [localDateFilter] = useState<DateFilterState>({ preset: 'all' });
   const [isNotifModalOpen, setIsNotifModalOpen] = useState(false);
-  const [notifWo, setNotifWo] = useState<WorkOrder | null>(null);
+  const [notifWo] = useState<WorkOrder | null>(null);
   const [inventoryPartId, setInventoryPartId] = useState<string>('');
   const [inventoryPartQty, setInventoryPartQty] = useState<number>(1);
   const [isAddPartOpen, setIsAddPartOpen] = useState(false);
@@ -462,18 +461,6 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     <StatusChip status={selectedWo.status} />
                   </div>
 
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      setNotifWo(selectedWo);
-                      setIsNotifModalOpen(true);
-                    }}
-                    className="h-10 px-3 bg-purple/10 hover:bg-purple/20 text-purple font-extrabold text-xs rounded-xl border border-purple/30 transition-all flex items-center space-x-1.5 cursor-pointer shrink-0"
-                    title="Send SMS / Viber / Telegram Notification"
-                  >
-                    <BellRing className="w-3.5 h-3.5 text-purple" />
-                    <span>Notify Customer</span>
-                  </Button>
                 </div>
 
                 {/* Line 2: device + customer */}
