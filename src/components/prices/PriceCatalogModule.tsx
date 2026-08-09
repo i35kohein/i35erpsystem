@@ -837,7 +837,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                 handleUpdateItemDiscount(item.categoryKey, p);
                 setDiscountMenuOpenFor(null);
               }}
-              className={`!w-7 !h-7 !min-h-7 !min-w-7 rounded-full text-[10px] font-extrabold flex items-center justify-center transition-all cursor-pointer active:scale-90 ${
+              className={`!w-7 !h-7 !min-h-7 !min-w-7 rounded-full text-[10px] font-extrabold flex items-center justify-center transition-all cursor-pointer active:scale-90 focus-visible:outline-none focus-visible:bg-brand focus-visible:text-white focus-visible:border-brand ${
                 item.discountPercent === p
                   ? 'bg-brand text-white border border-brand'
                   : 'bg-white text-ink border border-line hover:border-brand hover:text-brand'
@@ -1020,7 +1020,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
             <Button
               type="button"
               onClick={() => setCategoryFilter('ALL')}
-              className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-extrabold border transition-all cursor-pointer active:scale-95 ${
+              className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-extrabold border transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:bg-brand focus-visible:text-white focus-visible:border-brand ${
                 effectiveCategoryFilter === 'ALL'
                   ? 'bg-brand text-white border-brand shadow-2xs'
                   : 'bg-white text-ink border-line hover:border-brand/50'
@@ -1033,7 +1033,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                 key={group}
                 type="button"
                 onClick={() => setCategoryFilter(group)}
-                className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-extrabold border transition-all cursor-pointer active:scale-95 ${
+                className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-extrabold border transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:bg-brand focus-visible:text-white focus-visible:border-brand ${
                   effectiveCategoryFilter === group
                     ? 'bg-brand text-white border-brand shadow-2xs'
                     : 'bg-white text-ink border-line hover:border-brand/50'

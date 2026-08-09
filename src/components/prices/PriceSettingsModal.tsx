@@ -68,6 +68,8 @@ const parseCsvRows = (source: string): string[][] => {
 interface PriceSettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  /** Render as an inline panel inside Settings (no overlay/backdrop). */
+  embedded?: boolean;
   catalog: ModelRepairPrice[];
   updatePriceAndWarranty: (modelName: string, categoryKey: string, newPrice: number | null, newWarranty: string) => void;
   importCatalogRows?: (
@@ -98,6 +100,7 @@ interface PriceSettingsModalProps {
 export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
   isOpen,
   onClose,
+  embedded = false,
   catalog,
   updatePriceAndWarranty,
   importCatalogRows,
@@ -137,7 +140,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
 
   // ESC closes the settings modal.
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || embedded) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
@@ -409,8 +412,8 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/50 backdrop-blur-sm animate-fadeIn overflow-y-auto">
-      <div className="bg-white rounded-2xl border border-line shadow-2xl w-full max-w-5xl my-auto overflow-hidden flex flex-col max-h-[92vh]">
+    <div className={embedded ? '' : 'fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/50 backdrop-blur-sm animate-fadeIn overflow-y-auto'}>
+      <div className={embedded ? 'bg-white rounded-2xl border border-line shadow-2xs overflow-hidden flex flex-col' : 'bg-white rounded-2xl border border-line shadow-2xl w-full max-w-5xl my-auto overflow-hidden flex flex-col max-h-[92vh]'}>
         {/* Header */}
         <div className="px-5 py-4 bg-surface border-b border-line flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -428,7 +431,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
           </div>
           <Button
             onClick={onClose}
-            className="w-8 h-8 rounded-full text-muted hover:text-ink hover:bg-surface transition-colors flex items-center justify-center cursor-pointer"
+            className={`w-8 h-8 rounded-full text-muted hover:text-ink hover:bg-surface transition-colors flex items-center justify-center cursor-pointer ${embedded ? 'hidden' : ''}`}
           >
             <X className="w-4 h-4" />
           </Button>
@@ -1251,14 +1254,16 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
             <Button
               onClick={() => {
                 triggerToast('All changes saved.');
-                setTimeout(() => {
-                  onClose();
-                }, 400);
+                if (!embedded) {
+                  setTimeout(() => {
+                    onClose();
+                  }, 400);
+                }
               }}
               className="px-5 py-2 bg-brand hover:bg-brand/90 text-white rounded-xl text-xs font-extrabold transition-all flex items-center space-x-2 shadow-2xs cursor-pointer"
             >
               <Save className="w-4 h-4" />
-              <span>Save & Close</span>
+              <span>{embedded ? 'Save Changes' : 'Save & Close'}</span>
             </Button>
           </div>
         </div>

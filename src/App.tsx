@@ -2553,6 +2553,29 @@ export default function App() {
                     settingsSaveRef.current = actions.save;
                   }}
                   onAiRescanTickets={handleAiRescanTickets}
+                  priceCatalogManager={{
+                    catalog: priceCatalog.catalog,
+                    updatePriceAndWarranty: priceCatalog.updatePriceAndWarranty,
+                    importCatalogRows: priceCatalog.importCatalogRows,
+                    addModel: priceCatalog.addModel,
+                    renameModel: priceCatalog.renameModel,
+                    deleteModel: priceCatalog.deleteModel,
+                    resetToDefaults: priceCatalog.resetToDefaults,
+                    currencySymbol: priceCatalog.currencySymbol,
+                    setCurrencySymbol: priceCatalog.setCurrencySymbol,
+                    folders: priceCatalog.folders,
+                    toggleFolder: priceCatalog.toggleFolder,
+                    setAllFoldersEnabled: priceCatalog.setAllFoldersEnabled,
+                    addFolder: priceCatalog.addFolder,
+                    renameFolder: priceCatalog.renameFolder,
+                    categories: priceCatalog.categories,
+                    updateCategoryLabel: priceCatalog.updateCategoryLabel,
+                    addCategory: priceCatalog.addCategory,
+                    deleteCategory: priceCatalog.deleteCategory,
+                    applyGlobalPriceAdjustment: priceCatalog.applyGlobalPriceAdjustment,
+                    applyGlobalWarranty: priceCatalog.applyGlobalWarranty,
+                    formatPrice: priceCatalog.formatPrice,
+                  }}
                 />
               )}
           </div>

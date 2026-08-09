@@ -23,12 +23,14 @@ import {
   BellRing,
   Sparkles,
   Search,
+  Tag,
   ArrowLeft} from 'lucide-react';
 import { Technician, SystemSettings, TechnicianLevel, PaymentMethodConfig, WorkOrder, NotificationTemplate, AppUser, UserRole, UserPermissions, PartItem, PartQualityTier, Supplier } from '../../types';
 import {DEFAULT_PAYMENT_METHODS, DEFAULT_NOTIFICATION_TEMPLATES} from '../../data/seedData';
 import { Button , Input } from '../ui';
 
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
+import { PriceSettingsModal } from '../prices/PriceSettingsModal';
 
 import { DeviceTagPrinterModal } from '../common/DeviceTagPrinterModal';
 import { toast } from '../../lib/toast';
@@ -76,6 +78,30 @@ interface SystemManagementSettingsModuleProps {
   onRegisterActions?: (actions: { reset: () => void; save: () => void }) => void;
   initialSubTab?: 'users' | 'ai';
   onAiRescanTickets?: () => Promise<{ classified: number; failed: number }>;
+  /** Price Catalog manager — powers the embedded Price Catalog settings panel. */
+  priceCatalogManager?: {
+    catalog: any[];
+    updatePriceAndWarranty: (modelName: string, categoryKey: string, newPrice: number | null, newWarranty: string) => void;
+    importCatalogRows?: (rows: any[], importedCategories?: any[], replaceCategories?: boolean) => Promise<number>;
+    addModel: (modelName: string, folderId?: string, cloneFromModel?: string) => void;
+    renameModel?: (oldName: string, newName: string) => void;
+    deleteModel?: (modelName: string) => void;
+    resetToDefaults: () => void;
+    currencySymbol: string;
+    setCurrencySymbol: (sym: string) => void;
+    folders: any[];
+    toggleFolder: (folderId: string) => void;
+    setAllFoldersEnabled: (enabled: boolean) => void;
+    addFolder?: (name: string, family: string) => void;
+    renameFolder?: (id: string, newName: string) => void;
+    categories?: any[];
+    updateCategoryLabel?: (key: string, newLabel: string) => void;
+    addCategory?: (key: string, label: string, group: string) => void;
+    deleteCategory?: (key: string) => void;
+    applyGlobalPriceAdjustment?: (folderId: string | 'ALL', categoryKey: string | 'ALL', percentChange: number, flatChange: number) => void;
+    applyGlobalWarranty?: (folderId: string | 'ALL', categoryKey: string | 'ALL', warrantyTerm: string) => void;
+    formatPrice: (amount: number | null | undefined) => string;
+  };
 }
 
 const RECEIPT_FOOTER_ALIGNMENT_OPTIONS = [
@@ -143,8 +169,9 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   onRegisterActions,
   initialSubTab,
   onAiRescanTickets,
+  priceCatalogManager,
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'shop' | 'theme' | 'users' | 'technicians' | 'intake' | 'pricing' | 'payment' | 'inventory' | 'pos' | 'notifications' | 'qa' | 'recycle' | 'ai'>(initialSubTab || 'users');
+  const [activeSubTab, setActiveSubTab] = useState<'shop' | 'theme' | 'users' | 'technicians' | 'intake' | 'pricing' | 'payment' | 'inventory' | 'pos' | 'notifications' | 'qa' | 'recycle' | 'ai' | 'price-catalog'>(initialSubTab || 'users');
   // Two-level navigation: launcher menu → drilled-in tab view (Back returns).
   // App only sets initialSubTab='ai' when jumping from the dashboard AI shortcut — drill in then.
   const [settingsDrilledIn, setSettingsDrilledIn] = useState(initialSubTab === 'ai');
@@ -878,6 +905,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             { id: 'notifications', label: 'SMS & Telegram Alerts', icon: BellRing },
             { id: 'ai', label: 'AI Assistant & API', icon: Sparkles },
             { id: 'qa', label: 'QA & Diagnostic Rules', icon: ShieldCheck },
+            { id: 'price-catalog', label: 'Price Catalog & Models', icon: Tag },
             { id: 'recycle', label: 'Recycle Bin & Trash', icon: Trash2, badge: archivedCount },
           ];
           const defById = new Map(tabDefs.map((t) => [t.id, t]));
@@ -885,7 +913,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             { label: 'Business', ids: ['shop', 'pricing', 'payment', 'pos'] },
             { label: 'Staff', ids: ['users', 'technicians'] },
             { label: 'Operations', ids: ['intake', 'qa', 'inventory', 'notifications'] },
-            { label: 'System', ids: ['theme', 'ai', 'recycle'] },
+            { label: 'System', ids: ['theme', 'ai', 'price-catalog', 'recycle'] },
           ];
           // Work-desk accent tints per group (icon tile backgrounds)
           const accentByGroup: Record<string, string> = {
@@ -1040,6 +1068,36 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
         <Suspense fallback={<ModuleLoadingSkeleton />}>
           <TabQaLazy formData={formData} setFormData={setFormData} />
         </Suspense>
+      )}
+      {activeSubTab === 'price-catalog' && priceCatalogManager && (
+        <div className="bg-surface p-3 rounded-2xl border border-line">
+          <PriceSettingsModal
+            isOpen
+            embedded
+            onClose={() => setActiveSubTab('shop')}
+            catalog={priceCatalogManager.catalog}
+            updatePriceAndWarranty={priceCatalogManager.updatePriceAndWarranty}
+            importCatalogRows={priceCatalogManager.importCatalogRows}
+            addModel={priceCatalogManager.addModel}
+            renameModel={priceCatalogManager.renameModel}
+            deleteModel={priceCatalogManager.deleteModel}
+            resetToDefaults={priceCatalogManager.resetToDefaults}
+            currencySymbol={priceCatalogManager.currencySymbol}
+            setCurrencySymbol={priceCatalogManager.setCurrencySymbol}
+            folders={priceCatalogManager.folders}
+            toggleFolder={priceCatalogManager.toggleFolder}
+            setAllFoldersEnabled={priceCatalogManager.setAllFoldersEnabled}
+            addFolder={priceCatalogManager.addFolder}
+            renameFolder={priceCatalogManager.renameFolder}
+            categories={priceCatalogManager.categories}
+            updateCategoryLabel={priceCatalogManager.updateCategoryLabel}
+            addCategory={priceCatalogManager.addCategory}
+            deleteCategory={priceCatalogManager.deleteCategory}
+            applyGlobalPriceAdjustment={priceCatalogManager.applyGlobalPriceAdjustment}
+            applyGlobalWarranty={priceCatalogManager.applyGlobalWarranty}
+            formatPrice={priceCatalogManager.formatPrice}
+          />
+        </div>
       )}      {activeSubTab === 'recycle' && (
         <Suspense fallback={<ModuleLoadingSkeleton />}>
           <TabRecycleLazy formData={formData} setFormData={setFormData} onOpenRecycleBin={onOpenRecycleBin} archivedCount={archivedCount} />
