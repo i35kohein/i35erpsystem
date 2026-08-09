@@ -94,10 +94,10 @@ interface CartItem {
 const DISCOUNT_OPTIONS = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
 
 function WarrantyPill({ warranty, size = 'sm' }: { warranty: string; size?: 'sm' | 'md' }) {
-  const icon = size === 'md' ? 'w-2.5 h-2.5' : 'w-2 h-2';
-  const pad = size === 'md' ? 'px-1.5 py-0.5' : 'px-1 py-0.5';
+  const icon = size === 'md' ? 'w-2.5 h-2.5' : 'w-1.5 h-1.5 sm:w-2 sm:h-2';
+  const pad = size === 'md' ? 'px-1.5 py-0.5' : 'px-1 py-px sm:py-0.5';
   return (
-    <span className={`inline-flex items-center space-x-0.5 text-xs font-extrabold text-success-deep bg-success/10 ${pad} rounded-full border border-success/30 shrink-0`}>
+    <span className={`inline-flex items-center space-x-0.5 text-[10px] sm:text-xs font-extrabold text-success-deep bg-success/10 ${pad} rounded-full border border-success/30 shrink-0`}>
       <ShieldCheck className={`${icon} text-success shrink-0`} />
       <span>{warranty}</span>
     </span>
@@ -805,7 +805,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                 }
               }
             }}
-            className="!w-10 !h-8 !min-h-8 rounded-full bg-surface border border-line text-[11px] font-bold text-center text-ink outline-none focus:border-brand shrink-0 px-0"
+            className="!w-16 !h-8 !min-h-8 rounded-full bg-surface border border-line text-[11px] font-bold text-center text-ink outline-none focus:border-brand shrink-0 px-1"
             title="Custom discount % — type and press Enter"
           />
           <span className="text-[9px] font-bold text-muted">Type % + Enter</span>
