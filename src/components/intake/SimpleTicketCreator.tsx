@@ -241,7 +241,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
     <div className="mx-auto max-w-4xl space-y-4">
       {/* Paper sheet */}
       <div className="print:border-0 print:shadow-none overflow-hidden rounded-2xl border border-line bg-white shadow-xs">
-        <header className="flex items-center justify-between gap-4 border-b border-line px-4 py-4 sm:px-7">
+        <header className="flex items-center justify-between gap-4 border-b border-line px-4 py-3 sm:px-7">
           <div className="min-w-0">
             <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted">
               {editingId ? 'Editing simple ticket' : 'Service intake form'}
@@ -253,7 +253,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
 
         </header>
 
-        <form onSubmit={handleSubmit} onReset={resetForm} className="px-4 py-4 sm:px-7 sm:py-5">
+        <form onSubmit={handleSubmit} onReset={resetForm} className="px-4 py-3.5 sm:px-7 sm:py-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-6">
           <div className="flex flex-col divide-y divide-line">
             {/* LEFT header — mirrors the checklist header (Ko Hein) */}
@@ -391,7 +391,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
             </div>
             <div className="mt-0 grid grid-cols-1 gap-x-4 sm:grid-cols-2 sm:gap-x-8">
               {DIAGNOSTIC_NAMES.map((name, i) => (
-                <label key={name} className="group flex min-h-9 items-center gap-2 border-b border-line/60 py-2">
+                <label key={name} className="group flex min-h-7 items-center gap-2 border-b border-line/60 py-1.5">
                   <button
                     type="button"
                     onClick={() => cycleCheck(i)}
