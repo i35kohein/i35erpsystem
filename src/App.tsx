@@ -2046,27 +2046,8 @@ export default function App() {
               </div>
               </div>
 
-              {/* Phone row (<sm): full-width search + side-menu button */}
-              <div className={`sm:hidden flex items-center gap-1.5 min-w-0 flex-1 ${isIpad ? 'hidden' : ''}`}>
-                <div className="relative flex-1 min-w-0">
-                  <ScanLine className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-brand" />
-                  <Input
-                    value={inventoryScanQuery}
-                    onChange={(e) => {
-                      setInventoryScanQuery(e.target.value);
-                      setSearchQuery(e.target.value);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        inventoryScanSubmitRef.current?.();
-                      }
-                    }}
-                    placeholder="Scan barcode or search part..."
-                    autoComplete="off"
-                    className="h-10 w-full rounded-lg border border-line bg-white pl-8 pr-2 font-mono text-xs text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
-                  />
-                </div>
+              {/* Phone row (<sm): filter drawer trigger only */}
+              <div className={`sm:hidden flex items-center justify-end gap-1.5 min-w-0 flex-1 ${isIpad ? 'hidden' : ''}`}>
                 <button
                   type="button"
                   onClick={() => setIsFilterDrawerOpen(true)}
