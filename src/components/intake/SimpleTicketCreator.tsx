@@ -606,31 +606,6 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                   </div>
                 </div>
 
-                {/* Selected repairs — compact (discount applied from the card circle) */}
-                {form.repairs.length > 0 && (
-                  <div className="max-h-44 space-y-1 overflow-y-auto border-t border-line px-4 py-2.5">
-                    {form.repairs.map((r) => (
-                      <div key={r.id} className="flex items-center gap-2 text-[11px]">
-                        <span className="min-w-0 flex-1 truncate font-bold text-ink">{r.name}</span>
-                        {r.discountPercent > 0 && (
-                          <span className="shrink-0 font-mono text-[10px] font-bold text-brand">{r.discountPercent}%</span>
-                        )}
-                        <span className={`shrink-0 font-mono font-black ${r.finalPrice < r.basePrice ? 'text-brand' : 'text-ink'}`}>
-                          {r.finalPrice.toLocaleString()}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => setForm((f) => ({ ...f, repairs: f.repairs.filter((x) => x.id !== r.id) }))}
-                          className="shrink-0 rounded px-1 text-muted hover:text-danger"
-                          aria-label={`Remove ${r.name}`}
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
                 {/* Summary box */}
                 <div className="grid grid-cols-2 gap-2 border-t border-line px-4 py-3 text-center text-xs sm:grid-cols-4">
                   <div className="rounded-lg bg-surface p-2">
