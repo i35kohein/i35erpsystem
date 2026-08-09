@@ -18,7 +18,6 @@ import {Boxes,
   TrendingUp,
   PackageCheck,
   PackageX,
-  Filter,
   Check,
   Sparkles,
   ArrowRight,
@@ -237,7 +236,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const [showInlineSaveConfirm, setShowInlineSaveConfirm] = useState(false);
   const [isInlineSaving, setIsInlineSaving] = useState(false);
   const [showLowStockOnly, setShowLowStockOnly] = useState(false);
-  const [skuFilterOpen, setSkuFilterOpen] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
 
   // Supplier & Quality Tier Edit States
@@ -310,9 +308,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   }, [deviceModels]);
 
   // Inventory filters should only list models with an actual saved stock row.
-  const inventoryDeviceModels = useMemo(() => {
-    return sortModelsNewestFirst([...new Set(parts.flatMap((part) => part.deviceCompatibility || []).filter(Boolean))]);
-  }, [parts]);
 
   // Edit Part Modal state
   const [editingPart, setEditingPart] = useState<PartItem | null>(null);
@@ -525,32 +520,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   }, [inventoryCategories]);
 
   // Memoized filter-option lists (badge counts are expensive — computed once per data change, not per tap/render)
-  const modelFilterOptions = useMemo(
-    () => [
-      { value: 'ALL', label: 'All Models', badge: inventoryDeviceModels.length },
-      ...inventoryDeviceModels.map((model) => ({
-        value: model,
-        label: model,
-        badge: parts.filter((part) =>
-          part.deviceCompatibility.some((device) => isSameDeviceModel(device, model)),
-        ).length,
-      })),
-    ],
-    [parts, inventoryDeviceModels],
-  );
-
-  const categoryFilterOptions = useMemo(
-    () => [
-      { value: 'ALL', label: 'All Categories', badge: categories.length },
-      ...categories.map((category) => ({
-        value: category,
-        label: category,
-        badge: parts.filter((part) => part.category === category).length,
-      })),
-    ],
-    [parts, categories],
-  );
-
   const tierFilterOptions = useMemo(
     () => [{ value: 'ALL', label: 'All Tiers' }, ...customQualityTiers.map((tier) => ({ value: tier, label: tier }))],
     [customQualityTiers],
@@ -1551,60 +1520,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                           Part Name & SKU
                           {sortKey === 'name' && <SortArrow dir={sortDir} />}
                         </button>
-                        <div className="relative">
-                          <button
-                            type="button"
-                            onClick={() => setSkuFilterOpen(!skuFilterOpen)}
-                            className={`p-1 rounded-md transition-colors cursor-pointer focus:outline-none ${(selectedModelFilter !== 'ALL' || selectedCategory !== 'ALL' || showLowStockOnly) ? 'text-brand' : 'text-muted hover:text-brand'}`}
-                            title="Filter by model / category"
-                            aria-label="Filter parts"
-                          >
-                            <Filter className="w-3 h-3" />
-                            {(selectedModelFilter !== 'ALL' || selectedCategory !== 'ALL' || showLowStockOnly) && (
-                              <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-brand" />
-                            )}
-                          </button>
-                          {skuFilterOpen && (
-                            <>
-                              <div className="fixed inset-0 z-40" onClick={() => setSkuFilterOpen(false)} role="presentation" aria-hidden="true" />
-                              <div className="absolute left-0 top-full mt-1 z-50 w-56 rounded-xl border border-line bg-white p-2 space-y-2 shadow-xl">
-                                <div>
-                                  <p className="text-[10px] font-extrabold uppercase tracking-wide text-muted mb-1">Model</p>
-                                  <select
-                                    value={selectedModelFilter}
-                                    onChange={(e) => setSelectedModelFilter(e.target.value)}
-                                    className="w-full rounded-lg border border-line bg-white px-2 py-1.5 text-xs font-semibold text-ink outline-none focus:border-brand"
-                                  >
-                                    {modelFilterOptions.map((opt) => (
-                                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                    ))}
-                                  </select>
-                                </div>
-                                <div>
-                                  <p className="text-[10px] font-extrabold uppercase tracking-wide text-muted mb-1">Category</p>
-                                  <select
-                                    value={selectedCategory}
-                                    onChange={(e) => setSelectedCategory(e.target.value)}
-                                    className="w-full rounded-lg border border-line bg-white px-2 py-1.5 text-xs font-semibold text-ink outline-none focus:border-brand"
-                                  >
-                                    {categoryFilterOptions.map((opt) => (
-                                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                    ))}
-                                  </select>
-                                </div>
-                                <label className="flex items-center gap-1.5 text-xs font-bold text-ink cursor-pointer pt-1.5 mt-1 border-t border-line">
-                                  <input
-                                    type="checkbox"
-                                    checked={showLowStockOnly}
-                                    onChange={(e) => setShowLowStockOnly(e.target.checked)}
-                                    className="accent-brand w-3.5 h-3.5 cursor-pointer"
-                                  />
-                                  Low stock only
-                                </label>
-                              </div>
-                            </>
-                          )}
-                        </div>
                       </div>
                     </th>
                     <th className="w-[128px] px-2 py-2 bg-surface hidden md:table-cell">
