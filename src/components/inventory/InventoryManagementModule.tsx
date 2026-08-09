@@ -1085,19 +1085,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   </div>
                 )}
 
-                {/* Quick Add Part */}
-                {!isIpad && !inlineEditMode && (
-                  <Button
-                    type="button"
-                    onClick={() => setShowAddModal(true)}
-                    className="flex-1 sm:flex-none inline-flex h-10 items-center justify-center gap-1.5 rounded-xl bg-brand px-4 text-xs font-extrabold text-white shadow-xs transition-all hover:bg-brand-deep active:scale-95 cursor-pointer"
-                    title="Add a new part"
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    <span className="hidden md:inline">Add Part</span>
-                  </Button>
-                )}
-
                 {/* Save edits */}
                 {inlineEditMode && (
                   <Button
