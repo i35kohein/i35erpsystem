@@ -191,7 +191,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
   // Wizard step: 1 Customer → 2 Device → 3 Repairs/Notes/Photos → 4 21-Diagnostic → done
   const [wizardStep, setWizardStep] = useState(1);
   const canNextStep = (): boolean => {
-    if (wizardStep === 1) return !!(customerName.trim() && customerPhone.trim());
+    if (wizardStep === 1) return !!customerName.trim();
     if (wizardStep === 2) return !!deviceModel;
     if (wizardStep === 3) return repairCount > 0;
     return true;
@@ -369,7 +369,6 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
     if (isRegistering) return;
     const errs: Record<string, string> = {};
     if (!customerName.trim()) errs['field-customer-name'] = 'Customer name is required.';
-    if (!customerPhone.trim()) errs['field-customer-phone'] = 'Phone number is required.';
     if (!deviceModel.trim()) errs['intake-device'] = 'Select a device model to continue.';
     if (imei.trim() && imei.trim().length !== 15) errs['field-imei'] = 'IMEI must be exactly 15 digits.';
     setFieldErrors(errs);
@@ -761,8 +760,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               <Input
                 id="field-customer-phone"
                 type="text"
-                required
-                aria-required="true"
+                aria-required="false"
                 aria-invalid={Boolean(fieldErrors['field-customer-phone'])}
                 value={customerPhone}
                 onChange={(e) => { handlePhoneChange(e.target.value); clearFieldError('field-customer-phone'); setPhoneSuggestOpen(true); }}

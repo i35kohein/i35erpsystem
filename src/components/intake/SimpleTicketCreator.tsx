@@ -281,8 +281,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 value={form.phone}
                 onChange={(e) => handlePhoneChange(e.target.value)}
                 inputMode="tel"
-                required
-                placeholder="e.g. 09-123456789"
+                placeholder="e.g. 09-123456789 (optional)"
                 className={fieldLine}
               />
               {matchedCustomer && (
