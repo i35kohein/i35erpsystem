@@ -552,7 +552,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
                             {/* Compact Discount button — opens a centered modal popup, no layout shift */}
                             <div className="mt-2 flex items-center justify-between gap-2">
-                              {discountMenuOpenFor === item.categoryKey ? renderDiscountChips(item) : (
+                              <div className="relative">
                                 <Button
                                   type="button"
                                   onClick={() => setDiscountMenuOpenFor(item.categoryKey)}
@@ -565,7 +565,8 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                 >
                                   <BadgePercent className="w-4 h-4" />
                                 </Button>
-                              )}
+                                {renderDiscountPopup(item)}
+                              </div>
 
                               <span className="text-xs font-semibold text-muted">
                                 {item.discountPercent > 0
@@ -623,7 +624,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
                             <div className="flex items-center justify-between bg-surface px-2 py-1 rounded-lg">
                               <div className="flex items-center space-x-1.5">
-                                {discountMenuOpenFor === item.categoryKey ? renderDiscountChips(item) : (
+                                <div className="relative">
                                   <Button
                                     type="button"
                                     onClick={() => setDiscountMenuOpenFor(item.categoryKey)}
@@ -636,7 +637,8 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                   >
                                     <BadgePercent className="w-4 h-4" />
                                   </Button>
-                                )}
+                                  {renderDiscountPopup(item)}
+                                </div>
                                 {item.discountPercent > 0 && (
                                   <span className="text-[11px] font-extrabold text-success">{item.discountPercent}% Off</span>
                                 )}
@@ -711,7 +713,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
                         <div className="flex items-center justify-between bg-surface px-2 py-1 rounded-lg">
                           <div className="flex items-center space-x-1.5">
-                            {discountMenuOpenFor === item.categoryKey ? renderDiscountChips(item) : (
+                            <div className="relative">
                               <Button
                                 type="button"
                                 onClick={() => setDiscountMenuOpenFor(item.categoryKey)}
@@ -724,7 +726,8 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                               >
                                 <BadgePercent className="w-4 h-4" />
                               </Button>
-                            )}
+                              {renderDiscountPopup(item)}
+                            </div>
                             {item.discountPercent > 0 && (
                               <span className="text-[11px] font-extrabold text-success">{item.discountPercent}% Off</span>
                             )}
@@ -751,50 +754,71 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
           </div>
   );
 
-  // Discount control: clicking the circle expands a row of preset % circles to
-  // the right (Ko Hein) — picking one collapses back to a single circle.
-  const renderDiscountChips = (item: CartItem) => (
-    <div className="flex items-center gap-1 overflow-x-auto no-scrollbar" style={{ maxWidth: 190 }}>
-      {DISCOUNT_OPTIONS.map((p) => (
-        <button
-          key={p}
-          type="button"
-          onClick={() => {
-            handleUpdateItemDiscount(item.categoryKey, p);
-            setDiscountMenuOpenFor(null);
-          }}
-          className={`!w-6 !h-6 !min-h-6 !min-w-6 rounded-full text-[10px] font-extrabold flex items-center justify-center shrink-0 transition-all cursor-pointer active:scale-90 ${
-            item.discountPercent === p
-              ? 'bg-brand text-white border border-brand'
-              : 'bg-white text-ink border border-line hover:border-brand hover:text-brand'
-          }`}
-          title={`${p}% off`}
-        >
-          {p}
-        </button>
-      ))}
-      <input
-        type="number"
-        min={1}
-        max={100}
-        placeholder="%"
-        value={customDiscountInput}
-        onChange={(e) => setCustomDiscountInput(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            const v = Number(customDiscountInput);
-            if (v >= 1 && v <= 100) {
-              handleUpdateItemDiscount(item.categoryKey, v);
-              setDiscountMenuOpenFor(null);
-              setCustomDiscountInput('');
-            }
-          }
-        }}
-        className="!w-8 !h-8 !min-h-8 rounded-full bg-surface border border-line text-[10px] font-bold text-center text-ink outline-none focus:border-brand shrink-0 px-0"
-        title="Custom discount %"
-      />
-    </div>
-  );
+  // Discount popup — small box anchored right under the circle button, with
+  // circular preset options + custom % (Ko Hein: no rightward expansion).
+  const renderDiscountPopup = (item: CartItem) => {
+    if (discountMenuOpenFor !== item.categoryKey) return null;
+    return (
+      <div className="absolute left-0 top-full z-50 mt-1.5 w-44 rounded-2xl border border-line bg-white p-2 shadow-xl">
+        <div className="grid grid-cols-4 gap-1.5">
+          {DISCOUNT_OPTIONS.map((p) => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => {
+                handleUpdateItemDiscount(item.categoryKey, p);
+                setDiscountMenuOpenFor(null);
+              }}
+              className={`!w-7 !h-7 !min-h-7 !min-w-7 rounded-full text-[10px] font-extrabold flex items-center justify-center transition-all cursor-pointer active:scale-90 ${
+                item.discountPercent === p
+                  ? 'bg-brand text-white border border-brand'
+                  : 'bg-white text-ink border border-line hover:border-brand hover:text-brand'
+              }`}
+              title={`${p}% off`}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+        <div className="mt-2 pt-1.5 border-t border-line flex items-center gap-1">
+          <input
+            type="number"
+            min={1}
+            max={100}
+            placeholder="%"
+            value={customDiscountInput}
+            onChange={(e) => setCustomDiscountInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                const v = Number(customDiscountInput);
+                if (v >= 1 && v <= 100) {
+                  handleUpdateItemDiscount(item.categoryKey, v);
+                  setDiscountMenuOpenFor(null);
+                  setCustomDiscountInput('');
+                }
+              }
+            }}
+            className="!w-8 !h-8 !min-h-8 rounded-full bg-surface border border-line text-[10px] font-bold text-center text-ink outline-none focus:border-brand shrink-0 px-0"
+            title="Custom %"
+          />
+          <button
+            type="button"
+            onClick={() => {
+              const v = Number(customDiscountInput);
+              if (v >= 1 && v <= 100) {
+                handleUpdateItemDiscount(item.categoryKey, v);
+                setDiscountMenuOpenFor(null);
+                setCustomDiscountInput('');
+              }
+            }}
+            className="flex-1 !h-7 !min-h-7 rounded-full bg-brand text-white text-[10px] font-extrabold transition-all cursor-pointer active:scale-95"
+          >
+            Apply
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   const renderCartTotals = () => (
     <div className="shrink-0 bg-white border-t border-line px-3.5 pt-3 pb-[calc(0.875rem+env(safe-area-inset-bottom))] space-y-2.5">
