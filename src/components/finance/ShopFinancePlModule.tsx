@@ -12,7 +12,7 @@ import {DollarSign,
   Percent,
   Coins,
   Wallet,
-  Sparkles} from 'lucide-react';
+  Sparkles, ChevronDown, ChevronRight, Calendar} from 'lucide-react';
 import { 
   WorkOrder, 
   PartItem, 
@@ -64,6 +64,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
   const currency = systemSettings?.currencySymbol || 'MMK';
   const activePaymentMethods = getActivePaymentMethods(systemSettings).filter((m) => m.enabled);
   const [activeTab, setActiveTab] = useState<'overview' | 'revenue' | 'expenses' | 'inventory-asset' | 'commissions' | 'accounts-payable' | 'inventory-fund' | 'parts-revenue'>('overview');
+  const [expandedDay, setExpandedDay] = useState<string | null>(null);
   const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
   const [selectedDebtForPayment, setSelectedDebtForPayment] = useState<SupplierDebtRecord | null>(null);
 
@@ -300,6 +301,46 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
       })
       .filter((x): x is NonNullable<typeof x> => x !== null)
       .sort((a, b) => b.revenue - a.revenue);
+  }, [filteredWorkOrders]);
+
+  // Parts sold grouped by DAY (sale date = inventoryConsumedAt → completedAt → updatedAt)
+  const partsSalesByDay = useMemo(() => {
+    const map = new Map<string, {
+      date: string;
+      label: string;
+      tickets: Set<string>;
+      units: number;
+      revenue: number;
+      cost: number;
+      items: { name: string; qty: number; revenue: number; cost: number }[];
+    }>();
+    filteredWorkOrders.forEach((wo) => {
+      const ts = wo.inventoryConsumedAt || wo.completedAt || wo.updatedAt || wo.createdAt;
+      if (!ts) return;
+      const d = new Date(ts);
+      if (isNaN(d.getTime())) return;
+      const key = d.toISOString().slice(0, 10);
+      const label = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      (wo.lineItems || []).forEach((li) => {
+        if (li.partId && !li.isLabor && li.quantity > 0) {
+          const entry = map.get(key) || { date: key, label, tickets: new Set<string>(), units: 0, revenue: 0, cost: 0, items: [] };
+          entry.tickets.add(wo.id);
+          entry.units += li.quantity;
+          entry.revenue += li.unitPrice * li.quantity;
+          entry.cost += (li.unitCost || 0) * li.quantity;
+          entry.items.push({
+            name: li.partName || li.description || 'Part',
+            qty: li.quantity,
+            revenue: li.unitPrice * li.quantity,
+            cost: (li.unitCost || 0) * li.quantity,
+          });
+          map.set(key, entry);
+        }
+      });
+    });
+    return [...map.entries()]
+      .map(([, v]) => ({ ...v, tickets: v.tickets.size }))
+      .sort((a, b) => b.date.localeCompare(a.date));
   }, [filteredWorkOrders]);
 
   const handleSaveExpenseSubmit = (e: React.FormEvent) => {
@@ -1382,6 +1423,92 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
               </div>
               <span className="text-xs text-muted font-bold">gross margin</span>
             </div>
+          </div>
+
+          {/* Sales by day — which day, how many units, what was sold, how much profit */}
+          <div className="space-y-2">
+            <h4 className="font-extrabold text-xs text-ink uppercase tracking-wider">Sales by Day ({partsSalesByDay.length} days)</h4>
+            {partsSalesByDay.length === 0 ? (
+              <div className="p-8 text-center text-xs text-muted bg-surface rounded-xl border border-dashed border-line-strong">
+                <Calendar className="w-6 h-6 mx-auto opacity-50" />
+                <p className="font-extrabold text-sm text-ink">No part sales in this period</p>
+                <p>Days with sold parts will appear here — tap a day to see exactly what was sold.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto border border-line rounded-xl">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-surface text-muted uppercase font-mono text-xs">
+                    <tr>
+                      <th className="p-3"></th>
+                      <th className="p-3">Day</th>
+                      <th className="p-3 text-center">Tickets</th>
+                      <th className="p-3 text-center">Units</th>
+                      <th className="p-3 text-center">Revenue</th>
+                      <th className="p-3 text-center">COGS</th>
+                      <th className="p-3 text-center">Profit</th>
+                      <th className="p-3 text-right">Margin</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-line">
+                    {partsSalesByDay.map((day) => {
+                      const profit = day.revenue - day.cost;
+                      const margin = day.revenue > 0 ? Math.round((profit / day.revenue) * 100) : 0;
+                      const open = expandedDay === day.date;
+                      return (
+                        <React.Fragment key={day.date}>
+                          <tr
+                            className={`cursor-pointer hover:bg-surface ${open ? 'bg-brand-soft/50' : ''}`}
+                            onClick={() => setExpandedDay(open ? null : day.date)}
+                          >
+                            <td className="p-3 text-muted">
+                              {open ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                            </td>
+                            <td className="p-3 font-extrabold text-ink">{day.label}</td>
+                            <td className="p-3 text-center font-mono font-bold">{day.tickets}</td>
+                            <td className="p-3 text-center font-mono font-bold">{day.units}</td>
+                            <td className="p-3 text-center font-mono text-success-deep">{day.revenue.toLocaleString()} {currency}</td>
+                            <td className="p-3 text-center font-mono text-danger">{day.cost.toLocaleString()} {currency}</td>
+                            <td className="p-3 text-center font-mono font-black text-success-deep">+{profit.toLocaleString()} {currency}</td>
+                            <td className="p-3 text-right">
+                              <span className={`rounded-md px-1.5 py-0.5 font-mono text-[10px] font-black ${
+                                margin >= 40 ? 'bg-success/15 text-success-deep' : margin >= 20 ? 'bg-success/15 text-success-deep' : margin >= 0 ? 'bg-warning/15 text-warning' : 'bg-danger/15 text-danger'
+                              }`}>{margin}%</span>
+                            </td>
+                          </tr>
+                          {open && (
+                            <tr className="bg-surface/60">
+                              <td className="p-0" colSpan={8}>
+                                <div className="px-4 py-2.5 space-y-1.5">
+                                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-muted">Items sold on {day.label}</p>
+                                  {day.items.length === 0 ? (
+                                    <p className="text-xs text-muted">No part items recorded.</p>
+                                  ) : (
+                                    day.items.map((it, idx) => {
+                                      const itProfit = it.revenue - it.cost;
+                                      return (
+                                        <div key={idx} className="flex items-center justify-between gap-3 text-xs">
+                                          <span className="font-bold text-ink truncate min-w-0">
+                                            {it.name} <span className="text-muted font-mono">× {it.qty}</span>
+                                          </span>
+                                          <span className="flex items-center gap-3 shrink-0 font-mono">
+                                            <span className="text-muted">{it.revenue.toLocaleString()} {currency}</span>
+                                            <span className="font-black text-success-deep w-24 text-right">+{itProfit.toLocaleString()} {currency}</span>
+                                          </span>
+                                        </div>
+                                      );
+                                    })
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
 
           {/* Top parts categories by profit */}
