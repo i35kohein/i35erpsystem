@@ -1237,18 +1237,13 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
       {/* Mobile cart bottom sheet — popup instead of scrolling down (lg:hidden) */}
       {isCartSheetOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 backdrop-blur-sm animate-fadeIn lg:hidden"
-          onClick={() => setIsCartSheetOpen(false)}
+          className="fixed inset-0 z-50 flex flex-col bg-white animate-i35-slide-up lg:hidden pt-[env(safe-area-inset-top)]"
           role="presentation"
         >
           <div
-            className="w-full max-w-lg max-h-[94vh] flex flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl animate-i35-slide-up"
+            className="flex flex-col min-h-0 flex-1 w-full"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Drag handle */}
-            <div className="shrink-0 pt-2.5 pb-1 flex justify-center">
-              <div className="w-10 h-1 rounded-full bg-line" />
-            </div>
 
             {/* Sheet Header */}
             <div className="shrink-0 px-4 pb-3 pt-1.5 border-b border-line bg-white flex items-center justify-between gap-2">
