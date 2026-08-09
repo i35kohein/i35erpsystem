@@ -4,14 +4,13 @@ import {ShieldCheck,
   CheckCircle2, 
   X,
   ClipboardCheck,
-  MoreHorizontal,
   Camera,
   UserCheck,
   StickyNote,
   DollarSign, RotateCcw } from 'lucide-react';
 import { WorkOrder, PostRepairChecklist, Technician, DiagnosticItemResult, DiagnosticStatus, AppUser, SystemSettings } from '../../types';
-import { Button , Input } from '../ui';
-import { DIAGNOSTIC_NAMES, getDiagnosticIcon } from '../intake/deviceData';
+import { Button } from '../ui';
+import { DIAGNOSTIC_NAMES } from '../intake/deviceData';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 import { compressImageFile } from '../../lib/utils';
 import { PriorityBadge } from '../common/PriorityBadge';
@@ -132,9 +131,6 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
 
   // 21-Point Post-Repair Diagnostic Checklist State
   const [qaDiagnostics, setQaDiagnostics] = useState<DiagnosticItemResult[]>([]);
-  // Which checklist rows have the note input open (comment icon toggle)
-  // Which card's ⋮ menu popup is open
-  const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   // Before / After repair photos (uploaded in QA modal)
   const [qaBeforePhotos, setQaBeforePhotos] = useState<string[]>([]);
   const [qaAfterPhotos, setQaAfterPhotos] = useState<string[]>([]);
@@ -148,24 +144,12 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
       });
     });
   };
-  // Cycle status: Pass -> Fail -> N/A -> Pass
+  // Cycle status: Pass -> Fail -> Cant Test -> N/A -> Pass (Ko Hein)
   const cycleStatus = (id: string, current: string) => {
-    const order: DiagnosticStatus[] = ['Pass', 'Fail', 'N/A', 'Cant Test'];
+    const order: DiagnosticStatus[] = ['Pass', 'Fail', 'Cant Test', 'N/A'];
     const idx = order.indexOf(current as DiagnosticStatus);
     const next = order[(idx + 1) % order.length];
     handleDiagnosticStatusChange(id, next);
-    // Auto-open the comment popup to capture the reason for 'Cant Test'
-    if (next === 'Cant Test') setMenuOpenId(id);
-  };
-  // Long-press on a card opens its note input (no comment icon)
-  const pressTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-  const startNotePress = (id: string) => {
-    pressTimer.current = setTimeout(() => {
-      setMenuOpenId(id);
-    }, 450);
-  };
-  const cancelNotePress = () => {
-    if (pressTimer.current) { clearTimeout(pressTimer.current); pressTimer.current = null; }
   };
   // Update QA form & 21-point checklist whenever selectedWoId changes
   useEffect(() => {
@@ -594,153 +578,75 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                 </div>
               </div>
 
-              <div className="space-y-2.5 rounded-xl border border-line bg-surface p-3">
+              {/* 21-Point checklist — PHONE TESTING & CHECKING style (Ko Hein) */}
+              <div>
                 <div className="flex items-center justify-between border-b border-line pb-2">
-                  <h3 className="text-[11px] font-bold text-ink flex items-center space-x-1.5">
-                    <ClipboardCheck className="h-3.5 w-3.5 text-brand" />
-                    <span>21-Point Post-Repair Inspection</span>
-                  </h3>
-                  <div className="flex space-x-1.5">
-                    <Button
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted">Post-Repair Inspection</span>
+                  <div className="flex items-center gap-2">
+                    <span className="shrink-0 font-mono text-[11px] font-black text-brand">
+                      {qaDiagnostics.filter((d) => d.status !== 'N/A').length}/{qaDiagnostics.length || 21}
+                    </span>
+                    <button
                       type="button"
                       onClick={handleMarkAllPass}
-                      className="!h-7 !min-h-7 rounded-lg bg-success px-2.5 text-[11px] font-bold text-white shadow-2xs transition-colors hover:bg-success/90"
+                      className="!h-7 !min-h-7 rounded-lg bg-success px-2.5 text-[11px] font-bold text-white transition-colors hover:bg-success/90"
                     >
-                      Mark All Pass
-                    </Button>
-                    <Button
+                      All Pass
+                    </button>
+                    <button
                       type="button"
-                      onClick={() => setQaDiagnostics((prev) => prev.map((diagnostic) => ({ ...diagnostic, status: 'N/A' })))}
-                      className="!h-7 !min-h-7 rounded-lg border border-line-strong bg-surface px-2.5 text-[11px] font-bold text-ink shadow-2xs transition-colors hover:bg-line-strong"
+                      onClick={() => setQaDiagnostics((prev) => prev.map((d) => ({ ...d, status: 'N/A' as const })))}
+                      className="!h-7 !min-h-7 rounded-lg border border-line-strong bg-surface px-2.5 text-[11px] font-bold text-ink transition-colors hover:bg-line-strong"
                     >
-                      Mark All N/A
-                    </Button>
+                      All N/A
+                    </button>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-1.5">
+                <div className="mt-0 grid grid-cols-1 gap-x-4 sm:grid-cols-2 sm:gap-x-8">
                   {qaDiagnostics.map((item, idx) => {
-                    const IconComp = getDiagnosticIcon(item.name);
                     const isPass = item.status === 'Pass';
                     const isFail = item.status === 'Fail';
                     const isCantTest = item.status === 'Cant Test';
-
                     return (
-                      <div
-                        key={item.id}
-                        onMouseDown={() => startNotePress(item.id)}
-                        onMouseUp={cancelNotePress}
-                        onMouseLeave={cancelNotePress}
-                        onTouchStart={() => startNotePress(item.id)}
-                        onTouchEnd={cancelNotePress}
-                        onContextMenu={(e) => e.preventDefault()}
-                        className={`rounded-xl border p-2.5 transition-colors select-none ${
-                          isFail ? 'bg-danger/5 border-danger/20' : isPass ? 'bg-success/5 border-success/20' : isCantTest ? 'bg-warning/5 border-warning/30' : 'bg-white border-line hover:border-brand/30'
-                        }`}
-                        title="Hold to add note"
-                      >
-                        {/* Icon — click to cycle status (no border box) */}
+                      <div key={item.id} className="flex min-h-7 items-center gap-2 border-b border-line/60 py-1.5">
                         <button
                           type="button"
                           onClick={() => cycleStatus(item.id, item.status)}
-                          className={`mx-auto flex items-center justify-center transition-colors ${
-                            isFail
-                              ? 'text-danger'
-                              : isPass
-                              ? 'text-success-deep'
-                              : isCantTest
-                              ? 'text-warning'
-                              : 'text-brand'
-                          }`}
-                          title={`Status: ${item.status} — click to change`}
+                          title={isPass ? 'Pass — tap for Fail' : isFail ? 'Fail — tap for N/A' : isCantTest ? 'Cant Test — tap for N/A' : 'Not checked — tap for Pass'}
                           aria-label={`Change status for ${item.name}`}
+                          className={`flex !h-4 !w-4 !min-h-4 !min-w-4 shrink-0 items-center justify-center rounded-full border text-[10px] font-black leading-none transition-colors cursor-pointer ${
+                            isPass
+                              ? 'border-success bg-success text-white'
+                              : isFail
+                              ? 'border-danger bg-danger text-white'
+                              : isCantTest
+                              ? 'border-warning bg-warning text-white'
+                              : 'border-line bg-white text-muted hover:border-brand'
+                          }`}
                         >
-                          <IconComp className="w-8 h-8" />
+                          {isPass ? '\u2713' : isFail ? '\u2715' : isCantTest ? '?' : ''}
                         </button>
-
-                        {/* Name + ⋮ — same row */}
-                        <div className="flex items-center gap-1 mt-1">
-                          {/* Name — click to mark Pass */}
-                          <button
-                            type="button"
-                            onClick={() => handleDiagnosticStatusChange(item.id, 'Pass')}
-                            className={`flex-1 min-w-0 text-[11px] font-bold truncate text-left transition-colors ${
-                              isPass ? 'text-success-deep' : isCantTest ? 'text-warning' : 'text-ink hover:text-success-deep'
-                            }`}
-                            title={`Mark ${item.name} as Pass`}
-                            aria-label={`Mark ${item.name} as Pass`}
-                          >
-                            {idx + 1}. {item.name}
-                          </button>
-                          {/* ⋮ menu (Comment) */}
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); setMenuOpenId(menuOpenId === item.id ? null : item.id); }}
-                            className={`!h-5 !min-h-5 w-5 px-0 rounded shrink-0 flex items-center justify-center transition-colors ${
-                              menuOpenId === item.id ? 'bg-line text-ink' : 'text-muted hover:bg-line/60 hover:text-ink'
-                            }`}
-                            title="More options"
-                            aria-label={`More options for ${item.name}`}
-                          >
-                            <MoreHorizontal className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                        {/* Cant Test note on its own line — keeps the narrow card row uncluttered */}
-                        {isCantTest && (item.note || '').trim() && (
-                          <p className="text-[9px] font-semibold text-warning truncate mt-0.5" title={item.note}>
-                            ⚠ {item.note}
-                          </p>
-                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleDiagnosticStatusChange(item.id, 'Pass')}
+                          className={`min-w-0 truncate text-left text-xs font-semibold transition-colors ${isPass ? 'text-success-deep' : isFail ? 'text-danger' : isCantTest ? 'text-warning' : 'text-muted hover:text-success-deep'}`}
+                          title={`Mark ${item.name} as Pass`}
+                          aria-label={`Mark ${item.name} as Pass`}
+                        >
+                          {idx + 1}. {item.name}
+                        </button>
+                        <input
+                          aria-label={`${item.name} note`}
+                          value={item.note || ''}
+                          onChange={(e) => handleDiagnosticNoteChange(item.id, e.target.value)}
+                          placeholder={isPass ? 'ok' : isFail ? 'issue…' : isCantTest ? 'note' : 'n/a'}
+                          className="ml-auto min-w-0 flex-1 bg-transparent px-1 text-xs outline-none focus:bg-[#d9f99d]/40"
+                        />
                       </div>
                     );
                   })}
                 </div>
               </div>
-
-              {/* Comment modal — fixed, never overflows the QA modal */}
-              {menuOpenId && (() => {
-                const item = qaDiagnostics.find((d) => d.id === menuOpenId);
-                if (!item) return null;
-                return (
-                  <div
-                    className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/40 p-4"
-                    onClick={() => setMenuOpenId(null)}
-                  >
-                    <div
-                      className="w-full max-w-xs bg-white border border-line rounded-2xl shadow-2xl p-3 space-y-2"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <div className="flex items-center justify-between">
-                        <p className="text-[11px] font-extrabold text-ink truncate">Comment — {item.name}</p>
-                        <button
-                          type="button"
-                          onClick={() => setMenuOpenId(null)}
-                          className="!h-6 !min-h-6 w-6 px-0 rounded flex items-center justify-center text-muted hover:bg-surface hover:text-ink"
-                          aria-label="Close comment"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                      <Input
-                        type="text"
-                        value={item.note || ''}
-                        onChange={(e) => handleDiagnosticNoteChange(item.id, e.target.value)}
-                        placeholder="Type a note..."
-                        autoFocus
-                        className="!h-8 !min-h-8 w-full rounded-lg bg-surface border border-line px-2.5 text-xs text-ink focus:bg-white focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/20"
-                      />
-                      <Button
-                        type="button"
-                        onClick={() => setMenuOpenId(null)}
-                        className="!h-7 !min-h-7 w-full rounded-lg bg-brand text-white text-[11px] font-bold hover:bg-brand-deep"
-                      >
-                        Done
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })()}
-
               {/* Inspector — technician + notes in one compact row */}
               <div className="flex flex-col sm:flex-row gap-2 rounded-xl border border-line bg-surface/80 p-2.5">
                 <div className="flex items-center gap-2 sm:w-56 shrink-0">
