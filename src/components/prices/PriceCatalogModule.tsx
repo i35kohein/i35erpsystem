@@ -1106,20 +1106,19 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                     {/* Price (right on mobile / bottom on desktop) + selection checkmark */}
                     <div className="flex items-center gap-2 shrink-0 w-full mt-1 pt-2 border-t border-line justify-between sm:mt-2 sm:pt-2 sm:border-t sm:border-line sm:flex-col sm:items-start sm:gap-0.5">
                       <div className="text-right sm:text-left min-w-0">
-                        <div className="flex items-baseline space-x-1 sm:mt-0.5">
-                          <span className="font-mono text-xs sm:text-sm font-extrabold text-ink">
+                        <div className="flex items-baseline space-x-1.5 sm:mt-0.5 flex-wrap">
+                          <span className="font-mono text-sm sm:text-sm font-black text-ink">
                             {formatPrice(finalPrice)}
                           </span>
                           {discountPct > 0 && (
-                            <span className="text-xs sm:text-xs font-bold text-muted line-through font-mono">
+                            <span className="text-sm sm:text-sm font-bold text-muted line-through font-mono">
                               {formatPrice(item.price)}
                             </span>
                           )}
-                        </div>
-                        {/* Applied discount amount — fixed-height line so the card never shifts (Ko Hein) */}
-                        <div className="h-4 text-[10px] sm:text-[11px] font-extrabold leading-4 mt-0.5">
                           {discountPct > 0 && (
-                            <span className="text-success">−{formatPrice(Math.round(item.price! - finalPrice))} · {discountPct}% Off</span>
+                            <span className="text-[10px] sm:text-[11px] font-extrabold text-success whitespace-nowrap">
+                              −{formatPrice(Math.round(item.price! - finalPrice))} · {discountPct}%
+                            </span>
                           )}
                         </div>
                       </div>
