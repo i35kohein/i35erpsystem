@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useIsIpad } from '../../hooks/useIsIpad';
 import { motion } from 'motion/react';
 import { 
@@ -575,6 +576,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                 <Button
                                   type="button"
                                   onClick={() => setDiscountMenuOpenFor(item.categoryKey)}
+ref={(el) => { discountTriggerRefs.current[item.categoryKey] = el; }}
                                   title={item.discountPercent > 0 ? `${item.discountPercent}% discount applied` : 'Add discount'}
                                   className={`discount-trigger !w-8 !h-8 !min-h-8 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
                                     item.discountPercent > 0
@@ -649,6 +651,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                   <Button
                                     type="button"
                                     onClick={() => setDiscountMenuOpenFor(item.categoryKey)}
+ref={(el) => { discountTriggerRefs.current[item.categoryKey] = el; }}
                                     title={item.discountPercent > 0 ? `${item.discountPercent}% discount applied` : 'Add discount'}
                                     className={`discount-trigger !w-7 !h-7 !min-h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
                                       item.discountPercent > 0
@@ -740,6 +743,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                               <Button
                                 type="button"
                                 onClick={() => setDiscountMenuOpenFor(item.categoryKey)}
+ref={(el) => { discountTriggerRefs.current[item.categoryKey] = el; }}
                                 title={item.discountPercent > 0 ? `${item.discountPercent}% discount applied` : 'Add discount'}
                                 className={`discount-trigger !w-7 !h-7 !min-h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
                                   item.discountPercent > 0
@@ -779,10 +783,23 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
   // Discount popup — small box anchored right under the circle button, with
   // circular preset options + custom % (Ko Hein: no rightward expansion).
+  // Trigger refs so the portal popup can position itself exactly at the circle.
+  const discountTriggerRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
   const renderDiscountPopup = (item: CartItem, align: 'left' | 'right' = 'left') => {
     if (discountMenuOpenFor !== item.categoryKey) return null;
-    return (
-      <div className={`discount-popup absolute top-full z-50 mt-1.5 w-44 rounded-2xl border border-line bg-white p-2 shadow-xl ${align === 'right' ? 'right-0' : 'left-0'}`}>
+    const triggerEl = discountTriggerRefs.current[item.categoryKey];
+    if (!triggerEl) return null;
+    const r = triggerEl.getBoundingClientRect();
+    const popupW = 176;
+    let left = align === 'right' ? r.right - popupW : r.left;
+    left = Math.max(8, Math.min(left, window.innerWidth - popupW - 8));
+    const top = r.bottom + 6;
+    return createPortal(
+      <div
+        className="discount-popup fixed z-[80] w-44 rounded-2xl border border-line bg-white p-2 shadow-xl"
+        style={{ top, left }}
+      >
         <div className="grid grid-cols-4 gap-1.5">
           {DISCOUNT_OPTIONS.map((p) => (
             <button
@@ -831,7 +848,8 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
             title="Custom discount % — type and press Enter"
           />
         </div>
-      </div>
+      </div>,
+      document.body
     );
   };
 
@@ -1102,6 +1120,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                             }
                             setDiscountMenuOpenFor(item.key);
                           }}
+                          ref={(el) => { discountTriggerRefs.current[item.key] = el; }}
                           title={discountPct > 0 ? `${discountPct}% discount applied` : 'Add discount'}
                           className={`discount-trigger !w-7 !h-7 !min-h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
                             discountPct > 0
