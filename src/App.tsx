@@ -2,7 +2,7 @@ import  {useState, useRef, useEffect, useMemo, lazy, Suspense} from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import {Sparkles, Plus, Search, Filter, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, RotateCcw, Save, Timer, SlidersHorizontal, Eye, Stethoscope, Edit2, List,
   TrendingUp,
-  Grid, LayoutGrid, Printer, Smartphone, Layers, ScanLine, ListFilter, Activity, Users, Boxes, Coins, ShieldAlert} from 'lucide-react';
+  Grid, Printer, Smartphone, Layers, ScanLine, ListFilter, Activity, Users, Boxes, Coins, ShieldAlert} from 'lucide-react';
 import {subscribeToCollection, fetchCloudCollection, saveDocument, deleteDocument, clearCollection} from './lib/supabase';
 import { setActiveUserId, notifyAccountChanged } from './utils/accountSettings';
 
@@ -2031,40 +2031,6 @@ export default function App() {
                   />
                 </div>
               )}
-              {/* Table/Card view toggle — iPad only (toolbar moves here) */}
-              {isIpad && (
-                <div className="flex items-center rounded-lg border border-line bg-surface p-0.5 shrink-0">
-                  <Button
-                    type="button"
-                    onClick={() => setInventoryStockView('table')}
-                    title="Table view"
-                    aria-label="Stock table view"
-                    className={`h-10 w-10 flex items-center justify-center rounded-md transition-colors cursor-pointer ${
-                      inventoryStockView === 'table' ? 'bg-brand text-white shadow-2xs' : 'text-muted hover:text-ink'
-                    }`}
-                  >
-                    <List className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    onClick={() => setInventoryStockView('cards')}
-                    title="Card view"
-                    aria-label="Stock card view"
-                    className={`h-10 w-10 flex items-center justify-center rounded-md transition-colors cursor-pointer ${
-                      inventoryStockView === 'cards' ? 'bg-brand text-white shadow-2xs' : 'text-muted hover:text-ink'
-                    }`}
-                  >
-                    <LayoutGrid className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-              <Button
-                onClick={() => setInventoryAddModalOpen(true)}
-                className="h-10 flex items-center space-x-1.5 px-3.5 bg-brand hover:bg-brand-deep text-white text-xs font-bold rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>{t('addPart')}</span>
-              </Button>
               </>
             ) : activeTab === 'suppliers' ? (
               <Button

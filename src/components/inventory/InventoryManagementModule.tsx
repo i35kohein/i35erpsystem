@@ -13,8 +13,6 @@ import {Boxes,
   Smartphone,
   Filter,
   Grid,
-  LayoutGrid,
-  List,
   DollarSign,
   TrendingUp,
   PackageCheck,
@@ -187,7 +185,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   inlineEditMode: propInlineEditMode,
   setInlineEditMode: propSetInlineEditMode,
   stockView: propStockView,
-  setStockView: propSetStockView,
   isTagsPrintOpen: propIsTagsPrintOpen,
   setIsTagsPrintOpen: propSetIsTagsPrintOpen,
   scanQuery: propScanQuery,
@@ -230,9 +227,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const inlineEditMode = propInlineEditMode !== undefined ? propInlineEditMode : localInlineEditMode;
   const setInlineEditMode = propSetInlineEditMode || setLocalInlineEditMode;
   // Phones default to the card grid — the stock table is unusable below md.
-  const [localStockView, setStockViewLocal] = useState<'table' | 'cards'>('table');
-  const stockView = propStockView !== undefined ? propStockView : localStockView;
-  const setStockView = propSetStockView || setStockViewLocal;
+  const stockView = propStockView !== undefined ? propStockView : ('table' as const);
   const [inlineDrafts, setInlineDrafts] = useState<Record<string, InlineDraft>>({});
   const [showInlineSaveConfirm, setShowInlineSaveConfirm] = useState(false);
   const [isInlineSaving, setIsInlineSaving] = useState(false);
@@ -739,7 +734,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   // Force the stock card grid below md (phones); user toggle wins on desktop.
   useEffect(() => {
     const apply = () => {
-      if (window.innerWidth < 768) setStockView('cards');
+
     };
     apply();
     window.addEventListener('resize', apply);
@@ -1003,38 +998,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
           {viewMode === 'stock' && (
             <div className={`flex flex-wrap items-center justify-end gap-2 w-full md:w-auto md:ml-auto md:shrink-0`}>
-              {/* Table / Card view toggle (iOS segmented control style) */}
-              {!isIpad && !inlineEditMode && (
-                <div className="flex bg-surface p-1 rounded-xl shadow-inner border border-line-strong/50 w-full sm:w-auto h-10">
-                  <Button
-                    variant="ghost"
-                    type="button"
-                    onClick={() => setStockView('table')}
-                    title="Table view"
-                    className={`flex-1 sm:flex-none h-8 w-12 flex items-center justify-center rounded-lg transition-all ${
-                      stockView === 'table'
-                        ? 'bg-white text-brand shadow-xs border border-brand/20'
-                        : 'text-muted hover:text-ink'
-                    }`}
-                  >
-                    <List className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    type="button"
-                    onClick={() => setStockView('cards')}
-                    title="Card view"
-                    className={`flex-1 sm:flex-none h-8 w-12 flex items-center justify-center rounded-lg transition-all ${
-                      stockView === 'cards'
-                        ? 'bg-white text-brand shadow-xs border border-brand/20'
-                        : 'text-muted hover:text-ink'
-                    }`}
-                  >
-                    <LayoutGrid className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-
               <div className="flex items-center gap-1.5 w-full sm:w-auto">
                 {/* More actions — Print Tags + Edit (⋯) */}
                 {!isIpad && (
