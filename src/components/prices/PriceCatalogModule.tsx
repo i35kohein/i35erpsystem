@@ -707,7 +707,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                 <Button
                                   type="button"
                                   onClick={() => handleToggleCartItem(item.categoryKey, item.label, item.price, item.warranty)}
-                                  className="text-muted hover:text-danger p-1 rounded transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-0"
+                                  className="bg-transparent text-muted hover:text-danger hover:bg-transparent p-1 rounded transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-0"
                                   title="Remove item"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
@@ -805,7 +805,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                             <Button
                               type="button"
                               onClick={() => handleToggleCartItem(item.categoryKey, item.label, item.price, item.warranty)}
-                              className="text-muted hover:text-danger p-1 rounded transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-0"
+                              className="bg-transparent text-muted hover:text-danger hover:bg-transparent p-1 rounded transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-0"
                               title="Remove item"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
