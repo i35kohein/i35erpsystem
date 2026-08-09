@@ -209,6 +209,33 @@ export default function App() {
   const [inventoryStockView, setInventoryStockView] = useState<'table' | 'cards'>(() =>
     typeof window !== 'undefined' && window.innerWidth < 640 ? 'cards' : 'table'
   );
+
+  // Warm lazy-loaded module chunks once the user is signed in, so the first
+  // tab visit doesn't flash the loading skeleton ("lazy" feel).
+  const warmedRef = useRef(false);
+  useEffect(() => {
+    if (authUser && !warmedRef.current) {
+      warmedRef.current = true;
+      void import('./components/dashboard/DashboardOverview');
+      void import('./components/intake/IntakeWorkOrderModule');
+      void import('./components/pipeline/StatusPipelineView');
+      void import('./components/trello/TrelloBoardModule');
+      void import('./components/inventory/InventoryManagementModule');
+      void import('./components/suppliers/SupplierRmaModule');
+      void import('./components/pos/PosInvoicingModule');
+      void import('./components/crm/CrmCustomerPortalModule');
+      void import('./components/qa/QualityAssuranceModule');
+      void import('./components/prices/PriceCatalogModule');
+      void import('./components/settings/SystemManagementSettingsModule');
+      void import('./components/followup/CompletedDeviceFollowUpModule');
+      void import('./components/finance/ShopFinancePlModule');
+      void import('./components/portal/CustomerFacingWebPortal');
+      void import('./components/ai/AiDiagnosticAssistantModal');
+      void import('./components/common/DeviceTagPrinterModal');
+    }
+  }, [authUser]);
+
+
   // Phones (<sm) get the compact card grid; sm+ keeps the table (no horizontal scroll on phones).
   useEffect(() => {
     const onResize = () => setInventoryStockView(window.innerWidth < 640 ? 'cards' : 'table');
@@ -838,9 +865,6 @@ export default function App() {
 
         {(tab === 'intake' || tab === 'pipeline' || tab === 'suppliers' || tab === 'qa') && (
           <div>
-            <label className={labelCls}>
-              {tab === 'suppliers' ? 'RMA Status' : tab === 'qa' ? 'QA Status' : 'Status'}
-            </label>
             <DrawerSelect
               label={tab === 'suppliers' ? 'RMA Status' : tab === 'qa' ? 'QA Status' : 'Status'}
               value={statusFilter}
@@ -876,7 +900,6 @@ export default function App() {
 
         {tab === 'pipeline' && (
           <div>
-            <label className={labelCls}>Technician</label>
             <DrawerSelect
               label="Technician"
               value={techFilter}
@@ -893,7 +916,6 @@ export default function App() {
         {tab === 'inventory' && (
           <>
             <div>
-              <label className={labelCls}>Model</label>
               <DrawerSelect
                 label="Model"
                 value={modelFilter}
@@ -905,7 +927,6 @@ export default function App() {
               />
             </div>
             <div>
-              <label className={labelCls}>Category</label>
               <DrawerSelect
                 label="Category"
                 value={categoryFilter}
@@ -917,7 +938,6 @@ export default function App() {
               />
             </div>
             <div>
-              <label className={labelCls}>Quality</label>
               <DrawerSelect
                 label="Quality"
                 value={stockFilter}
@@ -997,7 +1017,6 @@ export default function App() {
 
         {tab === 'crm' && (
           <div>
-            <label className={labelCls}>Account Type</label>
             <DrawerSelect
               label="Account Type"
               value={customerTypeFilter}
