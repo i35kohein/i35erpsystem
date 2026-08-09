@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Printer, ChevronDown, Search } from 'lucide-react';
+import { Printer, ChevronDown, Search, BadgePercent } from 'lucide-react';
 import { WorkOrder, DiagnosticItemResult, AppleDeviceCategory, SelectedRepairItem } from '../../types';
 import { ModelRepairPrice } from '../../types/priceCatalog';
 import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
@@ -56,6 +56,8 @@ function colorSwatch(name: string): string {
   return '#b8b8b8';
 }
 
+const DISCOUNT_OPTIONS = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
+
 const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   workOrders,
   customers = [],
@@ -70,6 +72,9 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   const [isRepairsOpen, setIsRepairsOpen] = useState(false);
   const [repairSearch, setRepairSearch] = useState('');
   const [repairGroup, setRepairGroup] = useState('ALL');
+  const [discountMenuFor, setDiscountMenuFor] = useState<string | null>(null);
+  const [discountAnchor, setDiscountAnchor] = useState<{ top: number; left: number } | null>(null);
+  const [customDiscountInput, setCustomDiscountInput] = useState('');
 
   const catalogItemsForModel = getModelPriceCatalogItems(form.model, priceCatalog);
 
@@ -515,54 +520,84 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                   </div>
                 </div>
 
-                {/* Repair list */}
-                <div className="min-h-[180px] flex-1 space-y-2 overflow-y-auto px-4 py-3">
-                  {catalogItemsForModel.filter((item) => {
-                    const matchesSearch =
-                      !repairSearch ||
-                      item.name.toLowerCase().includes(repairSearch.toLowerCase()) ||
-                      item.group.toLowerCase().includes(repairSearch.toLowerCase());
-                    const matchesGroup = repairGroup === 'ALL' || item.group === repairGroup;
-                    return matchesSearch && matchesGroup;
-                  }).map((item) => {
-                    const isSelected = form.repairs.some((r) => r.id === item.id || r.name.toLowerCase() === item.name.toLowerCase());
-                    return (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => toggleRepair(item)}
-                        className={`w-full rounded-xl border p-3 text-left text-xs transition-all cursor-pointer ${
-                          isSelected ? 'border-brand bg-brand-soft font-bold shadow-2xs' : 'border-line bg-white text-ink hover:bg-surface'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="flex min-w-0 items-center space-x-3">
-                            <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-all ${
-                              isSelected ? 'border-brand bg-brand text-white' : 'border-line-strong bg-white'
-                            }`}>
-                              {isSelected && '✓'}
-                            </span>
-                            <div className="min-w-0">
-                              <span className="block truncate font-extrabold text-ink">{item.name}</span>
-                              <div className="flex items-center space-x-2 pt-0.5 text-muted">
-                                <span className="rounded bg-surface px-1.5 py-0.5 font-semibold text-ink">{item.group}</span>
-                                <span>Warranty: {item.warranty}</span>
-                              </div>
-                            </div>
+                {/* Repair list — small price-list style cards with discount circle (Ko Hein) */}
+                <div className="min-h-[180px] flex-1 overflow-y-auto px-4 py-3">
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {catalogItemsForModel.filter((item) => {
+                      const matchesSearch =
+                        !repairSearch ||
+                        item.name.toLowerCase().includes(repairSearch.toLowerCase()) ||
+                        item.group.toLowerCase().includes(repairSearch.toLowerCase());
+                      const matchesGroup = repairGroup === 'ALL' || item.group === repairGroup;
+                      return matchesSearch && matchesGroup;
+                    }).map((item) => {
+                      const sel = form.repairs.find((r) => r.id === item.id || r.name.toLowerCase() === item.name.toLowerCase());
+                      const isSelected = !!sel;
+                      const discPct = sel?.discountPercent || 0;
+                      const finalPrice = sel?.finalPrice ?? item.price;
+                      return (
+                        <div
+                          key={item.id}
+                          role="button"
+                          tabIndex={0}
+                          aria-pressed={isSelected}
+                          onClick={() => toggleRepair(item)}
+                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleRepair(item); } }}
+                          className={`group relative flex min-h-[92px] cursor-pointer flex-col gap-1.5 rounded-2xl border-2 bg-white p-2.5 shadow-2xs transition-colors select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60 ${
+                            isSelected ? 'border-brand bg-brand/5' : 'border-line hover:border-brand/50'
+                          }`}
+                        >
+                          {/* Row 1: name + warranty */}
+                          <div className="flex min-w-0 items-center justify-between gap-2">
+                            <h3 className="min-w-0 truncate text-xs font-extrabold text-ink leading-snug" title={item.name}>{item.name}</h3>
+                            {isSelected && <span className="shrink-0 rounded-full bg-brand px-1.5 py-0.5 text-[9px] font-black text-white">✓</span>}
                           </div>
-                          <div className="shrink-0 text-right">
-                            <span className="font-mono text-sm font-black text-brand">{item.price.toLocaleString()} MMK</span>
-                            {item.isCatalogMatch && (
-                              <span className="block text-[10px] font-bold text-success-deep">Catalog Verified</span>
+                          {/* Row 2: group + warranty */}
+                          <div className="flex min-w-0 items-center gap-1.5">
+                            <span className="truncate rounded bg-surface px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-muted">{item.group}</span>
+                            <span className="shrink-0 text-[10px] font-semibold text-muted">{item.warranty}</span>
+                          </div>
+                          {/* Row 3: price + discount circle */}
+                          <div className="mt-auto flex items-center justify-between gap-2 border-t border-line pt-1.5">
+                            <div className="min-w-0 leading-tight">
+                              <div className="flex items-baseline gap-1.5">
+                                <span className="font-mono text-sm font-black text-ink">{finalPrice.toLocaleString()}</span>
+                                {discPct > 0 && (
+                                  <span className="font-mono text-[11px] font-bold text-muted line-through">{item.price.toLocaleString()}</span>
+                                )}
+                              </div>
+                              {discPct > 0 && (
+                                <span className="text-[9px] font-extrabold text-success">−{Math.round(item.price - finalPrice).toLocaleString()} · {discPct}%</span>
+                              )}
+                            </div>
+                            {isSelected && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const rect = e.currentTarget.getBoundingClientRect();
+                                  const pw = 176;
+                                  let l = rect.right - pw;
+                                  l = Math.max(8, Math.min(l, window.innerWidth - pw - 8));
+                                  setDiscountAnchor({ top: rect.bottom + 6, left: l });
+                                  setDiscountMenuFor(item.id);
+                                }}
+                                title={discPct > 0 ? `${discPct}% discount applied` : 'Add discount'}
+                                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition-all cursor-pointer active:scale-95 ${
+                                  discPct > 0 ? 'border-brand bg-brand text-white' : 'border-line bg-white text-muted hover:border-brand hover:text-brand'
+                                }`}
+                              >
+                                <BadgePercent className="h-4 w-4" />
+                              </button>
                             )}
                           </div>
                         </div>
-                      </button>
-                    );
-                  })}
-                  {catalogItemsForModel.filter((item) => !repairSearch || item.name.toLowerCase().includes(repairSearch.toLowerCase()) || item.group.toLowerCase().includes(repairSearch.toLowerCase())).filter((item) => repairGroup === 'ALL' || item.group === repairGroup).length === 0 && (
-                    <p className="py-8 text-center text-xs font-bold text-muted">No repairs match your search.</p>
-                  )}
+                      );
+                    })}
+                    {catalogItemsForModel.filter((item) => !repairSearch || item.name.toLowerCase().includes(repairSearch.toLowerCase()) || item.group.toLowerCase().includes(repairSearch.toLowerCase())).filter((item) => repairGroup === 'ALL' || item.group === repairGroup).length === 0 && (
+                      <p className="col-span-full py-8 text-center text-xs font-bold text-muted">No repairs match your search.</p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Selected repairs + discount (2-line rows — roomy discount editing) */}
@@ -638,6 +673,73 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                     Done
                   </button>
                 </div>
+
+                {/* Anchored discount popup (price-list style) */}
+                {discountMenuFor && discountAnchor && (
+                  <div
+                    className="discount-popup fixed z-[80] w-44 rounded-2xl border border-line bg-white p-2 shadow-xl"
+                    style={{ top: discountAnchor.top, left: discountAnchor.left }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex items-center justify-between gap-2 px-1 pb-2">
+                      <p className="text-xs font-extrabold text-ink">Discount</p>
+                      <span className="max-w-[110px] truncate text-xs font-bold text-muted">
+                        {form.repairs.find((r) => r.id === discountMenuFor)?.name || ''}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {DISCOUNT_OPTIONS.map((pct) => (
+                        <button
+                          key={pct}
+                          type="button"
+                          onClick={() => {
+                            updateRepairDiscount(discountMenuFor, pct);
+                            setDiscountMenuFor(null);
+                            setDiscountAnchor(null);
+                          }}
+                          className={`flex h-7 w-7 min-w-7 items-center justify-center rounded-full text-[10px] font-extrabold transition-all cursor-pointer active:scale-90 ${
+                            form.repairs.find((r) => r.id === discountMenuFor)?.discountPercent === pct
+                              ? 'border border-brand bg-brand text-white'
+                              : 'border border-line bg-white text-ink hover:border-brand hover:text-brand'
+                          }`}
+                          title={pct === 0 ? 'No discount' : `${pct}% off`}
+                        >
+                          {pct === 0 ? '0' : pct}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="mt-2 border-t border-line pt-2">
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        placeholder="Custom %"
+                        value={customDiscountInput}
+                        onChange={(e) => setCustomDiscountInput(e.target.value)}
+                        onBlur={() => {
+                          const v = Number(customDiscountInput);
+                          if (v >= 1 && v <= 100) {
+                            updateRepairDiscount(discountMenuFor, v);
+                            setCustomDiscountInput('');
+                            setDiscountMenuFor(null);
+                            setDiscountAnchor(null);
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            const v = Number(customDiscountInput);
+                            if (v >= 1 && v <= 100) {
+                              updateRepairDiscount(discountMenuFor, v);
+                              setCustomDiscountInput('');
+                              setDiscountMenuFor(null);
+                              setDiscountAnchor(null);
+                            }
+                          }
+                        }}
+                        className="w-full rounded-lg border border-line bg-surface px-2 py-1.5 text-center font-mono text-xs font-bold text-ink outline-none focus:border-brand"
+                      />
+                    </div>
+                  </div>
+                )}
               </>
             )}
           </div>
