@@ -318,7 +318,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                       <span className="truncate">{form.color}</span>
                     </>
                   ) : (
-                    <span className="text-muted/70">Choose color…</span>
+                    <span className="text-muted/70">{form.model ? 'Choose color…' : 'Pick a device first'}</span>
                   )}
                 </span>
                 <ChevronDown className="print:hidden h-4 w-4 shrink-0 text-muted" />
@@ -355,7 +355,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               >
                 <span className="truncate">
                   {form.repairs.length === 0 ? (
-                    <span className="text-muted/70">Tap to add repairs…</span>
+                    <span className="text-muted/70">{form.model ? 'Tap to add repairs…' : 'Pick a device first'}</span>
                   ) : (
                     <span className="font-bold">
                       {form.repairs.length} repair{form.repairs.length > 1 ? 's' : ''}
@@ -449,13 +449,16 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
       {/* Color picker popup */}
       {isColorOpen && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 p-0 sm:items-center sm:p-4" onClick={() => setIsColorOpen(false)}>
-          <div className="w-full max-w-sm rounded-t-2xl bg-white p-4 shadow-2xl sm:rounded-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-sm font-extrabold text-ink">Choose Color</h3>
+          <div className="w-full max-w-lg rounded-t-2xl bg-white p-4 shadow-2xl sm:rounded-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-3 flex items-center justify-between border-b border-line pb-3">
+              <div>
+                <h3 className="text-sm font-extrabold text-ink">Choose Color</h3>
+                <p className="text-xs text-muted">{form.model ? `Colors for ${form.model}` : 'Pick a device first'}</p>
+              </div>
               <button type="button" onClick={() => setIsColorOpen(false)} className="rounded-lg p-1 text-muted hover:bg-surface hover:text-ink" aria-label="Close">✕</button>
             </div>
             {!form.model ? (
-              <p className="py-6 text-center text-xs font-bold text-muted">Pick a model first.</p>
+              <p className="py-8 text-center text-xs font-bold text-muted">Pick a device first — go back and choose the model.</p>
             ) : (
               <div className="grid grid-cols-2 gap-2">
                 {getAvailableColorsForModel(form.model).map((c) => (
@@ -710,8 +713,8 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
         onClose={() => setIsModelModalOpen(false)}
         selectedDevice={form.model}
         onSelectDevice={(m) => {
-          const colors = getAvailableColorsForModel(m);
-          setForm((f) => ({ ...f, model: m, color: colors.length ? colors[0] : f.color }));
+          // Ko Hein: no auto color — let the user pick it (hint shown in the row)
+          setForm((f) => ({ ...f, model: m, color: '' }));
           setIsModelModalOpen(false);
         }}
       />
