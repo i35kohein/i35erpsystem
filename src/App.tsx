@@ -101,7 +101,6 @@ const CompletedDeviceFollowUpModule = lazy(() => import('./components/followup/C
 const ShopFinancePlModule = lazy(() => import('./components/finance/ShopFinancePlModule').then((m) => ({ default: m.ShopFinancePlModule })));
 import { usePriceCatalog } from './hooks/usePriceCatalog';
 import { useIsIpad } from './hooks/useIsIpad';
-import { OfflineSyncStatusBadge } from './components/common/OfflineSyncStatusBadge';
 const GlobalSearchModal = lazy(() => import('./components/common/GlobalSearchModal').then((m) => ({ default: m.GlobalSearchModal })));
 import { HoverTooltip } from './components/common/HoverTooltip';
 import { registerToastHandler, unregisterToastHandler } from './lib/toast';
