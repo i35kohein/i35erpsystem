@@ -35,7 +35,6 @@ import {
   DEFAULT_DEVICE_FOLDERS} from '../../types/priceCatalog';
 import { PriceSettingsModal } from './PriceSettingsModal';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
-import { QuickPriceCalculatorModal } from './QuickPriceCalculatorModal';
 import { Button , Input } from '../ui';
 import { toast } from '../../lib/toast';
 
@@ -76,8 +75,6 @@ interface PriceCatalogModuleProps {
   }) => void;
   searchQuery?: string;
   setSearchQuery?: (q: string) => void;
-  isQuickCalcOpen?: boolean;
-  setIsQuickCalcOpen?: (open: boolean) => void;
   isDeviceModalOpen?: boolean;
   setIsDeviceModalOpen?: (open: boolean) => void;
   isSettingsModalOpen?: boolean;
@@ -134,8 +131,6 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
   onOpenNewWorkOrder,
   searchQuery: externalSearchQuery,
   setSearchQuery: setExternalSearchQuery,
-  isQuickCalcOpen: externalQuickCalcOpen,
-  setIsQuickCalcOpen: setExternalQuickCalcOpen,
   isDeviceModalOpen: externalDeviceModalOpen,
   setIsDeviceModalOpen: setExternalDeviceModalOpen,
   isSettingsModalOpen: externalSettingsModalOpen,
@@ -161,10 +156,6 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
   const [localSettingsModalOpen, setLocalSettingsModalOpen] = useState(false);
   const settingsModalOpen = externalSettingsModalOpen !== undefined ? externalSettingsModalOpen : localSettingsModalOpen;
   const setSettingsModalOpen = setExternalSettingsModalOpen || setLocalSettingsModalOpen;
-
-  const [localQuickCalcOpen, setLocalQuickCalcOpen] = useState(false);
-  const quickCalcOpen = externalQuickCalcOpen !== undefined ? externalQuickCalcOpen : localQuickCalcOpen;
-  const setQuickCalcOpen = setExternalQuickCalcOpen || setLocalQuickCalcOpen;
 
   const [quoteCopied, setQuoteCopied] = useState(false);
   const [isCartSheetOpen, setIsCartSheetOpen] = useState(false);
@@ -1206,25 +1197,6 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
         formatPrice={formatPrice}
       />
 
-      {/* Quick Price Calculator Modal */}
-      <QuickPriceCalculatorModal
-        isOpen={quickCalcOpen}
-        onClose={() => setQuickCalcOpen(false)}
-        catalog={catalog}
-        folders={folders}
-        currencySymbol={currencySymbol}
-        initialDevice={selectedDevice}
-        onSelectModelForCatalog={handleDeviceChange}
-        onCreateTicketWithQuote={(model, services) => {
-          if (onOpenNewWorkOrder) {
-            onOpenNewWorkOrder({
-              model,
-              service: services.map((s) => s.name).join(' + '),
-              price: services.reduce((acc, curr) => acc + curr.price, 0),
-            });
-          }
-        }}
-      />
     </div>
   );
 };

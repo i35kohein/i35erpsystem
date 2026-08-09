@@ -1,6 +1,6 @@
 import  {useState, useRef, useEffect, useMemo, lazy, Suspense} from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import {Sparkles, Plus, Search, Filter, Calculator, Folder, Settings, Download, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, Timer, MoreHorizontal, SlidersHorizontal, Eye, Stethoscope, Edit2, List, LayoutGrid, Printer, Smartphone, Layers, ScanLine, ListFilter, Activity, Users, Boxes, Coins, ShieldAlert} from 'lucide-react';
+import {Sparkles, Plus, Search, Filter, Folder, Settings, Download, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, Timer, MoreHorizontal, SlidersHorizontal, Eye, Stethoscope, Edit2, List, LayoutGrid, Printer, Smartphone, Layers, ScanLine, ListFilter, Activity, Users, Boxes, Coins, ShieldAlert} from 'lucide-react';
 import {subscribeToCollection, fetchCloudCollection, saveDocument, deleteDocument, clearCollection} from './lib/supabase';
 import { setActiveUserId, notifyAccountChanged } from './utils/accountSettings';
 
@@ -155,7 +155,6 @@ export default function App() {
   const dashboardRef = useRef<{ setSubTab: (tab: string) => void } | null>(null);
   
   // Price Catalog top navigation controls state
-  const [priceCatalogQuickCalcOpen, setPriceCatalogQuickCalcOpen] = useState(false);
   const [priceCatalogDeviceModalOpen, setPriceCatalogDeviceModalOpen] = useState(false);
   const [priceCatalogSettingsModalOpen, setPriceCatalogSettingsModalOpen] = useState(false);
   const [priceCatalogMenuOpen, setPriceCatalogMenuOpen] = useState(false);
@@ -1665,17 +1664,8 @@ export default function App() {
                   )}
                 </div>
 
-                {/* Desktop: all four actions inline (lg+) */}
+                {/* Desktop: action buttons (lg+) */}
                 <div className="hidden lg:flex items-center space-x-1.5 sm:space-x-2 shrink-0">
-                  <Button
-                    type="button"
-                    onClick={() => setPriceCatalogQuickCalcOpen(true)}
-                    className="px-2.5 sm:px-3 py-1.5 bg-success hover:bg-success/90 text-white font-extrabold text-xs rounded-xl transition-all flex items-center space-x-1 sm:space-x-1.5 shadow-2xs cursor-pointer shrink-0 active:scale-95"
-                  >
-                    <Calculator className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Calc</span>
-                  </Button>
-
                   <Button
                     type="button"
                     onClick={() => setPriceCatalogDeviceModalOpen(true)}
@@ -1727,17 +1717,6 @@ export default function App() {
                         aria-hidden="true"
                       />
                       <div className="absolute right-0 top-full mt-1.5 z-50 w-48 rounded-xl border border-line bg-white p-1.5 shadow-xl">
-                        <Button
-                          type="button"
-                          onClick={() => {
-                            setPriceCatalogQuickCalcOpen(true);
-                            setPriceCatalogMenuOpen(false);
-                          }}
-                          className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg hover:bg-surface transition-colors cursor-pointer text-left"
-                        >
-                          <Calculator className="w-4 h-4 text-success shrink-0" />
-                          Quick Price Calculator
-                        </Button>
                         <Button
                           type="button"
                           onClick={() => {
@@ -2440,8 +2419,6 @@ export default function App() {
                   formatPrice={priceCatalog.formatPrice}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
-                  isQuickCalcOpen={priceCatalogQuickCalcOpen}
-                  setIsQuickCalcOpen={setPriceCatalogQuickCalcOpen}
                   isDeviceModalOpen={priceCatalogDeviceModalOpen}
                   setIsDeviceModalOpen={setPriceCatalogDeviceModalOpen}
                   isSettingsModalOpen={priceCatalogSettingsModalOpen}

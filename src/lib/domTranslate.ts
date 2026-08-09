@@ -332,8 +332,6 @@ const DICT: [string, string][] = [
   ['Folder', 'ဖိုလ်ဒါ'],
   ['Export Catalog to CSV', 'Catalog ကို CSV ထုတ်ယူမည်'],
   ['Folder & Catalog Settings', 'ဖိုလ်ဒါနှင့် Catalog ဆက်တင်များ'],
-  ['Calc', 'တွက်မည်'],
-  ['Quick Price Calculator', 'အမြန် ဈေးတွက်စက်'],
   ['Price Catalog', 'ဈေးနှုန်း Catalog'],
 
   // POS
