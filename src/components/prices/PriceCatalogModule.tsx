@@ -992,24 +992,31 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
     <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
       {/* Active Device (left) + repair category chips (right) — one row (Ko Hein) */}
       <div className="flex items-center gap-2.5">
-        <div className="shrink-0 bg-white border border-line rounded-xl px-2.5 py-1.5 flex items-center gap-2 shadow-2xs min-w-0">
-          <div className="w-7 h-7 rounded-lg bg-brand text-white flex items-center justify-center shrink-0">
-            <Smartphone className="w-3.5 h-3.5" />
+        <div className="shrink-0 bg-white border border-line rounded-2xl px-3.5 py-3 shadow-2xs flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-brand text-white flex items-center justify-center shrink-0">
+            <Smartphone className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div className="min-w-0">
-            <p className="text-[10px] font-extrabold uppercase tracking-widest text-brand leading-none">Active Device</p>
-            <p className="text-xs font-black text-ink truncate leading-tight mt-0.5 max-w-[110px] sm:max-w-[180px]">{selectedDevice}</p>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-brand-deep bg-brand/10 px-2 py-0.5 rounded-full">
+                Active Device
+              </span>
+              <span className="text-[11px] font-bold text-muted hidden sm:inline">
+                {availableRepairItems.filter((i) => i.price && i.price > 0).length} Services
+              </span>
+            </div>
+            <h2 className="text-lg sm:text-xl font-black text-ink tracking-tight truncate max-w-[200px] sm:max-w-[280px]">
+              {selectedDevice}
+            </h2>
           </div>
-          <span className="text-[11px] font-bold text-muted shrink-0 whitespace-nowrap hidden sm:inline">
-            {availableRepairItems.filter((i) => i.price && i.price > 0).length} services
-          </span>
           <button
             type="button"
             onClick={() => setDeviceModalOpen(true)}
-            className="shrink-0 min-h-9 px-2.5 rounded-lg bg-surface hover:bg-line text-brand font-extrabold text-[11px] border border-line transition-all flex items-center gap-1 cursor-pointer focus:outline-none"
+            className="shrink-0 min-h-10 px-3 rounded-xl bg-surface hover:bg-line text-brand font-extrabold text-xs border border-line transition-all flex items-center gap-1.5 cursor-pointer focus:outline-none"
           >
-            <Folder className="w-3 h-3" />
-            <span>Switch</span>
+            <Folder className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Switch</span>
+            <span className="sm:hidden">⟳</span>
           </button>
         </div>
 
