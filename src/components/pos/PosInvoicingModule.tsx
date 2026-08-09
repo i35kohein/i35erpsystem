@@ -1012,7 +1012,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
         {/* Left Column: Select Work Order to Checkout (collapsible, hugs sidebar) */}
         <div className={`bg-white border border-line rounded-2xl p-3 space-y-3 shadow-xs shrink-0 ${
           isQueueCollapsed ? 'md:w-36' : 'md:w-[380px]'
-        } ${isIpad ? 'md:flex md:flex-col md:min-h-0' : 'md:self-start'}`}>
+        } ${isIpad ? 'md:flex md:flex-col md:min-h-0' : 'md:self-stretch md:flex md:flex-col md:min-h-0'}`}>
           <div className="flex justify-between items-center border-b border-line pb-2">
             {!isQueueCollapsed ? (
               <>
@@ -1046,7 +1046,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
           </div>
 
           {!isQueueCollapsed && (
-          <div className={`space-y-2 overflow-y-auto ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:flex-1 md:max-h-none' : 'min-h-[360px] max-h-[calc(100dvh-280px)]'}`}>
+          <div className={`space-y-2 overflow-y-auto ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:flex-1 md:max-h-none' : 'min-h-[360px] max-h-[calc(100dvh-280px)] md:max-h-none md:flex-1 md:min-h-0'}`}>
             {filteredWorkOrders.length === 0 ? (
               <div className="flex min-h-0 flex-1 flex-col items-center justify-center p-8 text-center text-muted space-y-2 bg-surface rounded-xl border border-dashed border-line-strong my-4">
                 <CheckCircle2 className="w-8 h-8 mx-auto text-success opacity-70" />
