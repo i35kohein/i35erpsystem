@@ -1863,6 +1863,30 @@ export default function App() {
 
             {activeTab === 'inventory' && (
               <>
+              {/* Scan / search — leftmost */}
+              <div className={isIpad ? 'hidden' : 'hidden lg:block shrink-0'}>
+                <div className="relative">
+                  <ScanLine className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-brand" />
+                  <Input
+                    value={inventoryScanQuery}
+                    onChange={(e) => {
+                      setInventoryScanQuery(e.target.value);
+                      setSearchQuery(e.target.value);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        inventoryScanSubmitRef.current?.();
+                      }
+                    }}
+                    placeholder="Scan barcode or search part..."
+                    autoComplete="off"
+                    className="h-10 w-40 xl:w-56 rounded-lg border border-line bg-white pl-8 pr-2 font-mono text-xs text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
+                  />
+                </div>
+              </div>
+
+              {/* Stock / Profit / Matrix */}
               <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2 shrink-0'}>
                 {(['stock', 'profit', 'matrix'] as const).map((v) => (
                   <button
@@ -1880,6 +1904,16 @@ export default function App() {
                   </button>
                 ))}
               </div>
+
+              {/* Add Part */}
+              <Button
+                type="button"
+                onClick={() => setInventoryAddModalOpen(true)}
+                className="hidden lg:inline-flex h-10 items-center gap-1.5 px-3.5 bg-brand hover:bg-brand-deep text-white text-xs font-bold rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Part</span>
+              </Button>
 
               {/* More actions — Print Tags + Edit (⋯) */}
               <div className={isIpad ? 'hidden' : 'relative hidden lg:block shrink-0'}>
@@ -1999,35 +2033,6 @@ export default function App() {
             {/* Contextual Action Button */}
             {activeTab === 'inventory' ? (
               <>
-              {/* Barcode scan — navbar (module bar removed) */}
-              <div className="hidden lg:flex items-center gap-1.5 shrink-0">
-                  <div className="relative">
-                    <ScanLine className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-brand" />
-                    <Input
-                      value={inventoryScanQuery}
-                      onChange={(e) => {
-                        setInventoryScanQuery(e.target.value);
-                        setSearchQuery(e.target.value);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          inventoryScanSubmitRef.current?.();
-                        }
-                      }}
-                      placeholder="Scan barcode or search part..."
-                      autoComplete="off"
-                      className="h-10 w-40 xl:w-56 rounded-lg border border-line bg-white pl-8 pr-2 font-mono text-xs text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
-                    />
-                  </div>
-                  <Button
-                    type="button"
-                    onClick={() => inventoryScanSubmitRef.current?.()}
-                    className="h-10 rounded-lg bg-brand px-2.5 text-xs font-extrabold text-white transition hover:bg-brand-deep shrink-0"
-                  >
-                    Lookup
-                  </Button>
-                </div>
               {/* Model / Category / Tier filter icons — iPad navbar quick access */}
               {isIpad && (
                 <div className="flex items-center gap-1.5 shrink-0">
