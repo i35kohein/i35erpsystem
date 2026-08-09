@@ -557,7 +557,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                   type="button"
                                   onClick={() => setDiscountMenuOpenFor(item.categoryKey)}
                                   title={item.discountPercent > 0 ? `${item.discountPercent}% discount applied` : 'Add discount'}
-                                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
+                                  className={`!w-8 !h-8 !min-h-8 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
                                     item.discountPercent > 0
                                       ? 'bg-brand text-white border border-brand shadow-2xs'
                                       : 'bg-white text-muted border border-line hover:border-brand hover:text-brand'
@@ -628,7 +628,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                     type="button"
                                     onClick={() => setDiscountMenuOpenFor(item.categoryKey)}
                                     title={item.discountPercent > 0 ? `${item.discountPercent}% discount applied` : 'Add discount'}
-                                    className={`w-7 h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
+                                    className={`!w-7 !h-7 !min-h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
                                       item.discountPercent > 0
                                         ? 'bg-brand text-white border border-brand shadow-2xs'
                                         : 'bg-white text-muted border border-line hover:border-brand hover:text-brand'
@@ -716,7 +716,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                 type="button"
                                 onClick={() => setDiscountMenuOpenFor(item.categoryKey)}
                                 title={item.discountPercent > 0 ? `${item.discountPercent}% discount applied` : 'Add discount'}
-                                className={`w-7 h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
+                                className={`!w-7 !h-7 !min-h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
                                   item.discountPercent > 0
                                     ? 'bg-brand text-white border border-brand shadow-2xs'
                                     : 'bg-white text-muted border border-line hover:border-brand hover:text-brand'
@@ -763,7 +763,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
             handleUpdateItemDiscount(item.categoryKey, p);
             setDiscountMenuOpenFor(null);
           }}
-          className={`w-6 h-6 rounded-full text-[10px] font-extrabold flex items-center justify-center shrink-0 transition-all cursor-pointer active:scale-90 ${
+          className={`!w-6 !h-6 !min-h-6 !min-w-6 rounded-full text-[10px] font-extrabold flex items-center justify-center shrink-0 transition-all cursor-pointer active:scale-90 ${
             item.discountPercent === p
               ? 'bg-brand text-white border border-brand'
               : 'bg-white text-ink border border-line hover:border-brand hover:text-brand'
@@ -790,7 +790,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
             }
           }
         }}
-        className="w-9 h-6 rounded-full bg-surface border border-line text-[10px] font-bold text-center text-ink outline-none focus:border-brand shrink-0"
+        className="!w-8 !h-8 !min-h-8 rounded-full bg-surface border border-line text-[10px] font-bold text-center text-ink outline-none focus:border-brand shrink-0 px-0"
         title="Custom discount %"
       />
     </div>
