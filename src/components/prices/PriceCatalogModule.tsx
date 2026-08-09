@@ -978,7 +978,6 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                       }
                     }}
                     initial={false}
-                    animate={{ scale: isSelected ? 1.015 : 1 }}
                     whileTap={{ scale: 0.98 }}
                     transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                     className={`group relative bg-white border-2 rounded-2xl p-2.5 sm:p-4 cursor-pointer transition-colors duration-200 flex items-center gap-2.5 sm:flex-col sm:items-stretch sm:justify-between select-none shadow-2xs min-h-[64px] sm:min-h-0 sm:h-[152px] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60 focus-visible:border-brand ${
@@ -992,7 +991,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                       <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl border flex items-center justify-center shrink-0 ${config.bg}`}>
                         <IconComp className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${config.color}`} />
                       </div>
-                      <div className="min-w-0 flex-1">
+                      <div className="min-w-0 flex-1 sm:pr-8">
                         <div className="flex items-center gap-1.5 min-w-0">
                           <h3 className="font-extrabold text-xs sm:text-sm text-ink truncate min-w-0" title={item.label}>
                             {item.label}
