@@ -568,49 +568,37 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                               </div>
                               {/* Warranty — plain text */}
                               <span className="text-[11px] font-semibold text-muted whitespace-nowrap">{shortWarranty(item.warranty)}</span>
-                              {/* Price — final + original/discount line */}
-                              <div className="text-right min-w-0">
+                              {/* Price — TAP to set/change discount (Ko Hein) */}
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  const rect = e.currentTarget.getBoundingClientRect();
+                                  const pw = 176;
+                                  let l = rect.left;
+                                  l = Math.max(8, Math.min(l, window.innerWidth - pw - 8));
+                                  setDiscountPopupAnchor({ top: rect.bottom + 6, left: l });
+                                  setDiscountMenuOpenFor(item.categoryKey);
+                                }}
+                                title={item.discountPercent > 0 ? `${item.discountPercent}% discount applied — tap to change` : 'Tap to add discount'}
+                                className="text-right min-w-0 rounded-lg px-1 -mx-1 py-0.5 transition-colors cursor-pointer focus:outline-none active:scale-[0.98] hover:bg-success/5"
+                              >
                                 <p className="font-mono text-xs font-black text-ink whitespace-nowrap tabular-nums">{formatPrice(finalItemPrice)}</p>
                                 {item.discountPercent > 0 && (
                                   <p className="text-[10px] font-semibold text-muted whitespace-nowrap tabular-nums">
                                     <s className="font-mono">{formatPrice(item.price)}</s> · {item.discountPercent}%
                                   </p>
                                 )}
-                              </div>
-                              {/* Discount circle + remove — grouped, spaced */}
-                              <div className="flex items-center justify-end gap-3">
-                              <div className="relative">
-                                <Button
-                                  type="button"
-                                  onClick={(e) => {
-                                    const rect = e.currentTarget.getBoundingClientRect();
-                                    const pw = 176;
-                                    let l = rect.left;
-                                    l = Math.max(8, Math.min(l, window.innerWidth - pw - 8));
-                                    setDiscountPopupAnchor({ top: rect.bottom + 6, left: l });
-                                    setDiscountMenuOpenFor(item.categoryKey);
-                                  }}
-                                  title={item.discountPercent > 0 ? `${item.discountPercent}% discount applied` : 'Add discount'}
-                                  className={`discount-trigger !w-7 !h-7 !min-h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
-                                    item.discountPercent > 0
-                                      ? 'bg-brand text-white border border-brand shadow-2xs'
-                                      : 'bg-white text-muted border border-line hover:border-brand hover:text-brand'
-                                  }`}
-                                >
-                                  <BadgePercent className="w-3.5 h-3.5" />
-                                </Button>
-                                {renderDiscountPopup(item)}
-                              </div>
-                              {/* Remove */}
-                              <Button
+                              </button>
+                              {renderDiscountPopup(item)}
+                              {/* Remove — plain X */}
+                              <button
                                 type="button"
                                 onClick={() => handleToggleCartItem(item.categoryKey, item.label, item.price, item.warranty)}
-                                className="text-muted hover:text-danger p-1 rounded-lg transition-colors cursor-pointer"
+                                className="text-muted hover:text-danger p-1 rounded transition-colors cursor-pointer justify-self-end focus:outline-none"
                                 title="Remove item"
                               >
                                 <X className="w-4 h-4" />
-                              </Button>
-                              </div>
+                              </button>
                             </div>
                           </div>
                         );
