@@ -420,30 +420,18 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
           </fieldset>
           </div>
 
-          {/* Totals strip — Items / Base / Discount / FINAL (Ko Hein) */}
-          <div className="no-print mt-4 grid grid-cols-2 gap-2 text-center text-xs sm:grid-cols-4">
-            <div className="rounded-xl border border-line bg-surface/60 p-2">
-              <span className="block text-[10px] font-bold uppercase tracking-wider text-muted">Items</span>
-              <span className="font-mono text-sm font-black text-ink">{form.repairs.length}</span>
-            </div>
-            <div className="rounded-xl border border-line bg-surface/60 p-2">
-              <span className="block text-[10px] font-bold uppercase tracking-wider text-muted">Base</span>
-              <span className="font-mono text-sm font-black text-ink">{baseTotal.toLocaleString()}</span>
-            </div>
-            <div className="rounded-xl border border-line bg-surface/60 p-2">
-              <span className="block text-[10px] font-bold uppercase tracking-wider text-muted">Discount</span>
-              <span className="font-mono text-sm font-black text-danger">{savedAmount > 0 ? `-${savedAmount.toLocaleString()}` : '0'}</span>
-            </div>
-            <div className="rounded-xl border border-brand/40 bg-brand p-2 text-white">
-              <span className="block text-[10px] font-bold uppercase tracking-wider opacity-90">Final</span>
-              <span className="font-mono text-sm font-black">{finalEstimate.toLocaleString()} MMK</span>
-            </div>
-          </div>
-
           <div className="no-print mt-3 flex items-center justify-between gap-2">
-            <p className="text-xs font-bold text-muted">
+            <p className="min-w-0 truncate text-[11px] font-bold text-muted">
               {checkedCount}/{DIAGNOSTIC_NAMES.length} passed
-              {editingId && <span className="ml-2 text-brand">· Editing {editTarget?.orderNumber}</span>}
+              <span className="mx-1.5 text-line">·</span>
+              <span className="font-mono">Items {form.repairs.length}</span>
+              <span className="mx-1 text-line">·</span>
+              <span className="font-mono">Base {baseTotal.toLocaleString()}</span>
+              <span className="mx-1 text-line">·</span>
+              <span className="font-mono">Disc {savedAmount > 0 ? `-${savedAmount.toLocaleString()}` : '0'}</span>
+              <span className="mx-1 text-line">·</span>
+              <span className="font-mono font-black text-brand">Final {finalEstimate.toLocaleString()} MMK</span>
+              {editingId && <span className="ml-2 text-brand">· {editTarget?.orderNumber}</span>}
             </p>
             <div className="flex justify-end gap-2">
               <button type="reset" className="rounded-xl border border-line bg-white px-4 py-2 text-xs font-bold text-ink hover:bg-surface">
