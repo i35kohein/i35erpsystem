@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useIsIpad } from '../../hooks/useIsIpad';
 import {ShieldCheck, 
   CheckCircle2, 
@@ -69,7 +69,14 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
       w.deviceModel.toLowerCase().includes(q) ||
       w.serialNumber.toLowerCase().includes(q);
 
-    const matchesStatus = statusFilter === 'ALL' || statusFilter === 'Pending QA';
+    // Dashboard-shared statusFilter must never empty the QA roster: apply it
+    // only when it names a roster status (Finished / Taken Out); 'Pending QA'
+    // and unrelated filters (e.g. Paid, In Progress) show the full queue.
+    const matchesStatus =
+      statusFilter === 'ALL' ||
+      statusFilter === 'Pending QA' ||
+      !['Finished', 'Taken Out'].includes(statusFilter) ||
+      w.status === statusFilter;
 
     return matchesSearch && matchesStatus;
   });
@@ -89,8 +96,16 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
         .filter(Boolean)
         .join(' • ');
 
+  // After a QA pass the ticket leaves the roster (checklist stamped) — the
+  // re-anchor effect must NOT jump the open detail to a different ticket.
+  const skipRetargetRef = useRef(false);
+
   useEffect(() => {
-    if (!filteredWorkOrders.some((workOrder) => workOrder.id === selectedWoId)) {
+    if (skipRetargetRef.current) {
+      skipRetargetRef.current = false;
+      return;
+    }
+    if (selectedWoId && !filteredWorkOrders.some((workOrder) => workOrder.id === selectedWoId)) {
       setSelectedWoId(filteredWorkOrders[0]?.id || '');
     }
   }, [filteredWorkOrders, selectedWoId]);
@@ -243,6 +258,8 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
 
   const handleSaveQaPass = () => {
     if (!selectedWo) return;
+    if (!canConfirm) return; // guard: verdict + photo gate must pass (button can be bypassed programmatically)
+    skipRetargetRef.current = true; // keep the detail pane on this ticket after it leaves the roster
     onSavePostRepairChecklist(selectedWo.id, qaData, qaDiagnostics, {
       before: qaBeforePhotos,
       after: qaAfterPhotos,

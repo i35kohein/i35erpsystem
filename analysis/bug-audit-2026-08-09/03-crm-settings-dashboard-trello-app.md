@@ -1,0 +1,40 @@
+# i35 ERP Audit Report — CRM / Settings / Dashboard / Trello / App (branch v1.1)
+
+## src/components/trello/TrelloBoardModule.tsx
+- **[P1] [workflow]** Date filter `today` is broken: `windowMs = now` → `created < now` removes every past ticket, so "Today" shows only future-dated tickets (usually an empty board). Line 85-90. Fix: `windowMs = now - DAY` (or compare to start-of-today). Note `filterByDateRange` in DateFilterSelector.tsx does this correctly (`createdAt.startsWith(todayStr)`) — Trello duplicated the logic wrong.
+- **[P1] [workflow]** "Unassigned" quick-assign is broken: `handleQuickAssign(wo, 'unassigned')` (line 247) sets `assignedTechId: 'unassigned'` (truthy) and **keeps the old `assignedTechName`**. Result: the ticket no longer matches the `unassigned` filter (`if (wo.assignedTechId || wo.assignedTechName) return false`, line 74) and the card still shows the old tech's name. Fix: clear both `assignedTechId`/`assignedTechName` when techId is `'unassigned'`.
+- **[P2] [workflow]** `handleDrop` line 144: `if (draggedWoId && draggedWoId !== targetStage)` compares an **order ID to a stage string** — wrong condition; only the inner `wo.status !== targetStage` check saves it. Fix: compare `wo.status !== targetStage`.
+- **[P2] [theme]** Line 32: `dot: 'bg-slate-400'` raw slate bypassing tokens (no dark-mode override). Use a muted token (e.g. `bg-line`/`bg-muted`).
+
+## src/components/crm/CrmCustomerPortalModule.tsx
+- **[P2] [theme]** Line 55: default status badge `bg-gray-50 text-gray-700 border-gray-200` — raw palette; `text-gray-700` has no dark-slate override → near-invisible in dark mode. Fix: `bg-surface text-muted border-line`.
+- **[P2] [theme]** Line 478: modal backdrop `bg-slate-900/50` — raw slate bypassing tokens (same in Settings lines 1045/1210/1239). Fix: use a themed overlay token.
+- **[P2] [workflow]** `selectedCustomer` desync: the re-anchor effect only depends on `customers` (line ~133), not on `searchQuery`/`customerTypeFilter`. If the selected row is filtered out, keyboard `[`/`]` nav computes from a stale selection (idx=-1 → `[` jumps to second-to-last item). Fix: include filters in the effect deps or resolve idx against the current filtered list.
+
+## src/components/settings/SystemManagementSettingsModule.tsx
+- **[P2] [theme]** User-role cards (lines 1338/1365/1392) mix tokens with raw Tailwind borders `border-purple-600 / border-blue-600 / border-amber-600` (no dark overrides; inconsistent with `bg-purple/15` etc.). Fix: `border-purple/30`, `border-brand/30`, `border-warning/30`.
+- **[P2] [workflow]** `initialSubTab='ai'` staleness: App.tsx:2629 `setSettingsInitialSubTab('ai')` is never reset, and `settingsDrilledIn` initializes to `initialSubTab === 'ai'` — after one AI-shortcut visit, **every later Settings visit opens drilled into the AI tab** instead of the launcher. Fix: reset to `'users'` on Back/mount.
+- **[P2] [workflow]** Inventory mutations write straight to committed `settings` (`saveInventoryQualityTiers`, `handleAddInventoryBin`) while other tabs draft in `formData` — mixed sources; a Save of a stale draft can momentarily clobber a just-added bin/tier (self-heals via the settings-sync effect, but the dirty flag/behavior is inconsistent). Also `handleSaveUser` line ~330: `t.name.toLowerCase()` crashes if any tech lacks `name`, and a name collision overrides the dropdown-selected `technicianId`. Fix: guard `t.name`, prefer explicit `technicianId` match first.
+
+## src/components/dashboard/DashboardOverview.tsx
+- **[P1] [theme]** Warranty banner line 589: `from-rose-50 via-amber-50 to-orange-50` gradient stops have **no dark-slate override** (only `.bg-rose-50` etc. are remapped, not `from-*` stops); chips use `bg-white/80` (line 630 — only `/50 /90 /95` are overridden). In dark-slate the banner stays light pastel with overridden light `text-ink` → unreadable. Fix: use token tints (`bg-warning/10`, `bg-danger/10`) instead of gradient stops.
+- **[P2] [workflow]** `rosterTicket` (line 187) is never set — the `TicketDetailInspectorModal` at line 1669 is dead code. Props `onDeleteWorkOrder`/`onUpdateWorkOrderStatus`/`onOpenAiAssistant` are declared but never destructured (dead wiring). Fix: wire the inspector (e.g. click a warranty row) or remove.
+- **[P2] [workflow/UI]** Currency hardcoded `"MMK"` in ~13 places (lines 718, 852, 856, 888, 1000, 1046, 1101, 1229, 1238, 1244, 1250, 1344, 1350) while the `currencySymbol` prop is only used in TrendChart — changing shop currency leaves the dashboard showing MMK. Fix: use `currencySymbol` everywhere.
+- **[P2] [workflow]** `repairLowStockParts` line 330: `(p.deviceCompatibility && p.deviceCompatibility.length > 0)` OR'd with keyword match → **any part with a compatibility list qualifies as a "repair part"**, making the low-stock repair list over-inclusive and the keyword check pointless. Fix: drop the OR (or make it AND).
+- **[P2] [theme]** Line 768 `bg-slate-400` bar (Taken Out) + KPI hover borders raw `border-emerald-500/50` / `border-indigo-500/50` / `border-teal-500/50` (lines 683/707/731) instead of tokens (teal token exists: `border-teal/50`). Also `text-slate-300` (1377/1394) bypasses tokens.
+- **[P2] [workflow]** Revenue uses `wo.subtotal` while POS/finance checkout records `totalAmount` — tickets with only `totalAmount` set show $0 revenue on the Finance subtab. Fix: `wo.subtotal || wo.totalAmount`.
+
+## src/App.tsx
+- **[P1] [UI]** AI FAB line 2604: `bg-[var(--accent)]` — `--accent` is **never defined anywhere in src** (grep confirms). FAB renders transparent with a white icon → invisible on mobile. Fix: `bg-brand` or define `--accent`.
+- **[P2] [workflow]** POS navbar filters not fully removed: `FILTER_TABS` (line 625) still includes `'pos'` → mobile gets a Sliders button + an **empty "POS Filters" drawer** (title map line 2677; the drawer body renders nothing for POS), and `getActiveFilterCount('pos')` counts `statusFilter`+date. Meanwhile `statusFilter`/`dateFilter` set on Intake/Pipeline leak silently into `PosInvoicingModule` (props still passed at ~line 2390) with no visible desktop control. Fix: remove `'pos'` from FILTER_TABS/drawer title, stop passing the filter props (or reset them on tab change).
+- **[P2] [workflow]** `hasActiveFilters` + `handleResetAllFilters` omit `modelFilter` (line 134) and `showAllStages`/`showBeforeNeedsDiagOnly`/`showNeedsDiagOnly` → the Reset pill may not appear, and inventory model filter can't be cleared from the pill/drawer-reset. Fix: include all filter states.
+- **[P2] [workflow]** iPad dashboard subtabs unreachable: subtab buttons are `isIpad ? 'hidden' : 'hidden lg:flex'` (~line 1925) and DashboardOverview renders no in-module tab bar; the mobile drawer only has Date for dashboard → "Analytics" (repair-data) and "Inventory" subtabs can't be opened on iPad. Fix: render a subtab row on iPad.
+- **[P2] [workflow]** `handleSwitchUser` tech redirect list `['pipeline','trello','qa','crm']` omits `'price-catalog'`, which Navigation.tsx:190 explicitly allows for technicians → a technician on price-catalog gets yanked to pipeline on role switch. Fix: align the two lists.
+- **[P2] [UI]** Line 2106: `py-0.2` is not a valid Tailwind utility (no 0.2 step) → recycle-bin badge has no vertical padding. Fix: `py-0.5`.
+- **[P2] [theme]** Toast container (~line 2705): `bg-slate-900/95 … text-slate-300` raw slate (works visually in both themes, but bypasses tokens; `text-slate-300` has no dark override). Fix: define toast tokens.
+- **[P2] [dead code]** `activeTab === 'portal'` renders `CustomerFacingWebPortal` but `'portal'` exists in neither Navigation nor the hash-restore allow-list (line ~45) → unreachable path.
+
+## Clean checks
+- No invalid double-opacity classes (`/10/60`) found in any audited file.
+- Tab ids in App.tsx routing match Navigation.tsx; `onNavigateToTab` wiring is consistent.
+- Dashboard `activeSubTab` ↔ App `dashboardSubTab` sync works (controlled prop + `onSubTabChange` + ref double-set is harmless).

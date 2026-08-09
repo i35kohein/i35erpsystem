@@ -121,7 +121,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
     partId: parts[0]?.id || 'part-102',
     supplierId: suppliers[0]?.id || 'sup-1',
     quantity: 1,
-    unitCost: 98.00,
+    unitCost: parts[0]?.costPrice || 0,
     reason: 'Screen ghosting / touch unresponsiveness after 10 mins usage.',
     status: 'Shipped to Vendor',
     trackingNumber: '1Z9999990199887766',
@@ -534,7 +534,15 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                 <label className="block text-muted mb-1">Select Component from Inventory</label>
                 <select
                   value={newRmaData.partId}
-                  onChange={(e) => setNewRmaData({ ...newRmaData, partId: e.target.value })}
+                  onChange={(e) => {
+                    const selPart = parts.find((p) => p.id === e.target.value);
+                    setNewRmaData({
+                      ...newRmaData,
+                      partId: e.target.value,
+                      // default the credit cost to the selected part's real cost
+                      unitCost: (selPart?.costPrice ?? Number(newRmaData.unitCost)) || 0,
+                    });
+                  }}
                   className="w-full bg-surface border border-line rounded-lg p-2 text-ink focus:border-brand focus:ring-2 focus:ring-brand/20"
                 >
                   {parts.map((p) => (
@@ -554,6 +562,29 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                     <option key={s.id} value={s.id}>{s.name}</option>
                   ))}
                 </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-muted mb-1">Quantity</label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={newRmaData.quantity ?? 1}
+                    onChange={(e) => setNewRmaData({ ...newRmaData, quantity: Number(e.target.value) || 1 })}
+                    className="w-full bg-surface border border-line rounded-lg p-2 text-ink font-mono focus:border-brand focus:ring-2 focus:ring-brand/20"
+                  />
+                </div>
+                <div>
+                  <label className="block text-muted mb-1">Unit Cost (MMK)</label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={newRmaData.unitCost ?? 0}
+                    onChange={(e) => setNewRmaData({ ...newRmaData, unitCost: Number(e.target.value) || 0 })}
+                    className="w-full bg-surface border border-line rounded-lg p-2 text-ink font-mono focus:border-brand focus:ring-2 focus:ring-brand/20"
+                  />
+                </div>
               </div>
 
               <div>

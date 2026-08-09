@@ -229,9 +229,14 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   const dateFiltered = filterByDateRange<WorkOrder>(workOrders, dateFilter);
   const filteredWorkOrders = dateFiltered.filter((wo) => {
     // Checkout-viable only: Finished / Taken Out tickets with a recorded QA
-    // checklist (same set that gets the green $ icon on Trello/rosters).
-    if (wo.status !== 'Finished' && wo.status !== 'Taken Out') return false;
-    const isDiagnosticDone = Boolean(wo.postRepairChecklist);
+    // checklist (same set that gets the green $ icon on Trello/rosters), plus
+    // Cant Repair / Customer Not Repair tickets so the Diagnostic-Fee-Only
+    // quick action is reachable (they never get a QA checklist).
+    if (wo.status !== 'Finished' && wo.status !== 'Taken Out' && wo.status !== 'Cant Repair' && wo.status !== 'Customer Not Repair') return false;
+    const isDiagnosticDone =
+      Boolean(wo.postRepairChecklist) ||
+      wo.status === 'Cant Repair' ||
+      wo.status === 'Customer Not Repair';
 
     if (!isDiagnosticDone) return false;
 
@@ -377,8 +382,31 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     onSaveWorkOrder(updatedWo);
   };
 
+  // Tendered amount depends on the active method: split = sum of splits,
+  // cash = numpad tendered, everything else = full amount (assumed exact).
+  const tenderedAmount =
+    paymentMethod === 'Split Payment'
+      ? splitPayments.reduce((acc, s) => acc + (Number(s.amount) || 0), 0)
+      : paymentMethod === 'Cash'
+        ? Number(cashTendered) || 0
+        : selectedWo
+          ? selectedWo.totalAmount
+          : 0;
+  const isPaymentShort = selectedWo ? tenderedAmount < selectedWo.totalAmount : false;
+
   const handleProcessPayment = () => {
     if (!selectedWo || isProcessingPayment) return;
+    if (selectedWo.isPaid) {
+      toast.error('This order is already paid — no double charging. Pick a different ticket.', 'Already Paid');
+      return;
+    }
+    if (isPaymentShort) {
+      toast.error(
+        `Tendered ${tenderedAmount.toLocaleString()} ${currency} is less than due ${selectedWo.totalAmount.toLocaleString()} ${currency}.`,
+        'Payment Short'
+      );
+      return;
+    }
     if (activePaymentMethods.length === 0) {
       toast.error('No payment methods enabled. Enable one in Settings → Payment Methods.', 'Payment Unavailable');
       return;
@@ -390,7 +418,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
         toast.error('Please enter at least one split payment amount.', 'Split Payment Incomplete');
         return;
       }
-      finalMethod = `Split Payment (${validSplits.map((s) => `${s.method}: ${s.amount.toLocaleString()} {currency}`).join(' + ')})`;
+      finalMethod = `Split Payment (${validSplits.map((s) => `${s.method}: ${s.amount.toLocaleString()} ${currency}`).join(' + ')})`;
     }
     setIsProcessingPayment(true);
     try {
@@ -1224,7 +1252,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 <Button
                   type="button"
                   onClick={() => setIsConfirmOpen(true)}
-                  disabled={isProcessingPayment}
+                  disabled={isProcessingPayment || isPaymentShort || selectedWo.isPaid}
                   className={`w-full sm:w-1/2 ${
                     isProcessingPayment
                       ? 'bg-muted text-white opacity-80'
@@ -1363,7 +1391,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   setIsConfirmOpen(false);
                   handleProcessPayment();
                 }}
-                disabled={isProcessingPayment}
+                disabled={isProcessingPayment || isPaymentShort || selectedWo.isPaid}
                 className="flex-1 bg-success hover:bg-success/90 text-white"
               >
                 <ShieldCheck className="w-4 h-4 shrink-0" />

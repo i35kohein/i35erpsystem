@@ -613,7 +613,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
 
       {/* Background Warranty Check Alert Banner on Dashboard */}
       {expiringSoonWorkOrders.length > 0 && activeDashboardSubTab !== 'warranty-watch' && (
-        <div className="p-4 bg-gradient-to-r from-rose-50 via-amber-50 to-orange-50 border border-danger/30 rounded-2xl shadow-xs space-y-3">
+        <div className="p-4 bg-gradient-to-r from-danger/10 via-warning/10 to-warning/10 border border-danger/30 rounded-2xl shadow-xs space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
             <div className="flex items-start sm:items-center space-x-3">
               <div className="p-2 bg-danger text-white rounded-xl shadow-2xs shrink-0">
@@ -654,7 +654,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveDashboardSubTab('warranty-watch'); }
                 }}
-                className="bg-white/80 hover:bg-white border border-danger/30 px-2.5 py-1 rounded-lg text-xs flex items-center space-x-2 cursor-pointer shrink-0 shadow-2xs transition-all"
+                className="bg-surface/80 hover:bg-surface border border-danger/30 px-2.5 py-1 rounded-lg text-xs flex items-center space-x-2 cursor-pointer shrink-0 shadow-2xs transition-all"
               >
                 <span className="font-mono font-bold text-brand">{item.wo.orderNumber}</span>
                 <span className="font-bold text-ink">{item.wo.customerName}</span>

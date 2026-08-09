@@ -83,7 +83,7 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
           const now = Date.now();
           const DAY = 1000 * 60 * 60 * 24;
           let windowMs = now;
-          if (dateFilter.preset === 'today') windowMs = now;
+          if (dateFilter.preset === 'today') windowMs = now - DAY;
           else if (dateFilter.preset === '7days') windowMs = now - 6 * DAY;
           else if (dateFilter.preset === '30days') windowMs = now - 29 * DAY;
           else if (dateFilter.preset === '60days') windowMs = now - 59 * DAY;
@@ -130,10 +130,11 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
   const handleQuickAssign = (wo: WorkOrder, techId: string) => {
     if (!onSaveWorkOrder) return;
     const tech = technicians.find((t) => t.id === techId);
+    const isUnassigned = techId === 'unassigned';
     onSaveWorkOrder({
       ...wo,
-      assignedTechId: techId,
-      assignedTechName: tech?.name || wo.assignedTechName,
+      assignedTechId: isUnassigned ? '' : techId,
+      assignedTechName: isUnassigned ? '' : tech?.name || wo.assignedTechName,
       updatedAt: new Date().toISOString(),
     });
     setTechAssignOpen(null);

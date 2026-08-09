@@ -455,8 +455,13 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       assignedTechName: baseWorkOrder?.assignedTechName || '',
       serviceType: baseWorkOrder?.serviceType || 'Standard Modular',
       selectedRepairs,
-      beforeDiagnostics: baseWorkOrder?.beforeDiagnostics || beforeDiagnostics.map((d) => ({ ...d, note: (d.note || '').trim() || undefined })),
-      symptomsReported: extraReportedNotes.trim() || baseWorkOrder?.symptomsReported || '',
+      // Edit mode must respect the live form: resetting a diagnostic to N/A,
+      // clearing notes or deleting photos would otherwise be silently
+      // overwritten by the stale base values (audit P1).
+      beforeDiagnostics: isEditMode
+        ? beforeDiagnostics.map((d) => ({ ...d, note: (d.note || '').trim() || undefined }))
+        : baseWorkOrder?.beforeDiagnostics || beforeDiagnostics.map((d) => ({ ...d, note: (d.note || '').trim() || undefined })),
+      symptomsReported: isEditMode ? extraReportedNotes.trim() : extraReportedNotes.trim() || baseWorkOrder?.symptomsReported || '',
       diagnosticResult: beforeDiagnostics.some(d => d.status === 'Pass' || d.status === 'Fail')
         ? 'Initial 21-point repair diagnostic completed during intake.'
         : 'Diagnostic Pending',
@@ -478,7 +483,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       paymentMethod: baseWorkOrder?.paymentMethod,
       warrantyDays,
       warrantyLabel,
-      intakePhotos: baseWorkOrder?.intakePhotos || intakePhotos,
+      intakePhotos: isEditMode ? intakePhotos : baseWorkOrder?.intakePhotos || intakePhotos,
       repairLogs: baseWorkOrder?.repairLogs || [
         {
           id: `log-${Date.now()}`,
@@ -545,6 +550,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
     setIntakePhotos([]);
     setMatchedCustomer(null);
     setFieldErrors({});
+    setWizardStep(1); // reopen on step 1, not the last step (audit P1)
   };
 
   const scrollToSection = (id: string) => {

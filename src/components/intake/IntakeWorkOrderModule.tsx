@@ -574,7 +574,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpenTicketDetail(wo); }
                   }}
-                  className={`relative p-4 rounded-2xl border text-xs cursor-pointer transition-all space-y-3 hover:shadow-md ${getPriorityStyle(wo.priority)}`}
+                  className={`group relative p-4 rounded-2xl border text-xs cursor-pointer transition-all space-y-3 hover:shadow-md ${getPriorityStyle(wo.priority)}`}
                 >
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-2xl bg-brand/10 text-brand flex items-center justify-center group-hover:scale-110 group-hover:bg-brand group-hover:text-white transition-all">
                     <Ticket className="w-5 h-5" />

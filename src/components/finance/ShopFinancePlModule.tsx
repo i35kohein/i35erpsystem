@@ -110,6 +110,29 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
     });
   }, [workOrders, dateFilter]);
 
+  // Expenses must respect the same date window as revenue/COGS — otherwise
+  // Net Profit for TODAY/THIS_WEEK/THIS_MONTH subtracts all-time expenses
+  // (e.g. months of rent) from one day's profit (audit P1).
+  const dateFilteredExpenses = useMemo(() => {
+    return expenses.filter((exp) => {
+      if (dateFilter === 'TODAY') {
+        const today = new Date().toISOString().split('T')[0];
+        return exp.date.startsWith(today);
+      }
+      if (dateFilter === 'THIS_WEEK') {
+        const expDate = new Date(exp.date).getTime();
+        const diffDays = (Date.now() - expDate) / (1000 * 3600 * 24);
+        return diffDays >= 0 && diffDays <= 7;
+      }
+      if (dateFilter === 'THIS_MONTH') {
+        const expDate = new Date(exp.date);
+        const now = new Date();
+        return expDate.getMonth() === now.getMonth() && expDate.getFullYear() === now.getFullYear();
+      }
+      return true; // ALL
+    });
+  }, [expenses, dateFilter]);
+
   // Inventory Fund: parts taken from stock awaiting settlement (internal debt
   // to the shop's parts fund — set aside money / restock to clear it).
   const fundTickets = filteredWorkOrders.filter((wo) => wo.inventoryConsumptionAmount);
@@ -184,8 +207,8 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
     const partsProfit = partsSalesIncome - cogsTotal;
     const partsMarginPercent = partsSalesIncome > 0 ? Math.round((partsProfit / partsSalesIncome) * 100) : 0;
 
-    // Total Expenses
-    const totalOpEx = expenses.reduce((acc, curr) => acc + curr.amount, 0);
+    // Total Expenses (date-filtered, matching the revenue/COGS window)
+    const totalOpEx = dateFilteredExpenses.reduce((acc, curr) => acc + curr.amount, 0);
     const netProfit = grossProfit - totalOpEx;
     const netMarginPercent = totalRevenue > 0 ? Math.round((netProfit / totalRevenue) * 100) : 0;
 
@@ -229,7 +252,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
       totalCommissionsEarned,
       pendingCommissionsAmount,
     };
-  }, [filteredWorkOrders, expenses, parts, supplierDebts, technicianPayouts]);
+  }, [filteredWorkOrders, dateFilteredExpenses, parts, supplierDebts, technicianPayouts]);
 
   // Parts profit by category: which parts make the money this period.
   const partsCategoryProfit = useMemo(() => {
@@ -446,7 +469,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
               </div>
               <div className="mt-auto pt-2 border-t border-surface text-xs font-bold text-muted flex justify-between gap-2">
                 <span>Shop Rent, Utils, Tools, Mktg</span>
-                <span className="text-ink shrink-0">{expenses.length} Expense Records</span>
+                <span className="text-ink shrink-0">{dateFilteredExpenses.length} Expense Records</span>
               </div>
             </div>
 
@@ -714,7 +737,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
-                {expenses.map((exp) => (
+                {dateFilteredExpenses.map((exp) => (
                   <tr key={exp.id} className="hover:bg-surface">
                     <td className="p-3 font-mono font-bold text-ink">{exp.date}</td>
                     <td className="p-3">
@@ -735,7 +758,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                 ))}
               </tbody>
             </table>
-            {expenses.length === 0 && (
+            {dateFilteredExpenses.length === 0 && (
               <div className="p-8 text-center text-xs text-muted space-y-1">
                 <Receipt className="w-6 h-6 mx-auto opacity-50" />
                 <p className="font-extrabold text-sm text-ink">No expense entries recorded</p>

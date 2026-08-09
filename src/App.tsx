@@ -1401,7 +1401,7 @@ export default function App() {
             ...(afterDiagnostics ? { afterDiagnostics } : {}),
             intakePhotos: photos?.before?.length ? photos.before : w.intakePhotos,
             afterRepairPhotos: photos?.after?.length ? photos.after : w.afterRepairPhotos,
-            status: 'Finished' as WorkOrderStatus,
+            status: w.status === 'Taken Out' ? ('Taken Out' as WorkOrderStatus) : ('Finished' as WorkOrderStatus),
             completedAt: w.completedAt || new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           };
@@ -2601,7 +2601,7 @@ export default function App() {
         <Button
           type="button"
           onClick={() => setIsAiAssistantOpen(true)}
-          className="lg:hidden fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-4 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent)] text-white shadow-lg cursor-pointer active:scale-95 transition-transform hover:scale-105"
+          className="lg:hidden fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-4 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-brand text-white shadow-lg cursor-pointer active:scale-95 transition-transform hover:scale-105"
           aria-label="Open AI Assistant"
           title="Open AI Assistant"
         >
