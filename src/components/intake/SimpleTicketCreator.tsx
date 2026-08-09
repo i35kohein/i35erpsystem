@@ -420,7 +420,27 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
           </fieldset>
           </div>
 
-          <div className="no-print mt-4 flex items-center justify-between gap-2">
+          {/* Totals strip — Items / Base / Discount / FINAL (Ko Hein) */}
+          <div className="no-print mt-4 grid grid-cols-2 gap-2 text-center text-xs sm:grid-cols-4">
+            <div className="rounded-xl border border-line bg-surface/60 p-2">
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-muted">Items</span>
+              <span className="font-mono text-sm font-black text-ink">{form.repairs.length}</span>
+            </div>
+            <div className="rounded-xl border border-line bg-surface/60 p-2">
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-muted">Base</span>
+              <span className="font-mono text-sm font-black text-ink">{baseTotal.toLocaleString()}</span>
+            </div>
+            <div className="rounded-xl border border-line bg-surface/60 p-2">
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-muted">Discount</span>
+              <span className="font-mono text-sm font-black text-danger">{savedAmount > 0 ? `-${savedAmount.toLocaleString()}` : '0'}</span>
+            </div>
+            <div className="rounded-xl border border-brand/40 bg-brand p-2 text-white">
+              <span className="block text-[10px] font-bold uppercase tracking-wider opacity-90">Final</span>
+              <span className="font-mono text-sm font-black">{finalEstimate.toLocaleString()} MMK</span>
+            </div>
+          </div>
+
+          <div className="no-print mt-3 flex items-center justify-between gap-2">
             <p className="text-xs font-bold text-muted">
               {checkedCount}/{DIAGNOSTIC_NAMES.length} passed
               {editingId && <span className="ml-2 text-brand">· Editing {editTarget?.orderNumber}</span>}
