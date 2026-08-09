@@ -98,27 +98,28 @@ function shortWarranty(warranty: string): string {
   return warranty.replace(/(\d+)\s*(?:Months?|M)\b/gi, '$1M');
 }
 
-/** Mobile swipe-to-remove row — swipe LEFT past threshold to delete (Ko Hein). */
+/** Mobile swipe-to-remove row — swipe LEFT reveals a theme Remove button; tap it to delete (Ko Hein). */
 function SwipeToRemoveRow({ onRemove, children }: { onRemove: () => void; children: React.ReactNode }) {
   const offsetRef = useRef(0);
-  const draggingRef = useRef(false);
   const startX = useRef<number | null>(null);
   const startY = useRef<number | null>(null);
   const base = useRef(0);
   const contentRef = useRef<HTMLDivElement | null>(null);
-  const THRESHOLD = 70;
+  const THRESHOLD = 60;
+  const OPEN_OFFSET = -96; // w-24 reveal width
 
-  const applyOffset = (next: number) => {
+  const applyOffset = (next: number, transition = true) => {
     offsetRef.current = next;
-    if (contentRef.current) contentRef.current.style.transform = `translateX(${next}px)`;
+    if (contentRef.current) {
+      contentRef.current.style.transition = transition ? 'transform 200ms' : 'none';
+      contentRef.current.style.transform = `translateX(${next}px)`;
+    }
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
     startX.current = e.touches[0].clientX;
     startY.current = e.touches[0].clientY;
     base.current = offsetRef.current;
-    draggingRef.current = true;
-    if (contentRef.current) contentRef.current.style.transition = 'none';
   };
   const handleTouchMove = (e: React.TouchEvent) => {
     if (startX.current === null || startY.current === null) return;
@@ -126,18 +127,18 @@ function SwipeToRemoveRow({ onRemove, children }: { onRemove: () => void; childr
     const dy = e.touches[0].clientY - startY.current;
     // Vertical scroll or plain tap — don't hijack.
     if (Math.abs(dx) < 8 || Math.abs(dx) < Math.abs(dy)) return;
-    applyOffset(Math.min(0, base.current + dx));
+    // Swiping right closes an open row; swiping left opens (clamped to reveal width).
+    const next = base.current + dx;
+    applyOffset(next > 0 ? 0 : Math.max(next, OPEN_OFFSET), false);
   };
   const handleTouchEnd = () => {
     if (offsetRef.current < -THRESHOLD) {
-      onRemove();
+      applyOffset(OPEN_OFFSET); // stay open — manual tap on Remove to delete
     } else {
       applyOffset(0);
     }
     startX.current = null;
     startY.current = null;
-    draggingRef.current = false;
-    if (contentRef.current) contentRef.current.style.transition = 'transform 200ms';
   };
 
   return (
@@ -148,12 +149,25 @@ function SwipeToRemoveRow({ onRemove, children }: { onRemove: () => void; childr
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Reveal background */}
-      <div className="absolute inset-y-0 right-0 w-24 bg-danger flex items-center justify-center">
-        <span className="text-white text-xs font-extrabold">Remove</span>
-      </div>
-      {/* Foreground content */}
-      <div ref={contentRef} className="relative bg-white" style={{ transition: 'transform 200ms' }}>
+      {/* Reveal button — theme danger, tap to delete */}
+      <button
+        type="button"
+        onClick={onRemove}
+        aria-label="Remove item"
+        className="absolute inset-y-0 right-0 w-24 bg-danger hover:bg-danger/90 text-white text-xs font-extrabold flex items-center justify-center gap-1.5 rounded-l-xl focus:outline-none"
+      >
+        <Trash2 className="w-4 h-4" />
+        <span>Remove</span>
+      </button>
+      {/* Foreground content — tapping it closes the reveal */}
+      <div
+        ref={contentRef}
+        className="relative bg-white"
+        style={{ transition: 'transform 200ms' }}
+        onClick={() => {
+          if (offsetRef.current < 0) applyOffset(0);
+        }}
+      >
         {children}
       </div>
     </div>
