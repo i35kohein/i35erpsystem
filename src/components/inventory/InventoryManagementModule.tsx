@@ -1528,7 +1528,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         onChange={setSelectedQuality}
                         options={tierFilterOptions}
                         size="sm"
-                        buttonClassName="uppercase font-mono text-xs text-muted hover:text-brand transition-colors gap-1 bg-transparent border-0 p-0 rounded-none min-h-0"
+                        buttonClassName="uppercase font-mono text-xs text-muted hover:text-brand transition-colors gap-1 bg-transparent border-0 p-0 rounded-none min-h-0 min-w-0 h-auto hover:bg-transparent focus:border-transparent focus:ring-0"
                         menuAlign="group-left"
                       />
                     </th>
