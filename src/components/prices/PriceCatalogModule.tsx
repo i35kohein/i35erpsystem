@@ -1036,23 +1036,22 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                         : 'border-line hover:border-brand/50'
                     }`}
                   >
-                    {/* Icon + service name + warranty (compact horizontal row on mobile) */}
-                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    {/* Row 1: icon + service name — full single line, warranty pill moved out */}
+                    <div className="flex items-center gap-2.5 min-w-0">
                       <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl border flex items-center justify-center shrink-0 ${config.bg}`}>
                         <IconComp className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${config.color}`} />
                       </div>
-                      <div className="min-w-0 flex-1 sm:pr-8">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <h3 className="font-extrabold text-xs sm:text-sm text-ink min-w-0 leading-snug" title={item.label}>
-                            {item.label}
-                          </h3>
-                          {/* Warranty pill — small, beside the service name */}
-                          <WarrantyPill warranty={item.warranty} />
-                        </div>
-                        <span className="block text-[10px] sm:text-xs font-extrabold text-muted uppercase tracking-wider mt-0.5 truncate">
-                          {item.group}
-                        </span>
-                      </div>
+                      <h3 className="font-extrabold text-xs sm:text-sm text-ink min-w-0 leading-snug" title={item.label}>
+                        {item.label}
+                      </h3>
+                    </div>
+
+                    {/* Row 2: Repair Category (left) + Warranty (right) */}
+                    <div className="flex items-center justify-between gap-2 min-w-0">
+                      <span className="text-[10px] sm:text-xs font-extrabold text-muted uppercase tracking-wider truncate">
+                        {item.group}
+                      </span>
+                      <WarrantyPill warranty={item.warranty} />
                     </div>
 
                     {/* Price (right on mobile / bottom on desktop) + selection checkmark */}
