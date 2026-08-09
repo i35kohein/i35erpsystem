@@ -413,7 +413,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                     aria-label={`${name} note`}
                     value={form.checks[i].note}
                     onChange={(e) => setCheck(i, { note: e.target.value })}
-                    placeholder={form.checks[i].status === 'Pass' ? 'ok' : 'issue…'}
+                    placeholder={form.checks[i].status === 'Pass' ? 'ok' : form.checks[i].status === 'Fail' ? 'issue…' : 'n/a'}
                     className="ml-auto min-w-0 flex-1 bg-transparent px-1 text-xs outline-none focus:bg-[#d9f99d]/40"
                   />
                 </label>
