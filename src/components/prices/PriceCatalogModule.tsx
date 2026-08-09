@@ -1253,7 +1253,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
           role="presentation"
         >
           <div
-            className="w-full max-w-lg max-h-[88vh] flex flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl animate-i35-slide-up"
+            className="w-full max-w-lg max-h-[94vh] flex flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl animate-i35-slide-up"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Drag handle */}
