@@ -1788,14 +1788,14 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <table className="min-w-max w-full text-left">
                 <thead className="sticky top-0 z-20 border-b border-line bg-surface font-mono text-xs uppercase text-muted">
                   <tr>
-                    <th className="sticky left-0 z-30 min-w-44 bg-surface p-2.5">Device Model</th>
+                    <th className="sticky left-0 z-30 min-w-44 bg-surface p-2.5 border-r border-line">Device Model</th>
                     {matrixCategories.map((category) => <th key={category} className="min-w-28 p-2.5 text-center">{category}</th>)}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">
                   {matrixModels.map((model) => (
                     <tr key={model} className="hover:bg-surface/80">
-                      <td className="sticky left-0 z-10 bg-white p-2.5 font-bold text-ink">{model}</td>
+                      <td className="sticky left-0 z-10 bg-surface p-2.5 font-bold text-ink border-r border-line">{model}</td>
                       {matrixCategories.map((category) => {
                         const merge = matrixMergeGroups[category]?.[model];
                         // Cell is consumed by the rowSpan of the row above it.
@@ -1840,7 +1840,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 </tbody>
                 <tfoot className="sticky bottom-0 z-20">
                   <tr className="border-t-2 border-ink bg-surface shadow-[0_-4px_8px_-6px_rgba(0,0,0,0.25)]">
-                    <td className="sticky left-0 z-30 bg-surface p-2.5 font-black text-ink">
+                    <td className="sticky left-0 z-30 bg-surface p-2.5 font-black text-ink border-r border-line">
                       Total ({matrixGrandTotal.toLocaleString()})
                     </td>
                     {matrixCategories.map((category) => (
