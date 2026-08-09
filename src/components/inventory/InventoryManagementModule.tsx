@@ -95,6 +95,9 @@ interface InventoryManagementModuleProps {
   setSelectedQuality?: (q: string) => void;
   selectedModelFilter?: string;
   setSelectedModelFilter?: (m: string) => void;
+  /** Controlled low-stock filter (App filter drawer). Falls back to local state. */
+  showLowStockOnly?: boolean;
+  onSetLowStockOnly?: (v: boolean) => void;
   viewMode?: 'stock' | 'profit' | 'matrix';
   setViewMode?: (v: 'stock' | 'profit' | 'matrix') => void;
   inlineEditMode?: boolean;
@@ -178,6 +181,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   selectedQuality: propSelectedQuality,
   setSelectedQuality: propSetSelectedQuality,
   selectedModelFilter: propSelectedModelFilter,
+  showLowStockOnly: propShowLowStockOnly,
+  onSetLowStockOnly: propOnSetLowStockOnly,
   setSelectedModelFilter: propSetSelectedModelFilter,
   viewMode: propViewMode,
   setViewMode: propSetViewMode,
@@ -230,7 +235,13 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const [inlineDrafts, setInlineDrafts] = useState<Record<string, InlineDraft>>({});
   const [showInlineSaveConfirm, setShowInlineSaveConfirm] = useState(false);
   const [isInlineSaving, setIsInlineSaving] = useState(false);
-  const [showLowStockOnly, setShowLowStockOnly] = useState(false);
+  const [localLowStockOnly, setLocalLowStockOnly] = useState(false);
+  const showLowStockOnly = propShowLowStockOnly !== undefined ? propShowLowStockOnly : localLowStockOnly;
+  const setShowLowStockOnly = (v: boolean) => {
+    if (propOnSetLowStockOnly) propOnSetLowStockOnly(v);
+    else setLocalLowStockOnly(v);
+  };
+  const handleToggleLowStockOnly = () => setShowLowStockOnly(!showLowStockOnly);
   const [skuFilterOpen, setSkuFilterOpen] = useState(false);
 
   // Supplier & Quality Tier Edit States
@@ -1053,7 +1064,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         {/* Low Stock Warning Card (Clickable Filter) */}
         <Button
           type="button"
-          onClick={() => setShowLowStockOnly(!showLowStockOnly)}
+          onClick={() => handleToggleLowStockOnly()}
           className={`relative p-3 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer shadow-2xs ${
             showLowStockOnly
               ? 'bg-warning text-white border-amber-600 ring-2 ring-amber-400'
@@ -1135,7 +1146,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         {metrics.lowStockCount > 0 && (
           <Button
             type="button"
-            onClick={() => setShowLowStockOnly(!showLowStockOnly)}
+            onClick={() => handleToggleLowStockOnly()}
             className={`w-full flex items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-xs transition-all cursor-pointer active:scale-[0.99] ${
               showLowStockOnly
                 ? 'bg-warning border-amber-600 text-white'
@@ -1389,7 +1400,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                                   <input
                                     type="checkbox"
                                     checked={showLowStockOnly}
-                                    onChange={(e) => setShowLowStockOnly(e.target.checked)}
+                                    onChange={() => handleToggleLowStockOnly()}
                                     className="accent-brand w-3.5 h-3.5 cursor-pointer"
                                   />
                                   Low stock only

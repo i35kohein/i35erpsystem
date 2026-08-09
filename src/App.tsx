@@ -227,6 +227,7 @@ export default function App() {
   }, [inventorySideMenuOpen]);
   const inventoryMoreAnchorRef = useRef<HTMLButtonElement | null>(null);
   const [inventoryScanQuery, setInventoryScanQuery] = useState('');
+  const [inventoryLowStockOnly, setInventoryLowStockOnly] = useState(false);
   const inventoryScanSubmitRef = useRef<(() => void) | null>(null);
   const [customerTypeFilter, setCustomerTypeFilter] = useState<string>('ALL');
   const [dateFilter, setDateFilter] = useState<DateFilterState>({ preset: 'all' });
@@ -722,7 +723,7 @@ export default function App() {
       case 'qa':
         return (statusFilter !== 'ALL' ? 1 : 0) + d;
       case 'inventory':
-        return (modelFilter !== 'ALL' ? 1 : 0) + (categoryFilter !== 'ALL' ? 1 : 0) + (stockFilter !== 'ALL' ? 1 : 0) + d;
+        return (modelFilter !== 'ALL' ? 1 : 0) + (categoryFilter !== 'ALL' ? 1 : 0) + (stockFilter !== 'ALL' ? 1 : 0) + (inventoryLowStockOnly ? 1 : 0);
       case 'crm':
         return (customerTypeFilter !== 'ALL' ? 1 : 0) + d;
       case 'finance':
@@ -928,6 +929,20 @@ export default function App() {
               />
             </div>
             <div>
+              <label className={labelCls}>Stock Level</label>
+              <Button
+                type="button"
+                onClick={() => setInventoryLowStockOnly((v) => !v)}
+                className={`${rowCls} ${inventoryLowStockOnly ? 'bg-warning text-white border-amber-600 shadow-2xs' : 'bg-white text-ink border-line hover:bg-slate-100'}`}
+              >
+                <span className="flex items-center gap-2">
+                  <AlertTriangle className={`w-4 h-4 ${inventoryLowStockOnly ? 'text-white' : 'text-warning'}`} />
+                  Low Stock Only
+                </span>
+                <span className={`text-xs ${inventoryLowStockOnly ? 'text-white/80' : 'text-muted'}`}>{inventoryLowStockOnly ? 'On' : 'Off'}</span>
+              </Button>
+            </div>
+            <div>
               <label className={labelCls}>View</label>
               <div className="grid grid-cols-3 gap-1.5">
                 {(['stock', 'profit', 'matrix'] as const).map((v) => (
@@ -977,42 +992,6 @@ export default function App() {
                 </span>
               </Button>
             </div>
-            <div>
-              <label className={labelCls}>Device Model</label>
-              <DrawerSelect
-                label="Device Model"
-                value={modelFilter}
-                onChange={(v) => setModelFilter(v as any)}
-                options={[
-                  { value: 'ALL', label: 'All Models' },
-                  ...inventoryDeviceModels.map((model) => ({ value: model, label: model })),
-                ]}
-              />
-            </div>
-            <div>
-              <label className={labelCls}>Category</label>
-              <DrawerSelect
-                label="Category"
-                value={categoryFilter}
-                onChange={(v) => setCategoryFilter(v as any)}
-                options={[
-                  { value: 'ALL', label: 'All Categories' },
-                  ...inventoryCategoryOptions.map((category) => ({ value: category, label: category })),
-                ]}
-              />
-            </div>
-            <div>
-              <label className={labelCls}>Quality Tier</label>
-              <DrawerSelect
-                label="Quality Tier"
-                value={stockFilter}
-                onChange={(v) => setStockFilter(v as any)}
-                options={[
-                  { value: 'ALL', label: 'All Tiers' },
-                  ...inventoryQualityOptions.map((tier) => ({ value: tier, label: tier })),
-                ]}
-              />
-            </div>
           </>
         )}
 
@@ -1033,7 +1012,7 @@ export default function App() {
           </div>
         )}
 
-        {(tab === 'intake' || tab === 'pipeline' || tab === 'inventory' || tab === 'crm' || tab === 'suppliers' || tab === 'qa' || tab === 'finance' || tab === 'dashboard') && (
+        {(tab === 'intake' || tab === 'pipeline' || tab === 'crm' || tab === 'suppliers' || tab === 'qa' || tab === 'finance' || tab === 'dashboard') && (
           <div>
             <DrawerSelect
               label="Date"
@@ -1085,6 +1064,7 @@ export default function App() {
     setStockFilter('ALL');
     setCustomerTypeFilter('ALL');
     setModelFilter('ALL');
+    setInventoryLowStockOnly(false);
     setDateFilter({ preset: 'all' });
     setShowBottlenecksOnly(false);
     setShowAllStages(false);
@@ -2416,6 +2396,8 @@ export default function App() {
                   viewMode={inventoryViewMode}
                   setViewMode={setInventoryViewMode}
                   inlineEditMode={inventoryEditMode}
+            showLowStockOnly={inventoryLowStockOnly}
+            onSetLowStockOnly={(v) => setInventoryLowStockOnly(v)}
                   setInlineEditMode={setInventoryEditMode}
                   stockView={inventoryStockView}
                   setStockView={setInventoryStockView}
