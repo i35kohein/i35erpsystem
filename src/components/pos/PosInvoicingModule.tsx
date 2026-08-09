@@ -449,7 +449,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
   const renderCheckoutPanel = () =>
     selectedWo ? (
-            <div className="space-y-5 md:grid md:grid-cols-2 md:gap-5 md:space-y-0 md:items-start">
+            <div className="space-y-5">
               {/* Desktop: left column — ticket header + items + summary */}
               <div className="space-y-5 md:min-w-0">
               <div className="border-b border-line pb-3 space-y-2">
@@ -954,10 +954,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   </div>
                 )}
               </div>
-              </div>
-
-              <div className="space-y-5 md:min-w-0">
-
+              
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
                 <Button
@@ -997,8 +994,9 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     </>
                   )}
                 </Button>
-              </div>
-              </div>
+              </div></div>
+
+              
             </div>
           ) : (
             <div className="p-12 text-center text-muted flex flex-col items-center justify-center space-y-3 min-h-[380px]">
