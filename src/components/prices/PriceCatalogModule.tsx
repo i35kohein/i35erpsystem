@@ -98,6 +98,68 @@ function shortWarranty(warranty: string): string {
   return warranty.replace(/(\d+)\s*(?:Months?|M)\b/gi, '$1M');
 }
 
+/** Mobile swipe-to-remove row — swipe LEFT past threshold to delete (Ko Hein). */
+function SwipeToRemoveRow({ onRemove, children }: { onRemove: () => void; children: React.ReactNode }) {
+  const offsetRef = useRef(0);
+  const draggingRef = useRef(false);
+  const startX = useRef<number | null>(null);
+  const startY = useRef<number | null>(null);
+  const base = useRef(0);
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  const THRESHOLD = 70;
+
+  const applyOffset = (next: number) => {
+    offsetRef.current = next;
+    if (contentRef.current) contentRef.current.style.transform = `translateX(${next}px)`;
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    startX.current = e.touches[0].clientX;
+    startY.current = e.touches[0].clientY;
+    base.current = offsetRef.current;
+    draggingRef.current = true;
+    if (contentRef.current) contentRef.current.style.transition = 'none';
+  };
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (startX.current === null || startY.current === null) return;
+    const dx = e.touches[0].clientX - startX.current;
+    const dy = e.touches[0].clientY - startY.current;
+    // Vertical scroll or plain tap — don't hijack.
+    if (Math.abs(dx) < 8 || Math.abs(dx) < Math.abs(dy)) return;
+    applyOffset(Math.min(0, base.current + dx));
+  };
+  const handleTouchEnd = () => {
+    if (offsetRef.current < -THRESHOLD) {
+      onRemove();
+    } else {
+      applyOffset(0);
+    }
+    startX.current = null;
+    startY.current = null;
+    draggingRef.current = false;
+    if (contentRef.current) contentRef.current.style.transition = 'transform 200ms';
+  };
+
+  return (
+    <div
+      className="relative overflow-hidden"
+      style={{ touchAction: 'pan-y' }}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* Reveal background */}
+      <div className="absolute inset-y-0 right-0 w-24 bg-danger flex items-center justify-center">
+        <span className="text-white text-xs font-extrabold">Remove</span>
+      </div>
+      {/* Foreground content */}
+      <div ref={contentRef} className="relative bg-white" style={{ transition: 'transform 200ms' }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 function WarrantyPill({ warranty, size = 'sm' }: { warranty: string; size?: 'sm' | 'md' }) {
   const icon = size === 'md' ? 'w-2.5 h-2.5' : 'w-1.5 h-1.5 sm:w-2 sm:h-2';
   const pad = size === 'md' ? 'px-1.5 py-0.5' : 'px-1 py-px sm:py-0.5';
@@ -546,19 +608,19 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                     ) : (
                       <>
                       {/* Table header — text-based, clear columns */}
-                      <div className="grid grid-cols-[14px_1fr_auto_auto] gap-x-2.5 px-0 py-2 border-b border-line">
+                      <div className="grid grid-cols-[14px_1fr_auto] gap-x-2.5 px-0 py-2 border-b border-line">
                         <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted">#</span>
                         <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted">Service</span>
                         <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted text-right">Price</span>
-                        <span />
                       </div>
                       {cartItems.map((item, idx) => {
                         const discAmt = item.price * (item.discountPercent / 100);
                         const finalItemPrice = item.price - discAmt;
 
                         return (
-                          <div key={item.categoryKey} className="py-2.5 border-b border-line last:border-0">
-                            <div className="grid grid-cols-[14px_1fr_auto_auto] items-center gap-x-2.5">
+                          <SwipeToRemoveRow key={item.categoryKey} onRemove={() => handleToggleCartItem(item.categoryKey, item.label, item.price, item.warranty)}>
+                          <div className="py-2.5 border-b border-line last:border-0">
+                            <div className="grid grid-cols-[14px_1fr_auto] items-center gap-x-2.5">
                               {/* # */}
                               <span className="text-[11px] font-extrabold text-muted tabular-nums">{idx + 1}</span>
                               {/* Service + warranty inline — compact (Ko Hein) */}
@@ -590,17 +652,9 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                 )}
                               </button>
                               {renderDiscountPopup(item)}
-                              {/* Remove — plain X */}
-                              <button
-                                type="button"
-                                onClick={() => handleToggleCartItem(item.categoryKey, item.label, item.price, item.warranty)}
-                                className="text-muted hover:text-danger p-1 rounded transition-colors cursor-pointer justify-self-end focus:outline-none"
-                                title="Remove item"
-                              >
-                                <X className="w-4 h-4" />
-                              </button>
                             </div>
                           </div>
+                          </SwipeToRemoveRow>
                         );
                       })}
                       </>
