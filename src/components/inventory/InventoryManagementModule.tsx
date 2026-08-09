@@ -1629,7 +1629,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     const editValue = (key: keyof PartItem, fallback: string | number) => draft[key] ?? fallback;
 
                     return (
-                      <tr key={part.id} className={`transition-colors ${selectedPartIds.has(part.id) ? 'bg-brand-soft' : 'hover:bg-surface/80'}`}>
+                      <tr key={part.id} className={`transition-colors ${selectedPartIds.has(part.id) ? 'bg-brand-soft' : ''}`}>
                         {/* Selection checkbox */}
                         {!inlineEditMode && (
                           <td className="px-2 py-2">
@@ -1949,7 +1949,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     margin >= 0 ? 'bg-warning/15 text-warning' :
                     'bg-danger/15 text-danger';
                   return (
-                    <tr key={part.id} className="hover:bg-surface/80">
+                    <tr key={part.id} className="">
                       <td className="p-2.5"><p className="max-w-[260px] truncate font-bold text-ink">{part.name}</p><p className="mt-0.5 font-mono text-xs text-muted">{part.sku}</p></td>
                       <td className="p-2.5 font-mono text-faint whitespace-nowrap hidden md:table-cell">{part.costPrice.toLocaleString()} {currency}</td>
                       <td className="p-2.5 font-mono font-bold text-success-deep whitespace-nowrap">{part.sellingPrice.toLocaleString()} {currency}</td>
