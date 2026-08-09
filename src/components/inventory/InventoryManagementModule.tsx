@@ -238,6 +238,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const [isInlineSaving, setIsInlineSaving] = useState(false);
   const [showLowStockOnly, setShowLowStockOnly] = useState(false);
   const [skuFilterOpen, setSkuFilterOpen] = useState(false);
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
 
   // Supplier & Quality Tier Edit States
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
@@ -1080,41 +1081,53 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               )}
 
               <div className="flex items-center gap-1.5 w-full sm:w-auto">
-                {/* Print Tags */}
+                {/* More actions — Print Tags + Edit (⋯) */}
                 {!isIpad && (
-                  <Button
-                    type="button"
-                    onClick={() => { setIsTagsPrintOpen(true); setSelectedTagIds(new Set()); }}
-                    className="flex-1 sm:flex-none inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-line bg-white px-3 text-xs font-bold text-ink shadow-2xs transition-colors hover:border-brand hover:text-brand"
-                    title="Print spare parts tags (A4)"
-                  >
-                    <Printer className="h-3.5 w-3.5" />
-                    <span className="hidden xl:inline">Print Tags</span>
-                  </Button>
-                )}
-
-                {/* Edit / Done toggle */}
-                {!isIpad && (
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      if (inlineEditMode && inlineSaveReview.length) {
-                        setShowInlineSaveConfirm(true);
-                        return;
-                      }
-                      setInlineEditMode((value) => !value);
-                      setInlineDrafts({});
-                    }}
-                    className={`flex-1 sm:flex-none inline-flex h-10 items-center justify-center gap-1.5 rounded-xl px-3 text-xs font-bold shadow-2xs transition-all ${
-                      inlineEditMode
-                        ? 'border border-warning/30 bg-warning/10 text-warning hover:border-amber-400'
-                        : 'border border-line bg-white text-ink hover:border-warning hover:text-warning'
-                    }`}
-                    title={inlineEditMode ? 'Cancel inline edit mode' : 'Edit stock rows'}
-                  >
-                    <Edit2 className="h-3.5 w-3.5" />
-                    <span className={inlineEditMode ? "inline" : "hidden xl:inline"}>{inlineEditMode ? 'Done' : 'Edit'}</span>
-                  </Button>
+                  <div className="relative">
+                    <Button
+                      type="button"
+                      onClick={() => setMoreMenuOpen(!moreMenuOpen)}
+                      className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-white text-ink hover:border-brand hover:text-brand transition-colors cursor-pointer"
+                      title="More actions"
+                      aria-label="More actions"
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                    {moreMenuOpen && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setMoreMenuOpen(false)} role="presentation" aria-hidden="true" />
+                        <div className="absolute right-0 top-full mt-1.5 z-50 w-48 rounded-xl border border-line bg-white p-1.5 shadow-xl">
+                          <button
+                            type="button"
+                            onClick={() => { setIsTagsPrintOpen(true); setSelectedTagIds(new Set()); setMoreMenuOpen(false); }}
+                            className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg hover:bg-surface transition-colors cursor-pointer text-left focus:outline-none"
+                          >
+                            <Printer className="w-4 h-4 text-brand shrink-0" />
+                            Print Tags
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (inlineEditMode && inlineSaveReview.length) {
+                                setShowInlineSaveConfirm(true);
+                                setMoreMenuOpen(false);
+                                return;
+                              }
+                              setInlineEditMode((value) => !value);
+                              setInlineDrafts({});
+                              setMoreMenuOpen(false);
+                            }}
+                            className={`w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg transition-colors cursor-pointer text-left focus:outline-none ${
+                              inlineEditMode ? 'text-warning hover:bg-warning/10' : 'hover:bg-surface'
+                            }`}
+                          >
+                            <Edit2 className="w-4 h-4 shrink-0" />
+                            {inlineEditMode ? 'Done Editing' : 'Edit Stock'}
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 )}
 
                 {/* Quick Add Part */}
