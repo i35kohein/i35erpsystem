@@ -35,10 +35,10 @@ const EMPTY_FORM: FormState = {
 };
 
 const fieldLine =
-  'field-line mt-2 w-full border-0 border-b border-dotted border-stone-400 bg-transparent px-1 py-2 text-sm text-[#17201c] outline-none focus:bg-[#d9f99d]/30 transition-colors';
+  'field-line mt-2 w-full border-0 border-b border-dotted border-stone-400 bg-transparent px-1 py-2 text-sm text-ink outline-none focus:bg-brand/5 transition-colors';
 
 const selectLine =
-  'field-line mt-2 w-full appearance-none border-0 border-b border-dotted border-stone-400 bg-transparent px-1 py-2 text-sm text-[#17201c] outline-none focus:bg-[#d9f99d]/30 transition-colors cursor-pointer';
+  'field-line mt-2 w-full appearance-none border-0 border-b border-dotted border-stone-400 bg-transparent px-1 py-2 text-sm text-ink outline-none focus:bg-brand/5 transition-colors cursor-pointer';
 
 const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   workOrders,
@@ -57,6 +57,24 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
     .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
 
   const catalogItemsForModel = getModelPriceCatalogItems(form.model, priceCatalog);
+
+  const updateRepairDiscount = (repairId: string, newDiscountPercent: number) => {
+    setForm((f) => ({
+      ...f,
+      repairs: f.repairs.map((item) => {
+        if (item.id === repairId) {
+          const clamped = Math.min(100, Math.max(0, Number.isFinite(newDiscountPercent) ? newDiscountPercent : 0));
+          return { ...item, discountPercent: clamped, finalPrice: Math.round(item.basePrice * (1 - clamped / 100)) };
+        }
+        return item;
+      }),
+    }));
+  };
+
+  const baseTotal = form.repairs.reduce((sum, r) => sum + r.basePrice, 0);
+  const finalEstimate = form.repairs.reduce((sum, r) => sum + r.finalPrice, 0);
+  const savedAmount = Math.max(0, baseTotal - finalEstimate);
+  const overallDiscountPercent = baseTotal > 0 ? Math.round((savedAmount / baseTotal) * 100) : 0;
 
   const toggleRepair = (item: ModelRepairCatalogItem) => {
     setForm((f) => {
@@ -107,8 +125,6 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const now = new Date().toISOString();
-    const baseTotal = form.repairs.reduce((sum, r) => sum + r.basePrice, 0);
-    const finalEstimate = form.repairs.reduce((sum, r) => sum + r.finalPrice, 0);
     const diagnostics: DiagnosticItemResult[] = DIAGNOSTIC_NAMES.map((name, i) => ({
       id: `simple-diag-${Date.now()}-${i}`,
       name,
@@ -162,7 +178,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
       })),
       subtotal: baseTotal,
       depositAmount: 0,
-      discountAmount: 0,
+      discountAmount: savedAmount,
       taxAmount: 0,
       totalAmount: finalEstimate,
       intakeChecklist: {
@@ -209,20 +225,20 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   return (
     <div className="mx-auto max-w-4xl space-y-4">
       {/* Paper sheet */}
-      <div className="overflow-hidden rounded-[20px] border border-black/10 bg-[#f5f4ee] shadow-[0_24px_70px_rgba(23,32,28,0.12)]">
-        <header className="flex items-center justify-between gap-4 border-b border-black/10 px-4 py-4 sm:px-7">
+      <div className="overflow-hidden rounded-2xl border border-line bg-white shadow-xs">
+        <header className="flex items-center justify-between gap-4 border-b border-line px-4 py-4 sm:px-7">
           <div className="min-w-0">
-            <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.22em] text-stone-500">
+            <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.22em] text-muted">
               {editingId ? 'Editing simple ticket' : 'Service intake form'}
             </p>
-            <h1 className="text-xl font-black leading-tight tracking-tight text-[#17201c] sm:text-2xl">
+            <h1 className="text-lg font-black leading-tight tracking-tight text-ink sm:text-xl">
               {editingId ? `Edit — ${editTarget?.orderNumber || ''}` : 'Phone Testing & Checking'}
             </h1>
           </div>
           <button
             type="button"
             onClick={() => window.print()}
-            className="no-print inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-full bg-[#17201c] px-4 text-xs font-bold text-white transition hover:-translate-y-0.5 hover:bg-black focus:outline-none"
+            className="no-print inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-line bg-white px-4 text-xs font-bold text-ink transition hover:bg-surface focus:outline-none"
           >
             <Printer className="h-3.5 w-3.5" />
             Print
@@ -232,15 +248,15 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
         <form onSubmit={handleSubmit} onReset={resetForm} className="px-4 py-4 sm:px-7 sm:py-5">
           <div className="grid grid-cols-2 gap-x-5 gap-y-3 sm:gap-x-8">
             <label className="block">
-              <span className="text-sm font-bold text-[#17201c]">Customer name</span>
+              <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Customer name</span>
               <input value={form.name} onChange={(e) => set('name', e.target.value)} required className={fieldLine} />
             </label>
             <label className="block">
-              <span className="text-sm font-bold text-[#17201c]">Phone number</span>
+              <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Phone number</span>
               <input value={form.phone} onChange={(e) => set('phone', e.target.value)} inputMode="tel" required className={fieldLine} />
             </label>
             <label className="block">
-              <span className="text-sm font-bold text-[#17201c]">Model</span>
+              <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Model</span>
               <select
                 value={form.model}
                 onChange={(e) => {
@@ -261,7 +277,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               </select>
             </label>
             <label className="block">
-              <span className="text-sm font-bold text-[#17201c]">Color</span>
+              <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Color</span>
               <select
                 value={form.color}
                 onChange={(e) => set('color', e.target.value)}
@@ -274,15 +290,15 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               </select>
             </label>
             <label className="block">
-              <span className="text-sm font-bold text-[#17201c]">IMEI</span>
+              <span className="text-xs font-extrabold uppercase tracking-wider text-muted">IMEI</span>
               <input value={form.imei} onChange={(e) => set('imei', e.target.value)} inputMode="numeric" className={fieldLine} />
             </label>
             <label className="block">
-              <span className="text-sm font-bold text-[#17201c]">Received date</span>
+              <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Received date</span>
               <input type="date" value={form.date} onChange={(e) => set('date', e.target.value)} className={`${fieldLine} [color-scheme:light]`} />
             </label>
             <div className="col-span-2 block">
-              <span className="text-sm font-bold text-[#17201c]">Error / Repair needed</span>
+              <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Error / Repair needed</span>
               {form.model && catalogItemsForModel.length > 0 ? (
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {catalogItemsForModel.map((item) => {
@@ -294,12 +310,12 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                         onClick={() => toggleRepair(item)}
                         className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold transition-colors cursor-pointer ${
                           on
-                            ? 'border-[#17201c] bg-[#17201c] text-white'
-                            : 'border-stone-400 bg-white/60 text-[#17201c] hover:border-[#17201c]'
+                            ? 'border-brand bg-brand text-white'
+                            : 'border-line bg-surface text-ink hover:border-brand hover:text-brand'
                         }`}
                       >
                         {on ? '✓ ' : ''}{item.name}
-                        <span className={`font-mono ${on ? 'text-[#d9f99d]' : 'text-stone-500'}`}>
+                        <span className={`font-mono ${on ? 'text-white/90' : 'text-muted'}`}>
                           {item.price.toLocaleString()}
                         </span>
                       </button>
@@ -307,7 +323,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                   })}
                 </div>
               ) : (
-                <p className="mt-1.5 text-xs font-semibold text-stone-500">
+                <p className="mt-1.5 text-xs font-semibold text-muted">
                   {form.model ? 'No price list entries for this model yet.' : 'Pick a model above to see price-list repairs.'}
                 </p>
               )}
@@ -318,23 +334,64 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 className={fieldLine}
               />
               {form.repairs.length > 0 && (
-                <p className="mt-1 text-xs font-mono font-bold text-[#17201c]">
-                  {form.repairs.length} repair{form.repairs.length > 1 ? 's' : ''} · {form.repairs.reduce((s2, r) => s2 + r.basePrice, 0).toLocaleString()} MMK
-                </p>
+                <div className="mt-2 space-y-1.5">
+                  {form.repairs.map((r) => (
+                    <div key={r.id} className="flex items-center gap-2 text-xs">
+                      <span className="min-w-0 flex-1 truncate font-bold text-ink">{r.name}</span>
+                      <span className="font-mono text-muted">{r.basePrice.toLocaleString()}</span>
+                      <div className="relative shrink-0">
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={r.discountPercent}
+                          onChange={(e) => updateRepairDiscount(r.id, Number(e.target.value))}
+                          aria-label={`${r.name} discount percent`}
+                          className="w-14 rounded-lg border border-line bg-white px-2 py-1 text-center font-mono font-bold text-ink outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+                        />
+                        <span className="pointer-events-none absolute inset-y-0 right-1.5 flex items-center text-[10px] font-bold text-muted">%</span>
+                      </div>
+                      <span className={`w-20 shrink-0 text-right font-mono font-black ${r.finalPrice < r.basePrice ? 'text-brand' : 'text-ink'}`}>
+                        {r.finalPrice.toLocaleString()}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setForm((f) => ({ ...f, repairs: f.repairs.filter((x) => x.id !== r.id) }))}
+                        className="shrink-0 rounded-md px-1 text-muted hover:text-danger"
+                        aria-label={`Remove ${r.name}`}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                  <div className="border-t border-dotted border-line pt-1.5 text-xs font-mono">
+                    <div className="flex justify-between text-muted">
+                      <span>Subtotal</span><span>{baseTotal.toLocaleString()} MMK</span>
+                    </div>
+                    {savedAmount > 0 && (
+                      <div className="flex justify-between text-danger">
+                        <span>Discount ({overallDiscountPercent}%)</span><span>-{savedAmount.toLocaleString()} MMK</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between font-black text-ink">
+                      <span>Total</span><span>{finalEstimate.toLocaleString()} MMK</span>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
             <label className="block">
-              <span className="text-sm font-bold text-[#17201c]">Password / passcode</span>
+              <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Password / passcode</span>
               <input value={form.passcode} onChange={(e) => set('passcode', e.target.value)} autoComplete="off" className={fieldLine} />
             </label>
             <label className="col-span-2 block">
-              <span className="text-sm font-bold text-[#17201c]">Customer reply</span>
+              <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Customer reply</span>
               <textarea value={form.reply} onChange={(e) => set('reply', e.target.value)} rows={1} className={`${fieldLine} mt-1 resize-none`} />
             </label>
           </div>
 
-          <fieldset className="mt-5 rounded-[18px] border-2 border-[#17201c] px-3 pb-3 pt-2 sm:px-5">
-            <legend className="mx-auto rounded-full bg-[#17201c] px-5 py-1.5 text-center text-xs font-black uppercase tracking-[0.12em] text-white">
+          <fieldset className="mt-5 rounded-2xl border-2 border-brand/40 px-3 pb-3 pt-2 sm:px-5">
+            <legend className="mx-auto rounded-full bg-brand px-5 py-1.5 text-center text-xs font-black uppercase tracking-[0.12em] text-white">
               Phone Testing & Checking
             </legend>
             <div className="mt-1 grid grid-cols-2 gap-x-4 sm:gap-x-8">
@@ -344,9 +401,9 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                     type="checkbox"
                     checked={form.checks[i].checked}
                     onChange={(e) => setCheck(i, { checked: e.target.checked })}
-                    className="h-4 w-4 shrink-0 rounded border-stone-400 accent-[#17201c]"
+                    className="h-4 w-4 shrink-0 rounded border-line accent-brand"
                   />
-                  <span className={`text-xs font-semibold sm:text-sm ${form.checks[i].checked ? 'text-[#17201c]' : 'text-stone-600'}`}>
+                  <span className={`text-xs font-semibold sm:text-sm ${form.checks[i].checked ? 'text-ink' : 'text-muted'}`}>
                     {name}
                   </span>
                   <input
@@ -362,17 +419,17 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
           </fieldset>
 
           <div className="no-print mt-4 flex items-center justify-between gap-2">
-            <p className="text-xs font-bold text-stone-500">
+            <p className="text-xs font-bold text-muted">
               {checkedCount}/{DIAGNOSTIC_NAMES.length} passed
-              {editingId && <span className="ml-2 text-[#17201c]">· Editing {editTarget?.orderNumber}</span>}
+              {editingId && <span className="ml-2 text-brand">· Editing {editTarget?.orderNumber}</span>}
             </p>
             <div className="flex justify-end gap-2">
-              <button type="reset" className="rounded-full border border-black/15 px-4 py-2 text-xs font-bold text-[#17201c] hover:bg-white">
+              <button type="reset" className="rounded-xl border border-line bg-white px-4 py-2 text-xs font-bold text-ink hover:bg-surface">
                 Clear
               </button>
               <button
                 type="submit"
-                className="rounded-full bg-[#d9f99d] px-5 py-2 text-xs font-black text-[#17201c] transition hover:-translate-y-0.5 hover:shadow-lg"
+                className="rounded-xl bg-brand px-5 py-2 text-xs font-black text-white transition hover:bg-brand-deep"
               >
                 {editingId ? 'Update ticket' : 'Save inspection'}
               </button>
@@ -380,7 +437,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
           </div>
 
           {savedFlash && (
-            <p role="status" className="no-print mt-4 rounded-2xl bg-[#d9f99d]/60 px-4 py-3 text-center text-sm font-bold text-[#17201c]">
+            <p role="status" className="no-print mt-4 rounded-2xl bg-success/10 px-4 py-3 text-center text-sm font-bold text-success-deep">
               {editingId ? 'Ticket updated and saved to the database.' : 'Inspection saved to the database.'}
             </p>
           )}
