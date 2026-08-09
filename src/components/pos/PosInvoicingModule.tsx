@@ -19,7 +19,6 @@ import {CreditCard,
   AlertTriangle, 
   XCircle, 
   X,
-  Settings,
   Split,
   UserCheck,
   ChevronsLeft,
@@ -112,7 +111,6 @@ interface PosInvoicingModuleProps {
   setDateFilter?: (d: DateFilterState) => void;
   statusFilter?: string;
   setStatusFilter?: (s: string) => void;
-  onOpenSettings?: () => void;
 }
 
 const repairSummaryOf = (wo: WorkOrder): string => {
@@ -133,7 +131,6 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   searchQuery = '',
   dateFilter: propDateFilter,
   statusFilter = 'ALL',
-  onOpenSettings,
 }) => {
   const currency = systemSettings?.currencySymbol || 'MMK';
   const activePaymentMethods = getActivePaymentMethods(systemSettings).filter((m) => m.enabled);
@@ -856,15 +853,12 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               <div className="space-y-5 lg:min-w-0">
               {/* Payment Gateway Options */}
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2">
                   <h3 className="font-bold text-brand text-xs flex items-center space-x-1.5">
                     <CreditCard className="w-3.5 h-3.5" />
-                    <span>Payment Method Selection ({activePaymentMethods.length} Enabled)</span>
+                    <span>Payment Method Selection</span>
                   </h3>
-                  <Button variant="ghost" type="button" onClick={onOpenSettings} className="text-xs text-brand hover:underline font-semibold cursor-pointer shrink-0" title="Open Settings → Payment Methods">
-                    <Settings className="w-3.5 h-3.5 md:hidden" />
-                    <span className="hidden md:inline">Configured in Settings → Payment Methods</span>
-                  </Button>
+                  <span className="text-[11px] font-semibold text-muted">({activePaymentMethods.length} Enabled)</span>
                 </div>
 
                 {activePaymentMethods.length === 0 ? (

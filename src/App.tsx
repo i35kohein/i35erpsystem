@@ -2341,7 +2341,6 @@ export default function App() {
                   onSaveWorkOrder={handleSaveWorkOrder}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
-                  onOpenSettings={() => setActiveTab('settings')}
                 />
               )}
 
