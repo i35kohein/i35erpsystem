@@ -2,11 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Button , Input } from '../ui';
 import {
   Folder,
-  Smartphone,
-  Tablet,
-  Watch,
-  Laptop,
-  Layers,
   Search,
   Settings,
   X,
@@ -89,17 +84,16 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
 
         {/* Folder Family Tabs & Search Bar Header */}
         <div className="p-3 border-b border-line bg-white space-y-2.5">
-          {/* Family Folder Tabs */}
-          <div className="flex items-center gap-1 overflow-x-auto pb-0.5 text-xs no-scrollbar">
+          {/* Family chips — price-list top category style (Ko Hein) */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar">
             {[
-              { key: 'All', label: 'All Folders', icon: Folder },
-              { key: 'iPhone', label: 'iPhone', icon: Smartphone },
-              { key: 'iPad', label: 'iPad', icon: Tablet },
-              { key: 'Apple Watch', label: 'Apple Watch', icon: Watch },
-              { key: 'Mac', label: 'Mac', icon: Laptop },
-              { key: 'Other', label: 'Other', icon: Layers },
+              { key: 'All', label: 'All' },
+              { key: 'iPhone', label: 'iPhone' },
+              { key: 'iPad', label: 'iPad' },
+              { key: 'Apple Watch', label: 'Apple Watch' },
+              { key: 'Mac', label: 'Mac' },
+              { key: 'Other', label: 'Other' },
             ].map((fam) => {
-              const IconComp = fam.icon;
               const isActive = activeFamilyTab === fam.key;
               const famFolderIds = new Set(
                 enabledFolders
@@ -109,31 +103,22 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
               const count = catalog.filter((m) => famFolderIds.has(getModelFolderId(m.model))).length;
 
               return (
-                <Button
+                <button
                   key={fam.key}
                   type="button"
                   onClick={() => { if (count > 0 || fam.key === 'All') setActiveFamilyTab(fam.key as any); }}
                   disabled={count === 0 && fam.key !== 'All'}
                   title={count === 0 && fam.key !== 'All' ? 'No models available yet' : undefined}
-                  aria-disabled={count === 0 && fam.key !== 'All'}
-                  className={`px-2.5 py-1.5 text-xs font-extrabold rounded-lg transition-all flex items-center gap-1.5 shrink-0 border select-none active:scale-95 ${
+                  className={`shrink-0 rounded-full border px-2.5 !h-7 !min-h-0 text-xs font-extrabold transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:bg-brand focus-visible:text-white focus-visible:border-brand ${
                     isActive
-                      ? 'bg-brand text-white border-brand shadow-xs'
+                      ? 'bg-brand text-white border-brand shadow-2xs'
                       : count === 0 && fam.key !== 'All'
-                      ? 'bg-surface text-muted border-line cursor-not-allowed'
-                      : 'bg-white hover:bg-surface text-faint hover:text-ink border-line'
+                      ? 'bg-white text-muted border-line cursor-not-allowed'
+                      : 'bg-white text-ink border-line hover:border-brand/50'
                   }`}
                 >
-                  <IconComp className="w-4 h-4" />
-                  <span>{fam.label}</span>
-                  <span
-                    className={`px-1.5 py-0.5 rounded-full text-xs font-mono font-bold ${
-                      isActive ? 'bg-white/20 text-white' : 'bg-line text-ink'
-                    }`}
-                  >
-                    {count}
-                  </span>
-                </Button>
+                  {fam.label} ({count})
+                </button>
               );
             })}
           </div>
