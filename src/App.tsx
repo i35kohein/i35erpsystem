@@ -1,6 +1,6 @@
 import  {useState, useRef, useEffect, useMemo, lazy, Suspense} from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import {Sparkles, Plus, Search, Filter, Folder, Settings, Download, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, Timer, MoreHorizontal, SlidersHorizontal, Eye, Stethoscope, Edit2, List, LayoutGrid, Printer, Smartphone, Layers, ScanLine, ListFilter, Activity, Users, Boxes, Coins, ShieldAlert} from 'lucide-react';
+import {Sparkles, Plus, Search, Filter, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, Trash2, RotateCcw, Save, Timer, SlidersHorizontal, Eye, Stethoscope, Edit2, List, LayoutGrid, Printer, Smartphone, Layers, ScanLine, ListFilter, Activity, Users, Boxes, Coins, ShieldAlert} from 'lucide-react';
 import {subscribeToCollection, fetchCloudCollection, saveDocument, deleteDocument, clearCollection} from './lib/supabase';
 import { setActiveUserId, notifyAccountChanged } from './utils/accountSettings';
 
@@ -157,7 +157,6 @@ export default function App() {
   // Price Catalog top navigation controls state
   const [priceCatalogDeviceModalOpen, setPriceCatalogDeviceModalOpen] = useState(false);
   const [priceCatalogSettingsModalOpen, setPriceCatalogSettingsModalOpen] = useState(false);
-  const [priceCatalogMenuOpen, setPriceCatalogMenuOpen] = useState(false);
   const priceCatalogExportRef = useRef<(() => void) | null>(null);
   
   // Settings top navigation controls state
@@ -1642,120 +1641,9 @@ export default function App() {
               </div>
             )}
 
-            {/* Price Catalog Header Controls */}
-            {activeTab === 'price-catalog' ? (
-              <>
-                <div className="relative hidden lg:block w-52 shrink-0">
-                  <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted" />
-                  <Input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Filter services..."
-                    className="w-full h-10 bg-surface text-xs text-ink placeholder-muted pl-7 pr-5 rounded-xl border border-line focus:bg-white focus:outline-none focus:border-brand transition-all shadow-2xs"
-                  />
-                  {searchQuery && (
-                    <Button
-                      onClick={() => setSearchQuery('')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-muted hover:text-ink"
-                    >
-                      ×
-                    </Button>
-                  )}
-                </div>
-
-                {/* Desktop: action buttons (lg+) */}
-                <div className="hidden lg:flex items-center space-x-1.5 sm:space-x-2 shrink-0">
-                  <Button
-                    type="button"
-                    onClick={() => setPriceCatalogDeviceModalOpen(true)}
-                    className="px-2.5 sm:px-3 py-1.5 bg-brand hover:bg-brand/90 text-white font-extrabold text-xs rounded-xl transition-all flex items-center space-x-1 sm:space-x-1.5 shadow-2xs cursor-pointer shrink-0 active:scale-95"
-                  >
-                    <Folder className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Model</span>
-                  </Button>
-
-                  <Button
-                    type="button"
-                    onClick={() => setPriceCatalogSettingsModalOpen(true)}
-                    className="px-2.5 sm:px-3 py-1.5 bg-surface hover:bg-line text-ink font-bold text-xs rounded-xl border border-line transition-all cursor-pointer shrink-0 shadow-2xs flex items-center space-x-1.5"
-                    title="Folder & Catalog Settings"
-                  >
-                    <Settings className="w-3.5 h-3.5 text-brand" />
-                    <span className="hidden md:inline">Settings</span>
-                  </Button>
-
-                  <Button
-                    type="button"
-                    onClick={() => priceCatalogExportRef.current?.()}
-                    className="px-2.5 sm:px-3 py-1.5 bg-surface hover:bg-line text-ink font-bold text-xs rounded-xl border border-line transition-all cursor-pointer shrink-0 shadow-2xs flex items-center space-x-1.5"
-                    title="Export Catalog to CSV"
-                  >
-                    <Download className="w-3.5 h-3.5 text-success" />
-                    <span className="hidden md:inline">Export</span>
-                  </Button>
-                </div>
-
-                {/* Mobile: all four actions behind a ⋯ overflow menu (lg:hidden) */}
-                <div className="relative lg:hidden shrink-0">
-                  <Button
-                    type="button"
-                    onClick={() => setPriceCatalogMenuOpen(!priceCatalogMenuOpen)}
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-surface hover:bg-line border border-line text-ink transition-all cursor-pointer active:scale-95"
-                    aria-label="More catalog actions"
-                    title="More actions"
-                  >
-                    <MoreHorizontal className="w-5 h-5" />
-                  </Button>
-
-                  {priceCatalogMenuOpen && (
-                    <>
-                      <div
-                        className="fixed inset-0 z-40"
-                        onClick={() => setPriceCatalogMenuOpen(false)}
-                        role="presentation"
-                        aria-hidden="true"
-                      />
-                      <div className="absolute right-0 top-full mt-1.5 z-50 w-48 rounded-xl border border-line bg-white p-1.5 shadow-xl">
-                        <Button
-                          type="button"
-                          onClick={() => {
-                            setPriceCatalogDeviceModalOpen(true);
-                            setPriceCatalogMenuOpen(false);
-                          }}
-                          className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg hover:bg-surface transition-colors cursor-pointer text-left"
-                        >
-                          <Folder className="w-4 h-4 text-brand shrink-0" />
-                          Switch Model
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={() => {
-                            setPriceCatalogSettingsModalOpen(true);
-                            setPriceCatalogMenuOpen(false);
-                          }}
-                          className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg hover:bg-surface transition-colors cursor-pointer text-left"
-                        >
-                          <Settings className="w-4 h-4 text-brand shrink-0" />
-                          Catalog Settings
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={() => {
-                            priceCatalogExportRef.current?.();
-                            setPriceCatalogMenuOpen(false);
-                          }}
-                          className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg hover:bg-surface transition-colors cursor-pointer text-left"
-                        >
-                          <Download className="w-4 h-4 text-success shrink-0" />
-                          Export to CSV
-                        </Button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </>
-            ) : ['intake', 'pipeline', 'pos', 'inventory', 'crm', 'suppliers', 'qa'].includes(activeTab) ? (
+            {/* Price Catalog: top navbar controls hidden — module has its own device switcher,
+                settings live in Settings tab (Ko Hein 2026-08-09) */}
+            {activeTab === 'price-catalog' ? null : ['intake', 'pipeline', 'pos', 'inventory', 'crm', 'suppliers', 'qa'].includes(activeTab) ? (
               /* Contextual Search Input — desktop only (modules have their own mobile search);
                   also hidden on iPad inventory where the navbar scan box handles search */
               !(isIpad && activeTab === 'inventory') && (
