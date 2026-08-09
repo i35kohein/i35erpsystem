@@ -385,21 +385,34 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
   
 
   const handleCopyCustomerQuote = () => {
+    const dateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     if (cart.size === 0) {
       // Copy single estimated service or active device total
-      const text = `🔧 *i35 Apple Repair Quote*\nDevice: ${selectedDevice}\nDate: ${new Date().toLocaleDateString()}\nStatus: Available Today`;
+      const text = [
+        '🔧 i35 Apple Repair Quote',
+        `Device: ${selectedDevice}`,
+        `Date: ${dateStr}`,
+        'Status: Available Today',
+      ].join('\n');
       navigator.clipboard.writeText(text);
     } else {
-      let lines = [`🔧 *i35 Service - Official Repair Quote*`, `Device: *${selectedDevice}*`, `----------------------------------`];
+      const lines: string[] = [
+        '🔧 i35 Apple Repair Quote',
+        `Device: ${selectedDevice}`,
+        `Date: ${dateStr}`,
+        '',
+      ];
+      let idx = 1;
       cart.forEach((item: CartItem) => {
         const itemFinal = item.price - item.price * (item.discountPercent / 100);
-        lines.push(`• *${item.label}*`);
-        lines.push(`  Warranty: ${item.warranty}`);
-        lines.push(`  Price: ${formatPrice(itemFinal)} ${item.discountPercent > 0 ? `(${item.discountPercent}% Off)` : ''}`);
+        const disc = item.discountPercent > 0 ? ` (${item.discountPercent}% Off)` : '';
+        lines.push(`${idx}. ${item.label} — ${formatPrice(itemFinal)}${disc}`);
+        lines.push(`   Warranty: ${item.warranty}`);
+        idx += 1;
       });
-      lines.push(`----------------------------------`);
-      lines.push(`*Total Estimated:* ${formatPrice(cartSummary.totalDue)}`);
-      lines.push(`📍 Store: i35 Service Center | Express Same-Day Repair`);
+      lines.push('');
+      lines.push(`Total Estimated: ${formatPrice(cartSummary.totalDue)}`);
+      lines.push('📍 i35 Service Center — Express Same-Day Repair');
       navigator.clipboard.writeText(lines.join('\n'));
     }
     setQuoteCopied(true);
