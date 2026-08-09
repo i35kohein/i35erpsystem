@@ -1116,12 +1116,12 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                             </span>
                           )}
                         </div>
-                        {/* Applied discount amount — shown right on the card (Ko Hein) */}
-                        {discountPct > 0 && (
-                          <div className="text-[10px] sm:text-[11px] font-extrabold text-success mt-0.5">
-                            −{formatPrice(Math.round(item.price! - finalPrice))} · {discountPct}% Off
-                          </div>
-                        )}
+                        {/* Applied discount amount — fixed-height line so the card never shifts (Ko Hein) */}
+                        <div className="h-4 text-[10px] sm:text-[11px] font-extrabold leading-4 mt-0.5">
+                          {discountPct > 0 && (
+                            <span className="text-success">−{formatPrice(Math.round(item.price! - finalPrice))} · {discountPct}% Off</span>
+                          )}
+                        </div>
                       </div>
 
                       {/* Mobile: discount circle — replaces the selection checkmark on phones (Ko Hein) */}
