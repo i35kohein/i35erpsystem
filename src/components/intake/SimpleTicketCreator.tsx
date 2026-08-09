@@ -24,14 +24,14 @@ interface FormState {
   repairs: SelectedRepairItem[];
   passcode: string;
   reply: string;
-  checks: { checked: boolean; note: string }[];
+  checks: { status: 'N/A' | 'Pass' | 'Fail'; note: string }[];
 }
 
 const EMPTY_FORM: FormState = {
   name: '', phone: '', model: '', color: '', imei: '',
   date: new Date().toISOString().slice(0, 10),
   error: '', repairs: [], passcode: '', reply: '',
-  checks: DIAGNOSTIC_NAMES.map(() => ({ checked: false, note: '' })),
+  checks: DIAGNOSTIC_NAMES.map(() => ({ status: 'N/A' as const, note: '' })),
 };
 
 /** Popup-trigger rows styled exactly like the text inputs so all rows align. */
@@ -137,11 +137,23 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   };
 
   const set = (key: keyof FormState, value: string) => setForm((f) => ({ ...f, [key]: value }));
-  const setCheck = (idx: number, patch: Partial<{ checked: boolean; note: string }>) =>
+  const setCheck = (idx: number, patch: Partial<{ status: 'N/A' | 'Pass' | 'Fail'; note: string }>) =>
     setForm((f) => ({
       ...f,
       checks: f.checks.map((c, i) => (i === idx ? { ...c, ...patch } : c)),
     }));
+
+  // 3-state cycle: N/A → Pass → Fail → N/A (Ko Hein)
+  const cycleCheck = (idx: number) => {
+    setForm((f) => ({
+      ...f,
+      checks: f.checks.map((c, i) => {
+        if (i !== idx) return c;
+        const next = c.status === 'N/A' ? 'Pass' : c.status === 'Pass' ? 'Fail' : 'N/A';
+        return { ...c, status: next };
+      }),
+    }));
+  };
 
   const resetForm = () => {
     setForm(EMPTY_FORM);
@@ -155,7 +167,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
     const diagnostics: DiagnosticItemResult[] = DIAGNOSTIC_NAMES.map((name, i) => ({
       id: `simple-diag-${Date.now()}-${i}`,
       name,
-      status: (form.checks[i].checked ? 'Pass' : 'Fail') as DiagnosticItemResult['status'],
+      status: form.checks[i].status as DiagnosticItemResult['status'],
       note: form.checks[i].note || undefined,
     }));
 
@@ -239,7 +251,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
     if (!editingId) resetForm();
   };
 
-  const checkedCount = form.checks.filter((c) => c.checked).length;
+  const checkedCount = form.checks.filter((c) => c.status === 'Pass').length;
   const editTarget = editingId ? workOrders.find((w) => w.id === editingId) : null;
 
   return (
@@ -248,12 +260,9 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
       <div className="print:border-0 print:shadow-none overflow-hidden rounded-2xl border border-line bg-white shadow-xs">
         <header className="flex items-center justify-between gap-4 border-b border-line px-4 py-4 sm:px-7">
           <div className="min-w-0">
-            <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.22em] text-muted">
-              {editingId ? 'Editing simple ticket' : 'Service intake form'}
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted">
+              {editingId ? `Editing simple ticket — ${editTarget?.orderNumber || ''}` : 'Service intake form'}
             </p>
-            <h1 className="text-lg font-black leading-tight tracking-tight text-ink sm:text-xl">
-              {editingId ? `Edit — ${editTarget?.orderNumber || ''}` : 'Phone Testing & Checking'}
-            </h1>
           </div>
 
         </header>
@@ -391,20 +400,28 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
             <div className="mt-1 grid grid-cols-1 gap-x-4 sm:grid-cols-2 sm:gap-x-8">
               {DIAGNOSTIC_NAMES.map((name, i) => (
                 <label key={name} className="group flex min-h-9 items-center gap-2 border-b border-dotted border-stone-400 py-1">
-                  <input
-                    type="checkbox"
-                    checked={form.checks[i].checked}
-                    onChange={(e) => setCheck(i, { checked: e.target.checked })}
-                    className="h-4 w-4 shrink-0 rounded border-line accent-brand"
-                  />
-                  <span className={`text-xs font-semibold sm:text-sm ${form.checks[i].checked ? 'text-ink' : 'text-muted'}`}>
+                  <button
+                    type="button"
+                    onClick={() => cycleCheck(i)}
+                    title={form.checks[i].status === 'N/A' ? 'Not checked — tap for Pass' : form.checks[i].status === 'Pass' ? 'Pass — tap for Fail' : 'Fail — tap for N/A'}
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border text-[11px] font-black transition-colors cursor-pointer ${
+                      form.checks[i].status === 'Pass'
+                        ? 'border-success bg-success text-white'
+                        : form.checks[i].status === 'Fail'
+                        ? 'border-danger bg-danger text-white'
+                        : 'border-line bg-white text-muted hover:border-brand'
+                    }`}
+                  >
+                    {form.checks[i].status === 'Pass' ? '✓' : form.checks[i].status === 'Fail' ? '✕' : ''}
+                  </button>
+                  <span className={`text-xs font-semibold sm:text-sm ${form.checks[i].status !== 'N/A' ? 'text-ink' : 'text-muted'}`}>
                     {name}
                   </span>
                   <input
                     aria-label={`${name} note`}
                     value={form.checks[i].note}
                     onChange={(e) => setCheck(i, { note: e.target.value })}
-                    placeholder={form.checks[i].checked ? 'ok' : 'issue…'}
+                    placeholder={form.checks[i].status === 'Pass' ? 'ok' : 'issue…'}
                     className="ml-auto min-w-0 flex-1 bg-transparent px-1 text-xs outline-none focus:bg-[#d9f99d]/40"
                   />
                 </label>
