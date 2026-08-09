@@ -1778,7 +1778,8 @@ export default function App() {
                 </div>              </>
             )}
 
-            {FILTER_TABS.includes(activeTab) && (
+            {/* Generic filters drawer trigger — inventory uses its own side menu on phones */}
+            {FILTER_TABS.includes(activeTab) && !(activeTab === 'inventory' && !isIpad) && (
               <Button
                 ref={filtersTriggerRef}
                 type="button"
@@ -2029,11 +2030,16 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setInventorySideMenuOpen(true)}
-                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line bg-white text-ink hover:border-brand hover:text-brand transition-colors cursor-pointer focus:outline-none"
+                  className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line bg-white text-ink hover:border-brand hover:text-brand transition-colors cursor-pointer focus:outline-none"
                   title="Inventory menu"
                   aria-label="Open inventory menu"
                 >
                   <Menu className="h-5 w-5" />
+                  {getActiveFilterCount('inventory') > 0 && (
+                    <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-xs font-black text-white">
+                      {getActiveFilterCount('inventory')}
+                    </span>
+                  )}
                 </button>
               </div>
 
@@ -2079,6 +2085,36 @@ export default function App() {
                         <button type="button" onClick={() => { setInventoryEditMode((m) => !m); setInventorySideMenuOpen(false); }} className={`w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-extrabold transition-colors cursor-pointer text-left ${inventoryEditMode ? 'bg-warning/10 text-warning hover:bg-warning/15' : 'text-ink hover:bg-surface'}`}>
                           <Edit2 className="h-4 w-4 shrink-0" /> {inventoryEditMode ? 'Done Editing' : 'Edit Stock'}
                         </button>
+                      </div>
+                      <div className="space-y-2.5">
+                        <p className="px-2 text-[10px] font-extrabold uppercase tracking-wider text-muted">Filters</p>
+                        <DrawerSelect
+                          label="Device Model"
+                          value={modelFilter}
+                          onChange={(v) => setModelFilter(v as any)}
+                          options={[
+                            { value: 'ALL', label: 'All Models' },
+                            ...inventoryDeviceModels.map((model) => ({ value: model, label: model })),
+                          ]}
+                        />
+                        <DrawerSelect
+                          label="Category"
+                          value={categoryFilter}
+                          onChange={(v) => setCategoryFilter(v as any)}
+                          options={[
+                            { value: 'ALL', label: 'All Categories' },
+                            ...inventoryCategoryOptions.map((category) => ({ value: category, label: category })),
+                          ]}
+                        />
+                        <DrawerSelect
+                          label="Quality Tier"
+                          value={stockFilter}
+                          onChange={(v) => setStockFilter(v as any)}
+                          options={[
+                            { value: 'ALL', label: 'All Tiers' },
+                            ...inventoryQualityOptions.map((tier) => ({ value: tier, label: tier })),
+                          ]}
+                        />
                       </div>
                     </div>
                   </div>
