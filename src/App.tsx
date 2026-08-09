@@ -1674,9 +1674,9 @@ export default function App() {
       {/* Main Right Content Column */}
       <div id="main-content-scroll" className={`relative flex h-full h-dvh min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-gutter:stable] transition-[padding] duration-300 ${isIpad ? '' : isCollapsed ? 'lg:pl-14' : 'lg:pl-64'}`}>
         {/* Top Navigation Bar Header */}
-        <header className="app-topbar flex flex-row flex-wrap items-center justify-between px-3 sm:px-5 min-h-[52px] py-1 bg-white border-b border-line sticky top-0 z-40 gap-x-2 gap-y-1 shrink-0">
+        <header className="app-topbar flex flex-row items-center justify-between px-3 sm:px-5 h-[52px] min-h-[52px] bg-white border-b border-line sticky top-0 z-40 gap-2 shrink-0">
           {/* Active Tab Title & Mobile Toggle */}
-          <div className="flex items-center space-x-2 sm:space-x-3 shrink-0 min-w-0 flex-1">
+          <div className="flex items-center space-x-2 sm:space-x-3 shrink-0 w-[150px] sm:w-[240px] lg:w-auto lg:flex-1 lg:min-w-0">
             <Button
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -1706,7 +1706,7 @@ export default function App() {
           </div>
 
           {/* Dynamic Header Actions & Quick Filters per Tab */}
-          <div className="app-topbar-actions flex min-w-0 items-center flex-nowrap justify-end gap-1.5 sm:gap-2 text-xs py-1 shrink-0 relative z-30 overflow-x-auto no-scrollbar max-w-full lg:overflow-visible">
+          <div className="app-topbar-actions flex min-w-0 flex-1 items-center flex-nowrap gap-1.5 sm:gap-2 text-xs py-1 relative z-30 overflow-x-auto no-scrollbar max-w-full">
             {/* Reset All Filters Pill Button when any filter is active */}
             {hasActiveFilters && (
               <Button
@@ -1964,7 +1964,7 @@ export default function App() {
             {activeTab === 'inventory' && (
               <>
               {/* Desktop/tablet row (sm+): search + view switcher + Add Part + ⋯ */}
-              <div className={`hidden sm:flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar max-w-full shrink-0 ${isIpad ? 'hidden' : ''}`}>
+              <div className={`flex items-center gap-1.5 sm:gap-2 shrink-0 ${isIpad ? 'hidden' : ''}`}>
               {/* Scan / search — leftmost */}
               <div className="shrink-0">
                 <div className="relative">
