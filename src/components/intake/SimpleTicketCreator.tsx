@@ -264,9 +264,9 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   const editTarget = editingId ? workOrders.find((w) => w.id === editingId) : null;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-4">
+    <div className="mx-auto max-w-5xl space-y-4">
       {/* Paper sheet */}
-      <div className="overflow-hidden rounded-2xl border border-line bg-white shadow-xs">
+      <div className="print:border-0 print:shadow-none overflow-hidden rounded-2xl border border-line bg-white shadow-xs">
         <header className="flex items-center justify-between gap-4 border-b border-line px-4 py-4 sm:px-7">
           <div className="min-w-0">
             <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.22em] text-muted">
@@ -290,43 +290,43 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-6">
           <div className="divide-y divide-line">
             {/* Phone */}
-            <label className="flex items-center gap-3 py-1.5">
-              <span className="w-36 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Phone</span>
+            <label className="flex items-center gap-3 py-2">
+              <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Phone</span>
               <input
                 value={form.phone}
                 onChange={(e) => handlePhoneChange(e.target.value)}
                 inputMode="tel"
                 placeholder="Optional — e.g. 09-…"
-                className="min-w-0 flex-1 bg-transparent py-1 text-sm text-ink outline-none placeholder:text-muted/70"
+                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15 placeholder:text-muted"
               />
               {matchedCustomer && <span className="shrink-0 text-[10px] font-black text-success-deep">✓ {matchedCustomer}</span>}
             </label>
             {/* Name */}
-            <label className="flex items-center gap-3 py-1.5">
-              <span className="w-36 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Name</span>
+            <label className="flex items-center gap-3 py-2">
+              <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Name</span>
               <input
                 value={form.name}
                 onChange={(e) => set('name', e.target.value)}
                 required
                 placeholder="Customer name"
-                className="min-w-0 flex-1 bg-transparent py-1 text-sm text-ink outline-none placeholder:text-muted/70"
+                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15 placeholder:text-muted"
               />
             </label>
             {/* Model → popup */}
-            <label className="flex items-center gap-3 py-1.5">
-              <span className="w-36 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Model</span>
+            <label className="flex items-center gap-3 py-2">
+              <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Model</span>
               <button
                 type="button"
                 onClick={() => setIsModelModalOpen(true)}
                 className="flex min-w-0 flex-1 items-center justify-between gap-2 py-1 text-left text-sm text-ink outline-none"
               >
                 <span className="truncate">{form.model || <span className="text-muted/70">Choose model…</span>}</span>
-                <span className="text-[10px] font-black uppercase text-brand shrink-0">Browse ▸</span>
+                <span className="print:hidden text-[10px] font-black uppercase text-brand shrink-0">Browse ▸</span>
               </button>
             </label>
             {/* Color → popup */}
-            <label className="flex items-center gap-3 py-1.5">
-              <span className="w-36 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Color</span>
+            <label className="flex items-center gap-3 py-2">
+              <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Color</span>
               <button
                 type="button"
                 onClick={() => setIsColorOpen(true)}
@@ -342,23 +342,23 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                     <span className="text-muted/70">Choose color…</span>
                   )}
                 </span>
-                <span className="text-[10px] font-black uppercase text-brand shrink-0">Pick ▸</span>
+                <span className="print:hidden text-[10px] font-black uppercase text-brand shrink-0">Pick ▸</span>
               </button>
             </label>
             {/* IMEI */}
-            <label className="flex items-center gap-3 py-1.5">
-              <span className="w-36 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">IMEI</span>
+            <label className="flex items-center gap-3 py-2">
+              <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">IMEI</span>
               <input
                 value={form.imei}
                 onChange={(e) => set('imei', e.target.value)}
                 inputMode="numeric"
                 placeholder="Serial / IMEI"
-                className="min-w-0 flex-1 bg-transparent py-1 text-sm text-ink outline-none placeholder:text-muted/70"
+                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15 placeholder:text-muted"
               />
             </label>
             {/* Received date */}
-            <label className="flex items-center gap-3 py-1.5">
-              <span className="w-36 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Received</span>
+            <label className="flex items-center gap-3 py-2">
+              <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Received</span>
               <input
                 type="date"
                 value={form.date}
@@ -367,8 +367,8 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               />
             </label>
             {/* Error / Repairs → popup */}
-            <label className="flex items-center gap-3 py-1.5">
-              <span className="w-36 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Repairs</span>
+            <label className="flex items-center gap-3 py-2">
+              <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Repairs</span>
               <button
                 type="button"
                 onClick={() => setIsRepairsOpen(true)}
@@ -384,29 +384,29 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                     </span>
                   )}
                 </span>
-                <span className="text-[10px] font-black uppercase text-brand shrink-0">Add ▸</span>
+                <span className="print:hidden text-[10px] font-black uppercase text-brand shrink-0">Add ▸</span>
               </button>
             </label>
             {/* Passcode */}
-            <label className="flex items-center gap-3 py-1.5">
-              <span className="w-36 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Passcode</span>
+            <label className="flex items-center gap-3 py-2">
+              <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Passcode</span>
               <input
                 value={form.passcode}
                 onChange={(e) => set('passcode', e.target.value)}
                 autoComplete="off"
                 placeholder="Device passcode"
-                className="min-w-0 flex-1 bg-transparent py-1 text-sm text-ink outline-none placeholder:text-muted/70"
+                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15 placeholder:text-muted"
               />
             </label>
             {/* Intake note */}
-            <label className="flex items-start gap-3 py-1.5">
+            <label className="flex items-start gap-3 py-2">
               <span className="w-36 shrink-0 pt-1 text-[11px] font-extrabold uppercase tracking-wider text-muted">Note</span>
               <textarea
                 value={form.reply}
                 onChange={(e) => set('reply', e.target.value)}
                 rows={2}
                 placeholder="Intake note & customer symptoms…"
-                className="min-w-0 flex-1 resize-none bg-transparent py-1 text-sm text-ink outline-none placeholder:text-muted/70"
+                className="w-full resize-none rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15 placeholder:text-muted"
               />
             </label>
           </div>
@@ -583,7 +583,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 {catalogItemsForModel.length === 0 ? (
                   <p className="py-6 text-center text-xs font-bold text-muted">No price list entries for this model yet.</p>
                 ) : (
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="grid max-h-56 grid-cols-2 gap-1.5 overflow-y-auto pr-1 sm:grid-cols-3">
                     {catalogItemsForModel.map((item) => {
                       const on = form.repairs.some((r) => r.id === item.id || r.name.toLowerCase() === item.name.toLowerCase());
                       return (
@@ -591,12 +591,12 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                           key={item.id}
                           type="button"
                           onClick={() => toggleRepair(item)}
-                          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold transition-colors cursor-pointer ${
+                          className={`flex items-center justify-between gap-1 rounded-lg border px-2 py-1.5 text-[11px] font-bold transition-colors cursor-pointer ${
                             on ? 'border-brand bg-brand text-white' : 'border-line bg-surface text-ink hover:border-brand/50'
                           }`}
                         >
-                          {on ? '✓ ' : ''}{item.name}
-                          <span className={`font-mono ${on ? 'text-white/90' : 'text-muted'}`}>{item.price.toLocaleString()}</span>
+                          <span className="truncate">{item.name}</span>
+                          <span className={`shrink-0 font-mono ${on ? 'text-white/90' : 'text-muted'}`}>{item.price.toLocaleString()}</span>
                         </button>
                       );
                     })}
@@ -604,7 +604,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 )}
 
                 {form.repairs.length > 0 && (
-                  <div className="mt-3 space-y-1.5 border-t border-line pt-3">
+                  <div className="mt-3 max-h-40 space-y-1.5 overflow-y-auto border-t border-line pt-3">
                     {form.repairs.map((r) => (
                       <div key={r.id} className="flex items-center gap-2 text-xs">
                         <span className="min-w-0 flex-1 truncate font-bold text-ink">{r.name}</span>
