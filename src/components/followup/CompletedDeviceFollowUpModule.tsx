@@ -255,8 +255,8 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
               </span>
               <div>
                 <h2 className="text-base font-extrabold text-ink tracking-tight">
-                  <span className="hidden sm:inline">Completed Repairs & Post-Delivery Customer Follow-Ups</span>
-                  <span className="sm:hidden">Completed Repairs & Follow-Ups</span>
+                  <span className="hidden sm:inline">Follow-Ups</span>
+                  <span className="sm:hidden">Follow-Ups</span>
                 </h2>
                 <p className="text-xs text-muted">
                   Conduct post-service quality calls for repaired & delivered devices. Tickets appear here starting <strong className="text-brand">7 days</strong> after delivery.

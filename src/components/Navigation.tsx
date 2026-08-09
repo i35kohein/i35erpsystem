@@ -95,7 +95,7 @@ export const Navigation: React.FC<NavigationProps> = ({
         },
         {
           id: 'trello',
-          label: 'Ticket Board (Trello)',
+          label: 'Ticket Board',
           icon: Trello,
         },
         {
@@ -127,7 +127,7 @@ export const Navigation: React.FC<NavigationProps> = ({
         },
         {
           id: 'finance',
-          label: 'Shop Finance',
+          label: 'Finance',
           icon: DollarSign,
         },
       ],
@@ -137,7 +137,7 @@ export const Navigation: React.FC<NavigationProps> = ({
       items: [
         {
           id: 'inventory',
-          label: isCollapsed ? t('navPartsMatrix') : 'Parts & Stock Matrix',
+          label: isCollapsed ? t('navPartsMatrix') : t('navPartsMatrix'),
           icon: Boxes,
         },
         {

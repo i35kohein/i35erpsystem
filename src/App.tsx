@@ -1567,14 +1567,14 @@ export default function App() {
       case 'dashboard': return { category: t('navRepair'), title: 'Dashboard' };
       case 'create-ticket': return { category: t('navRepair'), title: t('navCreateTicket') };
       case 'intake': return { category: t('navRepair'), title: t('navIntakeFull') };
-      case 'trello': return { category: t('navRepair'), title: 'Repair Ticket Board' };
+      case 'trello': return { category: t('navRepair'), title: 'Ticket Board' };
       case 'inventory': return { category: t('navInventory'), title: t('navPartsMatrix') };
       case 'suppliers': return { category: t('navInventory'), title: t('navSuppliers') };
       case 'price-catalog': return { category: t('navRepair'), title: t('navPriceList') };
       case 'pos': return { category: t('navFinance'), title: t('navPos') };
-      case 'finance': return { category: t('navFinance'), title: 'Shop Finance & P&L Engine' };
+      case 'finance': return { category: t('navFinance'), title: 'Finance' };
       case 'crm': return { category: t('navManagement'), title: t('navCrm') };
-      case 'follow-up': return { category: t('navRepair'), title: 'Follow Ups' };
+      case 'follow-up': return { category: t('navRepair'), title: 'Follow-Ups' };
       case 'settings': return { category: t('navManagement'), title: t('navSettings') };
       case 'qa': return { category: t('navRepair'), title: t('navQa') };
       default: return { category: 'ERP', title: t('appTitle') };

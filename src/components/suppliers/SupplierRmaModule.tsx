@@ -174,10 +174,10 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
         <div className="module-subheader">
           <h1 className="text-lg font-bold text-ink flex items-center space-x-2">
             <Truck className="w-5 h-5 text-brand" />
-            <span className="hidden sm:inline">Supplier Purchase Orders & Defective RMA Returns</span>
-            <span className="sm:hidden">Purchase Orders & RMA Returns</span>
+            <span className="hidden sm:inline">Suppliers & RMAs</span>
+            <span className="sm:hidden">Suppliers & RMAs</span>
           </h1>
-          <p className="text-xs text-muted">Track vendor shipments, defective part returns, and vendor credit authorizations</p>
+          <p className="text-xs text-muted">Vendor orders, returns, and credits</p>
         </div>
 
         {/* Subtab Toggle — full-width equal 3-column segmented on mobile */}

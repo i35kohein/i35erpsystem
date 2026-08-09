@@ -389,13 +389,13 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
       <div className="bg-surface p-1.5 rounded-2xl border border-line flex items-center space-x-1.5 overflow-x-auto no-scrollbar w-full text-xs shadow-2xs">
         {[
           { id: 'overview', label: 'Financial Overview', icon: PieChart },
-          { id: 'revenue', label: '1. Revenue & Payment Methods', icon: TrendingUp },
-          { id: 'expenses', label: '2. OpEx & COGS Costs', icon: Receipt },
-          { id: 'inventory-asset', label: '3. Parts Asset Valuation', icon: Boxes },
-          { id: 'commissions', label: '4. Tech Commissions', icon: Users },
-          { id: 'accounts-payable', label: '5. Accounts Payable / Debts', icon: Truck, badge: financialSummary.overdueDebtsCount > 0 ? `${financialSummary.overdueDebtsCount} Overdue` : undefined },
-          { id: 'inventory-fund', label: '6. Inventory Fund', icon: Coins, badge: pendingFundCount > 0 ? `${pendingFundCount} To Settle` : undefined },
-          { id: 'parts-revenue', label: '7. Parts Revenue & Profit', icon: Boxes, badge: financialSummary.partsUnitsSold > 0 ? `${financialSummary.partsUnitsSold} Sold` : undefined },
+          { id: 'revenue', label: 'Revenue', icon: TrendingUp },
+          { id: 'expenses', label: 'Expenses', icon: Receipt },
+          { id: 'inventory-asset', label: 'Parts Value', icon: Boxes },
+          { id: 'commissions', label: 'Commissions', icon: Users },
+          { id: 'accounts-payable', label: 'Debts', icon: Truck, badge: financialSummary.overdueDebtsCount > 0 ? `${financialSummary.overdueDebtsCount} Overdue` : undefined },
+          { id: 'inventory-fund', label: 'Inventory Fund', icon: Coins, badge: pendingFundCount > 0 ? `${pendingFundCount} To Settle` : undefined },
+          { id: 'parts-revenue', label: 'Parts Profit', icon: Boxes, badge: financialSummary.partsUnitsSold > 0 ? `${financialSummary.partsUnitsSold} Sold` : undefined },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -669,7 +669,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
         <div className="bg-white border border-line rounded-2xl p-5 space-y-5 shadow-xs">
           <div className="flex justify-between items-center pb-3 border-b border-line">
             <div>
-              <h3 className="font-extrabold text-base text-ink">Revenue & Income Stream Analysis</h3>
+              <h3 className="font-extrabold text-base text-ink">Revenue</h3>
               <p className="text-xs text-muted font-medium">Labor service charges vs direct parts sales with payment drawer breakdown</p>
             </div>
             <div className="text-right font-mono">
@@ -754,7 +754,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
         <div className="bg-white border border-line rounded-2xl p-5 space-y-5 shadow-xs">
           <div className="flex justify-between items-center pb-3 border-b border-line">
             <div>
-              <h3 className="font-extrabold text-base text-ink">Operating Expenses (OpEx) & Fixed Shop Overhead</h3>
+              <h3 className="font-extrabold text-base text-ink">Expenses</h3>
               <p className="text-xs text-muted font-medium">Rent, electricity, tools, marketing, and logistics expense logs</p>
             </div>
             <Button
@@ -817,7 +817,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
         <div className="bg-white border border-line rounded-2xl p-5 space-y-5 shadow-xs">
           <div className="flex justify-between items-center pb-3 border-b border-line">
             <div>
-              <h3 className="font-extrabold text-base text-ink">Parts Inventory Capital Valuation & Stock Turnover</h3>
+              <h3 className="font-extrabold text-base text-ink">Parts Value</h3>
               <p className="text-xs text-muted font-medium">Tracking tied-up capital in unsold screen displays, batteries, chips & slow vs fast movers</p>
             </div>
             <div className="text-right font-mono">
@@ -884,7 +884,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
         <div className="bg-white border border-line rounded-2xl p-5 space-y-5 shadow-xs">
           <div className="flex justify-between items-center pb-3 border-b border-line">
             <div>
-              <h3 className="font-extrabold text-base text-ink">Technician Commission & QA Payout Audit</h3>
+              <h3 className="font-extrabold text-base text-ink">Commissions</h3>
               <p className="text-xs text-muted font-medium">Verified ticket payouts based on commission rates and zero-warranty QA passes</p>
             </div>
             <div className="text-right font-mono">
@@ -966,7 +966,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
         <div className="bg-white border border-line rounded-2xl p-5 space-y-5 shadow-xs">
           <div className="flex justify-between items-center pb-3 border-b border-line">
             <div>
-              <h3 className="font-extrabold text-base text-ink">Accounts Payable & Wholesaler Credit Debts</h3>
+              <h3 className="font-extrabold text-base text-ink">Debts</h3>
               <p className="text-xs text-muted font-medium">Managing outstanding unpaid invoices to parts suppliers to protect shop credit rating</p>
             </div>
             <div className="text-right font-mono">
@@ -1248,7 +1248,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
         <div className="bg-white border border-line rounded-2xl p-5 space-y-5 shadow-xs">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-line">
             <div>
-              <h3 className="font-extrabold text-base text-ink">Inventory Fund — Parts Cost Settlement</h3>
+              <h3 className="font-extrabold text-base text-ink">Inventory Fund</h3>
               <p className="text-xs text-muted font-medium">
                 Parts taken from stock are an internal debt to the shop's parts fund. Settle once the money is set aside or replacement stock is bought.
               </p>

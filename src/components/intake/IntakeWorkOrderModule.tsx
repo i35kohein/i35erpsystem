@@ -197,10 +197,10 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
               </span>
               <div>
                 <h1 className="text-lg font-black text-ink">
-                  Work Intake & Active Tickets
+                  Work Intake
                 </h1>
                 <p className="text-xs text-muted">
-                  Spacious full-width roster for device intake, hardware diagnostics, and repair progress tracking
+                  All active repair tickets
                 </p>
               </div>
             </div>
