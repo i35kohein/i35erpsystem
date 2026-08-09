@@ -246,6 +246,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
         </header>
 
         <form onSubmit={handleSubmit} onReset={resetForm} className="px-4 py-4 sm:px-7 sm:py-5">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-6">
           <div className="grid grid-cols-2 gap-x-5 gap-y-3 sm:gap-x-8">
             <label className="block">
               <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Customer name</span>
@@ -390,11 +391,12 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
             </label>
           </div>
 
-          <fieldset className="mt-5 rounded-2xl border-2 border-brand/40 px-3 pb-3 pt-2 sm:px-5">
+          {/* RIGHT column: 21-point checklist */}
+          <fieldset className="rounded-2xl border-2 border-brand/40 px-3 pb-3 pt-2 sm:px-5 lg:mt-0">
             <legend className="mx-auto rounded-full bg-brand px-5 py-1.5 text-center text-xs font-black uppercase tracking-[0.12em] text-white">
               Phone Testing & Checking
             </legend>
-            <div className="mt-1 grid grid-cols-2 gap-x-4 sm:gap-x-8">
+            <div className="mt-1 grid grid-cols-1 gap-x-4 sm:grid-cols-2 sm:gap-x-8">
               {DIAGNOSTIC_NAMES.map((name, i) => (
                 <label key={name} className="group flex min-h-9 items-center gap-2 border-b border-dotted border-stone-400 py-1">
                   <input
@@ -417,6 +419,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               ))}
             </div>
           </fieldset>
+          </div>
 
           <div className="no-print mt-4 flex items-center justify-between gap-2">
             <p className="text-xs font-bold text-muted">
