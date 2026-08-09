@@ -180,44 +180,31 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
               renderedFolderCount++;
 
               return (
-                <div key={folder.id} className="space-y-2">
-                  {/* Folder Header */}
-                  <div className="flex items-center justify-between border-b border-line pb-2">
-                    <div className="flex items-center gap-1.5">
-                      <Folder className="w-3.5 h-3.5 text-brand" />
-                      <h3 className="text-xs font-black uppercase tracking-wider text-ink">
-                        {folder.name}
-                      </h3>
-                      <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-surface text-muted border border-line">
-                        {filteredModels.length}
-                      </span>
-                    </div>
-                  </div>
+                <div key={folder.id}>
+                  {/* Series text header (plain) */}
+                  <p className="text-[10px] font-black uppercase tracking-wider text-muted pb-1 pt-2 first:pt-0">
+                    {folder.name}
+                  </p>
 
-                  {/* Folder Models Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                  {/* Model names — plain text list (Ko Hein) */}
+                  <div className="divide-y divide-line/60">
                     {filteredModels.map((item) => {
                       const isSelected = selectedDevice === item.model;
-
                       return (
-                        <Button
+                        <button
                           key={item.model}
                           type="button"
                           onClick={() => {
                             onSelectDevice(item.model);
                             onClose();
                           }}
-                            className={`p-2.5 rounded-lg text-xs font-extrabold flex items-center justify-between border transition-all cursor-pointer text-left ${
-                            isSelected
-                              ? 'bg-brand text-white border-brand shadow-xs'
-                              : 'bg-surface text-ink border-line hover:border-brand hover:text-brand'
+                          className={`flex w-full items-center justify-between py-2 pl-2 text-left text-sm transition-colors cursor-pointer focus:outline-none ${
+                            isSelected ? 'font-extrabold text-brand' : 'font-semibold text-ink hover:text-brand'
                           }`}
                         >
-                          <div className="min-w-0 pr-2">
-                            <span className="truncate block">{item.model}</span>
-                          </div>
-                          {isSelected && <Check className="w-4 h-4 shrink-0 text-white stroke-[3]" />}
-                        </Button>
+                          <span className="truncate">{item.model}</span>
+                          {isSelected && <Check className="h-4 w-4 shrink-0 text-brand stroke-[3]" />}
+                        </button>
                       );
                     })}
                   </div>
