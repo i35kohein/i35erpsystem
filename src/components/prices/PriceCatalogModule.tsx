@@ -996,11 +996,11 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
           container scrolls (CSS-grid auto rows + stretch were collapsing the catalog
           section to ~289px so cards overlapped the cart panel). Desktop (lg): grid
           8/4 split with internal scrolling, unchanged. */}
-      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pb-16 lg:pb-0 md:flex-row [scrollbar-gutter:stable]">
+      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pb-16 lg:pb-0 md:flex-row md:overflow-hidden [scrollbar-gutter:stable]">
         {/* Main POS Catalog & Grid Section — left column */}
-        <div className="min-w-0 flex-1 space-y-4 overflow-visible p-2 sm:p-2.5">
+        <div className="min-w-0 flex-1 flex flex-col min-h-0 gap-4 p-2 sm:p-2.5">
       {/* Active Device (left, above) + repair category chips (below, full width) (Ko Hein) */}
-      <div className="flex flex-col gap-2.5">
+      <div className="shrink-0 flex flex-col gap-2.5">
         <div className="w-full bg-gradient-to-br from-brand/8 via-white to-white border border-line rounded-2xl px-4 sm:px-5 py-3.5 shadow-2xs flex items-center justify-between gap-3 min-w-0">
           <div className="flex items-center gap-3 sm:gap-4 min-w-0">
             <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-2xl bg-brand text-white flex items-center justify-center shadow-md shrink-0">
@@ -1065,7 +1065,8 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
 
 
-          {/* Service Grid - Fixed Height Non-shifting Cards */}
+          {/* Service Grid — ONLY this scrolls (device card + chips stay fixed) (Ko Hein) */}
+          <div className="min-h-0 flex-1 overflow-y-auto md:overflow-y-auto scrollbar-thin [scrollbar-gutter:stable]">
           <div className={`grid gap-3.5 pb-8 pt-0.5 px-0.5 ${isIpad ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5'}`}>
             {filteredItems.length === 0 ? (
               <div className="col-span-full bg-white border border-line rounded-2xl p-10 text-center text-muted">
@@ -1185,6 +1186,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                 );
               })
             )}
+          </div>
           </div>
         </div>
 
