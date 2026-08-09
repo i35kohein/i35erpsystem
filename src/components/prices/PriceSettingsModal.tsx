@@ -431,6 +431,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
           </div>
           <Button
             onClick={onClose}
+            aria-label="Close price settings"
             className={`w-8 h-8 rounded-full text-muted hover:text-ink hover:bg-surface transition-colors flex items-center justify-center cursor-pointer ${embedded ? 'hidden' : ''}`}
           >
             <X className="w-4 h-4" />

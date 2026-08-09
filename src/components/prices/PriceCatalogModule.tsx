@@ -93,13 +93,18 @@ interface CartItem {
 /** Shared warranty pill (extracted 2026-08-08 — was duplicated 4× verbatim) */
 const DISCOUNT_OPTIONS = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
 
+/** Compact warranty label: "3 Month" → "3M", "3 M ( Touch )" → "3M ( Touch )" (Ko Hein) */
+function shortWarranty(warranty: string): string {
+  return warranty.replace(/(\d+)\s*(?:Months?|M)\b/gi, '$1M');
+}
+
 function WarrantyPill({ warranty, size = 'sm' }: { warranty: string; size?: 'sm' | 'md' }) {
   const icon = size === 'md' ? 'w-2.5 h-2.5' : 'w-1.5 h-1.5 sm:w-2 sm:h-2';
   const pad = size === 'md' ? 'px-1.5 py-0.5' : 'px-1 py-px sm:py-0.5';
   return (
     <span className={`inline-flex items-center space-x-0.5 text-[10px] sm:text-xs font-extrabold text-success-deep bg-success/10 ${pad} rounded-full border border-success/30 shrink-0`}>
       <ShieldCheck className={`${icon} text-success shrink-0`} />
-      <span>{warranty}</span>
+      <span>{shortWarranty(warranty)}</span>
     </span>
   );
 }
@@ -448,7 +453,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
             ? ` (was ${formatPrice(item.price)} · ${item.discountPercent}% Off)`
             : '';
         lines.push(`${idx}. ${item.label} — ${formatPrice(itemFinal)}${disc}`);
-        lines.push(`   Warranty: ${item.warranty}`);
+        lines.push(`   Warranty: ${shortWarranty(item.warranty)}`);
         idx += 1;
       });
       lines.push('');
@@ -563,7 +568,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                 <p className="text-xs font-bold text-ink leading-snug">{item.label}</p>
                               </div>
                               {/* Warranty — plain text */}
-                              <span className="text-[11px] font-semibold text-muted whitespace-nowrap">{item.warranty}</span>
+                              <span className="text-[11px] font-semibold text-muted whitespace-nowrap">{shortWarranty(item.warranty)}</span>
                               {/* Price — final + original/discount line */}
                               <div className="text-right min-w-0">
                                 <p className="font-mono text-xs font-black text-ink whitespace-nowrap tabular-nums">{formatPrice(finalItemPrice)}</p>

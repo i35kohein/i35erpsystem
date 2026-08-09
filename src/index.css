@@ -1022,11 +1022,25 @@ html[data-theme] :is(
   scrollbar-color: var(--color-line-strong) transparent;
 }
 
-/* Close buttons: clean simple X — no blue focus ring, no border at all (Ko Hein 2026-08-09). */
+/* Close buttons: plain icon/text X everywhere — no circle, border, ring, or Button chrome (Ko Hein 2026-08-09). */
+button[aria-label^="Close"],
+button[aria-label^="close"] {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  border-radius: 0 !important;
+  height: auto !important;
+  width: auto !important;
+  padding: 8px !important;
+}
+button[aria-label^="Close"]:hover,
+button[aria-label^="close"]:hover,
 button[aria-label^="Close"]:focus-visible,
 button[aria-label^="close"]:focus-visible {
+  background: transparent !important;
   box-shadow: none !important;
-  outline: none;
+  outline: none !important;
 }
 
 /* ================= GLOBAL PRINT STYLES & OVERRIDES ================= */
