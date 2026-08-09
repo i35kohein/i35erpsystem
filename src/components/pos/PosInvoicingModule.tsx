@@ -21,6 +21,7 @@ import {CreditCard,
   BellRing,
   AlertTriangle, 
   XCircle, 
+  X,
   Split,
   UserCheck,
   ChevronsLeft,
@@ -716,88 +717,64 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 </div>
               )}
 
-              {/* Itemized Line Items Breakdown */}
+              {/* Itemized Line Items Breakdown — text-based, Review Cart style (Ko Hein) */}
               <div className="space-y-2">
                 <h3 className="font-bold text-brand text-xs">Itemized Labor & Parts</h3>
-                {/* overflow-x-auto instead of overflow-hidden: the Amount cell
-                    (strike-through + discounted price + remove button) and long
-                    part names used to get clipped with no way to reach them on
-                    ≤390px phones (audit P1-B). min-w lets it scroll on mobile
-                    instead of crushing; desktop is wide enough to fit. */}
-                <div className="relative">
-                <div className="border border-line rounded-xl overflow-x-auto bg-surface/80">
-                  <table className="w-full text-left min-w-[520px]">
-                    <thead className="sticky top-0 z-10 bg-surface text-muted text-xs uppercase font-mono border-b border-line">
-                      <tr>
-                        <th className="p-2.5">Item</th>
-                        <th className="p-2.5 text-right">Qty</th>
-                        <th className="p-2.5 text-right">Unit Price</th>
-                        <th className="p-2.5 text-right">Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-line">
-                      {selectedWo.lineItems.map((li) => {
-                        // Match line item to its original repair quote so we can
-                        // show the ORIGINAL price (before any discount).
-                        const quote = (selectedWo.selectedRepairs || []).find(
-                          (r) => r && r.name && r.name.toLowerCase() === String(li.description || '').toLowerCase()
-                        );
-                        const originalPrice = quote && typeof quote.basePrice === 'number' && quote.basePrice > 0
-                          ? quote.basePrice
-                          : li.unitPrice;
-                        const hasDiscount = quote && typeof quote.discountPercent === 'number' && quote.discountPercent > 0;
-                        return (
-                        <tr key={li.id} className={li.partId && !li.isLabor ? 'bg-brand-soft/60' : ''}>
-                          <td className="px-2.5 py-3 text-ink">
-                            <div className="space-y-1">
-                              <div className="font-medium">{li.description}</div>
-                              {li.partId && !li.isLabor && (
-                                <span className="inline-flex items-center rounded-full border border-brand/20 bg-brand-soft px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-brand">
-                                  Inventory Part
-                                </span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-2.5 py-3 align-top text-right text-muted">{li.quantity}</td>
-                          <td className="px-2.5 py-3 align-top text-right font-mono text-muted">
-                            {Number(li.unitPrice || 0).toLocaleString()}
-                          </td>
-                          <td className="px-2.5 py-3 align-top text-right font-mono text-ink">
-                            <div className="inline-flex items-center justify-end gap-2">
-                              <span className="text-right">
-                                {hasDiscount && (
-                                  <>
-                                    <span className="mr-1.5 text-xs text-muted line-through">
-                                      {originalPrice.toLocaleString()} {currency}
-                                    </span>
-                                    <span className="text-success-deep font-black">
-                                      {(li.unitPrice * li.quantity).toLocaleString()} {currency}
-                                    </span>
-                                  </>
-                                )}
-                                {!hasDiscount && <span>{(li.unitPrice * li.quantity).toLocaleString()} {currency}</span>}
-                              </span>
-                              {li.partId && !li.isLabor && (
-                                <Button
-                                  type="button"
-                                  onClick={() => handleRemoveInventoryPartFromWorkOrder(li.id)}
-                                  className="inline-flex h-10 w-10 items-center justify-center rounded-full text-danger transition-colors hover:bg-danger/10 hover:text-danger active:scale-90"
-                                  title="Remove inventory part"
-                                  aria-label={`Remove ${li.description}`}
-                                >
-                                  <XCircle className="h-4 w-4" />
-                                </Button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-                {/* Right-edge fade for the horizontally-scrolling invoice (below xl) */}
-                <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-6 rounded-r-xl bg-gradient-to-l from-surface/70 to-transparent xl:hidden" />
+                <div className="border border-line rounded-xl overflow-hidden bg-white">
+                  <div className="grid grid-cols-[18px_1fr_auto] gap-x-2.5 px-2.5 py-2 bg-surface text-[10px] font-extrabold uppercase tracking-wider text-muted border-b border-line">
+                    <span>#</span>
+                    <span>Item</span>
+                    <span className="text-right">Amount</span>
+                  </div>
+                  {selectedWo.lineItems.map((li, idx) => {
+                    // Match line item to its original repair quote so we can
+                    // show the ORIGINAL price (before any discount).
+                    const quote = (selectedWo.selectedRepairs || []).find(
+                      (r) => r && r.name && r.name.toLowerCase() === String(li.description || '').toLowerCase()
+                    );
+                    const originalPrice = quote && typeof quote.basePrice === 'number' && quote.basePrice > 0
+                      ? quote.basePrice
+                      : li.unitPrice;
+                    const hasDiscount = quote && typeof quote.discountPercent === 'number' && quote.discountPercent > 0;
+                    const isPart = li.partId && !li.isLabor;
+                    return (
+                      <div
+                        key={li.id}
+                        className={`grid grid-cols-[18px_1fr_auto] gap-x-2.5 items-center px-2.5 py-2 border-b border-line last:border-0 ${isPart ? 'bg-brand-soft/60' : ''}`}
+                      >
+                        <span className="text-[11px] font-extrabold text-muted tabular-nums">{idx + 1}</span>
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-ink leading-snug">{li.description}</p>
+                          <p className="text-[10px] font-semibold text-muted">
+                            Qty {li.quantity}{isPart ? ' · Inventory Part' : ''}
+                          </p>
+                        </div>
+                        <div className="text-right min-w-0 flex items-center justify-end gap-1.5">
+                          <div>
+                            <p className="font-mono text-xs font-black text-ink whitespace-nowrap tabular-nums">
+                              {(li.unitPrice * li.quantity).toLocaleString()} {currency}
+                            </p>
+                            {hasDiscount && quote && (
+                              <p className="text-[10px] font-semibold text-muted whitespace-nowrap tabular-nums">
+                                <s className="font-mono">{(originalPrice * li.quantity).toLocaleString()}</s> · {quote.discountPercent}%
+                              </p>
+                            )}
+                          </div>
+                          {isPart && (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveInventoryPartFromWorkOrder(li.id)}
+                              aria-label={`Remove ${li.description}`}
+                              title="Remove inventory part"
+                              className="text-muted hover:text-danger p-1 rounded transition-colors cursor-pointer focus:outline-none"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
 
                 <div className="bg-white border border-line rounded-xl p-4 space-y-2">
