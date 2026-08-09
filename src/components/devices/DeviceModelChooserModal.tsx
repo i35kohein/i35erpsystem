@@ -61,7 +61,6 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
             </div>
             <div className="min-w-0">
               <h2 className="font-extrabold text-sm text-ink truncate">Select Device Model</h2>
-              <p className="text-xs text-muted truncate">Choose a model for this repair ticket</p>
             </div>
           </div>
 
@@ -199,7 +198,6 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                     {filteredModels.map((item) => {
                       const isSelected = selectedDevice === item.model;
-                      const activeServiceCount = Object.values(item.prices).filter((p) => p !== null).length;
 
                       return (
                         <Button
@@ -217,13 +215,6 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                         >
                           <div className="min-w-0 pr-2">
                             <span className="truncate block">{item.model}</span>
-                            <span
-                              className={`text-xs font-bold block mt-0.5 ${
-                                isSelected ? 'text-white/80' : 'text-muted'
-                              }`}
-                            >
-                              {activeServiceCount} services priced
-                            </span>
                           </div>
                           {isSelected && <Check className="w-4 h-4 shrink-0 text-white stroke-[3]" />}
                         </Button>
