@@ -36,11 +36,23 @@ const EMPTY_FORM: FormState = {
   checks: DIAGNOSTIC_NAMES.map(() => ({ checked: false, note: '' })),
 };
 
-const fieldLine =
-  'field-line mt-2 w-full border-0 border-b border-dotted border-stone-400 bg-transparent px-1 py-2 text-sm text-ink outline-none focus:bg-brand/5 transition-colors';
-
-const selectLine =
-  'field-line mt-2 w-full appearance-none border-0 border-b border-dotted border-stone-400 bg-transparent px-1 py-2 text-sm text-ink outline-none focus:bg-brand/5 transition-colors cursor-pointer';
+/** Approximate swatch color for a device color name (used by the color picker). */
+function colorSwatch(name: string): string {
+  const n = name.toLowerCase();
+  if (n.includes('black')) return '#1c1c1e';
+  if (n.includes('white')) return '#f5f5f7';
+  if (n.includes('silver')) return '#c7c9cc';
+  if (n.includes('gold')) return '#f2d8a7';
+  if (n.includes('titanium')) return '#8a8d92';
+  if (n.includes('blue')) return '#3b6ea5';
+  if (n.includes('purple')) return '#7d5ba6';
+  if (n.includes('green')) return '#4a7c59';
+  if (n.includes('orange')) return '#d97b4a';
+  if (n.includes('pink')) return '#e8a2b0';
+  if (n.includes('red')) return '#c0392b';
+  if (n.includes('yellow')) return '#e5c158';
+  return '#b8b8b8';
+}
 
 const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   workOrders,
@@ -54,6 +66,8 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [savedFlash, setSavedFlash] = useState(false);
   const [isModelModalOpen, setIsModelModalOpen] = useState(false);
+  const [isColorOpen, setIsColorOpen] = useState(false);
+  const [isRepairsOpen, setIsRepairsOpen] = useState(false);
 
   // Simple tickets = tagged with simpleTicket flag
   const simpleTickets = workOrders
@@ -274,153 +288,125 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
 
         <form onSubmit={handleSubmit} onReset={resetForm} className="px-4 py-4 sm:px-7 sm:py-5">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-6">
-          <div className="grid grid-cols-1 gap-y-3">
-            <label className="block">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Phone number</span>
+          <div className="divide-y divide-line">
+            {/* Phone */}
+            <label className="flex items-center gap-3 py-1.5">
+              <span className="w-36 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Phone</span>
               <input
                 value={form.phone}
                 onChange={(e) => handlePhoneChange(e.target.value)}
                 inputMode="tel"
-                placeholder="e.g. 09-123456789 (optional)"
-                className={fieldLine}
+                placeholder="Optional — e.g. 09-…"
+                className="min-w-0 flex-1 bg-transparent py-1 text-sm text-ink outline-none placeholder:text-muted/70"
               />
-              {matchedCustomer && (
-                <span className="mt-1 block text-[11px] font-bold text-success-deep">
-                  ✓ Existing customer: {matchedCustomer}
-                </span>
-              )}
+              {matchedCustomer && <span className="shrink-0 text-[10px] font-black text-success-deep">✓ {matchedCustomer}</span>}
             </label>
-            <label className="block">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Customer name</span>
-              <input value={form.name} onChange={(e) => set('name', e.target.value)} required className={fieldLine} />
+            {/* Name */}
+            <label className="flex items-center gap-3 py-1.5">
+              <span className="w-36 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Name</span>
+              <input
+                value={form.name}
+                onChange={(e) => set('name', e.target.value)}
+                required
+                placeholder="Customer name"
+                className="min-w-0 flex-1 bg-transparent py-1 text-sm text-ink outline-none placeholder:text-muted/70"
+              />
             </label>
-            <label className="block">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Model</span>
+            {/* Model → popup */}
+            <label className="flex items-center gap-3 py-1.5">
+              <span className="w-36 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Model</span>
               <button
                 type="button"
                 onClick={() => setIsModelModalOpen(true)}
-                className={`${selectLine} ${form.model ? 'text-ink' : 'text-muted'} text-left flex items-center justify-between gap-2`}
+                className="flex min-w-0 flex-1 items-center justify-between gap-2 py-1 text-left text-sm text-ink outline-none"
               >
-                <span className="truncate">{form.model || 'Choose model…'}</span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-muted shrink-0">Browse</span>
+                <span className="truncate">{form.model || <span className="text-muted/70">Choose model…</span>}</span>
+                <span className="text-[10px] font-black uppercase text-brand shrink-0">Browse ▸</span>
               </button>
             </label>
-            <label className="block">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Color</span>
-              <select
-                value={form.color}
-                onChange={(e) => set('color', e.target.value)}
-                className={`${selectLine} ${form.color ? '' : 'text-stone-500'}`}
+            {/* Color → popup */}
+            <label className="flex items-center gap-3 py-1.5">
+              <span className="w-36 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Color</span>
+              <button
+                type="button"
+                onClick={() => setIsColorOpen(true)}
+                className="flex min-w-0 flex-1 items-center justify-between gap-2 py-1 text-left text-sm text-ink outline-none"
               >
-                <option value="">Choose color…</option>
-                {getAvailableColorsForModel(form.model).map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
+                <span className="flex items-center gap-2 truncate">
+                  {form.color ? (
+                    <>
+                      <span className="h-3 w-3 shrink-0 rounded-full border border-black/20" style={{ background: colorSwatch(form.color) }} />
+                      {form.color}
+                    </>
+                  ) : (
+                    <span className="text-muted/70">Choose color…</span>
+                  )}
+                </span>
+                <span className="text-[10px] font-black uppercase text-brand shrink-0">Pick ▸</span>
+              </button>
             </label>
-            <label className="block">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-muted">IMEI</span>
-              <input value={form.imei} onChange={(e) => set('imei', e.target.value)} inputMode="numeric" className={fieldLine} />
-            </label>
-            <label className="block">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Received date</span>
-              <input type="date" value={form.date} onChange={(e) => set('date', e.target.value)} className={`${fieldLine} [color-scheme:light]`} />
-            </label>
-            <div className="block">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Error / Repair needed</span>
-              {form.model && catalogItemsForModel.length > 0 ? (
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {catalogItemsForModel.map((item) => {
-                    const on = form.repairs.some((r) => r.id === item.id || r.name.toLowerCase() === item.name.toLowerCase());
-                    return (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => toggleRepair(item)}
-                        className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold transition-colors cursor-pointer ${
-                          on
-                            ? 'border-brand bg-brand text-white'
-                            : 'border-line bg-surface text-ink hover:border-brand hover:text-brand'
-                        }`}
-                      >
-                        {on ? '✓ ' : ''}{item.name}
-                        <span className={`font-mono ${on ? 'text-white/90' : 'text-muted'}`}>
-                          {item.price.toLocaleString()}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                <p className="mt-1.5 text-xs font-semibold text-muted">
-                  {form.model ? 'No price list entries for this model yet.' : 'Pick a model above to see price-list repairs.'}
-                </p>
-              )}
+            {/* IMEI */}
+            <label className="flex items-center gap-3 py-1.5">
+              <span className="w-36 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">IMEI</span>
               <input
-                value={form.error}
-                onChange={(e) => set('error', e.target.value)}
-                placeholder={form.repairs.length ? 'Extra notes about the issue…' : 'Describe the error…'}
-                className={fieldLine}
+                value={form.imei}
+                onChange={(e) => set('imei', e.target.value)}
+                inputMode="numeric"
+                placeholder="Serial / IMEI"
+                className="min-w-0 flex-1 bg-transparent py-1 text-sm text-ink outline-none placeholder:text-muted/70"
               />
-              {form.repairs.length > 0 && (
-                <div className="mt-2 space-y-1.5">
-                  {form.repairs.map((r) => (
-                    <div key={r.id} className="flex items-center gap-2 text-xs">
-                      <span className="min-w-0 flex-1 truncate font-bold text-ink">{r.name}</span>
-                      <span className="font-mono text-muted">{r.basePrice.toLocaleString()}</span>
-                      <div className="relative shrink-0">
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={r.discountPercent}
-                          onChange={(e) => updateRepairDiscount(r.id, Number(e.target.value))}
-                          aria-label={`${r.name} discount percent`}
-                          className="w-14 rounded-lg border border-line bg-white px-2 py-1 text-center font-mono font-bold text-ink outline-none focus:border-brand focus:ring-1 focus:ring-brand"
-                        />
-                        <span className="pointer-events-none absolute inset-y-0 right-1.5 flex items-center text-[10px] font-bold text-muted">%</span>
-                      </div>
-                      <span className={`w-20 shrink-0 text-right font-mono font-black ${r.finalPrice < r.basePrice ? 'text-brand' : 'text-ink'}`}>
-                        {r.finalPrice.toLocaleString()}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => setForm((f) => ({ ...f, repairs: f.repairs.filter((x) => x.id !== r.id) }))}
-                        className="shrink-0 rounded-md px-1 text-muted hover:text-danger"
-                        aria-label={`Remove ${r.name}`}
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ))}
-                  <div className="border-t border-dotted border-line pt-1.5 text-xs font-mono">
-                    <div className="flex justify-between text-muted">
-                      <span>Subtotal</span><span>{baseTotal.toLocaleString()} MMK</span>
-                    </div>
-                    {savedAmount > 0 && (
-                      <div className="flex justify-between text-danger">
-                        <span>Discount ({overallDiscountPercent}%)</span><span>-{savedAmount.toLocaleString()} MMK</span>
-                      </div>
-                    )}
-                    <div className="flex justify-between font-black text-ink">
-                      <span>Total</span><span>{finalEstimate.toLocaleString()} MMK</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-            <label className="block">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Password / passcode</span>
-              <input value={form.passcode} onChange={(e) => set('passcode', e.target.value)} autoComplete="off" className={fieldLine} />
             </label>
-            <label className="block">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Intake Note & Customer Symptoms</span>
+            {/* Received date */}
+            <label className="flex items-center gap-3 py-1.5">
+              <span className="w-36 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Received</span>
+              <input
+                type="date"
+                value={form.date}
+                onChange={(e) => set('date', e.target.value)}
+                className="min-w-0 flex-1 bg-transparent py-1 text-sm text-ink outline-none [color-scheme:light]"
+              />
+            </label>
+            {/* Error / Repairs → popup */}
+            <label className="flex items-center gap-3 py-1.5">
+              <span className="w-36 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Repairs</span>
+              <button
+                type="button"
+                onClick={() => setIsRepairsOpen(true)}
+                className="flex min-w-0 flex-1 items-center justify-between gap-2 py-1 text-left text-sm text-ink outline-none"
+              >
+                <span className="truncate">
+                  {form.repairs.length === 0 ? (
+                    <span className="text-muted/70">Tap to add repairs…</span>
+                  ) : (
+                    <span className="font-bold">
+                      {form.repairs.length} repair{form.repairs.length > 1 ? 's' : ''}
+                      <span className="ml-2 font-mono text-brand">{finalEstimate.toLocaleString()} MMK</span>
+                    </span>
+                  )}
+                </span>
+                <span className="text-[10px] font-black uppercase text-brand shrink-0">Add ▸</span>
+              </button>
+            </label>
+            {/* Passcode */}
+            <label className="flex items-center gap-3 py-1.5">
+              <span className="w-36 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Passcode</span>
+              <input
+                value={form.passcode}
+                onChange={(e) => set('passcode', e.target.value)}
+                autoComplete="off"
+                placeholder="Device passcode"
+                className="min-w-0 flex-1 bg-transparent py-1 text-sm text-ink outline-none placeholder:text-muted/70"
+              />
+            </label>
+            {/* Intake note */}
+            <label className="flex items-start gap-3 py-1.5">
+              <span className="w-36 shrink-0 pt-1 text-[11px] font-extrabold uppercase tracking-wider text-muted">Note</span>
               <textarea
                 value={form.reply}
                 onChange={(e) => set('reply', e.target.value)}
-                rows={1}
-                placeholder="e.g. Battery drains fast, screen flickers…"
-                className={`${fieldLine} mt-1 resize-none`}
+                rows={2}
+                placeholder="Intake note & customer symptoms…"
+                className="min-w-0 flex-1 resize-none bg-transparent py-1 text-sm text-ink outline-none placeholder:text-muted/70"
               />
             </label>
           </div>
@@ -547,6 +533,131 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
           Saved tickets appear in <button type="button" className="text-brand underline" onClick={() => onNavigateToTab?.('intake')}>Work Intake</button> — you can continue there with pricing &amp; checkout.
         </p>
       </div>
+
+      {/* Color picker popup */}
+      {isColorOpen && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 p-0 sm:items-center sm:p-4" onClick={() => setIsColorOpen(false)}>
+          <div className="w-full max-w-sm rounded-t-2xl bg-white p-4 shadow-2xl sm:rounded-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-sm font-extrabold text-ink">Choose Color</h3>
+              <button type="button" onClick={() => setIsColorOpen(false)} className="rounded-lg p-1 text-muted hover:bg-surface hover:text-ink" aria-label="Close">✕</button>
+            </div>
+            {!form.model ? (
+              <p className="py-6 text-center text-xs font-bold text-muted">Pick a model first.</p>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                {getAvailableColorsForModel(form.model).map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => { set('color', c); setIsColorOpen(false); }}
+                    className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-bold transition-colors cursor-pointer ${
+                      form.color === c ? 'border-brand bg-brand-soft/60 text-ink' : 'border-line bg-white text-ink hover:border-brand/40'
+                    }`}
+                  >
+                    <span className="h-4 w-4 shrink-0 rounded-full border border-black/20" style={{ background: colorSwatch(c) }} />
+                    <span className="truncate">{c}</span>
+                    {form.color === c && <span className="ml-auto text-brand">✓</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Repairs / Error picker popup */}
+      {isRepairsOpen && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 p-0 sm:items-center sm:p-4" onClick={() => setIsRepairsOpen(false)}>
+          <div className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-t-2xl bg-white p-4 shadow-2xl sm:rounded-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-3 flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-extrabold text-ink">Error / Repair Needed</h3>
+                <p className="text-xs text-muted">{form.model ? `Price list repairs for ${form.model}` : 'Pick a model first'}</p>
+              </div>
+              <button type="button" onClick={() => setIsRepairsOpen(false)} className="rounded-lg p-1 text-muted hover:bg-surface hover:text-ink" aria-label="Close">✕</button>
+            </div>
+
+            {form.model && (
+              <>
+                {catalogItemsForModel.length === 0 ? (
+                  <p className="py-6 text-center text-xs font-bold text-muted">No price list entries for this model yet.</p>
+                ) : (
+                  <div className="flex flex-wrap gap-1.5">
+                    {catalogItemsForModel.map((item) => {
+                      const on = form.repairs.some((r) => r.id === item.id || r.name.toLowerCase() === item.name.toLowerCase());
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => toggleRepair(item)}
+                          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold transition-colors cursor-pointer ${
+                            on ? 'border-brand bg-brand text-white' : 'border-line bg-surface text-ink hover:border-brand/50'
+                          }`}
+                        >
+                          {on ? '✓ ' : ''}{item.name}
+                          <span className={`font-mono ${on ? 'text-white/90' : 'text-muted'}`}>{item.price.toLocaleString()}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {form.repairs.length > 0 && (
+                  <div className="mt-3 space-y-1.5 border-t border-line pt-3">
+                    {form.repairs.map((r) => (
+                      <div key={r.id} className="flex items-center gap-2 text-xs">
+                        <span className="min-w-0 flex-1 truncate font-bold text-ink">{r.name}</span>
+                        <span className="font-mono text-muted">{r.basePrice.toLocaleString()}</span>
+                        <div className="relative shrink-0">
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={r.discountPercent}
+                            onChange={(e) => updateRepairDiscount(r.id, Number(e.target.value))}
+                            aria-label={`${r.name} discount percent`}
+                            className="w-14 rounded-lg border border-line bg-white px-2 py-1 text-center font-mono font-bold text-ink outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+                          />
+                          <span className="pointer-events-none absolute inset-y-0 right-1.5 flex items-center text-[10px] font-bold text-muted">%</span>
+                        </div>
+                        <span className={`w-20 shrink-0 text-right font-mono font-black ${r.finalPrice < r.basePrice ? 'text-brand' : 'text-ink'}`}>
+                          {r.finalPrice.toLocaleString()}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setForm((f) => ({ ...f, repairs: f.repairs.filter((x) => x.id !== r.id) }))}
+                          className="shrink-0 rounded-md px-1 text-muted hover:text-danger"
+                          aria-label={`Remove ${r.name}`}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                    <div className="border-t border-dotted border-line pt-1.5 text-xs font-mono">
+                      <div className="flex justify-between text-muted"><span>Subtotal</span><span>{baseTotal.toLocaleString()} MMK</span></div>
+                      {savedAmount > 0 && (
+                        <div className="flex justify-between text-danger"><span>Discount ({overallDiscountPercent}%)</span><span>-{savedAmount.toLocaleString()} MMK</span></div>
+                      )}
+                      <div className="flex justify-between font-black text-ink"><span>Total</span><span>{finalEstimate.toLocaleString()} MMK</span></div>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            <div className="mt-4 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setIsRepairsOpen(false)}
+                className="rounded-xl bg-brand px-5 py-2 text-xs font-black text-white transition hover:bg-brand-deep"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Model picker — grouped by series, same modal as Create Ticket */}
       <DeviceModelChooserModal
