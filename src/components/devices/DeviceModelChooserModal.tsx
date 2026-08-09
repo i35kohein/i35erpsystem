@@ -186,8 +186,8 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                     {folder.name}
                   </p>
 
-                  {/* Model names — plain text list (Ko Hein) */}
-                  <div className="divide-y divide-line/60">
+                  {/* Model names — plain text, 3 columns (Ko Hein) */}
+                  <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2 lg:grid-cols-3">
                     {filteredModels.map((item) => {
                       const isSelected = selectedDevice === item.model;
                       return (
@@ -198,7 +198,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                             onSelectDevice(item.model);
                             onClose();
                           }}
-                          className={`flex w-full items-center justify-between py-2 pl-2 text-left text-sm transition-colors cursor-pointer focus:outline-none ${
+                          className={`flex w-full items-center justify-between gap-2 border-b border-line/60 py-2 pl-1 text-left text-sm transition-colors cursor-pointer focus:outline-none ${
                             isSelected ? 'font-extrabold text-brand' : 'font-semibold text-ink hover:text-brand'
                           }`}
                         >
