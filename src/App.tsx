@@ -1999,9 +1999,8 @@ export default function App() {
             {/* Contextual Action Button */}
             {activeTab === 'inventory' ? (
               <>
-              {/* Barcode scan — iPad navbar (module bar hidden on iPad) */}
-              {isIpad && (
-                <div className="flex items-center gap-1.5 shrink-0">
+              {/* Barcode scan — navbar (module bar removed) */}
+              <div className="hidden lg:flex items-center gap-1.5 shrink-0">
                   <div className="relative">
                     <ScanLine className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-brand" />
                     <Input
@@ -2016,9 +2015,9 @@ export default function App() {
                           inventoryScanSubmitRef.current?.();
                         }
                       }}
-                      placeholder="Scan barcode..."
+                      placeholder="Scan barcode or search part..."
                       autoComplete="off"
-                      className="h-10 w-32 xl:w-40 rounded-lg border border-line bg-white pl-8 pr-2 font-mono text-xs text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
+                      className="h-10 w-40 xl:w-56 rounded-lg border border-line bg-white pl-8 pr-2 font-mono text-xs text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
                     />
                   </div>
                   <Button
@@ -2029,7 +2028,6 @@ export default function App() {
                     Lookup
                   </Button>
                 </div>
-              )}
               {/* Model / Category / Tier filter icons — iPad navbar quick access */}
               {isIpad && (
                 <div className="flex items-center gap-1.5 shrink-0">

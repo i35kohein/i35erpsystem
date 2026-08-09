@@ -29,7 +29,6 @@ import {Boxes,
   ChevronRight,
   ChevronDown,
   Printer,
-  ScanLine,
   MoreHorizontal} from 'lucide-react';
 import { PartItem, PartQualityTier, Supplier, SystemSettings, RmaItem } from '../../types';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
@@ -1090,48 +1089,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       {/* VIEW MODE 1: STOCK TABLE */}
       {viewMode === 'stock' && (
         <>
-        {/* Scan + search bar — iPad: lives in the navbar (topbar) instead */}
-        {!isIpad && (
-        <div className="flex items-center gap-2 rounded-xl border border-brand/25 bg-brand-soft/50 px-3 py-2">
-          <ScanLine className="h-4 w-4 shrink-0 text-brand" />
-          <Input
-            ref={scanInputRef}
-            value={scanQuery}
-            onChange={(e) => {
-              setScanQuery(e.target.value);
-              setSearchQuery(e.target.value);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') { e.preventDefault(); handleScanSubmit(); }
-            }}
-            placeholder="Scan barcode or search part..."
-            autoComplete="off"
-            autoFocus
-            className="min-w-0 flex-1 basis-[140px] rounded-lg border border-line-strong bg-white px-3 py-1.5 font-mono text-xs font-semibold text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
-          />
-          {scanQuery && (
-            <Button
-              type="button"
-              onClick={() => {
-                setScanQuery('');
-                setSearchQuery('');
-                scanInputRef.current?.focus();
-              }}
-              aria-label="Clear search"
-              className="shrink-0 w-7 h-7 flex items-center justify-center rounded-full text-muted hover:bg-brand/15 hover:text-ink transition-colors cursor-pointer"
-            >
-              <X className="w-3.5 h-3.5" />
-            </Button>
-          )}
-          <Button
-            type="button"
-            onClick={handleScanSubmit}
-            className="shrink-0 rounded-lg bg-brand px-3 py-1.5 text-xs font-extrabold text-white transition hover:bg-brand-deep"
-          >
-            Lookup
-          </Button>
-        </div>
-        )}
 
         {/* Bulk actions bar — appears when parts are selected (stock table only) */}
         {selectedPartIds.size > 0 && !inlineEditMode && (
