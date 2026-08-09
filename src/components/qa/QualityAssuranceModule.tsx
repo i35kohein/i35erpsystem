@@ -13,6 +13,7 @@ import { WorkOrder, PostRepairChecklist, Technician, DiagnosticItemResult, Diagn
 import { Button , Input } from '../ui';
 import { DIAGNOSTIC_NAMES, getDiagnosticIcon } from '../intake/deviceData';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
+import { compressImageFile } from '../../lib/utils';
 import { PriorityBadge } from '../common/PriorityBadge';
 
 interface QualityAssuranceModuleProps {
@@ -138,10 +139,10 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
   const afterPhotoInputRef = React.useRef<HTMLInputElement>(null);
   const handlePhotoFiles = (files: FileList | null, setter: React.Dispatch<React.SetStateAction<string[]>>) => {
     Array.from(files || []).forEach((file) => {
-      if (file.size > 4_000_000) return;
-      const reader = new FileReader();
-      reader.onload = () => setter((prev) => [...prev, String(reader.result || '')]);
-      reader.readAsDataURL(file);
+      if (file.size > 8_000_000) return;
+      void compressImageFile(file).then((dataUrl) => {
+        if (dataUrl) setter((prev) => [...prev, dataUrl]);
+      });
     });
   };
   // Cycle status: Pass -> Fail -> N/A -> Pass

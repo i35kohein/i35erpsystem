@@ -5,6 +5,7 @@ import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
 const CameraQrScannerModal = lazy(() => import('../common/CameraQrScannerModal').then((m) => ({ default: m.CameraQrScannerModal })));
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 import { useIsIpad } from '../../hooks/useIsIpad';
+import { compressImageFile } from '../../lib/utils';
 import {
   Check, 
   X, 
@@ -1502,16 +1503,13 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               onChange={(e) => {
                 const files = Array.from(e.target.files || []);
                 files.forEach((file) => {
-                  if (file.size > 4_000_000) {
-                    toast.error(`${file.name} is over 4MB — skipping. Use a smaller photo.`, 'Photo Too Large');
+                  if (file.size > 8_000_000) {
+                    toast.error(`${file.name} is over 8MB — skipping. Use a smaller photo.`, 'Photo Too Large');
                     return;
                   }
-                  const reader = new FileReader();
-                  reader.onload = () => {
-                    const dataUrl = String(reader.result || '');
-                    setIntakePhotos((prev) => [...prev, dataUrl]);
-                  };
-                  reader.readAsDataURL(file);
+                  void compressImageFile(file).then((dataUrl) => {
+                    if (dataUrl) setIntakePhotos((prev) => [...prev, dataUrl]);
+                  });
                 });
                 e.target.value = '';
               }}
