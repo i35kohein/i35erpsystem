@@ -283,7 +283,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
   return (
     <>
       <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-5 animate-fadeIn">
-        <div className="bg-white border border-line rounded-3xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+        <div className="bg-white border border-line rounded-2xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
           {/* Modal Top Header */}
           <div className="px-5 py-4 border-b border-line bg-white flex items-center justify-between">
             <div className="flex items-center space-x-3">

@@ -118,6 +118,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
         <span className={`relative flex ${dotSizes} shrink-0`}>
           {isPulsing && (
             <span
+              aria-hidden="true"
               className={`animate-ping absolute inline-flex h-full w-full rounded-full ${pingColor} opacity-75`}
             />
           )}

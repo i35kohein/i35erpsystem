@@ -143,6 +143,33 @@ export interface DashboardOverviewHandle {
   setSubTab: (tab: 'status-queue' | 'repair-data' | 'tech-kpi' | 'inventory' | 'finance' | 'warranty-watch') => void;
 }
 
+function KpiCard({
+  label,
+  value,
+  valueClass = 'text-ink',
+  footer,
+  footerClass = 'text-muted',
+  footerIcon,
+}: {
+  label: string;
+  value: string;
+  valueClass?: string;
+  footer: string;
+  footerClass?: string;
+  footerIcon?: React.ReactNode;
+}) {
+  return (
+    <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-1">
+      <span className="text-xs font-bold text-muted uppercase">{label}</span>
+      <p className={`text-2xl font-extrabold ${valueClass}`}>{value}</p>
+      <p className={`text-xs flex items-center space-x-1 ${footerClass}`}>
+        {footerIcon}
+        <span>{footer}</span>
+      </p>
+    </div>
+  );
+}
+
 export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOverviewProps>(({
   workOrders,
   parts,
@@ -1224,32 +1251,33 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
         <div role="tabpanel" id="dash-panel-finance" aria-labelledby="dash-tab-finance" className="space-y-6">
           {/* Financial Performance KPI Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-1">
-              <span className="text-xs font-bold text-muted uppercase">Total Revenue</span>
-              <p className="text-2xl font-extrabold text-ink">{totalRevenue.toLocaleString()} MMK</p>
-              <p className={`text-xs font-semibold flex items-center space-x-1 ${marginPercent < 0 ? 'text-danger' : 'text-success-deep'}`}>
-                {marginPercent < 0 && <AlertTriangle className="w-3 h-3 shrink-0" />}
-                <span>{marginPercent}% Gross Profit Margin</span>
-              </p>
-            </div>
-
-            <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-1">
-              <span className="text-xs font-bold text-muted uppercase">Gross Profit (Margin)</span>
-              <p className="text-2xl font-extrabold text-success">{totalMargin.toLocaleString()} MMK</p>
-              <p className="text-xs text-muted">Revenue minus parts cost</p>
-            </div>
-
-            <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-1">
-              <span className="text-xs font-bold text-muted uppercase">Total Collected (Paid)</span>
-              <p className="text-2xl font-extrabold text-brand">{financialAnalytics.totalCollected.toLocaleString()} MMK</p>
-              <p className="text-xs text-brand font-semibold">{financialAnalytics.paidCount} Tickets Fully Settled</p>
-            </div>
-
-            <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-1">
-              <span className="text-xs font-bold text-muted uppercase">Unpaid Pending Balance</span>
-              <p className="text-2xl font-extrabold text-danger">{financialAnalytics.totalUnpaidBalance.toLocaleString()} MMK</p>
-              <p className="text-xs text-danger font-semibold">{financialAnalytics.unpaidCount} Tickets Outstanding</p>
-            </div>
+            <KpiCard
+              label="Total Revenue"
+              value={`${totalRevenue.toLocaleString()} MMK`}
+              footer={`${marginPercent}% Gross Profit Margin`}
+              footerClass={marginPercent < 0 ? 'font-semibold text-danger' : 'font-semibold text-success-deep'}
+              footerIcon={marginPercent < 0 ? <AlertTriangle className="w-3 h-3 shrink-0" /> : undefined}
+            />
+            <KpiCard
+              label="Gross Profit (Margin)"
+              value={`${totalMargin.toLocaleString()} MMK`}
+              valueClass="text-success"
+              footer="Revenue minus parts cost"
+            />
+            <KpiCard
+              label="Total Collected (Paid)"
+              value={`${financialAnalytics.totalCollected.toLocaleString()} MMK`}
+              valueClass="text-brand"
+              footer={`${financialAnalytics.paidCount} Tickets Fully Settled`}
+              footerClass="font-semibold text-brand"
+            />
+            <KpiCard
+              label="Unpaid Pending Balance"
+              value={`${financialAnalytics.totalUnpaidBalance.toLocaleString()} MMK`}
+              valueClass="text-danger"
+              footer={`${financialAnalytics.unpaidCount} Tickets Outstanding`}
+              footerClass="font-semibold text-danger"
+            />
           </div>
 
           {/* Revenue & Repairs Trend — with previous-period comparison */}
@@ -1370,7 +1398,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
                     <span>90-Day Warranty Background Telemetry</span>
                   </h2>
                   <span className="px-2.5 py-0.5 bg-success/20 text-emerald-300 border border-emerald-500/30 font-mono text-xs font-bold rounded-full flex items-center space-x-1">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block mr-1" />
+                    <span aria-hidden="true" className="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block mr-1" />
                     <span>Background Scanner Active</span>
                   </span>
                 </div>

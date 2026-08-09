@@ -948,7 +948,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                         <span className={`text-xs font-black px-2.5 py-1 rounded-md ${
                           debt.status === 'Paid' ? 'bg-success/15 text-success-deep' :
                           debt.status === 'Partial' ? 'bg-brand/15 text-brand' :
-                          isOverdue ? 'bg-danger text-white animate-pulse' : 'bg-warning/15 text-warning'
+                          isOverdue ? 'bg-danger text-white' : 'bg-warning/15 text-warning'
                         }`}>
                           {isOverdue ? 'OVERDUE' : debt.status}
                         </span>
