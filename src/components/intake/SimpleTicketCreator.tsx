@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Printer, PencilLine, Inbox, Trash2 } from 'lucide-react';
 import { WorkOrder, DiagnosticItemResult, AppleDeviceCategory } from '../../types';
-import { DIAGNOSTIC_NAMES } from './deviceData';
+import { DIAGNOSTIC_NAMES, APPLE_MODEL_SERIES, getAvailableColorsForModel } from './deviceData';
 
 interface SimpleTicketCreatorProps {
   workOrders: WorkOrder[];
@@ -32,6 +32,9 @@ const EMPTY_FORM: FormState = {
 
 const fieldLine =
   'field-line mt-2 w-full border-0 border-b border-dotted border-stone-400 bg-transparent px-1 py-2 text-sm text-[#17201c] outline-none focus:bg-[#d9f99d]/30 transition-colors';
+
+const selectLine =
+  'field-line mt-2 w-full appearance-none border-0 border-b border-dotted border-stone-400 bg-transparent px-1 py-2 text-sm text-[#17201c] outline-none focus:bg-[#d9f99d]/30 transition-colors cursor-pointer';
 
 const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   workOrders,
@@ -208,11 +211,37 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
             </label>
             <label className="block">
               <span className="text-sm font-bold text-[#17201c]">Model</span>
-              <input value={form.model} onChange={(e) => set('model', e.target.value)} placeholder="e.g. iPhone 14 Pro" className={fieldLine} />
+              <select
+                value={form.model}
+                onChange={(e) => {
+                  const m = e.target.value;
+                  const colors = getAvailableColorsForModel(m);
+                  setForm((f) => ({ ...f, model: m, color: colors.length ? colors[0] : f.color }));
+                }}
+                className={`${selectLine} ${form.model ? '' : 'text-stone-500'}`}
+              >
+                <option value="">Choose model…</option>
+                {APPLE_MODEL_SERIES.map((g) => (
+                  <optgroup key={g.series} label={g.series}>
+                    {g.models.map((m) => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
             </label>
             <label className="block">
               <span className="text-sm font-bold text-[#17201c]">Color</span>
-              <input value={form.color} onChange={(e) => set('color', e.target.value)} className={fieldLine} />
+              <select
+                value={form.color}
+                onChange={(e) => set('color', e.target.value)}
+                className={`${selectLine} ${form.color ? '' : 'text-stone-500'}`}
+              >
+                <option value="">Choose color…</option>
+                {getAvailableColorsForModel(form.model).map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
             </label>
             <label className="block">
               <span className="text-sm font-bold text-[#17201c]">IMEI</span>
