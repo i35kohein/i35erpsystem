@@ -12,7 +12,7 @@ import { ConfirmDeleteModal } from '../common/ConfirmDeleteModal';
 import { Button } from '../ui';
 import { TicketDetailInspectorModal } from '../common/TicketDetailInspectorModal';
 import type { TicketPrefillData } from './CreateTicketSoloPage';
-import {ClipboardList, ClipboardCheck, 
+import {ClipboardList, ClipboardCheck, Stethoscope, 
   Camera,
   Inbox,
   Ticket,
@@ -461,7 +461,8 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                       {/* Ticket status inspector and label export — icon-only actions */}
                       <td className="py-3 px-3 text-right">
                         <div className="inline-flex items-center justify-end gap-1">
-                          {(wo.status === 'Finished' || wo.status === 'Taken Out') && (
+                          {(wo.status === 'Finished' || wo.status === 'Taken Out') &&
+                            (wo.postRepairChecklist ? (
                             <Button
                               variant="ghost"
                               type="button"
@@ -472,7 +473,18 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                             >
                               <DollarSign className="w-3.5 h-3.5" />
                             </Button>
-                          )}
+                            ) : (
+                            <Button
+                              variant="ghost"
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); onNavigateToTab?.('qa'); }}
+                              className="!h-7 !min-h-7 w-7 px-0 rounded-full bg-brand text-white hover:bg-brand-deep border border-brand"
+                              title="Run 21-point diagnosis first"
+                              aria-label={`Diagnose ${wo.orderNumber || wo.id}`}
+                            >
+                              <Stethoscope className="w-3.5 h-3.5" />
+                            </Button>
+                            ))}
                           <Button
                             variant="ghost"
                             type="button"
