@@ -196,7 +196,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                   </div>
 
                   {/* Folder Models Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                     {filteredModels.map((item) => {
                       const isSelected = selectedDevice === item.model;
                       const activeServiceCount = Object.values(item.prices).filter((p) => p !== null).length;
