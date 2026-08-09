@@ -23,6 +23,7 @@ import {WorkOrder,
   Technician, 
   RepairLogEntry, 
   DiagnosticItemResult,
+  DiagnosticStatus,
   SystemSettings,
   AppUser} from '../../types';
 import { Button , Input } from '../ui';
@@ -1162,120 +1163,112 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
         </div>
       )}
 
-      {/* MODAL 5: After-Repair Diagnostic */}
+      {/* MODAL 5: After-Repair Diagnostic — PHONE TESTING & CHECKING simple style (Ko Hein) */}
       {afterDiagModalWo && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-line-strong rounded-2xl max-w-xl w-full p-6 space-y-4 text-xs shadow-2xl relative max-h-[88vh] overflow-y-auto">
-            <Button onClick={() => setAfterDiagModalWo(null)} aria-label="Close post-diagnosis" className="absolute right-4 top-4 text-muted hover:text-ink">
-              <X className="w-5 h-5" />
-            </Button>
-
-            <div className="border-b border-line-strong pb-3 space-y-1">
-              <div className="flex items-center space-x-2">
-                <ShieldCheck className="w-5 h-5 text-purple" />
-                <h3 className="text-sm font-bold text-ink">
-                  After-Repair 21-Point QA Inspection
-                </h3>
-              </div>
-              <p className="text-xs text-muted">
-                Ticket <strong className="text-brand font-mono">{afterDiagModalWo.orderNumber}</strong> • {afterDiagModalWo.deviceModel}
-              </p>
-            </div>
-
-            {/* Quick Actions & Pass/Fail Counts */}
-            <div className="flex items-center justify-between p-2.5 bg-purple/10 rounded-xl border border-purple/30 text-xs">
-              <div className="flex items-center space-x-2 font-bold text-ink">
-                <span className="px-2 py-0.5 rounded bg-success/15 text-success-deep text-xs">
-                  Pass: {afterDiagnostics.filter(d => d.status === 'Pass').length}
-                </span>
-                <span className="px-2 py-0.5 rounded bg-danger/15 text-danger text-xs">
-                  Fail: {afterDiagnostics.filter(d => d.status === 'Fail').length}
-                </span>
-                <span className="px-2 py-0.5 rounded bg-line text-muted text-xs">
-                  N/A: {afterDiagnostics.filter(d => d.status === 'N/A').length}
-                </span>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Button
-                  type="button"
-                  onClick={() => {
-                    setAfterDiagnostics(afterDiagnostics.map(d => ({ ...d, status: 'Pass', note: d.note || 'QA Passed' })));
-                  }}
-                  className="px-2.5 min-h-10 bg-success text-white font-extrabold rounded-lg text-xs hover:bg-success/90 shadow-2xs flex items-center"
-                >
-                  Mark All Pass
-                </Button>
-              </div>
-            </div>
-
-            {/* 21-Point Diagnostic Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-72 overflow-y-auto pr-1">
-              {afterDiagnostics.map((item, idx) => (
-                <div key={item.id || item.name} className="p-2 bg-surface border border-line rounded-xl space-y-1.5">
-                  <div className="flex justify-between items-center text-xs font-bold text-ink">
-                    <span className="truncate pr-1">{idx + 1}. {item.name}</span>
-                    <span className={`text-xs font-extrabold px-1.5 py-0.5 rounded ${
-                      item.status === 'Pass' ? 'bg-success/15 text-success-deep' :
-                      item.status === 'Fail' ? 'bg-danger/15 text-danger' : 'bg-line text-muted'
-                    }`}>
-                      {item.status}
-                    </span>
-                  </div>
-
-                  <div className="flex space-x-1 text-xs">
-                    <Button
-                      type="button"
-                      onClick={() => {
-                        const copy = [...afterDiagnostics];
-                        copy[idx].status = 'Pass';
-                        setAfterDiagnostics(copy);
-                      }}
-                      className={`flex-1 min-h-10 py-1 rounded-md font-extrabold transition-all ${item.status === 'Pass' ? 'bg-success text-white shadow-2xs' : 'bg-line text-ink hover:bg-line'}`}
-                    >
-                      Pass
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => {
-                        const copy = [...afterDiagnostics];
-                        copy[idx].status = 'Fail';
-                        setAfterDiagnostics(copy);
-                      }}
-                      className={`flex-1 min-h-10 py-1 rounded-md font-extrabold transition-all ${item.status === 'Fail' ? 'bg-danger text-white shadow-2xs' : 'bg-line text-ink hover:bg-line'}`}
-                    >
-                      Fail
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => {
-                        const copy = [...afterDiagnostics];
-                        copy[idx].status = 'N/A';
-                        setAfterDiagnostics(copy);
-                      }}
-                      className={`flex-1 min-h-10 py-1 rounded-md font-extrabold transition-all ${item.status === 'N/A' ? 'bg-ink text-white shadow-2xs' : 'bg-line text-ink hover:bg-line'}`}
-                    >
-                      N/A
-                    </Button>
-                  </div>
-
-                  <Input
-                    type="text"
-                    value={item.note || ''}
-                    onChange={(e) => {
-                      const copy = [...afterDiagnostics];
-                      copy[idx].note = e.target.value;
-                      setAfterDiagnostics(copy);
-                    }}
-                    placeholder="Note e.g. TrueTone OK"
-                    className="w-full bg-white border border-line rounded-md px-2 py-0.5 text-xs text-ink"
-                  />
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setAfterDiagModalWo(null)}>
+          <div
+            className="bg-white border border-line-strong rounded-2xl w-full max-w-2xl p-4 sm:p-5 space-y-3 text-xs shadow-2xl relative max-h-[88vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-start justify-between gap-3 border-b border-line-strong pb-3">
+              <div className="min-w-0">
+                <div className="flex items-center space-x-2">
+                  <ShieldCheck className="w-4 h-4 text-purple shrink-0" />
+                  <h3 className="text-sm font-bold text-ink truncate">After-Repair 21-Point QA Inspection</h3>
                 </div>
-              ))}
+                <p className="mt-0.5 text-xs text-muted truncate">
+                  Ticket <strong className="text-brand font-mono">{afterDiagModalWo.orderNumber}</strong> • {afterDiagModalWo.deviceModel}
+                </p>
+              </div>
+              <Button onClick={() => setAfterDiagModalWo(null)} aria-label="Close post-diagnosis" className="!h-8 !min-h-8 w-8 px-0 text-muted hover:text-ink shrink-0">
+                <X className="w-4 h-4" />
+              </Button>
             </div>
 
+            {/* 21-Point checklist — PHONE TESTING & CHECKING simple rows (Ko Hein) */}
             <div>
-              <label className="block text-muted mb-1 font-semibold">QA Inspection Summary Note</label>
+              <div className="flex items-center justify-between border-b border-line pb-2">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted">Phone Testing & Checking</span>
+                <div className="flex items-center gap-2">
+                  <span className="shrink-0 font-mono text-[11px] font-black text-brand">
+                    {afterDiagnostics.filter((d) => d.status !== 'N/A').length}/{afterDiagnostics.length || 21}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setAfterDiagnostics(afterDiagnostics.map((d) => ({ ...d, status: 'Pass' as const, note: d.note || 'QA Passed' })))}
+                    className="!h-7 !min-h-7 rounded-lg bg-success px-2.5 text-[11px] font-bold text-white transition-colors hover:bg-success/90"
+                  >
+                    All Pass
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAfterDiagnostics(afterDiagnostics.map((d) => ({ ...d, status: 'N/A' as const })))}
+                    className="!h-7 !min-h-7 rounded-lg border border-line-strong bg-surface px-2.5 text-[11px] font-bold text-ink transition-colors hover:bg-line-strong"
+                  >
+                    All N/A
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-0 grid grid-cols-1 gap-x-4 sm:grid-cols-2 sm:gap-x-8">
+                {afterDiagnostics.map((item, idx) => {
+                  const isPass = item.status === 'Pass';
+                  const isFail = item.status === 'Fail';
+                  const isCantTest = item.status === 'Cant Test';
+                  const cycleStatus = () => {
+                    const order: DiagnosticStatus[] = ['Pass', 'Fail', 'Cant Test', 'N/A'];
+                    const next = order[(order.indexOf(item.status as DiagnosticStatus) + 1) % order.length];
+                    setAfterDiagnostics((prev) => prev.map((d) => (d.id === item.id ? { ...d, status: next } : d)));
+                  };
+                  return (
+                    <div key={item.id || item.name} className="flex min-h-7 items-center gap-2 border-b border-line/60 py-1.5">
+                      <button
+                        type="button"
+                        onClick={cycleStatus}
+                        title={isPass ? 'Pass — tap for Fail' : isFail ? 'Fail — tap for Cant Test' : isCantTest ? 'Cant Test — tap for N/A' : 'Not checked — tap for Pass'}
+                        aria-label={`Change status for ${item.name}`}
+                        className={`flex !h-4 !w-4 !min-h-4 !min-w-4 shrink-0 items-center justify-center rounded-full border text-[10px] font-black leading-none transition-colors cursor-pointer ${
+                          isPass
+                            ? 'border-success bg-success text-white'
+                            : isFail
+                            ? 'border-danger bg-danger text-white'
+                            : isCantTest
+                            ? 'border-warning bg-warning text-white'
+                            : 'border-line bg-white text-muted hover:border-brand'
+                        }`}
+                      >
+                        {isPass ? '\u2713' : isFail ? '\u2715' : isCantTest ? '?' : ''}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setAfterDiagnostics((prev) => prev.map((d) => (d.id === item.id ? { ...d, status: 'Pass' as const } : d)))
+                        }
+                        className={`min-w-0 truncate text-left text-xs font-semibold transition-colors ${isPass ? 'text-success-deep' : isFail ? 'text-danger' : isCantTest ? 'text-warning' : 'text-muted hover:text-success-deep'}`}
+                        title={`Mark ${item.name} as Pass`}
+                        aria-label={`Mark ${item.name} as Pass`}
+                      >
+                        {idx + 1}. {item.name}
+                      </button>
+                      <input
+                        aria-label={`${item.name} note`}
+                        value={item.note || ''}
+                        onChange={(e) =>
+                          setAfterDiagnostics((prev) => prev.map((d) => (d.id === item.id ? { ...d, note: e.target.value } : d)))
+                        }
+                        placeholder={isPass ? 'ok' : isFail ? 'issue…' : isCantTest ? 'note' : 'n/a'}
+                        className="ml-auto min-w-0 flex-1 bg-transparent px-1 text-xs outline-none focus:bg-[#d9f99d]/40"
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* QA Inspection Summary Note */}
+            <div>
+              <label className="block text-[11px] font-extrabold uppercase tracking-wider text-muted mb-1">QA Inspection Summary Note</label>
               <textarea
                 rows={2}
                 value={afterSummaryNote}
