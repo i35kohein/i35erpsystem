@@ -8,7 +8,7 @@ import {ShieldCheck,
   Camera,
   UserCheck,
   StickyNote,
-  DollarSign} from 'lucide-react';
+  DollarSign, RotateCcw } from 'lucide-react';
 import { WorkOrder, PostRepairChecklist, Technician, DiagnosticItemResult, DiagnosticStatus, AppUser, SystemSettings } from '../../types';
 import { Button , Input } from '../ui';
 import { DIAGNOSTIC_NAMES, getDiagnosticIcon } from '../intake/deviceData';
@@ -32,6 +32,8 @@ interface QualityAssuranceModuleProps {
   statusFilter?: string;
   setStatusFilter?: (s: string) => void;
   onNavigateToTab?: (tab: string) => void;
+  /** Move a Taken Out ticket back for an Error Return (Ko Hein) */
+  onErrorReturn?: (workOrderId: string) => void;
 }
 
 export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
@@ -43,6 +45,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
   searchQuery = '',
   statusFilter = 'ALL',
   onNavigateToTab,
+  onErrorReturn,
 }) => {
   // Only finished tasks are shown in QA & Warranty Inspection module
   const finishedWorkOrders = workOrders.filter(
@@ -388,10 +391,30 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                         <p className="font-mono font-extrabold text-xs text-ink">{wo.totalAmount.toLocaleString()} MMK</p>
                       </td>
 
-                      {/* Actions — Inspect + checkout */}
+                      {/* Actions — Diagnose before Checkout; Taken Out is final except Error Return (Ko Hein) */}
                       <td className="py-3 px-3 text-right">
                         <div className="inline-flex items-center justify-end gap-1">
-                          {(wo.status === 'Finished' || wo.status === 'Taken Out') && (
+                          {(wo as WorkOrder).status === 'Taken Out' ? (
+                            /* Checked out — only Error Return can bring it back */
+                            onErrorReturn ? (
+                              <Button
+                                variant="ghost"
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (window.confirm(`Error Return ${wo.orderNumber}? The ticket reopens for repair.`)) {
+                                    onErrorReturn(wo.id);
+                                  }
+                                }}
+                                className="!h-7 !min-h-7 px-2 rounded-full border border-warning/40 bg-warning/10 text-warning hover:bg-warning/20"
+                                title="Error Return — customer brought the device back"
+                                aria-label={`Error Return ${wo.orderNumber}`}
+                              >
+                                <RotateCcw className="w-3 h-3" />
+                                <span className="text-[10px] font-black">Return</span>
+                              </Button>
+                            ) : null
+                          ) : ((wo as WorkOrder).status === 'Finished' || (wo as WorkOrder).status === 'Taken Out') && wo.postRepairChecklist ? (
                             <Button
                               variant="ghost"
                               type="button"
@@ -402,17 +425,18 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                             >
                               <DollarSign className="w-3.5 h-3.5" />
                             </Button>
-                          )}
-                          <Button
-                            variant="ghost"
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); openQa(); }}
-                            className="!h-7 !min-h-7 w-7 px-0 border border-line bg-brand-soft text-brand hover:bg-white rounded-lg"
-                            title="Run 21-Point Diagnostic"
-                            aria-label={`Run 21-point diagnostic for ${wo.orderNumber}`}
-                          >
-                            <ClipboardCheck className="h-3.5 w-3.5" />
-                          </Button>
+                          ) : wo.status === 'Finished' ? (
+                            <Button
+                              variant="ghost"
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); openQa(); }}
+                              className="!h-7 !min-h-7 w-7 px-0 border border-line bg-brand-soft text-brand hover:bg-white rounded-lg"
+                              title="Run 21-Point Diagnostic"
+                              aria-label={`Run 21-point diagnostic for ${wo.orderNumber}`}
+                            >
+                              <ClipboardCheck className="h-3.5 w-3.5" />
+                            </Button>
+                          ) : null}
                         </div>
                       </td>
                     </tr>

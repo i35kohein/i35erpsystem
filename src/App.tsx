@@ -2440,6 +2440,7 @@ export default function App() {
                   technicians={technicians}
                   currentUser={currentUser}
                   onSavePostRepairChecklist={handleSavePostRepairChecklist}
+                  onErrorReturn={(id) => handleUpdateWorkOrderStatus(id, 'In Progress')}
                   systemSettings={systemSettings}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}

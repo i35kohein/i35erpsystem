@@ -463,6 +463,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                         <div className="inline-flex items-center justify-end gap-1">
                           {(wo.status === 'Finished' || wo.status === 'Taken Out') &&
                             (wo.postRepairChecklist ? (
+                            /* Diagnosed → checkout (Finished or Taken Out) */
                             <Button
                               variant="ghost"
                               type="button"
@@ -473,7 +474,8 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                             >
                               <DollarSign className="w-3.5 h-3.5" />
                             </Button>
-                            ) : (
+                            ) : wo.status === 'Finished' ? (
+                            /* Not diagnosed yet → Diagnose (Ko Hein) */
                             <Button
                               variant="ghost"
                               type="button"
@@ -484,7 +486,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                             >
                               <Stethoscope className="w-3.5 h-3.5" />
                             </Button>
-                            ))}
+                            ) : null)}
                           <Button
                             variant="ghost"
                             type="button"

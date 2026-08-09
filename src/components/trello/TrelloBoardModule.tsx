@@ -282,7 +282,7 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
                               >
                                 <DollarSign className="w-3.5 h-3.5" />
                               </button>
-                            ) : (
+                            ) : wo.status === 'Finished' ? (
                               /* Not diagnosed yet → show Diagnostic instead (Ko Hein) */
                               <button
                                 type="button"
@@ -296,7 +296,7 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
                               >
                                 <Stethoscope className="w-3.5 h-3.5" />
                               </button>
-                            ))}
+                            ) : null)}
                           <span className="font-mono text-[11px] font-black text-success-deep">{totalAmt.toLocaleString()} MMK</span>
                         </div>
                       </div>
