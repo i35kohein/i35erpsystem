@@ -3,7 +3,8 @@ import { Printer, PencilLine, Inbox, Trash2 } from 'lucide-react';
 import { WorkOrder, DiagnosticItemResult, AppleDeviceCategory, SelectedRepairItem } from '../../types';
 import { ModelRepairPrice } from '../../types/priceCatalog';
 import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
-import { DIAGNOSTIC_NAMES, APPLE_MODEL_SERIES, getAvailableColorsForModel } from './deviceData';
+import { DIAGNOSTIC_NAMES, getAvailableColorsForModel } from './deviceData';
+import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
 
 interface SimpleTicketCreatorProps {
   workOrders: WorkOrder[];
@@ -50,6 +51,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [savedFlash, setSavedFlash] = useState(false);
+  const [isModelModalOpen, setIsModelModalOpen] = useState(false);
 
   // Simple tickets = tagged with simpleTicket flag
   const simpleTickets = workOrders
@@ -258,24 +260,14 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
             </label>
             <label className="block">
               <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Model</span>
-              <select
-                value={form.model}
-                onChange={(e) => {
-                  const m = e.target.value;
-                  const colors = getAvailableColorsForModel(m);
-                  setForm((f) => ({ ...f, model: m, color: colors.length ? colors[0] : f.color }));
-                }}
-                className={`${selectLine} ${form.model ? '' : 'text-stone-500'}`}
+              <button
+                type="button"
+                onClick={() => setIsModelModalOpen(true)}
+                className={`${selectLine} ${form.model ? 'text-ink' : 'text-muted'} text-left flex items-center justify-between gap-2`}
               >
-                <option value="">Choose model…</option>
-                {APPLE_MODEL_SERIES.map((g) => (
-                  <optgroup key={g.series} label={g.series}>
-                    {g.models.map((m) => (
-                      <option key={m} value={m}>{m}</option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
+                <span className="truncate">{form.model || 'Choose model…'}</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted shrink-0">Browse</span>
+              </button>
             </label>
             <label className="block">
               <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Color</span>
@@ -513,6 +505,18 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
           Saved tickets appear in <button type="button" className="text-brand underline" onClick={() => onNavigateToTab?.('intake')}>Work Intake</button> — you can continue there with pricing &amp; checkout.
         </p>
       </div>
+
+      {/* Model picker — grouped by series, same modal as Create Ticket */}
+      <DeviceModelChooserModal
+        isOpen={isModelModalOpen}
+        onClose={() => setIsModelModalOpen(false)}
+        selectedDevice={form.model}
+        onSelectDevice={(m) => {
+          const colors = getAvailableColorsForModel(m);
+          setForm((f) => ({ ...f, model: m, color: colors.length ? colors[0] : f.color }));
+          setIsModelModalOpen(false);
+        }}
+      />
     </div>
   );
 };
