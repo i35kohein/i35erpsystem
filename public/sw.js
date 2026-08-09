@@ -1,6 +1,6 @@
 // Service Worker for Apple Repair ERP - Full Offline Capability & Cache Management
 
-const CACHE_NAME = 'apple-repair-erp-v1';
+const CACHE_NAME = 'apple-repair-erp-v2';
 
 const STATIC_ASSETS = [
   '/',
