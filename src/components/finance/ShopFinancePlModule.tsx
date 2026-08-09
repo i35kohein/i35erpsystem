@@ -385,35 +385,6 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
   return (
     <div className="finance-module space-y-3">
       {/* Title & Header Bar */}
-      <div className="module-toolbar flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-line shadow-xs">
-        <div className="module-subheader flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-success text-white flex items-center justify-center font-black shadow-2xs">
-            <DollarSign className="w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-lg font-black text-ink tracking-tight">
-              <span className="hidden sm:inline">Shop Finance, Profit & Loss (P&L) Engine</span>
-              <span className="sm:hidden">Finance & P&L Engine</span>
-            </h1>
-            <p className="text-xs text-muted font-medium">
-              Labor & parts income, COGS margins, OpEx overhead, inventory asset valuation & supplier debts
-            </p>
-          </div>
-        </div>
-
-        {/* Action Controls — desktop: Record Expense lives in the app navbar (2026-08-08); mobile keeps it here since the navbar button is lg-only */}
-        <div className="flex items-center space-x-2 w-full md:w-auto">
-          <Button
-            type="button"
-            onClick={() => setShowAddExpenseModal(true)}
-            className="md:hidden w-full bg-brand hover:opacity-90 text-white flex items-center justify-center space-x-1.5"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Record Expense</span>
-          </Button>
-        </div>
-      </div>
-
       {/* Navigation Sub-Tabs Bar */}
       <div className="bg-surface p-1.5 rounded-2xl border border-line flex items-center space-x-1.5 overflow-x-auto no-scrollbar w-full text-xs shadow-2xs">
         {[
