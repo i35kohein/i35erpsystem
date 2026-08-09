@@ -130,10 +130,10 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
       color: wo.deviceColor || '',
       imei: wo.imei || wo.serialNumber || '',
       date: (wo.createdAt || '').slice(0, 10) || new Date().toISOString().slice(0, 10),
-      error: wo.symptomsReported || '',
+      error: '',
+      reply: wo.symptomsReported || '',
       repairs: wo.selectedRepairs || [],
       passcode: wo.passcode || '',
-      reply: wo.afterRepairSummary || '',
       checks: DIAGNOSTIC_NAMES.map((name) => {
         const d = diagnostics.find((x) => x.name === name);
         return { checked: d ? d.status !== 'Fail' : false, note: d?.note || '' };
@@ -193,8 +193,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
       assignedTechId: '',
       serviceType: 'Standard Modular',
       beforeDiagnostics: diagnostics,
-      afterRepairSummary: form.reply.trim() || undefined,
-      symptomsReported: form.error.trim(),
+      symptomsReported: [form.error.trim(), form.reply.trim()].filter(Boolean).join(' — '),
       selectedRepairs: form.repairs,
       lineItems: form.repairs.map((r) => ({
         id: `li-${r.id}`,
@@ -416,8 +415,14 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               <input value={form.passcode} onChange={(e) => set('passcode', e.target.value)} autoComplete="off" className={fieldLine} />
             </label>
             <label className="block">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Customer reply</span>
-              <textarea value={form.reply} onChange={(e) => set('reply', e.target.value)} rows={1} className={`${fieldLine} mt-1 resize-none`} />
+              <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Intake Note & Customer Symptoms</span>
+              <textarea
+                value={form.reply}
+                onChange={(e) => set('reply', e.target.value)}
+                rows={1}
+                placeholder="e.g. Battery drains fast, screen flickers…"
+                className={`${fieldLine} mt-1 resize-none`}
+              />
             </label>
           </div>
 
