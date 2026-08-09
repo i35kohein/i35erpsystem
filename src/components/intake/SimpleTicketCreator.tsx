@@ -38,24 +38,6 @@ const EMPTY_FORM: FormState = {
 const boxBtnCls =
   'flex w-full min-w-0 items-center justify-between gap-2 rounded-lg border border-line bg-white px-3 py-2 text-left text-sm text-ink transition-colors hover:border-brand/50 focus:border-brand focus:ring-2 focus:ring-brand/15';
 
-/** Approximate swatch color for a device color name (used by the color picker). */
-function colorSwatch(name: string): string {
-  const n = name.toLowerCase();
-  if (n.includes('black')) return '#1c1c1e';
-  if (n.includes('white')) return '#f5f5f7';
-  if (n.includes('silver')) return '#c7c9cc';
-  if (n.includes('gold')) return '#f2d8a7';
-  if (n.includes('titanium')) return '#8a8d92';
-  if (n.includes('blue')) return '#3b6ea5';
-  if (n.includes('purple')) return '#7d5ba6';
-  if (n.includes('green')) return '#4a7c59';
-  if (n.includes('orange')) return '#d97b4a';
-  if (n.includes('pink')) return '#e8a2b0';
-  if (n.includes('red')) return '#c0392b';
-  if (n.includes('yellow')) return '#e5c158';
-  return '#b8b8b8';
-}
-
 const DISCOUNT_OPTIONS = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
 
 /** '12 Month' → '12M', '6 Months' → '6M' (price-list style short warranty). */
@@ -320,7 +302,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 <span className="flex min-w-0 items-center gap-2 truncate">
                   {form.color ? (
                     <>
-                      <span className="h-3 w-3 shrink-0 rounded-full border border-black/20" style={{ background: colorSwatch(form.color) }} />
+                      <span className={`h-5 w-5 shrink-0 rounded-full border-2 border-white shadow ${(() => { const st = getRealisticColorStyle(form.color); return st.border; })()}`} style={{ background: (() => { const st = getRealisticColorStyle(form.color); return st.gradient; })() }} />
                       <span className="truncate">{form.color}</span>
                     </>
                   ) : (
@@ -396,14 +378,15 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
             </label>
           </div>
 
-          {/* RIGHT column: 21-point checklist */}
-          <fieldset className="rounded-2xl border-2 border-brand/40 px-3 pb-3 pt-2 sm:px-5 lg:mt-0">
-            <legend className="mx-auto rounded-full bg-brand px-5 py-1.5 text-center text-xs font-black uppercase tracking-[0.12em] text-white">
-              Phone Testing & Checking
-            </legend>
-            <div className="mt-1 grid grid-cols-1 gap-x-4 sm:grid-cols-2 sm:gap-x-8">
+          {/* RIGHT column: 21-point checklist — plain header, balanced with the left column (Ko Hein) */}
+          <div className="lg:mt-0">
+            <div className="flex items-center justify-between border-b border-line pb-2">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted">Phone Testing & Checking</span>
+              <span className="shrink-0 font-mono text-[11px] font-black text-brand">{checkedCount}/{DIAGNOSTIC_NAMES.length}</span>
+            </div>
+            <div className="mt-0 grid grid-cols-1 gap-x-4 sm:grid-cols-2 sm:gap-x-8">
               {DIAGNOSTIC_NAMES.map((name, i) => (
-                <label key={name} className="group flex min-h-9 items-center gap-2 border-b border-dotted border-stone-400 py-1">
+                <label key={name} className="group flex min-h-9 items-center gap-2 border-b border-line/60 py-2">
                   <button
                     type="button"
                     onClick={() => cycleCheck(i)}
@@ -431,7 +414,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 </label>
               ))}
             </div>
-          </fieldset>
+          </div>
           </div>
 
           <div className="no-print mt-3 flex items-center justify-between gap-2">
