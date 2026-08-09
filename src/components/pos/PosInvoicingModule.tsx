@@ -22,6 +22,7 @@ import {CreditCard,
   AlertTriangle, 
   XCircle, 
   X,
+  Settings,
   Split,
   UserCheck,
   ChevronsLeft,
@@ -115,7 +116,7 @@ const PAYMENT_METHOD_META: Record<string, { icon: LucideIcon; color: string }> =
 const getPaymentMeta = (name: string) => PAYMENT_METHOD_META[name] || { icon: DollarSign, color: '#0071E3' };
 
 /** Payment method tile — shared by the method grid and Split Payment (was duplicated verbatim, P2 audit 2026-08-08) */
-const tileBase = 'flex-1 min-w-[150px]! md:min-w-[165px]! min-h-[56px] p-2.5 rounded-xl border text-left font-bold text-xs transition-all cursor-pointer flex items-center space-x-2.5';
+const tileBase = 'flex-1 min-w-[150px]! md:min-w-[165px]! !min-h-[56px] p-2.5 rounded-xl border text-left font-bold text-xs transition-all cursor-pointer flex items-center space-x-2.5';
 
 function PaymentMethodTile({ selected, selectedClass, icon: Icon, iconColor, name, desc, onClick }: {
   selected: boolean;
@@ -651,7 +652,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
         </div>
 
         {/* Right Column: Dynamic Invoice & Terminal Checkout (8 cols) */}
-        <div className={`flex-1 min-w-0 bg-white border border-line rounded-2xl p-5 space-y-5 shadow-xs ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:overflow-y-auto' : ''}`}>
+        <div className={`flex-1 min-w-0 bg-white border border-line rounded-2xl p-5 pb-24 md:pb-5 space-y-5 shadow-xs ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:overflow-y-auto' : ''}`}>
           {selectedWo ? (
             <div className="space-y-5 lg:grid lg:grid-cols-2 lg:gap-5 lg:space-y-0 lg:items-start">
               {/* Desktop: left column — ticket header + items + summary */}
@@ -910,7 +911,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     <CreditCard className="w-3.5 h-3.5" />
                     <span>Payment Method Selection ({activePaymentMethods.length} Enabled)</span>
                   </h3>
-                  <Button variant="ghost" type="button" onClick={onOpenSettings} className="text-xs text-brand hover:underline font-semibold cursor-pointer" title="Open Settings → Payment Methods">Configured in Settings → Payment Methods</Button>
+                  <Button variant="ghost" type="button" onClick={onOpenSettings} className="text-xs text-brand hover:underline font-semibold cursor-pointer shrink-0" title="Open Settings → Payment Methods">
+                    <Settings className="w-3.5 h-3.5 md:hidden" />
+                    <span className="hidden md:inline">Configured in Settings → Payment Methods</span>
+                  </Button>
                 </div>
 
                 {activePaymentMethods.length === 0 ? (
@@ -1272,7 +1276,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   type="button"
                   onClick={() => setIsConfirmOpen(true)}
                   disabled={isProcessingPayment || isPaymentShort || selectedWo.isPaid}
-                  className={`w-full sm:w-1/2 ${
+                  className={`hidden md:flex w-full sm:w-1/2 ${
                     isProcessingPayment
                       ? 'bg-muted text-white opacity-80'
                       : 'bg-success hover:bg-success/90 text-white'
