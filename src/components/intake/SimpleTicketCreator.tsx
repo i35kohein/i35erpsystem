@@ -268,7 +268,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 value={form.phone}
                 onChange={(e) => handlePhoneChange(e.target.value)}
                 inputMode="tel"
-                placeholder="Optional — e.g. 09-…"
+                placeholder="09"
                 className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15 placeholder:text-muted"
               />
               {matchedCustomer && <span className="shrink-0 text-[10px] font-black text-success-deep">✓ {matchedCustomer}</span>}
