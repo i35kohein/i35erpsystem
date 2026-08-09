@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Printer, ChevronDown, Search, BadgePercent } from 'lucide-react';
+import { Printer, ChevronDown, Search, BadgePercent, ShieldCheck } from 'lucide-react';
 import { WorkOrder, DiagnosticItemResult, AppleDeviceCategory, SelectedRepairItem } from '../../types';
 import { ModelRepairPrice } from '../../types/priceCatalog';
 import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
@@ -57,6 +57,11 @@ function colorSwatch(name: string): string {
 }
 
 const DISCOUNT_OPTIONS = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
+
+/** '12 Month' → '12M', '6 Months' → '6M' (price-list style short warranty). */
+function shortWarranty(warranty: string): string {
+  return (warranty || '').replace(/(\d+)\s*(?:Months?|M)\b/gi, '$1M');
+}
 
 const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   workOrders,
@@ -552,10 +557,13 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                             <h3 className="min-w-0 truncate text-[11px] font-extrabold text-ink leading-snug" title={item.name}>{item.name}</h3>
                             <span className={`shrink-0 rounded-full bg-brand px-1.5 py-0.5 text-[9px] font-black text-white ${isSelected ? 'visible' : 'invisible'}`}>✓</span>
                           </div>
-                          {/* Row 2: group + warranty */}
-                          <div className="flex min-w-0 items-center gap-1.5">
-                            <span className="truncate rounded bg-surface px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-muted">{item.group}</span>
-                            <span className="shrink-0 text-[10px] font-semibold text-muted">{item.warranty}</span>
+                          {/* Row 2: category plain text + warranty pill (price-list style) */}
+                          <div className="flex min-w-0 items-center justify-between gap-2">
+                            <span className="truncate text-[10px] font-extrabold uppercase tracking-wider text-muted">{item.group}</span>
+                            <span className="inline-flex shrink-0 items-center space-x-0.5 rounded-full border border-success/30 bg-success/10 px-1 py-px text-[10px] font-extrabold text-success-deep">
+                              <ShieldCheck className="h-1.5 w-1.5 text-success shrink-0" />
+                              <span>{shortWarranty(item.warranty)}</span>
+                            </span>
                           </div>
                           {/* Row 3: price + discount circle (circle space always reserved → no shift) */}
                           <div className="mt-auto flex items-center justify-between gap-2 border-t border-line pt-1.5">
