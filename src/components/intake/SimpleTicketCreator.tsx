@@ -255,7 +255,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
 
         <form onSubmit={handleSubmit} onReset={resetForm} className="px-4 py-4 sm:px-7 sm:py-5">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-6">
-          <div className="divide-y divide-line">
+          <div className="flex flex-col divide-y divide-line">
             {/* LEFT header — mirrors the checklist header (Ko Hein) */}
             <div className="flex items-center justify-between border-b border-line pb-2">
               <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted">Customer Data</span>
@@ -370,15 +370,15 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15 placeholder:text-muted"
               />
             </label>
-            {/* Intake note */}
-            <label className="flex items-start gap-3 py-2">
+            {/* Intake note — flex-1 absorbs the remaining height so both columns balance */}
+            <label className="flex flex-1 items-stretch gap-3 py-2">
               <span className="w-32 shrink-0 pt-2.5 text-[11px] font-extrabold uppercase tracking-wider text-muted">Intake Note</span>
               <textarea
                 value={form.reply}
                 onChange={(e) => set('reply', e.target.value)}
                 rows={2}
                 placeholder="Intake note & customer symptoms…"
-                className="w-full resize-none rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15 placeholder:text-muted"
+                className="w-full flex-1 resize-none rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15 placeholder:text-muted"
               />
             </label>
           </div>
