@@ -2230,6 +2230,7 @@ export default function App() {
               {activeTab === 'simple-ticket' && (
                 <SimpleTicketCreator
                   workOrders={activeWorkOrders}
+                  priceCatalog={priceCatalog.catalog}
                   onSaveWorkOrder={handleSaveWorkOrder}
                   onDeleteWorkOrder={handleDeleteWorkOrder}
                   onNavigateToTab={(tab) => setActiveTab(tab as any)}

@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { Printer, PencilLine, Inbox, Trash2 } from 'lucide-react';
-import { WorkOrder, DiagnosticItemResult, AppleDeviceCategory } from '../../types';
+import { WorkOrder, DiagnosticItemResult, AppleDeviceCategory, SelectedRepairItem } from '../../types';
+import { ModelRepairPrice } from '../../types/priceCatalog';
+import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
 import { DIAGNOSTIC_NAMES, APPLE_MODEL_SERIES, getAvailableColorsForModel } from './deviceData';
 
 interface SimpleTicketCreatorProps {
   workOrders: WorkOrder[];
+  priceCatalog?: ModelRepairPrice[];
   onSaveWorkOrder: (wo: WorkOrder) => void;
   onDeleteWorkOrder?: (id: string) => void;
   onNavigateToTab?: (tab: string) => void;
@@ -18,6 +21,7 @@ interface FormState {
   imei: string;
   date: string;
   error: string;
+  repairs: SelectedRepairItem[];
   passcode: string;
   reply: string;
   checks: { checked: boolean; note: string }[];
@@ -26,7 +30,7 @@ interface FormState {
 const EMPTY_FORM: FormState = {
   name: '', phone: '', model: '', color: '', imei: '',
   date: new Date().toISOString().slice(0, 10),
-  error: '', passcode: '', reply: '',
+  error: '', repairs: [], passcode: '', reply: '',
   checks: DIAGNOSTIC_NAMES.map(() => ({ checked: false, note: '' })),
 };
 
@@ -38,6 +42,7 @@ const selectLine =
 
 const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   workOrders,
+  priceCatalog = [],
   onSaveWorkOrder,
   onDeleteWorkOrder,
   onNavigateToTab,
@@ -50,6 +55,20 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   const simpleTickets = workOrders
     .filter((wo) => (wo as any).simpleTicket === true)
     .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+
+  const catalogItemsForModel = getModelPriceCatalogItems(form.model, priceCatalog);
+
+  const toggleRepair = (item: ModelRepairCatalogItem) => {
+    setForm((f) => {
+      const exists = f.repairs.some((r) => r.id === item.id || r.name.toLowerCase() === item.name.toLowerCase());
+      return {
+        ...f,
+        repairs: exists
+          ? f.repairs.filter((r) => r.id !== item.id && r.name.toLowerCase() !== item.name.toLowerCase())
+          : [...f.repairs, { id: item.id, name: item.name, basePrice: item.price, discountPercent: 0, finalPrice: item.price }],
+      };
+    });
+  };
 
   const set = (key: keyof FormState, value: string) => setForm((f) => ({ ...f, [key]: value }));
   const setCheck = (idx: number, patch: Partial<{ checked: boolean; note: string }>) =>
@@ -68,6 +87,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
       imei: wo.imei || wo.serialNumber || '',
       date: (wo.createdAt || '').slice(0, 10) || new Date().toISOString().slice(0, 10),
       error: wo.symptomsReported || '',
+      repairs: wo.selectedRepairs || [],
       passcode: wo.passcode || '',
       reply: wo.afterRepairSummary || '',
       checks: DIAGNOSTIC_NAMES.map((name) => {
@@ -87,6 +107,8 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const now = new Date().toISOString();
+    const baseTotal = form.repairs.reduce((sum, r) => sum + r.basePrice, 0);
+    const finalEstimate = form.repairs.reduce((sum, r) => sum + r.finalPrice, 0);
     const diagnostics: DiagnosticItemResult[] = DIAGNOSTIC_NAMES.map((name, i) => ({
       id: `simple-diag-${Date.now()}-${i}`,
       name,
@@ -129,6 +151,20 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
       beforeDiagnostics: diagnostics,
       afterRepairSummary: form.reply.trim() || undefined,
       symptomsReported: form.error.trim(),
+      selectedRepairs: form.repairs,
+      lineItems: form.repairs.map((r) => ({
+        id: `li-${r.id}`,
+        description: r.name,
+        unitCost: Math.round(r.basePrice * 0.5),
+        unitPrice: r.finalPrice,
+        quantity: 1,
+        isLabor: true,
+      })),
+      subtotal: baseTotal,
+      depositAmount: 0,
+      discountAmount: 0,
+      taxAmount: 0,
+      totalAmount: finalEstimate,
       intakeChecklist: {
         powerOn: false,
         screenDisplay: false,
@@ -145,15 +181,9 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
         liquidIndicatorTriggered: false,
         physicalDamageNotes: '',
       },
-      lineItems: [],
       warrantyDays: 0,
       intakePhotos: [],
       estimatedCompletion: undefined,
-      subtotal: 0,
-      depositAmount: 0,
-      discountAmount: 0,
-      taxAmount: 0,
-      totalAmount: 0,
       isPaid: false,
       createdAt: editingId ? (workOrders.find((w) => w.id === editingId)?.createdAt || now) : form.date ? `${form.date}T09:00:00.000Z` : now,
       updatedAt: now,
@@ -251,10 +281,48 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               <span className="text-sm font-bold text-[#17201c]">Received date</span>
               <input type="date" value={form.date} onChange={(e) => set('date', e.target.value)} className={`${fieldLine} [color-scheme:light]`} />
             </label>
-            <label className="block">
-              <span className="text-sm font-bold text-[#17201c]">Error</span>
-              <input value={form.error} onChange={(e) => set('error', e.target.value)} className={fieldLine} />
-            </label>
+            <div className="col-span-2 block">
+              <span className="text-sm font-bold text-[#17201c]">Error / Repair needed</span>
+              {form.model && catalogItemsForModel.length > 0 ? (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {catalogItemsForModel.map((item) => {
+                    const on = form.repairs.some((r) => r.id === item.id || r.name.toLowerCase() === item.name.toLowerCase());
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => toggleRepair(item)}
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold transition-colors cursor-pointer ${
+                          on
+                            ? 'border-[#17201c] bg-[#17201c] text-white'
+                            : 'border-stone-400 bg-white/60 text-[#17201c] hover:border-[#17201c]'
+                        }`}
+                      >
+                        {on ? '✓ ' : ''}{item.name}
+                        <span className={`font-mono ${on ? 'text-[#d9f99d]' : 'text-stone-500'}`}>
+                          {item.price.toLocaleString()}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="mt-1.5 text-xs font-semibold text-stone-500">
+                  {form.model ? 'No price list entries for this model yet.' : 'Pick a model above to see price-list repairs.'}
+                </p>
+              )}
+              <input
+                value={form.error}
+                onChange={(e) => set('error', e.target.value)}
+                placeholder={form.repairs.length ? 'Extra notes about the issue…' : 'Describe the error…'}
+                className={fieldLine}
+              />
+              {form.repairs.length > 0 && (
+                <p className="mt-1 text-xs font-mono font-bold text-[#17201c]">
+                  {form.repairs.length} repair{form.repairs.length > 1 ? 's' : ''} · {form.repairs.reduce((s2, r) => s2 + r.basePrice, 0).toLocaleString()} MMK
+                </p>
+              )}
+            </div>
             <label className="block">
               <span className="text-sm font-bold text-[#17201c]">Password / passcode</span>
               <input value={form.passcode} onChange={(e) => set('passcode', e.target.value)} autoComplete="off" className={fieldLine} />
