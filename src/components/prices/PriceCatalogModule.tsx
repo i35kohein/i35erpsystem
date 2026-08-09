@@ -990,9 +990,9 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
-      {/* Active Device (left) + repair category chips (right) — one row (Ko Hein) */}
-      <div className="flex items-center gap-2.5">
-        <div className="shrink-0 bg-white border border-line rounded-2xl px-3.5 py-3 shadow-2xs flex items-center gap-3 min-w-0">
+      {/* Active Device (left, above) + repair category chips (below, full width) (Ko Hein) */}
+      <div className="flex flex-col gap-2.5">
+        <div className="self-start shrink-0 bg-white border border-line rounded-2xl px-3.5 py-3 shadow-2xs flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-brand text-white flex items-center justify-center shrink-0">
             <Smartphone className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
@@ -1020,9 +1020,8 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
           </button>
         </div>
 
-        {/* Repair category quick-filter chips — beside the device card */}
-          {/* Repair category quick-filter chips — mobile + desktop */}
-          <div className="-mx-1 px-1 overflow-x-auto no-scrollbar flex items-center gap-1.5 pb-0.5">
+        {/* Repair category quick-filter chips — below the device card (Ko Hein) */}
+          <div className="w-full -mx-1 px-1 overflow-x-auto no-scrollbar flex items-center gap-1.5 pb-0.5">
             <Button
               type="button"
               onClick={() => setCategoryFilter('ALL')}
