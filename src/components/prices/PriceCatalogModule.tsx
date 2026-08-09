@@ -20,7 +20,6 @@ import {
   Mic, 
   FileText, 
   Folder,
-  Sparkles,
   BadgePercent,
   Trash2
 } from 'lucide-react';
@@ -950,13 +949,6 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
             <span className="font-mono text-muted">{formatPrice(0)}</span>
           )}
         </div>
-
-        {cartSummary.totalDiscountAmount > 0 && (
-          <div className="flex items-center gap-1.5 rounded-lg bg-success/10 border border-success/20 px-2 py-1.5 text-xs font-extrabold text-success">
-            <Sparkles className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate">You save {formatPrice(cartSummary.totalDiscountAmount)} on this repair</span>
-          </div>
-        )}
 
         <div className="flex justify-between items-baseline pt-2 border-t border-line">
           <div className="min-w-0">
