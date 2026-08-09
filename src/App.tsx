@@ -5,7 +5,8 @@ import {Sparkles, Plus, Search, Filter, ShieldCheck, AlertTriangle, CheckCircle2
   MoreHorizontal,
   Printer, List,
   TrendingUp,
-  Grid, Smartphone, Layers, ScanLine, ListFilter, Activity, Users, Boxes, Coins, ShieldAlert} from 'lucide-react';
+  Grid, Smartphone, Layers, ScanLine, ListFilter, Activity, Users, Boxes, Coins, ShieldAlert,
+  Table as TableIcon, LayoutGrid, Flame, Camera} from 'lucide-react';
 import {subscribeToCollection, fetchCloudCollection, saveDocument, deleteDocument, clearCollection} from './lib/supabase';
 import { setActiveUserId, notifyAccountChanged } from './utils/accountSettings';
 
@@ -255,6 +256,11 @@ export default function App() {
   const inventoryMoreAnchorRef = useRef<HTMLButtonElement | null>(null);
   const [inventoryScanQuery, setInventoryScanQuery] = useState('');
   const [inventoryLowStockOnly, setInventoryLowStockOnly] = useState(false);
+  const [intakeViewMode, setIntakeViewMode] = useState<'table' | 'cards'>(() =>
+    typeof window !== 'undefined' && window.innerWidth < 768 ? 'cards' : 'table'
+  );
+  const [intakeSortByPriority, setIntakeSortByPriority] = useState(false);
+  const [intakeScanRequest, setIntakeScanRequest] = useState(0);
   const inventoryScanSubmitRef = useRef<(() => void) | null>(null);
   const [customerTypeFilter, setCustomerTypeFilter] = useState<string>('ALL');
   const [dateFilter, setDateFilter] = useState<DateFilterState>({ preset: 'all' });
@@ -896,6 +902,58 @@ export default function App() {
               }
             />
           </div>
+        )}
+
+        {tab === 'intake' && (
+          <>
+            <div>
+              <label className={labelCls}>View</label>
+              <div className="grid grid-cols-2 gap-1.5">
+                {(['table', 'cards'] as const).map((v) => (
+                  <Button
+                    key={v}
+                    type="button"
+                    onClick={() => setIntakeViewMode(v)}
+                    className={`flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 text-xs font-extrabold transition-colors cursor-pointer ${
+                      intakeViewMode === v
+                        ? 'bg-ink text-white border-ink shadow-2xs'
+                        : 'bg-white text-ink border-line hover:bg-slate-100'
+                    }`}
+                  >
+                    {v === 'table' ? <TableIcon className="w-4 h-4" /> : <LayoutGrid className="w-4 h-4" />}
+                    {v === 'table' ? 'Table' : 'Grid Cards'}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className={labelCls}>Sort</label>
+              <Button
+                type="button"
+                onClick={() => setIntakeSortByPriority((v) => !v)}
+                className={`${rowCls} ${intakeSortByPriority ? 'bg-brand text-white border-brand shadow-2xs' : 'bg-white text-ink border-line hover:bg-slate-100'}`}
+              >
+                <span className="flex items-center gap-2">
+                  <Flame className={`w-4 h-4 ${intakeSortByPriority ? 'text-white' : 'text-danger'}`} />
+                  Priority First
+                </span>
+                <span className={`text-xs ${intakeSortByPriority ? 'text-white/80' : 'text-muted'}`}>{intakeSortByPriority ? 'On' : 'Off'}</span>
+              </Button>
+            </div>
+            <div>
+              <label className={labelCls}>Scan</label>
+              <Button
+                type="button"
+                onClick={() => setIntakeScanRequest((n) => n + 1)}
+                className={`${rowCls} bg-white text-ink border-line hover:bg-slate-100`}
+              >
+                <span className="flex items-center gap-2">
+                  <Camera className="w-4 h-4 text-brand" />
+                  Scan Barcode / QR
+                </span>
+              </Button>
+            </div>
+          </>
         )}
 
         {tab === 'pipeline' && (
@@ -2045,24 +2103,6 @@ export default function App() {
               </div>
               </div>
 
-              {/* Phone row (<sm): filter drawer trigger only */}
-              <div className={`sm:hidden flex items-center justify-end gap-1.5 min-w-0 flex-1 ${isIpad ? 'hidden' : ''}`}>
-                <button
-                  type="button"
-                  onClick={() => setIsFilterDrawerOpen(true)}
-                  className="relative inline-flex h-10 w-10 items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand transition-all cursor-pointer shrink-0"
-                  title="Open filters"
-                  aria-label="Open filters"
-                >
-                  <SlidersHorizontal className="h-4 w-4" />
-                  {getActiveFilterCount('inventory') > 0 && (
-                    <span className="absolute -right-1 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-xs font-black text-white">
-                      {getActiveFilterCount('inventory')}
-                    </span>
-                  )}
-                </button>
-              </div>
-
               {/* Phone side menu (drawer) */}
               {inventorySideMenuOpen && (
                 <div className="fixed inset-0 z-[70] sm:hidden" role="dialog" aria-modal="true" aria-label="Inventory menu">
@@ -2276,6 +2316,22 @@ export default function App() {
               </Button>
             ) : null}
 
+            {/* Mobile filter drawer trigger — rightmost on phones (all tabs) */}
+            <button
+              type="button"
+              onClick={() => setIsFilterDrawerOpen(true)}
+              className={`sm:hidden relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand transition-all cursor-pointer ${isIpad ? 'hidden' : ''}`}
+              title="Open filters"
+              aria-label="Open filters"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              {getActiveFilterCount(activeTab) > 0 && (
+                <span className="absolute -right-1 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-xs font-black text-white">
+                  {getActiveFilterCount(activeTab)}
+                </span>
+              )}
+            </button>
+
             {/* Live Supabase connection indicator — dev-mode only (VITE_DEV_MODE or localhost); hidden in production & iPad */}
           </div>
         </header>
@@ -2331,7 +2387,6 @@ export default function App() {
                   onOpenAiAssistant={() => setIsAiAssistantOpen(true)}
                   onOpenNewWorkOrder={(prefill) => handleOpenNewWorkOrder(prefill)}
                   onDeleteWorkOrder={handleDeleteWorkOrder}
-                  onClearAllWorkOrders={handleClearAllWorkOrders}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
                   filterStatus={statusFilter}
@@ -2343,6 +2398,11 @@ export default function App() {
                     setActiveTab('create-ticket');
                   }}
                   onNavigateToTab={(tab) => setActiveTab(tab as any)}
+                  viewMode={intakeViewMode}
+                  setViewMode={setIntakeViewMode}
+                  sortByPriority={intakeSortByPriority}
+                  setSortByPriority={setIntakeSortByPriority}
+                  scanRequested={intakeScanRequest}
                 />
               )}
 

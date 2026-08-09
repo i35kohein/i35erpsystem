@@ -15,7 +15,6 @@ import { TicketDetailInspectorModal } from '../common/TicketDetailInspectorModal
 import type { TicketPrefillData } from './CreateTicketSoloPage';
 import {ClipboardList, 
   Camera,
-  Trash2,
   Inbox,
   Ticket,
   SlidersHorizontal,
@@ -50,7 +49,6 @@ interface IntakeWorkOrderModuleProps {
   onOpenAiAssistant: () => void;
   onOpenNewWorkOrder?: (prefill?: any) => void;
   onDeleteWorkOrder?: (id: string) => void;
-  onClearAllWorkOrders?: () => void;
   searchQuery: string;
   setSearchQuery?: (q: string) => void;
   filterStatus?: string;
@@ -59,6 +57,13 @@ interface IntakeWorkOrderModuleProps {
   setDateFilter?: (d: DateFilterState) => void;
   onNavigateToCreateTicket?: (prefill?: TicketPrefillData) => void;
   onNavigateToTab?: (tab: string) => void;
+  /** Controlled from the App filter drawer (mobile): view mode + priority sort + scan trigger */
+  viewMode?: 'table' | 'cards';
+  setViewMode?: (v: 'table' | 'cards') => void;
+  sortByPriority?: boolean;
+  setSortByPriority?: (v: boolean) => void;
+  /** Increment to open the barcode/QR scanner from outside (drawer) */
+  scanRequested?: number;
 }
 
 
@@ -69,20 +74,26 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   onSelectPrintTag,
   onOpenNewWorkOrder,
   onDeleteWorkOrder,
-  onClearAllWorkOrders,
   searchQuery,
   filterStatus: propFilterStatus,
   setFilterStatus: propSetFilterStatus,
   dateFilter: propDateFilter,
   onNavigateToCreateTicket,
   onNavigateToTab,
+  viewMode: propViewMode,
+  setViewMode: propSetViewMode,
+  sortByPriority: propSortByPriority,
+  setSortByPriority: propSetSortByPriority,
+  scanRequested = 0,
 }) => {
   const [selectedWorkOrder, setSelectedWorkOrder] = useState<WorkOrder | null>(null);
   const isIpad = useIsIpad();
   const [isDetailModalOpen, setIsDetailModalOpen] = useState<boolean>(false);
   const [isCameraScannerOpen, setIsCameraScannerOpen] = useState<boolean>(false);
   const [ticketToDelete, setTicketToDelete] = useState<WorkOrder | null>(null);
-  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
+  const [localViewMode, setLocalViewMode] = useState<'table' | 'cards'>('table');
+  const viewMode = propViewMode !== undefined ? propViewMode : localViewMode;
+  const setViewMode = (v: 'table' | 'cards') => (propSetViewMode ? propSetViewMode(v) : setLocalViewMode(v));
 
   // Phones default to the card grid — the 9-column table is unusable below md.
   // (User can still switch back to Table; manual choice is preserved.)
@@ -98,7 +109,14 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   const dateFilter = propDateFilter !== undefined ? propDateFilter : localDateFilter;
 
   // Roster State (no pagination — all matching tickets shown, like Parts Inventory)
-  const [sortByPriority, setSortByPriority] = useState<boolean>(false);
+  const [localSortByPriority, setLocalSortByPriority] = useState<boolean>(false);
+  const sortByPriority = propSortByPriority !== undefined ? propSortByPriority : localSortByPriority;
+  const setSortByPriority = (v: boolean) => (propSetSortByPriority ? propSetSortByPriority(v) : setLocalSortByPriority(v));
+
+  // External scan trigger (mobile filter drawer → open scanner)
+  useEffect(() => {
+    if (scanRequested > 0) setIsCameraScannerOpen(true);
+  }, [scanRequested]);
 
   const getPriorityWeight = (priority: string) => {
     switch (priority) {
@@ -110,15 +128,6 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
     }
   };
 
-  const getPriorityStyle = (priority: string) => {
-    switch (priority) {
-      case 'Urgent':
-      case 'Rush': return 'border-danger/30 bg-danger/10 hover:border-danger/50';
-      case 'Warranty Redo': return 'border-purple/30 bg-purple/10 hover:border-purple/50';
-      case 'B2B Priority': return 'border-warning/30 bg-warning/10 hover:border-warning/50';
-      default: return 'border-line bg-surface hover:border-line-strong';
-    }
-  };
 
   // Filter list by status, search query, and date range
   const dateFilteredOrders = filterByDateRange<WorkOrder>(workOrders, dateFilter);
@@ -212,8 +221,8 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto md:shrink-0 sm:items-stretch md:items-center">
-            {/* View Mode Switcher — full-width segmented control on mobile */}
+          <div className="hidden md:flex flex-col sm:flex-row gap-2 w-full md:w-auto md:shrink-0 sm:items-stretch md:items-center">
+            {/* View Mode Switcher — desktop only (mobile: in filter drawer) */}
             <div className="bg-surface p-1 rounded-xl border border-line flex items-center gap-1 w-full md:w-auto">
               <Button
                 variant="ghost"
@@ -260,20 +269,20 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           </div>
         </div>
 
-        {/* Quick Stats Filter Chips — full-width responsive: 2 cols mobile → 3 tablet → 6 desktop */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3">
+        {/* Quick Stats Filter Chips — compact text pills */}
+        <div className="flex flex-wrap gap-1.5">
           {[
-            { id: 'ALL', label: 'All Active Tickets', count: counts.total, color: 'text-brand', bg: 'bg-brand-soft/60', border: 'border-brand/30', icon: ClipboardList, chipBg: 'bg-brand/10 text-brand' },
-            { id: 'Receive', label: 'Intake (Receive)', count: counts.receive, color: 'text-brand', bg: 'bg-brand-soft/60', border: 'border-brand/30', icon: Inbox, chipBg: 'bg-brand/10 text-brand' },
-            { id: 'In Progress', label: 'In Progress', count: counts.inProgress, color: 'text-teal', bg: 'bg-teal/10', border: 'border-teal/30', icon: Wrench, chipBg: 'bg-teal/10 text-teal' },
-            { id: 'Pending', label: 'Pending Approval', count: counts.pending, color: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/30', icon: Clock, chipBg: 'bg-warning/10 text-warning' },
-            { id: 'Finished', label: 'Ready (Finished)', count: counts.finished, color: 'text-success-deep', bg: 'bg-success/10', border: 'border-success/30', icon: CheckCircle2, chipBg: 'bg-success/10 text-success-deep' },
-            { id: 'RUSH', label: 'Urgent Priority', count: counts.rush, color: 'text-danger', bg: 'bg-danger/10', border: 'border-danger/30', icon: Flame, chipBg: 'bg-danger/10 text-danger' },
+            { id: 'ALL', label: 'All Active', count: counts.total, icon: ClipboardList },
+            { id: 'Receive', label: 'Intake', count: counts.receive, icon: Inbox },
+            { id: 'In Progress', label: 'In Progress', count: counts.inProgress, icon: Wrench },
+            { id: 'Pending', label: 'Pending', count: counts.pending, icon: Clock },
+            { id: 'Finished', label: 'Ready', count: counts.finished, icon: CheckCircle2 },
+            { id: 'RUSH', label: 'Urgent', count: counts.rush, icon: Flame },
           ].map((st) => {
             const Icon = st.icon;
             const isSelected = st.id === 'RUSH' ? sortByPriority : filterStatus === st.id;
             return (
-              <Button
+              <button
                 key={st.id}
                 type="button"
                 onClick={() => {
@@ -284,24 +293,16 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                   }
                 }}
                 aria-pressed={isSelected}
-                className={`group relative !min-h-[96px] w-full overflow-hidden rounded-xl border p-3.5 text-left transition-all cursor-pointer flex flex-col justify-between ${
+                className={`inline-flex h-8 items-center gap-1.5 rounded-full border px-2.5 text-[11px] font-bold transition-colors cursor-pointer focus:outline-none ${
                   isSelected
-                    ? `${st.bg} ${st.border} ring-2 ring-brand/25 shadow-xs`
-                    : `${st.bg} ${st.border} hover:border-brand/45 hover:shadow-xs`
+                    ? 'bg-ink text-white border-ink'
+                    : 'bg-white text-ink border-line hover:border-brand/40 hover:text-brand'
                 }`}
               >
-                <div className="flex items-start justify-between gap-2">
-                  <span className="text-xs font-bold text-muted uppercase tracking-[0.06em] leading-4 pr-1 line-clamp-2">
-                    {st.label}
-                  </span>
-                  <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${st.chipBg} transition-transform group-hover:scale-105`}>
-                    <Icon className="h-3.5 w-3.5" />
-                  </span>
-                </div>
-                <span className={`text-2xl font-extrabold leading-none mt-2 ${st.color}`}>
-                  {st.count}
-                </span>
-              </Button>
+                <Icon className={`w-3 h-3 ${isSelected ? 'text-white' : 'text-brand'}`} />
+                {st.label}
+                <span className={`font-mono font-black ${isSelected ? 'text-white/90' : 'text-brand'}`}>{st.count}</span>
+              </button>
             );
           })}
         </div>
@@ -335,29 +336,11 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           </div>
 
           <div className="flex items-center space-x-2 flex-wrap">
-            {/* Clear All — desktop only (iPad: removed for declutter) */}
-            {!isIpad && workOrders.length > 0 && (
-              <Button
-                type="button"
-                onClick={() => {
-                  if (window.confirm(`Are you sure you want to remove all ${workOrders.length} tickets?`)) {
-                    onClearAllWorkOrders?.();
-                    setSelectedWorkOrder(null);
-                  }
-                }}
-                className="h-8 px-3 bg-danger/10 hover:bg-danger/15 text-danger border border-danger/30 text-xs font-bold rounded-lg transition-all inline-flex items-center space-x-1.5 cursor-pointer shadow-2xs"
-                title="Remove all tickets"
-              >
-                <Trash2 className="w-3.5 h-3.5 text-danger shrink-0" />
-                <span>Clear All ({workOrders.length})</span>
-              </Button>
-            )}
-
-            {/* Sort By Urgency Toggle */}
+            {/* Sort By Urgency Toggle — desktop only (mobile: in filter drawer) */}
             <Button
               type="button"
               onClick={() => setSortByPriority(!sortByPriority)}
-              className={`h-8 px-3 border text-xs font-bold rounded-lg transition-all inline-flex items-center space-x-1.5 cursor-pointer ${
+              className={`hidden md:inline-flex h-8 px-3 border text-xs font-bold rounded-lg transition-all items-center space-x-1.5 cursor-pointer ${
                 sortByPriority 
                   ? 'bg-brand text-white border-brand shadow-2xs' 
                   : 'bg-surface text-ink border-line hover:bg-surface'
@@ -560,10 +543,11 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
             )}
           </div>
         ) : (
-          /* GRID CARDS VIEW */
-          <div className="workspace-panel__scroll grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 content-start rounded-xl">
+          /* GRID CARDS VIEW — POS Ready-to-Checkout style */
+          <div className="workspace-panel__scroll grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 content-start rounded-xl p-1">
             {filteredOrders.map((wo) => {
               const woColorStyle = getRealisticColorStyle(wo.deviceColor);
+              const summary = wo.symptomsReported || wo.serviceType || 'General Repair';
 
               return (
                 <div
@@ -574,52 +558,49 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpenTicketDetail(wo); }
                   }}
-                  className={`group relative p-4 rounded-2xl border text-xs cursor-pointer transition-all space-y-3 hover:shadow-md ${getPriorityStyle(wo.priority)}`}
+                  className={`group cursor-pointer rounded-xl border bg-white p-3 shadow-2xs transition-all hover:shadow-md hover:border-brand/50 select-none ${
+                    sortByPriority && getPriorityWeight(wo.priority) >= 4 ? 'border-danger/30 ring-1 ring-danger/20' : 'border-line'
+                  }`}
                 >
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-2xl bg-brand/10 text-brand flex items-center justify-center group-hover:scale-110 group-hover:bg-brand group-hover:text-white transition-all">
-                    <Ticket className="w-5 h-5" />
+                  {/* Top row: order # + priority + status */}
+                  <div className="flex items-center justify-between gap-1.5">
+                    <span className="font-mono text-[11px] font-extrabold text-brand truncate">{wo.orderNumber}</span>
+                    <div className="flex items-center gap-1 shrink-0">
+                      {wo.priority && wo.priority !== 'Normal' ? (
+                        <PriorityBadge priority={wo.priority} size="xs" />
+                      ) : (
+                        <span className="text-[9px] font-black px-1.5 py-px rounded uppercase bg-surface text-muted">NORM</span>
+                      )}
+                      <StatusBadge status={wo.status} size="xs" />
+                    </div>
                   </div>
-                  <div className="pr-12">
-                    <div className="flex justify-between items-center pb-2 border-b border-line">
-                      <span className="font-mono font-black text-brand bg-brand/10 px-2.5 py-1 rounded-md text-xs">
-                        {wo.orderNumber}
-                      </span>
 
-                      <div className="flex items-center space-x-1.5">
-                        {wo.priority && wo.priority !== 'Normal' ? (
-                            <PriorityBadge priority={wo.priority} size="xs" />
-                          ) : (
-                            <span className="text-xs text-muted">-</span>
-                          )}
-                        <StatusBadge status={wo.status} size="xs" />
-                      </div>
-                    </div>
+                  {/* Device + color + customer */}
+                  <p className="mt-1.5 flex items-center gap-1.5 text-xs font-extrabold text-ink truncate">
+                    <span className="truncate">{wo.deviceModel}</span>
+                    <span
+                      className={`w-2.5 h-2.5 shrink-0 rounded-full border border-white shadow-2xs ${woColorStyle.border}`}
+                      style={{ background: woColorStyle.gradient }}
+                    />
+                  </p>
+                  <p className="text-[11px] text-muted truncate">
+                    {wo.customerName} · {wo.customerPhone}
+                  </p>
 
-                    <div className="space-y-1 pt-2">
-                      <div className="flex justify-between items-center font-extrabold text-sm text-ink">
-                        <span>{wo.deviceModel}</span>
-                        <div className="flex items-center space-x-1.5">
-                          <span className="text-xs text-muted font-medium">{wo.deviceColor || 'Standard'}</span>
-                          <span 
-                            className={`w-3.5 h-3.5 rounded-full border border-white shadow-2xs ${woColorStyle.border}`}
-                            style={{ background: woColorStyle.gradient }}
-                          />
-                        </div>
-                      </div>
-                      <p className="text-xs text-muted">
-                        <strong className="text-ink">{wo.customerName}</strong> · {wo.customerPhone}
-                      </p>
-                    </div>
+                  {/* Repair summary */}
+                  <p className="mt-1 line-clamp-2 text-[11px] font-medium text-muted leading-snug">
+                    {summary}
+                  </p>
 
-                    <div className="flex items-center justify-between text-xs pt-2">
-                      <span className="font-bold text-ink flex items-center space-x-1.5">
-                        <User className="w-3.5 h-3.5 text-brand" />
-                        {wo.assignedTechName || 'Unassigned'}
-                      </span>
-                      <span className="font-mono font-black text-sm text-brand">
-                        {(wo.totalAmount || wo.subtotal || 0).toLocaleString()} MMK
-                      </span>
-                    </div>
+                  {/* Footer: tech + amount */}
+                  <div className="mt-2 flex items-center justify-between border-t border-line/60 pt-1.5">
+                    <span className="flex items-center space-x-1 text-[11px] font-bold text-brand min-w-0 truncate">
+                      <User className="w-3 h-3 shrink-0" />
+                      <span className="truncate max-w-[80px]">{wo.assignedTechName || 'Unassigned'}</span>
+                    </span>
+                    <span className="font-mono text-[11px] font-black text-success-deep">
+                      {(wo.totalAmount || wo.subtotal || 0).toLocaleString()} MMK
+                    </span>
                   </div>
                 </div>
               );
