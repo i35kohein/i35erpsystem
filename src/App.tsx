@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { createPortal } from 'react-dom';
 import {Sparkles, Plus, Search, Filter, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, RotateCcw, Save, Timer, SlidersHorizontal, Eye, Stethoscope, Edit2,
   MoreHorizontal,
-  Printer, List, Menu,
+  Printer, List,
   TrendingUp,
   Grid, Smartphone, Layers, ScanLine, ListFilter, Activity, Users, Boxes, Coins, ShieldAlert} from 'lucide-react';
 import {subscribeToCollection, fetchCloudCollection, saveDocument, deleteDocument, clearCollection} from './lib/supabase';
@@ -2067,20 +2067,6 @@ export default function App() {
                     className="h-10 w-full rounded-lg border border-line bg-white pl-8 pr-2 font-mono text-xs text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
                   />
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setInventorySideMenuOpen(true)}
-                  className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line bg-white text-ink hover:border-brand hover:text-brand transition-colors cursor-pointer focus:outline-none"
-                  title="Inventory menu"
-                  aria-label="Open inventory menu"
-                >
-                  <Menu className="h-5 w-5" />
-                  {getActiveFilterCount('inventory') > 0 && (
-                    <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-xs font-black text-white">
-                      {getActiveFilterCount('inventory')}
-                    </span>
-                  )}
-                </button>
                 <button
                   type="button"
                   onClick={() => setIsFilterDrawerOpen(true)}
