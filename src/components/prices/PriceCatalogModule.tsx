@@ -1056,9 +1056,9 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
           container scrolls (CSS-grid auto rows + stretch were collapsing the catalog
           section to ~289px so cards overlapped the cart panel). Desktop (lg): grid
           8/4 split with internal scrolling, unchanged. */}
-      <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto pb-16 lg:pb-0 lg:grid lg:grid-cols-12 lg:overflow-hidden [scrollbar-gutter:stable]">
-        {/* Main POS Catalog & Grid Section (8 Cols on Desktop) - Dedicated Scroll Container */}
-        <div className={`shrink-0 space-y-4 overflow-visible p-2 sm:p-2.5 lg:min-h-0 ${isIpad ? 'lg:col-span-5' : 'lg:col-span-8'} lg:overflow-y-auto scrollbar-thin [scrollbar-gutter:stable]`}>
+      <div className="flex min-h-0 flex-1 gap-3 overflow-y-auto pb-16 lg:pb-0 [scrollbar-gutter:stable]">
+        {/* Main POS Catalog & Grid Section — left column */}
+        <div className="min-w-0 flex-1 space-y-4 overflow-visible p-2 sm:p-2.5">
 
           {/* Service Grid - Fixed Height Non-shifting Cards */}
           <div className={`grid gap-3.5 pb-8 pt-0.5 px-0.5 ${isIpad ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5'}`}>
@@ -1183,8 +1183,8 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
           </div>
         </div>
 
-        {/* Right Side Cart & Invoice Summary Panel (4 Cols Desktop, lg+) — on mobile the cart opens as a bottom sheet */}
-        <div className={`hidden lg:flex flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-2xs ${isIpad ? 'lg:col-span-7' : 'lg:col-span-4'} lg:h-full lg:min-h-0`}>
+        {/* Right Side Cart — Selected Cart, always visible 2nd column (Ko Hein) */}
+        <div className="shrink-0 w-[168px] sm:w-[280px] md:w-[320px] lg:w-[380px] xl:w-[420px] flex flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-2xs min-h-0">
           {/* Cart Header */}
           <div className="p-3.5 sm:p-4 border-b border-line flex items-center justify-between bg-surface/80 h-[56px] shrink-0">
             <div className="flex items-center space-x-2.5 min-w-0">
