@@ -247,7 +247,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
 
         <form onSubmit={handleSubmit} onReset={resetForm} className="px-4 py-4 sm:px-7 sm:py-5">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-6">
-          <div className="grid grid-cols-2 gap-x-5 gap-y-3 sm:gap-x-8">
+          <div className="grid grid-cols-1 gap-y-3">
             <label className="block">
               <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Customer name</span>
               <input value={form.name} onChange={(e) => set('name', e.target.value)} required className={fieldLine} />
@@ -298,7 +298,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Received date</span>
               <input type="date" value={form.date} onChange={(e) => set('date', e.target.value)} className={`${fieldLine} [color-scheme:light]`} />
             </label>
-            <div className="col-span-2 block">
+            <div className="block">
               <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Error / Repair needed</span>
               {form.model && catalogItemsForModel.length > 0 ? (
                 <div className="mt-2 flex flex-wrap gap-1.5">
@@ -385,7 +385,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Password / passcode</span>
               <input value={form.passcode} onChange={(e) => set('passcode', e.target.value)} autoComplete="off" className={fieldLine} />
             </label>
-            <label className="col-span-2 block">
+            <label className="block">
               <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Customer reply</span>
               <textarea value={form.reply} onChange={(e) => set('reply', e.target.value)} rows={1} className={`${fieldLine} mt-1 resize-none`} />
             </label>
