@@ -398,6 +398,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
   // Mobile category chips — group quick-filter for the catalog list (mobile only).
   const [categoryFilter, setCategoryFilter] = useState('ALL');
+  const [categoryFilterTouched, setCategoryFilterTouched] = useState(false);
   const chipGroups = useMemo(() => {
     const map = new Map<string, number>();
     availableRepairItems.forEach((item) => {
@@ -1024,9 +1025,9 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
           <div className="w-full -mx-1 px-1 overflow-x-auto no-scrollbar flex items-center gap-1.5 pb-0.5">
             <Button
               type="button"
-              onClick={() => setCategoryFilter('ALL')}
+              onClick={() => { setCategoryFilter('ALL'); setCategoryFilterTouched(true); }}
               className={`shrink-0 px-2.5 !h-7 !min-h-0 sm:!h-10 sm:!min-h-10 sm:px-3 rounded-full text-xs font-extrabold border transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:bg-brand focus-visible:text-white focus-visible:border-brand ${
-                effectiveCategoryFilter === 'ALL'
+                effectiveCategoryFilter === 'ALL' && categoryFilterTouched
                   ? 'bg-brand text-white border-brand shadow-2xs'
                   : 'bg-white text-ink border-line hover:border-brand/50'
               }`}
@@ -1037,7 +1038,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
               <Button
                 key={group}
                 type="button"
-                onClick={() => setCategoryFilter(group)}
+                onClick={() => { setCategoryFilter(group); setCategoryFilterTouched(true); }}
                 className={`shrink-0 px-2.5 !h-7 !min-h-0 sm:!h-10 sm:!min-h-10 sm:px-3 rounded-full text-xs font-extrabold border transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:bg-brand focus-visible:text-white focus-visible:border-brand ${
                   effectiveCategoryFilter === group
                     ? 'bg-brand text-white border-brand shadow-2xs'
@@ -1058,35 +1059,6 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
       <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto pb-16 lg:pb-0 lg:grid lg:grid-cols-12 lg:overflow-hidden [scrollbar-gutter:stable]">
         {/* Main POS Catalog & Grid Section (8 Cols on Desktop) - Dedicated Scroll Container */}
         <div className={`shrink-0 space-y-4 overflow-visible p-2 sm:p-2.5 lg:min-h-0 ${isIpad ? 'lg:col-span-5' : 'lg:col-span-8'} lg:overflow-y-auto scrollbar-thin [scrollbar-gutter:stable]`}>
-
-          {/* Repair category quick-filter chips — mobile + desktop */}
-          <div className="-mx-1 px-1 overflow-x-auto no-scrollbar flex items-center gap-1.5 pb-0.5">
-            <Button
-              type="button"
-              onClick={() => setCategoryFilter('ALL')}
-              className={`shrink-0 px-2.5 !h-7 !min-h-0 sm:!h-10 sm:!min-h-10 sm:px-3 rounded-full text-xs font-extrabold border transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:bg-brand focus-visible:text-white focus-visible:border-brand ${
-                effectiveCategoryFilter === 'ALL'
-                  ? 'bg-brand text-white border-brand shadow-2xs'
-                  : 'bg-white text-ink border-line hover:border-brand/50'
-              }`}
-            >
-              All ({availableRepairItems.length})
-            </Button>
-            {chipGroups.map(([group, count]) => (
-              <Button
-                key={group}
-                type="button"
-                onClick={() => setCategoryFilter(group)}
-                className={`shrink-0 px-2.5 !h-7 !min-h-0 sm:!h-10 sm:!min-h-10 sm:px-3 rounded-full text-xs font-extrabold border transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:bg-brand focus-visible:text-white focus-visible:border-brand ${
-                  effectiveCategoryFilter === group
-                    ? 'bg-brand text-white border-brand shadow-2xs'
-                    : 'bg-white text-ink border-line hover:border-brand/50'
-                }`}
-              >
-                {group} ({count})
-              </Button>
-            ))}
-          </div>
 
           {/* Service Grid - Fixed Height Non-shifting Cards */}
           <div className={`grid gap-3.5 pb-8 pt-0.5 px-0.5 ${isIpad ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5'}`}>
