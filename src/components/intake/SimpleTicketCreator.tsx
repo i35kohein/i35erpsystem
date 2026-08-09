@@ -3,7 +3,7 @@ import { ChevronDown, Search, BadgePercent, ShieldCheck } from 'lucide-react';
 import { WorkOrder, DiagnosticItemResult, AppleDeviceCategory, SelectedRepairItem } from '../../types';
 import { ModelRepairPrice } from '../../types/priceCatalog';
 import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
-import { DIAGNOSTIC_NAMES, getAvailableColorsForModel } from './deviceData';
+import { DIAGNOSTIC_NAMES, getAvailableColorsForModel, getRealisticColorStyle } from './deviceData';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
 
 interface SimpleTicketCreatorProps {
@@ -482,21 +482,28 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
             {!form.model ? (
               <p className="py-8 text-center text-xs font-bold text-muted">Pick a device first — go back and choose the model.</p>
             ) : (
-              <div className="grid grid-cols-2 gap-2">
-                {getAvailableColorsForModel(form.model).map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => { set('color', c); setIsColorOpen(false); }}
-                    className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-bold transition-colors cursor-pointer ${
-                      form.color === c ? 'border-brand bg-brand-soft/60 text-ink' : 'border-line bg-white text-ink hover:border-brand/40'
-                    }`}
-                  >
-                    <span className="h-4 w-4 shrink-0 rounded-full border border-black/20" style={{ background: colorSwatch(c) }} />
-                    <span className="truncate">{c}</span>
-                    {form.color === c && <span className="ml-auto text-brand">✓</span>}
-                  </button>
-                ))}
+              <div className="grid max-h-72 grid-cols-2 gap-3 overflow-y-auto p-1 sm:grid-cols-3">
+                {getAvailableColorsForModel(form.model).map((c) => {
+                  const style = getRealisticColorStyle(c);
+                  const isSelected = form.color === c;
+                  return (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => { set('color', c); setIsColorOpen(false); }}
+                      className={`flex flex-col items-center rounded-2xl border p-3 text-center transition-all hover:scale-105 cursor-pointer ${
+                        isSelected ? 'border-brand bg-brand-soft ring-2 ring-brand/30' : 'border-line bg-white hover:bg-surface'
+                      }`}
+                    >
+                      {/* Big realistic color circle — same as New Intake Ticket */}
+                      <span
+                        className={`h-14 w-14 rounded-full border-2 border-white shadow-lg ${style.border}`}
+                        style={{ background: style.gradient, boxShadow: style.shadow }}
+                      />
+                      <span className={`mt-2 text-xs font-bold ${isSelected ? 'text-brand' : 'text-ink'}`}>{c}</span>
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
