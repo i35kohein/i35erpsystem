@@ -1001,31 +1001,35 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
         <div className="min-w-0 flex-1 space-y-4 overflow-visible p-2 sm:p-2.5">
       {/* Active Device (left, above) + repair category chips (below, full width) (Ko Hein) */}
       <div className="flex flex-col gap-2.5">
-        <div className="w-full bg-white border border-line rounded-2xl px-4 py-3 shadow-2xs flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-brand text-white flex items-center justify-center shrink-0">
-            <Smartphone className="w-5 h-5 sm:w-6 sm:h-6" />
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-brand-deep bg-brand/10 px-2 py-0.5 rounded-full">
-                Active Device
-              </span>
-              <span className="text-[11px] font-bold text-muted hidden sm:inline">
-                {availableRepairItems.filter((i) => i.price && i.price > 0).length} Services
-              </span>
+        <div className="w-full bg-gradient-to-br from-brand/8 via-white to-white border border-line rounded-2xl px-4 sm:px-5 py-3.5 shadow-2xs flex items-center justify-between gap-3 min-w-0">
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+            <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-2xl bg-brand text-white flex items-center justify-center shadow-md shrink-0">
+              <Smartphone className="w-5 h-5 sm:w-7 sm:h-7" />
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-ink tracking-tight truncate">
-              {selectedDevice}
-            </h2>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-brand-deep bg-brand/10 px-2 py-0.5 rounded-full">
+                  Active Device
+                </span>
+                <span className="text-[11px] font-bold text-muted">
+                  {availableRepairItems.filter((i) => i.price && i.price > 0).length} Services
+                </span>
+                <span className="hidden sm:inline text-[11px] font-bold text-success/80">
+                  {chipGroups.length} Categories
+                </span>
+              </div>
+              <h2 className="text-lg sm:text-2xl font-black text-ink tracking-tight truncate mt-0.5">
+                {selectedDevice}
+              </h2>
+            </div>
           </div>
           <button
             type="button"
             onClick={() => setDeviceModalOpen(true)}
-            className="shrink-0 min-h-10 px-3 rounded-xl bg-surface hover:bg-line text-brand font-extrabold text-xs border border-line transition-all flex items-center gap-1.5 cursor-pointer focus:outline-none"
+            className="shrink-0 min-h-10 px-3.5 sm:px-4 rounded-xl bg-brand hover:bg-brand-deep text-white font-extrabold text-xs border border-brand transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-2xs focus:outline-none"
           >
             <Folder className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Switch</span>
-            <span className="sm:hidden">⟳</span>
+            <span>Switch Model</span>
           </button>
         </div>
 
