@@ -1,6 +1,6 @@
 import  {useState, useRef, useEffect, useMemo, lazy, Suspense} from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import {Sparkles, Plus, Search, Filter, Tag, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, RotateCcw, Save, Timer, SlidersHorizontal, Eye, Stethoscope, Edit2, List, LayoutGrid, Printer, Smartphone, Layers, ScanLine, ListFilter, Activity, Users, Boxes, Coins, ShieldAlert} from 'lucide-react';
+import {Sparkles, Plus, Search, Filter, ShieldCheck, AlertTriangle, CheckCircle2, Info, AlertCircle, X, RotateCcw, Save, Timer, SlidersHorizontal, Eye, Stethoscope, Edit2, List, LayoutGrid, Printer, Smartphone, Layers, ScanLine, ListFilter, Activity, Users, Boxes, Coins, ShieldAlert} from 'lucide-react';
 import {subscribeToCollection, fetchCloudCollection, saveDocument, deleteDocument, clearCollection} from './lib/supabase';
 import { setActiveUserId, notifyAccountChanged } from './utils/accountSettings';
 
@@ -1859,36 +1859,7 @@ export default function App() {
 
             {activeTab === 'inventory' && (
               <>
-                <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
-                <CustomDropdownMenu
-                  value={categoryFilter}
-                  onChange={(val) => setCategoryFilter(val)}
-                  iconOnly
-                  triggerIcon={<Tag className="h-3.5 w-3.5" />}
-                  ariaLabel="Filter inventory by category"
-                  menuAlign="right"
-                  options={[
-                    { value: 'ALL', label: 'All Categories' },
-                    ...inventoryCategoryOptions.map((category) => ({ value: category, label: category })),
-                  ]}
-                />
-
-                <CustomDropdownMenu
-                  value={stockFilter}
-                  onChange={(val) => setStockFilter(val)}
-                  iconOnly
-                  triggerIcon={<ShieldCheck className="h-3.5 w-3.5" />}
-                  ariaLabel="Filter inventory by quality tier"
-                  menuAlign="right"
-                  options={[
-                    { value: 'ALL', label: 'All Tiers' },
-                    ...inventoryQualityOptions.map((tier) => ({ value: tier, label: tier })),
-                  ]}
-                />
-
-                <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact iconOnly />
-
-                </div>              </>
+              </>
             )}
 
             {activeTab === 'crm' && (
