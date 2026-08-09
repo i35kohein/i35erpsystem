@@ -735,25 +735,25 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         {wizardStep === 1 && (
         <>
         <div id="intake-customer" className={`p-3 bg-surface rounded-xl border border-line space-y-2.5 scroll-mt-40 `}>
-          <div className="flex items-center justify-between border-b border-line pb-2.5">
-            <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
-              <span className="w-6 h-6 rounded-full bg-brand text-white flex items-center justify-center text-xs font-black">1</span>
-              <span className="text-sm">Customer Information</span>
+          <div className="flex items-center justify-between gap-2 border-b border-line pb-2.5">
+            <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2 min-w-0">
+              <span className="w-6 h-6 rounded-full bg-brand text-white flex items-center justify-center text-xs font-black shrink-0">1</span>
+              <span className="text-sm truncate">Customer Information</span>
             </h3>
-            {matchedCustomer && (
-              <span className="text-xs bg-success/10 text-success-deep px-2.5 py-0.5 rounded-full font-bold flex items-center space-x-1 border border-success/20 shadow-2xs">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>{isEditMode ? 'Editing Existing Ticket' : 'Existing Customer Profile Matched!'}</span>
-              </span>
-            )}
+            {/* Always rendered (visibility toggles) so the header never changes
+                height when a phone number matches — no layout shift below. */}
+            <span className={`text-xs bg-success/10 text-success-deep px-2.5 py-0.5 rounded-full font-bold flex items-center space-x-1 border border-success/20 shadow-2xs shrink-0 whitespace-nowrap ${matchedCustomer ? 'visible' : 'invisible'}`}>
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>{isEditMode ? 'Editing Existing Ticket' : 'Existing Customer Profile Matched!'}</span>
+            </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div className="relative">
-              <label htmlFor="field-customer-phone" className="flex items-center justify-between text-muted mb-1 font-medium">
-                <span>Phone Number *</span>
+              <label htmlFor="field-customer-phone" className="flex items-center justify-between gap-2 text-muted mb-1 font-medium min-h-5">
+                <span className="truncate">Phone Number *</span>
                 {customerPhone.replace(/\D/g, '').length > 0 && (
-                  <span className="text-xs font-mono font-bold text-muted">
+                  <span className="text-xs font-mono font-bold text-muted shrink-0 whitespace-nowrap">
                     {customerPhone.replace(/\D/g, '').length} digit(s)
                   </span>
                 )}
@@ -806,10 +806,10 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             </div>
 
             <div>
-              <label htmlFor="field-customer-name" className="flex items-center justify-between text-muted mb-1 font-medium">
+              <label htmlFor="field-customer-name" className="flex items-center justify-between gap-2 text-muted mb-1 font-medium min-h-5">
                 <span>Customer Name *</span>
                 {customerPhone.replace(/\D/g, '').length >= 7 && !matchedCustomer && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-black px-1.5 py-0.5 rounded-full bg-brand/10 text-brand border border-brand/25">
+                  <span className="inline-flex items-center gap-1 h-5 text-[10px] font-black leading-none px-1.5 rounded-full bg-brand/10 text-brand border border-brand/25">
                     <UserPlus className="w-2.5 h-2.5" />
                     NEW USER
                   </span>
