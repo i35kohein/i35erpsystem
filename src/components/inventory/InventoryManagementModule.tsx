@@ -25,8 +25,6 @@ import {Boxes,
   Trash2,
   X,
   Palette,
-  ChevronLeft,
-  ChevronRight,
   ChevronDown,
   Printer,
   MoreHorizontal} from 'lucide-react';
@@ -351,7 +349,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const toggleSelectAllVisible = () => {
     // Scope to the current page only — selecting across every filtered page
     // silently grabbed hundreds of off-screen parts (audit P2).
-    const visibleIds = tablePageParts.map((p) => p.id);
+    const visibleIds = paginatedParts.map((p) => p.id);
     const allSelected = visibleIds.every((id) => selectedPartIds.has(id));
     setSelectedPartIds((prev) => {
       const next = new Set(prev);
@@ -838,16 +836,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   }, [parts, selectedQuality, selectedCategory, selectedModelFilter, showLowStockOnly, activeSearchQuery, sortKey, sortDir]);
 
   const paginatedParts = filteredParts;
-
-  // Table pagination (stock table only — cards/profit/matrix stay full list)
-  const TABLE_PAGE_SIZE = 50;
-  const [tablePage, setTablePage] = useState(1);
-  useEffect(() => {
-    setTablePage(1); // reset to first page whenever the filtered/sorted list changes
-  }, [filteredParts, sortKey, sortDir]);
-  const tableTotalPages = Math.max(1, Math.ceil(paginatedParts.length / TABLE_PAGE_SIZE));
-  const tablePageSafe = Math.min(tablePage, tableTotalPages);
-  const tablePageParts = paginatedParts.slice((tablePageSafe - 1) * TABLE_PAGE_SIZE, tablePageSafe * TABLE_PAGE_SIZE);
 
   const handleSaveNewPart = () => {
     if (!newPartData.name || !newPartData.sku || !newPartData.category || !newPartData.qualityTier || !newPartData.supplierId || !newPartData.deviceCompatibility?.[0] || (isBackGlassCategory && !newPartData.backGlassColor)) {
@@ -1342,7 +1330,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       <th className="w-[40px] px-2 py-2 bg-surface">
                         <Input
                           type="checkbox"
-                          checked={tablePageParts.length > 0 && tablePageParts.every((p) => selectedPartIds.has(p.id))}
+                          checked={paginatedParts.length > 0 && paginatedParts.every((p) => selectedPartIds.has(p.id))}
                           onChange={toggleSelectAllVisible}
                           aria-label="Select all visible parts"
                           className="accent-brand w-3.5 h-3.5 cursor-pointer"
@@ -1439,7 +1427,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">
-                  {tablePageParts.map((part) => {
+                  {paginatedParts.map((part) => {
                     const isLow = part.quantityInStock <= part.reorderPoint;
                     const isOut = part.quantityInStock === 0;
                     const draft = inlineDrafts[part.id] || {};
@@ -1635,44 +1623,16 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   })}
                 </tbody>
               </table>
-              {/* Table pagination controls */}
-              {tableTotalPages > 1 && (
-                <div className="sticky bottom-0 flex items-center justify-between gap-2 border-t border-line bg-white px-3 py-2">
-                  <span className="text-xs font-mono font-bold text-muted">
-                    {paginatedParts.length} parts · Page {tablePageSafe}/{tableTotalPages}
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    <Button
-                      type="button"
-                      onClick={() => setTablePage((p) => Math.max(1, p - 1))}
-                      disabled={tablePageSafe <= 1}
-                      className="flex h-10 lg:h-8 items-center gap-1 rounded-lg border border-line bg-white px-2.5 text-xs font-bold text-ink hover:border-brand hover:text-brand disabled:opacity-40 disabled:hover:border-line disabled:hover:text-ink transition-colors cursor-pointer"
-                    >
-                      <ChevronLeft className="w-3.5 h-3.5" />
-                      Prev
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => setTablePage((p) => Math.min(tableTotalPages, p + 1))}
-                      disabled={tablePageSafe >= tableTotalPages}
-                      className="flex h-10 lg:h-8 items-center gap-1 rounded-lg border border-line bg-white px-2.5 text-xs font-bold text-ink hover:border-brand hover:text-brand disabled:opacity-40 disabled:hover:border-line disabled:hover:text-ink transition-colors cursor-pointer"
-                    >
-                      Next
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
-          {/* Full list footer */}
+          {/* Full list footer — always visible with full count */}
           {filteredParts.length > 0 && (
             <div className="workspace-panel__footer p-3.5 bg-white border-t border-line flex items-center justify-between text-xs text-muted">
               <span className="font-bold">
-                Showing <strong className="text-ink">{Math.min(paginatedParts.length, (tablePageSafe - 1) * TABLE_PAGE_SIZE + 1)}-{Math.min(tablePageSafe * TABLE_PAGE_SIZE, paginatedParts.length)}</strong> of <strong className="text-ink">{paginatedParts.length}</strong> parts
+                Showing all <strong className="text-ink">{filteredParts.length}</strong> parts
               </span>
-              <span className="font-bold text-ink">Page {tablePageSafe}/{tableTotalPages}</span>
+              <span className="font-bold text-ink">{filteredParts.length} items</span>
             </div>
           )}
         </div>
@@ -1786,6 +1746,14 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               </div>
             )}
           </div>
+          {filteredParts.length > 0 && (
+            <div className="workspace-panel__footer p-3.5 bg-white border-t border-line flex items-center justify-between text-xs text-muted">
+              <span className="font-bold">
+                Showing all <strong className="text-ink">{filteredParts.length}</strong> parts
+              </span>
+              <span className="font-bold text-ink">{filteredParts.length} items</span>
+            </div>
+          )}
         </div>
       )}
 
@@ -1891,6 +1859,14 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <Boxes className="h-8 w-8 text-muted" />
               <p className="font-bold text-ink">No saved inventory data yet</p>
               <p className="text-xs text-muted">Add components with a device model and category to populate the matrix.</p>
+            </div>
+          )}
+          {filteredParts.length > 0 && (
+            <div className="workspace-panel__footer p-3.5 bg-white border-t border-line flex items-center justify-between text-xs text-muted">
+              <span className="font-bold">
+                Showing all <strong className="text-ink">{filteredParts.length}</strong> parts
+              </span>
+              <span className="font-bold text-ink">{filteredParts.length} items</span>
             </div>
           )}
         </div>
