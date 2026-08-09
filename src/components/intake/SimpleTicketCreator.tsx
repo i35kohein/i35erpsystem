@@ -254,14 +254,13 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
         </header>
 
         <form onSubmit={handleSubmit} onReset={resetForm} className="px-4 py-3.5 sm:px-7 sm:py-4">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-6">
-          <div className="flex flex-col lg:col-span-2">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-6">
+          <div className="flex flex-col divide-y divide-line">
             {/* LEFT header — mirrors the checklist header (Ko Hein) */}
             <div className="flex items-center justify-between border-b border-line pb-2">
               <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted">Customer Data</span>
               <span className="shrink-0 font-mono text-[11px] font-black text-brand">{form.repairs.length > 0 ? `${form.repairs.length} repair${form.repairs.length > 1 ? 's' : ''}` : '—'}</span>
             </div>
-            <div className="grid grid-cols-1 gap-x-5 sm:grid-cols-2">
             {/* Phone */}
             <label className="flex items-center gap-3 py-2">
               <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Phone</span>
@@ -371,10 +370,8 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15 placeholder:text-muted"
               />
             </label>
-            {/* Note — spans both field columns */}
-            </div>
             {/* Intake note — flex-1 absorbs the remaining height so both columns balance */}
-            <label className="mt-2 flex flex-1 items-stretch gap-3 pt-2">
+            <label className="flex flex-1 items-stretch gap-3 py-2">
               <span className="w-32 shrink-0 pt-2.5 text-[11px] font-extrabold uppercase tracking-wider text-muted">Intake Note</span>
               <textarea
                 value={form.reply}
@@ -392,9 +389,9 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted">Phone Testing & Checking</span>
               <span className="shrink-0 font-mono text-[11px] font-black text-brand">{checkedCount}/{DIAGNOSTIC_NAMES.length}</span>
             </div>
-            <div className="mt-0 grid grid-cols-1 gap-x-4">
+            <div className="mt-0 grid grid-cols-1 gap-x-4 sm:grid-cols-2 sm:gap-x-8">
               {DIAGNOSTIC_NAMES.map((name, i) => (
-                <label key={name} className="group flex min-h-6 items-center gap-2 border-b border-line/60 py-1">
+                <label key={name} className="group flex min-h-7 items-center gap-2 border-b border-line/60 py-1.5">
                   <button
                     type="button"
                     onClick={() => cycleCheck(i)}
