@@ -1314,25 +1314,11 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                   <Receipt className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
-                  <div className="flex items-center space-x-2">
-                    <h3 className="font-extrabold text-sm text-ink truncate">Review Cart</h3>
-                    <span className="text-xs font-extrabold bg-brand/10 text-brand-deep px-2 py-0.5 rounded-full shrink-0">
-                      {cartSummary.count} {cartSummary.count === 1 ? 'Service' : 'Services'}
-                    </span>
-                  </div>
+                  <h3 className="font-extrabold text-sm text-ink truncate">Review Cart</h3>
                   <p className="text-xs font-bold text-muted truncate">{selectedDevice}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                {cart.size > 0 && (
-                  <button
-                    type="button"
-                    onClick={handleClearCart}
-                    className="text-xs font-extrabold text-danger hover:text-danger/80 transition-colors cursor-pointer p-1.5 focus:outline-none"
-                  >
-                    Clear All
-                  </button>
-                )}
                 <button
                   type="button"
                   onClick={() => setIsCartSheetOpen(false)}
