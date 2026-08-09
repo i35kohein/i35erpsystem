@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Printer } from 'lucide-react';
+import { Printer, ChevronDown } from 'lucide-react';
 import { WorkOrder, DiagnosticItemResult, AppleDeviceCategory, SelectedRepairItem } from '../../types';
 import { ModelRepairPrice } from '../../types/priceCatalog';
 import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
@@ -33,6 +33,10 @@ const EMPTY_FORM: FormState = {
   error: '', repairs: [], passcode: '', reply: '',
   checks: DIAGNOSTIC_NAMES.map(() => ({ checked: false, note: '' })),
 };
+
+/** Popup-trigger rows styled exactly like the text inputs so all rows align. */
+const boxBtnCls =
+  'flex w-full min-w-0 items-center justify-between gap-2 rounded-lg border border-line bg-white px-3 py-2 text-left text-sm text-ink transition-colors hover:border-brand/50 focus:border-brand focus:ring-2 focus:ring-brand/15';
 
 /** Approximate swatch color for a device color name (used by the color picker). */
 function colorSwatch(name: string): string {
@@ -280,10 +284,10 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               <button
                 type="button"
                 onClick={() => setIsModelModalOpen(true)}
-                className="flex min-w-0 flex-1 items-center justify-between gap-2 py-1 text-left text-sm text-ink outline-none"
+                className={boxBtnCls}
               >
                 <span className="truncate">{form.model || <span className="text-muted/70">Choose model…</span>}</span>
-                <span className="print:hidden text-[10px] font-black uppercase text-brand shrink-0">Browse ▸</span>
+                <ChevronDown className="print:hidden h-4 w-4 shrink-0 text-muted" />
               </button>
             </label>
             {/* Color → popup */}
@@ -292,19 +296,19 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               <button
                 type="button"
                 onClick={() => setIsColorOpen(true)}
-                className="flex min-w-0 flex-1 items-center justify-between gap-2 py-1 text-left text-sm text-ink outline-none"
+                className={boxBtnCls}
               >
-                <span className="flex items-center gap-2 truncate">
+                <span className="flex min-w-0 items-center gap-2 truncate">
                   {form.color ? (
                     <>
                       <span className="h-3 w-3 shrink-0 rounded-full border border-black/20" style={{ background: colorSwatch(form.color) }} />
-                      {form.color}
+                      <span className="truncate">{form.color}</span>
                     </>
                   ) : (
                     <span className="text-muted/70">Choose color…</span>
                   )}
                 </span>
-                <span className="print:hidden text-[10px] font-black uppercase text-brand shrink-0">Pick ▸</span>
+                <ChevronDown className="print:hidden h-4 w-4 shrink-0 text-muted" />
               </button>
             </label>
             {/* IMEI */}
@@ -325,7 +329,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 type="date"
                 value={form.date}
                 onChange={(e) => set('date', e.target.value)}
-                className="min-w-0 flex-1 bg-transparent py-1 text-sm text-ink outline-none [color-scheme:light]"
+                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15 [color-scheme:light]"
               />
             </label>
             {/* Error / Repairs → popup */}
@@ -334,7 +338,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               <button
                 type="button"
                 onClick={() => setIsRepairsOpen(true)}
-                className="flex min-w-0 flex-1 items-center justify-between gap-2 py-1 text-left text-sm text-ink outline-none"
+                className={boxBtnCls}
               >
                 <span className="truncate">
                   {form.repairs.length === 0 ? (
@@ -346,7 +350,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                     </span>
                   )}
                 </span>
-                <span className="print:hidden text-[10px] font-black uppercase text-brand shrink-0">Add ▸</span>
+                <ChevronDown className="print:hidden h-4 w-4 shrink-0 text-muted" />
               </button>
             </label>
             {/* Passcode */}
