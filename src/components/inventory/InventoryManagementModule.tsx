@@ -976,54 +976,34 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     <div className={`space-y-3 ${isIpad ? 'flex min-h-0 flex-1 flex-col' : ''}`}>
       {/* Module Toolbar — iPad: title hidden (topbar covers it) + filters in drawer.
           Desktop: original layout (title + inline filter dropdowns).
-          iPad hides the whole bar unless inline-edit is active (Save needs a home). */}
-      <div className={`module-toolbar overflow-visible bg-white p-3 rounded-xl border border-line shadow-xs flex flex-col lg:flex-row lg:items-center gap-2 ${isIpad && !inlineEditMode ? 'hidden' : ''}`}>
-        {!isIpad && (
-          <div className="module-subheader lg:shrink-0">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-lg bg-brand text-white flex items-center justify-center font-bold shadow-2xs">
-                <Boxes className="w-4 h-4" />
-              </div>
-              <div>
-                <h1 className="text-base font-black text-ink tracking-tight">Parts Inventory</h1>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Right cluster — one line on md+ */}
-        <div className="flex flex-col md:flex-row md:items-center gap-2 w-full lg:w-auto lg:ml-auto min-w-0">
-
-
-          {viewMode === 'stock' && (
-            <div className={`flex flex-wrap items-center justify-end gap-2 w-full md:w-auto md:ml-auto md:shrink-0`}>
-              <div className="flex items-center gap-1.5 w-full sm:w-auto">
-
-                {/* Save edits */}
-                {inlineEditMode && (
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      if (!inlineSaveReview.length) {
-                        setInlineEditMode(false);
-                        setInlineDrafts({});
-                        toast.info('No changes to save', 'Nothing Changed');
-                        return;
-                      }
-                      setShowInlineSaveConfirm(true);
-                    }}
-                    className="flex-1 sm:flex-none inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-brand bg-brand px-4 text-xs font-extrabold text-white shadow-xs transition-all hover:bg-brand-deep active:scale-95"
-                    title="Save all inline edits"
-                  >
-                    <Check className="h-4 w-4" />
-                    <span>Save {inlineSaveReview.length} Edits</span>
-                  </Button>
-                )}
-              </div>
-            </div>
+      {/* Inline-edit save bar — appears only while editing rows */}
+      {inlineEditMode && (
+        <div className="bg-white p-2.5 rounded-xl border border-line shadow-xs flex items-center justify-between gap-2">
+          <span className="text-xs font-extrabold text-ink truncate">
+            Editing {Object.keys(inlineDrafts).length} row{Object.keys(inlineDrafts).length === 1 ? '' : 's'}…
+          </span>
+          {/* Save edits */}
+          {inlineEditMode && (
+          <Button
+          type="button"
+          onClick={() => {
+          if (!inlineSaveReview.length) {
+          setInlineEditMode(false);
+          setInlineDrafts({});
+          toast.info('No changes to save', 'Nothing Changed');
+          return;
+          }
+          setShowInlineSaveConfirm(true);
+          }}
+          className="flex-1 sm:flex-none inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-brand bg-brand px-4 text-xs font-extrabold text-white shadow-xs transition-all hover:bg-brand-deep active:scale-95"
+          title="Save all inline edits"
+          >
+          <Check className="h-4 w-4" />
+          <span>Save {inlineSaveReview.length} Edits</span>
+          </Button>
           )}
         </div>
-      </div>
+      )}
 
       {/* Financial summary belongs to the Profit view, leaving Stock and Matrix full-height. */}
       {viewMode === 'profit' && (
