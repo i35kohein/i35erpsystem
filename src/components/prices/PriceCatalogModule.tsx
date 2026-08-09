@@ -338,6 +338,17 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
   }, [cart]);
 
   // Handlers
+  // Device change must never leave stale per-device prices in the cart — a
+  // quote under the new model header would silently use the old model's prices
+  // (selected-UIUX audit P1, verified live).
+  const handleDeviceChange = (model: string) => {
+    if (model !== selectedDevice && cart.size > 0) {
+      setCart(new Map());
+      toast.info('Cart cleared — services are priced per device model.', 'Device Changed');
+    }
+    setSelectedDevice(model);
+  };
+
   const handleToggleCartItem = (categoryKey: string, label: string, price: number, warranty: string) => {
     setCart((prev) => {
       const next = new Map(prev);
@@ -678,7 +689,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                             {i + 1}
                           </div>
                           <span className="text-xs font-bold text-muted truncate">
-                            {i === 0 ? 'Primary Service Slot' : `Add-on Service #${i + 1}`}
+                            {i === 0 ? 'Empty — pick a service to add' : `Empty slot #${i + 1} — pick a service`}
                           </span>
                         </div>
                       );
@@ -972,7 +983,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                     transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                     className={`group relative bg-white border-2 rounded-2xl p-2.5 sm:p-4 cursor-pointer transition-colors duration-200 flex items-center gap-2.5 sm:flex-col sm:items-stretch sm:justify-between select-none shadow-2xs min-h-[64px] sm:min-h-0 sm:h-[152px] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60 focus-visible:border-brand ${
                       isSelected
-                        ? 'border-brand bg-brand/[0.03] shadow-md'
+                        ? 'border-brand bg-brand/5 shadow-md'
                         : 'border-line hover:border-brand/50'
                     }`}
                   >
@@ -1165,7 +1176,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
         isOpen={deviceModalOpen}
         onClose={() => setDeviceModalOpen(false)}
         selectedDevice={selectedDevice}
-        onSelectDevice={(model) => setSelectedDevice(model)}
+        onSelectDevice={handleDeviceChange}
         onOpenSettings={() => setSettingsModalOpen(true)}
       />
 
@@ -1204,7 +1215,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
         folders={folders}
         currencySymbol={currencySymbol}
         initialDevice={selectedDevice}
-        onSelectModelForCatalog={(model) => setSelectedDevice(model)}
+        onSelectModelForCatalog={handleDeviceChange}
         onCreateTicketWithQuote={(model, services) => {
           if (onOpenNewWorkOrder) {
             onOpenNewWorkOrder({

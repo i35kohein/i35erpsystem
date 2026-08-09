@@ -407,6 +407,7 @@ export const QuickPriceCalculatorModal: React.FC<QuickPriceCalculatorModalProps>
                       <Button
                         key={service.key}
                         type="button"
+                        aria-pressed={isSelected}
                         onClick={() =>
                           handleToggleService(service.key, service.label, service.price, service.warranty)
                         }
