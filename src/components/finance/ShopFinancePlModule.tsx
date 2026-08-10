@@ -1455,66 +1455,94 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
             ))}
           </div>
 
-          {/* OVERVIEW — P&L summary cards */}
+          {/* OVERVIEW — professional KPI + net profit panel (Ko Hein 2026-08-11) */}
           {partsSubTab === 'overview' && (
           <>
-          {/* P&L summary cards */}
+          {/* KPI cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <div className="p-3.5 bg-white border border-line rounded-xl shadow-2xs">
-              <span className="text-xs font-bold text-muted uppercase block">Units Sold</span>
-              <p className="text-xl font-black text-ink mt-1">{financialSummary.partsUnitsSold}</p>
-              <span className="text-xs text-muted font-bold">parts this period</span>
+            <div className="p-4 bg-white border border-line rounded-xl shadow-2xs">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-muted">Units Sold</span>
+                <span className="w-7 h-7 rounded-lg bg-brand-soft text-brand flex items-center justify-center"><Boxes className="w-3.5 h-3.5" /></span>
+              </div>
+              <p className="text-2xl font-black text-ink mt-2 tabular-nums">{financialSummary.partsUnitsSold}</p>
+              <span className="text-[10px] font-bold text-muted">parts this period</span>
             </div>
-            <div className="p-3.5 bg-white border border-line rounded-xl shadow-2xs">
-              <span className="text-xs font-bold text-muted uppercase block">Parts Revenue</span>
-              <p className="text-xl font-black text-success-deep mt-1">{financialSummary.partsSalesIncome.toLocaleString()} {currency}</p>
-              <span className="text-xs text-muted font-bold">selling price</span>
+            <div className="p-4 bg-white border border-line rounded-xl shadow-2xs">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-muted">Parts Revenue</span>
+                <span className="w-7 h-7 rounded-lg bg-success/10 text-success-deep flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5" /></span>
+              </div>
+              <p className="text-2xl font-black text-success-deep mt-2 tabular-nums">{financialSummary.partsSalesIncome.toLocaleString()} {currency}</p>
+              <span className="text-[10px] font-bold text-muted">selling price</span>
             </div>
-            <div className="p-3.5 bg-white border border-line rounded-xl shadow-2xs">
-              <span className="text-xs font-bold text-muted uppercase block">Parts COGS</span>
-              <p className="text-xl font-black text-danger mt-1">-{financialSummary.cogsTotal.toLocaleString()} {currency}</p>
-              <span className="text-xs text-muted font-bold">unit cost</span>
+            <div className="p-4 bg-white border border-line rounded-xl shadow-2xs">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-muted">Parts COGS</span>
+                <span className="w-7 h-7 rounded-lg bg-danger/10 text-danger flex items-center justify-center"><Coins className="w-3.5 h-3.5" /></span>
+              </div>
+              <p className="text-2xl font-black text-danger mt-2 tabular-nums">-{financialSummary.cogsTotal.toLocaleString()} {currency}</p>
+              <span className="text-[10px] font-bold text-muted">unit cost</span>
             </div>
-            <div className="p-3.5 bg-gradient-to-br from-success/10 to-surface border border-success/30 rounded-xl shadow-2xs">
-              <span className="text-xs font-bold text-muted uppercase block">Parts Profit</span>
-              <div className="flex items-baseline justify-between mt-1">
-                <p className="text-xl font-black text-success-deep">+{financialSummary.partsProfit.toLocaleString()} {currency}</p>
-                <span className={`text-xs font-black px-1.5 py-0.5 rounded-full ${
+            <div className="p-4 bg-gradient-to-br from-success/10 to-surface border border-success/30 rounded-xl shadow-2xs">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-success-deep">Gross Profit</span>
+                <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
                   financialSummary.partsMarginPercent >= 40 ? 'bg-success/15 text-success-deep' : 'bg-warning/15 text-warning'
                 }`}>
-                  {financialSummary.partsMarginPercent}%
+                  {financialSummary.partsMarginPercent}% margin
                 </span>
               </div>
-              <span className="text-xs text-muted font-bold">gross margin</span>
+              <p className="text-2xl font-black text-success-deep mt-2 tabular-nums">+{financialSummary.partsProfit.toLocaleString()} {currency}</p>
+              <span className="text-[10px] font-bold text-muted">revenue − cost</span>
             </div>
           </div>
 
-          {/* Net profit after tech commission — Ko Hein's formula:
-              Net Profit = Amount Due (Customer) − Parts Cost − Tech Commission (2026-08-11) */}
+          {/* Net profit panel — Ko Hein's formula:
+              Net = Amount Due (Customer) − Parts Cost − Tech Commission (2026-08-11) */}
           {(() => {
             const rows = partsTickets.map(({ wo, cost }) => {
               const amountDue = wo.totalAmount || wo.subtotal || 0;
               const grossProfit = Math.max(0, amountDue - cost);
-              return { grossProfit, commission: commissionOf(wo) };
+              return { amountDue, cost, grossProfit, commission: commissionOf(wo) };
             });
+            const dueTotal = rows.reduce((s, r) => s + r.amountDue, 0);
+            const costTotal = rows.reduce((s, r) => s + r.cost, 0);
             const grossTotal = rows.reduce((s, r) => s + r.grossProfit, 0);
             const commissionTotal = rows.reduce((s, r) => s + r.commission, 0);
             const netTotal = Math.max(0, grossTotal - commissionTotal);
             return (
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-brand/30 bg-gradient-to-r from-brand-soft/50 to-surface">
-                <div>
-                  <span className="text-xs font-bold text-muted uppercase block">Net Parts Profit (after Tech Commission)</span>
-                  <p className="text-xl font-black text-brand mt-0.5">+{netTotal.toLocaleString()} {currency}</p>
+              <div className="rounded-2xl bg-ink text-white p-5 shadow-lg">
+                <div className="flex items-center justify-between gap-2 mb-4">
+                  <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-white/60">Net Parts Profit</span>
+                  <span className="text-[10px] font-bold text-white/40">Amount Due − Parts Cost − Tech Commission</span>
                 </div>
-                <div className="flex gap-4 sm:gap-6 text-xs font-mono shrink-0">
-                  <div className="text-right">
-                    <span className="text-muted block text-[10px] uppercase font-black">Gross Profit</span>
-                    <span className="font-bold text-success-deep">+{grossTotal.toLocaleString()} {currency}</span>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0">
+                  <div className="grid grid-cols-3 flex-1 gap-3 text-center">
+                    <div className="rounded-xl bg-white/10 px-2 py-2.5">
+                      <span className="block text-[9px] font-extrabold uppercase tracking-wider text-white/50">Amount Due</span>
+                      <span className="block text-sm font-black tabular-nums mt-0.5">{dueTotal.toLocaleString()}</span>
+                    </div>
+                    <div className="rounded-xl bg-white/10 px-2 py-2.5">
+                      <span className="block text-[9px] font-extrabold uppercase tracking-wider text-white/50">Parts Cost</span>
+                      <span className="block text-sm font-black tabular-nums text-danger mt-0.5">-{costTotal.toLocaleString()}</span>
+                    </div>
+                    <div className="rounded-xl bg-white/10 px-2 py-2.5">
+                      <span className="block text-[9px] font-extrabold uppercase tracking-wider text-white/50">Tech Commission</span>
+                      <span className="block text-sm font-black tabular-nums text-warning mt-0.5">-{commissionTotal.toLocaleString()}</span>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <span className="text-muted block text-[10px] uppercase font-black">Tech Commission</span>
-                    <span className="font-bold text-danger">-{commissionTotal.toLocaleString()} {currency}</span>
+                  <div className="hidden sm:flex items-center justify-center px-4 shrink-0">
+                    <span className="text-2xl font-black text-white/50">=</span>
                   </div>
+                  <div className="rounded-xl bg-success text-white px-5 py-3 text-center shrink-0 shadow-md">
+                    <span className="block text-[9px] font-extrabold uppercase tracking-wider text-white/70">Net Profit</span>
+                    <span className="block text-xl font-black tabular-nums mt-0.5">+{netTotal.toLocaleString()} {currency}</span>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center justify-between text-[10px] font-bold text-white/40">
+                  <span>Gross Profit +{grossTotal.toLocaleString()} {currency}</span>
+                  <span>· {rows.length} parts ticket{rows.length !== 1 ? 's' : ''} this period</span>
                 </div>
               </div>
             );
