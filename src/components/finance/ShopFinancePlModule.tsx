@@ -51,7 +51,6 @@ export interface ShopFinancePlModuleHandle {
 export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFinancePlModuleProps>(({
   workOrders,
   parts,
-  technicians = [],
   expenses,
   supplierDebts,
   technicianPayouts,
@@ -170,31 +169,6 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
       .filter((li) => li.partId && !li.isLabor && li.quantity > 0)
       .reduce((s, li) => s + li.unitPrice * li.quantity, 0);
   const partsRevenueTotal = fundTickets.reduce((s, wo) => s + partsRevenueOf(wo), 0);
-
-  // Technician commission per ticket — mirrors App.tsx handleMarkPaid / POS
-  // System section (Ko Hein 2026-08-11): base = labor revenue after per-item
-  // discounts × tech rate (spareparts vs hardware).
-  const commissionOf = (wo: WorkOrder) => {
-    const techId = wo.assignedTechId || (wo as WorkOrder & { qaTechnicianId?: string }).qaTechnicianId;
-    const tech = techId ? technicians.find((t) => t.id === techId) : undefined;
-    if (!tech) return 0;
-    const repairType =
-      wo.repairTypeAI ||
-      (wo.serviceType === 'Micro-Soldering' ? ('hardware' as const) : ('spareparts' as const));
-    const rate =
-      repairType === 'hardware'
-        ? tech.commissionRateHardware || tech.commissionRate || 0
-        : tech.commissionRateParts || tech.commissionRate || 0;
-    if (rate <= 0) return 0;
-    const laborRevenue = (wo.lineItems || [])
-      .filter((li) => li.isLabor)
-      .reduce((s, li) => {
-        const lineTotal = (Number(li.unitPrice) || 0) * (Number(li.quantity) || 0);
-        const disc = li.lineItemDiscountPercent ? Math.round(lineTotal * (li.lineItemDiscountPercent / 100)) : 0;
-        return s + lineTotal - disc;
-      }, 0);
-    return Math.round(laborRevenue * (rate / 100));
-  };
 
   // Financial Calculations
   const financialSummary = useMemo(() => {
@@ -1498,51 +1472,39 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
             </div>
           </div>
 
-          {/* Net profit panel — Ko Hein's formula:
-              Net = Amount Due (Customer) − Parts Cost − Tech Commission (2026-08-11) */}
+          {/* Parts P&L panel — parts only, no tech commission (Ko Hein 2026-08-11) */}
           {(() => {
-            const rows = partsTickets.map(({ wo, cost }) => {
-              const amountDue = wo.totalAmount || wo.subtotal || 0;
-              const grossProfit = Math.max(0, amountDue - cost);
-              return { amountDue, cost, grossProfit, commission: commissionOf(wo) };
-            });
-            const dueTotal = rows.reduce((s, r) => s + r.amountDue, 0);
-            const costTotal = rows.reduce((s, r) => s + r.cost, 0);
-            const grossTotal = rows.reduce((s, r) => s + r.grossProfit, 0);
-            const commissionTotal = rows.reduce((s, r) => s + r.commission, 0);
-            const netTotal = Math.max(0, grossTotal - commissionTotal);
+            const profit = financialSummary.partsProfit;
+            const margin = financialSummary.partsMarginPercent;
             return (
               <div className="rounded-2xl bg-ink text-white p-5 shadow-lg">
                 <div className="flex items-center justify-between gap-2 mb-4">
-                  <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-white/60">Net Parts Profit</span>
-                  <span className="text-[10px] font-bold text-white/40">Amount Due − Parts Cost − Tech Commission</span>
+                  <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-white/60">Parts Profit Summary</span>
+                  <span className="text-[10px] font-bold text-white/40">Parts Revenue − Parts COGS</span>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0">
-                  <div className="grid grid-cols-3 flex-1 gap-3 text-center">
+                  <div className="grid grid-cols-2 flex-1 gap-3 text-center">
                     <div className="rounded-xl bg-white/10 px-2 py-2.5">
-                      <span className="block text-[9px] font-extrabold uppercase tracking-wider text-white/50">Amount Due</span>
-                      <span className="block text-sm font-black tabular-nums mt-0.5">{dueTotal.toLocaleString()}</span>
+                      <span className="block text-[9px] font-extrabold uppercase tracking-wider text-white/50">Parts Revenue</span>
+                      <span className="block text-sm font-black tabular-nums mt-0.5">{financialSummary.partsSalesIncome.toLocaleString()} {currency}</span>
                     </div>
                     <div className="rounded-xl bg-white/10 px-2 py-2.5">
-                      <span className="block text-[9px] font-extrabold uppercase tracking-wider text-white/50">Parts Cost</span>
-                      <span className="block text-sm font-black tabular-nums text-danger mt-0.5">-{costTotal.toLocaleString()}</span>
-                    </div>
-                    <div className="rounded-xl bg-white/10 px-2 py-2.5">
-                      <span className="block text-[9px] font-extrabold uppercase tracking-wider text-white/50">Tech Commission</span>
-                      <span className="block text-sm font-black tabular-nums text-warning mt-0.5">-{commissionTotal.toLocaleString()}</span>
+                      <span className="block text-[9px] font-extrabold uppercase tracking-wider text-white/50">Parts COGS</span>
+                      <span className="block text-sm font-black tabular-nums text-danger mt-0.5">-{financialSummary.cogsTotal.toLocaleString()} {currency}</span>
                     </div>
                   </div>
                   <div className="hidden sm:flex items-center justify-center px-4 shrink-0">
                     <span className="text-2xl font-black text-white/50">=</span>
                   </div>
                   <div className="rounded-xl bg-success text-white px-5 py-3 text-center shrink-0 shadow-md">
-                    <span className="block text-[9px] font-extrabold uppercase tracking-wider text-white/70">Net Profit</span>
-                    <span className="block text-xl font-black tabular-nums mt-0.5">+{netTotal.toLocaleString()} {currency}</span>
+                    <span className="block text-[9px] font-extrabold uppercase tracking-wider text-white/70">Parts Profit</span>
+                    <span className="block text-xl font-black tabular-nums mt-0.5">+{profit.toLocaleString()} {currency}</span>
+                    <span className="block text-[10px] font-black text-white/70 mt-0.5">{margin}% margin</span>
                   </div>
                 </div>
                 <div className="mt-3 flex items-center justify-between text-[10px] font-bold text-white/40">
-                  <span>Gross Profit +{grossTotal.toLocaleString()} {currency}</span>
-                  <span>· {rows.length} parts ticket{rows.length !== 1 ? 's' : ''} this period</span>
+                  <span>{financialSummary.partsUnitsSold} units · this period</span>
+                  <span>· {fundTickets.length} parts ticket{fundTickets.length !== 1 ? 's' : ''}</span>
                 </div>
               </div>
             );
@@ -1699,35 +1661,25 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                       <th className="p-3">Ticket</th>
                       <th className="p-3">Device / Customer</th>
                       <th className="p-3 text-center">Parts Units</th>
-                      <th className="p-3 text-center">Parts Cost</th>
-                      <th className="p-3 text-center">Amount Due</th>
-                      <th className="p-3 text-center">Gross Profit</th>
-                      <th className="p-3 text-center">Tech Commission</th>
-                      <th className="p-3 text-right">Net Profit</th>
+                      <th className="p-3 text-center">Parts Revenue</th>
+                      <th className="p-3 text-center">Parts COGS</th>
+                      <th className="p-3 text-right">Parts Profit</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-line">
-                    {partsTickets.map(({ wo, units, cost }) => {
-                      const amountDue = wo.totalAmount || wo.subtotal || 0;
-                      const grossProfit = Math.max(0, amountDue - cost);
-                      const commission = commissionOf(wo);
-                      const netProfit = Math.max(0, grossProfit - commission);
-                      return (
-                        <tr key={wo.id} className="hover:bg-surface">
-                          <td className="p-3 font-mono font-bold text-brand">{wo.orderNumber}</td>
-                          <td className="p-3">
-                            <span className="font-bold text-ink block">{wo.deviceModel}</span>
-                            <span className="text-xs text-muted">{wo.customerName}</span>
-                          </td>
-                          <td className="p-3 text-center font-mono font-bold">{units}</td>
-                          <td className="p-3 text-center font-mono text-danger">{cost.toLocaleString()} {currency}</td>
-                          <td className="p-3 text-center font-mono text-ink">{amountDue.toLocaleString()} {currency}</td>
-                          <td className="p-3 text-center font-mono font-bold text-success-deep">+{grossProfit.toLocaleString()} {currency}</td>
-                          <td className="p-3 text-center font-mono text-muted">-{commission.toLocaleString()} {currency}</td>
-                          <td className="p-3 text-right font-mono font-black text-success-deep">+{netProfit.toLocaleString()} {currency}</td>
-                        </tr>
-                      );
-                    })}
+                    {partsTickets.map(({ wo, units, revenue, cost }) => (
+                      <tr key={wo.id} className="hover:bg-surface">
+                        <td className="p-3 font-mono font-bold text-brand">{wo.orderNumber}</td>
+                        <td className="p-3">
+                          <span className="font-bold text-ink block">{wo.deviceModel}</span>
+                          <span className="text-xs text-muted">{wo.customerName}</span>
+                        </td>
+                        <td className="p-3 text-center font-mono font-bold">{units}</td>
+                        <td className="p-3 text-center font-mono text-success-deep">{revenue.toLocaleString()} {currency}</td>
+                        <td className="p-3 text-center font-mono text-danger">{cost.toLocaleString()} {currency}</td>
+                        <td className="p-3 text-right font-mono font-black text-success-deep">+{(revenue - cost).toLocaleString()} {currency}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
