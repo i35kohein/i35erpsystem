@@ -28,6 +28,7 @@ import {WorkOrder,
   AppUser} from '../../types';
 import { Button , Input } from '../ui';
 import { ActiveFilterChips } from '../common/ActiveFilterChips';
+import { confirmDialog } from '../common/ConfirmDialog';
 import {get21Diagnostics,
   checkIsBeforeDiagnosticNeeded,
   checkIsAfterDiagnosticNeeded,
@@ -604,10 +605,9 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
           {onClearAllWorkOrders && workOrders.length > 0 && (
             <Button
               type="button"
-              onClick={() => {
-                if (window.confirm(`Are you sure you want to clear all ${workOrders.length} tickets from the system?`)) {
-                  onClearAllWorkOrders();
-                }
+              onClick={async () => {
+                const ok = await confirmDialog({ title: 'Clear All Tickets', message: `Are you sure you want to clear all ${workOrders.length} tickets from the system?`, confirmLabel: 'Clear All Tickets', danger: true });
+                if (ok) onClearAllWorkOrders();
               }}
               className="inline-flex h-7 items-center gap-1 rounded-md border border-danger/30 bg-danger/10 px-2 text-xs font-bold text-danger shadow-2xs transition-colors hover:bg-danger/15"
               title="⚠️ Permanently delete ALL tickets from the system (Admin only)"

@@ -11,6 +11,7 @@ const CameraQrScannerModal = lazy(() => import('../common/CameraQrScannerModal')
 import { ConfirmDeleteModal } from '../common/ConfirmDeleteModal';
 import { Button } from '../ui';
 import { TicketDetailInspectorModal } from '../common/TicketDetailInspectorModal';
+import { confirmDialog } from '../common/ConfirmDialog';
 import type { TicketPrefillData } from './CreateTicketSoloPage';
 import {ClipboardList, ClipboardCheck, Stethoscope, 
   Camera,
@@ -494,11 +495,10 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                             <Button
                               variant="ghost"
                               type="button"
-                              onClick={(e) => {
+                              onClick={async (e) => {
                                 e.stopPropagation();
-                                if (window.confirm(`Reopen QA for ${wo.orderNumber || wo.id}? It goes back to the QA queue for re-inspection.`)) {
-                                  onReopenQa(wo.id);
-                                }
+                                const ok = await confirmDialog({ title: 'Reopen QA', message: `Reopen QA for ${wo.orderNumber || wo.id}? It goes back to the QA queue for re-inspection.`, confirmLabel: 'Reopen QA' });
+                                if (ok) onReopenQa(wo.id);
                               }}
                               className="!h-7 !min-h-7 w-7 px-0 rounded-full border border-warning/40 bg-warning/10 text-warning hover:bg-warning/20"
                               title="Reopen QA — re-run the 21-point check"

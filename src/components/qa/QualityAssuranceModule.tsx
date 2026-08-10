@@ -13,6 +13,7 @@ import { Button } from '../ui';
 import { DIAGNOSTIC_NAMES } from '../intake/deviceData';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 import { compressImageFile } from '../../lib/utils';
+import { confirmDialog } from '../common/ConfirmDialog';
 import { PriorityBadge } from '../common/PriorityBadge';
 
 interface QualityAssuranceModuleProps {
@@ -395,11 +396,10 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                               <Button
                                 variant="ghost"
                                 type="button"
-                                onClick={(e) => {
+                                onClick={async (e) => {
                                   e.stopPropagation();
-                                  if (window.confirm(`Error Return ${wo.orderNumber}? The ticket reopens for repair.`)) {
-                                    onErrorReturn(wo.id);
-                                  }
+                                  const ok = await confirmDialog({ title: 'Error Return', message: `Error Return ${wo.orderNumber}? The ticket reopens for repair.`, confirmLabel: 'Error Return', danger: false });
+                                  if (ok && onErrorReturn) onErrorReturn(wo.id);
                                 }}
                                 className="!h-7 !min-h-7 px-2 rounded-full border border-warning/40 bg-warning/10 text-warning hover:bg-warning/20"
                                 title="Error Return — customer brought the device back"

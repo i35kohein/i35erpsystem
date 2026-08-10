@@ -28,6 +28,7 @@ import {X,
 import { ModelRepairPrice, PriceCatalogImportRow, REPAIR_CATEGORIES, RepairCategoryDef, FolderConfig, getModelFolderId } from '../../types/priceCatalog';
 import { Button , Input } from '../ui';
 import { toast } from '../../lib/toast';
+import { confirmDialog } from '../common/ConfirmDialog';
 
 const normalizeCsvHeader = (value: string) => value.replace(/^\uFEFF/, '').trim().toLowerCase().replace(/\s+/g, ' ');
 
@@ -214,15 +215,15 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
     setIsRenamingModel(false);
   };
 
-  const handleDeleteModelClick = () => {
+  const handleDeleteModelClick = async () => {
     if (!deleteModel) return;
-    if (window.confirm(`Are you sure you want to delete model "${selectedModel}" from catalog?`)) {
-      deleteModel(selectedModel);
-      triggerToast(`Deleted model "${selectedModel}".`);
-      const remaining = catalog.filter((m) => m.model !== selectedModel);
-      if (remaining.length > 0) {
-        setSelectedModel(remaining[0].model);
-      }
+    const ok = await confirmDialog({ title: 'Delete Model', message: `Are you sure you want to delete model "${selectedModel}" from catalog?`, confirmLabel: 'Delete Model', danger: true });
+    if (!ok) return;
+    deleteModel(selectedModel);
+    triggerToast(`Deleted model "${selectedModel}".`);
+    const remaining = catalog.filter((m) => m.model !== selectedModel);
+    if (remaining.length > 0) {
+      setSelectedModel(remaining[0].model);
     }
   };
 
@@ -251,12 +252,12 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
     setNewCategoryLabel('');
   };
 
-  const handleDeleteCategoryClick = (key: string, label: string) => {
+  const handleDeleteCategoryClick = async (key: string, label: string) => {
     if (!deleteCategory) return;
-    if (window.confirm(`Delete repair category "${label}"? Existing model prices for this key will be hidden.`)) {
-      deleteCategory(key);
-      triggerToast(`Deleted repair category "${label}".`);
-    }
+    const ok = await confirmDialog({ title: 'Delete Repair Category', message: `Delete repair category "${label}"? Existing model prices for this key will be hidden.`, confirmLabel: 'Delete Category', danger: true });
+    if (!ok) return;
+    deleteCategory(key);
+    triggerToast(`Deleted repair category "${label}".`);
   };
 
   // Folder Actions
@@ -381,7 +382,8 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
 
       if (parsedRows.length === 0) throw new Error('No existing Price List models matched this file.');
       const csvCategories = REPAIR_CATEGORIES.filter((category) => csvCategoryKeys.has(category.key));
-      if (!window.confirm(`Replace the Price List repair categories with the ${csvCategories.length} services in this CSV and import prices for ${parsedRows.length} existing model(s)? Inventory Categories will not change.`)) return;
+      const okReplace = await confirmDialog({ title: 'Import CSV Prices', message: `Replace the Price List repair categories with the ${csvCategories.length} services in this CSV and import prices for ${parsedRows.length} existing model(s)? Inventory Categories will not change.`, confirmLabel: 'Import & Replace' });
+      if (!okReplace) return;
 
       const imported = await importCatalogRows(
         parsedRows,
@@ -519,12 +521,12 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
               <span className="hidden sm:inline">Export JSON</span>
             </Button>
             <Button
-              onClick={() => {
-                if (window.confirm('Reset all price tables, folder settings, and categories back to factory defaults?')) {
-                  resetToDefaults();
-                  setAllFoldersEnabled(true);
-                  triggerToast('Price catalog and preferences reset to factory defaults.');
-                }
+              onClick={async () => {
+                const ok = await confirmDialog({ title: 'Reset Price Catalog', message: 'Reset all price tables, folder settings, and categories back to factory defaults?', confirmLabel: 'Reset Catalog', danger: true });
+                if (!ok) return;
+                resetToDefaults();
+                setAllFoldersEnabled(true);
+                triggerToast('Price catalog and preferences reset to factory defaults.');
               }}
               className="px-3 py-1.5 rounded-lg bg-danger/10 hover:bg-danger/15 text-danger font-bold text-xs transition-all flex items-center space-x-1.5 border border-red-200 cursor-pointer"
             >

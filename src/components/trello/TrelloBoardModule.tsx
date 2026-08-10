@@ -7,6 +7,7 @@ import {
 import { WorkOrder, Technician, SystemSettings, WorkOrderStatus } from '../../types';
 import { PriorityBadge } from '../common/PriorityBadge';
 import { TicketDetailInspectorModal } from '../common/TicketDetailInspectorModal';
+import { confirmDialog } from '../common/ConfirmDialog';
 
 interface TrelloBoardProps {
   workOrders: WorkOrder[];
@@ -304,11 +305,10 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
                           {wo.status === 'Finished' && wo.postRepairChecklist && onReopenQa && (
                             <button
                               type="button"
-                              onClick={(e) => {
+                              onClick={async (e) => {
                                 e.stopPropagation();
-                                if (window.confirm(`Reopen QA for ${wo.orderNumber}? It goes back to the QA queue for re-inspection.`)) {
-                                  onReopenQa(wo.id);
-                                }
+                                const ok = await confirmDialog({ title: 'Reopen QA', message: `Reopen QA for ${wo.orderNumber}? It goes back to the QA queue for re-inspection.`, confirmLabel: 'Reopen QA' });
+                                if (ok) onReopenQa(wo.id);
                               }}
                               title="Reopen QA — re-run the 21-point check"
                               aria-label={`Reopen QA for ${wo.orderNumber}`}

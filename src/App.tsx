@@ -76,6 +76,7 @@ import { ActiveFilterChips } from './components/common/ActiveFilterChips';
 import { DrawerSelect } from './components/common/DrawerSelect';
 import { checkIsDiagnosticCompleted, checkIsBeforeDiagnosticCompleted, checkIsAfterDiagnosticCompleted } from './utils/diagnosticUtils';
 import { CustomDropdownMenu } from './components/common/CustomDropdownMenu';
+import { ConfirmDialogHost } from './components/common/ConfirmDialog';
 import { Button , Input } from './components/ui';
 import { ModuleLoadingSkeleton } from './components/common/ModuleLoadingSkeleton';
 import { useLanguage } from './context/LanguageContext';
@@ -2727,6 +2728,9 @@ export default function App() {
       </RightFilterDrawer>
 
       <HoverTooltip />
+
+      {/* App-styled confirm modal (replaces window.confirm) */}
+      <ConfirmDialogHost />
 
       {/* Floating Toast Notification Container */}
       <div className="fixed top-24 right-3 sm:right-6 z-[60] flex flex-col items-end gap-2.5 max-w-sm w-full pointer-events-none">

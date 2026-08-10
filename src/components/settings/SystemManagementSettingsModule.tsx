@@ -34,6 +34,7 @@ import { PriceSettingsModal } from '../prices/PriceSettingsModal';
 
 import { DeviceTagPrinterModal } from '../common/DeviceTagPrinterModal';
 import { toast } from '../../lib/toast';
+import { confirmDialog } from '../common/ConfirmDialog';
 
 import { Suspense } from 'react';
 import { ModuleLoadingSkeleton } from '../common/ModuleLoadingSkeleton';
@@ -387,10 +388,10 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
     });
   };
 
-  const handleResetPaymentMethods = () => {
-    if (window.confirm('Reset all payment gateways to default Myanmar configuration (Cash, KBZ Pay, UAB Pay, AYA Pay, MMQR, Banks)?')) {
-      setFormData({ ...formData, paymentMethods: DEFAULT_PAYMENT_METHODS });
-    }
+  const handleResetPaymentMethods = async () => {
+    const ok = await confirmDialog({ title: 'Reset Payment Gateways', message: 'Reset all payment gateways to default Myanmar configuration (Cash, KBZ Pay, UAB Pay, AYA Pay, MMQR, Banks)?', confirmLabel: 'Reset Gateways' });
+    if (!ok) return;
+    setFormData({ ...formData, paymentMethods: DEFAULT_PAYMENT_METHODS });
   };
 
   const handleSetAllPaymentMethodsState = (enabled: boolean) => {
@@ -441,26 +442,26 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
     });
   };
 
-  const handleDeleteNotificationTemplate = (id: string) => {
+  const handleDeleteNotificationTemplate = async (id: string) => {
     if (currentNotificationTemplates.length <= 1) {
       toast.error('You must keep at least one notification template.', 'Cannot Delete');
       return;
     }
-    if (window.confirm('Are you sure you want to delete this notification template?')) {
-      const updated = currentNotificationTemplates.filter((t) => t.id !== id);
-      setFormData({ ...formData, notificationTemplates: updated });
-    }
+    const ok = await confirmDialog({ title: 'Delete Notification Template', message: 'Are you sure you want to delete this notification template?', confirmLabel: 'Delete Template', danger: true });
+    if (!ok) return;
+    const updated = currentNotificationTemplates.filter((t) => t.id !== id);
+    setFormData({ ...formData, notificationTemplates: updated });
   };
 
-  const handleResetNotificationTemplates = () => {
-    if (window.confirm('Reset all notification templates to standard Myanmar default templates?')) {
-      setFormData({
-        ...formData,
-        notificationTemplates: DEFAULT_NOTIFICATION_TEMPLATES,
-        defaultNotificationChannel: 'Viber',
-        autoPromptNotificationModal: true,
-      });
-    }
+  const handleResetNotificationTemplates = async () => {
+    const ok = await confirmDialog({ title: 'Reset Notification Templates', message: 'Reset all notification templates to standard Myanmar default templates?', confirmLabel: 'Reset Templates' });
+    if (!ok) return;
+    setFormData({
+      ...formData,
+      notificationTemplates: DEFAULT_NOTIFICATION_TEMPLATES,
+      defaultNotificationChannel: 'Viber',
+      autoPromptNotificationModal: true,
+    });
   };
 
   // User Management State
@@ -847,9 +848,11 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
     setEditingQualityTierLabel('');
   };
 
-  const handleDeleteInventoryQualityTier = (tier: string) => {
+  const handleDeleteInventoryQualityTier = async (tier: string) => {
     const remaining = inventoryQualityTiers.filter((item) => item !== tier);
-    if (!remaining.length || !window.confirm(`Delete quality tier “${tier}”? Parts using it will change to “${remaining[0]}”.`)) return;
+    if (remaining.length === 0) return;
+    const ok = await confirmDialog({ title: 'Delete Quality Tier', message: `Delete quality tier “${tier}”? Parts using it will change to “${remaining[0]}”.`, confirmLabel: 'Delete Tier', danger: true });
+    if (!ok) return;
     saveInventoryQualityTiers(remaining);
     parts.filter((part) => part.qualityTier === tier).forEach((part) => onUpdatePart?.({ ...part, qualityTier: remaining[0] as PartQualityTier }));
   };
@@ -944,9 +947,10 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                       <Button
                         key={tab.id}
                         type="button"
-                        onClick={() => {
+                        onClick={async () => {
                           if (isDirty && tab.id !== activeSubTab) {
-                            if (!window.confirm('You have unsaved changes. Discard them and switch tab?')) return;
+                            const ok = await confirmDialog({ title: 'Discard Unsaved Changes', message: 'You have unsaved changes. Discard them and switch tab?', confirmLabel: 'Discard Changes' });
+                            if (!ok) return;
                           }
                           setActiveSubTab(tab.id as any);
                           setSettingsDrilledIn(true);

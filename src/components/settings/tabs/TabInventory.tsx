@@ -4,6 +4,7 @@ import {AlertCircle, Boxes, ChevronDown, MapPin, Plus, ShieldCheck, Truck} from 
 import type { Supplier } from '../../../types';
 import type { SystemSettings } from '../../../types';
 import type { PartItem } from '../../../types';
+import { confirmDialog } from '../../common/ConfirmDialog';
 
 interface InventoryTabProps {
   formData: SystemSettings;
@@ -130,7 +131,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                   )}
                   <Button
                     type="button"
-                    onClick={() => { if (window.confirm(`Delete category “${category}”? It will no longer appear for new inventory parts.`)) { const nextCategories = inventoryCategories.filter((item) => item !== category); onUpdateInventoryCategories?.(nextCategories); setFormData((current) => ({ ...current, inventoryCategories: nextCategories })); } }}
+                    onClick={async () => { if (await confirmDialog({ title: 'Delete Category', message: `Delete category “${category}”? It will no longer appear for new inventory parts.`, confirmLabel: 'Delete Category', danger: true })) { const nextCategories = inventoryCategories.filter((item) => item !== category); onUpdateInventoryCategories?.(nextCategories); setFormData((current) => ({ ...current, inventoryCategories: nextCategories })); } }}
                     className="text-xs font-extrabold text-danger"
                   >
                     Delete
@@ -175,7 +176,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                   <span className="font-mono text-xs text-muted">{supplier.code}</span>
                   <span className="hidden text-xs text-muted sm:inline">{supplier.avgRmaTurnaroundDays} days</span>
                   <Button type="button" onClick={() => setEditingInventorySupplier(supplier)} className="text-xs font-extrabold text-brand">Edit</Button>
-                  <Button type="button" onClick={() => { if (window.confirm(`Delete supplier “${supplier.name}”?`)) onDeleteSupplier?.(supplier.id); }} className="text-xs font-extrabold text-danger">Delete</Button>
+                  <Button type="button" onClick={async () => { if (await confirmDialog({ title: 'Delete Supplier', message: `Delete supplier “${supplier.name}”?`, confirmLabel: 'Delete Supplier', danger: true })) onDeleteSupplier?.(supplier.id); }} className="text-xs font-extrabold text-danger">Delete</Button>
                 </div>
               )) : <p className="px-3 py-4 text-center text-xs text-muted">No suppliers yet.</p>}
             </div>

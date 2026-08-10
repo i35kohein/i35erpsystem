@@ -13,6 +13,7 @@ import {Truck,
 import { Supplier, RmaItem, PurchaseOrder, PartItem, RmaStatus, SystemSettings } from '../../types';
 import { Button , Input } from '../ui';
 import { toast } from '../../lib/toast';
+import { confirmDialog } from '../common/ConfirmDialog';
 
 interface SupplierRmaModuleProps {
   suppliers: Supplier[];
@@ -139,11 +140,11 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
     setEditingSupplier(null);
   };
 
-  const handleDeleteSupplierClick = (supId: string, supName: string) => {
-    if (window.confirm(`Are you sure you want to delete supplier "${supName}"?`)) {
-      if (onDeleteSupplier) {
-        onDeleteSupplier(supId);
-      }
+  const handleDeleteSupplierClick = async (supId: string, supName: string) => {
+    const okDelete = await confirmDialog({ title: 'Delete Supplier', message: `Are you sure you want to delete supplier "${supName}"?`, confirmLabel: 'Delete Supplier', danger: true });
+    if (!okDelete) return;
+    if (onDeleteSupplier) {
+      onDeleteSupplier(supId);
     }
   };
 
@@ -369,10 +370,9 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                           Approve Credit
                         </Button>
                         <Button
-                          onClick={() => {
-                            if (window.confirm(`Mark ${rma.partName} × ${rma.quantity} as Replacement Received? Stock will increase by ${rma.quantity}.`)) {
-                              onUpdateRmaStatus(rma.id, 'Replacement Received');
-                            }
+                          onClick={async () => {
+                            const ok = await confirmDialog({ title: 'Replacement Received', message: `Mark ${rma.partName} × ${rma.quantity} as Replacement Received? Stock will increase by ${rma.quantity}.`, confirmLabel: 'Mark Received' });
+                            if (ok) onUpdateRmaStatus(rma.id, 'Replacement Received');
                           }}
                           className="px-2.5 py-1.5 bg-brand/10 hover:bg-brand/15 text-brand border border-brand/20 text-xs font-bold rounded-lg cursor-pointer"
                         >
@@ -447,10 +447,9 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                             Approve Credit
                           </Button>
                           <Button
-                            onClick={() => {
-                              if (window.confirm(`Mark ${rma.partName} × ${rma.quantity} as Replacement Received? Stock will increase by ${rma.quantity}.`)) {
-                                onUpdateRmaStatus(rma.id, 'Replacement Received');
-                              }
+                            onClick={async () => {
+                              const ok = await confirmDialog({ title: 'Replacement Received', message: `Mark ${rma.partName} × ${rma.quantity} as Replacement Received? Stock will increase by ${rma.quantity}.`, confirmLabel: 'Mark Received' });
+                              if (ok) onUpdateRmaStatus(rma.id, 'Replacement Received');
                             }}
                             className="px-2 py-1 bg-brand/10 hover:bg-brand/15 text-brand border border-brand/20 text-xs font-bold rounded"
                           >
@@ -518,10 +517,9 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                   <div className="flex justify-end pt-1">
                     <Button
                       type="button"
-                      onClick={() => {
-                        if (window.confirm(`Receive ${po.poNumber}? ${po.items.reduce((s, it) => s + it.quantity, 0)} unit(s) will be added to stock.`)) {
-                          onReceivePurchaseOrder(po.id);
-                        }
+                      onClick={async () => {
+                        const ok = await confirmDialog({ title: 'Receive Purchase Order', message: `Receive ${po.poNumber}? ${po.items.reduce((s, it) => s + it.quantity, 0)} unit(s) will be added to stock.`, confirmLabel: 'Receive & Restock' });
+                        if (ok) onReceivePurchaseOrder(po.id);
                       }}
                       className="px-3 py-1.5 bg-success/10 hover:bg-success/15 text-success-deep border border-success/30 text-xs font-bold rounded-lg cursor-pointer"
                     >

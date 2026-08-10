@@ -17,6 +17,7 @@ import { CustomerFacingWebPortal } from '../portal/CustomerFacingWebPortal';
 import { PrintableInvoiceModal } from '../common/PrintableInvoiceModal';
 import { CustomerRepairHistoryModal } from './CustomerRepairHistoryModal';
 import { DEFAULT_SYSTEM_SETTINGS } from '../../data/seedData';
+import { confirmDialog } from '../common/ConfirmDialog';
 
 interface CrmCustomerPortalModuleProps {
   customers: Customer[];
@@ -367,11 +368,10 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                         {(cloudCustomerIds?.has(cust.id) ?? true) ? (
                           <Button
                             type="button"
-                            onClick={(e) => {
+                            onClick={async (e) => {
                               e.stopPropagation();
-                              if (window.confirm(`Are you sure you want to delete customer "${cust.name}"?`)) {
-                                if (onDeleteCustomer) onDeleteCustomer(cust.id);
-                              }
+                              const ok = await confirmDialog({ title: 'Delete Customer', message: `Are you sure you want to delete customer "${cust.name}"?`, confirmLabel: 'Delete Customer', danger: true });
+                              if (ok && onDeleteCustomer) onDeleteCustomer(cust.id);
                             }}
                             className="p-1.5 bg-danger/10 text-danger hover:bg-danger hover:text-white font-bold rounded-md transition-colors cursor-pointer"
                             title="Delete Customer Account"

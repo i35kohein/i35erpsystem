@@ -2,6 +2,7 @@ import React from 'react';
 import {Edit2, Plus, Trash2, UserPlus, LogOut} from 'lucide-react';
 import { Button } from '../../ui';
 import { toast } from '../../../lib/toast';
+import { confirmDialog } from '../../common/ConfirmDialog';
 
 import type { SystemSettings } from '../../../types';
 import type { AppUser } from '../../../types';
@@ -24,7 +25,12 @@ const UsersTab: React.FC<UsersTabProps> = ({ users, currentUser, handleOpenAddUs
       toast('No active session found.', 'info', 'Sign Out All Devices');
       return;
     }
-    if (!window.confirm('Sign out all other devices? Every session except this one will be revoked immediately.')) return;
+    const ok = await confirmDialog({
+      title: 'Sign Out All Devices',
+      message: 'Sign out all other devices? Every session except this one will be revoked immediately.',
+      confirmLabel: 'Sign Out All',
+    });
+    if (!ok) return;
     try {
       const res = await fetch('/api/auth/logout-all', {
         method: 'POST',
@@ -161,8 +167,8 @@ const UsersTab: React.FC<UsersTabProps> = ({ users, currentUser, handleOpenAddUs
                           {usr.id !== 'usr-admin-1' && usr.id !== currentUser?.id && (
                             <Button
                               type="button"
-                              onClick={() => {
-                                if (window.confirm(`Delete user account "${usr.name}"?`)) {
+                              onClick={async () => {
+                                if (await confirmDialog({ title: 'Delete User Account', message: `Delete user account "${usr.name}"? This cannot be undone.`, confirmLabel: 'Delete User', danger: true })) {
                                   onDeleteUser?.(usr.id);
                                 }
                               }}

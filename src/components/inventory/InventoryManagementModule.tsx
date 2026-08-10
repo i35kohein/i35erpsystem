@@ -30,6 +30,7 @@ import {Boxes,
   MoreHorizontal} from 'lucide-react';
 import { PartItem, PartQualityTier, Supplier, SystemSettings, RmaItem } from '../../types';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
+import { confirmDialog } from '../common/ConfirmDialog';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
 import { getAvailableColorsForModel, getRealisticColorStyle } from '../intake/deviceData';
 import { Button, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem , Input } from '../ui';
@@ -385,8 +386,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     toast.success(`Reorder point set to ${value} for ${selectedParts.length} part(s)`, 'Bulk Update');
     clearSelection();
   };
-  const bulkDelete = () => {
-    if (!window.confirm(`Delete ${selectedParts.length} selected part(s)? This cannot be undone.`)) return;
+  const bulkDelete = async () => {
+    const ok = await confirmDialog({ title: 'Delete Parts', message: `Delete ${selectedParts.length} selected part(s)? This cannot be undone.`, confirmLabel: `Delete ${selectedParts.length} Parts`, danger: true });
+    if (!ok) return;
     selectedParts.forEach((p) => onDeletePart?.(p.id));
     toast.success(`${selectedParts.length} part(s) deleted`, 'Bulk Delete');
     clearSelection();
@@ -2313,7 +2315,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   <DropdownMenuItem onSelect={() => { setEditingPart(selectedPartForDetails); setSelectedPartForDetails(null); }}>
                     <Edit2 className="h-4 w-4" /> Edit
                   </DropdownMenuItem>
-                  <DropdownMenuItem destructive onSelect={() => { if (window.confirm(`Delete part “${selectedPartForDetails.name}” (${selectedPartForDetails.sku})?`)) { onDeletePart?.(selectedPartForDetails.id); setSelectedPartForDetails(null); } }}>
+                  <DropdownMenuItem destructive onSelect={async () => { const ok = await confirmDialog({ title: 'Delete Part', message: `Delete part “${selectedPartForDetails.name}” (${selectedPartForDetails.sku})?`, confirmLabel: 'Delete Part', danger: true }); if (ok) { onDeletePart?.(selectedPartForDetails.id); setSelectedPartForDetails(null); } }}>
                     <Trash2 className="h-4 w-4" /> Delete
                   </DropdownMenuItem>
                 </DropdownMenuContent>

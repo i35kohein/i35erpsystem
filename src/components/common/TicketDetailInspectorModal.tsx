@@ -25,6 +25,7 @@ import {
 import { AppUser, WorkOrder } from '../../types';
 import { get21AfterDiagnostics, get21Diagnostics } from '../../utils/diagnosticUtils';
 import { getRealisticColorStyle } from '../intake/deviceData';
+import { confirmDialog } from './ConfirmDialog';
 
 interface TicketDetailInspectorModalProps {
   workOrder: WorkOrder;
@@ -175,8 +176,9 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                 {currentUser?.role === 'Admin' && onDelete ? (
                   <DropdownMenuItem
                     destructive
-                    onSelect={() => {
-                      if (window.confirm(`Are you sure you want to delete ticket ${workOrder.orderNumber || workOrder.id}?`)) {
+                    onSelect={async () => {
+                      const ok = await confirmDialog({ title: 'Delete Ticket', message: `Are you sure you want to delete ticket ${workOrder.orderNumber || workOrder.id}?`, confirmLabel: 'Delete Ticket', danger: true });
+                      if (ok) {
                         onDelete(workOrder.id);
                         onClose();
                       }
