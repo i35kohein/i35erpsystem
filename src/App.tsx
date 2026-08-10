@@ -1875,7 +1875,7 @@ export default function App() {
                     chips + filter indicator; status still resettable via those chips. */}
 
                 {/* Date Filter Dropdown */}
-                <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
+                <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact iconOnly />
 
                 {/* Scan + Simple Ticket — navbar (Ko Hein 2026-08-10); Table/Grid stay in roster chips row */}
                 <div className="flex items-center gap-1.5">
@@ -1910,7 +1910,7 @@ export default function App() {
             {activeTab === 'dashboard' && (
               <>
                 <div className="hidden md:flex items-center gap-2">
-                <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
+                <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact iconOnly />
                 </div>
               </>
             )}
@@ -1965,7 +1965,7 @@ export default function App() {
                       ...technicians.map((t) => ({ value: t.id, label: t.name })),
                     ]}
                   />
-                  <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
+                  <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact iconOnly />
                 </div>
               </>
             )}
@@ -2149,7 +2149,7 @@ export default function App() {
                   ]}
                 />
 
-                <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
+                <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact iconOnly />
 
                 </div>              </>
             )}
@@ -2171,7 +2171,7 @@ export default function App() {
                   ]}
                 />
 
-                <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
+                <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact iconOnly />
 
                 </div>              </>
             )}
@@ -2190,14 +2190,14 @@ export default function App() {
                   ]}
                 />
 
-                <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
+                <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact iconOnly />
 
                 </div>              </>
             )}
 
             {activeTab === 'finance' && (
               <div className="hidden md:flex items-center gap-2">
-                <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
+                <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact iconOnly />
                 <Button
                   type="button"
                   onClick={() => financeModuleRef.current?.openAddExpense()}
