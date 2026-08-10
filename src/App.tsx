@@ -2599,6 +2599,10 @@ export default function App() {
                 />
               )}
 
+              {activeTab === 'mermaid' && (
+                <MermaidModule />
+              )}
+
               {activeTab === 'portal' && (
                 <CustomerFacingWebPortal
                   workOrders={activeWorkOrders}

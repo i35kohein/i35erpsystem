@@ -1785,7 +1785,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
           role="presentation"
         >
           <div
-            className="bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md h-[85dvh] sm:h-auto p-5 space-y-4 overflow-y-auto shadow-xl animate-i35-slide-up"
+            className="bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md max-h-[85dvh] sm:max-h-[520px] p-5 space-y-4 overflow-y-auto shadow-xl animate-i35-slide-up"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -2081,7 +2081,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
             role="presentation"
           >
             <div
-              className="bg-white border border-line rounded-2xl max-w-2xl w-full p-6 space-y-4 text-xs shadow-2xl relative max-h-[85vh] flex flex-col"
+              className="bg-white border border-line rounded-2xl max-w-2xl w-full p-6 space-y-4 text-xs shadow-2xl relative max-h-[80vh] min-h-[400px] flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
               <button
