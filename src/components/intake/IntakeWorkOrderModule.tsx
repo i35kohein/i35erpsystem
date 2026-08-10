@@ -3,6 +3,7 @@ import { DateFilterState, filterByDateRange } from '../common/DateFilterSelector
 
 import { timeAgoShort } from '../../utils/timeAgo';
 import { StatusBadge } from '../common/StatusBadge';
+import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 import { PriorityBadge } from '../common/PriorityBadge';
 
 // Camera/barcode scanner is code-split: html5-qrcode (~340KB) only downloads
@@ -29,7 +30,8 @@ import {WorkOrder,
   PartItem, 
   Customer, 
   Technician,
-  AppUser} from '../../types';
+  AppUser,
+  WorkOrderStatus} from '../../types';
 import { getRealisticColorStyle } from './deviceData';
 
 export { APPLE_MODEL_SERIES, WARRANTY_OPTIONS, AVAILABLE_REPAIRS, DIAGNOSTIC_NAMES, getAvailableColorsForModel } from './deviceData';
@@ -62,6 +64,8 @@ interface IntakeWorkOrderModuleProps {
   scanRequested?: number;
   /** Reopen QA: clear the passed checklist so the ticket flows back into QA (bug #12) */
   onReopenQa?: (id: string) => void;
+  /** Direct status change from the roster (Ko Hein 2026-08-10) */
+  onUpdateWorkOrderStatus?: (id: string, status: WorkOrderStatus) => void;
 }
 
 export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
@@ -82,6 +86,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   setSortByPriority: propSetSortByPriority,
   scanRequested = 0,
   onReopenQa,
+  onUpdateWorkOrderStatus,
 }) => {
   const [selectedWorkOrder, setSelectedWorkOrder] = useState<WorkOrder | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState<boolean>(false);
@@ -377,9 +382,28 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                         )}
                       </td>
 
-                      {/* Stage & Status (Read-Only Badge) */}
-                      <td className="py-3 px-3">
-                        <StatusBadge status={wo.status} size="xs" />
+                      {/* Stage & Status — changeable dropdown (Ko Hein 2026-08-10) */}
+                      <td className="py-3 px-3" onClick={(e) => e.stopPropagation()}>
+                        {onUpdateWorkOrderStatus ? (
+                          <CustomDropdownMenu
+                            value={wo.status}
+                            onChange={(val) => onUpdateWorkOrderStatus(wo.id, val as WorkOrderStatus)}
+                            size="sm"
+                            ariaLabel={`Change status for ${wo.orderNumber || wo.id}`}
+                            buttonClassName="!h-7 !min-h-7 !px-2 !text-[11px]"
+                            options={[
+                              { value: 'Receive', label: 'Receive' },
+                              { value: 'In Progress', label: 'In Progress' },
+                              { value: 'Pending', label: 'Pending' },
+                              { value: 'Finished', label: 'Finished' },
+                              { value: 'Cant Repair', label: 'Cant Repair' },
+                              { value: 'Customer Not Repair', label: 'Customer Not Repair' },
+                              { value: 'Taken Out', label: 'Takeout' },
+                            ]}
+                          />
+                        ) : (
+                          <StatusBadge status={wo.status} size="xs" />
+                        )}
                       </td>
 
                       {/* Financial Amount */}
@@ -492,13 +516,32 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                   {/* Top row: order # + priority + status */}
                   <div className="flex items-center justify-between gap-1.5">
                     <span className="font-mono text-[11px] font-extrabold text-brand truncate">{wo.orderNumber}</span>
-                    <div className="flex items-center gap-1 shrink-0">
+                    <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
                       {wo.priority && wo.priority !== 'Normal' ? (
                         <PriorityBadge priority={wo.priority} size="xs" />
                       ) : (
                         <span className="text-[9px] font-black px-1.5 py-px rounded uppercase bg-surface text-muted">NORM</span>
                       )}
-                      <StatusBadge status={wo.status} size="xs" />
+                      {onUpdateWorkOrderStatus ? (
+                        <CustomDropdownMenu
+                          value={wo.status}
+                          onChange={(val) => onUpdateWorkOrderStatus(wo.id, val as WorkOrderStatus)}
+                          size="sm"
+                          ariaLabel={`Change status for ${wo.orderNumber || wo.id}`}
+                          buttonClassName="!h-6 !min-h-6 !px-1.5 !text-[10px]"
+                          options={[
+                            { value: 'Receive', label: 'Receive' },
+                            { value: 'In Progress', label: 'In Progress' },
+                            { value: 'Pending', label: 'Pending' },
+                            { value: 'Finished', label: 'Finished' },
+                            { value: 'Cant Repair', label: 'Cant Repair' },
+                            { value: 'Customer Not Repair', label: 'Customer Not Repair' },
+                            { value: 'Taken Out', label: 'Takeout' },
+                          ]}
+                        />
+                      ) : (
+                        <StatusBadge status={wo.status} size="xs" />
+                      )}
                     </div>
                   </div>
 

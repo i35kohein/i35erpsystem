@@ -2367,6 +2367,7 @@ export default function App() {
                   }}
                   onNavigateToTab={(tab) => setActiveTab(tab as any)}
                   onReopenQa={handleReopenQa}
+                  onUpdateWorkOrderStatus={handleUpdateWorkOrderStatus}
                   viewMode={intakeViewMode}
                   setViewMode={setIntakeViewMode}
                   sortByPriority={intakeSortByPriority}
