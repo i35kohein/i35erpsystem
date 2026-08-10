@@ -1871,22 +1871,8 @@ export default function App() {
             {activeTab === 'intake' && (
               <>
                 <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
-                {/* Status Dropdown */}
-                <CustomDropdownMenu
-                  value={statusFilter}
-                  onChange={(val) => setStatusFilter(val)}
-                  buttonClassName="!px-2.5 !py-1.5 !h-10 text-xs"
-                  options={[
-                    { value: 'ALL', label: 'All Statuses' },
-                    { value: 'Receive', label: 'Receive' },
-                    { value: 'In Progress', label: 'In Progress' },
-                    { value: 'Pending', label: 'Pending' },
-                    { value: 'Finished', label: 'Finished' },
-                    { value: 'Taken Out', label: 'Taken Out' },
-                    { value: 'Cant Repair', label: 'Cant Repair' },
-                    { value: 'Customer Not Repair', label: 'Customer Not Repair' },
-                  ]}
-                />
+                {/* Status Dropdown removed 2026-08-10 (Ko Hein) — roster has quick status
+                    chips + filter indicator; status still resettable via those chips. */}
 
                 {/* Date Filter Dropdown */}
                 <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
