@@ -73,9 +73,13 @@ export const Navigation: React.FC<NavigationProps> = ({
     : workOrders;
 
   // Sidebar counts — only POS keeps a badge (decluttered sidebar).
-  // POS-ready = tickets past QA (have a postRepairChecklist). Declined/cant-repair
-  // tickets are NOT payable work — don't count them here (P0 #2).
-  const posReadyCount = myWorkOrders.filter((w) => Boolean(w.postRepairChecklist)).length;
+  // Keep this in sync with the POS "Ready to Checkout" queue: unpaid tickets
+  // that can actually be opened in checkout.
+  const posReadyCount = myWorkOrders.filter((w) => {
+    if (w.isPaid) return false;
+    if (w.status !== 'Finished' && w.status !== 'Taken Out' && w.status !== 'Cant Repair' && w.status !== 'Customer Not Repair') return false;
+    return Boolean(w.postRepairChecklist) || w.status === 'Cant Repair' || w.status === 'Customer Not Repair';
+  }).length;
 
   const allNavGroups = [
     {

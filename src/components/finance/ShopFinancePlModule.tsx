@@ -76,6 +76,8 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
     [ownerFilteredParts]
   );
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
+  // Sub-tabs inside Parts Profit (Ko Hein 2026-08-11)
+  const [partsSubTab, setPartsSubTab] = useState<'overview' | 'day' | 'category' | 'ticket'>('overview');
   const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
   const [selectedDebtForPayment, setSelectedDebtForPayment] = useState<SupplierDebtRecord | null>(null);
 
@@ -1432,6 +1434,30 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
             </div>
           </div>
 
+          {/* Sub-tabs (Ko Hein 2026-08-11) */}
+          <div className="flex flex-wrap gap-1.5 pb-1">
+            {[
+              { id: 'overview' as const, label: 'Overview' },
+              { id: 'day' as const, label: 'Sales by Day' },
+              { id: 'category' as const, label: 'Profit by Category' },
+              { id: 'ticket' as const, label: 'Sold by Ticket' },
+            ].map((st) => (
+              <button
+                key={st.id}
+                type="button"
+                onClick={() => setPartsSubTab(st.id)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-colors cursor-pointer ${
+                  partsSubTab === st.id ? 'bg-brand text-white shadow-2xs' : 'bg-surface text-muted hover:bg-surface/80 hover:text-ink'
+                }`}
+              >
+                {st.label}
+              </button>
+            ))}
+          </div>
+
+          {/* OVERVIEW — P&L summary cards */}
+          {partsSubTab === 'overview' && (
+          <>
           {/* P&L summary cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <div className="p-3.5 bg-white border border-line rounded-xl shadow-2xs">
@@ -1494,7 +1520,11 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
             );
           })()}
 
-          {/* Sales by day — which day, how many units, what was sold, how much profit */}
+          </>
+          )}
+
+          {/* SALES BY DAY — which day, how many units, what was sold, how much profit */}
+          {partsSubTab === 'day' && (
           <div className="space-y-2">
             <h4 className="font-extrabold text-xs text-ink uppercase tracking-wider">Sales by Day ({partsSalesByDay.length} days)</h4>
             {partsSalesByDay.length === 0 ? (
@@ -1579,8 +1609,10 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
               </div>
             )}
           </div>
+          )}
 
-          {/* Top parts categories by profit */}
+          {/* PROFIT BY CATEGORY */}
+          {partsSubTab === 'category' && (
           <div className="space-y-2">
             <h4 className="font-extrabold text-xs text-ink uppercase tracking-wider">Profit by Parts Category</h4>
             {partsCategoryProfit.length === 0 ? (
@@ -1620,8 +1652,10 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
               </div>
             )}
           </div>
+          )}
 
-          {/* Parts sold per ticket */}
+          {/* PARTS SOLD BY TICKET */}
+          {partsSubTab === 'ticket' && (
           <div className="space-y-2">
             <h4 className="font-extrabold text-xs text-ink uppercase tracking-wider">Parts Sold by Ticket ({partsTickets.length})</h4>
             {partsTickets.length === 0 ? (
@@ -1671,6 +1705,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
               </div>
             )}
           </div>
+          )}
         </div>
       )}
     </div>
