@@ -18,7 +18,6 @@ import {Boxes,
   PackageCheck,
   PackageX,
   Check,
-  Folder,
   Sparkles,
   Edit2,
   Eye,
@@ -30,7 +29,7 @@ import {Boxes,
   MoreHorizontal} from 'lucide-react';
 import { PartItem, PartOwner, PartQualityTier, Supplier, SystemSettings, RmaItem } from '../../types';
 import { ModelRepairPrice } from '../../types/priceCatalog';
-import { getModelPriceCatalogItems } from '../../utils/priceCatalogLookup';
+
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 import { confirmDialog } from '../common/ConfirmDialog';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
@@ -180,7 +179,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   suppliers,
   systemSettings,
   deviceModels,
-  priceCatalog = [],
+  priceCatalog: _priceCatalog = [],
   inventoryCategories = [],
   onAddPart,
   onUpdatePart,
@@ -440,6 +439,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const [isDeviceModelChooserOpen, setIsDeviceModelChooserOpen] = useState(false);
   const [isLocationBinMenuOpen, setIsLocationBinMenuOpen] = useState(false);
   const [isEditLocationBinMenuOpen, setIsEditLocationBinMenuOpen] = useState(false);
+  const [isEditDeviceChooserOpen, setIsEditDeviceChooserOpen] = useState(false);
   // Fixed-position anchors for the bin menus — the modal body scroll container clips
   // absolutely-positioned dropdowns (Ko Hein 2026-08-10: "Storage Location Bin drawer menu cant see").
   const [binMenuAnchor, setBinMenuAnchor] = useState<{ top: number; left: number; width: number } | null>(null);
@@ -666,13 +666,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
   const isBackGlassCategory = /back\s*glass/i.test(newPartData.category || '');
   const selectedPartModel = newPartData.deviceCompatibility?.[0] || '';
-  // Active-device card stats: repair services + distinct categories from the price catalog.
-  const selectedModelStats = useMemo(() => {
-    const model = selectedPartModel;
-    if (!model) return { services: 0, categories: 0 };
-    const items = getModelPriceCatalogItems(model, priceCatalog || []);
-    return { services: items.length, categories: new Set(items.map((i) => i.group).filter(Boolean)).size };
-  }, [selectedPartModel, priceCatalog]);
   const availableBackGlassColors = selectedPartModel ? getAvailableColorsForModel(selectedPartModel) : [];
   const existingLocationBins = useMemo(
     () => [...new Set([
@@ -922,7 +915,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
   const handleSaveNewPart = () => {
     if (!newPartData.name || !newPartData.sku || !newPartData.category || !newPartData.qualityTier || !newPartData.supplierId || !newPartData.deviceCompatibility?.[0] || (isBackGlassCategory && !newPartData.backGlassColor)) {
-      toast.error('Choose a device model, category, quality tier, and supplier. Back Glass parts also need a color. Then enter the part name and SKU.', 'Incomplete Part Details');
+      toast.error('Add at least one device model, category, quality tier, and supplier. Back Glass parts also need a color. Then enter the part name and SKU.', 'Incomplete Part Details');
       return;
     }
 
@@ -1357,6 +1350,16 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         </span>
                       )}
                     </div>
+                    {part.deviceCompatibility && part.deviceCompatibility.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {part.deviceCompatibility.map((device) => (
+                          <span key={device} className="inline-flex items-center gap-0.5 rounded-full bg-brand-soft px-1.5 py-px text-[10px] font-bold text-brand-deep" title={device}>
+                            <Smartphone className="h-2.5 w-2.5" />
+                            {device}
+                          </span>
+                        ))}
+                      </div>
+                    )}
 
                     {inlineEditMode ? (
                       <div className="flex items-center justify-between gap-2 rounded-xl border border-warning/30 bg-warning/10 p-2 sm:p-2.5">
@@ -1587,11 +1590,20 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                             <div className="p-1 rounded-md bg-brand/10 text-brand-deep shrink-0 mt-0.5">
                               <Cpu className="w-3 h-3" />
                             </div>
-                            <div>
+                            <div className="min-w-0">
                               <p className="font-extrabold text-ink text-xs leading-snug">
                                 {part.name}
                               </p>
                               <p className="mt-0.5 font-mono text-xs font-medium text-muted">SKU {part.sku}</p>
+                              {part.deviceCompatibility && part.deviceCompatibility.length > 0 && (
+                                <div className="mt-1 flex flex-wrap gap-1">
+                                  {part.deviceCompatibility.map((device) => (
+                                    <span key={device} className="inline-flex items-center gap-0.5 rounded-full bg-brand-soft px-1.5 py-px text-[10px] font-bold text-brand-deep" title={device}>
+                                      {device}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                           </div>
                         </td>
@@ -2076,39 +2088,37 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto px-4 py-2.5 [scrollbar-gutter:stable]">
             <div className="space-y-1">
               <div className="flex items-center justify-between gap-2">
-                <label className="block font-bold text-ink">Device Model</label>
-                <span className="font-medium text-xs text-muted">Price List · {activeDeviceModels.length} models</span>
+                <label className="block font-bold text-ink">Compatible Devices</label>
+                <span className="font-medium text-xs text-muted">{newPartData.deviceCompatibility?.length || 0} selected</span>
               </div>
-              {/* Active Device — compact row (Ko Hein 2026-08-10: compact register modal) */}
-              <div
-                role="button"
-                tabIndex={0}
+              {/* Selected devices as removable chips */}
+              {newPartData.deviceCompatibility && newPartData.deviceCompatibility.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {newPartData.deviceCompatibility.map((device, idx) => (
+                    <span key={device} className="inline-flex items-center gap-1 rounded-full border border-brand/30 bg-brand-soft px-2 py-0.5 text-xs font-bold text-brand-deep">
+                      <Smartphone className="h-3 w-3 shrink-0" />
+                      <span className="truncate max-w-[140px]">{device}</span>
+                      <button
+                        type="button"
+                        onClick={() => applyPartSpecification({ deviceCompatibility: newPartData.deviceCompatibility.filter((_, i) => i !== idx) })}
+                        className="ml-0.5 rounded-full p-0.5 hover:bg-brand/20 transition-colors"
+                        title={`Remove ${device}`}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+              {/* Add Device button */}
+              <button
+                type="button"
                 onClick={() => setIsDeviceModelChooserOpen(true)}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setIsDeviceModelChooserOpen(true); } }}
-                className="flex w-full min-w-0 cursor-pointer items-center justify-between gap-2 rounded-lg border border-line bg-surface px-2.5 py-1.5 transition-colors hover:border-brand/40"
-                title="Choose a model from the Price List"
+                className="flex w-full cursor-pointer items-center gap-2 rounded-lg border border-dashed border-line bg-surface px-2.5 py-1.5 text-xs font-bold text-muted transition-colors hover:border-brand/40 hover:text-brand"
               >
-                <span className="flex min-w-0 items-center gap-2 text-sm font-extrabold text-ink">
-                  <Smartphone className="h-4 w-4 shrink-0 text-brand" />
-                  {selectedPartModel ? (
-                    <>
-                      <span className="truncate">{selectedPartModel}</span>
-                      <span className="shrink-0 text-[10px] font-bold text-muted">· {selectedModelStats.services} services · {selectedModelStats.categories} categories</span>
-                    </>
-                  ) : (
-                    <span className="text-muted/70">Select Device Model…</span>
-                  )}
-                </span>
-                <Button
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); setIsDeviceModelChooserOpen(true); }}
-                  className="shrink-0 !h-8 rounded-lg border border-brand bg-brand px-3 text-xs font-extrabold text-white hover:bg-brand-deep"
-                  title="Choose a model from the Price List"
-                >
-                  <Folder className="h-3.5 w-3.5" />
-                  {selectedPartModel ? 'Switch' : 'Select'}
-                </Button>
-              </div>
+                <Plus className="h-4 w-4" />
+                Add Device Model
+              </button>
             </div>
 
             <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
@@ -2427,7 +2437,15 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 isOpen
                 onClose={() => setIsDeviceModelChooserOpen(false)}
                 selectedDevice={newPartData.deviceCompatibility?.[0] || ''}
-                onSelectDevice={(model) => applyPartSpecification({ deviceCompatibility: [model] })}
+                onSelectDevice={(model) => {
+                  const existing = newPartData.deviceCompatibility || [];
+                  if (existing.some((d) => d.toLowerCase() === model.toLowerCase())) {
+                    setIsDeviceModelChooserOpen(false);
+                    return;
+                  }
+                  applyPartSpecification({ deviceCompatibility: [...existing, model] });
+                  setIsDeviceModelChooserOpen(false);
+                }}
               />
             )}
           </div>
@@ -2443,6 +2461,16 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 <p className="font-mono text-xs font-extrabold text-brand">{selectedPartForDetails.sku}</p>
                 <h3 className="mt-1 truncate text-sm font-extrabold text-ink">{selectedPartForDetails.name}</h3>
                 <p className="mt-1 text-xs text-muted">{selectedPartForDetails.category} · {selectedPartForDetails.qualityTier}</p>
+                {selectedPartForDetails.deviceCompatibility && selectedPartForDetails.deviceCompatibility.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {selectedPartForDetails.deviceCompatibility.map((device) => (
+                      <span key={device} className="inline-flex items-center gap-0.5 rounded-full border border-brand/30 bg-brand-soft px-1.5 py-0.5 text-[10px] font-bold text-brand-deep">
+                        <Smartphone className="h-2.5 w-2.5" />
+                        {device}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
               <Button type="button" onClick={() => setSelectedPartForDetails(null)} aria-label="Close part details" title="Close details" variant="iconGhost" className="p-1">
                 <X className="h-4 w-4" />
@@ -2520,6 +2548,36 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   onChange={(e) => setEditingPart({ ...editingPart, name: e.target.value })}
                   className="w-full bg-surface border border-line rounded-xl p-2.5 text-xs font-bold text-ink"
                 />
+              </div>
+
+              <div>
+                <label className="block font-bold text-ink mb-1">Compatible Devices</label>
+                {editingPart.deviceCompatibility && editingPart.deviceCompatibility.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {editingPart.deviceCompatibility.map((device, idx) => (
+                      <span key={device} className="inline-flex items-center gap-1 rounded-full border border-brand/30 bg-brand-soft px-2 py-0.5 text-xs font-bold text-brand-deep">
+                        <Smartphone className="h-3 w-3 shrink-0" />
+                        <span className="truncate max-w-[120px]">{device}</span>
+                        <button
+                          type="button"
+                          onClick={() => setEditingPart({ ...editingPart, deviceCompatibility: editingPart.deviceCompatibility.filter((_, i) => i !== idx) })}
+                          className="ml-0.5 rounded-full p-0.5 hover:bg-brand/20 transition-colors"
+                          title={`Remove ${device}`}
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setIsEditDeviceChooserOpen(true)}
+                  className="flex w-full cursor-pointer items-center gap-2 rounded-lg border border-dashed border-line bg-surface px-2.5 py-1.5 text-xs font-bold text-muted transition-colors hover:border-brand/40 hover:text-brand"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Add Device Model
+                </button>
               </div>
 
               <div>
@@ -2732,6 +2790,26 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               </Button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Device Model Chooser for Edit Part modal */}
+      {isEditDeviceChooserOpen && editingPart && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+          <DeviceModelChooserModal
+            isOpen
+            onClose={() => setIsEditDeviceChooserOpen(false)}
+            selectedDevice={editingPart.deviceCompatibility?.[0] || ''}
+            onSelectDevice={(model) => {
+              const existing = editingPart.deviceCompatibility || [];
+              if (existing.some((d) => d.toLowerCase() === model.toLowerCase())) {
+                setIsEditDeviceChooserOpen(false);
+                return;
+              }
+              setEditingPart({ ...editingPart, deviceCompatibility: [...existing, model] });
+              setIsEditDeviceChooserOpen(false);
+            }}
+          />
         </div>
       )}
 
