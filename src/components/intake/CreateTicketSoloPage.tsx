@@ -487,7 +487,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         id: `li-${r.id}`,
         description: r.name,
         unitCost: Math.round(r.basePrice * 0.5),
-        unitPrice: r.finalPrice,
+        unitPrice: r.basePrice,
         quantity: 1,
         isLabor: true,
         lineItemDiscountPercent: r.discountPercent || undefined,
