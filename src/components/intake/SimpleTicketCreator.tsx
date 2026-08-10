@@ -265,7 +265,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
       })),
       subtotal: baseTotal,
       depositAmount: 0,
-      discountAmount: savedAmount,
+      discountAmount: 0,
       taxAmount: 0,
       totalAmount: finalEstimate,
       intakeChecklist: {
