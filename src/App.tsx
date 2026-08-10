@@ -2550,6 +2550,7 @@ export default function App() {
                   onMarkPaid={handleMarkPaid}
                   onOpenPrintTag={(wo) => setPrintableTagWo(wo)}
                   onSaveWorkOrder={handleSaveWorkOrder}
+                  priceCatalog={priceCatalog.catalog}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
                 />

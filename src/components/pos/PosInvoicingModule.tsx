@@ -26,6 +26,8 @@ import {CreditCard,
   Percent,
 } from 'lucide-react';
 import { WorkOrder, Customer, SystemSettings, PartItem, WorkOrderLineItem } from '../../types';
+import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
+import { ModelRepairPrice } from '../../types/priceCatalog';
 import { PriorityBadge } from '../common/PriorityBadge';
 import { Button , Input } from '../ui';
 import { StatusChip } from '../common/StatusChip';
@@ -106,6 +108,7 @@ interface PosInvoicingModuleProps {
   onMarkPaid: (workOrder: WorkOrder, method: string, completedAtIso?: string) => void;
   onOpenPrintTag?: (wo: WorkOrder) => void;
   onSaveWorkOrder?: (wo: WorkOrder) => void;
+  priceCatalog?: ModelRepairPrice[];
   searchQuery?: string;
   setSearchQuery?: (q: string) => void;
   dateFilter?: DateFilterState;
@@ -129,6 +132,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   onMarkPaid,
   onOpenPrintTag,
   onSaveWorkOrder,
+  priceCatalog,
   searchQuery = '',
   dateFilter: propDateFilter,
   statusFilter = 'ALL',
@@ -167,6 +171,9 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   const [customRepairName, setCustomRepairName] = useState('');
   const [customRepairPrice, setCustomRepairPrice] = useState<number>(0);
   const [customRepairQty, setCustomRepairQty] = useState<number>(1);
+
+  // Price List repair picker (Ko Hein 2026-08-10)
+  const [isAddRepairFromPriceListOpen, setIsAddRepairFromPriceListOpen] = useState(false);
 
   // Invoice-level discount input (Ko Hein 2026-08-10)
   const [invoiceDiscountInput, setInvoiceDiscountInput] = useState<string>('');
@@ -450,6 +457,30 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     setCustomRepairPrice(0);
     setCustomRepairQty(1);
     setIsAddCustomRepairOpen(false);
+  };
+
+  // Add selected repairs from Price List as line items (Ko Hein 2026-08-10)
+  const handleAddRepairsFromPriceList = (catalogItems: ModelRepairCatalogItem[]) => {
+    if (!selectedWo || !onSaveWorkOrder || catalogItems.length === 0) return;
+    const newLines: WorkOrderLineItem[] = catalogItems.map((item) => ({
+      id: `pricelist-${Date.now()}-${item.categoryKey}`,
+      description: item.name,
+      unitCost: 0,
+      unitPrice: item.price,
+      quantity: 1,
+      isLabor: true,
+    }));
+    const nextLineItems = [...(selectedWo.lineItems || []), ...newLines];
+    const totals = recalculateTotals(nextLineItems, selectedWo.discountAmount, selectedWo.depositAmount);
+    onSaveWorkOrder({
+      ...selectedWo,
+      lineItems: nextLineItems,
+      subtotal: totals.subtotal,
+      taxAmount: totals.taxAmount,
+      totalAmount: totals.totalAmount,
+      updatedAt: new Date().toISOString(),
+    });
+    setIsAddRepairFromPriceListOpen(false);
   };
 
   // Update whole-invoice discount (Ko Hein 2026-08-10)
@@ -743,7 +774,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               </div>
 
                 {/* Add buttons row */}
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   <button
                     type="button"
                     onClick={() => setIsAddPartOpen(true)}
@@ -765,7 +796,19 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   >
                     <span className="flex items-center gap-1.5 text-xs font-extrabold text-ink">
                       <Wrench className="w-3.5 h-3.5 text-brand shrink-0" />
-                      Add Repair
+                      Custom
+                    </span>
+                    <Plus className="w-3.5 h-3.5 text-muted shrink-0" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsAddRepairFromPriceListOpen(true)}
+                    className="flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg border border-line-strong bg-white hover:bg-surface transition-colors cursor-pointer focus:outline-none"
+                  >
+                    <span className="flex items-center gap-1.5 text-xs font-extrabold text-ink">
+                      <FileText className="w-3.5 h-3.5 text-brand shrink-0" />
+                      Price List
                     </span>
                     <Plus className="w-3.5 h-3.5 text-muted shrink-0" />
                   </button>
@@ -1839,6 +1882,126 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
           </div>
         </div>
       )}
+
+      {/* Price List Repair Picker — select from catalog (Ko Hein 2026-08-10) */}
+      {isAddRepairFromPriceListOpen && selectedWo && (() => {
+        const catalogItems = getModelPriceCatalogItems(selectedWo.deviceModel || '', priceCatalog as any);
+        return (
+          <div
+            className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center pt-[env(safe-area-inset-top)]"
+            onClick={() => setIsAddRepairFromPriceListOpen(false)}
+            role="presentation"
+          >
+            <div
+              className="bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md h-[85dvh] sm:h-auto p-5 space-y-4 overflow-y-auto shadow-xl animate-i35-slide-up"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <h3 className="font-extrabold text-sm text-ink">Add Repair from Price List</h3>
+                  <p className="text-xs text-muted truncate">
+                    {selectedWo.deviceModel || 'Unknown device'} — select repairs to add
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsAddRepairFromPriceListOpen(false)}
+                  aria-label="Close price list"
+                  className="text-muted hover:text-ink p-1.5 rounded transition-colors cursor-pointer focus:outline-none"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Group filter chips */}
+              <div className="flex flex-wrap gap-1">
+                {['ALL', ...new Set(catalogItems.map((i) => i.group))].map((g) => (
+                  <button
+                    key={g}
+                    type="button"
+                    className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-colors cursor-pointer ${
+                      g === 'ALL' ? 'bg-brand/10 text-brand' : 'bg-surface text-muted hover:text-ink'
+                    }`}
+                    onClick={() => {/* group filter — simple inline toggle would need state, skip for now */}}
+                  >
+                    {g}
+                  </button>
+                ))}
+              </div>
+
+              {/* Catalog items list */}
+              <div className="space-y-1.5 max-h-[400px] overflow-y-auto">
+                {catalogItems.length === 0 ? (
+                  <div className="p-8 text-center text-muted text-xs space-y-1">
+                    <FileText className="w-8 h-8 mx-auto opacity-40 text-brand" />
+                    <p className="font-extrabold text-ink">No price catalog for this model</p>
+                    <p>Set up prices in Price List settings first.</p>
+                  </div>
+                ) : (
+                  catalogItems
+                    .filter((item) => item.price > 0)
+                    .map((item) => {
+                      const alreadyExists = (selectedWo.lineItems || []).some(
+                        (li) => li.description?.toLowerCase() === item.name.toLowerCase()
+                      );
+                      return (
+                        <div
+                          key={item.categoryKey}
+                          className={`flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl border transition-all ${
+                            alreadyExists ? 'border-line bg-surface/50 opacity-60' : 'border-line bg-white'
+                          }`}
+                        >
+                          <div className="min-w-0">
+                            <p className="text-xs font-extrabold text-ink truncate">{item.name}</p>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span className="text-[10px] font-semibold text-muted bg-surface px-1.5 py-px rounded">
+                                {item.group}
+                              </span>
+                              <span className="text-[10px] font-semibold text-muted">{item.warranty}</span>
+                            </div>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <span className="font-mono font-black text-sm text-brand block">
+                              {item.price.toLocaleString()}
+                            </span>
+                            {alreadyExists && (
+                              <span className="text-[10px] text-muted font-semibold">Already added</span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
+                )}
+              </div>
+
+              {/* Quick-add single repair buttons */}
+              {catalogItems.filter((i) => i.price > 0).length > 0 && (
+                <div className="space-y-1.5">
+                  <p className="text-[11px] font-bold text-muted">Tap to add a repair:</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {catalogItems
+                      .filter((item) => item.price > 0 && !(selectedWo.lineItems || []).some(
+                        (li) => li.description?.toLowerCase() === item.name.toLowerCase()
+                      ))
+                      .slice(0, 12)
+                      .map((item) => (
+                        <button
+                          key={item.categoryKey}
+                          type="button"
+                          onClick={() => handleAddRepairsFromPriceList([item])}
+                          className="px-2.5 py-1.5 rounded-lg bg-brand-soft hover:bg-brand/15 border border-brand/30 text-xs font-extrabold text-brand transition-all cursor-pointer active:scale-95"
+                        >
+                          {item.name.split(' ').slice(0, 3).join(' ')} +{item.price.toLocaleString()}
+                        </button>
+                      ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Reusable Printable Invoice Modal */}
       <PrintableInvoiceModal
