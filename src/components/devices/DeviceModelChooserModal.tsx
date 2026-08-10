@@ -103,7 +103,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
               const count = catalog.filter((m) => famFolderIds.has(getModelFolderId(m.model))).length;
 
               return (
-                <button
+                <Button
                   key={fam.key}
                   type="button"
                   onClick={() => { if (count > 0 || fam.key === 'All') setActiveFamilyTab(fam.key as any); }}
@@ -118,7 +118,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                   }`}
                 >
                   {fam.label} ({count})
-                </button>
+                </Button>
               );
             })}
           </div>
@@ -177,7 +177,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                     {filteredModels.map((item) => {
                       const isSelected = selectedDevice === item.model;
                       return (
-                        <button
+                        <Button
                           key={item.model}
                           type="button"
                           onClick={() => {
@@ -190,7 +190,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                         >
                           <span className="truncate">{item.model}</span>
                           {isSelected && <Check className="h-4 w-4 shrink-0 text-brand stroke-[3]" />}
-                        </button>
+                        </Button>
                       );
                     })}
                   </div>

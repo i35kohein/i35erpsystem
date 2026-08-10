@@ -921,7 +921,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                 <h3 className="text-sm font-extrabold text-ink">Create Purchase Order</h3>
                 <p className="text-xs text-muted">Order parts from a supplier — receiving adds them to stock.</p>
               </div>
-              <button type="button" onClick={() => { setShowPoModal(false); resetPoForm(); }} className="rounded-lg p-1 text-muted hover:bg-surface hover:text-ink" aria-label="Close">✕</button>
+              <Button type="button" onClick={() => { setShowPoModal(false); resetPoForm(); }} className="rounded-lg p-1 text-muted hover:bg-surface hover:text-ink" aria-label="Close">✕</Button>
             </div>
 
             <div className="flex-1 min-h-0 space-y-3 overflow-y-auto p-4">
@@ -972,7 +972,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                           <option key={p.id} value={p.id}>{p.name} (stock {p.quantityInStock})</option>
                         ))}
                       </select>
-                      <input
+                      <Input
                         type="number"
                         min={1}
                         value={item.quantity}
@@ -980,7 +980,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                         className="w-16 rounded-lg border border-line bg-white px-2 py-1.5 text-center font-mono text-xs text-ink outline-none "
                         aria-label={`Qty line ${idx + 1}`}
                       />
-                      <input
+                      <Input
                         type="number"
                         min={0}
                         step={500}
@@ -989,12 +989,12 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                         className="w-24 rounded-lg border border-line bg-white px-2 py-1.5 text-right font-mono text-xs text-ink outline-none "
                         aria-label={`Unit cost line ${idx + 1}`}
                       />
-                      <button
+                      <Button
                         type="button"
                         onClick={() => setPoItems((prev) => prev.filter((_, i) => i !== idx))}
                         className="shrink-0 rounded-lg p-1 text-muted hover:bg-line hover:text-danger"
                         aria-label={`Remove line ${idx + 1}`}
-                      >✕</button>
+                      >✕</Button>
                     </div>
                   ))}
                 </div>

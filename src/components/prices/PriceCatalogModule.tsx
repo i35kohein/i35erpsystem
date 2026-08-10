@@ -33,7 +33,7 @@ import {
 import { PriceSettingsModal } from './PriceSettingsModal';
 import { SystemSettings } from '../../types';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
-import { Button } from '../ui';
+import { Button, Input } from '../ui';
 import { toast } from '../../lib/toast';
 
 interface PriceCatalogModuleProps {
@@ -149,7 +149,7 @@ function SwipeToRemoveRow({ onRemove, children }: { onRemove: () => void; childr
       onTouchEnd={handleTouchEnd}
     >
       {/* Reveal button — theme danger, tap to delete */}
-      <button
+      <Button
         type="button"
         onClick={onRemove}
         aria-label="Remove item"
@@ -157,7 +157,7 @@ function SwipeToRemoveRow({ onRemove, children }: { onRemove: () => void; childr
       >
         <Trash2 className="w-4 h-4" />
         <span>Remove</span>
-      </button>
+      </Button>
       {/* Foreground content — tapping it closes the reveal */}
       <div
         ref={contentRef}
@@ -645,7 +645,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                 </p>
                               </div>
                               {/* Price — TAP to set/change discount (Ko Hein) */}
-                              <button
+                              <Button
                                 type="button"
                                 onClick={(e) => {
                                   const rect = e.currentTarget.getBoundingClientRect();
@@ -664,7 +664,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                     <s className="font-mono">{formatPrice(item.price)}</s> · {item.discountPercent}%
                                   </p>
                                 )}
-                              </button>
+                              </Button>
                               {renderDiscountPopup(item)}
                             </div>
                           </div>
@@ -881,7 +881,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
         </div>
         <div className="grid grid-cols-4 gap-1.5">
           {DISCOUNT_OPTIONS.map((p) => (
-            <button
+            <Button
               key={p}
               type="button"
               onClick={() => {
@@ -896,11 +896,11 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
               title={p === 0 ? 'No discount' : `${p}% off`}
             >
               {p === 0 ? '0' : p}
-            </button>
+            </Button>
           ))}
         </div>
         <div className="mt-2 pt-2 border-t border-line">
-          <input
+          <Input
             type="number"
             inputMode="numeric"
             placeholder="Custom %"
@@ -1023,14 +1023,14 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
               </h2>
             </div>
           </div>
-          <button
+          <Button
             type="button"
             onClick={() => setDeviceModalOpen(true)}
             className="shrink-0 min-h-10 px-3.5 sm:px-4 rounded-xl bg-brand hover:bg-brand-deep text-white font-extrabold text-xs border border-brand transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-2xs focus:outline-none"
           >
             <Folder className="w-3.5 h-3.5" />
             <span>Switch Model</span>
-          </button>
+          </Button>
         </div>
 
         {/* Repair category quick-filter chips — below the device card (Ko Hein) */}
@@ -1279,14 +1279,14 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <button
+                <Button
                   type="button"
                   onClick={() => setIsCartSheetOpen(false)}
                   aria-label="Close cart"
                   className="text-muted hover:text-ink transition-colors cursor-pointer p-1.5 focus:outline-none"
                 >
                   <X className="w-4 h-4" />
-                </button>
+                </Button>
               </div>
             </div>
 

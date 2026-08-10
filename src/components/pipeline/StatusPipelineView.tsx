@@ -1194,20 +1194,20 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   <span className="shrink-0 font-mono text-[11px] font-black text-brand">
                     {afterDiagnostics.filter((d) => d.status !== 'N/A').length}/{afterDiagnostics.length || 21}
                   </span>
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setAfterDiagnostics(afterDiagnostics.map((d) => ({ ...d, status: 'Pass' as const, note: d.note || 'QA Passed' })))}
                     className="!h-7 !min-h-7 rounded-lg bg-success px-2.5 text-[11px] font-bold text-white transition-colors hover:bg-success/90"
                   >
                     All Pass
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
                     onClick={() => setAfterDiagnostics(afterDiagnostics.map((d) => ({ ...d, status: 'N/A' as const })))}
                     className="!h-7 !min-h-7 rounded-lg border border-line-strong bg-surface px-2.5 text-[11px] font-bold text-ink transition-colors hover:bg-line-strong"
                   >
                     All N/A
-                  </button>
+                  </Button>
                 </div>
               </div>
 
@@ -1223,7 +1223,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   };
                   return (
                     <div key={item.id || item.name} className="flex min-h-7 items-center gap-2 border-b border-line/60 py-1.5">
-                      <button
+                      <Button
                         type="button"
                         onClick={cycleStatus}
                         title={isPass ? 'Pass — tap for Fail' : isFail ? 'Fail — tap for Cant Test' : isCantTest ? 'Cant Test — tap for N/A' : 'Not checked — tap for Pass'}
@@ -1239,8 +1239,8 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         }`}
                       >
                         {isPass ? '\u2713' : isFail ? '\u2715' : isCantTest ? '?' : ''}
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         type="button"
                         onClick={() =>
                           setAfterDiagnostics((prev) => prev.map((d) => (d.id === item.id ? { ...d, status: 'Pass' as const } : d)))
@@ -1250,8 +1250,8 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                         aria-label={`Mark ${item.name} as Pass`}
                       >
                         {idx + 1}. {item.name}
-                      </button>
-                      <input
+                      </Button>
+                      <Input
                         aria-label={`${item.name} note`}
                         value={item.note || ''}
                         onChange={(e) =>

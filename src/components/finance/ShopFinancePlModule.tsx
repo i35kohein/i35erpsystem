@@ -835,7 +835,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
             <div className="flex items-center gap-3 shrink-0">
               <div className="flex items-center gap-1">
                 {(['ALL', 'APP', 'KZH'] as const).map((owner) => (
-                  <button
+                  <Button
                     key={owner}
                     type="button"
                     onClick={() => setPartsOwner(owner)}
@@ -844,7 +844,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                     }`}
                   >
                     {owner}
-                  </button>
+                  </Button>
                 ))}
               </div>
               <div className="text-right font-mono">

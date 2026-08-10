@@ -139,7 +139,7 @@ function FixedMoreMenu({ anchorRef, isOpen, editMode, onClose, onPrintTags, onTo
       <div className="fixed inset-0 z-40" onClick={onClose} role="presentation" aria-hidden="true" />
       <div className="fixed z-50 w-48 rounded-xl border border-line bg-white p-1.5 shadow-xl" style={{ top, left }}>
         {(['stock', 'profit', 'matrix'] as const).map((v) => (
-          <button
+          <Button
             key={v}
             type="button"
             onClick={() => { onView(v); onClose(); }}
@@ -147,26 +147,26 @@ function FixedMoreMenu({ anchorRef, isOpen, editMode, onClose, onPrintTags, onTo
           >
             {v === 'stock' ? <List className="w-4 h-4 text-brand shrink-0" /> : v === 'profit' ? <TrendingUp className="w-4 h-4 text-brand shrink-0" /> : <Grid className="w-4 h-4 text-brand shrink-0" />}
             {v === 'stock' ? 'Stock View' : v === 'profit' ? 'Profit View' : 'Matrix View'}
-          </button>
+          </Button>
         ))}
-        <button
+        <Button
           type="button"
           onClick={() => { onAddPart(); onClose(); }}
           className="lg:hidden w-full flex items-center gap-2 px-3 py-2 text-xs font-extrabold rounded-lg hover:bg-surface transition-colors cursor-pointer text-left focus:outline-none"
         >
           <Plus className="w-4 h-4 text-brand shrink-0" />
           Add Part
-        </button>
+        </Button>
         <div className="lg:hidden my-1 border-t border-line" />
-        <button
+        <Button
           type="button"
           onClick={onPrintTags}
           className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg hover:bg-surface transition-colors cursor-pointer text-left focus:outline-none"
         >
           <Printer className="w-4 h-4 text-brand shrink-0" />
           Print Tags
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={onToggleEdit}
           className={`w-full flex items-center gap-2 px-3 py-2.5 text-xs font-extrabold rounded-lg transition-colors cursor-pointer text-left focus:outline-none ${
@@ -175,7 +175,7 @@ function FixedMoreMenu({ anchorRef, isOpen, editMode, onClose, onPrintTags, onTo
         >
           <Edit2 className="w-4 h-4 shrink-0" />
           {editMode ? 'Done Editing' : 'Edit Stock'}
-        </button>
+        </Button>
       </div>
     </>,
     document.body,
@@ -1569,6 +1569,64 @@ export default function App() {
       setCustomers((prev) => prev.map((c) => (c.id === cust.id ? updatedCust : c)));
       saveDocument('customers', updatedCust).catch(reportSaveError);
     }
+
+    // Auto-create/update technician commission payout (Ko Hein 2026-08-10)
+    const techId = current.assignedTechId || (current as WorkOrder & { qaTechnicianId?: string }).qaTechnicianId;
+    if (techId && technicians.length > 0) {
+      const tech = technicians.find((t) => t.id === techId);
+      if (tech) {
+        const repairType =
+          current.repairTypeAI ||
+          (current.serviceType === 'Micro-Soldering' ? ('hardware' as const) : ('spareparts' as const));
+        const rate =
+          repairType === 'hardware'
+            ? tech.commissionRateHardware || tech.commissionRate || 0
+            : tech.commissionRateParts || tech.commissionRate || 0;
+
+        // Commission base = labor revenue (repair items after per-item discounts)
+        const laborRevenue = (current.lineItems || [])
+          .filter((li) => li.isLabor)
+          .reduce((s, li) => {
+            const lineTotal = (Number(li.unitPrice) || 0) * (Number(li.quantity) || 0);
+            const disc = li.lineItemDiscountPercent ? Math.round(lineTotal * (li.lineItemDiscountPercent / 100)) : 0;
+            return s + lineTotal - disc;
+          }, 0);
+
+        const commissionAmt = Math.round(laborRevenue * (rate / 100));
+        if (commissionAmt > 0) {
+          const now = new Date();
+          const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+          const existingPayout = technicianPayouts.find((p) => p.technicianId === tech.id && p.period === period);
+
+          if (existingPayout) {
+            const updatedPayout: TechnicianPayoutRecord = {
+              ...existingPayout,
+              totalTicketsClosed: (existingPayout.totalTicketsClosed || 0) + 1,
+              totalLaborRevenue: (existingPayout.totalLaborRevenue || 0) + laborRevenue,
+              commissionAmount: (existingPayout.commissionAmount || 0) + commissionAmt,
+              netPayout: ((existingPayout.netPayout || 0) + commissionAmt),
+            };
+            setTechnicianPayouts((prev) => prev.map((p) => (p.id === existingPayout.id ? updatedPayout : p)));
+            saveDocument('technicianPayouts', updatedPayout).catch(reportSaveError);
+          } else {
+            const newPayout: TechnicianPayoutRecord = {
+              id: `payout-${tech.id}-${period}`,
+              technicianId: tech.id,
+              technicianName: tech.name,
+              period,
+              totalTicketsClosed: 1,
+              totalLaborRevenue: laborRevenue,
+              commissionRatePercent: rate,
+              commissionAmount: commissionAmt,
+              netPayout: commissionAmt,
+              status: 'Pending',
+            };
+            setTechnicianPayouts((prev) => [...prev, newPayout]);
+            saveDocument('technicianPayouts', newPayout).catch(reportSaveError);
+          }
+        }
+      }
+    }
     addToast(`Payment recorded for ${workOrder.orderNumber} via ${paymentMethod} — Moved to Takeout`, 'success', 'Payment Received');
   };
 
@@ -2021,7 +2079,7 @@ export default function App() {
               {/* Stock / Profit / Matrix — desktop only (mobile: in ⋯ menu) */}
               <div className="hidden md:flex items-center gap-1.5 sm:gap-2 shrink-0">
                 {(['stock', 'profit', 'matrix'] as const).map((v) => (
-                  <button
+                  <Button
                     key={v}
                     type="button"
                     onClick={() => setInventoryViewMode(v)}
@@ -2033,7 +2091,7 @@ export default function App() {
                   >
                     {v === 'stock' ? <List className="w-3.5 h-3.5" /> : v === 'profit' ? <TrendingUp className="w-3.5 h-3.5" /> : <Grid className="w-3.5 h-3.5" />}
                     {v === 'stock' ? 'Stock' : v === 'profit' ? 'Profit' : 'Matrix'}
-                  </button>
+                  </Button>
                 ))}
               </div>
 
@@ -2049,7 +2107,7 @@ export default function App() {
 
               {/* More actions — Print Tags + Edit (⋯) */}
               <div className={'relative block shrink-0'}>
-                <button
+                <Button
                   type="button"
                   ref={inventoryMoreAnchorRef}
                   onClick={() => setInventoryMoreOpen(!inventoryMoreOpen)}
@@ -2058,7 +2116,7 @@ export default function App() {
                   aria-label="More actions"
                 >
                   <MoreHorizontal className="h-4 w-4" />
-                </button>
+                </Button>
                 {inventoryMoreOpen && (
                   <FixedMoreMenu
                     anchorRef={inventoryMoreAnchorRef}
@@ -2084,15 +2142,15 @@ export default function App() {
                         <Boxes className="h-4 w-4 text-brand" />
                         <span className="text-sm font-extrabold text-ink">Parts Inventory</span>
                       </div>
-                      <button type="button" onClick={() => setInventorySideMenuOpen(false)} aria-label="Close menu" className="rounded-lg p-1.5 text-muted hover:bg-surface hover:text-ink transition-colors cursor-pointer">
+                      <Button type="button" onClick={() => setInventorySideMenuOpen(false)} aria-label="Close menu" className="rounded-lg p-1.5 text-muted hover:bg-surface hover:text-ink transition-colors cursor-pointer">
                         <X className="h-4 w-4" />
-                      </button>
+                      </Button>
                     </div>
                     <div className="flex-1 space-y-5 overflow-y-auto p-3">
                       <div className="space-y-1.5">
                         <p className="px-2 text-[10px] font-extrabold uppercase tracking-wider text-muted">View</p>
                         {(['stock', 'profit', 'matrix'] as const).map((v) => (
-                          <button
+                          <Button
                             key={v}
                             type="button"
                             onClick={() => { setInventoryViewMode(v); setInventorySideMenuOpen(false); }}
@@ -2102,20 +2160,20 @@ export default function App() {
                           >
                             {v === 'stock' ? <List className="h-4 w-4 shrink-0" /> : v === 'profit' ? <TrendingUp className="h-4 w-4 shrink-0" /> : <Grid className="h-4 w-4 shrink-0" />}
                             {v === 'stock' ? 'Stock & Quantities' : v === 'profit' ? 'Profit Analysis' : 'Stock Matrix'}
-                          </button>
+                          </Button>
                         ))}
                       </div>
                       <div className="space-y-1.5">
                         <p className="px-2 text-[10px] font-extrabold uppercase tracking-wider text-muted">Actions</p>
-                        <button type="button" onClick={() => { setInventoryAddModalOpen(true); setInventorySideMenuOpen(false); }} className="w-full flex items-center gap-2.5 rounded-xl bg-brand/10 px-3 py-2.5 text-xs font-extrabold text-brand hover:bg-brand/15 transition-colors cursor-pointer text-left">
+                        <Button type="button" onClick={() => { setInventoryAddModalOpen(true); setInventorySideMenuOpen(false); }} className="w-full flex items-center gap-2.5 rounded-xl bg-brand/10 px-3 py-2.5 text-xs font-extrabold text-brand hover:bg-brand/15 transition-colors cursor-pointer text-left">
                           <Plus className="h-4 w-4 shrink-0" /> Add Part
-                        </button>
-                        <button type="button" onClick={() => { setInventoryTagsPrintOpen(true); setInventorySideMenuOpen(false); }} className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-extrabold text-ink hover:bg-surface transition-colors cursor-pointer text-left">
+                        </Button>
+                        <Button type="button" onClick={() => { setInventoryTagsPrintOpen(true); setInventorySideMenuOpen(false); }} className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-extrabold text-ink hover:bg-surface transition-colors cursor-pointer text-left">
                           <Printer className="h-4 w-4 shrink-0 text-brand" /> Print Tags
-                        </button>
-                        <button type="button" onClick={() => { setInventoryEditMode((m) => !m); setInventorySideMenuOpen(false); }} className={`w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-extrabold transition-colors cursor-pointer text-left ${inventoryEditMode ? 'bg-warning/10 text-warning hover:bg-warning/15' : 'text-ink hover:bg-surface'}`}>
+                        </Button>
+                        <Button type="button" onClick={() => { setInventoryEditMode((m) => !m); setInventorySideMenuOpen(false); }} className={`w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-extrabold transition-colors cursor-pointer text-left ${inventoryEditMode ? 'bg-warning/10 text-warning hover:bg-warning/15' : 'text-ink hover:bg-surface'}`}>
                           <Edit2 className="h-4 w-4 shrink-0" /> {inventoryEditMode ? 'Done Editing' : 'Edit Stock'}
-                        </button>
+                        </Button>
                       </div>
                       <div className="space-y-2.5">
                         <p className="px-2 text-[10px] font-extrabold uppercase tracking-wider text-muted">Filters</p>
@@ -2303,7 +2361,7 @@ export default function App() {
             ) : null}
 
             {/* Mobile filter drawer trigger — rightmost on phones (all tabs) */}
-            <button
+            <Button
               type="button"
               onClick={() => setIsFilterDrawerOpen(true)}
               className={`sm:hidden relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand transition-all cursor-pointer`}
@@ -2316,7 +2374,7 @@ export default function App() {
                   {getActiveFilterCount(activeTab)}
                 </span>
               )}
-            </button>
+            </Button>
 
             {/* Live Supabase connection indicator — dev-mode only (VITE_DEV_MODE or localhost); hidden in production & iPad */}
           </div>

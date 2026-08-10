@@ -991,7 +991,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
               </div>
 
               <label className="flex items-start space-x-2 cursor-pointer pt-1">
-                <input
+                <Input
                   type="checkbox"
                   checked={agreedToTerms}
                   onChange={(e) => setAgreedToTerms(e.target.checked)}

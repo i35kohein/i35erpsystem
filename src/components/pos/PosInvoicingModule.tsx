@@ -681,13 +681,13 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       </tr>
                       <tr>
                         <td className="border border-line px-2 py-1.5" colSpan={2}>
-                          <button
+                          <Button
                             type="button"
                             onClick={handleApplyDiagnosticFeeOnly}
                             className="w-full py-1.5 rounded-md bg-danger hover:bg-danger-deep text-white font-extrabold text-xs transition-all cursor-pointer active:scale-[0.98] focus:outline-none"
                           >
                             Apply Diagnostic Fee Only (စက်စစ်ခ သာကောက်မည်)
-                          </button>
+                          </Button>
                         </td>
                       </tr>
                     </tbody>
@@ -743,21 +743,21 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                   <td className="border border-line px-2 py-1.5">
                                     <div className="flex items-center gap-1">
                                       <span className="font-bold text-ink min-w-0 truncate">{li.description}</span>
-                                      <button
+                                      <Button
                                         type="button"
                                         onClick={() => setEditingLineId(isEditing ? null : li.id)}
                                         className={`shrink-0 p-0.5 rounded transition-colors cursor-pointer focus:outline-none ${isEditing ? 'text-brand' : 'text-muted hover:text-brand'}`}
                                         title={isEditing ? 'Done editing' : 'Edit price / qty / discount'}
                                       >
                                         {isEditing ? <Check className="w-3 h-3" /> : <Pencil className="w-3 h-3" />}
-                                      </button>
+                                      </Button>
                                     </div>
                                   </td>
 
                                   {/* Qty — editable */}
                                   <td className="border border-line px-1 py-1 text-center">
                                     {isEditing ? (
-                                      <input
+                                      <Input
                                         type="number"
                                         min={1}
                                         value={li.quantity}
@@ -772,7 +772,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                   {/* Unit Price — show original (strike) + discounted side by side if discounted */}
                                   <td className="border border-line px-1 py-1 text-center">
                                     {isEditing ? (
-                                      <input
+                                      <Input
                                         type="number"
                                         min={0}
                                         step={500}
@@ -798,7 +798,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                   <td className="border border-line px-1 py-1 text-center">
                                     {isEditing ? (
                                       <div className="flex items-center gap-0.5">
-                                        <input
+                                        <Input
                                           type="number"
                                           min={0}
                                           max={100}
@@ -829,7 +829,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                         <React.Fragment>
                                           <span className="inline-flex items-center gap-1.5">
                                             {effectiveTotal.toLocaleString()}
-                                            <button
+                                            <Button
                                               type="button"
                                               onClick={() => handleRemoveInventoryPartFromWorkOrder(li.id)}
                                               aria-label={`Remove ${li.description}`}
@@ -837,7 +837,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                               className="text-muted hover:text-danger p-0.5 rounded transition-colors cursor-pointer focus:outline-none"
                                             >
                                               <X className="w-3 h-3" />
-                                            </button>
+                                            </Button>
                                           </span>
                                           {itemDiscountAmt > 0 && (
                                             <span className="text-[10px] font-semibold text-success">-{itemDiscountAmt.toLocaleString()} off</span>
@@ -894,14 +894,14 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                       <td className="border border-line px-2 py-1 text-right font-mono text-muted tabular-nums text-[10px]">{sellTotal.toLocaleString()}</td>
                                       <td className="border border-line px-2 py-1 text-right font-mono text-ink font-bold tabular-nums text-[10px]">{sellTotal.toLocaleString()}</td>
                                       <td className="border border-line px-2 py-1 text-center">
-                                        <button
+                                        <Button
                                           type="button"
                                           onClick={() => handleRemoveInventoryPartFromWorkOrder(li.id)}
                                           aria-label={`Remove ${li.description}`}
                                           className="text-muted hover:text-danger p-0.5 rounded transition-colors cursor-pointer focus:outline-none"
                                         >
                                           <X className="w-2.5 h-2.5" />
-                                        </button>
+                                        </Button>
                                       </td>
                                     </tr>
                                   );
@@ -945,7 +945,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
                 {/* Add buttons row */}
                 <div className="grid grid-cols-3 gap-2">
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setIsAddPartOpen(true)}
                     className="flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg border border-line-strong bg-white hover:bg-surface transition-colors cursor-pointer focus:outline-none"
@@ -955,9 +955,9 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       Add Part
                     </span>
                     <Plus className="w-3.5 h-3.5 text-muted shrink-0" />
-                  </button>
+                  </Button>
 
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setIsAddCustomRepairOpen(!isAddCustomRepairOpen)}
                     className={`flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg border transition-colors cursor-pointer focus:outline-none ${
@@ -969,9 +969,9 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       Custom
                     </span>
                     <Plus className="w-3.5 h-3.5 text-muted shrink-0" />
-                  </button>
+                  </Button>
 
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setIsAddRepairFromPriceListOpen(true)}
                     className="flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg border border-line-strong bg-white hover:bg-surface transition-colors cursor-pointer focus:outline-none"
@@ -981,7 +981,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       Price List
                     </span>
                     <Plus className="w-3.5 h-3.5 text-muted shrink-0" />
-                  </button>
+                  </Button>
                 </div>
 
                 {/* Custom Repair Form (Ko Hein 2026-08-10) */}
@@ -1020,7 +1020,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       <span className="text-[11px] font-mono text-muted">
                         Total: <strong className="text-ink">{((customRepairPrice || 0) * (customRepairQty || 1)).toLocaleString()} {currency}</strong>
                       </span>
-                      <button
+                      <Button
                         type="button"
                         onClick={handleAddCustomRepair}
                         disabled={!customRepairName.trim() || !customRepairPrice}
@@ -1028,7 +1028,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       >
                         <Plus className="w-3 h-3" />
                         Add to Invoice
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -1063,7 +1063,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         </td>
                         <td className="border border-line px-2 py-1.5">
                           <div className="flex items-center gap-1 justify-end">
-                            <input
+                            <Input
                               type="number"
                               min={0}
                               step={1000}
@@ -1164,7 +1164,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   {activePaymentMethods.map((m) => {
                     const isSelected = paymentMethod === m.name;
                     return (
-                      <button
+                      <Button
                         key={m.id}
                         type="button"
                         onClick={() => setPaymentMethod(m.name)}
@@ -1173,12 +1173,12 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         }`}
                       >
                         {m.name}
-                      </button>
+                      </Button>
                     );
                   })}
 
                   {/* Split Payment pill */}
-                  <button
+                  <Button
                     type="button"
                     onClick={() => {
                       setPaymentMethod('Split Payment');
@@ -1195,7 +1195,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     }`}
                   >
                     Split Payment
-                  </button>
+                  </Button>
                 </div>
                 )}
 
@@ -1526,7 +1526,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   <span className="text-xs font-mono font-bold bg-success/10 text-success-deep px-2 py-0.5 rounded-full border border-success/20">
                     Checkout
                   </span>
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setIsQueueCollapsed(true)}
                     className="!h-6 !min-h-6 w-6 px-0 rounded flex items-center justify-center text-muted hover:bg-surface hover:text-ink transition-colors"
@@ -1534,11 +1534,11 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     aria-label="Collapse ticket list"
                   >
                     <ChevronsLeft className="w-3.5 h-3.5" />
-                  </button>
+                  </Button>
                 </div>
               </>
             ) : (
-              <button
+              <Button
                 type="button"
                 onClick={() => setIsQueueCollapsed(false)}
                 className="w-full h-8 rounded-lg flex items-center justify-center text-muted hover:bg-surface hover:text-brand transition-colors"
@@ -1546,7 +1546,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 aria-label="Expand ticket list"
               >
                 <ChevronsRight className="w-4 h-4" />
-              </button>
+              </Button>
             )}
           </div>
 
@@ -1631,7 +1631,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               {filteredWorkOrders.map((wo) => {
                 const isSel = wo.id === selectedWoId;
                 return (
-                  <button
+                  <Button
                     key={wo.id}
                     type="button"
                     onClick={() => {
@@ -1653,7 +1653,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     <span className={`text-[8px] font-black leading-tight ${isSel ? 'text-white/80' : 'text-muted'}`}>
                       {wo.isPaid ? '✓ PAID' : '$ DUE'} · {wo.totalAmount.toLocaleString()}
                     </span>
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -1670,14 +1670,14 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
       {isMobileCheckoutFullOpen && selectedWo && (
         <div className="fixed inset-0 z-50 md:hidden bg-white overflow-y-auto pt-[calc(env(safe-area-inset-top)+8px)] pb-28">
           <div className="sticky top-0 z-10 flex justify-end px-3 pt-1.5">
-            <button
+            <Button
               type="button"
               onClick={() => setIsMobileCheckoutFullOpen(false)}
               aria-label="Close checkout"
               className="text-muted hover:text-ink p-1.5 rounded transition-colors cursor-pointer focus:outline-none"
             >
               <X className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
           <div className="p-4">
             {renderCheckoutPanel()}
@@ -1752,7 +1752,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               {/* Backdate checkout (Ko Hein 2026-08-10) */}
               <div className="flex items-center justify-between gap-2 border-t border-line pt-2">
                 <span className="text-muted">Checkout Date</span>
-                <input
+                <Input
                   type="date"
                   value={checkoutDate}
                   onChange={(e) => setCheckoutDate(e.target.value)}
@@ -1832,20 +1832,20 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 <h3 className="font-extrabold text-sm text-ink">Add Inventory Part Used</h3>
                 <p className="text-xs text-muted truncate">Pick the stock part used on this ticket</p>
               </div>
-              <button
+              <Button
                 type="button"
                 onClick={() => setIsAddPartOpen(false)}
                 aria-label="Close add part"
                 className="text-muted hover:text-ink p-1.5 rounded transition-colors cursor-pointer focus:outline-none"
               >
                 <X className="w-4 h-4" />
-              </button>
+              </Button>
             </div>
 
             {/* Owner filter — APP / KZH (Ko Hein 2026-08-10) */}
             <div className="flex items-center gap-1">
               {(['ALL', 'APP', 'KZH'] as const).map((owner) => (
-                <button
+                <Button
                   key={owner}
                   type="button"
                   onClick={() => setPosOwner(owner)}
@@ -1854,7 +1854,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   }`}
                 >
                   {owner}
-                </button>
+                </Button>
               ))}
             </div>
 
@@ -1879,7 +1879,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   const isSelected = inventoryPartId === part.id;
                   const low = part.quantityInStock <= part.reorderPoint;
                   return (
-                    <button
+                    <Button
                       key={part.id}
                       type="button"
                       onClick={() => setInventoryPartId(part.id)}
@@ -1905,7 +1905,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       <span className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${isSelected ? 'border-brand' : 'border-line-strong'}`}>
                         {isSelected && <span className="w-2 h-2 rounded-full bg-brand" />}
                       </span>
-                    </button>
+                    </Button>
                   );
                 })
               )}
@@ -2122,13 +2122,13 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               className="bg-white border border-line rounded-2xl max-w-2xl w-full p-6 space-y-4 text-xs shadow-2xl relative max-h-[80vh] min-h-[400px] flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
-              <button
+              <Button
                 type="button"
                 onClick={() => setIsAddRepairFromPriceListOpen(false)}
                 className="absolute right-4 top-4 text-muted hover:text-ink p-1 rounded-lg hover:bg-surface cursor-pointer"
               >
                 <X className="w-5 h-5" />
-              </button>
+              </Button>
 
               <div className="border-b border-line pb-3 space-y-1">
                 <h3 className="text-base font-black text-ink flex items-center space-x-2">
@@ -2144,7 +2144,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               <div className="space-y-2">
                 <div className="relative">
                   <Search className="w-4 h-4 text-muted absolute left-3 top-2.5" />
-                  <input
+                  <Input
                     type="text"
                     value={priceSearchQuery}
                     onChange={(e) => setPriceSearchQuery(e.target.value)}
@@ -2156,7 +2156,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 {/* Category Group Filter Pills */}
                 <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs">
                   {['ALL', 'Battery', 'Display', 'Housing', 'Charging', 'Audio', 'Logic Board', 'Network', 'Sensors & Keys'].map((grp) => (
-                    <button
+                    <Button
                       key={grp}
                       type="button"
                       onClick={() => setSelectedGroupFilter(grp)}
@@ -2167,7 +2167,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       }`}
                     >
                       {grp}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
@@ -2187,7 +2187,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       (li) => li.description?.toLowerCase() === item.name.toLowerCase()
                     );
                     return (
-                      <button
+                      <Button
                         type="button"
                         key={item.categoryKey}
                         onClick={() => {
@@ -2230,7 +2230,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                             {item.price.toLocaleString()} MMK
                           </span>
                         </div>
-                      </button>
+                      </Button>
                     );
                   })
                 )}
@@ -2241,7 +2241,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 <span className="text-xs text-muted font-semibold">
                   Selected: <strong className="text-ink">{posCatalogSelection.length} repair(s)</strong>
                 </span>
-                <button
+                <Button
                   type="button"
                   onClick={() => {
                     const selected = catalogItems.filter(
@@ -2258,7 +2258,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   className="px-6 py-2.5 bg-brand text-white font-bold rounded-xl text-xs hover:bg-brand-deep transition-colors shadow-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Apply Selected Repairs ({posCatalogSelection.length})
-                </button>
+                </Button>
               </div>
             </div>
           </div>

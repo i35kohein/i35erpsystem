@@ -8,6 +8,7 @@ import { WorkOrder, Technician, SystemSettings, WorkOrderStatus } from '../../ty
 import { PriorityBadge } from '../common/PriorityBadge';
 import { TicketDetailInspectorModal } from '../common/TicketDetailInspectorModal';
 import { confirmDialog } from '../common/ConfirmDialog';
+import { Button } from '../ui';
 
 interface TrelloBoardProps {
   workOrders: WorkOrder[];
@@ -224,7 +225,7 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
                       <div className="mt-2 flex items-center justify-between border-t border-line/60 pt-1.5">
                         <div className="flex items-center space-x-1 min-w-0" onClick={(e) => e.stopPropagation()}>
                           {isTechnicianUser && myTechId ? (
-                            <button
+                            <Button
                               type="button"
                               onClick={() => handleQuickAssign(wo, myTechId)}
                               title="Assign to me"
@@ -232,10 +233,10 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
                             >
                               <UserCheck className="w-3 h-3" />
                               <span className="truncate max-w-[70px]">{techName(wo)}</span>
-                            </button>
+                            </Button>
                           ) : (
                             <div className="relative" onClick={(e) => { e.stopPropagation(); }}>
-                              <button
+                              <Button
                                 type="button"
                                 onClick={() => { setTechAssignWo(wo); setTechAssignOpen(techAssignOpen === wo.id ? null : wo.id); }}
                                 title="Assign technician"
@@ -243,27 +244,27 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
                               >
                                 <UserCheck className="w-3 h-3" />
                                 <span className="truncate max-w-[70px]">{techName(wo)}</span>
-                              </button>
+                              </Button>
                               {techAssignOpen === wo.id && techAssignWo?.id === wo.id && (
                                 <>
                                   <div className="fixed inset-0 z-40" onClick={() => setTechAssignOpen(null)} role="presentation" aria-hidden="true" />
                                   <div className="absolute left-0 top-full z-50 mt-1 w-44 rounded-xl border border-line bg-white p-1 shadow-xl">
-                                    <button
+                                    <Button
                                       type="button"
                                       onClick={() => handleQuickAssign(wo, 'unassigned')}
                                       className="w-full px-2.5 py-1.5 text-left text-xs font-bold rounded-lg hover:bg-surface"
                                     >
                                       Unassigned
-                                    </button>
+                                    </Button>
                                     {technicians.map((t) => (
-                                      <button
+                                      <Button
                                         key={t.id}
                                         type="button"
                                         onClick={() => handleQuickAssign(wo, t.id)}
                                         className="w-full px-2.5 py-1.5 text-left text-xs font-bold rounded-lg hover:bg-surface"
                                       >
                                         {t.name}
-                                      </button>
+                                      </Button>
                                     ))}
                                   </div>
                                 </>
@@ -275,7 +276,7 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
                           {(wo.status === 'Finished' || wo.status === 'Taken Out') &&
                             (wo.postRepairChecklist ? (
                               /* Diagnosis done → allow checkout (Ko Hein) */
-                              <button
+                              <Button
                                 type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -286,10 +287,10 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
                                 className="!h-6 !min-h-6 w-6 rounded-full bg-success text-white flex items-center justify-center shadow-2xs hover:bg-success/90 transition-colors shrink-0"
                               >
                                 <DollarSign className="w-3.5 h-3.5" />
-                              </button>
+                              </Button>
                             ) : wo.status === 'Finished' ? (
                               /* Not diagnosed yet → show Diagnostic instead (Ko Hein) */
-                              <button
+                              <Button
                                 type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -300,10 +301,10 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
                                 className="!h-6 !min-h-6 w-6 rounded-full bg-brand text-white flex items-center justify-center shadow-2xs hover:bg-brand-deep transition-colors shrink-0"
                               >
                                 <Stethoscope className="w-3.5 h-3.5" />
-                              </button>
+                              </Button>
                             ) : null)}
                           {wo.status === 'Finished' && wo.postRepairChecklist && onReopenQa && (
-                            <button
+                            <Button
                               type="button"
                               onClick={async (e) => {
                                 e.stopPropagation();
@@ -315,7 +316,7 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
                               className="!h-6 !min-h-6 w-6 rounded-full border border-warning/40 bg-warning/10 text-warning flex items-center justify-center hover:bg-warning/20 transition-colors shrink-0"
                             >
                               <RotateCcw className="w-3.5 h-3.5" />
-                            </button>
+                            </Button>
                           )}
                           <span className="font-mono text-[11px] font-black text-success-deep">{totalAmt.toLocaleString()} MMK</span>
                         </div>

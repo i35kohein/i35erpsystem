@@ -6,6 +6,7 @@ import { ModelRepairPrice } from '../../types/priceCatalog';
 import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
 import { DIAGNOSTIC_NAMES, getAvailableColorsForModel, getRealisticColorStyle } from './deviceData';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
+import { Button, Input } from '../ui';
 
 interface SimpleTicketCreatorProps {
   workOrders: WorkOrder[];
@@ -335,13 +336,13 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
             ))}
           </select>
           {editingId && (
-            <button
+            <Button
               type="button"
               onClick={resetForm}
               className="rounded-lg border border-line bg-surface px-3 py-2 text-xs font-bold text-ink transition-colors hover:bg-line cursor-pointer"
             >
               + New Ticket
-            </button>
+            </Button>
           )}
         </div>
       )}
@@ -370,7 +371,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
             {/* Phone */}
             <label className="flex items-center gap-3 py-2">
               <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Phone</span>
-              <input
+              <Input
                 value={form.phone}
                 onChange={(e) => handlePhoneChange(e.target.value)}
                 inputMode="tel"
@@ -382,7 +383,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
             {/* Name */}
             <label className="flex items-center gap-3 py-2">
               <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Name</span>
-              <input
+              <Input
                 value={form.name}
                 onChange={(e) => set('name', e.target.value)}
                 required
@@ -393,19 +394,19 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
             {/* Model → popup */}
             <label className="flex items-center gap-3 py-2">
               <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Model</span>
-              <button
+              <Button
                 type="button"
                 onClick={() => setIsModelModalOpen(true)}
                 className={boxBtnCls}
               >
                 <span className="truncate">{form.model || <span className="text-muted/70">Choose model…</span>}</span>
                 <ChevronDown className="print:hidden h-4 w-4 shrink-0 text-muted" />
-              </button>
+              </Button>
             </label>
             {/* Color → popup */}
             <label className="flex items-center gap-3 py-2">
               <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Color</span>
-              <button
+              <Button
                 type="button"
                 onClick={() => setIsColorOpen(true)}
                 className={boxBtnCls}
@@ -421,12 +422,12 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                   )}
                 </span>
                 <ChevronDown className="print:hidden h-4 w-4 shrink-0 text-muted" />
-              </button>
+              </Button>
             </label>
             {/* IMEI */}
             <label className="flex items-center gap-3 py-2">
               <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">IMEI</span>
-              <input
+              <Input
                 value={form.imei}
                 onChange={(e) => set('imei', e.target.value)}
                 inputMode="numeric"
@@ -437,7 +438,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
             {/* Received date */}
             <label className="flex items-center gap-3 py-2">
               <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Received</span>
-              <input
+              <Input
                 type="date"
                 value={form.date}
                 onChange={(e) => set('date', e.target.value)}
@@ -447,7 +448,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
             {/* Error / Repairs → popup */}
             <label className="flex items-center gap-3 py-2">
               <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Repairs</span>
-              <button
+              <Button
                 type="button"
                 onClick={() => setIsRepairsOpen(true)}
                 className={boxBtnCls}
@@ -463,12 +464,12 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                   )}
                 </span>
                 <ChevronDown className="print:hidden h-4 w-4 shrink-0 text-muted" />
-              </button>
+              </Button>
             </label>
             {/* Passcode */}
             <label className="flex items-center gap-3 py-2">
               <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Passcode</span>
-              <input
+              <Input
                 value={form.passcode}
                 onChange={(e) => set('passcode', e.target.value)}
                 autoComplete="off"
@@ -494,27 +495,27 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
             <div className="flex items-center justify-between border-b border-line pb-2">
               <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted">Phone Testing & Checking</span>
               <span className="flex shrink-0 items-center gap-1.5">
-                <button
+                <Button
                   type="button"
                   onClick={() => setAllChecks('Pass')}
                   className="no-print rounded-lg border border-success/30 bg-success/10 px-2 py-0.5 text-[10px] font-black text-success-deep transition-colors hover:bg-success/20 cursor-pointer"
                 >
                   All Pass
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
                   onClick={() => setAllChecks('N/A')}
                   className="no-print rounded-lg border border-line bg-surface px-2 py-0.5 text-[10px] font-black text-muted transition-colors hover:bg-line cursor-pointer"
                 >
                   All N/A
-                </button>
+                </Button>
                 <span className="font-mono text-[11px] font-black text-brand">{checkedCount}/{DIAGNOSTIC_NAMES.length}</span>
               </span>
             </div>
             <div className="mt-0 grid grid-cols-1 gap-x-4 sm:grid-cols-2 sm:gap-x-8">
               {DIAGNOSTIC_NAMES.map((name, i) => (
                 <label key={name} className="group flex min-h-7 items-center gap-2 border-b border-line/60 py-1.5">
-                  <button
+                  <Button
                     type="button"
                     onClick={() => cycleCheck(i)}
                     title={form.checks[i].status === 'N/A' ? 'Not checked — tap for Pass' : form.checks[i].status === 'Pass' ? 'Pass — tap for Fail' : 'Fail — tap for N/A'}
@@ -527,11 +528,11 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                     }`}
                   >
                     {form.checks[i].status === 'Pass' ? '✓' : form.checks[i].status === 'Fail' ? '✕' : ''}
-                  </button>
+                  </Button>
                   <span className={`text-xs font-semibold sm:text-sm ${form.checks[i].status !== 'N/A' ? 'text-ink' : 'text-muted'}`}>
                     {name}
                   </span>
-                  <input
+                  <Input
                     aria-label={`${name} note`}
                     value={form.checks[i].note}
                     onChange={(e) => setCheck(i, { note: e.target.value })}
@@ -556,15 +557,15 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               {editingId && <span className="ml-2 text-brand">· {editTarget?.orderNumber}</span>}
             </p>
             <div className="flex justify-end gap-2">
-              <button type="reset" className="rounded-xl border border-line bg-white px-4 py-2 text-xs font-bold text-ink hover:bg-surface">
+              <Button type="reset" className="rounded-xl border border-line bg-white px-4 py-2 text-xs font-bold text-ink hover:bg-surface">
                 Clear
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
                 className="rounded-xl bg-brand px-5 py-2 text-xs font-black text-white transition hover:bg-brand-deep"
               >
                 {editingId ? 'Update & Print' : 'Save & Print'}
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -572,22 +573,22 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
             <div role="status" className="no-print mt-4 flex flex-wrap items-center justify-center gap-3 rounded-2xl bg-success/10 px-4 py-3 text-center text-sm font-bold text-success-deep">
               <span>{editingId ? 'Ticket updated and saved to the database.' : 'Inspection saved to the database.'}</span>
               {onSelectPrintTag && lastSavedWo && (
-                <button
+                <Button
                   type="button"
                   onClick={() => onSelectPrintTag(lastSavedWo)}
                   className="rounded-lg border border-success/40 bg-white px-3 py-1.5 text-xs font-black text-success-deep transition hover:bg-success/10"
                 >
                   🖨 Print Ticket
-                </button>
+                </Button>
               )}
               {onNavigateToTab && (
-                <button
+                <Button
                   type="button"
                   onClick={() => onNavigateToTab('intake')}
                   className="rounded-lg border border-success/40 bg-white px-3 py-1.5 text-xs font-black text-success-deep transition hover:bg-success/10"
                 >
                   → Work Intake
-                </button>
+                </Button>
               )}
             </div>
           )}
@@ -603,7 +604,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 <h3 className="text-sm font-extrabold text-ink">Choose Color</h3>
                 <p className="text-xs text-muted">{form.model ? `Colors for ${form.model}` : 'Pick a device first'}</p>
               </div>
-              <button type="button" onClick={() => setIsColorOpen(false)} className="rounded-lg p-1 text-muted hover:bg-surface hover:text-ink" aria-label="Close">✕</button>
+              <Button type="button" onClick={() => setIsColorOpen(false)} className="rounded-lg p-1 text-muted hover:bg-surface hover:text-ink" aria-label="Close">✕</Button>
             </div>
             {!form.model ? (
               <p className="py-8 text-center text-xs font-bold text-muted">Pick a device first — go back and choose the model.</p>
@@ -613,7 +614,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                   const style = getRealisticColorStyle(c);
                   const isSelected = form.color === c;
                   return (
-                    <button
+                    <Button
                       key={c}
                       type="button"
                       onClick={() => { set('color', c); setIsColorOpen(false); }}
@@ -627,7 +628,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                         style={{ background: style.gradient, boxShadow: style.shadow }}
                       />
                       <span className={`mt-2 text-xs font-bold ${isSelected ? 'text-brand' : 'text-ink'}`}>{c}</span>
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
@@ -645,7 +646,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 <h3 className="text-sm font-extrabold text-ink">Add Repairs & Details</h3>
                 <p className="truncate text-xs text-muted">{form.model ? `Repairs for ${form.model}` : 'Pick a model first'}</p>
               </div>
-              <button type="button" onClick={closeRepairs} className="rounded-lg p-1 text-muted hover:bg-surface hover:text-ink" aria-label="Close">✕</button>
+              <Button type="button" onClick={closeRepairs} className="rounded-lg p-1 text-muted hover:bg-surface hover:text-ink" aria-label="Close">✕</Button>
             </div>
 
             {!form.model ? (
@@ -659,7 +660,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 <div className="space-y-2 border-b border-line px-4 py-3">
                   <div className="relative">
                     <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-                    <input
+                    <Input
                       type="text"
                       value={repairSearch}
                       onChange={(e) => setRepairSearch(e.target.value)}
@@ -669,7 +670,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                   </div>
                   <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
                     {['ALL', 'Battery', 'Display', 'Housing', 'Charging', 'Audio', 'Logic Board', 'Network', 'Sensors & Keys'].map((grp) => (
-                      <button
+                      <Button
                         key={grp}
                         type="button"
                         onClick={() => setRepairGroup(grp)}
@@ -678,7 +679,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                         }`}
                       >
                         {grp}
-                      </button>
+                      </Button>
                     ))}
                   </div>
                 </div>
@@ -735,7 +736,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                                 )}
                               </div>
                             </div>
-                            <button
+                            <Button
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -752,7 +753,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                               }`}
                             >
                               <BadgePercent className="h-4 w-4" />
-                            </button>
+                            </Button>
                           </div>
                         </div>
                       );
@@ -784,9 +785,9 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 </div>
 
                 <div className="flex justify-end gap-2 border-t border-line px-4 py-3">
-                  <button type="button" onClick={closeRepairs} className="rounded-xl bg-brand px-5 py-2 text-xs font-black text-white transition hover:bg-brand-deep">
+                  <Button type="button" onClick={closeRepairs} className="rounded-xl bg-brand px-5 py-2 text-xs font-black text-white transition hover:bg-brand-deep">
                     Done
-                  </button>
+                  </Button>
                 </div>
 
                 {/* Anchored discount popup (price-list style) */}
@@ -804,7 +805,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                     </div>
                     <div className="grid grid-cols-4 gap-1.5">
                       {DISCOUNT_OPTIONS.map((pct) => (
-                        <button
+                        <Button
                           key={pct}
                           type="button"
                           onClick={() => {
@@ -820,11 +821,11 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                           title={pct === 0 ? 'No discount' : `${pct}% off`}
                         >
                           {pct === 0 ? '0' : pct}
-                        </button>
+                        </Button>
                       ))}
                     </div>
                     <div className="mt-2 border-t border-line pt-2">
-                      <input
+                      <Input
                         type="number"
                         inputMode="numeric"
                         placeholder="Custom %"

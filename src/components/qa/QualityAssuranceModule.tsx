@@ -8,7 +8,7 @@ import {CheckCircle2,
   StickyNote,
   DollarSign, RotateCcw } from 'lucide-react';
 import { WorkOrder, PostRepairChecklist, Technician, DiagnosticItemResult, DiagnosticStatus, AppUser, SystemSettings } from '../../types';
-import { Button } from '../ui';
+import { Button, Input } from '../ui';
 import { DIAGNOSTIC_NAMES } from '../intake/deviceData';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 import { compressImageFile } from '../../lib/utils';
@@ -601,17 +601,17 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                       {qaBeforePhotos.map((photo, idx) => (
                         <div key={idx} className="relative w-16 h-16 rounded-lg overflow-hidden border border-line group">
                           <img src={photo} alt={`Before photo ${idx + 1}`} className="w-full h-full object-cover" />
-                          <button
+                          <Button
                             type="button"
                             onClick={() => setQaBeforePhotos((prev) => prev.filter((_, i) => i !== idx))}
                             className="absolute top-0.5 right-0.5 bg-black/70 text-white p-0.5 rounded-full"
                             aria-label={`Remove before photo ${idx + 1}`}
                           >
                             <X className="w-2.5 h-2.5" />
-                          </button>
+                          </Button>
                         </div>
                       ))}
-                      <input
+                      <Input
                         ref={beforePhotoInputRef}
                         type="file"
                         accept="image/*"
@@ -620,7 +620,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                         className="hidden"
                         onChange={(e) => { handlePhotoFiles(e.target.files, setQaBeforePhotos, 'before'); e.target.value = ''; }}
                       />
-                      <button
+                      <Button
                         type="button"
                         onClick={() => beforePhotoInputRef.current?.click()}
                         className="w-16 h-16 rounded-lg border-2 border-dashed border-line hover:border-brand flex flex-col items-center justify-center text-muted hover:text-brand text-[9px] gap-0.5 bg-white transition-all"
@@ -628,7 +628,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                       >
                         <Camera className="w-4 h-4" />
                         <span>Add</span>
-                      </button>
+                      </Button>
                     </div>
                   </div>
                   {/* After */}
@@ -641,17 +641,17 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                       {qaAfterPhotos.map((photo, idx) => (
                         <div key={idx} className="relative w-16 h-16 rounded-lg overflow-hidden border border-line group">
                           <img src={photo} alt={`After photo ${idx + 1}`} className="w-full h-full object-cover" />
-                          <button
+                          <Button
                             type="button"
                             onClick={() => setQaAfterPhotos((prev) => prev.filter((_, i) => i !== idx))}
                             className="absolute top-0.5 right-0.5 bg-black/70 text-white p-0.5 rounded-full"
                             aria-label={`Remove after photo ${idx + 1}`}
                           >
                             <X className="w-2.5 h-2.5" />
-                          </button>
+                          </Button>
                         </div>
                       ))}
-                      <input
+                      <Input
                         ref={afterPhotoInputRef}
                         type="file"
                         accept="image/*"
@@ -660,7 +660,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                         className="hidden"
                         onChange={(e) => { handlePhotoFiles(e.target.files, setQaAfterPhotos, 'after'); e.target.value = ''; }}
                       />
-                      <button
+                      <Button
                         type="button"
                         onClick={() => afterPhotoInputRef.current?.click()}
                         className="w-16 h-16 rounded-lg border-2 border-dashed border-line hover:border-success flex flex-col items-center justify-center text-muted hover:text-success-deep text-[9px] gap-0.5 bg-white transition-all"
@@ -668,7 +668,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                       >
                         <Camera className="w-4 h-4" />
                         <span>Add</span>
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -687,20 +687,20 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     <span className="shrink-0 font-mono text-[11px] font-black text-brand">
                       {qaDiagnostics.filter((d) => d.status !== 'N/A').length}/{qaDiagnostics.length || 21}
                     </span>
-                    <button
+                    <Button
                       type="button"
                       onClick={handleMarkAllPass}
                       className="!h-7 !min-h-7 rounded-lg bg-success px-2.5 text-[11px] font-bold text-white transition-colors hover:bg-success/90"
                     >
                       All Pass
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
                       onClick={() => setQaDiagnostics((prev) => prev.map((d) => ({ ...d, status: 'N/A' as const })))}
                       className="!h-7 !min-h-7 rounded-lg border border-line-strong bg-surface px-2.5 text-[11px] font-bold text-ink transition-colors hover:bg-line-strong"
                     >
                       All N/A
-                    </button>
+                    </Button>
                   </div>
                 </div>
                 <div className="mt-0 grid grid-cols-1 gap-x-4 sm:grid-cols-2 sm:gap-x-8">
@@ -710,7 +710,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     const isCantTest = item.status === 'Cant Test';
                     return (
                       <div key={item.id} className="flex min-h-7 items-center gap-2 border-b border-line/60 py-1.5">
-                        <button
+                        <Button
                           type="button"
                           onClick={() => cycleStatus(item.id, item.status)}
                           title={isPass ? 'Pass — tap for Fail' : isFail ? 'Fail — tap for N/A' : isCantTest ? 'Cant Test — tap for N/A' : 'Not checked — tap for Pass'}
@@ -726,8 +726,8 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           }`}
                         >
                           {isPass ? '\u2713' : isFail ? '\u2715' : isCantTest ? '?' : ''}
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="button"
                           onClick={() => handleDiagnosticStatusChange(item.id, 'Pass')}
                           className={`min-w-0 truncate text-left text-xs font-semibold transition-colors ${isPass ? 'text-success-deep' : isFail ? 'text-danger' : isCantTest ? 'text-warning' : 'text-muted hover:text-success-deep'}`}
@@ -735,8 +735,8 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           aria-label={`Mark ${item.name} as Pass`}
                         >
                           {idx + 1}. {item.name}
-                        </button>
-                        <input
+                        </Button>
+                        <Input
                           aria-label={`${item.name} note`}
                           value={item.note || ''}
                           onChange={(e) => handleDiagnosticNoteChange(item.id, e.target.value)}
@@ -775,7 +775,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="text-[10px] font-bold text-muted uppercase tracking-wider">Notes</p>
-                    <input
+                    <Input
                       type="text"
                       value={qaData.notes}
                       onChange={(e) => setQaData({ ...qaData, notes: e.target.value })}

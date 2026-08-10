@@ -36,10 +36,8 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
   const taxRate = systemSettings?.taxPercentage ?? systemSettings?.taxRatePercent ?? 6;
 
   // Calculate Parts vs Labor breakdowns
-  const partsItems = workOrder.lineItems?.filter((item) => !item.isLabor) || [];
   const laborItems = workOrder.lineItems?.filter((item) => item.isLabor) || [];
 
-  const _partsSubtotal = partsItems.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
   const laborSubtotal = laborItems.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
   const laborDiscount = laborItems.reduce((sum, item) => {
     const lineTotal = item.unitPrice * item.quantity;

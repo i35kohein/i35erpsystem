@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '../ui';
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -82,7 +83,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             )}
 
             <div className="flex gap-2">
-              <button
+              <Button
                 onClick={this.handleReload}
                 className="flex-1 inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-brand bg-brand px-4 text-xs font-extrabold text-white shadow-xs transition-all hover:bg-brand-deep active:scale-95"
               >
@@ -90,7 +91,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
                 Reload Page
-              </button>
+              </Button>
             </div>
           </div>
         </div>

@@ -212,6 +212,21 @@ export const Navigation: React.FC<NavigationProps> = ({
     setIsMobileMenuOpen(false);
   };
 
+  const navButtonBase = (isActive: boolean) => `
+    group w-full border transition-all duration-200
+    ${effectiveCollapsed ? 'h-10 w-10 mx-auto justify-center p-0 relative rounded-xl' : 'h-10 justify-between px-2.5 rounded-xl'}
+    ${
+      isActive
+        ? 'bg-brand-soft text-brand-deep font-bold border-brand/30 shadow-2xs'
+        : 'border-transparent text-ink hover:text-ink hover:bg-surface hover:border-line'
+    }
+  `;
+
+  const navIconClass = (isActive: boolean) => `
+    flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors
+    ${isActive ? 'bg-white text-brand shadow-2xs' : 'bg-transparent text-muted group-hover:bg-white group-hover:text-brand group-hover:shadow-2xs'}
+  `;
+
   return (
     <>
       {/* Backdrop overlay for mobile menu drawer */}
@@ -344,12 +359,12 @@ export const Navigation: React.FC<NavigationProps> = ({
               variant="default"
               size="sm"
               title="New Intake Ticket"
-              className={`w-full mt-1.5 ${
-                effectiveCollapsed ? 'w-10 h-10 mx-auto justify-center p-0' : 'justify-center px-3.5 py-2.5 min-h-10'
-              } font-bold ${activeTab === 'create-ticket' ? 'bg-brand-deep' : 'hover:bg-brand-deep'}`}
+              className={`w-full mt-1.5 h-10 rounded-xl font-bold shadow-sm ${
+                effectiveCollapsed ? 'w-10 mx-auto justify-center p-0' : 'justify-center px-3.5'
+              } ${activeTab === 'create-ticket' ? 'bg-brand-deep' : 'hover:bg-brand-deep'}`}
             >
               <div className="flex items-center justify-center min-w-0">
-                <Plus className={`${effectiveCollapsed ? '!w-6 !h-6' : 'w-4 h-4'} shrink-0 ${effectiveCollapsed ? '' : 'mr-2'}`} />
+                <Plus className={`${effectiveCollapsed ? '!w-5 !h-5' : 'w-4 h-4'} shrink-0 ${effectiveCollapsed ? '' : 'mr-2'}`} />
                 {!effectiveCollapsed && <span className="truncate text-xs">+ Intake Ticket</span>}
               </div>
             </Button>
@@ -362,16 +377,12 @@ export const Navigation: React.FC<NavigationProps> = ({
               variant="outline"
               size="sm"
               title="Dashboard"
-              className={`w-full mt-1.5 ${
-                effectiveCollapsed ? 'w-10 h-10 mx-auto justify-center p-0 relative' : 'justify-between px-3.5 py-2.5 min-h-10'
-              } ${
-                activeTab === 'dashboard'
-                  ? 'bg-brand-soft text-brand-deep font-bold border-brand/30'
-                  : 'border-transparent hover:text-ink hover:bg-surface'
-              }`}
+              className={`${navButtonBase(activeTab === 'dashboard')} mt-1.5`}
             >
               <div className="flex items-center justify-center min-w-0">
-                <LayoutDashboard className={`${effectiveCollapsed ? '!w-6 !h-6' : 'w-4 h-4'} shrink-0 ${activeTab === 'dashboard' ? 'text-brand' : 'text-muted'}`} />
+                <span className={navIconClass(activeTab === 'dashboard')}>
+                  <LayoutDashboard className="!h-4.5 !w-4.5" />
+                </span>
                 {!effectiveCollapsed && <span className="truncate text-xs ml-2.5">Dashboard</span>}
               </div>
             </Button>
@@ -399,23 +410,19 @@ export const Navigation: React.FC<NavigationProps> = ({
                       aria-current={isActive ? 'page' : undefined}
                       variant="outline"
                       size="sm"
-                      className={`w-full ${
-                        effectiveCollapsed ? 'w-10 h-10 mx-auto justify-center p-0 relative' : 'justify-between px-3.5 py-2.5 min-h-10'
-                      } ${
-                        isActive
-                          ? 'bg-brand-soft text-brand-deep font-bold border-brand/30'
-                          : 'border-transparent hover:text-ink hover:bg-surface'
-                      }`}
+                      className={navButtonBase(isActive)}
                       title={item.badge !== undefined && (typeof item.badge === 'string' || item.badge > 0) ? `${item.label} (${item.badge})` : item.label}
                       aria-label={item.badge !== undefined && (typeof item.badge === 'string' || item.badge > 0) ? `${item.label} (${item.badge} pending)` : item.label}
                     >
                       <div className={`flex items-center min-w-0 ${effectiveCollapsed ? 'justify-center' : 'flex-1'}`}>
-                        <ItemIcon className={`${effectiveCollapsed ? '!w-6 !h-6' : 'w-4 h-4'} shrink-0 ${isActive ? 'text-brand' : 'text-muted'}`} />
+                        <span className={navIconClass(isActive)}>
+                          <ItemIcon className="!h-4.5 !w-4.5" />
+                        </span>
                         {!effectiveCollapsed && <span className="truncate text-xs ml-2.5">{item.label}</span>}
                       </div>
 
                       {item.badge !== undefined && (typeof item.badge === 'string' || item.badge > 0) && (
-                        <Badge className={`text-xs py-0.5 px-2 shrink-0 ${item.badgeColor || 'bg-brand text-white'} ${effectiveCollapsed ? 'absolute -top-1.5 -right-1.5 px-1 py-0.5 text-xs leading-none min-w-[18px] text-center border border-white shadow-2xs' : ''}`}>
+                        <Badge className={`text-xs py-0.5 px-2 shrink-0 ${item.badgeColor || 'bg-brand text-white'} ${effectiveCollapsed ? 'absolute -top-1.5 -right-1.5 px-1 py-0.5 text-xs leading-none min-w-[18px] text-center border border-white shadow-2xs' : 'ml-2'}`}>
                           {effectiveCollapsed && typeof item.badge === 'number' && item.badge > 99 ? '99+' : item.badge}
                         </Badge>
                       )}

@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useMemo, lazy, Suspense } from 'react';
+import { createPortal } from 'react-dom';
 import { DateFilterState, filterByDateRange } from '../common/DateFilterSelector';
 
 import { timeAgoShort } from '../../utils/timeAgo';
 import { StatusBadge } from '../common/StatusBadge';
-import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 import { PriorityBadge } from '../common/PriorityBadge';
 
 // Camera/barcode scanner is code-split: html5-qrcode (~340KB) only downloads
@@ -25,7 +25,12 @@ import {ClipboardList, Stethoscope,
   CheckCircle2,
   MoveDiagonal2,
   Printer,
-  Flame, DollarSign, RotateCcw } from 'lucide-react';
+  Flame,
+  DollarSign,
+  RotateCcw,
+  Ban,
+  UserX,
+  PackageCheck } from 'lucide-react';
 import {WorkOrder, 
   PartItem, 
   Customer, 
@@ -95,6 +100,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   const [isCameraScannerOpen, setIsCameraScannerOpen] = useState<boolean>(false);
   const [ticketToDelete, setTicketToDelete] = useState<WorkOrder | null>(null);
   const [techAssignOpenId, setTechAssignOpenId] = useState<string | null>(null);
+  const [statusPicker, setStatusPicker] = useState<{ id: string; left: number; top: number } | null>(null);
   const [localViewMode, setLocalViewMode] = useState<'table' | 'cards'>('cards');
   const viewMode = propViewMode !== undefined ? propViewMode : localViewMode;
   const setViewMode = (v: 'table' | 'cards') => (propSetViewMode ? propSetViewMode(v) : setLocalViewMode(v));
@@ -202,6 +208,119 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
     rush: techScopedOrders.filter(w => w.priority === 'Urgent' || w.priority === 'Rush' || w.priority === 'Warranty Redo').length,
   };
 
+  const rosterStatusActions: {
+    value: WorkOrderStatus;
+    label: string;
+    shortLabel: string;
+    icon: React.ElementType;
+    color: string;
+  }[] = [
+    { value: 'Receive', label: 'Receive', shortLabel: 'In', icon: Inbox, color: 'bg-brand text-white border-brand shadow-brand/20' },
+    { value: 'In Progress', label: 'In Progress', shortLabel: 'Fix', icon: Wrench, color: 'bg-purple text-white border-purple shadow-purple/20' },
+    { value: 'Pending', label: 'Pending', shortLabel: 'Wait', icon: Clock, color: 'bg-warning text-white border-warning shadow-warning/20' },
+    { value: 'Finished', label: 'Finished', shortLabel: 'Done', icon: CheckCircle2, color: 'bg-success text-white border-success shadow-success/20' },
+    { value: 'Cant Repair', label: 'Cant Repair', shortLabel: 'No', icon: Ban, color: 'bg-danger text-white border-danger shadow-danger/20' },
+    { value: 'Customer Not Repair', label: 'Customer Not Repair', shortLabel: 'Skip', icon: UserX, color: 'bg-muted text-white border-muted shadow-muted/20' },
+    { value: 'Taken Out', label: 'Takeout', shortLabel: 'Out', icon: PackageCheck, color: 'bg-ink text-white border-ink shadow-ink/20' },
+  ];
+
+  const renderStatusCirclePicker = (wo: WorkOrder) => {
+    if (!onUpdateWorkOrderStatus) return <StatusBadge status={wo.status} size="xs" />;
+    const currentStatus = rosterStatusActions.find((statusAction) => statusAction.value === wo.status) || rosterStatusActions[0];
+    const CurrentIcon = currentStatus.icon;
+    const isOpen = statusPicker?.id === wo.id;
+
+    return (
+      <div className="inline-flex" aria-label={`Change status for ${wo.orderNumber || wo.id}`}>
+        <Button
+          variant="ghost"
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setTechAssignOpenId(null);
+            if (isOpen) {
+              setStatusPicker(null);
+              return;
+            }
+            const rect = e.currentTarget.getBoundingClientRect();
+            const menuWidth = 192;
+            const menuHeight = 278;
+            const gap = 8;
+            const viewportPadding = 8;
+            const left = Math.min(
+              Math.max(viewportPadding, rect.right - menuWidth),
+              window.innerWidth - menuWidth - viewportPadding
+            );
+            const opensDown = rect.bottom + gap + menuHeight <= window.innerHeight;
+            const top = opensDown
+              ? rect.bottom + gap
+              : Math.max(viewportPadding, rect.top - menuHeight - gap);
+            setStatusPicker({ id: wo.id, left, top });
+          }}
+          aria-expanded={isOpen}
+          aria-label={`Current status ${currentStatus.label}. Change status.`}
+          title={`Current: ${currentStatus.label}`}
+          className={`!h-7 !min-h-7 w-7 shrink-0 px-0 flex items-center justify-center rounded-full border shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-brand/30 ${currentStatus.color}`}
+        >
+          <CurrentIcon className="h-3.5 w-3.5" />
+        </Button>
+        {isOpen && createPortal(
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setStatusPicker(null)} role="presentation" aria-hidden="true" />
+            <div
+              className="fixed z-50 w-48 rounded-xl border border-line bg-white p-1.5 shadow-xl"
+              style={{ left: statusPicker.left, top: statusPicker.top }}
+            >
+              {rosterStatusActions.map((statusAction) => {
+                const Icon = statusAction.icon;
+                const isCurrent = wo.status === statusAction.value;
+                return (
+                  <Button
+                    key={statusAction.value}
+                    variant="ghost"
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setStatusPicker(null);
+                      if (!isCurrent) onUpdateWorkOrderStatus(wo.id, statusAction.value);
+                    }}
+                    aria-pressed={isCurrent}
+                    className={`flex w-full items-center justify-start gap-2 rounded-lg px-2.5 py-1.5 text-xs font-bold ${
+                      isCurrent ? 'bg-surface text-ink' : 'text-muted hover:bg-surface hover:text-ink'
+                    }`}
+                  >
+                    <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border ${statusAction.color}`}>
+                      <Icon className="h-3.5 w-3.5" />
+                    </span>
+                    <span className="truncate">{statusAction.label}</span>
+                  </Button>
+                );
+              })}
+            </div>
+          </>,
+          document.body
+        )}
+      </div>
+    );
+  };
+
+  const renderCheckoutButton = (wo: WorkOrder) => {
+    if (!(wo.status === 'Finished' || wo.status === 'Taken Out') || !wo.postRepairChecklist) return null;
+
+    return (
+      <Button
+        variant="ghost"
+        type="button"
+        onClick={(e) => { e.stopPropagation(); onNavigateToTab?.('pos'); }}
+        className="!h-7 !min-h-7 w-7 shrink-0 px-0 rounded-full bg-success text-white hover:bg-success/90 border border-success shadow-2xs"
+        title="Go to POS checkout"
+        aria-label={`Checkout ${wo.orderNumber || wo.id}`}
+      >
+        <DollarSign className="w-3.5 h-3.5" />
+      </Button>
+    );
+  };
+
   const handleOpenTicketDetail = (wo: WorkOrder) => {
     setSelectedWorkOrder(wo);
     setIsDetailModalOpen(true);
@@ -228,8 +347,9 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
             const Icon = st.icon;
             const isSelected = st.id === 'RUSH' ? sortByPriority : filterStatus === st.id;
             return (
-              <button
+              <Button
                 key={st.id}
+                variant="ghost"
                 type="button"
                 onClick={() => {
                   if (st.id === 'RUSH') {
@@ -248,7 +368,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                 <Icon className={`w-3 h-3 ${isSelected ? 'text-white' : 'text-brand'}`} />
                 {st.label}
                 <span className={`font-mono font-black ${isSelected ? 'text-white/90' : 'text-brand'}`}>{st.count}</span>
-              </button>
+              </Button>
             );
           })}
           </div>
@@ -381,7 +501,8 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                       {/* Assigned Tech — clickable dropdown (Ko Hein 2026-08-10) */}
                       <td className="py-3 px-3 hidden lg:table-cell" onClick={(e) => e.stopPropagation()}>
                         <div className="relative">
-                          <button
+                          <Button
+                            variant="ghost"
                             type="button"
                             onClick={() => setTechAssignOpenId(techAssignOpenId === wo.id ? null : wo.id)}
                             className="flex items-center space-x-1.5 text-left hover:opacity-80 transition-opacity"
@@ -393,27 +514,29 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                             <span className="text-xs text-ink font-medium truncate max-w-[100px]">
                               {wo.assignedTechName || 'Unassigned'}
                             </span>
-                          </button>
+                          </Button>
                           {techAssignOpenId === wo.id && (
                             <>
                               <div className="fixed inset-0 z-40" onClick={() => setTechAssignOpenId(null)} role="presentation" aria-hidden="true" />
                               <div className="absolute left-0 top-full z-50 mt-1 w-44 rounded-xl border border-line bg-white p-1 shadow-xl">
-                                <button
+                                <Button
+                                  variant="ghost"
                                   type="button"
                                   onClick={() => handleAssignTech(wo, 'unassigned')}
                                   className={`w-full px-2.5 py-1.5 text-left text-xs font-bold rounded-lg hover:bg-surface ${!wo.assignedTechId ? 'text-brand bg-brand/5' : ''}`}
                                 >
                                   Unassigned
-                                </button>
+                                </Button>
                                 {(technicians || []).map((t) => (
-                                  <button
+                                  <Button
                                     key={t.id}
+                                    variant="ghost"
                                     type="button"
                                     onClick={() => handleAssignTech(wo, t.id)}
                                     className={`w-full px-2.5 py-1.5 text-left text-xs font-bold rounded-lg hover:bg-surface ${wo.assignedTechId === t.id ? 'text-brand bg-brand/5' : ''}`}
                                   >
                                     {t.name}
-                                  </button>
+                                  </Button>
                                 ))}
                               </div>
                             </>
@@ -432,33 +555,16 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
 
                       {/* Stage & Status — changeable dropdown (Ko Hein 2026-08-10) */}
                       <td className="py-3 px-3" onClick={(e) => e.stopPropagation()}>
-                        {onUpdateWorkOrderStatus ? (
-                          <CustomDropdownMenu
-                            value={wo.status}
-                            onChange={(val) => onUpdateWorkOrderStatus(wo.id, val as WorkOrderStatus)}
-                            size="sm"
-                            ariaLabel={`Change status for ${wo.orderNumber || wo.id}`}
-                            buttonClassName="!h-7 !min-h-7 !px-2 !text-[11px]"
-                            options={[
-                              { value: 'Receive', label: 'Receive' },
-                              { value: 'In Progress', label: 'In Progress' },
-                              { value: 'Pending', label: 'Pending' },
-                              { value: 'Finished', label: 'Finished' },
-                              { value: 'Cant Repair', label: 'Cant Repair' },
-                              { value: 'Customer Not Repair', label: 'Customer Not Repair' },
-                              { value: 'Taken Out', label: 'Takeout' },
-                            ]}
-                          />
-                        ) : (
-                          <StatusBadge status={wo.status} size="xs" />
-                        )}
+                        {renderStatusCirclePicker(wo)}
                       </td>
 
                       {/* Financial Amount */}
                       <td className="py-3 px-3">
-                        <p className="font-mono font-extrabold text-xs text-ink">
-                          {totalAmount.toLocaleString()} MMK
-                        </p>
+                        <div className="flex items-center gap-1.5">
+                          <p className="font-mono font-extrabold text-xs text-ink">
+                            {totalAmount.toLocaleString()} MMK
+                          </p>
+                        </div>
                         <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
                           wo.isPaid ? 'bg-success/15 text-success-deep' : 'bg-danger/15 text-danger'
                         }`}>
@@ -469,20 +575,9 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                       {/* Ticket status inspector and label export — icon-only actions */}
                       <td className="py-3 px-3 text-right">
                         <div className="inline-flex items-center justify-end gap-1">
+                          {renderCheckoutButton(wo)}
                           {(wo.status === 'Finished' || wo.status === 'Taken Out') &&
-                            (wo.postRepairChecklist ? (
-                            /* Diagnosed → checkout (Finished or Taken Out) */
-                            <Button
-                              variant="ghost"
-                              type="button"
-                              onClick={(e) => { e.stopPropagation(); onNavigateToTab?.('pos'); }}
-                              className="!h-7 !min-h-7 w-7 px-0 rounded-full bg-success text-white hover:bg-success/90 border border-success"
-                              title="Go to POS checkout"
-                              aria-label={`Checkout ${wo.orderNumber || wo.id}`}
-                            >
-                              <DollarSign className="w-3.5 h-3.5" />
-                            </Button>
-                            ) : wo.status === 'Finished' ? (
+                            (!wo.postRepairChecklist && wo.status === 'Finished' ? (
                             /* Not diagnosed yet → Diagnose (Ko Hein) */
                             <Button
                               variant="ghost"
@@ -571,22 +666,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                         <span className="text-[9px] font-black px-1.5 py-px rounded uppercase bg-surface text-muted">NORM</span>
                       )}
                       {onUpdateWorkOrderStatus ? (
-                        <CustomDropdownMenu
-                          value={wo.status}
-                          onChange={(val) => onUpdateWorkOrderStatus(wo.id, val as WorkOrderStatus)}
-                          size="sm"
-                          ariaLabel={`Change status for ${wo.orderNumber || wo.id}`}
-                          buttonClassName="!h-6 !min-h-6 !px-1.5 !text-[10px]"
-                          options={[
-                            { value: 'Receive', label: 'Receive' },
-                            { value: 'In Progress', label: 'In Progress' },
-                            { value: 'Pending', label: 'Pending' },
-                            { value: 'Finished', label: 'Finished' },
-                            { value: 'Cant Repair', label: 'Cant Repair' },
-                            { value: 'Customer Not Repair', label: 'Customer Not Repair' },
-                            { value: 'Taken Out', label: 'Takeout' },
-                          ]}
-                        />
+                        renderStatusCirclePicker(wo)
                       ) : (
                         <StatusBadge status={wo.status} size="xs" />
                       )}
@@ -613,7 +693,8 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                   {/* Footer: tech + amount */}
                   <div className="mt-2 flex items-center justify-between border-t border-line/60 pt-1.5">
                     <div className="relative min-w-0" onClick={(e) => e.stopPropagation()}>
-                      <button
+                      <Button
+                        variant="ghost"
                         type="button"
                         onClick={() => setTechAssignOpenId(techAssignOpenId === wo.id ? null : wo.id)}
                         className="flex items-center space-x-1 text-[11px] font-bold text-brand min-w-0 truncate hover:opacity-80 transition-opacity"
@@ -621,35 +702,40 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                       >
                         <UserCheck className="w-3 h-3 shrink-0" />
                         <span className="truncate max-w-[80px]">{wo.assignedTechName || 'Unassigned'}</span>
-                      </button>
+                      </Button>
                       {techAssignOpenId === wo.id && (
                         <>
                           <div className="fixed inset-0 z-40" onClick={() => setTechAssignOpenId(null)} role="presentation" aria-hidden="true" />
                           <div className="absolute left-0 bottom-full z-50 mb-1 w-40 rounded-xl border border-line bg-white p-1 shadow-xl">
-                            <button
+                            <Button
+                              variant="ghost"
                               type="button"
                               onClick={() => handleAssignTech(wo, 'unassigned')}
                               className={`w-full px-2 py-1.5 text-left text-xs font-bold rounded-lg hover:bg-surface ${!wo.assignedTechId ? 'text-brand bg-brand/5' : ''}`}
                             >
                               Unassigned
-                            </button>
+                            </Button>
                             {(technicians || []).map((t) => (
-                              <button
+                              <Button
                                 key={t.id}
+                                variant="ghost"
                                 type="button"
                                 onClick={() => handleAssignTech(wo, t.id)}
                                 className={`w-full px-2 py-1.5 text-left text-xs font-bold rounded-lg hover:bg-surface ${wo.assignedTechId === t.id ? 'text-brand bg-brand/5' : ''}`}
                               >
                                 {t.name}
-                              </button>
+                              </Button>
                             ))}
                           </div>
                         </>
                       )}
                     </div>
-                    <span className="font-mono text-[11px] font-black text-success-deep">
-                      {(wo.totalAmount || wo.subtotal || 0).toLocaleString()} MMK
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      {renderCheckoutButton(wo)}
+                      <span className="font-mono text-[11px] font-black text-success-deep">
+                        {(wo.totalAmount || wo.subtotal || 0).toLocaleString()} MMK
+                      </span>
+                    </div>
                   </div>
                 </div>
               );

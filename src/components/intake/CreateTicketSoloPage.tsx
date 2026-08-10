@@ -729,7 +729,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           ].map((s, i) => (
             <React.Fragment key={s.n}>
               {i > 0 && <span className={`h-px w-6 sm:w-10 ${wizardStep >= s.n ? 'bg-brand' : 'bg-line'}`} />}
-              <button
+              <Button
                 type="button"
                 onClick={() => { if (s.n < wizardStep || canNextStep()) setWizardStep(s.n); }}
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-extrabold transition-all cursor-pointer border ${
@@ -747,7 +747,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                   {wizardStep > s.n ? '✓' : s.n}
                 </span>
                 <span className="hidden sm:inline">{s.label}</span>
-              </button>
+              </Button>
             </React.Fragment>
           ))}
         </div>
@@ -801,7 +801,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               {phoneSuggestOpen && phoneSuggestions.length > 0 && (
                 <div className="absolute left-0 right-0 top-full z-30 mt-1 bg-white border border-line rounded-xl shadow-xl overflow-hidden">
                   {phoneSuggestions.map((c) => (
-                    <button
+                    <Button
                       key={c.id}
                       type="button"
                       onMouseDown={(e) => {
@@ -817,7 +817,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                     >
                       <span className="text-xs font-bold text-ink truncate">{c.name}</span>
                       <span className="text-xs font-mono text-muted shrink-0">{c.phone}</span>
-                    </button>
+                    </Button>
                   ))}
                 </div>
               )}
@@ -1319,7 +1319,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                   isFail ? 'bg-danger/5 border-danger/20' : isPass ? 'bg-success/5 border-success/20' : 'bg-white border-line hover:border-brand/30'
                 }`}>
                   {/* Big icon — click to cycle status */}
-                  <button
+                  <Button
                     type="button"
                     onClick={() => {
                       const updated = [...beforeDiagnostics];
@@ -1333,12 +1333,12 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                     aria-label={`Change status for ${item.name}`}
                   >
                     <IconComp className="w-8 h-8" />
-                  </button>
+                  </Button>
 
                   {/* Name + ⋮ — same row */}
                   <div className="flex items-center gap-1 mt-1">
                     {/* Name — click to mark Pass */}
-                    <button
+                    <Button
                       type="button"
                       onClick={() => {
                         const updated = [...beforeDiagnostics];
@@ -1352,9 +1352,9 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                       aria-label={`Mark ${item.name} as Pass`}
                     >
                       {idx + 1}. {item.name}
-                    </button>
+                    </Button>
                     {/* ⋮ menu (Comment) */}
-                    <button
+                    <Button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); setDiagCommentId(diagCommentId === item.id ? null : item.id); }}
                       className={`!h-5 !min-h-5 w-5 px-0 rounded shrink-0 flex items-center justify-center transition-colors ${
@@ -1364,7 +1364,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                       aria-label={`More options for ${item.name}`}
                     >
                       <MoreHorizontal className="w-3.5 h-3.5" />
-                    </button>
+                    </Button>
                   </div>
 
                   {/* Reason chip when Fail + note */}
@@ -1473,14 +1473,14 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 >
                   <div className="flex items-center justify-between">
                     <p className="text-[11px] font-extrabold text-ink truncate">Comment — {diagCommentItem.name}</p>
-                    <button
+                    <Button
                       type="button"
                       onClick={() => setDiagCommentId(null)}
                       className="!h-6 !min-h-6 w-6 px-0 rounded flex items-center justify-center text-muted hover:bg-surface hover:text-ink"
                       aria-label="Close comment"
                     >
                       <X className="w-3.5 h-3.5" />
-                    </button>
+                    </Button>
                   </div>
                   <Input
                     type="text"

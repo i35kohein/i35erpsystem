@@ -1164,7 +1164,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         </div>
 
         {/* Low Stock Warning Card (Clickable Filter) — native button: <Button> base h-10 collapsed this card */}
-        <button
+        <Button
           type="button"
           onClick={() => handleToggleLowStockOnly()}
           className={`relative w-full !h-auto p-3 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer shadow-2xs focus:outline-none ${
@@ -1193,7 +1193,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               </span>
             </div>
           </div>
-        </button>
+        </Button>
       </div>
       )}
 
@@ -1205,7 +1205,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             const count = owner === 'ALL' ? parts.length : parts.filter((p) => (p.owner || 'APP') === owner).length;
             const active = ownerFilter === owner;
             return (
-              <button
+              <Button
                 key={owner}
                 type="button"
                 onClick={() => setOwnerFilter(owner)}
@@ -1215,7 +1215,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               >
                 {owner === 'ALL' ? 'All Owners' : owner}
                 <span className={`rounded-full px-1.5 text-[10px] font-black ${active ? 'bg-white/20' : 'bg-white'}`}>{count}</span>
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -1486,12 +1486,12 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     )}
                     <th className="w-[28%] min-w-[220px] px-2 py-2 bg-surface">
                       <div className="flex items-center gap-1">
-                        <button type="button" onClick={() => toggleSort('name')} className="inline-flex items-center gap-1 hover:text-brand transition-colors cursor-pointer uppercase font-mono text-xs focus:outline-none" title="Sort by part name">
+                        <Button type="button" onClick={() => toggleSort('name')} className="inline-flex items-center gap-1 hover:text-brand transition-colors cursor-pointer uppercase font-mono text-xs focus:outline-none" title="Sort by part name">
                           Part Name & SKU
                           {sortKey === 'name' && <SortArrow dir={sortDir} />}
-                        </button>
+                        </Button>
                         <div className="relative">
-                          <button
+                          <Button
                             type="button"
                             onClick={() => setSkuFilterOpen(!skuFilterOpen)}
                             className={`p-1 rounded-md transition-colors cursor-pointer focus:outline-none ${(selectedModelFilter !== 'ALL' || selectedCategory !== 'ALL' || showLowStockOnly) ? 'text-brand' : 'text-muted hover:text-brand'}`}
@@ -1502,7 +1502,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                             {(selectedModelFilter !== 'ALL' || selectedCategory !== 'ALL' || showLowStockOnly) && (
                               <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-brand" />
                             )}
-                          </button>
+                          </Button>
                           {skuFilterOpen && (
                             <>
                               <div className="fixed inset-0 z-40" onClick={() => setSkuFilterOpen(false)} role="presentation" aria-hidden="true" />
@@ -1544,7 +1544,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                                   </select>
                                 </div>
                                 <label className="flex items-center gap-1.5 text-xs font-bold text-ink cursor-pointer pt-1.5 mt-1 border-t border-line">
-                                  <input
+                                  <Input
                                     type="checkbox"
                                     checked={showLowStockOnly}
                                     onChange={() => handleToggleLowStockOnly()}
@@ -1569,19 +1569,19 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       />
                     </th>
                     <th className="w-[10%] min-w-[88px] px-1.5 py-2 bg-surface">
-                      <button type="button" onClick={() => toggleSort('stock')} className="inline-flex items-center gap-1 hover:text-brand transition-colors cursor-pointer uppercase font-mono text-xs focus:outline-none" title="Sort by stock quantity">
+                      <Button type="button" onClick={() => toggleSort('stock')} className="inline-flex items-center gap-1 hover:text-brand transition-colors cursor-pointer uppercase font-mono text-xs focus:outline-none" title="Sort by stock quantity">
                         Stock
                         {sortKey === 'stock' && <SortArrow dir={sortDir} />}
-                      </button>
+                      </Button>
                     </th>
                     <th className="w-[9%] min-w-[64px] px-1.5 py-2 bg-surface hidden md:table-cell">
                       <span className="uppercase font-mono text-xs text-muted">Owner</span>
                     </th>
                     <th className="w-[13%] min-w-[110px] px-1.5 py-2 bg-surface">
-                      <button type="button" onClick={() => toggleSort('price')} className="inline-flex items-center gap-1 hover:text-brand transition-colors cursor-pointer uppercase font-mono text-xs focus:outline-none" title="Sort by selling price">
+                      <Button type="button" onClick={() => toggleSort('price')} className="inline-flex items-center gap-1 hover:text-brand transition-colors cursor-pointer uppercase font-mono text-xs focus:outline-none" title="Sort by selling price">
                         Selling Price
                         {sortKey === 'price' && <SortArrow dir={sortDir} />}
-                      </button>
+                      </Button>
                     </th>
                     {inlineEditMode && <th className="w-[13%] min-w-[110px] px-1.5 py-2 bg-surface">Supplier</th>}
                     <th className="w-[10%] min-w-[96px] px-2 py-2 bg-surface hidden md:table-cell">Bin</th>
@@ -2123,34 +2123,34 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     <span key={device} className="inline-flex items-center gap-1 rounded-full border border-brand/30 bg-brand-soft px-2 py-0.5 text-xs font-bold text-brand-deep">
                       <Smartphone className="h-3 w-3 shrink-0" />
                       <span className="truncate max-w-[140px]">{device}</span>
-                      <button
+                      <Button
                         type="button"
                         onClick={() => applyPartSpecification({ deviceCompatibility: newPartData.deviceCompatibility.filter((_, i) => i !== idx) })}
                         className="ml-0.5 rounded-full p-0.5 hover:bg-brand/20 transition-colors"
                         title={`Remove ${device}`}
                       >
                         <X className="h-3 w-3" />
-                      </button>
+                      </Button>
                     </span>
                   ))}
                 </div>
               )}
               {/* Add Device button */}
-              <button
+              <Button
                 type="button"
                 onClick={() => setIsDeviceModelChooserOpen(true)}
                 className="flex w-full cursor-pointer items-center gap-2 rounded-lg border border-dashed border-line bg-surface px-2.5 py-1.5 text-xs font-bold text-muted transition-colors hover:border-brand/40 hover:text-brand"
               >
                 <Plus className="h-4 w-4" />
                 Add Device Model
-              </button>
+              </Button>
             </div>
 
             <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <label className="mb-1 block font-bold text-ink">Owner</label>
                 <div className="grid grid-cols-2 gap-2">
-                  <button
+                  <Button
                     type="button"
                     onClick={() => applyPartSpecification({ owner: 'APP' })}
                     className={`inline-flex items-center justify-center gap-1.5 rounded-lg border px-2 py-1.5 text-xs font-black transition-all cursor-pointer ${
@@ -2160,8 +2160,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     }`}
                   >
                     APP <span className="font-semibold opacity-70">· Shop</span>
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
                     onClick={() => applyPartSpecification({ owner: 'KZH' })}
                     className={`inline-flex items-center justify-center gap-1.5 rounded-lg border px-2 py-1.5 text-xs font-black transition-all cursor-pointer ${
@@ -2171,7 +2171,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     }`}
                   >
                     KZH <span className="font-semibold opacity-70">· Ko Hein</span>
-                  </button>
+                  </Button>
                 </div>
               </div>
               <div>
@@ -2587,32 +2587,32 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       <span key={device} className="inline-flex items-center gap-1 rounded-full border border-brand/30 bg-brand-soft px-2 py-0.5 text-xs font-bold text-brand-deep">
                         <Smartphone className="h-3 w-3 shrink-0" />
                         <span className="truncate max-w-[120px]">{device}</span>
-                        <button
+                        <Button
                           type="button"
                           onClick={() => setEditingPart({ ...editingPart, deviceCompatibility: editingPart.deviceCompatibility.filter((_, i) => i !== idx) })}
                           className="ml-0.5 rounded-full p-0.5 hover:bg-brand/20 transition-colors"
                           title={`Remove ${device}`}
                         >
                           <X className="h-3 w-3" />
-                        </button>
+                        </Button>
                       </span>
                     ))}
                   </div>
                 )}
-                <button
+                <Button
                   type="button"
                   onClick={() => setIsEditDeviceChooserOpen(true)}
                   className="flex w-full cursor-pointer items-center gap-2 rounded-lg border border-dashed border-line bg-surface px-2.5 py-1.5 text-xs font-bold text-muted transition-colors hover:border-brand/40 hover:text-brand"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   Add Device Model
-                </button>
+                </Button>
               </div>
 
               <div>
                 <label className="block font-bold text-ink mb-1">Owner</label>
                 <div className="grid grid-cols-2 gap-2">
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setEditingPart({ ...editingPart, owner: 'APP' })}
                     className={`rounded-xl border px-3 py-2 text-left transition-all cursor-pointer ${
@@ -2623,8 +2623,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   >
                     <span className="block text-xs font-black uppercase tracking-wide">APP</span>
                     <span className="block text-[10px] font-semibold opacity-80">Shop stock</span>
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
                     onClick={() => setEditingPart({ ...editingPart, owner: 'KZH' })}
                     className={`rounded-xl border px-3 py-2 text-left transition-all cursor-pointer ${
@@ -2635,7 +2635,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   >
                     <span className="block text-xs font-black uppercase tracking-wide">KZH</span>
                     <span className="block text-[10px] font-semibold opacity-80">Ko Hein stock</span>
-                  </button>
+                  </Button>
                 </div>
               </div>
 

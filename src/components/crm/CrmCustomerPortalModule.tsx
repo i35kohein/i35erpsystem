@@ -313,7 +313,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                       </span>
                     </td>
                     <td className="px-3 py-2.5 text-center">
-                      <button
+                      <Button
                         type="button"
                         onClick={(e) => toggleExpandCustomer(cust.id, e)}
                         className={`inline-flex items-center space-x-1 text-xs font-bold text-brand hover:text-brand-deep cursor-pointer ${FOCUS}`}
@@ -321,7 +321,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                       >
                         {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                         <span>{custOrders.length}</span>
-                      </button>
+                      </Button>
                     </td>
                     <td className="px-3 py-2.5 text-right font-bold text-success-deep hidden sm:table-cell">
                       {custSpent.toLocaleString()} {systemSettings.currencySymbol}
