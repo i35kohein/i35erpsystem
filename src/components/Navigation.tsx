@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import {LogOut,
-  CircleDot,
+import {CircleDot,
   LayoutDashboard,
   ClipboardList,
   Boxes,
@@ -18,7 +17,6 @@ import {LogOut,
   Trello, ClipboardCheck, Stethoscope} from 'lucide-react';
 import { WorkOrder, SystemSettings, AppUser } from '../types';
 import { useLanguage } from '../context/LanguageContext';
-import { UserRoleSwitcher } from './common/UserRoleSwitcher';
 import { Button, Badge } from './ui';
 
 interface NavigationProps {
@@ -49,10 +47,6 @@ export const Navigation: React.FC<NavigationProps> = ({
   workOrders,
   systemSettings,
   currentUser,
-  users = [],
-  onSwitchUser,
-  onLogout,
-  onOpenUserManagement,
   onOpenNewWorkOrder,
   onOpenRecycleBin,
   isCollapsed,
@@ -217,14 +211,14 @@ export const Navigation: React.FC<NavigationProps> = ({
     ${effectiveCollapsed ? 'h-10 w-10 mx-auto justify-center p-0 relative rounded-xl' : 'h-10 justify-between px-2.5 rounded-xl'}
     ${
       isActive
-        ? 'bg-brand-soft text-brand-deep font-bold border-brand/30 shadow-2xs'
-        : 'border-transparent text-ink hover:text-ink hover:bg-surface hover:border-line'
+        ? 'bg-brand-soft text-brand-deep font-bold border-transparent'
+        : 'border-transparent text-ink hover:text-ink hover:bg-surface'
     }
   `;
 
   const navIconClass = (isActive: boolean) => `
-    flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors
-    ${isActive ? 'bg-white text-brand shadow-2xs' : 'bg-transparent text-muted group-hover:bg-white group-hover:text-brand group-hover:shadow-2xs'}
+    flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-transparent transition-colors
+    ${isActive ? 'text-brand' : 'text-muted group-hover:text-brand'}
   `;
 
   return (
@@ -273,7 +267,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                 onClick={() => setIsCollapsed(false)}
                 variant="iconGhost"
                 size="icon"
-                className="hidden lg:flex hover:text-brand hover:bg-brand-soft border border-transparent hover:border-brand/20"
+                className="hidden lg:flex border-0 bg-transparent text-muted hover:bg-surface hover:text-ink shadow-none"
                 title="Expand sidebar"
                 aria-label="Expand sidebar"
               >
@@ -434,37 +428,8 @@ export const Navigation: React.FC<NavigationProps> = ({
           ))}
         </nav>
 
-        {/* Sidebar Footer Quick Action Utilities */}
-        <div className="p-2.5 border-t border-line bg-surface space-y-2 pb-[calc(0.625rem+env(safe-area-inset-bottom))]">
-          {/* Active User Role Switcher */}
-          {currentUser && onSwitchUser && (
-            <div className="w-full flex justify-center">
-              <UserRoleSwitcher
-                currentUser={currentUser}
-                users={users}
-                onSwitchUser={onSwitchUser}
-                onOpenUserManagement={onOpenUserManagement}
-                compact={effectiveCollapsed}
-              />
-            </div>
-          )}
-
-          {/* Logout */}
-          {onLogout && (
-            <Button
-              type="button"
-              onClick={onLogout}
-              title="Logout"
-              aria-label="Logout"
-              variant="outline"
-              size="sm"
-              className="w-full justify-center gap-2 py-2 text-xs hover:bg-danger/5 hover:text-danger"
-            >
-              <LogOut className="h-3.5 w-3.5" />
-              {!effectiveCollapsed && <span>Logout</span>}
-            </Button>
-          )}
-
+        {/* Sidebar Footer */}
+        <div className="p-2.5 border-t border-line bg-surface pb-[calc(0.625rem+env(safe-area-inset-bottom))]">
           {/* System Online Status Pill */}
           {!effectiveCollapsed && (
             <div className="pt-1 px-1 flex items-center justify-between text-xs text-muted">

@@ -1211,7 +1211,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
               <h3 className="text-base font-extrabold text-ink">
                 Record Supplier Debt Payment
               </h3>
-              <Button onClick={() => setSelectedDebtForPayment(null)} aria-label="Close debt payment" className="rounded-lg p-1 hover:bg-surface transition-colors">
+              <Button variant="iconGhost" onClick={() => setSelectedDebtForPayment(null)} aria-label="Close debt payment" className="rounded-lg p-1 hover:bg-surface transition-colors">
                 <X className="w-5 h-5 text-muted" />
               </Button>
             </div>

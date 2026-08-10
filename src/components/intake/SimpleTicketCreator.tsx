@@ -604,7 +604,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 <h3 className="text-sm font-extrabold text-ink">Choose Color</h3>
                 <p className="text-xs text-muted">{form.model ? `Colors for ${form.model}` : 'Pick a device first'}</p>
               </div>
-              <Button type="button" onClick={() => setIsColorOpen(false)} className="rounded-lg p-1 text-muted hover:bg-surface hover:text-ink" aria-label="Close">✕</Button>
+              <Button type="button" variant="iconGhost" onClick={() => setIsColorOpen(false)} className="rounded-lg p-1 text-muted hover:bg-surface hover:text-ink" aria-label="Close">✕</Button>
             </div>
             {!form.model ? (
               <p className="py-8 text-center text-xs font-bold text-muted">Pick a device first — go back and choose the model.</p>
@@ -646,7 +646,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 <h3 className="text-sm font-extrabold text-ink">Add Repairs & Details</h3>
                 <p className="truncate text-xs text-muted">{form.model ? `Repairs for ${form.model}` : 'Pick a model first'}</p>
               </div>
-              <Button type="button" onClick={closeRepairs} className="rounded-lg p-1 text-muted hover:bg-surface hover:text-ink" aria-label="Close">✕</Button>
+              <Button type="button" variant="iconGhost" onClick={closeRepairs} className="rounded-lg p-1 text-muted hover:bg-surface hover:text-ink" aria-label="Close">✕</Button>
             </div>
 
             {!form.model ? (

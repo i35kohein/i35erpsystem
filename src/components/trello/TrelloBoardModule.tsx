@@ -30,7 +30,7 @@ interface TrelloBoardProps {
 }
 
 const STAGE_COLUMNS: { id: WorkOrderStatus; title: string; dot: string; border: string; headerBg: string }[] = [
-  { id: 'Receive', title: 'Received', dot: 'bg-brand', border: 'border-brand/30', headerBg: 'bg-brand/5' },
+  { id: 'Receive', title: 'Received', dot: 'bg-ink', border: 'border-line', headerBg: 'bg-surface' },
   { id: 'In Progress', title: 'In Progress', dot: 'bg-purple', border: 'border-purple/30', headerBg: 'bg-purple/5' },
   { id: 'Pending', title: 'Pending', dot: 'bg-warning', border: 'border-warning/40', headerBg: 'bg-warning/5' },
   { id: 'Finished', title: 'Finished', dot: 'bg-success-deep', border: 'border-success/40', headerBg: 'bg-success/5' },
@@ -169,7 +169,7 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
             onDragLeave={() => setDragOverStage((s) => (s === col.id ? null : s))}
             onDrop={(e) => { e.preventDefault(); handleDrop(col.id); }}
             className={`flex min-h-[140px] w-[300px] shrink-0 flex-col rounded-2xl border transition-colors ${
-              dragOverStage === col.id ? 'border-brand/60 bg-brand/5' : `${col.border} bg-surface/60`
+              dragOverStage === col.id ? 'border-ink/40 bg-surface' : `${col.border} bg-surface/60`
             }`}
           >
             {/* Column header — tinted with the stage color */}
@@ -202,13 +202,13 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
                       role="button"
                       tabIndex={0}
                       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setDetailWo(wo); } }}
-                      className={`group cursor-pointer rounded-xl border bg-white p-3 shadow-2xs transition-all hover:shadow-md hover:border-brand/50 select-none ${
+                      className={`group cursor-pointer rounded-xl border bg-white p-3 shadow-2xs transition-all hover:shadow-md hover:border-ink/30 select-none ${
                         stagnant ? 'border-l-4 border-l-danger' : 'border-line'
                       }`}
                     >
                       {/* Top row: order # + priority */}
                       <div className="flex items-center justify-between gap-1.5">
-                        <span className="font-mono text-[11px] font-extrabold text-brand truncate">{wo.orderNumber || wo.id.slice(0, 8)}</span>
+                        <span className="font-mono text-[11px] font-extrabold text-ink truncate">{wo.orderNumber || wo.id.slice(0, 8)}</span>
                         <PriorityBadge priority={wo.priority} size="xs" />
                       </div>
 
@@ -227,9 +227,10 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
                           {isTechnicianUser && myTechId ? (
                             <Button
                               type="button"
+                              variant="ghost"
                               onClick={() => handleQuickAssign(wo, myTechId)}
                               title="Assign to me"
-                              className="flex items-center space-x-1 text-[11px] font-bold text-brand hover:underline"
+                              className="h-auto min-h-0 bg-transparent p-0 text-[11px] font-bold text-ink hover:bg-transparent hover:text-ink hover:underline"
                             >
                               <UserCheck className="w-3 h-3" />
                               <span className="truncate max-w-[70px]">{techName(wo)}</span>
@@ -238,9 +239,10 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
                             <div className="relative" onClick={(e) => { e.stopPropagation(); }}>
                               <Button
                                 type="button"
+                                variant="ghost"
                                 onClick={() => { setTechAssignWo(wo); setTechAssignOpen(techAssignOpen === wo.id ? null : wo.id); }}
                                 title="Assign technician"
-                                className="flex items-center space-x-1 text-[11px] font-bold text-brand hover:underline"
+                                className="h-auto min-h-0 bg-transparent p-0 text-[11px] font-bold text-ink hover:bg-transparent hover:text-ink hover:underline"
                               >
                                 <UserCheck className="w-3 h-3" />
                                 <span className="truncate max-w-[70px]">{techName(wo)}</span>
@@ -251,8 +253,9 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
                                   <div className="absolute left-0 top-full z-50 mt-1 w-44 rounded-xl border border-line bg-white p-1 shadow-xl">
                                     <Button
                                       type="button"
+                                      variant="ghost"
                                       onClick={() => handleQuickAssign(wo, 'unassigned')}
-                                      className="w-full px-2.5 py-1.5 text-left text-xs font-bold rounded-lg hover:bg-surface"
+                                      className="w-full justify-start bg-transparent px-2.5 py-1.5 text-left text-xs font-bold text-ink rounded-lg hover:bg-surface"
                                     >
                                       Unassigned
                                     </Button>
@@ -260,8 +263,9 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
                                       <Button
                                         key={t.id}
                                         type="button"
+                                        variant="ghost"
                                         onClick={() => handleQuickAssign(wo, t.id)}
-                                        className="w-full px-2.5 py-1.5 text-left text-xs font-bold rounded-lg hover:bg-surface"
+                                        className="w-full justify-start bg-transparent px-2.5 py-1.5 text-left text-xs font-bold text-ink rounded-lg hover:bg-surface"
                                       >
                                         {t.name}
                                       </Button>
@@ -298,7 +302,7 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
                                 }}
                                 title="Run 21-point diagnosis first"
                                 aria-label={`Diagnose ${wo.orderNumber}`}
-                                className="!h-6 !min-h-6 w-6 rounded-full bg-brand text-white flex items-center justify-center shadow-2xs hover:bg-brand-deep transition-colors shrink-0"
+                                className="!h-6 !min-h-6 w-6 rounded-full bg-ink text-white flex items-center justify-center shadow-2xs hover:bg-ink/90 transition-colors shrink-0"
                               >
                                 <Stethoscope className="w-3.5 h-3.5" />
                               </Button>

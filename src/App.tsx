@@ -2142,7 +2142,7 @@ export default function App() {
                         <Boxes className="h-4 w-4 text-brand" />
                         <span className="text-sm font-extrabold text-ink">Parts Inventory</span>
                       </div>
-                      <Button type="button" onClick={() => setInventorySideMenuOpen(false)} aria-label="Close menu" className="rounded-lg p-1.5 text-muted hover:bg-surface hover:text-ink transition-colors cursor-pointer">
+                      <Button type="button" variant="iconGhost" onClick={() => setInventorySideMenuOpen(false)} aria-label="Close menu" className="rounded-lg p-1.5 text-muted hover:bg-surface hover:text-ink transition-colors cursor-pointer">
                         <X className="h-4 w-4" />
                       </Button>
                     </div>

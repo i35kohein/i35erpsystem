@@ -4,7 +4,6 @@ import { useIsIpad } from '../../hooks/useIsIpad';
 import { DateFilterState, filterByDateRange } from '../common/DateFilterSelector';
 import {CreditCard,
   Receipt,
-  Coins,
   CheckCircle2, 
   Printer, 
   ShieldCheck, 
@@ -21,7 +20,6 @@ import {CreditCard,
   UserCheck,
   ChevronsLeft,
   ChevronsRight,
-  ChevronsDown,
   Pencil,
   Wrench,
   Percent,
@@ -623,14 +621,14 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
   const renderCheckoutPanel = () =>
     selectedWo ? (
-            <div className="space-y-5">
+            <div className="space-y-3">
               {/* Desktop: left column — ticket header + items + summary */}
-              <div className="space-y-5 md:min-w-0">
-              <div className="border-b border-line pb-3 space-y-2">
+              <div className="space-y-3 md:min-w-0">
+              <div className="border border-line bg-surface/40 rounded-xl px-3 py-2 space-y-1.5">
                 {/* Line 1: WO number + status + Notify */}
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center space-x-2 min-w-0">
-                    <span className="font-mono font-bold text-brand text-sm">{selectedWo.orderNumber}</span>
+                    <span className="font-mono font-black text-ink text-xs">{selectedWo.orderNumber}</span>
                     <StatusChip status={selectedWo.status} />
                   </div>
 
@@ -638,7 +636,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
                 {/* Line 2: device + customer */}
                 <div className="flex items-end justify-between gap-3">
-                  <h2 className="text-base font-bold text-ink truncate">{selectedWo.deviceModel}</h2>
+                  <h2 className="text-sm font-black text-ink truncate">{selectedWo.deviceModel}</h2>
                   <div className="text-right shrink-0">
                     <p className="font-bold text-ink text-xs">{selectedWo.customerName}</p>
                     {selectedWo.customerPhone && (
@@ -697,33 +695,66 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
               {/* Itemized Line Items — Labor/Repair + System Parts (Ko Hein 2026-08-10) */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-brand text-xs">Itemized Labor & Parts</h3>
-                  <span className="text-[10px] text-muted font-semibold">
-                    {laborItems.length} repair{laborItems.length !== 1 ? 's' : ''}{partsItems.length > 0 ? ` · ${partsItems.length} part${partsItems.length !== 1 ? 's' : ''}` : ''}
-                  </span>
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-1.5">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <h3 className="font-black text-ink text-xs uppercase tracking-wide">Itemized Labor & Parts</h3>
+                    <span className="text-[10px] text-muted font-semibold">
+                      {laborItems.length} repair{laborItems.length !== 1 ? 's' : ''}{partsItems.length > 0 ? ` · ${partsItems.length} part${partsItems.length !== 1 ? 's' : ''}` : ''}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => setIsAddPartOpen(true)}
+                      className="h-auto min-h-0 bg-transparent p-0 text-[11px] font-extrabold text-ink hover:bg-transparent hover:text-ink hover:underline"
+                    >
+                      <PackageCheck className="w-3.5 h-3.5" />
+                      <span>Add Part</span>
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => setIsAddCustomRepairOpen(!isAddCustomRepairOpen)}
+                      className={`h-auto min-h-0 bg-transparent p-0 text-[11px] font-extrabold hover:bg-transparent hover:underline ${
+                        isAddCustomRepairOpen ? 'text-success-deep' : 'text-ink hover:text-ink'
+                      }`}
+                    >
+                      <Wrench className="w-3.5 h-3.5" />
+                      <span>Custom</span>
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => setIsAddRepairFromPriceListOpen(true)}
+                      className="h-auto min-h-0 bg-transparent p-0 text-[11px] font-extrabold text-ink hover:bg-transparent hover:text-ink hover:underline"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>Price List</span>
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Repair Items (Customer invoice) */}
                 {laborItems.length === 0 && partsItems.length === 0 ? (
                   <div className="p-6 text-center text-muted text-xs border border-dashed border-line-strong rounded-lg bg-surface/30">
-                    <Wrench className="w-6 h-6 mx-auto mb-1.5 opacity-40 text-brand" />
+                    <Wrench className="w-6 h-6 mx-auto mb-1.5 opacity-40 text-ink" />
                     <p className="font-extrabold text-ink">No items added yet</p>
-                    <p>Use Add Part, Custom, or Price List below to add line items.</p>
+                    <p>Use Add Part, Custom, or Price List above to add line items.</p>
                   </div>
                 ) : (
                   <>
-                    {/* Repair Items Table */}
-                    {laborItems.length > 0 && (
+                    {/* Itemized sheet — repair rows + internal system-part rows together */}
+                    {(laborItems.length > 0 || partsItems.length > 0) && (
                       <div className="border border-line-strong rounded-lg overflow-hidden bg-white">
-                        <table className="w-full border-collapse text-xs">
+                        <table className="w-full border-collapse text-[11px]">
                           <thead>
-                            <tr className="bg-surface">
-                              <th className="border border-line px-2 py-1.5 text-left font-extrabold text-muted text-[11px] uppercase tracking-wide">Repair / Service</th>
-                              <th className="border border-line px-2 py-1.5 text-center font-extrabold text-muted text-[11px] uppercase tracking-wide w-14">Qty</th>
-                              <th className="border border-line px-2 py-1.5 text-center font-extrabold text-muted text-[11px] uppercase tracking-wide w-24">Unit Price</th>
-                              <th className="border border-line px-2 py-1.5 text-center font-extrabold text-muted text-[11px] uppercase tracking-wide w-16">Disc%</th>
-                              <th className="border border-line px-2 py-1.5 text-right font-extrabold text-muted text-[11px] uppercase tracking-wide">Amount</th>
+                            <tr className="bg-surface/80">
+                              <th className="border border-line px-2 py-1 text-left font-black text-muted text-[10px] uppercase tracking-wide">Item</th>
+                              <th className="border border-line px-2 py-1 text-center font-black text-muted text-[10px] uppercase tracking-wide w-12">Qty</th>
+                              <th className="border border-line px-2 py-1 text-center font-black text-muted text-[10px] uppercase tracking-wide w-24">Unit Price</th>
+                              <th className="border border-line px-2 py-1 text-center font-black text-muted text-[10px] uppercase tracking-wide w-14">Disc%</th>
+                              <th className="border border-line px-2 py-1 text-right font-black text-muted text-[10px] uppercase tracking-wide">Amount</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -738,15 +769,16 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                               const effectiveTotal = lineTotal - itemDiscountAmt;
                               const displayDiscountPct = li.lineItemDiscountPercent || 0;
                               return (
-                                <tr key={li.id} className={`bg-white ${isEditing ? 'ring-2 ring-brand/30' : ''}`}>
+                                <tr key={li.id} className={`bg-white ${isEditing ? 'ring-2 ring-ink/20' : ''}`}>
                                   {/* Item name + edit toggle */}
                                   <td className="border border-line px-2 py-1.5">
                                     <div className="flex items-center gap-1">
                                       <span className="font-bold text-ink min-w-0 truncate">{li.description}</span>
                                       <Button
                                         type="button"
+                                        variant="iconGhost"
                                         onClick={() => setEditingLineId(isEditing ? null : li.id)}
-                                        className={`shrink-0 p-0.5 rounded transition-colors cursor-pointer focus:outline-none ${isEditing ? 'text-brand' : 'text-muted hover:text-brand'}`}
+                                        className={`shrink-0 !h-5 !min-h-5 w-5 p-0 rounded transition-colors cursor-pointer focus:outline-none ${isEditing ? 'text-success' : 'text-muted hover:text-ink'}`}
                                         title={isEditing ? 'Done editing' : 'Edit price / qty / discount'}
                                       >
                                         {isEditing ? <Check className="w-3 h-3" /> : <Pencil className="w-3 h-3" />}
@@ -762,7 +794,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                         min={1}
                                         value={li.quantity}
                                         onChange={(e) => handleUpdateLineItem(li.id, 'quantity', Number(e.target.value))}
-                                        className="w-full text-center text-xs font-mono font-bold text-ink bg-surface border border-brand rounded px-1 py-0.5 outline-none"
+                                        className="w-full text-center text-xs font-mono font-bold text-ink bg-white border border-line-strong rounded px-1 py-0.5 outline-none"
                                       />
                                     ) : (
                                       <span className="text-muted tabular-nums">{li.quantity}</span>
@@ -778,14 +810,14 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                         step={500}
                                         value={li.unitPrice}
                                         onChange={(e) => handleUpdateLineItem(li.id, 'unitPrice', Number(e.target.value))}
-                                        className="w-full text-center text-xs font-mono font-bold text-ink bg-surface border border-brand rounded px-1 py-0.5 outline-none"
+                                        className="w-full text-center text-xs font-mono font-bold text-ink bg-white border border-line-strong rounded px-1 py-0.5 outline-none"
                                       />
                                     ) : (
                                       <div className="flex flex-col items-center gap-0">
                                         {hasDiscount ? (
                                           <React.Fragment>
                                             <span className="font-mono text-[10px] text-muted line-through">{li.unitPrice.toLocaleString()}</span>
-                                            <span className="font-mono text-[11px] font-black text-brand">{discountedUnitPrice.toLocaleString()}</span>
+                                            <span className="font-mono text-[11px] font-black text-ink">{discountedUnitPrice.toLocaleString()}</span>
                                           </React.Fragment>
                                         ) : (
                                           <span className="font-mono text-muted tabular-nums">{li.unitPrice.toLocaleString()}</span>
@@ -805,7 +837,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                           value={li.lineItemDiscountPercent ?? ''}
                                           onChange={(e) => handleUpdateLineItem(li.id, 'lineItemDiscountPercent', Number(e.target.value))}
                                           placeholder="0"
-                                          className="w-full text-center text-xs font-mono font-bold text-ink bg-surface border border-brand rounded px-1 py-0.5 outline-none"
+                                          className="w-full text-center text-xs font-mono font-bold text-ink bg-white border border-line-strong rounded px-1 py-0.5 outline-none"
                                         />
                                         <Percent className="w-3 h-3 text-muted shrink-0" />
                                       </div>
@@ -831,10 +863,11 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                             {effectiveTotal.toLocaleString()}
                                             <Button
                                               type="button"
+                                              variant="iconGhost"
                                               onClick={() => handleRemoveInventoryPartFromWorkOrder(li.id)}
                                               aria-label={`Remove ${li.description}`}
                                               title="Remove line item"
-                                              className="text-muted hover:text-danger p-0.5 rounded transition-colors cursor-pointer focus:outline-none"
+                                              className="!h-5 !min-h-5 w-5 text-muted hover:text-danger p-0 rounded transition-colors cursor-pointer focus:outline-none"
                                             >
                                               <X className="w-3 h-3" />
                                             </Button>
@@ -849,146 +882,58 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                 </tr>
                               );
                             })}
+                            {partsItems.map((li) => {
+                              const costTotal = (li.unitCost || 0) * li.quantity;
+                              const sellTotal = li.unitPrice * li.quantity;
+                              return (
+                                <tr key={li.id} className="bg-surface/30">
+                                  <td className="border border-line px-2 py-1.5">
+                                    <div className="flex items-center gap-1.5 min-w-0">
+                                      <PackageCheck className="w-3 h-3 text-muted shrink-0" />
+                                      <div className="min-w-0">
+                                        <span className="font-bold text-ink truncate block">{li.description || li.partName}</span>
+                                        <span className="text-[9px] font-black uppercase tracking-wide text-muted">System part · hidden from customer invoice</span>
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td className="border border-line px-1 py-1 text-center text-muted tabular-nums">{li.quantity}</td>
+                                  <td className="border border-line px-1 py-1 text-center">
+                                    <div className="flex flex-col items-center leading-tight">
+                                      <span className="font-mono text-[10px] text-muted">Cost {costTotal.toLocaleString()}</span>
+                                      <span className="font-mono text-[10px] text-ink">Sell {sellTotal.toLocaleString()}</span>
+                                    </div>
+                                  </td>
+                                  <td className="border border-line px-1 py-1 text-center text-muted">—</td>
+                                  <td className="border border-line px-2 py-1.5 text-right font-mono font-black text-muted tabular-nums whitespace-nowrap">
+                                    <span className="inline-flex items-center gap-1.5">
+                                      {sellTotal.toLocaleString()}
+                                      <Button
+                                        type="button"
+                                        variant="iconGhost"
+                                        onClick={() => handleRemoveInventoryPartFromWorkOrder(li.id)}
+                                        aria-label={`Remove ${li.description}`}
+                                        title="Remove system part"
+                                        className="!h-5 !min-h-5 w-5 text-muted hover:text-danger p-0 rounded transition-colors cursor-pointer focus:outline-none"
+                                      >
+                                        <X className="w-3 h-3" />
+                                      </Button>
+                                    </span>
+                                  </td>
+                                </tr>
+                              );
+                            })}
                           </tbody>
                         </table>
-                      </div>
-                    )}
-
-                    {/* System Parts Section — hidden from customer invoice */}
-                    {partsItems.length > 0 && (
-                      <div className="border border-dashed border-line rounded-lg overflow-hidden bg-surface/30">
-                        <div
-                          className="px-2.5 py-1.5 flex items-center justify-between cursor-pointer select-none hover:bg-surface transition-colors"
-                          onClick={() => setEditingLineId(editingLineId === '__parts_toggle' ? null : '__parts_toggle')}
-                        >
-                          <span className="text-[11px] font-extrabold text-muted flex items-center gap-1.5">
-                            <PackageCheck className="w-3 h-3 text-brand shrink-0" />
-                            System Parts Used ({partsItems.length}) — hidden from customer invoice
-                          </span>
-                          <ChevronsDown className={`w-3 h-3 text-muted transition-transform ${editingLineId === '__parts_toggle' ? '' : '-rotate-90'}`} />
-                        </div>
-                        {editingLineId === '__parts_toggle' && (
-                          <div className="border-t border-dashed border-line">
-                            <table className="w-full border-collapse text-xs">
-                              <thead>
-                                <tr className="bg-surface/50">
-                                  <th className="border border-line px-2 py-1 text-left font-extrabold text-muted text-[10px] uppercase">Part</th>
-                                  <th className="border border-line px-2 py-1 text-center font-extrabold text-muted text-[10px] uppercase w-14">Qty</th>
-                                  <th className="border border-line px-2 py-1 text-right font-extrabold text-muted text-[10px] uppercase w-20">Unit Cost</th>
-                                  <th className="border border-line px-2 py-1 text-right font-extrabold text-muted text-[10px] uppercase w-24">Sell Price</th>
-                                  <th className="border border-line px-2 py-1 text-right font-extrabold text-muted text-[10px] uppercase w-16">Subtotal</th>
-                                  <th className="border border-line px-2 py-1 text-center w-8"></th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {partsItems.map((li) => {
-                                  const costTotal = (li.unitCost || 0) * li.quantity;
-                                  const sellTotal = li.unitPrice * li.quantity;
-                                  return (
-                                    <tr key={li.id} className="bg-white">
-                                      <td className="border border-line px-2 py-1">
-                                        <span className="font-semibold text-ink text-[10px]">{li.description || li.partName}</span>
-                                      </td>
-                                      <td className="border border-line px-2 py-1 text-center text-muted tabular-nums text-[10px]">{li.quantity}</td>
-                                      <td className="border border-line px-2 py-1 text-right font-mono text-muted tabular-nums text-[10px]">{costTotal.toLocaleString()}</td>
-                                      <td className="border border-line px-2 py-1 text-right font-mono text-muted tabular-nums text-[10px]">{sellTotal.toLocaleString()}</td>
-                                      <td className="border border-line px-2 py-1 text-right font-mono text-ink font-bold tabular-nums text-[10px]">{sellTotal.toLocaleString()}</td>
-                                      <td className="border border-line px-2 py-1 text-center">
-                                        <Button
-                                          type="button"
-                                          onClick={() => handleRemoveInventoryPartFromWorkOrder(li.id)}
-                                          aria-label={`Remove ${li.description}`}
-                                          className="text-muted hover:text-danger p-0.5 rounded transition-colors cursor-pointer focus:outline-none"
-                                        >
-                                          <X className="w-2.5 h-2.5" />
-                                        </Button>
-                                      </td>
-                                    </tr>
-                                  );
-                                })}
-                              </tbody>
-                              <tfoot>
-                                <tr className="bg-surface/50">
-                                  <td colSpan={4} className="border border-line px-2 py-1 text-right font-extrabold text-[10px] text-muted">Parts Total</td>
-                                  <td className="border border-line px-2 py-1 text-right font-mono font-black text-ink tabular-nums text-[10px]">{partsSubtotal.toLocaleString()}</td>
-                                  <td></td>
-                                </tr>
-                                <tr className="bg-surface/50">
-                                  <td colSpan={4} className="border border-line px-2 py-1 text-right font-extrabold text-[10px] text-muted">Parts Cost</td>
-                                  <td className="border border-line px-2 py-1 text-right font-mono font-black text-warning tabular-nums text-[10px]">-{partsCostTotal.toLocaleString()}</td>
-                                  <td></td>
-                                </tr>
-                                <tr className="bg-surface/50">
-                                  <td colSpan={4} className="border border-line px-2 py-1 text-right font-extrabold text-[10px] text-success-deep">Parts Profit</td>
-                                  <td className="border border-line px-2 py-1 text-right font-mono font-black text-success-deep tabular-nums text-[10px]">+{(partsSubtotal - partsCostTotal).toLocaleString()}</td>
-                                  <td></td>
-                                </tr>
-                              </tfoot>
-                            </table>
-          
-                            {/* Deduct from total reminder */}
-                            <div className="px-2.5 py-1.5 bg-warning/5 border-t border-dashed border-line">
-                              <div className="flex items-center gap-1.5">
-                                <Coins className="w-3 h-3 text-warning shrink-0" />
-                                <span className="text-[10px] font-semibold text-warning">
-                                  Parts cost {partsCostTotal.toLocaleString()} {currency} deducted from system profit. Customer invoice shows repair items only.
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        )}
                       </div>
                     )}
                   </>
                 )}
               </div>
-
-                {/* Add buttons row */}
-                <div className="grid grid-cols-3 gap-2">
-                  <Button
-                    type="button"
-                    onClick={() => setIsAddPartOpen(true)}
-                    className="flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg border border-line-strong bg-white hover:bg-surface transition-colors cursor-pointer focus:outline-none"
-                  >
-                    <span className="flex items-center gap-1.5 text-xs font-extrabold text-ink">
-                      <PackageCheck className="w-3.5 h-3.5 text-brand shrink-0" />
-                      Add Part
-                    </span>
-                    <Plus className="w-3.5 h-3.5 text-muted shrink-0" />
-                  </Button>
-
-                  <Button
-                    type="button"
-                    onClick={() => setIsAddCustomRepairOpen(!isAddCustomRepairOpen)}
-                    className={`flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg border transition-colors cursor-pointer focus:outline-none ${
-                      isAddCustomRepairOpen ? 'border-brand bg-brand-soft' : 'border-line-strong bg-white hover:bg-surface'
-                    }`}
-                  >
-                    <span className="flex items-center gap-1.5 text-xs font-extrabold text-ink">
-                      <Wrench className="w-3.5 h-3.5 text-brand shrink-0" />
-                      Custom
-                    </span>
-                    <Plus className="w-3.5 h-3.5 text-muted shrink-0" />
-                  </Button>
-
-                  <Button
-                    type="button"
-                    onClick={() => setIsAddRepairFromPriceListOpen(true)}
-                    className="flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg border border-line-strong bg-white hover:bg-surface transition-colors cursor-pointer focus:outline-none"
-                  >
-                    <span className="flex items-center gap-1.5 text-xs font-extrabold text-ink">
-                      <FileText className="w-3.5 h-3.5 text-brand shrink-0" />
-                      Price List
-                    </span>
-                    <Plus className="w-3.5 h-3.5 text-muted shrink-0" />
-                  </Button>
-                </div>
-
                 {/* Custom Repair Form (Ko Hein 2026-08-10) */}
                 {isAddCustomRepairOpen && (
-                  <div className="p-3 bg-brand-soft/50 border border-brand/30 rounded-xl space-y-2.5 animate-fadeIn">
+                  <div className="p-3 bg-surface/60 border border-line rounded-xl space-y-2.5 animate-fadeIn">
                     <div className="flex items-center gap-2">
-                      <Wrench className="w-4 h-4 text-brand shrink-0" />
+                      <Wrench className="w-4 h-4 text-ink shrink-0" />
                       <span className="text-xs font-extrabold text-ink">Add Custom Repair / Service</span>
                     </div>
                     <div className="grid grid-cols-[1fr_80px_80px] gap-2">
@@ -1024,7 +969,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         type="button"
                         onClick={handleAddCustomRepair}
                         disabled={!customRepairName.trim() || !customRepairPrice}
-                        className="px-3 py-1.5 rounded-lg bg-brand hover:bg-brand-deep text-white text-xs font-extrabold transition-all cursor-pointer active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1"
+                        className="px-3 py-1.5 rounded-lg bg-ink hover:bg-ink/90 text-white text-xs font-extrabold transition-all cursor-pointer active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1"
                       >
                         <Plus className="w-3 h-3" />
                         Add to Invoice
@@ -1034,34 +979,38 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 )}
 
                 {/* Calculation Summary — Customer & System totals (Ko Hein 2026-08-10) */}
-                <div className="border border-line-strong rounded-lg overflow-hidden bg-white text-xs">
+                <div className="rounded-lg border border-line bg-white text-[11px] shadow-2xs overflow-hidden">
                   <table className="w-full border-collapse">
                     <tbody>
                       {/* Customer-facing section */}
-                      <tr className="bg-surface/30">
-                        <td className="border border-line px-2 py-1 text-[10px] font-extrabold text-muted uppercase tracking-wider" colSpan={2}>Customer Invoice</td>
+                      <tr className="bg-surface/80">
+                        <td className="border-b border-line px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-muted" colSpan={2}>
+                          Customer Invoice
+                        </td>
                       </tr>
                       <tr>
-                        <td className="border border-line px-2 py-1.5 text-muted">Repair Subtotal ({laborItems.length} item{laborItems.length !== 1 ? 's' : ''})</td>
-                        <td className="border border-line px-2 py-1.5 text-right font-mono text-ink tabular-nums">{selectedWo.subtotal.toLocaleString()} {currency}</td>
+                        <td className="border-b border-line px-3 py-2 text-muted">Repair Subtotal <span className="text-[10px]">({laborItems.length} item{laborItems.length !== 1 ? 's' : ''})</span></td>
+                        <td className="border-b border-line px-3 py-2 text-right font-mono font-bold text-ink tabular-nums">{selectedWo.subtotal.toLocaleString()} {currency}</td>
                       </tr>
                       {perItemDiscountTotal > 0 && (
                         <tr>
-                          <td className="border border-line px-2 py-1.5 text-success-deep">Per-item Discounts</td>
-                          <td className="border border-line px-2 py-1.5 text-right font-mono text-success-deep tabular-nums">-{perItemDiscountTotal.toLocaleString()} {currency}</td>
+                          <td className="border-b border-line px-3 py-2 text-success-deep">Per-item Discounts</td>
+                          <td className="border-b border-line px-3 py-2 text-right font-mono font-bold text-success-deep tabular-nums">-{perItemDiscountTotal.toLocaleString()} {currency}</td>
                         </tr>
                       )}
                       <tr>
-                        <td className="border border-line px-2 py-1.5 text-muted">Sales Tax ({Math.round(taxRate * 100)}%)</td>
-                        <td className="border border-line px-2 py-1.5 text-right font-mono text-ink tabular-nums">{selectedWo.taxAmount.toLocaleString()} {currency}</td>
+                        <td className="border-b border-line px-3 py-2 text-muted">Sales Tax ({Math.round(taxRate * 100)}%)</td>
+                        <td className="border-b border-line px-3 py-2 text-right font-mono font-bold text-ink tabular-nums">{selectedWo.taxAmount.toLocaleString()} {currency}</td>
                       </tr>
                       {/* Invoice Discount — editable (Ko Hein 2026-08-10) */}
                       <tr>
-                        <td className="border border-line px-2 py-1.5 text-success-deep flex items-center gap-1">
+                        <td className="border-b border-line px-3 py-2 text-success-deep">
+                          <span className="flex items-center gap-1">
                           <Percent className="w-3 h-3 shrink-0" />
                           Invoice Discount
+                          </span>
                         </td>
-                        <td className="border border-line px-2 py-1.5">
+                        <td className="border-b border-line px-3 py-2">
                           <div className="flex items-center gap-1 justify-end">
                             <Input
                               type="number"
@@ -1082,7 +1031,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                 }
                               }}
                               placeholder={selectedWo.discountAmount ? selectedWo.discountAmount.toLocaleString() : '0'}
-                              className="w-24 text-right text-xs font-mono font-bold text-success-deep bg-surface border border-line rounded px-1.5 py-0.5 outline-none focus:border-success"
+                              className="w-24 text-right text-xs font-mono font-bold text-success-deep bg-white border border-line rounded-lg px-2 py-1 outline-none focus:border-success"
                             />
                             <span className="text-success-deep font-mono tabular-nums text-xs shrink-0">{currency}</span>
                           </div>
@@ -1094,8 +1043,8 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         if (totalDisc > 0 && discPct >= 40) {
                           return (
                             <tr>
-                              <td colSpan={2} className="border border-line px-2 py-1">
-                                <div className="flex items-center gap-1 text-warning text-[10px] font-bold">
+                              <td colSpan={2} className="border-b border-line bg-warning/5 px-3 py-1.5">
+                                <div className="flex items-center gap-1.5 text-warning text-[10px] font-bold">
                                   <AlertTriangle className="w-3 h-3 shrink-0" />
                                   Total discount {discPct}% — over {discPct >= 70 ? '70% (near full discount!)' : '40% (high discount)'}
                                 </div>
@@ -1107,13 +1056,13 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       })()}
                       {selectedWo.depositAmount > 0 && (
                         <tr>
-                          <td className="border border-line px-2 py-1.5 text-success-deep">Upfront Deposit Paid</td>
-                          <td className="border border-line px-2 py-1.5 text-right font-mono text-success-deep tabular-nums">-{selectedWo.depositAmount.toLocaleString()} {currency}</td>
+                          <td className="border-b border-line px-3 py-2 text-success-deep">Upfront Deposit Paid</td>
+                          <td className="border-b border-line px-3 py-2 text-right font-mono font-bold text-success-deep tabular-nums">-{selectedWo.depositAmount.toLocaleString()} {currency}</td>
                         </tr>
                       )}
-                      <tr className="bg-brand-soft">
-                        <td className="border border-line px-2 py-2 text-sm font-extrabold text-ink">Amount Due (Customer)</td>
-                        <td className="border border-line px-2 py-2 text-right font-mono text-base font-black text-brand tabular-nums">
+                      <tr className="bg-ink text-white">
+                        <td className="px-3 py-2.5 text-xs font-black uppercase tracking-wide">Amount Due (Customer)</td>
+                        <td className="px-3 py-2.5 text-right font-mono text-lg font-black tabular-nums">
                           {selectedWo.totalAmount.toLocaleString()} {currency}
                         </td>
                       </tr>
@@ -1144,9 +1093,9 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
 
               {/* Payment Gateway Options */}
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className="font-bold text-brand text-xs flex items-center space-x-1.5">
+                  <h3 className="font-black text-ink text-xs flex items-center space-x-1.5 uppercase tracking-wide">
                     <CreditCard className="w-3.5 h-3.5" />
                     <span>Payment Method Selection</span>
                   </h3>
@@ -1168,8 +1117,9 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         key={m.id}
                         type="button"
                         onClick={() => setPaymentMethod(m.name)}
-                        className={`!min-h-0 px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold border transition-all cursor-pointer focus:outline-none active:scale-95 ${
-                          isSelected ? 'bg-brand text-white border-brand shadow-2xs' : 'bg-white text-ink border-line hover:border-brand hover:text-brand'
+                        variant="outline"
+                        className={`!h-8 !min-h-0 px-2.5 py-1 rounded-lg text-[11px] font-extrabold border transition-all cursor-pointer focus:outline-none active:scale-95 ${
+                          isSelected ? 'bg-ink text-white border-transparent shadow-2xs' : 'bg-white text-ink border-line hover:bg-surface'
                         }`}
                       >
                         {m.name}
@@ -1190,8 +1140,9 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         ]);
                       }
                     }}
-                    className={`!min-h-0 px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold border transition-all cursor-pointer focus:outline-none active:scale-95 ${
-                      paymentMethod === 'Split Payment' ? 'bg-purple text-white border-purple shadow-2xs' : 'bg-white text-ink border-line hover:border-purple hover:text-purple'
+                    variant="outline"
+                    className={`!h-8 !min-h-0 px-2.5 py-1 rounded-lg text-[11px] font-extrabold border transition-all cursor-pointer focus:outline-none active:scale-95 ${
+                      paymentMethod === 'Split Payment' ? 'bg-ink text-white border-transparent shadow-2xs' : 'bg-white text-ink border-line hover:bg-surface'
                     }`}
                   >
                     Split Payment
@@ -1335,10 +1286,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
                 {/* Account / QR details box if selected method has accountNumber or accountName */}
                 {selectedMethodConfig && (selectedMethodConfig.accountNumber || selectedMethodConfig.notes) && (
-                  <div className="p-3.5 bg-brand-soft/80 border border-brand/30 rounded-xl space-y-2 text-xs animate-fadeIn">
+                  <div className="p-3 bg-surface/70 border border-line rounded-xl space-y-2 text-xs animate-fadeIn">
                     <div className="flex items-center justify-between">
                       <span className="font-extrabold text-ink flex items-center space-x-1.5">
-                        <Landmark className="w-4 h-4 text-brand" />
+                        <Landmark className="w-4 h-4 text-ink" />
                         <span>{selectedMethodConfig.name} - Account Transfer Details</span>
                       </span>
                       {selectedMethodConfig.accountNumber && (
@@ -1350,7 +1301,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                             setTimeout(() => setCopiedAccount(false), 2000);
                           }}
                           variant="outline"
-                          className="px-2 py-1 bg-white hover:bg-brand/15 text-brand border border-brand/30"
+                          className="px-2 py-1 bg-white hover:bg-surface text-ink border border-line"
                         >
                           {copiedAccount ? (
                             <>
@@ -1371,7 +1322,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       {selectedMethodConfig.accountNumber && (
                         <div>
                           <span className="text-muted block text-xs">Account / Phone No:</span>
-                          <span className="font-mono font-extrabold text-brand">{selectedMethodConfig.accountNumber}</span>
+                          <span className="font-mono font-extrabold text-ink">{selectedMethodConfig.accountNumber}</span>
                         </div>
                       )}
                       {selectedMethodConfig.accountName && (
@@ -1391,7 +1342,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 )}
 
                 {paymentMethod === 'Cash' && (
-                  <div className="p-4 bg-surface/80 border border-line rounded-xl space-y-2">
+                  <div className="p-3 bg-surface/70 border border-line rounded-xl space-y-2">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <label className="block text-xs font-extrabold text-ink">Cash Amount Tendered (MMK):</label>
                       <div className="flex flex-wrap items-center gap-1">
@@ -1405,8 +1356,8 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                               variant="outline"
                               className={`h-10 px-2 ${
                                 cashTendered === amt
-                                  ? 'bg-brand text-white border-brand'
-                                  : 'bg-white text-ink border-line hover:bg-brand-soft'
+                                  ? 'bg-ink text-white border-transparent'
+                                  : 'bg-white text-ink border-line hover:bg-surface'
                               }`}
                             >
                               {amt === selectedWo.totalAmount ? 'Exact' : amt.toLocaleString()}
@@ -1437,7 +1388,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                             }
                           }}
                           variant="outline"
-                          className="h-11 font-mono text-sm font-black hover:bg-brand-soft hover:border-brand"
+                          className="h-11 font-mono text-sm font-black hover:bg-surface hover:border-line-strong"
                           aria-label={`Numpad ${key}`}
                         >
                           {key}
@@ -1473,7 +1424,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   variant="secondary"
                   className="w-full sm:w-1/2 border border-line-strong"
                 >
-                  <FileText className="w-4 h-4 text-brand shrink-0" />
+                  <FileText className="w-4 h-4 text-ink shrink-0" />
                   <span className="truncate">Print Itemized Invoice</span>
                 </Button>
 
@@ -1512,11 +1463,11 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     );
 
   return (
-    <div className={`space-y-3 ${isIpad ? 'flex min-h-0 flex-1 flex-col' : ''}`}>
-      <div className={`flex flex-col md:flex-row gap-3 text-xs pb-16 md:pb-0 ${isIpad ? 'md:flex-1 md:min-h-0' : ''}`}>
+    <div className={`space-y-2 ${isIpad ? 'flex min-h-0 flex-1 flex-col' : ''}`}>
+      <div className={`flex flex-col md:flex-row gap-2 text-xs pb-16 md:pb-0 ${isIpad ? 'md:flex-1 md:min-h-0' : ''}`}>
         {/* Left Column: Select Work Order to Checkout (collapsible, hugs sidebar) */}
-        <div className={`bg-white border border-line rounded-2xl p-3 space-y-3 shadow-xs shrink-0 ${
-          isQueueCollapsed ? 'md:w-36' : 'md:w-[380px]'
+        <div className={`bg-white border border-line rounded-xl p-2.5 space-y-2 shadow-xs shrink-0 ${
+          isQueueCollapsed ? 'md:w-32' : 'md:w-[340px]'
         } ${isIpad ? 'md:flex md:flex-col md:min-h-0' : 'md:self-stretch md:flex md:flex-col md:min-h-0'}`}>
           <div className="flex justify-between items-center border-b border-line pb-2">
             {!isQueueCollapsed ? (
@@ -1529,6 +1480,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   <Button
                     type="button"
                     onClick={() => setIsQueueCollapsed(true)}
+                    variant="iconGhost"
                     className="!h-6 !min-h-6 w-6 px-0 rounded flex items-center justify-center text-muted hover:bg-surface hover:text-ink transition-colors"
                     title="Collapse ticket list"
                     aria-label="Collapse ticket list"
@@ -1580,13 +1532,13 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         handleSelectWo();
                       }
                     }}
-                    className={`group cursor-pointer rounded-xl border bg-white p-3 shadow-2xs transition-all hover:shadow-md hover:border-brand/50 select-none ${
-                      isSelected ? 'border-brand ring-2 ring-brand/20 bg-brand-soft/40' : 'border-line'
+                    className={`group cursor-pointer rounded-lg border bg-white p-2.5 shadow-2xs transition-all hover:shadow-md hover:border-ink/30 select-none ${
+                      isSelected ? 'border-ink ring-2 ring-ink/10 bg-surface' : 'border-line'
                     }`}
                   >
                     {/* Top row: order # + priority */}
                     <div className="flex items-center justify-between gap-1.5">
-                      <span className="font-mono text-[11px] font-extrabold text-brand truncate">{wo.orderNumber}</span>
+                      <span className="font-mono text-[11px] font-black text-ink truncate">{wo.orderNumber}</span>
                       <div className="flex items-center gap-1 shrink-0">
                         <PriorityBadge priority={wo.priority} size="xs" />
                         <span className={`text-[9px] font-black px-1.5 py-px rounded uppercase ${
@@ -1608,7 +1560,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
                     {/* Footer: tech + amount */}
                     <div className="mt-2 flex items-center justify-between border-t border-line/60 pt-1.5">
-                      <span className="flex items-center space-x-1 text-[11px] font-bold text-brand min-w-0 truncate">
+                      <span className="flex items-center space-x-1 text-[11px] font-bold text-ink min-w-0 truncate">
                         <UserCheck className="w-3 h-3 shrink-0" />
                         <span className="truncate max-w-[80px]">{wo.assignedTechName || 'Unassigned'}</span>
                       </span>
@@ -1638,13 +1590,14 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       setSelectedWoId(wo.id);
                       resetTransactionState();
                     }}
+                    variant="outline"
                     className={`w-full px-2 py-1.5 rounded-lg flex flex-col items-start transition-colors ${
-                      isSel ? 'bg-brand text-white shadow-2xs' : 'bg-white text-ink border border-line hover:bg-brand-soft hover:border-brand/30'
+                      isSel ? 'bg-ink text-white border-transparent shadow-2xs' : 'bg-white text-ink border border-line hover:bg-surface'
                     }`}
                     title={`${wo.orderNumber} · ${wo.deviceModel} · ${wo.customerName}`}
                     aria-label={`Select ${wo.orderNumber} ${wo.deviceModel}`}
                   >
-                    <span className={`font-mono text-[10px] font-black leading-tight ${isSel ? 'text-white' : 'text-brand'}`}>
+                    <span className={`font-mono text-[10px] font-black leading-tight ${isSel ? 'text-white' : 'text-ink'}`}>
                       {wo.orderNumber}
                     </span>
                     <span className={`text-[9px] font-bold leading-tight truncate w-full ${isSel ? 'text-white/90' : 'text-ink'}`}>
@@ -1661,7 +1614,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
         </div>
 
         {/* Right Column: Dynamic Invoice & Terminal Checkout (8 cols) */}
-        <div className={`hidden md:block flex-1 min-w-0 bg-white border border-line rounded-2xl p-5 pb-24 md:pb-5 space-y-5 shadow-xs ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:overflow-y-auto' : ''}`}>
+        <div className={`hidden md:block flex-1 min-w-0 bg-white border border-line rounded-xl p-3 pb-24 md:pb-3 space-y-3 shadow-xs ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:overflow-y-auto' : ''}`}>
                     {renderCheckoutPanel()}
         </div>
       </div>
@@ -1834,6 +1787,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               </div>
               <Button
                 type="button"
+                variant="iconGhost"
                 onClick={() => setIsAddPartOpen(false)}
                 aria-label="Close add part"
                 className="text-muted hover:text-ink p-1.5 rounded transition-colors cursor-pointer focus:outline-none"
@@ -1848,9 +1802,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 <Button
                   key={owner}
                   type="button"
+                  variant="ghost"
                   onClick={() => setPosOwner(owner)}
                   className={`rounded-lg px-2 py-1 text-xs font-bold transition-colors cursor-pointer ${
-                    posOwner === owner ? 'bg-brand text-white shadow-2xs' : 'bg-surface text-muted hover:bg-line hover:text-ink'
+                    posOwner === owner ? 'bg-ink text-white shadow-2xs' : 'bg-surface text-muted hover:bg-line hover:text-ink'
                   }`}
                 >
                   {owner}
@@ -1864,7 +1819,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               <div className="space-y-1.5">
               {filteredInventoryParts.filter((part) => part.quantityInStock > 0).length === 0 ? (
                 <div className="p-8 text-center text-muted text-xs space-y-1">
-                  <PackageCheck className="w-8 h-8 mx-auto opacity-40 text-brand" />
+                  <PackageCheck className="w-8 h-8 mx-auto opacity-40 text-ink" />
                   <p className="font-extrabold text-ink">
                     {parts.length === 0 ? 'No parts in database' : 'No compatible parts in stock'}
                   </p>
@@ -1882,9 +1837,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     <Button
                       key={part.id}
                       type="button"
+                      variant="outline"
                       onClick={() => setInventoryPartId(part.id)}
-                      className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl border text-left transition-all cursor-pointer focus:outline-none active:scale-[0.99] ${
-                        isSelected ? 'border-brand bg-brand/5 ring-1 ring-brand/30' : 'border-line bg-white hover:bg-surface'
+                      className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border text-left text-ink transition-all cursor-pointer focus:outline-none active:scale-[0.99] ${
+                        isSelected ? 'border-ink bg-surface ring-1 ring-ink/10' : 'border-line bg-white hover:bg-surface'
                       }`}
                     >
                       <div className="min-w-0">
@@ -1894,7 +1850,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                             className={`mr-1.5 rounded px-1 py-px text-[9px] font-black uppercase ${
                               (part.owner || 'APP') === 'KZH'
                                 ? 'bg-success/10 text-success-deep border border-success/30'
-                                : 'bg-brand-soft text-brand border border-brand/30'
+                                : 'bg-surface text-ink border border-line'
                             }`}
                           >
                             {part.owner || 'APP'}
@@ -1902,8 +1858,8 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           Stock: {part.quantityInStock}{low ? ' — Low' : ''}
                         </p>
                       </div>
-                      <span className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${isSelected ? 'border-brand' : 'border-line-strong'}`}>
-                        {isSelected && <span className="w-2 h-2 rounded-full bg-brand" />}
+                      <span className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${isSelected ? 'border-success' : 'border-line-strong'}`}>
+                        {isSelected && <span className="w-2 h-2 rounded-full bg-success" />}
                       </span>
                     </Button>
                   );
@@ -1951,7 +1907,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     handleAddInventoryPartToWorkOrder();
                     setIsAddPartOpen(false);
                   }}
-                  className="flex-1 h-10 bg-brand hover:bg-brand-deep text-white font-extrabold text-xs rounded-lg"
+                  className="flex-1 h-10 bg-ink hover:bg-ink/90 text-white font-extrabold text-xs rounded-lg"
                 >
                   Add Part to Ticket
                 </Button>

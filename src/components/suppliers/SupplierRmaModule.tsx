@@ -921,7 +921,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                 <h3 className="text-sm font-extrabold text-ink">Create Purchase Order</h3>
                 <p className="text-xs text-muted">Order parts from a supplier — receiving adds them to stock.</p>
               </div>
-              <Button type="button" onClick={() => { setShowPoModal(false); resetPoForm(); }} className="rounded-lg p-1 text-muted hover:bg-surface hover:text-ink" aria-label="Close">✕</Button>
+              <Button type="button" variant="iconGhost" onClick={() => { setShowPoModal(false); resetPoForm(); }} className="rounded-lg p-1 text-muted hover:bg-surface hover:text-ink" aria-label="Close">✕</Button>
             </div>
 
             <div className="flex-1 min-h-0 space-y-3 overflow-y-auto p-4">

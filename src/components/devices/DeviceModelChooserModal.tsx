@@ -51,7 +51,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
         {/* Modal Header */}
         <div className="px-3.5 py-3 border-b border-line flex items-center justify-between bg-surface/80">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-brand text-white flex items-center justify-center font-bold shadow-2xs shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-ink text-white flex items-center justify-center font-bold shadow-2xs shrink-0">
               <Folder className="w-4 h-4" />
             </div>
             <div className="min-w-0">
@@ -67,7 +67,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                   onClose();
                   onOpenSettings();
                 }}
-                className="px-2.5 py-1.5 rounded-lg bg-white hover:bg-line text-brand font-extrabold text-xs border border-line transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                className="px-2.5 py-1.5 rounded-lg bg-white hover:bg-line text-ink font-extrabold text-xs border border-line transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
               >
                 <Settings className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Folder Settings</span>
@@ -109,12 +109,13 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                   onClick={() => { if (count > 0 || fam.key === 'All') setActiveFamilyTab(fam.key as any); }}
                   disabled={count === 0 && fam.key !== 'All'}
                   title={count === 0 && fam.key !== 'All' ? 'No models available yet' : undefined}
-                  className={`shrink-0 rounded-full border px-2.5 !h-7 !min-h-0 text-xs font-extrabold transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:bg-brand focus-visible:text-white ${
+                  variant="ghost"
+                  className={`shrink-0 rounded-full border px-2.5 !h-7 !min-h-0 text-xs font-extrabold transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:bg-ink focus-visible:text-white ${
                     isActive
-                      ? 'bg-brand text-white border-brand shadow-2xs'
+                      ? 'bg-ink text-white border-transparent shadow-2xs'
                       : count === 0 && fam.key !== 'All'
                       ? 'bg-white text-muted border-line cursor-not-allowed'
-                      : 'bg-white text-ink border-line hover:border-brand/50'
+                      : 'bg-white text-ink border-line hover:bg-surface'
                   }`}
                 >
                   {fam.label} ({count})
@@ -180,16 +181,17 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                         <Button
                           key={item.model}
                           type="button"
+                          variant="ghost"
                           onClick={() => {
                             onSelectDevice(item.model);
                             onClose();
                           }}
-                          className={`flex w-full items-center justify-between gap-2 border-b border-line/60 py-2 pl-1 text-left text-sm transition-colors cursor-pointer focus:outline-none ${
-                            isSelected ? 'font-extrabold text-brand' : 'font-semibold text-ink hover:text-brand'
+                          className={`flex w-full items-center justify-between gap-2 border-b border-line/60 bg-transparent py-2 pl-1 text-left text-sm transition-colors cursor-pointer focus:outline-none hover:bg-surface ${
+                            isSelected ? 'font-extrabold text-ink' : 'font-semibold text-ink'
                           }`}
                         >
                           <span className="truncate">{item.model}</span>
-                          {isSelected && <Check className="h-4 w-4 shrink-0 text-brand stroke-[3]" />}
+                          {isSelected && <Check className="h-4 w-4 shrink-0 text-success stroke-[3]" />}
                         </Button>
                       );
                     })}
@@ -201,7 +203,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
             if (renderedFolderCount === 0) {
               return (
                 <div className="py-12 text-center text-muted space-y-2">
-                  <Folder className="w-10 h-10 mx-auto opacity-30 text-brand" />
+                  <Folder className="w-10 h-10 mx-auto opacity-30 text-ink" />
                   <p className="font-extrabold text-sm text-ink">No matching device models found</p>
                   <p className="text-xs">
                     Try another search term or check folder visibility toggles in settings.
@@ -218,7 +220,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
         {/* Modal Footer */}
         <div className="px-3.5 py-2 bg-surface border-t border-line flex items-center justify-between text-xs">
           <span className="font-bold text-muted">
-            Selected: <span className="text-brand font-black">{selectedDevice || 'None'}</span>
+            Selected: <span className="text-ink font-black">{selectedDevice || 'None'}</span>
           </span>
           <span className="text-xs text-muted font-medium">{enabledFolders.length} folders available</span>
         </div>

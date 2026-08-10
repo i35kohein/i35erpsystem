@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronDown } from 'lucide-react';
 
 interface DrawerSelectProps {
@@ -8,37 +9,72 @@ interface DrawerSelectProps {
   options: Array<{ value: string; label: string }>;
 }
 
+const MENU_WIDTH = 200;
+const MENU_MIN_HEIGHT = 120;
+const VIEWPORT_MARGIN = 8;
+
 /**
- * Branded inline dropdown for the filter drawer. The option list renders as an
- * OVERLAY (absolute) so opening it never pushes content below — no layout shift.
+ * Branded inline dropdown for the filter drawer. Uses portal + fixed positioning
+ * so it can never be clipped by overflow or viewport edges (Ko Hein 2026-08-10).
  */
 export const DrawerSelect: React.FC<DrawerSelectProps> = ({ label, value, onChange, options }) => {
   const [open, setOpen] = useState(false);
+  const [menuPos, setMenuPos] = useState<{ top: number; left: number; placeTop: boolean } | null>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const selected = options.find((o) => o.value === value);
 
-  return (
-    <div className="relative">
-      <label className="mb-1 block text-xs font-extrabold uppercase tracking-wider text-muted">{label}</label>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        className="flex w-full items-center justify-between gap-2 rounded-xl border border-line bg-white px-3 py-2.5 text-xs font-extrabold text-ink outline-none transition-colors cursor-pointer"
+  const close = useCallback(() => {
+    setOpen(false);
+    setMenuPos(null);
+  }, []);
+
+  const toggle = useCallback(() => {
+    if (open) { close(); return; }
+    const rect = buttonRef.current?.getBoundingClientRect();
+    if (!rect) { setOpen(true); return; }
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    const placeTop = spaceBelow < MENU_MIN_HEIGHT && spaceAbove > spaceBelow;
+    let left = Math.max(VIEWPORT_MARGIN, Math.min(rect.left, window.innerWidth - MENU_WIDTH - VIEWPORT_MARGIN));
+    setMenuPos({ top: placeTop ? rect.top - 8 : rect.bottom + 8, left, placeTop });
+    setOpen(true);
+  }, [open, close]);
+
+  useEffect(() => {
+    if (!open) return;
+    const closeOnOutside = (e: Event) => {
+      const target = e.target as Node | null;
+      if (target && menuRef.current?.contains(target)) return;
+      close();
+    };
+    window.addEventListener('scroll', closeOnOutside, true);
+    window.addEventListener('resize', closeOnOutside);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+    return () => {
+      window.removeEventListener('scroll', closeOnOutside, true);
+      window.removeEventListener('resize', closeOnOutside);
+    };
+  }, [open, close]);
+
+  const menu = menuPos && (
+    <>
+      <div className="fixed inset-0 z-[95]" onMouseDown={close} onTouchStart={close} role="presentation" aria-hidden="true" />
+      <div
+        ref={menuRef}
+        role="listbox"
+        className={`fixed z-[96] w-48 max-w-[calc(100vw-1rem)] rounded-xl border border-line bg-white p-1.5 shadow-xl ${menuPos.placeTop ? '-translate-y-full' : ''}`}
+        style={{ top: menuPos.top, left: menuPos.left }}
+        onMouseDown={(e) => e.stopPropagation()}
       >
-        <span className="truncate">{selected ? selected.label : 'Select…'}</span>
-        <ChevronDown className={`h-4 w-4 shrink-0 text-muted transition-transform ${open ? 'rotate-180' : ''}`} />
-      </button>
-      {/* Overlay list — does not affect flow, so no layout shift when opened */}
-      {open && (
-        <div className="absolute left-0 right-0 top-full z-20 mt-1.5 max-h-56 overflow-y-auto rounded-xl border border-line bg-white p-1 shadow-xl animate-fadeIn">
+        <div className="max-h-56 overflow-y-auto space-y-0.5 custom-scrollbar">
           {options.map((opt) => (
             <button
               key={opt.value}
               type="button"
-              onClick={() => {
-                onChange(opt.value);
-                setOpen(false);
-              }}
+              role="option"
+              aria-selected={opt.value === value}
+              onClick={() => { onChange(opt.value); close(); }}
               className={`w-full rounded-lg px-3 py-2.5 text-left text-xs font-bold transition-colors cursor-pointer ${
                 opt.value === value ? 'bg-brand text-white' : 'text-ink hover:bg-surface'
               }`}
@@ -47,7 +83,25 @@ export const DrawerSelect: React.FC<DrawerSelectProps> = ({ label, value, onChan
             </button>
           ))}
         </div>
-      )}
+      </div>
+    </>
+  );
+
+  return (
+    <div className="relative">
+      <label className="mb-1 block text-xs font-extrabold uppercase tracking-wider text-muted">{label}</label>
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={toggle}
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        className="flex w-full items-center justify-between gap-2 rounded-xl border border-line bg-white px-3 py-2.5 text-xs font-extrabold text-ink outline-none transition-colors cursor-pointer"
+      >
+        <span className="truncate">{selected ? selected.label : 'Select…'}</span>
+        <ChevronDown className={`h-4 w-4 shrink-0 text-muted transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && menu && createPortal(menu, document.body)}
     </div>
   );
 };
