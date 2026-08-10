@@ -55,11 +55,8 @@ body {
   --color-danger-deep: #D70015;  /* danger hover/pressed red */
 }
 
-/* Global focus ring — consistent visible keyboard focus across the app. */
-:where(button, a, input, select, textarea, [tabindex]):focus-visible {
-  outline: 2px solid #0071E3;
-  outline-offset: 2px;
-}
+/* Global focus ring removed 2026-08-10 (Ko Hein: clean look — no blue
+   outline/ring decorations). Suppressed globally by the rule at the bottom. */
 
 @font-face {
   font-family: "MyanmarChatu";
@@ -393,8 +390,7 @@ button {
 .basic-ui select:focus,
 .basic-ui textarea:focus,
 .basic-ui button:focus-visible {
-  outline: 2px solid #8bb8e8 !important;
-  outline-offset: 1px;
+  /* focus outline removed 2026-08-10 — clean look (Ko Hein) */
 }
 
 .basic-ui table {
@@ -1320,4 +1316,11 @@ html[data-theme="dark-slate"] .bg-yellow-100 { background-color: rgba(234, 179, 
 }
 html[data-theme="dark-slate"] .shadow-raised-top {
   box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.45);
+}
+
+/* Ko Hein 2026-08-10: clean look — no focus ring/outline decorations on
+   interactive elements (replaces the accessibility focus rings). */
+:where(button, input, select, textarea, [role="button"], a, [tabindex]):focus,
+:where(button, input, select, textarea, [role="button"], a, [tabindex]):focus-visible {
+  outline: none;
 }

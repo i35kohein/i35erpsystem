@@ -880,7 +880,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             value={settingsTabQuery}
             onChange={(e) => setSettingsTabQuery(e.target.value)}
             placeholder="Search settings…"
-            className="w-full bg-white border border-line text-xs text-ink placeholder-muted pl-8 pr-7 py-2 rounded-xl focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all"
+            className="w-full bg-white border border-line text-xs text-ink placeholder-muted pl-8 pr-7 py-2 rounded-xl focus:outline-none transition-all"
           />
           {settingsTabQuery && (
             <Button
@@ -1142,7 +1142,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                   value={techFormData.name}
                   onChange={(e) => setTechFormData({ ...techFormData, name: e.target.value })}
                   placeholder="e.g. Alex Rivera"
-                  className="w-full h-10 bg-surface text-ink font-medium px-3 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand"
+                  className="w-full h-10 bg-surface text-ink font-medium px-3 rounded-xl border border-line-strong focus:bg-white focus:outline-none "
                 />
               </div>
 
@@ -1156,7 +1156,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                       value={techFormData.email}
                       onChange={(e) => setTechFormData({ ...techFormData, email: e.target.value })}
                       placeholder="alex@applerepairpro.com"
-                      className="w-full h-10 bg-surface text-ink font-medium px-3 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand"
+                      className="w-full h-10 bg-surface text-ink font-medium px-3 rounded-xl border border-line-strong focus:bg-white focus:outline-none "
                     />
                   </div>
 
@@ -1167,7 +1167,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                       value={techFormData.phone}
                       onChange={(e) => setTechFormData({ ...techFormData, phone: e.target.value })}
                       placeholder="+95 9 700 000 000"
-                      className="w-full h-10 bg-surface text-ink font-medium px-3 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand"
+                      className="w-full h-10 bg-surface text-ink font-medium px-3 rounded-xl border border-line-strong focus:bg-white focus:outline-none "
                     />
                   </div>
                 </div>
@@ -1198,7 +1198,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                     <select aria-label="Status"
                       value={techFormData.status}
                       onChange={(e) => setTechFormData({ ...techFormData, status: e.target.value as any })}
-                      className="w-full h-10 bg-surface text-ink font-bold px-3 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand"
+                      className="w-full h-10 bg-surface text-ink font-bold px-3 rounded-xl border border-line-strong focus:bg-white focus:outline-none "
                     >
                       <option value="Active">Active</option>
                       <option value="On Leave">On Leave</option>
@@ -1215,7 +1215,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                   value={techFormData.specialty}
                   onChange={(e) => setTechFormData({ ...techFormData, specialty: e.target.value })}
                   placeholder="e.g. MacBook Logic Boards, Display Repair"
-                  className="w-full h-10 bg-surface text-ink font-medium px-3 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand"
+                  className="w-full h-10 bg-surface text-ink font-medium px-3 rounded-xl border border-line-strong focus:bg-white focus:outline-none "
                 />
               </div>
 
@@ -1230,7 +1230,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                       onChange={(e) => setTechFormData({ ...techFormData, commissionRateParts: Number(e.target.value) })}
                       min="0"
                       max="50"
-                      className="w-full h-9 bg-white text-ink font-bold px-3 rounded-lg border border-line-strong focus:outline-none focus:border-brand"
+                      className="w-full h-9 bg-white text-ink font-bold px-3 rounded-lg border border-line-strong focus:outline-none "
                     />
                     <p className="text-xs text-muted mt-1.5">Standard Modular (parts-swap) jobs</p>
                   </div>
@@ -1243,7 +1243,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                       onChange={(e) => setTechFormData({ ...techFormData, commissionRateHardware: Number(e.target.value) })}
                       min="0"
                       max="50"
-                      className="w-full h-9 bg-white text-ink font-bold px-3 rounded-lg border border-line-strong focus:outline-none focus:border-brand"
+                      className="w-full h-9 bg-white text-ink font-bold px-3 rounded-lg border border-line-strong focus:outline-none "
                     />
                     <p className="text-xs text-muted mt-1.5">Micro-Soldering (board-level) jobs</p>
                   </div>
@@ -1334,7 +1334,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                     value={userFormData.name}
                     onChange={(e) => setUserFormData({ ...userFormData, name: e.target.value })}
                     placeholder="e.g. Mg Mg or Daw Thin"
-                    className="w-full px-3 py-2 rounded-xl border border-line-strong focus:outline-none focus:border-brand font-medium"
+                    className="w-full px-3 py-2 rounded-xl border border-line-strong focus:outline-none font-medium"
                   />
                 </div>
 
@@ -1345,7 +1345,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                     value={userFormData.email}
                     onChange={(e) => setUserFormData({ ...userFormData, email: e.target.value })}
                     placeholder="user@applerepairpro.com"
-                    className="w-full px-3 py-2 rounded-xl border border-line-strong focus:outline-none focus:border-brand font-medium"
+                    className="w-full px-3 py-2 rounded-xl border border-line-strong focus:outline-none font-medium"
                   />
                 </div>
               </div>
@@ -1359,7 +1359,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                     value={userFormData.phone}
                     onChange={(e) => setUserFormData({ ...userFormData, phone: e.target.value })}
                     placeholder="+95 9 123 456 789"
-                    className="w-full px-3 py-2 rounded-xl border border-line-strong focus:outline-none focus:border-brand font-medium"
+                    className="w-full px-3 py-2 rounded-xl border border-line-strong focus:outline-none font-medium"
                   />
                 </div>
 
@@ -1368,7 +1368,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                   <select aria-label="Account Status"
                     value={userFormData.status}
                     onChange={(e) => setUserFormData({ ...userFormData, status: e.target.value as any })}
-                    className="w-full px-3 py-2 rounded-xl border border-line-strong focus:outline-none focus:border-brand font-bold bg-white"
+                    className="w-full px-3 py-2 rounded-xl border border-line-strong focus:outline-none font-bold bg-white"
                   >
                     <option value="Active">Active User</option>
                     <option value="Inactive">Inactive / Suspended</option>
@@ -1474,7 +1474,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                   <select aria-label="-- Select Technician Staff Profile --"
                     value={userFormData.technicianId}
                     onChange={(e) => setUserFormData({ ...userFormData, technicianId: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-brand/30 focus:outline-none focus:border-brand font-bold bg-white text-brand-deep"
+                    className="w-full px-3 py-2 rounded-xl border border-brand/30 focus:outline-none font-bold bg-white text-brand-deep"
                   >
                     <option value="">-- Select Technician Staff Profile --</option>
                     {technicians.map((tech) => (
@@ -1506,7 +1506,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                           },
                         })
                       }
-                      className="rounded text-brand focus:ring-brand"
+                      className="rounded text-brand "
                     />
                     <span>Delete Work Orders & Tasks</span>
                   </label>
@@ -1524,7 +1524,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                           },
                         })
                       }
-                      className="rounded text-brand focus:ring-brand"
+                      className="rounded text-brand "
                     />
                     <span>Delete Parts & Stock</span>
                   </label>
@@ -1542,7 +1542,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                           },
                         })
                       }
-                      className="rounded text-brand focus:ring-brand"
+                      className="rounded text-brand "
                     />
                     <span>Delete Customer Records</span>
                   </label>
@@ -1560,7 +1560,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                           },
                         })
                       }
-                      className="rounded text-brand focus:ring-brand"
+                      className="rounded text-brand "
                     />
                     <span>Access System Settings</span>
                   </label>
@@ -1578,7 +1578,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                           },
                         })
                       }
-                      className="rounded text-brand focus:ring-brand"
+                      className="rounded text-brand "
                     />
                     <span>Access Finance & P&L</span>
                   </label>
@@ -1596,7 +1596,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                           },
                         })
                       }
-                      className="rounded text-brand focus:ring-brand"
+                      className="rounded text-brand "
                     />
                     <span>Modify Price Catalog</span>
                   </label>

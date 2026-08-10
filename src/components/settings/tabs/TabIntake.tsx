@@ -30,7 +30,7 @@ const IntakeTab: React.FC<IntakeTabProps> = ({ formData, setFormData }) => {
                 value={formData.ticketPrefix}
                 onChange={(e) => setFormData({ ...formData, ticketPrefix: e.target.value })}
                 placeholder="WO-"
-                className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand"
+                className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none "
               />
               <p className="text-xs text-muted">e.g. WO- generates vouchers like WO-2026-1001.</p>
             </div>
@@ -44,7 +44,7 @@ const IntakeTab: React.FC<IntakeTabProps> = ({ formData, setFormData }) => {
               <select aria-label="30 Days (Standard Modular)"
                 value={formData.defaultWarrantyDays}
                 onChange={(e) => setFormData({ ...formData, defaultWarrantyDays: Number(e.target.value) })}
-                className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand"
+                className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none "
               >
                 <option value={30}>30 Days (Standard Modular)</option>
                 <option value={60}>60 Days (Extended)</option>
@@ -61,7 +61,7 @@ const IntakeTab: React.FC<IntakeTabProps> = ({ formData, setFormData }) => {
                   type="checkbox"
                   checked={formData.requirePasscodeIntake}
                   onChange={(e) => setFormData({ ...formData, requirePasscodeIntake: e.target.checked })}
-                  className="w-4 h-4 text-brand rounded focus:ring-0 cursor-pointer"
+                  className="w-4 h-4 text-brand rounded cursor-pointer"
                 />
                 <div>
                   <span className="font-extrabold text-ink text-xs block">Require Device Passcode / PIN at Intake</span>
@@ -74,7 +74,7 @@ const IntakeTab: React.FC<IntakeTabProps> = ({ formData, setFormData }) => {
                   type="checkbox"
                   checked={formData.requireFindMyCheck}
                   onChange={(e) => setFormData({ ...formData, requireFindMyCheck: e.target.checked })}
-                  className="w-4 h-4 text-brand rounded focus:ring-0 cursor-pointer"
+                  className="w-4 h-4 text-brand rounded cursor-pointer"
                 />
                 <div>
                   <span className="font-extrabold text-ink text-xs block">Mandatory Find My / iCloud Lock Check</span>

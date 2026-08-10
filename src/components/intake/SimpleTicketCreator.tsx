@@ -37,7 +37,7 @@ const EMPTY_FORM: FormState = {
 
 /** Popup-trigger rows styled exactly like the text inputs so all rows align. */
 const boxBtnCls =
-  'flex w-full min-w-0 items-center justify-between gap-2 rounded-lg border border-line bg-white px-3 py-2 text-left text-sm text-ink transition-colors hover:border-brand/50 focus:border-brand focus:ring-2 focus:ring-brand/15';
+  'flex w-full min-w-0 items-center justify-between gap-2 rounded-lg border border-line bg-white px-3 py-2 text-left text-sm text-ink transition-colors hover:border-brand/50 ';
 
 const DISCOUNT_OPTIONS = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
 
@@ -291,7 +291,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 onChange={(e) => handlePhoneChange(e.target.value)}
                 inputMode="tel"
                 placeholder="09"
-                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15 placeholder:text-muted"
+                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-muted"
               />
               {matchedCustomer && <span className="shrink-0 text-[10px] font-black text-success-deep">✓ {matchedCustomer}</span>}
             </label>
@@ -303,7 +303,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 onChange={(e) => set('name', e.target.value)}
                 required
                 placeholder="Customer name"
-                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15 placeholder:text-muted"
+                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-muted"
               />
             </label>
             {/* Model → popup */}
@@ -347,7 +347,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 onChange={(e) => set('imei', e.target.value)}
                 inputMode="numeric"
                 placeholder="Serial / IMEI"
-                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15 placeholder:text-muted"
+                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-muted"
               />
             </label>
             {/* Received date */}
@@ -357,7 +357,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 type="date"
                 value={form.date}
                 onChange={(e) => set('date', e.target.value)}
-                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15 [color-scheme:light]"
+                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors [color-scheme:light]"
               />
             </label>
             {/* Error / Repairs → popup */}
@@ -389,7 +389,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 onChange={(e) => set('passcode', e.target.value)}
                 autoComplete="off"
                 placeholder="Device passcode"
-                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15 placeholder:text-muted"
+                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-muted"
               />
             </label>
             {/* Intake note — flex-1 absorbs the remaining height so both columns balance */}
@@ -400,7 +400,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 onChange={(e) => set('reply', e.target.value)}
                 rows={2}
                 placeholder="Intake note & customer symptoms…"
-                className="w-full flex-1 resize-none rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15 placeholder:text-muted"
+                className="w-full flex-1 resize-none rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-muted"
               />
             </label>
           </div>
@@ -553,7 +553,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                       value={repairSearch}
                       onChange={(e) => setRepairSearch(e.target.value)}
                       placeholder={`Search repairs (e.g. Battery, Display, Face ID)...`}
-                      className="w-full rounded-xl border border-line bg-surface py-2.5 pl-9 pr-3 text-sm font-medium outline-none transition-colors focus:border-brand focus:bg-white"
+                      className="w-full rounded-xl border border-line bg-surface py-2.5 pl-9 pr-3 text-sm font-medium outline-none transition-colors focus:bg-white"
                     />
                   </div>
                   <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
@@ -595,7 +595,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                           aria-pressed={isSelected}
                           onClick={() => toggleRepair(item)}
                           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleRepair(item); } }}
-                          className={`group relative flex min-h-[92px] cursor-pointer flex-col gap-1.5 rounded-2xl border-2 bg-white p-2.5 shadow-2xs transition-colors select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60 ${
+                          className={`group relative flex min-h-[92px] cursor-pointer flex-col gap-1.5 rounded-2xl border-2 bg-white p-2.5 shadow-2xs transition-colors select-none focus:outline-none ${
                             isSelected ? 'border-brand bg-brand/5' : 'border-line hover:border-brand/50'
                           }`}
                         >
@@ -739,7 +739,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                             }
                           }
                         }}
-                        className="w-full rounded-lg border border-line bg-surface px-2 py-1.5 text-center font-mono text-xs font-bold text-ink outline-none focus:border-brand"
+                        className="w-full rounded-lg border border-line bg-surface px-2 py-1.5 text-center font-mono text-xs font-bold text-ink outline-none "
                       />
                     </div>
                   </div>

@@ -726,7 +726,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                 updated[idx].method = e.target.value;
                                 setSplitPayments(updated);
                               }}
-                              className="bg-surface border border-line rounded-lg p-1.5 text-xs font-extrabold text-ink focus:border-purple focus:ring-1 focus:ring-purple outline-none"
+                              className="bg-surface border border-line rounded-lg p-1.5 text-xs font-extrabold text-ink outline-none"
                             >
                               {activePaymentMethods.map((m) => (
                                 <option key={m.id} value={m.name}>
@@ -746,7 +746,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                   setSplitPayments(updated);
                                 }}
                                 placeholder="Amount MMK"
-                                className="w-full bg-surface border border-line rounded-lg p-1.5 text-xs font-mono font-bold text-ink focus:border-purple focus:ring-1 focus:ring-purple outline-none"
+                                className="w-full bg-surface border border-line rounded-lg p-1.5 text-xs font-mono font-bold text-ink outline-none"
                               />
                               <Button
                                 type="button"
@@ -916,7 +916,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       onChange={(e) => setCashTendered(Math.max(0, Number(e.target.value) || 0))}
                       placeholder="e.g. 250000"
                       inputMode="numeric"
-                      className="w-full bg-white border border-line rounded-lg p-2 text-ink font-mono focus:border-brand focus:ring-2 focus:ring-brand/20"
+                      className="w-full bg-white border border-line rounded-lg p-2 text-ink font-mono "
                     />
                     {/* On-screen numpad — cashier speed on phones */}
                     <div className="grid grid-cols-3 gap-1.5 md:hidden pt-0.5">
@@ -1371,7 +1371,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               <select
                 value={inventoryPartId || ''}
                 onChange={(e) => setInventoryPartId(e.target.value)}
-                className="w-full rounded-lg border border-line bg-white px-2.5 py-2 text-xs font-semibold text-ink outline-none focus:border-brand"
+                className="w-full rounded-lg border border-line bg-white px-2.5 py-2 text-xs font-semibold text-ink outline-none "
               >
                 <option value="">— Choose a part —</option>
                 {filteredInventoryParts
@@ -1395,7 +1395,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     max={selectedInventoryPart.quantityInStock || 99}
                     value={inventoryPartQty || ''}
                     onChange={(e) => setInventoryPartQty(Math.max(1, Math.floor(Number(e.target.value) || 1)))}
-                    className="w-20 rounded-lg border border-line bg-white px-2 py-2 text-xs font-mono font-bold text-ink outline-none focus:border-brand"
+                    className="w-20 rounded-lg border border-line bg-white px-2 py-2 text-xs font-mono font-bold text-ink outline-none "
                   />
                 </label>
                 <Button

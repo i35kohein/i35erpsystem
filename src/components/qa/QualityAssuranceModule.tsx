@@ -698,7 +698,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                       value={qaData.notes}
                       onChange={(e) => setQaData({ ...qaData, notes: e.target.value })}
                       placeholder="Final QA notes…"
-                      className="!h-6 !min-h-6 w-full rounded-md bg-white border border-line px-2 text-[11px] text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/20"
+                      className="!h-6 !min-h-6 w-full rounded-md bg-white border border-line px-2 text-[11px] text-ink focus:outline-none "
                     />
                   </div>
                 </div>

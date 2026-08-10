@@ -530,7 +530,7 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
               }}
               rows={1}
               placeholder="Ask a business question…"
-              className="flex-1 min-h-[42px] max-h-28 resize-none border border-line bg-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand"
+              className="flex-1 min-h-[42px] max-h-28 resize-none border border-line bg-white rounded-xl px-3 py-2 text-xs focus:outline-none "
             />
             <Button type="submit" disabled={!input.trim() || isLoading} title="Send message" aria-label="Send message" className="w-10 h-10 bg-brand text-white rounded-xl flex items-center justify-center disabled:opacity-40">
               <Send className="w-4 h-4" />

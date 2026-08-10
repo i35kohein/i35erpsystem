@@ -188,7 +188,7 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
         aria-expanded={isOpen}
         aria-label={ariaLabel || selectedOption?.label || placeholder}
         title={ariaLabel || selectedOption?.label || placeholder}
-        className={`flex items-center justify-between gap-2 rounded-lg border border-line bg-surface font-bold text-ink transition-colors cursor-pointer hover:bg-brand-soft focus:outline-none focus:border-brand ${
+        className={`flex items-center justify-between gap-2 rounded-lg border border-line bg-surface font-bold text-ink transition-colors cursor-pointer hover:bg-brand-soft focus:outline-none ${
           iconOnly
             ? size === 'sm' ? 'h-8 w-8 justify-center' : 'h-10 w-10 justify-center'
             : size === 'sm' ? 'h-8 min-w-32 px-2.5 text-xs' : 'h-10 min-w-32 px-3.5 text-sm'

@@ -98,7 +98,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                 onChange={(event) => setCategoryDraft(event.target.value)}
                 onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleAddInventoryCategory(); } }}
                 placeholder="New category, e.g. Camera"
-                className="h-9 min-w-0 flex-1 rounded-xl border border-line-strong bg-surface px-3 text-xs font-medium text-ink outline-none focus:border-brand focus:bg-white"
+                className="h-9 min-w-0 flex-1 rounded-xl border border-line-strong bg-surface px-3 text-xs font-medium text-ink outline-none focus:bg-white"
               />
               <Button
                 type="button"
@@ -151,19 +151,19 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
             </div>
 
             <form onSubmit={handleAddInventorySupplier} className="grid grid-cols-1 gap-2 rounded-xl border border-line bg-surface p-3 sm:grid-cols-2 lg:grid-cols-5">
-              <Input required value={supplierDraft.name} onChange={(event) => setSupplierDraft({ ...supplierDraft, name: event.target.value })} placeholder="Supplier name" className="h-9 rounded-lg border border-line-strong bg-white px-2.5 text-xs font-semibold outline-none focus:border-brand" />
-              <Input required value={supplierDraft.code} onChange={(event) => setSupplierDraft({ ...supplierDraft, code: event.target.value })} placeholder="Code" className="h-9 rounded-lg border border-line-strong bg-white px-2.5 font-mono text-xs outline-none focus:border-brand" />
-              <Input value={supplierDraft.phone} onChange={(event) => setSupplierDraft({ ...supplierDraft, phone: event.target.value })} placeholder="Phone" className="h-9 rounded-lg border border-line-strong bg-white px-2.5 text-xs outline-none focus:border-brand" />
-              <Input type="number" min="1" value={supplierDraft.avgRmaTurnaroundDays} onChange={(event) => setSupplierDraft({ ...supplierDraft, avgRmaTurnaroundDays: Number(event.target.value) })} placeholder="RMA days" className="h-9 rounded-lg border border-line-strong bg-white px-2.5 text-xs outline-none focus:border-brand" />
+              <Input required value={supplierDraft.name} onChange={(event) => setSupplierDraft({ ...supplierDraft, name: event.target.value })} placeholder="Supplier name" className="h-9 rounded-lg border border-line-strong bg-white px-2.5 text-xs font-semibold outline-none " />
+              <Input required value={supplierDraft.code} onChange={(event) => setSupplierDraft({ ...supplierDraft, code: event.target.value })} placeholder="Code" className="h-9 rounded-lg border border-line-strong bg-white px-2.5 font-mono text-xs outline-none " />
+              <Input value={supplierDraft.phone} onChange={(event) => setSupplierDraft({ ...supplierDraft, phone: event.target.value })} placeholder="Phone" className="h-9 rounded-lg border border-line-strong bg-white px-2.5 text-xs outline-none " />
+              <Input type="number" min="1" value={supplierDraft.avgRmaTurnaroundDays} onChange={(event) => setSupplierDraft({ ...supplierDraft, avgRmaTurnaroundDays: Number(event.target.value) })} placeholder="RMA days" className="h-9 rounded-lg border border-line-strong bg-white px-2.5 text-xs outline-none " />
               <Button type="submit" className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-brand px-3 text-xs font-extrabold text-white hover:bg-brand-deep"><Plus className="h-3.5 w-3.5" /> Add supplier</Button>
             </form>
 
             {editingInventorySupplier && (
               <form onSubmit={(event) => { event.preventDefault(); onUpdateSupplier?.(editingInventorySupplier); setEditingInventorySupplier(null); }} className="grid grid-cols-1 gap-2 rounded-xl border border-brand/30 bg-brand-soft/60 p-3 sm:grid-cols-2 lg:grid-cols-5">
-                <Input required value={editingInventorySupplier.name} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, name: event.target.value })} className="h-9 rounded-lg border border-brand/30 bg-white px-2.5 text-xs font-semibold outline-none focus:border-brand" />
-                <Input required value={editingInventorySupplier.code} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, code: event.target.value })} className="h-9 rounded-lg border border-brand/30 bg-white px-2.5 font-mono text-xs outline-none focus:border-brand" />
-                <Input value={editingInventorySupplier.phone} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, phone: event.target.value })} className="h-9 rounded-lg border border-brand/30 bg-white px-2.5 text-xs outline-none focus:border-brand" />
-                <Input type="number" min="1" value={editingInventorySupplier.avgRmaTurnaroundDays} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, avgRmaTurnaroundDays: Number(event.target.value) })} className="h-9 rounded-lg border border-brand/30 bg-white px-2.5 text-xs outline-none focus:border-brand" />
+                <Input required value={editingInventorySupplier.name} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, name: event.target.value })} className="h-9 rounded-lg border border-brand/30 bg-white px-2.5 text-xs font-semibold outline-none " />
+                <Input required value={editingInventorySupplier.code} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, code: event.target.value })} className="h-9 rounded-lg border border-brand/30 bg-white px-2.5 font-mono text-xs outline-none " />
+                <Input value={editingInventorySupplier.phone} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, phone: event.target.value })} className="h-9 rounded-lg border border-brand/30 bg-white px-2.5 text-xs outline-none " />
+                <Input type="number" min="1" value={editingInventorySupplier.avgRmaTurnaroundDays} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, avgRmaTurnaroundDays: Number(event.target.value) })} className="h-9 rounded-lg border border-brand/30 bg-white px-2.5 text-xs outline-none " />
                 <div className="flex gap-2"><Button type="submit" className="h-9 flex-1 rounded-lg bg-brand text-xs font-extrabold text-white">Save</Button><Button type="button" onClick={() => setEditingInventorySupplier(null)} className="h-9 rounded-lg border border-line-strong px-3 text-xs font-bold">Cancel</Button></div>
               </form>
             )}
@@ -191,7 +191,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
               <span className="rounded-full bg-purple/15 px-2 py-0.5 font-mono text-xs font-bold text-purple">{inventoryQualityTiers.length} tiers</span>
             </div>
             <div className="flex gap-2">
-              <Input value={qualityTierDraft} onChange={(event) => setQualityTierDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleAddInventoryQualityTier(); } }} placeholder="New quality tier" className="h-9 min-w-0 flex-1 rounded-lg border border-line-strong bg-surface px-3 text-xs font-medium outline-none focus:border-brand focus:bg-white" />
+              <Input value={qualityTierDraft} onChange={(event) => setQualityTierDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleAddInventoryQualityTier(); } }} placeholder="New quality tier" className="h-9 min-w-0 flex-1 rounded-lg border border-line-strong bg-surface px-3 text-xs font-medium outline-none focus:bg-white" />
               <Button type="button" onClick={handleAddInventoryQualityTier} disabled={!qualityTierDraft.trim()} className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-purple px-3 text-xs font-extrabold text-white hover:bg-purple disabled:opacity-45"><Plus className="h-3.5 w-3.5" /> Add</Button>
             </div>
             <div className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
@@ -212,7 +212,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
               <div><h4 className="text-xs font-extrabold text-ink">Storage Bin Names</h4><p className="text-xs text-muted">Saved bin names appear when registering or editing inventory parts.</p></div>
               <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-bold text-brand-deep">{inventoryBinNames.length} bins</span>
             </div>
-            <div className="flex gap-2"><Input value={binDraft} onChange={(event) => setBinDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleAddInventoryBin(); } }} placeholder="e.g. BIN-A01" className="h-9 min-w-0 flex-1 rounded-lg border border-line-strong bg-surface px-3 text-xs font-mono font-bold outline-none focus:border-brand focus:bg-white" /><Button type="button" onClick={handleAddInventoryBin} disabled={!binDraft.trim()} className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-brand px-3 text-xs font-extrabold text-white hover:bg-brand-deep disabled:opacity-45"><Plus className="h-3.5 w-3.5" /> Add bin</Button></div>
+            <div className="flex gap-2"><Input value={binDraft} onChange={(event) => setBinDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleAddInventoryBin(); } }} placeholder="e.g. BIN-A01" className="h-9 min-w-0 flex-1 rounded-lg border border-line-strong bg-surface px-3 text-xs font-mono font-bold outline-none focus:bg-white" /><Button type="button" onClick={handleAddInventoryBin} disabled={!binDraft.trim()} className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-brand px-3 text-xs font-extrabold text-white hover:bg-brand-deep disabled:opacity-45"><Plus className="h-3.5 w-3.5" /> Add bin</Button></div>
             <div className="space-y-2 rounded-xl border border-line bg-surface p-3">
               {inventoryBinNames.length ? inventoryBinNames.map((bin) => {
                 const binParts = partsByBin.get(bin) || [];
@@ -275,7 +275,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                 onChange={(e) => setFormData({ ...formData, lowStockThreshold: Number(e.target.value) })}
                 min="1"
                 max="20"
-                className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand"
+                className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none "
               />
               <p className="text-xs text-muted">Parts at or below this count get amber warnings.</p>
             </div>
@@ -291,7 +291,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                 onChange={(e) => setFormData({ ...formData, defaultSupplierSlaDays: Number(e.target.value) })}
                 min="1"
                 max="30"
-                className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand"
+                className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none "
               />
             </div>
 
@@ -301,7 +301,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                   type="checkbox"
                   checked={formData.autoReserveOnAssignment}
                   onChange={(e) => setFormData({ ...formData, autoReserveOnAssignment: e.target.checked })}
-                  className="w-4 h-4 text-brand rounded focus:ring-0 cursor-pointer"
+                  className="w-4 h-4 text-brand rounded cursor-pointer"
                 />
                 <div>
                   <span className="font-extrabold text-ink text-xs block">Auto-Reserve Parts on Ticket Assignment</span>

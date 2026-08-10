@@ -214,7 +214,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                     type="text"
                     value={formData.receiptHeaderTitle}
                     onChange={(e) => setFormData({ ...formData, receiptHeaderTitle: e.target.value })}
-                    className="w-full bg-surface text-ink font-bold px-3.5 py-2.5 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand transition-all"
+                    className="w-full bg-surface text-ink font-bold px-3.5 py-2.5 rounded-xl border border-line-strong focus:bg-white focus:outline-none transition-all"
                     placeholder="e.g. Official ACMT Certified Service Voucher"
                   />
                 </div>
@@ -229,7 +229,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                     onKeyUp={(e) => updateSelectedFooterLines(e.currentTarget)}
                     onSelect={(e) => updateSelectedFooterLines(e.currentTarget)}
                     rows={2.5}
-                    className="w-full bg-surface text-ink font-bold px-3.5 py-2.5 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand transition-all"
+                    className="w-full bg-surface text-ink font-bold px-3.5 py-2.5 rounded-xl border border-line-strong focus:bg-white focus:outline-none transition-all"
                     placeholder="e.g. Thank you for choosing AppleRepair! All repairs covered by warranty under standard terms."
                   />
                   <p className="text-xs text-muted">Select a line, then choose alignment.</p>
@@ -342,7 +342,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                 <select aria-label="Black & White / Grayscale (Ink-Saver)"
                   value={formData.a4PrintColorMode || 'monochrome'}
                   onChange={(e) => setFormData({ ...formData, a4PrintColorMode: e.target.value as any })}
-                  className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand"
+                  className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none "
                 >
                   <option value="monochrome">Black & White / Grayscale (Ink-Saver)</option>
                   <option value="color">Standard Color</option>
@@ -354,7 +354,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                 <select aria-label="Standard Single A4 Page"
                   value={formData.a4PrintLayoutDensity || 'compact'}
                   onChange={(e) => setFormData({ ...formData, a4PrintLayoutDensity: e.target.value as any })}
-                  className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand"
+                  className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none "
                 >
                   <option value="standard">Standard Single A4 Page</option>
                   <option value="compact">Compact Single A4 Page</option>
@@ -368,7 +368,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                   type="text"
                   value={formData.a4CustomHeaderNote || 'Official Device Intake & Hardware Diagnostic Voucher'}
                   onChange={(e) => setFormData({ ...formData, a4CustomHeaderNote: e.target.value })}
-                  className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand"
+                  className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none "
                 />
               </div>
 
@@ -377,7 +377,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                 <select aria-label="Before vs After Table"
                   value={formData.a4DiagnosticDisplayFormat || 'comparison_table'}
                   onChange={(e) => setFormData({ ...formData, a4DiagnosticDisplayFormat: e.target.value as SystemSettings['a4DiagnosticDisplayFormat'] })}
-                  className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none focus:border-brand"
+                  className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none "
                 >
                   <option value="comparison_table">Before vs After Table</option>
                   <option value="dual_grid">Before & After Dual Cards</option>
@@ -393,7 +393,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                   type="checkbox"
                   checked={formData.a4ShowDiagnosticsTable ?? true}
                   onChange={(e) => setFormData({ ...formData, a4ShowDiagnosticsTable: e.target.checked })}
-                  className="w-4 h-4 text-brand rounded focus:ring-0 cursor-pointer"
+                  className="w-4 h-4 text-brand rounded cursor-pointer"
                 />
                 <div>
                   <span className="font-bold text-ink text-xs block">Include 21-Point Diagnostics</span>
@@ -406,7 +406,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                   type="checkbox"
                   checked={formData.a4ShowPricingTable ?? true}
                   onChange={(e) => setFormData({ ...formData, a4ShowPricingTable: e.target.checked })}
-                  className="w-4 h-4 text-brand rounded focus:ring-0 cursor-pointer"
+                  className="w-4 h-4 text-brand rounded cursor-pointer"
                 />
                 <div>
                   <span className="font-bold text-ink text-xs block">Include Service & Price Matrix</span>
@@ -419,7 +419,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                   type="checkbox"
                   checked={formData.a4ShowTermsDisclaimer ?? true}
                   onChange={(e) => setFormData({ ...formData, a4ShowTermsDisclaimer: e.target.checked })}
-                  className="w-4 h-4 text-brand rounded focus:ring-0 cursor-pointer"
+                  className="w-4 h-4 text-brand rounded cursor-pointer"
                 />
                 <div>
                   <span className="font-bold text-ink text-xs block">Include Terms & Signatures</span>

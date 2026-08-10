@@ -1024,7 +1024,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                 value={logText}
                 onChange={(e) => setLogText(e.target.value)}
                 placeholder="e.g. Jul 22, 2026 5:57 PM - No Power fixed. Speaker still not working."
-                className="w-full bg-surface border border-line-strong rounded-xl p-3 text-xs text-ink focus:border-brand"
+                className="w-full bg-surface border border-line-strong rounded-xl p-3 text-xs text-ink "
               />
             </div>
 

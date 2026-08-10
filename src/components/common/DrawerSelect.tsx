@@ -23,7 +23,7 @@ export const DrawerSelect: React.FC<DrawerSelectProps> = ({ label, value, onChan
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="flex w-full items-center justify-between gap-2 rounded-xl border border-line bg-white px-3 py-2.5 text-xs font-extrabold text-ink focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition-colors cursor-pointer"
+        className="flex w-full items-center justify-between gap-2 rounded-xl border border-line bg-white px-3 py-2.5 text-xs font-extrabold text-ink outline-none transition-colors cursor-pointer"
       >
         <span className="truncate">{selected ? selected.label : 'Select…'}</span>
         <ChevronDown className={`h-4 w-4 shrink-0 text-muted transition-transform ${open ? 'rotate-180' : ''}`} />

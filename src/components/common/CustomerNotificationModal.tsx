@@ -219,7 +219,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
               rows={4}
               value={messageText}
               onChange={(e) => setMessageText(e.target.value)}
-              className="w-full bg-surface border border-line rounded-2xl p-3.5 text-xs text-ink font-sans leading-relaxed focus:bg-white focus:border-brand focus:ring-2 focus:ring-brand/20 resize-none"
+              className="w-full bg-surface border border-line rounded-2xl p-3.5 text-xs text-ink font-sans leading-relaxed focus:bg-white resize-none"
             />
           </div>
 

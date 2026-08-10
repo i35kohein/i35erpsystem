@@ -275,14 +275,14 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                       setLoginError(null);
                     }}
                     placeholder="e.g. (555) 234-5678 or WO-2026-1001"
-                    className="w-full bg-surface border border-line rounded-xl pl-10 pr-4 py-3 text-sm font-medium text-ink focus:outline-none focus:border-brand focus:bg-white transition-all placeholder-muted"
+                    className="w-full bg-surface border border-line rounded-xl pl-10 pr-4 py-3 text-sm font-medium text-ink focus:outline-none focus:bg-white transition-all placeholder-muted"
                   />
                 </div>
               </div>
 
               <Button
                 type="submit"
-                className="w-full max-w-md mx-auto py-3 bg-brand hover:bg-brand-deep text-white font-bold rounded-xl text-sm shadow-xs transition-all active:scale-95 flex items-center justify-center space-x-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2"
+                className="w-full max-w-md mx-auto py-3 bg-brand hover:bg-brand-deep text-white font-bold rounded-xl text-sm shadow-xs transition-all active:scale-95 flex items-center justify-center space-x-2 cursor-pointer focus-visible:outline-none "
               >
                 <span className="truncate">Track Repair Voucher</span>
                 <ChevronRight className="w-4 h-4 shrink-0" />
@@ -331,7 +331,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 <select aria-label={`${currentWorkOrder.orderNumber} - device selector`}
                   value={currentWorkOrder.id}
                   onChange={(e) => setSelectedWorkOrderId(e.target.value)}
-                  className="bg-transparent text-brand font-bold text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 rounded"
+                  className="bg-transparent text-brand font-bold text-xs focus:outline-none rounded"
                 >
                   {matchingWorkOrders.map((wo) => (
                     <option key={wo.id} value={wo.id}>
@@ -818,7 +818,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 {(currentWorkOrder.status === 'Receive' || currentWorkOrder.status === 'Pending') && (
                   <Button
                     onClick={() => setRejectionModalOpen(true)}
-                    className="w-full sm:w-auto px-5 py-3 bg-white border border-line text-danger hover:bg-danger/10 font-extrabold rounded-xl transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger/40 focus-visible:ring-offset-2"
+                    className="w-full sm:w-auto px-5 py-3 bg-white border border-line text-danger hover:bg-danger/10 font-extrabold rounded-xl transition-all cursor-pointer active:scale-95 focus-visible:outline-none "
                   >
                     <span className="hidden sm:inline">Decline / Request Callback</span>
                     <span className="sm:hidden">Decline</span>
@@ -826,7 +826,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 )}
                 <Button
                   onClick={() => setApprovalModalOpen(true)}
-                  className="w-full sm:w-auto px-6 py-3 bg-success hover:bg-success/90 text-white font-extrabold rounded-xl shadow-xs transition-all active:scale-95 flex items-center justify-center space-x-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success/40 focus-visible:ring-offset-2"
+                  className="w-full sm:w-auto px-6 py-3 bg-success hover:bg-success/90 text-white font-extrabold rounded-xl shadow-xs transition-all active:scale-95 flex items-center justify-center space-x-2 cursor-pointer focus-visible:outline-none "
                 >
                   <ThumbsUp className="w-4 h-4 shrink-0" />
                   <span className="truncate hidden sm:inline">Approve Estimate & Authorize Repair</span>
@@ -926,7 +926,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 value={messageInput}
                 onChange={(e) => setMessageInput(e.target.value)}
                 placeholder="Type your message or question here..."
-                className="flex-1 bg-surface border border-line rounded-xl px-4 py-2.5 text-xs text-ink focus:outline-none focus:bg-white focus:border-brand transition-all"
+                className="flex-1 bg-surface border border-line rounded-xl px-4 py-2.5 text-xs text-ink focus:outline-none focus:bg-white transition-all"
               />
               <Button
                 type="submit"
@@ -986,7 +986,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   value={customerNameSig}
                   onChange={(e) => setCustomerNameSig(e.target.value)}
                   placeholder="Type your full name as signature"
-                  className="w-full bg-surface border border-line rounded-xl px-3 py-2 text-xs font-bold focus:bg-white focus:border-brand focus:outline-none"
+                  className="w-full bg-surface border border-line rounded-xl px-3 py-2 text-xs font-bold focus:bg-white focus:outline-none"
                 />
               </div>
 
@@ -1046,7 +1046,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 <select aria-label="Reason for Requesting Modification"
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
-                  className="w-full bg-surface border border-line rounded-xl px-3 py-2 text-xs font-semibold focus:bg-white focus:border-brand"
+                  className="w-full bg-surface border border-line rounded-xl px-3 py-2 text-xs font-semibold focus:bg-white "
                 >
                   <option value="Request Phone Call from Technician">Request Phone Call from Technician</option>
                   <option value="Price exceeds budget / Cancel repair">Price exceeds budget / Cancel repair</option>
@@ -1062,7 +1062,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   onChange={(e) => setRejectionNotes(e.target.value)}
                   placeholder="Tell us what you need or when you'd like us to call you back..."
                   rows={3}
-                  className="w-full bg-surface border border-line rounded-xl p-3 text-xs focus:bg-white focus:border-brand focus:outline-none"
+                  className="w-full bg-surface border border-line rounded-xl p-3 text-xs focus:bg-white focus:outline-none"
                 />
               </div>
             </div>

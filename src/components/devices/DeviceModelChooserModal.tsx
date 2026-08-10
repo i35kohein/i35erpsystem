@@ -109,7 +109,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                   onClick={() => { if (count > 0 || fam.key === 'All') setActiveFamilyTab(fam.key as any); }}
                   disabled={count === 0 && fam.key !== 'All'}
                   title={count === 0 && fam.key !== 'All' ? 'No models available yet' : undefined}
-                  className={`shrink-0 rounded-full border px-2.5 !h-7 !min-h-0 text-xs font-extrabold transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:bg-brand focus-visible:text-white focus-visible:border-brand ${
+                  className={`shrink-0 rounded-full border px-2.5 !h-7 !min-h-0 text-xs font-extrabold transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:bg-brand focus-visible:text-white ${
                     isActive
                       ? 'bg-brand text-white border-brand shadow-2xs'
                       : count === 0 && fam.key !== 'All'
@@ -131,7 +131,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
               placeholder="Type model name (e.g. 15 Pro, M2, Series 9)..."
               value={deviceSearchQuery}
               onChange={(e) => setDeviceSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-surface border border-line rounded-lg text-xs font-bold text-ink focus:outline-none focus:ring-2 focus:ring-brand"
+              className="w-full pl-9 pr-4 py-2 bg-surface border border-line rounded-lg text-xs font-bold text-ink focus:outline-none "
             />
             {deviceSearchQuery && (
               <Button

@@ -407,7 +407,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
               <select
                 value={targetStatus}
                 onChange={(e) => setTargetStatus(e.target.value as WorkOrderStatus)}
-                className="w-full bg-white border border-line rounded-xl px-3 py-1.5 text-xs font-bold text-ink focus:border-brand focus:outline-none"
+                className="w-full bg-white border border-line rounded-xl px-3 py-1.5 text-xs font-bold text-ink focus:outline-none"
               >
                 <option value="Receive">Receive (Intake & Inspection)</option>
                 <option value="In Progress">In Progress (Active Repair)</option>
@@ -458,7 +458,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
                 value={newLogAuthor}
                 onChange={(e) => setNewLogAuthor(e.target.value)}
                 placeholder="e.g. Elena Rostova"
-                className="w-full bg-white border border-line rounded-xl px-3 py-1.5 text-xs text-ink focus:border-brand focus:outline-none font-semibold"
+                className="w-full bg-white border border-line rounded-xl px-3 py-1.5 text-xs text-ink focus:outline-none font-semibold"
               />
             </div>
           </div>
@@ -470,7 +470,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
               value={newLogNote}
               onChange={(e) => setNewLogNote(e.target.value)}
               placeholder="e.g. Replaced display panel and completed 21-point touch & TrueTone calibration. Moving to QA testing."
-              className="w-full bg-white border border-line rounded-xl p-3 text-xs text-ink focus:border-brand focus:outline-none"
+              className="w-full bg-white border border-line rounded-xl p-3 text-xs text-ink focus:outline-none"
             />
           </div>
 
@@ -505,7 +505,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search transitions, notes, tech..."
-              className="w-full bg-white border border-line rounded-xl pl-8 pr-3 py-1.5 text-xs text-ink focus:border-brand focus:outline-none font-medium"
+              className="w-full bg-white border border-line rounded-xl pl-8 pr-3 py-1.5 text-xs text-ink focus:outline-none font-medium"
             />
           </div>
 

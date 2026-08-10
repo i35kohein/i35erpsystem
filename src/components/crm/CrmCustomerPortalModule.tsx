@@ -1,4 +1,4 @@
-const FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2';
+const FOCUS = 'focus-visible:outline-none ';
 
 import React, { useEffect, useState } from 'react';
 import {Users, 
@@ -503,7 +503,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                   value={newCustomerForm.name}
                   onChange={(e) => setNewCustomerForm({ ...newCustomerForm, name: e.target.value })}
                   placeholder="e.g. U Kyaw Zin"
-                  className="w-full bg-surface border border-line rounded-xl p-2 text-xs font-bold text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+                  className="w-full bg-surface border border-line rounded-xl p-2 text-xs font-bold text-ink outline-none "
                 />
               </div>
 
@@ -516,7 +516,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                     value={newCustomerForm.phone}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, phone: e.target.value })}
                     placeholder="09 123 456 789"
-                    className="w-full bg-surface border border-line rounded-xl p-2 text-xs font-mono font-bold text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+                    className="w-full bg-surface border border-line rounded-xl p-2 text-xs font-mono font-bold text-ink outline-none "
                   />
                 </div>
                 <div>
@@ -524,7 +524,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                   <select aria-label="Account Type" 
                     value={newCustomerForm.type}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, type: e.target.value as CustomerType })}
-                    className="w-full bg-surface border border-line rounded-xl p-2 text-xs font-bold text-ink outline-none cursor-pointer focus:border-brand focus:ring-2 focus:ring-brand/20"
+                    className="w-full bg-surface border border-line rounded-xl p-2 text-xs font-bold text-ink outline-none cursor-pointer "
                   >
                     <option value="Retail">Retail</option>
                     <option value="B2B Corporate">B2B Corporate</option>
@@ -540,7 +540,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                   value={newCustomerForm.email}
                   onChange={(e) => setNewCustomerForm({ ...newCustomerForm, email: e.target.value })}
                   placeholder="customer@example.com"
-                  className="w-full bg-surface border border-line rounded-xl p-2 text-xs text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+                  className="w-full bg-surface border border-line rounded-xl p-2 text-xs text-ink outline-none "
                 />
               </div>
 
@@ -552,7 +552,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                     value={newCustomerForm.company}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, company: e.target.value })}
                     placeholder="e.g. i35 Apple Service"
-                    className="w-full bg-surface border border-line rounded-xl p-2 text-xs text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+                    className="w-full bg-surface border border-line rounded-xl p-2 text-xs text-ink outline-none "
                   />
                 </div>
                 <div>
@@ -563,7 +563,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                     max={100}
                     value={newCustomerForm.discountPercentage}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, discountPercentage: Number(e.target.value) })}
-                    className="w-full bg-surface border border-line rounded-xl p-2 text-xs font-mono font-bold text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+                    className="w-full bg-surface border border-line rounded-xl p-2 text-xs font-mono font-bold text-ink outline-none "
                   />
                 </div>
               </div>
@@ -575,7 +575,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                   value={newCustomerForm.notes}
                   onChange={(e) => setNewCustomerForm({ ...newCustomerForm, notes: e.target.value })}
                   placeholder="VIP customer, credit terms, preferred tech…"
-                  className="w-full bg-surface border border-line rounded-xl p-2 text-xs text-ink outline-none resize-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+                  className="w-full bg-surface border border-line rounded-xl p-2 text-xs text-ink outline-none resize-none "
                 />
               </div>
             </div>

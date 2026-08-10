@@ -784,8 +784,8 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 autoComplete="off"
                 className={`w-full bg-white border rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none transition-all ${
                   fieldErrors['field-customer-phone']
-                    ? 'border-danger focus:border-danger focus:ring-2 focus:ring-danger/20'
-                    : 'border-line focus:border-brand focus:ring-2 focus:ring-brand/20'
+                    ? 'border-danger '
+                    : 'border-line '
                 }`}
               />
               {/* Previously used customer suggestions */}
@@ -838,8 +838,8 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 placeholder={matchedCustomer ? '' : 'e.g. Mg Mg (Full Name)'}
                 className={`w-full bg-white border rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none transition-all ${
                   fieldErrors['field-customer-name']
-                    ? 'border-danger focus:border-danger focus:ring-2 focus:ring-danger/20'
-                    : 'border-line focus:border-brand focus:ring-2 focus:ring-brand/20'
+                    ? 'border-danger '
+                    : 'border-line '
                 }`}
               />
               {fieldErrors['field-customer-name'] && (
@@ -857,7 +857,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                   value={customerTown}
                   onChange={(e) => setCustomerTown(e.target.value)}
                   placeholder="e.g. Yangon"
-                  className="w-full bg-white border border-line rounded-xl pl-9 pr-3 py-2.5 text-sm text-ink focus:border-brand focus:ring-2 focus:ring-brand/20 focus:outline-none font-semibold transition-all"
+                  className="w-full bg-white border border-line rounded-xl pl-9 pr-3 py-2.5 text-sm text-ink focus:outline-none font-semibold transition-all"
                 />
               </div>
             </div>
@@ -897,7 +897,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             }
           }}
           aria-label={deviceModel ? `Selected model: ${deviceModel}. Change device model` : 'Choose Apple hardware device model'}
-          className={`w-full text-left p-3 bg-surface/80 rounded-xl border border-line space-y-2.5 cursor-pointer hover:border-brand/50 hover:bg-surface transition-all group scroll-mt-40 flex flex-col h-auto items-stretch justify-start focus-visible:ring-2 focus-visible:ring-brand/60 focus-visible:border-brand`}
+          className={`w-full text-left p-3 bg-surface/80 rounded-xl border border-line space-y-2.5 cursor-pointer hover:border-brand/50 hover:bg-surface transition-all group scroll-mt-40 flex flex-col h-auto items-stretch justify-start `}
         >
           <div className="flex items-center justify-between border-b border-line pb-2">
             <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
@@ -1034,7 +1034,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 value={serialNumber}
                 onChange={(e) => setSerialNumber(e.target.value.toUpperCase())}
                 placeholder="e.g. C02M2MAX2023 or F2LXK09PN6T"
-                className="w-full bg-white border border-line rounded-xl px-3 py-2.5 text-sm font-mono text-ink focus:border-brand focus:ring-2 focus:ring-brand/20 focus:outline-none transition-all"
+                className="w-full bg-white border border-line rounded-xl px-3 py-2.5 text-sm font-mono text-ink focus:outline-none transition-all"
               />
             </div>
 
@@ -1054,10 +1054,10 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 placeholder="e.g. 358921102938102"
                 className={`w-full bg-white border rounded-xl px-3 py-2.5 text-sm font-mono text-ink focus:outline-none transition-all ${
                   imei.length > 0 && imei.length !== 15
-                    ? 'border-warning/30 focus:border-amber-400 focus:ring-2 focus:ring-amber-300/30'
+                    ? 'border-warning/30 '
                     : imei.length === 15
-                    ? 'border-success/60 focus:border-success focus:ring-2 focus:ring-success/20'
-                    : 'border-line focus:border-brand focus:ring-2 focus:ring-brand/20'
+                    ? 'border-success/60 '
+                    : 'border-line '
                 }`}
               />
               {fieldErrors['field-imei'] && (
@@ -1073,7 +1073,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 value={passcode}
                 onChange={(e) => setPasscode(e.target.value)}
                 placeholder="Passcode / PIN"
-                className="w-full bg-white border border-line rounded-xl px-3 py-2.5 text-sm font-mono text-ink focus:border-brand focus:ring-2 focus:ring-brand/20 focus:outline-none transition-all"
+                className="w-full bg-white border border-line rounded-xl px-3 py-2.5 text-sm font-mono text-ink focus:outline-none transition-all"
               />
             </div>
           </div>
@@ -1165,7 +1165,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                             max="100"
                             value={repair.discountPercent}
                             onChange={(e) => updateRepairDiscount(repair.id, Number(e.target.value))}
-                            className="w-16 bg-surface border border-line-strong rounded-lg px-2 py-1.5 font-bold text-center text-ink focus:border-brand focus:ring-1 focus:ring-brand focus:outline-none transition-all"
+                            className="w-16 bg-surface border border-line-strong rounded-lg px-2 py-1.5 font-bold text-center text-ink focus:outline-none transition-all"
                           />
                           <span className="absolute inset-y-0 right-2 flex items-center text-muted text-xs font-bold pointer-events-none">%</span>
                         </div>
@@ -1232,7 +1232,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             value={extraReportedNotes}
             onChange={(e) => setExtraReportedNotes(e.target.value)}
             placeholder="Enter customer symptoms or intake notes"
-            className="w-full bg-white border border-line-strong rounded-xl p-3.5 text-sm text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/25 transition-all"
+            className="w-full bg-white border border-line-strong rounded-xl p-3.5 text-sm text-ink focus:outline-none transition-all"
           />
         </div>
 
@@ -1468,7 +1468,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                     }}
                     placeholder="Type a note..."
                     autoFocus
-                    className="!h-8 !min-h-8 w-full rounded-lg bg-surface border border-line px-2.5 text-xs text-ink focus:bg-white focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/20"
+                    className="!h-8 !min-h-8 w-full rounded-lg bg-surface border border-line px-2.5 text-xs text-ink focus:bg-white focus:outline-none "
                   />
                   <Button
                     type="button"
@@ -1776,7 +1776,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                   value={priceSearchQuery}
                   onChange={(e) => setPriceSearchQuery(e.target.value)}
                   placeholder={`Search repairs for ${matchedModelName} (e.g. Battery, Display, Face ID)...`}
-                  className="w-full bg-surface border border-line rounded-xl pl-9 pr-3 py-2.5 text-sm font-medium focus:bg-white focus:border-brand focus:outline-none transition-all"
+                  className="w-full bg-surface border border-line rounded-xl pl-9 pr-3 py-2.5 text-sm font-medium focus:bg-white focus:outline-none transition-all"
                 />
               </div>
 

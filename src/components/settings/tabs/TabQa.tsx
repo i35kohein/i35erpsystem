@@ -23,7 +23,7 @@ const QaTab: React.FC<QaTabProps> = ({ formData, setFormData }) => {
                 type="checkbox"
                 checked={formData.mandatoryQaChecklist}
                 onChange={(e) => setFormData({ ...formData, mandatoryQaChecklist: e.target.checked })}
-                className="w-4 h-4 text-brand rounded focus:ring-0 cursor-pointer"
+                className="w-4 h-4 text-brand rounded cursor-pointer"
               />
               <div>
                 <span className="font-extrabold text-ink text-xs block">Mandatory QA Checklist Verification</span>
@@ -36,7 +36,7 @@ const QaTab: React.FC<QaTabProps> = ({ formData, setFormData }) => {
                 type="checkbox"
                 checked={formData.requireMicroSolderingLog}
                 onChange={(e) => setFormData({ ...formData, requireMicroSolderingLog: e.target.checked })}
-                className="w-4 h-4 text-brand rounded focus:ring-0 cursor-pointer"
+                className="w-4 h-4 text-brand rounded cursor-pointer"
               />
               <div>
                 <span className="font-extrabold text-ink text-xs block">Require Diode/Thermal Log for Level 3 Board Repairs</span>
@@ -49,7 +49,7 @@ const QaTab: React.FC<QaTabProps> = ({ formData, setFormData }) => {
                 type="checkbox"
                 checked={formData.requireQaPhotoBeforeConfirm}
                 onChange={(e) => setFormData({ ...formData, requireQaPhotoBeforeConfirm: e.target.checked })}
-                className="w-4 h-4 text-brand rounded focus:ring-0 cursor-pointer"
+                className="w-4 h-4 text-brand rounded cursor-pointer"
               />
               <div>
                 <span className="font-extrabold text-ink text-xs block">Require Before/After Photo to Confirm QA</span>

@@ -89,7 +89,7 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
                     type="checkbox"
                     checked={formData.autoPromptNotificationModal ?? true}
                     onChange={(e) => setFormData({ ...formData, autoPromptNotificationModal: e.target.checked })}
-                    className="w-4 h-4 text-brand rounded focus:ring-0 cursor-pointer"
+                    className="w-4 h-4 text-brand rounded cursor-pointer"
                   />
                   <div>
                     <span className="font-extrabold text-ink text-xs block">Auto-Prompt Notification Window on Status Change</span>
@@ -113,7 +113,7 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
                     placeholder="e.g. 7890123456:AAFx..."
                     value={formData.telegramBotToken || ''}
                     onChange={(e) => setFormData({ ...formData, telegramBotToken: e.target.value })}
-                    className="w-full bg-white border border-line-strong rounded-xl px-3 py-2 text-xs font-mono text-ink focus:border-brand focus:ring-1 focus:ring-brand"
+                    className="w-full bg-white border border-line-strong rounded-xl px-3 py-2 text-xs font-mono text-ink "
                   />
                 </div>
                 <div>
@@ -123,7 +123,7 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
                     placeholder="e.g. @applerepair_updates or -100123456789"
                     value={formData.telegramChatId || ''}
                     onChange={(e) => setFormData({ ...formData, telegramChatId: e.target.value })}
-                    className="w-full bg-white border border-line-strong rounded-xl px-3 py-2 text-xs font-mono text-ink focus:border-brand focus:ring-1 focus:ring-brand"
+                    className="w-full bg-white border border-line-strong rounded-xl px-3 py-2 text-xs font-mono text-ink "
                   />
                 </div>
               </div>
@@ -187,7 +187,7 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
                             type="text"
                             value={tmpl.title}
                             onChange={(e) => handleUpdateTemplateField(tmpl.id, 'title', e.target.value)}
-                            className="font-extrabold text-sm text-ink bg-transparent border-b border-transparent hover:border-line-strong focus:border-brand focus:outline-none px-1"
+                            className="font-extrabold text-sm text-ink bg-transparent border-b border-transparent hover:border-line-strong focus:outline-none px-1"
                           />
                           {tmpl.description && (
                             <p className="text-xs text-muted px-1">{tmpl.description}</p>
@@ -246,7 +246,7 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
                         rows={3}
                         value={tmpl.templateText}
                         onChange={(e) => handleUpdateTemplateField(tmpl.id, 'templateText', e.target.value)}
-                        className="w-full bg-surface border border-line rounded-xl p-3 text-xs text-ink font-sans leading-relaxed focus:bg-white focus:border-brand focus:ring-2 focus:ring-brand/20 resize-none"
+                        className="w-full bg-surface border border-line rounded-xl p-3 text-xs text-ink font-sans leading-relaxed focus:bg-white resize-none"
                       />
                     </div>
 

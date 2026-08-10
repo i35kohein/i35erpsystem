@@ -1853,7 +1853,7 @@ export default function App() {
                       ? "Search Ticket #, Customer, Model, IMEI..."
                       : `Search ${currentTab.title}...`
                   }
-                  className="w-full h-10 bg-surface text-xs text-ink placeholder-muted pl-7 pr-5 rounded-xl border border-line focus:bg-white focus:outline-none focus:border-brand transition-all shadow-2xs"
+                  className="w-full h-10 bg-surface text-xs text-ink placeholder-muted pl-7 pr-5 rounded-xl border border-line focus:bg-white focus:outline-none transition-all shadow-2xs"
                 />
                 {searchQuery && (
                   <Button
@@ -1981,7 +1981,7 @@ export default function App() {
                     }}
                     placeholder="Scan barcode or search part..."
                     autoComplete="off"
-                    className="h-10 w-32 sm:w-40 xl:w-56 rounded-lg border border-line bg-white pl-8 pr-2 font-mono text-xs text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
+                    className="h-10 w-32 sm:w-40 xl:w-56 rounded-lg border border-line bg-white pl-8 pr-2 font-mono text-xs text-ink outline-none transition "
                   />
                 </div>
               </div>

@@ -373,7 +373,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
                   type="date"
                   value={tempStartDate || ''}
                   onChange={(e) => setTempStartDate(e.target.value)}
-                  className="w-full px-2 py-1 bg-surface border border-line rounded-lg text-ink focus:outline-none focus:border-brand"
+                  className="w-full px-2 py-1 bg-surface border border-line rounded-lg text-ink focus:outline-none "
                 />
               </div>
               <div>
@@ -382,7 +382,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
                   type="date"
                   value={tempEndDate || ''}
                   onChange={(e) => setTempEndDate(e.target.value)}
-                  className="w-full px-2 py-1 bg-surface border border-line rounded-lg text-ink focus:outline-none focus:border-brand"
+                  className="w-full px-2 py-1 bg-surface border border-line rounded-lg text-ink focus:outline-none "
                 />
               </div>
             </div>

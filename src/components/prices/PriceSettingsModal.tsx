@@ -591,7 +591,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                           type="text"
                           value={renameModelInput}
                           onChange={(e) => setRenameModelInput(e.target.value)}
-                          className="flex-1 px-3 py-2 bg-white border border-brand rounded-lg text-xs font-bold text-ink focus:outline-none focus:ring-2 focus:ring-brand"
+                          className="flex-1 px-3 py-2 bg-white border border-brand rounded-lg text-xs font-bold text-ink focus:outline-none "
                           placeholder="New Model Name"
                         />
                         <Button
@@ -615,7 +615,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                       <select
                         value={selectedModel}
                         onChange={(e) => setSelectedModel(e.target.value)}
-                        className="w-full px-3 py-2 bg-white border border-line rounded-xl text-xs font-extrabold text-ink focus:outline-none focus:ring-2 focus:ring-brand"
+                        className="w-full px-3 py-2 bg-white border border-line rounded-xl text-xs font-extrabold text-ink focus:outline-none "
                       >
                         {catalog.map((m) => (
                           <option key={m.model} value={m.model}>
@@ -644,7 +644,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                         placeholder="e.g. iPhone 16 Pro, iPad Air 6"
                         value={newModelInput}
                         onChange={(e) => setNewModelInput(e.target.value)}
-                        className="w-full px-3 py-1.5 bg-white border border-line rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-brand text-ink"
+                        className="w-full px-3 py-1.5 bg-white border border-line rounded-lg text-xs font-medium focus:outline-none text-ink"
                       />
                     </div>
 
@@ -653,7 +653,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                       <select
                         value={cloneModelSource}
                         onChange={(e) => setCloneModelSource(e.target.value)}
-                        className="w-full px-3 py-1.5 bg-white border border-line rounded-lg text-xs font-medium text-ink focus:outline-none focus:ring-2 focus:ring-brand"
+                        className="w-full px-3 py-1.5 bg-white border border-line rounded-lg text-xs font-medium text-ink focus:outline-none "
                       >
                         <option value="">Start Empty (N/A)</option>
                         {catalog.map((m) => (
@@ -724,7 +724,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                               placeholder="e.g. 3 Month, 12 Month"
                               value={currentWarranty}
                               onChange={(e) => handleWarrantyChange(cat.key, e.target.value)}
-                              className="w-full px-3 py-1.5 bg-surface border border-line focus:bg-white focus:border-brand rounded-lg text-xs font-semibold text-ink transition-all"
+                              className="w-full px-3 py-1.5 bg-surface border border-line focus:bg-white rounded-lg text-xs font-semibold text-ink transition-all"
                             />
                           </td>
                         </tr>
@@ -759,7 +759,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                       placeholder="e.g. Camera_Lens_Glass"
                       value={newCategoryKey}
                       onChange={(e) => setNewCategoryKey(e.target.value)}
-                      className="w-full px-3 py-1.5 bg-white border border-line rounded-lg text-xs font-mono font-medium focus:outline-none focus:ring-2 focus:ring-brand text-ink"
+                      className="w-full px-3 py-1.5 bg-white border border-line rounded-lg text-xs font-mono font-medium focus:outline-none text-ink"
                     />
                   </div>
                   <div>
@@ -769,7 +769,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                       placeholder="e.g. Rear Camera Lens Glass"
                       value={newCategoryLabel}
                       onChange={(e) => setNewCategoryLabel(e.target.value)}
-                      className="w-full px-3 py-1.5 bg-white border border-line rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-brand text-ink"
+                      className="w-full px-3 py-1.5 bg-white border border-line rounded-lg text-xs font-medium focus:outline-none text-ink"
                     />
                   </div>
                   <div>
@@ -777,7 +777,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                     <select
                       value={newCategoryGroup}
                       onChange={(e) => setNewCategoryGroup(e.target.value as any)}
-                      className="w-full px-3 py-1.5 bg-white border border-line rounded-lg text-xs font-medium text-ink focus:outline-none focus:ring-2 focus:ring-brand"
+                      className="w-full px-3 py-1.5 bg-white border border-line rounded-lg text-xs font-medium text-ink focus:outline-none "
                     >
                       {['Battery', 'Display', 'Housing', 'Charging', 'Audio', 'Logic Board', 'Network', 'Sensors & Keys'].map((g) => (
                         <option key={g} value={g}>{g}</option>
@@ -930,7 +930,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                         placeholder="e.g. Google Pixel Series, Samsung Galaxy"
                         value={newFolderName}
                         onChange={(e) => setNewFolderName(e.target.value)}
-                        className="w-full px-3 py-1.5 bg-white border border-line rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-brand text-ink"
+                        className="w-full px-3 py-1.5 bg-white border border-line rounded-lg text-xs font-medium focus:outline-none text-ink"
                       />
                     </div>
                     <div>
@@ -938,7 +938,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                       <select
                         value={newFolderFamily}
                         onChange={(e) => setNewFolderFamily(e.target.value as any)}
-                        className="w-full px-3 py-1.5 bg-white border border-line rounded-lg text-xs font-medium text-ink focus:outline-none focus:ring-2 focus:ring-brand"
+                        className="w-full px-3 py-1.5 bg-white border border-line rounded-lg text-xs font-medium text-ink focus:outline-none "
                       >
                         {['iPhone', 'iPad', 'Apple Watch', 'Mac', 'Other'].map((f) => (
                           <option key={f} value={f}>{f}</option>
@@ -1086,7 +1086,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                     <select
                       value={globalAdjFolder}
                       onChange={(e) => setGlobalAdjFolder(e.target.value)}
-                      className="w-full px-3 py-2 bg-surface border border-line rounded-xl text-xs font-bold text-ink focus:outline-none focus:ring-2 focus:ring-brand"
+                      className="w-full px-3 py-2 bg-surface border border-line rounded-xl text-xs font-bold text-ink focus:outline-none "
                     >
                       <option value="ALL">All Device Folders ({catalog.length} models)</option>
                       {folders.map((f) => (
@@ -1100,7 +1100,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                     <select
                       value={globalAdjCategory}
                       onChange={(e) => setGlobalAdjCategory(e.target.value)}
-                      className="w-full px-3 py-2 bg-surface border border-line rounded-xl text-xs font-bold text-ink focus:outline-none focus:ring-2 focus:ring-brand"
+                      className="w-full px-3 py-2 bg-surface border border-line rounded-xl text-xs font-bold text-ink focus:outline-none "
                     >
                       <option value="ALL">All Service Categories ({categories.length} categories)</option>
                       {categories.map((c) => (
@@ -1116,7 +1116,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                       placeholder="e.g. 10 for +10% or -5 for -5%"
                       value={globalAdjPercent || ''}
                       onChange={(e) => setGlobalAdjPercent(parseFloat(e.target.value) || 0)}
-                      className="w-full px-3 py-2 bg-surface border border-line rounded-xl text-xs font-mono font-bold text-ink focus:outline-none focus:ring-2 focus:ring-brand"
+                      className="w-full px-3 py-2 bg-surface border border-line rounded-xl text-xs font-mono font-bold text-ink focus:outline-none "
                     />
                   </div>
 
@@ -1127,7 +1127,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                       placeholder="e.g. 5000 or -2000"
                       value={globalAdjFlat || ''}
                       onChange={(e) => setGlobalAdjFlat(parseFloat(e.target.value) || 0)}
-                      className="w-full px-3 py-2 bg-surface border border-line rounded-xl text-xs font-mono font-bold text-ink focus:outline-none focus:ring-2 focus:ring-brand"
+                      className="w-full px-3 py-2 bg-surface border border-line rounded-xl text-xs font-mono font-bold text-ink focus:outline-none "
                     />
                   </div>
                 </div>
@@ -1229,7 +1229,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                     type="text"
                     value={currencySymbol}
                     onChange={(e) => setCurrencySymbol(e.target.value)}
-                    className="w-full max-w-xs px-3 py-2 border border-line bg-white rounded-lg text-xs font-bold text-ink focus:outline-none focus:ring-2 focus:ring-brand"
+                    className="w-full max-w-xs px-3 py-2 border border-line bg-white rounded-lg text-xs font-bold text-ink focus:outline-none "
                     placeholder="Custom symbol e.g. RM, SGD, AUD"
                   />
                 </div>

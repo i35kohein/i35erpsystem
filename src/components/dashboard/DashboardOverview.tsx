@@ -1458,7 +1458,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
                   value={warrantySearchQuery}
                   onChange={(e) => setWarrantySearchQuery(e.target.value)}
                   placeholder="Search ticket #, customer, device, serial..."
-                  className="w-full bg-surface text-xs text-ink placeholder-muted pl-8 pr-8 py-1.5 rounded-xl border border-line focus:bg-white focus:outline-none focus:border-brand transition-all"
+                  className="w-full bg-surface text-xs text-ink placeholder-muted pl-8 pr-8 py-1.5 rounded-xl border border-line focus:bg-white focus:outline-none transition-all"
                 />
                 {warrantySearchQuery && (
                   <Button

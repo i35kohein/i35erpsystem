@@ -273,7 +273,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search ticket, customer, device..."
-                className="pl-8 pr-3 h-10 bg-surface border border-line rounded-xl text-xs focus:outline-none focus:border-brand focus:bg-white transition-all w-full md:w-64"
+                className="pl-8 pr-3 h-10 bg-surface border border-line rounded-xl text-xs focus:outline-none focus:bg-white transition-all w-full md:w-64"
               />
             </div>
           </div>
@@ -660,7 +660,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                   value={formAuthor}
                   onChange={(e) => setFormAuthor(e.target.value)}
                   placeholder="e.g. Service Advisor Alex"
-                  className="w-full bg-surface border border-line rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand focus:bg-white transition-all"
+                  className="w-full bg-surface border border-line rounded-xl px-3 py-2 text-xs focus:outline-none focus:bg-white transition-all"
                 />
               </div>
 
@@ -689,7 +689,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                   value={formNotes}
                   onChange={(e) => setFormNotes(e.target.value)}
                   placeholder="Enter details from customer follow-up call..."
-                  className="w-full bg-surface border border-line rounded-xl p-3 text-xs focus:outline-none focus:border-brand focus:bg-white transition-all resize-none"
+                  className="w-full bg-surface border border-line rounded-xl p-3 text-xs focus:outline-none focus:bg-white transition-all resize-none"
                 />
               </div>
 
@@ -700,7 +700,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                   type="date"
                   value={formNextDate}
                   onChange={(e) => setFormNextDate(e.target.value)}
-                  className="w-full bg-surface border border-line rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand focus:bg-white transition-all"
+                  className="w-full bg-surface border border-line rounded-xl px-3 py-2 text-xs focus:outline-none focus:bg-white transition-all"
                 />
               </div>
             </div>

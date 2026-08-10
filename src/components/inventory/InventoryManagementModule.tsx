@@ -1388,7 +1388,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                                   <select
                                     value={selectedModelFilter}
                                     onChange={(e) => setSelectedModelFilter(e.target.value)}
-                                    className="w-full rounded-lg border border-line bg-white px-2 py-1.5 text-xs font-semibold text-ink outline-none focus:border-brand"
+                                    className="w-full rounded-lg border border-line bg-white px-2 py-1.5 text-xs font-semibold text-ink outline-none "
                                   >
                                     {modelFilterOptions.map((opt) => (
                                       <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -1400,7 +1400,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                                   <select
                                     value={selectedCategory}
                                     onChange={(e) => setSelectedCategory(e.target.value)}
-                                    className="w-full rounded-lg border border-line bg-white px-2 py-1.5 text-xs font-semibold text-ink outline-none focus:border-brand"
+                                    className="w-full rounded-lg border border-line bg-white px-2 py-1.5 text-xs font-semibold text-ink outline-none "
                                   >
                                     {categoryFilterOptions.map((opt) => (
                                       <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -1428,7 +1428,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         onChange={setSelectedQuality}
                         options={tierFilterOptions}
                         size="sm"
-                        buttonClassName="uppercase font-mono text-xs text-muted hover:text-brand transition-colors gap-1 bg-transparent border-0 p-0 rounded-none min-h-0 min-w-0 h-auto hover:bg-transparent focus:border-transparent focus:ring-0"
+                        buttonClassName="uppercase font-mono text-xs text-muted hover:text-brand transition-colors gap-1 bg-transparent border-0 p-0 rounded-none min-h-0 min-w-0 h-auto hover:bg-transparent "
                         menuAlign="group-left"
                       />
                     </th>
@@ -1966,7 +1966,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 type="button"
                 onClick={() => setIsDeviceModelChooserOpen(true)}
                 aria-haspopup="dialog"
-                className="flex h-24 w-full items-center justify-between rounded-xl border border-brand/30 bg-brand-soft/60 px-4 text-left transition-colors hover:border-brand hover:bg-brand-soft focus:outline-none focus:ring-2 focus:ring-brand/20"
+                className="flex h-24 w-full items-center justify-between rounded-xl border border-brand/30 bg-brand-soft/60 px-4 text-left transition-colors hover:border-brand hover:bg-brand-soft focus:outline-none "
                 title="Choose a model from the Price List"
               >
                 <span className="flex min-w-0 items-center gap-2">
@@ -2080,7 +2080,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   value={newPartData.name || ''}
                   onChange={(e) => setNewPartData({ ...newPartData, name: e.target.value })}
                   placeholder="Select model, category, and quality tier to generate"
-                  className="w-full rounded-lg border border-line bg-surface p-2 text-xs font-bold text-ink focus:border-brand focus:bg-white focus:outline-none"
+                  className="w-full rounded-lg border border-line bg-surface p-2 text-xs font-bold text-ink focus:bg-white focus:outline-none"
                 />
                 <p className="mt-1 text-xs text-muted">Model → Category → Quality Tier</p>
               </div>
@@ -2102,7 +2102,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   value={newPartData.sku || ''}
                   onChange={(e) => setNewPartData({ ...newPartData, sku: e.target.value })}
                   placeholder="Generated after specifications are selected"
-                  className="w-full rounded-lg border border-line bg-surface p-2 text-xs font-mono text-ink focus:border-brand focus:bg-white focus:outline-none"
+                  className="w-full rounded-lg border border-line bg-surface p-2 text-xs font-mono text-ink focus:bg-white focus:outline-none"
                 />
               </div>
 
@@ -2143,7 +2143,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   type="number"
                   value={newPartData.costPrice || ''}
                   onChange={(e) => setNewPartData({ ...newPartData, costPrice: Number(e.target.value) })}
-                  className="w-full rounded-lg border border-line bg-surface p-2 text-xs font-mono font-bold text-ink focus:border-brand focus:bg-white focus:outline-none"
+                  className="w-full rounded-lg border border-line bg-surface p-2 text-xs font-mono font-bold text-ink focus:bg-white focus:outline-none"
                 />
               </div>
 
@@ -2153,7 +2153,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   type="number"
                   value={newPartData.sellingPrice || ''}
                   onChange={(e) => setNewPartData({ ...newPartData, sellingPrice: Number(e.target.value) })}
-                  className="w-full rounded-lg border border-line bg-surface p-2 text-xs font-mono font-bold text-success-deep focus:border-brand focus:bg-white focus:outline-none"
+                  className="w-full rounded-lg border border-line bg-surface p-2 text-xs font-mono font-bold text-success-deep focus:bg-white focus:outline-none"
                 />
               </div>
 
@@ -2163,7 +2163,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   type="number"
                   value={newPartData.quantityInStock || ''}
                   onChange={(e) => setNewPartData({ ...newPartData, quantityInStock: Number(e.target.value) })}
-                  className="w-full rounded-lg border border-line bg-surface p-2 text-xs font-mono text-ink focus:border-brand focus:bg-white focus:outline-none"
+                  className="w-full rounded-lg border border-line bg-surface p-2 text-xs font-mono text-ink focus:bg-white focus:outline-none"
                 />
               </div>
 
@@ -2184,7 +2184,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       setIsLocationBinMenuOpen(true);
                     }}
                     placeholder="Choose saved bin or type a new bin"
-                    className="w-full rounded-lg border border-line bg-surface p-2 pr-8 text-xs font-mono text-ink focus:border-brand focus:bg-white focus:outline-none"
+                    className="w-full rounded-lg border border-line bg-surface p-2 pr-8 text-xs font-mono text-ink focus:bg-white focus:outline-none"
                   />
                   <Button
                     type="button"
@@ -2412,7 +2412,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       setIsEditLocationBinMenuOpen(true);
                     }}
                     placeholder="Choose saved bin or type a new bin"
-                    className="w-full bg-surface border border-line rounded-xl p-2.5 pr-9 text-xs font-mono text-ink focus:border-brand focus:bg-white focus:outline-none"
+                    className="w-full bg-surface border border-line rounded-xl p-2.5 pr-9 text-xs font-mono text-ink focus:bg-white focus:outline-none"
                   />
                   <Button
                     type="button"
@@ -2563,7 +2563,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       supplierName: selectedSup?.name || e.target.value,
                     });
                   }}
-                  className="w-full bg-surface border border-line rounded-xl p-2.5 text-xs font-bold text-ink focus:bg-white focus:border-brand focus:outline-none"
+                  className="w-full bg-surface border border-line rounded-xl p-2.5 text-xs font-bold text-ink focus:bg-white focus:outline-none"
                 >
                   {suppliers.map((s) => (
                     <option key={s.id} value={s.id}>

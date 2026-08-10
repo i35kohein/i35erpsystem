@@ -446,7 +446,7 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
               {/* Confirm Action */}
               <Button
                 onClick={handleConfirmResult}
-                className="w-full max-w-md mx-auto py-3 bg-success hover:bg-success-deep text-white font-black text-xs rounded-xl shadow-sm transition-all flex items-center justify-center space-x-2 cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success/40 focus-visible:ring-offset-2"
+                className="w-full max-w-md mx-auto py-3 bg-success hover:bg-success-deep text-white font-black text-xs rounded-xl shadow-sm transition-all flex items-center justify-center space-x-2 cursor-pointer active:scale-95 focus-visible:outline-none "
               >
                 <span className="truncate">Apply Code to Intake ({scannedResult})</span>
                 <ArrowRight className="w-4 h-4 shrink-0" />

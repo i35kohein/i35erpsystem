@@ -642,7 +642,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                       unitCost: (selPart?.costPrice ?? Number(newRmaData.unitCost)) || 0,
                     });
                   }}
-                  className="w-full bg-surface border border-line rounded-lg p-2 text-ink focus:border-brand focus:ring-2 focus:ring-brand/20"
+                  className="w-full bg-surface border border-line rounded-lg p-2 text-ink "
                 >
                   {parts.map((p) => (
                     <option key={p.id} value={p.id}>{p.name} ({p.qualityTier}) - {p.costPrice.toLocaleString()} {currency}</option>
@@ -655,7 +655,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                 <select
                   value={newRmaData.supplierId}
                   onChange={(e) => setNewRmaData({ ...newRmaData, supplierId: e.target.value })}
-                  className="w-full bg-surface border border-line rounded-lg p-2 text-ink focus:border-brand focus:ring-2 focus:ring-brand/20"
+                  className="w-full bg-surface border border-line rounded-lg p-2 text-ink "
                 >
                   {suppliers.map((s) => (
                     <option key={s.id} value={s.id}>{s.name}</option>
@@ -671,7 +671,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                     min={1}
                     value={newRmaData.quantity ?? 1}
                     onChange={(e) => setNewRmaData({ ...newRmaData, quantity: Number(e.target.value) || 1 })}
-                    className="w-full bg-surface border border-line rounded-lg p-2 text-ink font-mono focus:border-brand focus:ring-2 focus:ring-brand/20"
+                    className="w-full bg-surface border border-line rounded-lg p-2 text-ink font-mono "
                   />
                 </div>
                 <div>
@@ -681,7 +681,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                     min={0}
                     value={newRmaData.unitCost ?? 0}
                     onChange={(e) => setNewRmaData({ ...newRmaData, unitCost: Number(e.target.value) || 0 })}
-                    className="w-full bg-surface border border-line rounded-lg p-2 text-ink font-mono focus:border-brand focus:ring-2 focus:ring-brand/20"
+                    className="w-full bg-surface border border-line rounded-lg p-2 text-ink font-mono "
                   />
                 </div>
               </div>
@@ -693,7 +693,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                   value={newRmaData.reason || ''}
                   onChange={(e) => setNewRmaData({ ...newRmaData, reason: e.target.value })}
                   placeholder="e.g. Screen lines, battery non-genuine warning loop..."
-                  className="w-full bg-surface border border-line rounded-lg p-2 text-ink focus:border-brand focus:ring-2 focus:ring-brand/20"
+                  className="w-full bg-surface border border-line rounded-lg p-2 text-ink "
                 />
               </div>
 
@@ -704,7 +704,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                   value={newRmaData.trackingNumber || ''}
                   onChange={(e) => setNewRmaData({ ...newRmaData, trackingNumber: e.target.value })}
                   placeholder="e.g. 1Z9999990199887766"
-                  className="w-full bg-surface border border-line rounded-lg p-2 text-ink font-mono focus:border-brand focus:ring-2 focus:ring-brand/20"
+                  className="w-full bg-surface border border-line rounded-lg p-2 text-ink font-mono "
                 />
               </div>
             </div>
@@ -939,7 +939,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                 <select
                   value={poSupplierId}
                   onChange={(e) => setPoSupplierId(e.target.value)}
-                  className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm text-ink outline-none focus:border-brand"
+                  className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm text-ink outline-none "
                 >
                   <option value="">Choose supplier…</option>
                   {suppliers.map((s) => (
@@ -974,7 +974,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                             )
                           );
                         }}
-                        className="min-w-0 flex-1 rounded-lg border border-line bg-white px-2 py-1.5 text-xs text-ink outline-none focus:border-brand"
+                        className="min-w-0 flex-1 rounded-lg border border-line bg-white px-2 py-1.5 text-xs text-ink outline-none "
                       >
                         <option value="">Part…</option>
                         {parts.map((p) => (
@@ -986,7 +986,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                         min={1}
                         value={item.quantity}
                         onChange={(e) => setPoItems((prev) => prev.map((it, i) => (i === idx ? { ...it, quantity: Math.max(1, Number(e.target.value) || 1) } : it)))}
-                        className="w-16 rounded-lg border border-line bg-white px-2 py-1.5 text-center font-mono text-xs text-ink outline-none focus:border-brand"
+                        className="w-16 rounded-lg border border-line bg-white px-2 py-1.5 text-center font-mono text-xs text-ink outline-none "
                         aria-label={`Qty line ${idx + 1}`}
                       />
                       <input
@@ -995,7 +995,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                         step={500}
                         value={item.unitCost}
                         onChange={(e) => setPoItems((prev) => prev.map((it, i) => (i === idx ? { ...it, unitCost: Math.max(0, Number(e.target.value) || 0) } : it)))}
-                        className="w-24 rounded-lg border border-line bg-white px-2 py-1.5 text-right font-mono text-xs text-ink outline-none focus:border-brand"
+                        className="w-24 rounded-lg border border-line bg-white px-2 py-1.5 text-right font-mono text-xs text-ink outline-none "
                         aria-label={`Unit cost line ${idx + 1}`}
                       />
                       <button

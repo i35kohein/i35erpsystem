@@ -92,7 +92,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                     value={formData.shopName || ''}
                     onChange={(e) => setFormData({ ...formData, shopName: e.target.value })}
                     placeholder="e.g. AppleRepair Pro Lab"
-                    className="w-full p-2.5 bg-white border border-line rounded-xl text-xs font-bold text-ink focus:outline-none focus:border-brand"
+                    className="w-full p-2.5 bg-white border border-line rounded-xl text-xs font-bold text-ink focus:outline-none "
                   />
                   <p className="text-xs text-muted mt-1">
                     Appears in top sidebar brand header, repair tickets, and customer documents.
@@ -108,7 +108,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                     value={formData.shopLogoUrl || ''}
                     onChange={(e) => setFormData({ ...formData, shopLogoUrl: e.target.value })}
                     placeholder="https://example.com/logo.png or data:image/png..."
-                    className="w-full p-2.5 bg-white border border-line rounded-xl text-xs text-ink focus:outline-none focus:border-brand"
+                    className="w-full p-2.5 bg-white border border-line rounded-xl text-xs text-ink focus:outline-none "
                   />
                 </div>
 
@@ -216,7 +216,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                           });
                         }}
                         placeholder={idx === 0 ? "+95 9 790 000 000 (Primary Customer Service)" : "+95 9 440 000 000 (Hotline / Viber / WhatsApp)"}
-                        className="flex-1 p-2.5 bg-white border border-line rounded-xl text-xs font-bold text-ink focus:outline-none focus:border-brand"
+                        className="flex-1 p-2.5 bg-white border border-line rounded-xl text-xs font-bold text-ink focus:outline-none "
                       />
                       {((formData.shopPhones?.length || 1) > 1) && (
                         <Button
@@ -254,7 +254,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                   value={formData.shopEmail || ''}
                   onChange={(e) => setFormData({ ...formData, shopEmail: e.target.value })}
                   placeholder="support@applerepairpro.com"
-                  className="w-full p-2.5 bg-white border border-line rounded-xl text-xs text-ink focus:outline-none focus:border-brand"
+                  className="w-full p-2.5 bg-white border border-line rounded-xl text-xs text-ink focus:outline-none "
                 />
               </div>
 
@@ -268,7 +268,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                   value={formData.shopWebsite || ''}
                   onChange={(e) => setFormData({ ...formData, shopWebsite: e.target.value })}
                   placeholder="www.applerepairpro.com"
-                  className="w-full p-2.5 bg-white border border-line rounded-xl text-xs text-ink focus:outline-none focus:border-brand"
+                  className="w-full p-2.5 bg-white border border-line rounded-xl text-xs text-ink focus:outline-none "
                 />
               </div>
 
@@ -282,7 +282,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                   value={formData.taxId || ''}
                   onChange={(e) => setFormData({ ...formData, taxId: e.target.value })}
                   placeholder="MMK-TAX-90210"
-                  className="w-full p-2.5 bg-white border border-line rounded-xl text-xs text-ink focus:outline-none focus:border-brand"
+                  className="w-full p-2.5 bg-white border border-line rounded-xl text-xs text-ink focus:outline-none "
                 />
               </div>
 
@@ -296,7 +296,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                   value={formData.shopAddress || ''}
                   onChange={(e) => setFormData({ ...formData, shopAddress: e.target.value })}
                   placeholder="No. 123 Sule Pagoda Road, Downtown Tech Plaza, Yangon"
-                  className="w-full p-2.5 bg-white border border-line rounded-xl text-xs text-ink focus:outline-none focus:border-brand"
+                  className="w-full p-2.5 bg-white border border-line rounded-xl text-xs text-ink focus:outline-none "
                 />
               </div>
             </div>
@@ -310,7 +310,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                 value={formData.shopInfo || ''}
                 onChange={(e) => setFormData({ ...formData, shopInfo: e.target.value })}
                 placeholder="Authorized Apple Hardware Repair Center. Open Mon-Sat 9:00 AM - 6:30 PM."
-                className="w-full p-2.5 bg-white border border-line rounded-xl text-xs text-ink focus:outline-none focus:border-brand"
+                className="w-full p-2.5 bg-white border border-line rounded-xl text-xs text-ink focus:outline-none "
               />
             </div>
           </div>

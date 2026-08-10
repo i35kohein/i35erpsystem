@@ -30,7 +30,7 @@ const TechniciansTab: React.FC<TechniciansTabProps> = ({ formData, setFormData, 
                 <select
                   value={formData.defaultTechnicianId}
                   onChange={(e) => setFormData({ ...formData, defaultTechnicianId: e.target.value })}
-                  className="px-3 py-2 bg-surface text-xs font-bold text-ink border border-line-strong rounded-xl focus:outline-none focus:border-brand"
+                  className="px-3 py-2 bg-surface text-xs font-bold text-ink border border-line-strong rounded-xl focus:outline-none "
                 >
                   {technicians.length > 0 ? (
                     technicians.map((t) => (

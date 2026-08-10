@@ -708,7 +708,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                                 <Button
                                   type="button"
                                   onClick={() => handleToggleCartItem(item.categoryKey, item.label, item.price, item.warranty)}
-                                  className="bg-transparent text-muted hover:text-danger hover:bg-transparent p-1 rounded transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-0"
+                                  className="bg-transparent text-muted hover:text-danger hover:bg-transparent p-1 rounded transition-colors cursor-pointer shrink-0 focus-visible:outline-none "
                                   title="Remove item"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
@@ -806,7 +806,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                             <Button
                               type="button"
                               onClick={() => handleToggleCartItem(item.categoryKey, item.label, item.price, item.warranty)}
-                              className="bg-transparent text-muted hover:text-danger hover:bg-transparent p-1 rounded transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-0"
+                              className="bg-transparent text-muted hover:text-danger hover:bg-transparent p-1 rounded transition-colors cursor-pointer shrink-0 focus-visible:outline-none "
                               title="Remove item"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -888,7 +888,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                 handleUpdateItemDiscount(item.categoryKey, p);
                 setDiscountMenuOpenFor(null);
               }}
-              className={`!w-7 !h-7 !min-h-7 !min-w-7 rounded-full text-[10px] font-extrabold flex items-center justify-center transition-all cursor-pointer active:scale-90 focus-visible:outline-none focus-visible:bg-brand focus-visible:text-white focus-visible:border-brand ${
+              className={`!w-7 !h-7 !min-h-7 !min-w-7 rounded-full text-[10px] font-extrabold flex items-center justify-center transition-all cursor-pointer active:scale-90 focus-visible:outline-none focus-visible:bg-brand focus-visible:text-white ${
                 item.discountPercent === p
                   ? 'bg-brand text-white border border-brand'
                   : 'bg-white text-ink border border-line hover:border-brand hover:text-brand'
@@ -923,7 +923,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                 }
               }
             }}
-            className="w-full !h-9 !min-h-9 rounded-full bg-surface border border-line px-3.5 text-xs font-bold text-ink/60 placeholder:text-muted/50 outline-none focus:border-brand transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            className="w-full !h-9 !min-h-9 rounded-full bg-surface border border-line px-3.5 text-xs font-bold text-ink/60 placeholder:text-muted/50 outline-none transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             title="Custom discount % — type and press Enter"
           />
         </div>
@@ -1038,7 +1038,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
             <Button
               type="button"
               onClick={() => { setCategoryFilter('ALL'); setCategoryFilterTouched(true); }}
-              className={`shrink-0 px-2.5 !h-7 !min-h-0 sm:!h-10 sm:!min-h-10 sm:px-3 rounded-full text-xs font-extrabold border transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:bg-brand focus-visible:text-white focus-visible:border-brand ${
+              className={`shrink-0 px-2.5 !h-7 !min-h-0 sm:!h-10 sm:!min-h-10 sm:px-3 rounded-full text-xs font-extrabold border transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:bg-brand focus-visible:text-white ${
                 effectiveCategoryFilter === 'ALL' && categoryFilterTouched
                   ? 'bg-brand text-white border-brand shadow-2xs'
                   : 'bg-white text-ink border-line hover:border-brand/50'
@@ -1051,7 +1051,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                 key={group}
                 type="button"
                 onClick={() => { setCategoryFilter(group); setCategoryFilterTouched(true); }}
-                className={`shrink-0 px-2.5 !h-7 !min-h-0 sm:!h-10 sm:!min-h-10 sm:px-3 rounded-full text-xs font-extrabold border transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:bg-brand focus-visible:text-white focus-visible:border-brand ${
+                className={`shrink-0 px-2.5 !h-7 !min-h-0 sm:!h-10 sm:!min-h-10 sm:px-3 rounded-full text-xs font-extrabold border transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:bg-brand focus-visible:text-white ${
                   effectiveCategoryFilter === group
                     ? 'bg-brand text-white border-brand shadow-2xs'
                     : 'bg-white text-ink border-line hover:border-brand/50'
@@ -1099,7 +1099,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                     initial={false}
                     whileTap={{ scale: 0.98 }}
                     transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                    className={`group relative bg-white border-2 rounded-2xl p-2.5 sm:p-4 cursor-pointer transition-colors duration-200 flex flex-col gap-2 sm:gap-2.5 sm:items-stretch sm:justify-between select-none shadow-2xs min-h-[100px] sm:min-h-0 sm:h-[180px] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60 focus-visible:border-brand ${
+                    className={`group relative bg-white border-2 rounded-2xl p-2.5 sm:p-4 cursor-pointer transition-colors duration-200 flex flex-col gap-2 sm:gap-2.5 sm:items-stretch sm:justify-between select-none shadow-2xs min-h-[100px] sm:min-h-0 sm:h-[180px] focus:outline-none ${
                       isSelected
                         ? 'border-brand bg-brand/5 shadow-md'
                         : 'border-line hover:border-brand/50'
