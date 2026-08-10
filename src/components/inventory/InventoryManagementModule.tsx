@@ -440,6 +440,10 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const [isDeviceModelChooserOpen, setIsDeviceModelChooserOpen] = useState(false);
   const [isLocationBinMenuOpen, setIsLocationBinMenuOpen] = useState(false);
   const [isEditLocationBinMenuOpen, setIsEditLocationBinMenuOpen] = useState(false);
+  // Fixed-position anchors for the bin menus — the modal body scroll container clips
+  // absolutely-positioned dropdowns (Ko Hein 2026-08-10: "Storage Location Bin drawer menu cant see").
+  const [binMenuAnchor, setBinMenuAnchor] = useState<{ top: number; left: number; width: number } | null>(null);
+  const [editBinMenuAnchor, setEditBinMenuAnchor] = useState<{ top: number; left: number; width: number } | null>(null);
 
   // Warranty Claim Modal state
   const [claimingWarrantyPart, setClaimingWarrantyPart] = useState<PartItem | null>(null);
@@ -2312,8 +2316,14 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   <Input
                     type="text"
                     value={newPartData.locationBin || ''}
-                    onFocus={() => setIsLocationBinMenuOpen(true)}
+                    onFocus={(e) => {
+                      const r = e.currentTarget.getBoundingClientRect();
+                      setBinMenuAnchor({ top: r.bottom + 4, left: r.left, width: r.width });
+                      setIsLocationBinMenuOpen(true);
+                    }}
                     onChange={(e) => {
+                      const r = e.currentTarget.getBoundingClientRect();
+                      setBinMenuAnchor({ top: r.bottom + 4, left: r.left, width: r.width });
                       setNewPartData({ ...newPartData, locationBin: e.target.value });
                       setIsLocationBinMenuOpen(true);
                     }}
@@ -2322,15 +2332,25 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   />
                   <Button
                     type="button"
-                    onClick={() => setIsLocationBinMenuOpen((open) => !open)}
+                    onClick={(e) => {
+                      const wrap = e.currentTarget.closest('div.relative');
+                      const r = wrap ? wrap.getBoundingClientRect() : e.currentTarget.getBoundingClientRect();
+                      setBinMenuAnchor({ top: r.bottom + 4, left: r.left, width: r.width });
+                      setIsLocationBinMenuOpen((open) => !open);
+                    }}
                     variant="ghost"
                     className="absolute right-1 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-muted hover:bg-white hover:text-brand"
                     title="Choose a saved bin"
                   >
                     <ChevronDown className={`h-3.5 w-3.5 transition-transform ${isLocationBinMenuOpen ? 'rotate-180' : ''}`} />
                   </Button>
-                  {isLocationBinMenuOpen && (
-                    <div className="absolute z-30 mt-1 w-full overflow-hidden rounded-lg border border-line bg-white p-1 shadow-lg">
+                  {isLocationBinMenuOpen && binMenuAnchor && (
+                    <>
+                      <div className="fixed inset-0 z-[70]" onClick={() => setIsLocationBinMenuOpen(false)} role="presentation" aria-hidden="true" />
+                      <div
+                        className="fixed z-[80] overflow-hidden rounded-lg border border-line bg-white p-1 shadow-lg"
+                        style={{ top: binMenuAnchor.top, left: binMenuAnchor.left, width: binMenuAnchor.width }}
+                      >
                       {existingLocationBins.length ? (
                         <div className="max-h-32 overflow-y-auto">
                           {existingLocationBins.map((bin) => (
@@ -2352,6 +2372,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         <p className="px-2 py-2 text-xs text-muted">No saved bins yet — type a new bin above.</p>
                       )}
                     </div>
+                    </>
                   )}
                 </div>
               </div>
@@ -2571,8 +2592,14 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   <Input
                     type="text"
                     value={editingPart.locationBin}
-                    onFocus={() => setIsEditLocationBinMenuOpen(true)}
+                    onFocus={(e) => {
+                      const r = e.currentTarget.getBoundingClientRect();
+                      setEditBinMenuAnchor({ top: r.bottom + 4, left: r.left, width: r.width });
+                      setIsEditLocationBinMenuOpen(true);
+                    }}
                     onChange={(e) => {
+                      const r = e.currentTarget.getBoundingClientRect();
+                      setEditBinMenuAnchor({ top: r.bottom + 4, left: r.left, width: r.width });
                       setEditingPart({ ...editingPart, locationBin: e.target.value });
                       setIsEditLocationBinMenuOpen(true);
                     }}
@@ -2581,14 +2608,24 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   />
                   <Button variant="ghost"
                     type="button"
-                    onClick={() => setIsEditLocationBinMenuOpen((open) => !open)}
+                    onClick={(e) => {
+                      const wrap = e.currentTarget.closest('div.relative');
+                      const r = wrap ? wrap.getBoundingClientRect() : e.currentTarget.getBoundingClientRect();
+                      setEditBinMenuAnchor({ top: r.bottom + 4, left: r.left, width: r.width });
+                      setIsEditLocationBinMenuOpen((open) => !open);
+                    }}
                     className="absolute right-1.5 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-muted hover:bg-white hover:text-brand"
                     title="Choose a saved bin"
                   >
                     <ChevronDown className={`h-3.5 w-3.5 transition-transform ${isEditLocationBinMenuOpen ? 'rotate-180' : ''}`} />
                   </Button>
-                  {isEditLocationBinMenuOpen && (
-                    <div className="absolute z-30 mt-1 w-full overflow-hidden rounded-lg border border-line bg-white p-1 shadow-lg">
+                  {isEditLocationBinMenuOpen && editBinMenuAnchor && (
+                    <>
+                      <div className="fixed inset-0 z-[70]" onClick={() => setIsEditLocationBinMenuOpen(false)} role="presentation" aria-hidden="true" />
+                      <div
+                        className="fixed z-[80] overflow-hidden rounded-lg border border-line bg-white p-1 shadow-lg"
+                        style={{ top: editBinMenuAnchor.top, left: editBinMenuAnchor.left, width: editBinMenuAnchor.width }}
+                      >
                       {existingLocationBins.length ? (
                         <div className="max-h-32 overflow-y-auto">
                           {existingLocationBins.map((bin) => (
@@ -2610,6 +2647,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         <p className="px-2 py-2 text-xs text-muted">No saved bins yet — type a new bin above.</p>
                       )}
                     </div>
+                    </>
                   )}
                 </div>
               </div>
