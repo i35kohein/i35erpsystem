@@ -418,10 +418,16 @@ export const filterByDateRange = <T extends { createdAt?: string }>(
 ): T[] => {
   if (!filter || filter.preset === 'all') return items;
 
-  const todayStr = new Date().toISOString().split('T')[0];
-
   if (filter.preset === 'today') {
-    return items.filter((item) => item.createdAt && item.createdAt.startsWith(todayStr));
+    // Local-day range (numeric): toISOString() would give the UTC date, which is
+    // the previous day for UTC+6:30 between midnight and 06:30.
+    const now = new Date();
+    const startMs = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const endMs = startMs + 24 * 60 * 60 * 1000;
+    return items.filter((item) => {
+      const itemTime = item.createdAt ? new Date(item.createdAt).getTime() : 0;
+      return !isNaN(itemTime) && itemTime >= startMs && itemTime < endMs;
+    });
   }
 
   let days = 0;

@@ -319,7 +319,9 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
       if (!ts) return;
       const d = new Date(ts);
       if (isNaN(d.getTime())) return;
-      const key = d.toISOString().slice(0, 10);
+      // Local calendar day (toISOString() would bucket by UTC — off by one for
+      // UTC+6:30 mornings).
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       const label = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
       (wo.lineItems || []).forEach((li) => {
         if (li.partId && !li.isLabor && li.quantity > 0) {

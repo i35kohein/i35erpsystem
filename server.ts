@@ -468,10 +468,14 @@ ${JSON.stringify(context)}`;
             return `${p.model}: ${priced.length ? priced.join(", ") : "no prices"}`;
           });
         const now = new Date();
-        const today = now.toISOString().slice(0, 10);
+        // 'Today' in shop-local time (Asia/Rangoon, UTC+6:30) — toISOString()
+        // would give the UTC date, which is the previous day before 06:30 local.
+        const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Rangoon" }).format(now);
+        const localDateOf = (iso: string) =>
+          iso ? new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Rangoon" }).format(new Date(iso)) : "";
         const done = ["Finished", "Taken Out"];
         const active = wosData.filter((w) => !done.includes(w.status) && w.status !== "Cant Repair" && w.status !== "Customer Not Repair");
-        const completedToday = wosData.filter((w) => done.includes(w.status) && (w.completedAt || w.updatedAt || "").slice(0, 10) === today);
+        const completedToday = wosData.filter((w) => done.includes(w.status) && localDateOf(w.completedAt || w.updatedAt || "") === today);
         const unpaid = wosData.filter((w) => !w.isPaid);
         const lowStock = partData.filter((p) => Number(p.quantityInStock || 0) <= Number(p.reorderPoint || 0)).slice(0, 30);
         const completedTodayTickets = completedToday.slice(0, 8).map((w) =>

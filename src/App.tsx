@@ -2268,9 +2268,10 @@ export default function App() {
 
               {activeTab === 'simple-ticket' && (
                 <SimpleTicketCreator
-                  workOrders={activeWorkOrders}
+                  workOrders={workOrders}
                   customers={rosterCustomers}
                   priceCatalog={priceCatalog.catalog}
+                  systemSettings={systemSettings}
                   onSaveWorkOrder={handleSaveWorkOrder}
                 />
               )}

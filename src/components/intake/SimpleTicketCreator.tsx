@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ChevronDown, Search, BadgePercent, ShieldCheck } from 'lucide-react';
-import { WorkOrder, DiagnosticItemResult, AppleDeviceCategory, SelectedRepairItem } from '../../types';
+import { WorkOrder, DiagnosticItemResult, AppleDeviceCategory, SelectedRepairItem, SystemSettings } from '../../types';
 import { ModelRepairPrice } from '../../types/priceCatalog';
 import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
 import { DIAGNOSTIC_NAMES, getAvailableColorsForModel, getRealisticColorStyle } from './deviceData';
@@ -10,6 +10,7 @@ interface SimpleTicketCreatorProps {
   workOrders: WorkOrder[];
   customers?: Array<{ id: string; name: string; phone: string; type?: string }>;
   priceCatalog?: ModelRepairPrice[];
+  systemSettings?: SystemSettings;
   onSaveWorkOrder: (wo: WorkOrder) => void;
 }
 
@@ -49,13 +50,30 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   workOrders,
   customers = [],
   priceCatalog = [],
+  systemSettings,
   onSaveWorkOrder,
 }) => {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [savedFlash, setSavedFlash] = useState(false);
   const [isModelModalOpen, setIsModelModalOpen] = useState(false);
-  const [previewNumber] = useState(() => `WO-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`);
+  // Same sequential order-number scheme as New Intake Ticket (max existing + 1,
+  // prefix from Settings) so the two forms never collide or duplicate numbers.
+  const ticketPrefix = systemSettings?.ticketPrefix || 'WO-';
+  const nextOrderNumber = (): string => {
+    const year = new Date().getFullYear();
+    const maxExistingNum = workOrders.reduce((max, wo) => {
+      const match = /(\d+)\s*$/.exec(wo.orderNumber || '');
+      return match ? Math.max(max, parseInt(match[1], 10)) : max;
+    }, 1000);
+    const usedNumbers = new Set(workOrders.map((w) => w.orderNumber).filter(Boolean));
+    let nextNum = maxExistingNum + 1;
+    while (usedNumbers.has(`${ticketPrefix}${year}-${nextNum}`)) nextNum += 1;
+    return `${ticketPrefix}${year}-${nextNum}`;
+  };
+  // Reactive preview: recomputes once workOrders finish loading (useState would
+  // freeze the initial empty-list value → off-by-one preview number).
+  const previewNumber = useMemo(nextOrderNumber, [workOrders, ticketPrefix]);
   const [isColorOpen, setIsColorOpen] = useState(false);
   const [isRepairsOpen, setIsRepairsOpen] = useState(false);
   const [repairSearch, setRepairSearch] = useState('');
@@ -168,8 +186,8 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
     const base: WorkOrder = {
       id: editingId || `wo-${Date.now()}`,
       orderNumber: editingId
-        ? (workOrders.find((w) => w.id === editingId)?.orderNumber || `WO-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`)
-        : `WO-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`,
+        ? (workOrders.find((w) => w.id === editingId)?.orderNumber || nextOrderNumber())
+        : nextOrderNumber(),
       customerId: '',
       customerName: form.name.trim() || 'Walk-in Customer',
       customerPhone: form.phone.trim(),
@@ -218,7 +236,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
         liquidIndicatorTriggered: false,
         physicalDamageNotes: '',
       },
-      warrantyDays: 0,
+      warrantyDays: systemSettings?.defaultWarrantyDays ?? 90,
       intakePhotos: [],
       estimatedCompletion: undefined,
       isPaid: false,
