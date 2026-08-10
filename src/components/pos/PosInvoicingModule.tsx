@@ -713,9 +713,12 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           <tbody>
                             {laborItems.map((li) => {
                               const isEditing = editingLineId === li.id;
-                              const lineTotal = li.unitPrice * li.quantity;
+                              const originalUnitPrice = li.lineItemDiscountPercent
+                                ? Math.round(li.unitPrice / (1 - li.lineItemDiscountPercent / 100))
+                                : li.unitPrice;
+                              const lineTotal = originalUnitPrice * li.quantity;
                               const itemDiscountAmt = li.lineItemDiscountPercent ? Math.round(lineTotal * (li.lineItemDiscountPercent / 100)) : 0;
-                              const effectiveTotal = lineTotal - itemDiscountAmt;
+                              const effectiveTotal = li.lineItemDiscountPercent ? li.unitPrice * li.quantity : lineTotal;
                               return (
                                 <tr key={li.id} className={`bg-white ${isEditing ? 'ring-2 ring-brand/30' : ''}`}>
                                   {/* Item name + edit toggle */}
@@ -763,8 +766,8 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                       <div className="flex flex-col items-center gap-0">
                                         {li.lineItemDiscountPercent ? (
                                           <React.Fragment>
-                                            <span className="font-mono text-[10px] text-muted line-through">{li.unitPrice.toLocaleString()}</span>
-                                            <span className="font-mono text-[11px] font-black text-brand">{Math.round(li.unitPrice * (1 - li.lineItemDiscountPercent / 100)).toLocaleString()}</span>
+                                            <span className="font-mono text-[10px] text-muted line-through">{originalUnitPrice.toLocaleString()}</span>
+                                            <span className="font-mono text-[11px] font-black text-brand">{li.unitPrice.toLocaleString()}</span>
                                           </React.Fragment>
                                         ) : (
                                           <span className="font-mono text-muted tabular-nums">{li.unitPrice.toLocaleString()}</span>

@@ -260,6 +260,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
         unitPrice: r.finalPrice,
         quantity: 1,
         isLabor: true,
+        lineItemDiscountPercent: r.discountPercent || undefined,
       })),
       subtotal: baseTotal,
       depositAmount: 0,
