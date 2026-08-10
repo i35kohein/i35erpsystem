@@ -257,6 +257,7 @@ export default function App() {
   const inventoryMoreAnchorRef = useRef<HTMLButtonElement | null>(null);
   const [inventoryScanQuery, setInventoryScanQuery] = useState('');
   const [inventoryLowStockOnly, setInventoryLowStockOnly] = useState(false);
+  const [qaViewMode, setQaViewMode] = useState<'table' | 'cards'>('table');
   const [intakeViewMode, setIntakeViewMode] = useState<'table' | 'cards'>(() =>
     typeof window !== 'undefined' && window.innerWidth < 768 ? 'cards' : 'table'
   );
@@ -1828,7 +1829,7 @@ export default function App() {
 
             {/* Price Catalog: top navbar controls hidden — module has its own device switcher,
                 settings live in Settings tab (Ko Hein 2026-08-09) */}
-            {activeTab === 'price-catalog' || activeTab === 'inventory' ? null : ['intake', 'pos', 'inventory', 'crm', 'suppliers', 'qa'].includes(activeTab) ? (
+            {activeTab === 'price-catalog' || activeTab === 'inventory' ? null : ['intake', 'pos', 'inventory', 'crm', 'suppliers'].includes(activeTab) ? (
               /* Contextual Search Input — desktop only (modules have their own mobile search);
                   also hidden on iPad inventory where the navbar scan box handles search */
               !(isIpad && activeTab === 'inventory') && (
@@ -2178,21 +2179,33 @@ export default function App() {
 
             {activeTab === 'qa' && (
               <>
-                <div className="hidden md:flex items-center gap-2">
-                <CustomDropdownMenu
-                  value={statusFilter}
-                  onChange={(val) => setStatusFilter(val)}
-                  buttonClassName="!px-2.5 !py-1.5 !h-10 text-xs"
-                  triggerIcon={<ListFilter className="w-3.5 h-3.5" />}
-                  options={[
-                    { value: 'ALL', label: 'All QA Statuses' },
-                    { value: 'Pending QA', label: 'Pending QA' },
-                  ]}
-                />
-
-                <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact iconOnly />
-
-                </div>              </>
+                {/* All QA Status dropdown + date filter + search removed 2026-08-10 (Ko Hein);
+                    only the Table|Cards toggle lives here */}
+                <div className="flex items-center gap-1.5">
+                  <div className="bg-surface p-0.5 rounded-lg border border-line flex items-center gap-0.5">
+                    <Button
+                      variant="ghost"
+                      type="button"
+                      onClick={() => setQaViewMode('table')}
+                      className={`!h-8 !min-h-8 w-8 px-0 rounded-md flex items-center justify-center cursor-pointer hover:bg-transparent! ${qaViewMode === 'table' ? 'bg-brand text-white shadow-2xs' : 'text-muted hover:text-ink'}`}
+                      title="Table View"
+                      aria-label="Table View"
+                    >
+                      <TableIcon className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      type="button"
+                      onClick={() => setQaViewMode('cards')}
+                      className={`!h-8 !min-h-8 w-8 px-0 rounded-md flex items-center justify-center cursor-pointer hover:bg-transparent! ${qaViewMode === 'cards' ? 'bg-brand text-white shadow-2xs' : 'text-muted hover:text-ink'}`}
+                      title="Cards Grid View"
+                      aria-label="Cards Grid View"
+                    >
+                      <LayoutGrid className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              </>
             )}
 
             {activeTab === 'finance' && (
@@ -2580,6 +2593,8 @@ export default function App() {
                   onSavePostRepairChecklist={handleSavePostRepairChecklist}
                   onErrorReturn={(id) => handleUpdateWorkOrderStatus(id, 'In Progress')}
                   systemSettings={systemSettings}
+                  viewMode={qaViewMode}
+                  setViewMode={setQaViewMode}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
                   statusFilter={statusFilter}

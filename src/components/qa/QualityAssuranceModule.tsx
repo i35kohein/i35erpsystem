@@ -6,7 +6,7 @@ import {CheckCircle2,
   Camera,
   UserCheck,
   StickyNote,
-  DollarSign, RotateCcw, Table as TableIcon, LayoutGrid } from 'lucide-react';
+  DollarSign, RotateCcw } from 'lucide-react';
 import { WorkOrder, PostRepairChecklist, Technician, DiagnosticItemResult, DiagnosticStatus, AppUser, SystemSettings } from '../../types';
 import { Button } from '../ui';
 import { DIAGNOSTIC_NAMES } from '../intake/deviceData';
@@ -31,6 +31,9 @@ interface QualityAssuranceModuleProps {
   statusFilter?: string;
   setStatusFilter?: (s: string) => void;
   onNavigateToTab?: (tab: string) => void;
+  /** Roster view mode — controlled from the navbar (Ko Hein 2026-08-10) */
+  viewMode?: 'table' | 'cards';
+  setViewMode?: (v: 'table' | 'cards') => void;
   /** Move a Taken Out ticket back for an Error Return (Ko Hein) */
   onErrorReturn?: (workOrderId: string) => void;
 }
@@ -43,6 +46,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
   onSavePostRepairChecklist,
   searchQuery = '',
   statusFilter = 'ALL',
+  viewMode: propViewMode,
   onNavigateToTab,
   onErrorReturn,
 }) => {
@@ -131,8 +135,9 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
 
   // 21-Point Post-Repair Diagnostic Checklist State
   const [qaDiagnostics, setQaDiagnostics] = useState<DiagnosticItemResult[]>([]);
-  // Roster view mode (Ko Hein 2026-08-10)
-  const [qaViewMode, setQaViewMode] = useState<'table' | 'cards'>('table');
+  // Roster view mode — controlled from the navbar (falls back to local)
+  const [localQaViewMode] = useState<'table' | 'cards'>('table');
+  const qaViewMode = propViewMode !== undefined ? propViewMode : localQaViewMode;
   // Before / After repair photos (uploaded in QA modal)
   const [qaBeforePhotos, setQaBeforePhotos] = useState<string[]>([]);
   const [qaAfterPhotos, setQaAfterPhotos] = useState<string[]>([]);
@@ -271,38 +276,8 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
 
   return (
     <div className={`space-y-3 text-xs ${isIpad ? 'flex min-h-0 flex-1 flex-col' : ''}`}>
-      {/* Header */}
-      <div className="flex items-center justify-end gap-4 bg-white p-3 rounded-2xl border border-line shadow-xs">
-        <div className="flex items-center gap-2">
-          {/* Table | Cards view toggle (Ko Hein 2026-08-10) */}
-          <div className="bg-surface p-0.5 rounded-lg border border-line flex items-center gap-0.5">
-            <Button
-              variant="ghost"
-              type="button"
-              onClick={() => setQaViewMode('table')}
-              className={`!h-7 !min-h-7 w-7 px-0 rounded-md flex items-center justify-center cursor-pointer hover:bg-transparent! ${qaViewMode === 'table' ? 'bg-brand text-white shadow-2xs' : 'text-muted hover:text-ink'}`}
-              title="Table View"
-              aria-label="Table View"
-            >
-              <TableIcon className="w-3.5 h-3.5" />
-            </Button>
-            <Button
-              variant="ghost"
-              type="button"
-              onClick={() => setQaViewMode('cards')}
-              className={`!h-7 !min-h-7 w-7 px-0 rounded-md flex items-center justify-center cursor-pointer hover:bg-transparent! ${qaViewMode === 'cards' ? 'bg-brand text-white shadow-2xs' : 'text-muted hover:text-ink'}`}
-              title="Cards Grid View"
-              aria-label="Cards Grid View"
-            >
-              <LayoutGrid className="w-3.5 h-3.5" />
-            </Button>
-          </div>
-
-          <div className="bg-success/10 text-success-deep font-mono font-bold px-3 py-1 rounded-full border border-success/20">
-            QA Control • Zero Defect Standard
-          </div>
-        </div>
-      </div>
+      {/* Header removed 2026-08-10 (Ko Hein) — view toggle lives in the navbar,
+          'QA Control' badge dropped */}
 
       {/* QA Roster — click a row/card to run the 21-Point Diagnostic */}
       <div className="bg-white border border-line rounded-2xl shadow-2xs overflow-hidden">
