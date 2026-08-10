@@ -2037,9 +2037,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       {/* MODAL: ADD NEW PART */}
       {showAddModal && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="flex h-[82vh] max-h-[82vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-line bg-white text-xs shadow-2xl">
+          <div className="flex max-h-[85vh] min-h-0 w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-line bg-white text-xs shadow-2xl">
             <div className={isDeviceModelChooserOpen ? 'hidden' : 'contents'}>
-            <div className="flex shrink-0 items-center justify-between border-b border-line px-4 py-3">
+            <div className="flex shrink-0 items-center justify-between border-b border-line px-4 py-2.5">
               <h3 className="flex items-center space-x-2 text-sm font-extrabold text-ink">
                 <Plus className="h-4 w-4 text-brand" />
                 <span>Register New Hardware Component</span>
@@ -2053,96 +2053,74 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               </Button>
             </div>
 
-            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-3 [scrollbar-gutter:stable]">
+            <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto px-4 py-2.5 [scrollbar-gutter:stable]">
             <div className="space-y-1">
               <div className="flex items-center justify-between gap-2">
                 <label className="block font-bold text-ink">Device Model</label>
                 <span className="font-medium text-xs text-muted">Price List · {activeDeviceModels.length} models</span>
               </div>
-              {/* Active Device card — Ko Hein 2026-08-10: gradient card with selected
-                  model + services/categories counts + Switch Model button */}
+              {/* Active Device — compact row (Ko Hein 2026-08-10: compact register modal) */}
               <div
                 role="button"
                 tabIndex={0}
                 onClick={() => setIsDeviceModelChooserOpen(true)}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setIsDeviceModelChooserOpen(true); } }}
-                className="w-full min-w-0 cursor-pointer bg-gradient-to-br from-brand/8 via-white to-white border border-line rounded-2xl px-4 sm:px-5 py-3.5 shadow-2xs flex items-center justify-between gap-3 transition-colors hover:border-brand/40"
+                className="flex w-full min-w-0 cursor-pointer items-center justify-between gap-2 rounded-lg border border-line bg-surface px-2.5 py-1.5 transition-colors hover:border-brand/40"
                 title="Choose a model from the Price List"
               >
-                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                  <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-2xl bg-brand text-white flex items-center justify-center shadow-md shrink-0">
-                    <Smartphone className="w-5 h-5 sm:w-7 sm:h-7" />
-                  </div>
-                  <div className="min-w-0">
-                    {selectedPartModel ? (
-                      <>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-[10px] font-extrabold uppercase tracking-widest text-brand-deep bg-brand/10 px-2 py-0.5 rounded-full">Active Device</span>
-                          <span className="text-[11px] font-bold text-muted">{selectedModelStats.services} Services</span>
-                          <span className="hidden sm:inline text-[11px] font-bold text-success/80">{selectedModelStats.categories} Categories</span>
-                        </div>
-                        <h2 className="text-lg sm:text-2xl font-black text-ink tracking-tight truncate mt-0.5">{selectedPartModel}</h2>
-                      </>
-                    ) : (
-                      <>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-[10px] font-extrabold uppercase tracking-widest text-brand-deep bg-brand/10 px-2 py-0.5 rounded-full">Device Model</span>
-                          <span className="text-[11px] font-bold text-muted">Price List · {activeDeviceModels.length} models</span>
-                        </div>
-                        <h2 className="text-lg sm:text-2xl font-black text-ink tracking-tight truncate mt-0.5">Select Device Model</h2>
-                        <p className="text-xs font-medium text-muted truncate">{activeDeviceModels.length ? 'Choose from Price List' : 'No models in Price List'}</p>
-                      </>
-                    )}
-                  </div>
-                </div>
+                <span className="flex min-w-0 items-center gap-2 text-sm font-extrabold text-ink">
+                  <Smartphone className="h-4 w-4 shrink-0 text-brand" />
+                  {selectedPartModel ? (
+                    <>
+                      <span className="truncate">{selectedPartModel}</span>
+                      <span className="shrink-0 text-[10px] font-bold text-muted">· {selectedModelStats.services} services · {selectedModelStats.categories} categories</span>
+                    </>
+                  ) : (
+                    <span className="text-muted/70">Select Device Model…</span>
+                  )}
+                </span>
                 <Button
                   type="button"
                   onClick={(e) => { e.stopPropagation(); setIsDeviceModelChooserOpen(true); }}
-                  className="shrink-0 min-h-10 px-3.5 sm:px-4 rounded-xl bg-brand hover:bg-brand-deep text-white font-extrabold text-xs border border-brand transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-2xs"
+                  className="shrink-0 !h-8 rounded-lg border border-brand bg-brand px-3 text-xs font-extrabold text-white hover:bg-brand-deep"
                   title="Choose a model from the Price List"
                 >
-                  <Folder className="w-3.5 h-3.5" />
-                  <span>{selectedPartModel ? 'Switch Model' : 'Select Model'}</span>
+                  <Folder className="h-3.5 w-3.5" />
+                  {selectedPartModel ? 'Switch' : 'Select'}
                 </Button>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
               <div className="sm:col-span-2">
-                <div className="mb-1 flex h-4 items-center">
-                  <label className="block font-bold text-ink">Owner</label>
-                </div>
+                <label className="mb-1 block font-bold text-ink">Owner</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => applyPartSpecification({ owner: 'APP' })}
-                    className={`rounded-xl border px-3 py-2 text-left transition-all cursor-pointer ${
+                    className={`inline-flex items-center justify-center gap-1.5 rounded-lg border px-2 py-1.5 text-xs font-black transition-all cursor-pointer ${
                       (newPartData.owner || 'APP') === 'APP'
                         ? 'border-brand bg-brand-soft text-brand ring-1 ring-brand/30'
                         : 'border-line bg-white text-muted hover:border-brand/40'
                     }`}
                   >
-                    <span className="block text-xs font-black uppercase tracking-wide">APP</span>
-                    <span className="block text-[10px] font-semibold opacity-80">Shop stock</span>
+                    APP <span className="font-semibold opacity-70">· Shop</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => applyPartSpecification({ owner: 'KZH' })}
-                    className={`rounded-xl border px-3 py-2 text-left transition-all cursor-pointer ${
+                    className={`inline-flex items-center justify-center gap-1.5 rounded-lg border px-2 py-1.5 text-xs font-black transition-all cursor-pointer ${
                       (newPartData.owner || 'APP') === 'KZH'
                         ? 'border-success bg-success/10 text-success-deep ring-1 ring-success/30'
                         : 'border-line bg-white text-muted hover:border-success/40'
                     }`}
                   >
-                    <span className="block text-xs font-black uppercase tracking-wide">KZH</span>
-                    <span className="block text-[10px] font-semibold opacity-80">Ko Hein stock</span>
+                    KZH <span className="font-semibold opacity-70">· Ko Hein</span>
                   </button>
                 </div>
               </div>
               <div>
-                <div className="mb-1 flex h-4 items-center">
-                  <label className="block font-bold text-ink">Category</label>
-                </div>
+                <label className="mb-1 block font-bold text-ink">Category</label>
                 <CustomDropdownMenu
                   value={newPartData.category}
                   onChange={(category) => applyPartSpecification({ category })}
@@ -2156,9 +2134,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               </div>
 
               <div>
-                <div className="mb-1 flex h-4 items-center">
-                  <label className="block font-bold text-ink">Quality Tier</label>
-                </div>
+                <label className="mb-1 block font-bold text-ink">Quality Tier</label>
                 <CustomDropdownMenu
                   value={newPartData.qualityTier || ''}
                   onChange={(qualityTier) => applyPartSpecification({ qualityTier: qualityTier as PartQualityTier })}
@@ -2173,13 +2149,13 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             </div>
 
             {isBackGlassCategory && (
-              <div className="rounded-xl border border-brand/20 bg-brand-soft p-3">
-                <div className="mb-2 flex items-center justify-between gap-3">
+              <div className="rounded-xl border border-brand/20 bg-brand-soft p-2">
+                <div className="mb-1.5 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <Palette className="h-4 w-4 text-brand" />
                     <div>
                       <p className="text-xs font-extrabold text-ink">Back Glass Color</p>
-                      <p className="text-xs text-muted">Match the original device color</p>
+                      <p className="text-[11px] text-muted">Match the original device color</p>
                     </div>
                   </div>
                   {newPartData.backGlassColor && (
@@ -2188,7 +2164,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 </div>
 
                 {availableBackGlassColors.length ? (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5">
                     {availableBackGlassColors.map((colorName) => {
                       const colorStyle = getRealisticColorStyle(colorName);
                       const isSelected = newPartData.backGlassColor === colorName;
@@ -2197,7 +2173,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                           key={colorName}
                           type="button"
                           onClick={() => applyPartSpecification({ backGlassColor: colorName })}
-                          className={`inline-flex h-10 lg:h-8 items-center gap-1.5 rounded-lg border px-2 text-xs font-bold transition-colors ${
+                          className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-2 text-xs font-bold transition-colors ${
                             isSelected
                               ? 'border-brand bg-white text-brand shadow-xs'
                               : 'border-line bg-white text-ink hover:border-brand/50'
@@ -2218,49 +2194,48 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               </div>
             )}
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div className="sm:col-span-2">
-                <div className="mb-1 flex items-center justify-between gap-3">
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+              <div>
+                <div className="mb-1 flex items-center justify-between gap-2">
                   <label className="block font-bold text-ink">Part Name *</label>
                   <Button
                     type="button"
                     onClick={() => setNewPartData((current) => ({ ...current, name: generatePartName(current) || current.name || '' }))}
                     variant="ghost"
-                    className="inline-flex shrink-0 items-center gap-1 text-xs font-extrabold text-brand hover:underline"
+                    className="inline-flex shrink-0 items-center gap-1 text-[11px] font-extrabold text-brand hover:underline"
                     title="Generate from model, category, and quality tier"
                   >
-                    <Sparkles className="h-3 w-3" /> Auto-generate
+                    <Sparkles className="h-3 w-3" /> Auto
                   </Button>
                 </div>
                 <Input
                   type="text"
                   value={newPartData.name || ''}
                   onChange={(e) => setNewPartData({ ...newPartData, name: e.target.value })}
-                  placeholder="Select model, category, and quality tier to generate"
-                  className="w-full rounded-lg border border-line bg-surface p-2 text-xs font-bold text-ink focus:bg-white focus:outline-none"
+                  placeholder="Part name"
+                  className="w-full rounded-lg border border-line bg-surface px-2.5 py-1.5 text-xs font-bold text-ink focus:bg-white focus:outline-none"
                 />
-                <p className="mt-1 text-xs text-muted">Model → Category → Quality Tier</p>
               </div>
 
-              <div className="sm:col-span-2">
+              <div>
                 <div className="mb-1 flex items-center justify-between gap-2">
                   <label className="block font-bold text-ink">SKU / Code *</label>
                   <Button
                     type="button"
                     onClick={() => setNewPartData((current) => ({ ...current, sku: generatePartSku(current) || current.sku || '' }))}
                     variant="ghost"
-                    className="inline-flex items-center gap-1 text-xs font-extrabold text-brand hover:underline"
+                    className="inline-flex items-center gap-1 text-[11px] font-extrabold text-brand hover:underline"
                     title="Generate from model, category, color, and quality tier"
                   >
-                    <Sparkles className="h-3 w-3" /> Auto-generate
+                    <Sparkles className="h-3 w-3" /> Auto
                   </Button>
                 </div>
                 <Input
                   type="text"
                   value={newPartData.sku || ''}
                   onChange={(e) => setNewPartData({ ...newPartData, sku: e.target.value })}
-                  placeholder="Generated after specifications are selected"
-                  className="w-full rounded-lg border border-line bg-surface p-2 text-xs font-mono text-ink focus:bg-white focus:outline-none"
+                  placeholder="Auto-generated"
+                  className="w-full rounded-lg border border-line bg-surface px-2.5 py-1.5 text-xs font-mono text-ink focus:bg-white focus:outline-none"
                 />
               </div>
 
@@ -2290,7 +2265,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   options={suppliers.map((supplier) => ({ value: supplier.id, label: supplier.name }))}
                   placeholder={suppliers.length ? 'Choose supplier name' : 'Add a supplier first'}
                   className="w-full"
-                  buttonClassName="!h-9 !w-full !rounded-lg !border-line !bg-surface !px-2.5"
+                  buttonClassName="!h-8 !w-full !rounded-lg !border-line !bg-surface !px-2.5"
                   menuAlign="left"
                   size="md"
                 />
@@ -2302,7 +2277,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   type="number"
                   value={newPartData.costPrice || ''}
                   onChange={(e) => setNewPartData({ ...newPartData, costPrice: Number(e.target.value) })}
-                  className="w-full rounded-lg border border-line bg-surface p-2 text-xs font-mono font-bold text-ink focus:bg-white focus:outline-none"
+                  className="w-full rounded-lg border border-line bg-surface px-2.5 py-1.5 text-xs font-mono font-bold text-ink focus:bg-white focus:outline-none"
                 />
               </div>
 
@@ -2312,7 +2287,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   type="number"
                   value={newPartData.sellingPrice || ''}
                   onChange={(e) => setNewPartData({ ...newPartData, sellingPrice: Number(e.target.value) })}
-                  className="w-full rounded-lg border border-line bg-surface p-2 text-xs font-mono font-bold text-success-deep focus:bg-white focus:outline-none"
+                  className="w-full rounded-lg border border-line bg-surface px-2.5 py-1.5 text-xs font-mono font-bold text-success-deep focus:bg-white focus:outline-none"
                 />
               </div>
 
@@ -2322,7 +2297,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   type="number"
                   value={newPartData.quantityInStock || ''}
                   onChange={(e) => setNewPartData({ ...newPartData, quantityInStock: Number(e.target.value) })}
-                  className="w-full rounded-lg border border-line bg-surface p-2 text-xs font-mono text-ink focus:bg-white focus:outline-none"
+                  className="w-full rounded-lg border border-line bg-surface px-2.5 py-1.5 text-xs font-mono text-ink focus:bg-white focus:outline-none"
                 />
               </div>
 
@@ -2343,7 +2318,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       setIsLocationBinMenuOpen(true);
                     }}
                     placeholder="Choose saved bin or type a new bin"
-                    className="w-full rounded-lg border border-line bg-surface p-2 pr-8 text-xs font-mono text-ink focus:bg-white focus:outline-none"
+                    className="w-full rounded-lg border border-line bg-surface px-2.5 py-1.5 pr-8 text-xs font-mono text-ink focus:bg-white focus:outline-none"
                   />
                   <Button
                     type="button"
@@ -2385,7 +2360,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
             {/* Projected Margin Card */}
             {Boolean(newPartData.costPrice && newPartData.sellingPrice) && (
-              <div className="p-3 bg-success/10 border border-success/30 rounded-xl flex items-center justify-between text-xs font-bold text-success-deep">
+              <div className="p-2 bg-success/10 border border-success/30 rounded-xl flex items-center justify-between text-xs font-bold text-success-deep">
                 <span>Projected Profit Margin per Unit:</span>
                 <span className="font-mono text-sm">
                   +{(Number(newPartData.sellingPrice) - Number(newPartData.costPrice)).toLocaleString()} {currency}
@@ -2394,7 +2369,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             )}
             </div>
 
-            <div className="flex shrink-0 justify-end space-x-2 border-t border-line bg-white px-4 py-2.5">
+            <div className="flex shrink-0 justify-end space-x-2 border-t border-line bg-white px-4 py-2">
               <Button variant="ghost"
                 type="button"
                 onClick={() => setShowAddModal(false)}
