@@ -1,26 +1,16 @@
 import React from 'react';
 import { Button, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '../ui';
 import {
-  Banknote,
-  CalendarDays,
-  Clock3,
-  Contact,
   FileText,
   Hash,
   History,
   Lock,
-  MapPin,
-  MessageSquareWarning,
-  Phone,
-  Printer,
+  MoreHorizontal,
   PencilLine,
-  ScanLine,
-  Smartphone,
+  Printer,
   Ticket,
   Trash2,
-  UserRound,
   X,
-  MoreHorizontal,
 } from 'lucide-react';
 import { AppUser, WorkOrder } from '../../types';
 import { get21AfterDiagnostics, get21Diagnostics } from '../../utils/diagnosticUtils';
@@ -76,20 +66,23 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
     afterItem: afterList[index] || beforeItem,
   }));
   const deviceColor = getRealisticColorStyle(workOrder.deviceColor || 'Standard');
-  const intakeTime = new Date(workOrder.createdAt).getTime();
-  const hasLeftShop = ['Taken Out', 'Cant Repair', 'Customer Not Repair'].includes(workOrder.status);
-  const shopTimeEnd = hasLeftShop ? new Date(workOrder.updatedAt || workOrder.createdAt).getTime() : Date.now();
-  const totalShopHours = Number.isFinite(intakeTime)
-    ? Math.max(0, Math.floor((shopTimeEnd - intakeTime) / (1000 * 60 * 60)))
-    : 0;
-  const shopDays = Math.floor(totalShopHours / 24);
-  const shopHours = totalShopHours % 24;
-  const timeInShop =
-    totalShopHours < 1
-      ? 'Less than 1 hour'
-      : `${shopDays > 0 ? `${shopDays} ${shopDays === 1 ? 'day' : 'days'} ` : ''}${shopHours} ${
-          shopHours === 1 ? 'hour' : 'hours'
-        }`.trim();
+
+  // Simple Ticket style 3-state circle (Pass ✓ / Fail ✕ / N/A empty).
+  const StatusDot = ({ status, label }: { status: string; label: string }) => (
+    <span
+      title={label}
+      aria-label={label}
+      className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border text-[10px] font-black leading-none ${
+        status === 'Pass'
+          ? 'border-success bg-success text-white'
+          : status === 'Fail'
+          ? 'border-danger bg-danger text-white'
+          : 'border-line bg-white text-muted'
+      }`}
+    >
+      {status === 'Pass' ? '✓' : status === 'Fail' ? '✕' : ''}
+    </span>
+  );
   const repairSummary = workOrder.selectedRepairs?.length
     ? Array.from(new Set(workOrder.selectedRepairs.map((repair) => repair.name.trim()).filter(Boolean))).join(' • ')
     : (workOrder.lineItems || [])
@@ -252,137 +245,109 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
             id="inspector-panel-details"
             role="tabpanel"
             aria-labelledby="inspector-tab-details"
-            className="grid min-h-0 flex-1 grid-cols-1 overflow-y-scroll md:grid-cols-[250px_minmax(0,1fr)]" tabIndex={0}
+            className="min-h-0 flex-1 overflow-y-scroll p-4 sm:p-5"
             style={{ scrollbarGutter: 'stable' }}
+            tabIndex={0}
           >
-          <aside aria-label="Ticket summary" className="border-b border-line bg-surface p-4 md:border-b-0 md:border-r md:p-5">
-            <div className="space-y-5">
-              <div>
-                <div className="flex items-start gap-2">
-                  <Smartphone className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
-                  <h3 className="text-lg font-black leading-6 text-ink">{workOrder.deviceModel}</h3>
+            {/* Simple Ticket style: 2-column grid — Customer Data | Phone Testing & Checking (before + after) (Ko Hein 2026-08-10) */}
+            <div className="mx-auto grid max-w-4xl grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-6">
+              {/* LEFT — Customer Data (mirrors the Simple Ticket form, read-only) */}
+              <div className="flex flex-col divide-y divide-line">
+                <div className="flex items-center justify-between border-b border-line pb-2">
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted">Customer Data</span>
+                  <span className="shrink-0 font-mono text-[11px] font-black text-brand">
+                    {workOrder.selectedRepairs?.length
+                      ? `${workOrder.selectedRepairs.length} repair${workOrder.selectedRepairs.length > 1 ? 's' : ''}`
+                      : '—'}
+                  </span>
                 </div>
-                <div className="mt-2 rounded-md border border-line bg-white px-2.5 py-2">
-                  <p className="text-xs font-black uppercase tracking-wider text-muted">Repair Category</p>
-                  <p className="mt-0.5 text-xs font-bold leading-snug text-ink">
-                    {repairCategoryLabel}
-                  </p>
-                </div>
-                <div
-                  className={`mt-2 h-2.5 w-full overflow-hidden rounded-sm border border-white shadow-sm ${deviceColor.border}`}
-                  style={{ background: deviceColor.gradient }}
-                  aria-hidden="true"
-                />
-                <div className="mt-1.5 flex items-center gap-1.5 text-xs font-bold text-muted">
-                  <span
-                    className={`h-2 w-2 shrink-0 rounded-sm border border-white shadow-sm ${deviceColor.border}`}
-                    style={{ background: deviceColor.gradient }}
-                    aria-hidden="true"
-                  />
-                  <span className="truncate">{workOrder.deviceColor || 'Standard'}</span>
-                </div>
-              </div>
 
-              <div className="divide-y divide-line border-y border-line text-xs">
-                {[
-                  ['Customer Name', workOrder.customerName || 'Unknown customer', UserRound],
-                  ['Address', workOrder.customerAddress || 'No address', MapPin],
-                  ['Contact', workOrder.customerPhone || 'No phone', Phone],
-                  ['Serial / IMEI', workOrder.serialNumber || workOrder.imei || 'N/A', ScanLine],
-                  ['Technician', workOrder.assignedTechName || 'Unassigned', Contact],
-                  ['Intake Date', new Date(workOrder.createdAt).toLocaleDateString(), CalendarDays],
-                  ['Time in Shop', timeInShop, Clock3],
-                ].map(([label, value, Icon]) => (
-                  <div key={label as string} className="flex items-center gap-2.5 py-2.5">
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-brand-soft text-brand">
-                      <Icon className="h-3.5 w-3.5" />
+                {(
+                  [
+                    ['Phone', workOrder.customerPhone || '—'],
+                    ['Name', workOrder.customerName || 'Walk-in Customer'],
+                    ['Model', workOrder.deviceModel || 'Unknown Model'],
+                    ['Serial / IMEI', workOrder.serialNumber || workOrder.imei || '—'],
+                    ['Received', new Date(workOrder.createdAt).toLocaleDateString()],
+                    ['Repairs', repairCategoryLabel],
+                    ['Passcode', workOrder.passcode || '—'],
+                  ] as Array<[string, string]>
+                ).map(([label, value]) => (
+                  <div key={label} className="flex items-center gap-3 py-2">
+                    <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">{label}</span>
+                    <span className="min-w-0 flex-1 truncate text-sm font-semibold text-ink" title={value}>
+                      {value}
                     </span>
-                    <div className="min-w-0">
-                      <div className="text-xs font-extrabold uppercase tracking-wider text-muted">{typeof label === 'string' ? label : null}</div>
-                      <p className="mt-0.5 truncate font-bold text-ink">{typeof value === 'string' ? value : null}</p>
-                    </div>
                   </div>
                 ))}
-                <div className="flex items-center gap-2.5 py-2.5">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-brand-soft text-brand">
-                    <Banknote className="h-3.5 w-3.5" />
+
+                {/* Color — swatch + name (same as Simple Ticket color row) */}
+                <div className="flex items-center gap-3 py-2">
+                  <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Color</span>
+                  <span className="flex min-w-0 items-center gap-2 text-sm font-semibold text-ink">
+                    <span
+                      className={`h-5 w-5 shrink-0 rounded-full border-2 border-white shadow ${deviceColor.border}`}
+                      style={{ background: deviceColor.gradient }}
+                    />
+                    <span className="truncate">{workOrder.deviceColor || 'Standard'}</span>
                   </span>
-                  <div className="min-w-0">
-                    <div className="text-xs font-extrabold uppercase tracking-wider text-muted">Total Estimate</div>
-                    <p className="mt-0.5 font-mono text-base font-black text-brand">
-                      {(workOrder.totalAmount || workOrder.subtotal || 0).toLocaleString()} MMK
-                    </p>
-                  </div>
                 </div>
-              </div>
-            </div>
-          </aside>
 
-          <section className="min-w-0 space-y-4 p-4 sm:p-5">
-            {cleanNotes && (
-              <div className="rounded-lg border border-warning/30 bg-warning/10/80 p-3 text-xs shadow-sm">
-                <div className="flex items-start gap-2.5">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-warning/15 text-warning">
-                    <MessageSquareWarning className="h-4 w-4" />
+                {/* Intake note — multi-line like the form's textarea */}
+                <div className="flex items-start gap-3 py-2">
+                  <span className="w-32 shrink-0 pt-2.5 text-[11px] font-extrabold uppercase tracking-wider text-muted">Intake Note</span>
+                  <p className={`min-w-0 flex-1 whitespace-pre-wrap text-sm leading-snug ${cleanNotes ? 'font-semibold text-ink' : 'font-normal text-muted/70'}`}>
+                    {cleanNotes || 'No intake note'}
+                  </p>
+                </div>
+
+                {/* Total estimate */}
+                <div className="flex items-center gap-3 py-2.5">
+                  <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Total Estimate</span>
+                  <span className="font-mono text-base font-black text-brand">
+                    {(workOrder.totalAmount || workOrder.subtotal || 0).toLocaleString()} MMK
                   </span>
-                  <div className="min-w-0">
-                    <span className="block text-xs font-black uppercase tracking-wide text-warning">Reported issue / Comment</span>
-                    <p className="mt-1 whitespace-pre-wrap font-semibold leading-relaxed text-warning">{cleanNotes}</p>
-                  </div>
                 </div>
               </div>
-            )}
 
-            <section className="rounded-lg border border-line bg-surface p-4">
-              <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-line pb-2.5">
-                <span className="text-xs font-black text-ink">21-Point Hardware Diagnostic Comparison</span>
-                <span className="rounded-md border border-line bg-white px-2 py-0.5 text-xs font-extrabold text-muted">
-                  {diagnosticRows.length} checks
-                </span>
-              </div>
-
-              <div className="overflow-hidden rounded-lg border border-line">
-                {/* Mini table header */}
-                <div className="sticky top-0 z-10 grid grid-cols-[24px_minmax(0,1fr)_auto_auto] items-center gap-x-3 border-b border-line bg-surface px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider text-muted">
-                  <span>#</span>
-                  <span>Check item</span>
-                  <span className="w-14 text-right">Before</span>
-                  <span className="w-14 text-right">After</span>
+              {/* RIGHT — Phone Testing & Checking (before and after) */}
+              <div className="lg:mt-0">
+                <div className="flex items-center justify-between border-b border-line pb-2">
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted">Phone Testing &amp; Checking</span>
+                  <span className="flex shrink-0 items-center gap-1.5">
+                    <span className="rounded-md border border-line bg-surface px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-muted">Before · After</span>
+                    <span className="font-mono text-[11px] font-black text-brand">{diagnosticRows.length} checks</span>
+                  </span>
                 </div>
-                <div className="divide-y divide-line">
+                <div className="mt-0 grid grid-cols-1 gap-x-4 sm:grid-cols-2 sm:gap-x-8">
                   {diagnosticRows.map(({ beforeItem, afterItem }, index) => {
                     const hasFail = beforeItem.status === 'Fail' || afterItem.status === 'Fail';
-                    const statusText = (status: string) =>
-                      status === 'Pass' ? 'text-success'
-                      : status === 'Fail' ? 'text-danger font-extrabold'
-                      : 'text-muted';
+                    const note = afterItem.note || beforeItem.note;
+                    const anyChecked = beforeItem.status !== 'N/A' || afterItem.status !== 'N/A';
                     return (
                       <div
-                        key={beforeItem.id || beforeItem.name}
-                        className={`grid grid-cols-[24px_minmax(0,1fr)_auto_auto] items-baseline gap-x-3 px-3 py-1.5 ${hasFail ? 'bg-danger/10/50' : ''}`}
+                        key={beforeItem.id || `${beforeItem.name}-${index}`}
+                        className={`flex min-h-7 items-center gap-1.5 border-b border-line/60 py-1.5 ${hasFail ? 'bg-danger/10' : ''}`}
                       >
-                        <span className="font-mono text-xs text-muted">{index + 1}</span>
-                        <span className="min-w-0 text-xs font-semibold text-ink">
+                        <StatusDot status={beforeItem.status} label={`Before: ${beforeItem.status}`} />
+                        <StatusDot status={afterItem.status} label={`After: ${afterItem.status}`} />
+                        <span
+                          className={`min-w-0 flex-1 truncate text-xs font-semibold sm:text-sm ${anyChecked ? 'text-ink' : 'text-muted'}`}
+                          title={beforeItem.name}
+                        >
                           {beforeItem.name}
-                          {(afterItem.note || beforeItem.note) && (
-                            <span className="ml-1.5 text-xs font-normal italic text-muted">
-                              — {afterItem.note || beforeItem.note}
-                            </span>
-                          )}
                         </span>
-                        <span className={`w-14 text-right text-xs font-bold uppercase ${statusText(beforeItem.status)}`}>
-                          {beforeItem.status}
-                        </span>
-                        <span className={`w-14 text-right text-xs font-bold uppercase ${statusText(afterItem.status)}`}>
-                          {afterItem.status}
-                        </span>
+                        {note && (
+                          <span className="max-w-[45%] shrink-0 truncate text-xs italic text-muted" title={note}>
+                            {note}
+                          </span>
+                        )}
                       </div>
                     );
                   })}
                 </div>
               </div>
-            </section>
-          </section>
+            </div>
           </div>
         ) : (
           <section
