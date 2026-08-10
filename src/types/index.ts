@@ -277,6 +277,7 @@ export interface PurchaseOrder {
   totalCost: number;
   status: 'Draft' | 'Sent' | 'Received' | 'Partially Received';
   createdAt: string;
+  receivedAt?: string;
 }
 
 export interface Customer {

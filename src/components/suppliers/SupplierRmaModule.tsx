@@ -25,6 +25,8 @@ interface SupplierRmaModuleProps {
   onUpdateSupplier?: (supplier: Supplier) => void;
   onDeleteSupplier?: (supplierId: string) => void;
   onUpdateRmaStatus: (rmaId: string, status: RmaStatus, creditAmount?: number) => void;
+  onAddPurchaseOrder?: (po: PurchaseOrder) => void;
+  onReceivePurchaseOrder?: (poId: string) => void;
   searchQuery?: string;
   setSearchQuery?: (q: string) => void;
   statusFilter?: string;
@@ -44,6 +46,8 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
   onUpdateSupplier,
   onDeleteSupplier,
   onUpdateRmaStatus,
+  onAddPurchaseOrder,
+  onReceivePurchaseOrder,
   searchQuery = '',
   statusFilter = 'ALL',
   showNewRmaModal: propShowNewRmaModal,
@@ -56,6 +60,46 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
   const [localShowNewRmaModal, setLocalShowNewRmaModal] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [showAddSupplierModal, setShowAddSupplierModal] = useState(false);
+
+  // --- Create PO state ---
+  const [showPoModal, setShowPoModal] = useState(false);
+  const [poSupplierId, setPoSupplierId] = useState('');
+  const [poItems, setPoItems] = useState<{ partId: string; partName: string; quantity: number; unitCost: number }[]>([
+    { partId: '', partName: '', quantity: 1, unitCost: 0 },
+  ]);
+  const poTotal = poItems.reduce((sum, it) => sum + (it.unitCost || 0) * (it.quantity || 0), 0);
+  const resetPoForm = () => {
+    setPoSupplierId('');
+    setPoItems([{ partId: '', partName: '', quantity: 1, unitCost: 0 }]);
+  };
+  const handleCreatePoSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!onAddPurchaseOrder) return;
+    const supplier = suppliers.find((s) => s.id === poSupplierId);
+    if (!supplier) {
+      toast.error('Choose a supplier first.', 'Create PO');
+      return;
+    }
+    const items = poItems.filter((it) => it.partId && it.quantity > 0);
+    if (items.length === 0) {
+      toast.error('Add at least one part line.', 'Create PO');
+      return;
+    }
+    const now = new Date().toISOString();
+    const po: PurchaseOrder = {
+      id: `po-${Date.now()}`,
+      poNumber: `PO-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`,
+      supplierId: supplier.id,
+      supplierName: supplier.name,
+      items,
+      totalCost: items.reduce((sum, it) => sum + (it.unitCost || 0) * (it.quantity || 0), 0),
+      status: 'Sent',
+      createdAt: now,
+    };
+    onAddPurchaseOrder(po);
+    setShowPoModal(false);
+    resetPoForm();
+  };
 
   const [newSupplierForm, setNewSupplierForm] = useState({
     name: '',
@@ -317,12 +361,26 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                     {rma.status === 'Credit Approved' ? (
                       <span className="text-xs text-success-deep font-extrabold">+{(rma.vendorCreditAmount || 0).toLocaleString()} {currency} Credit</span>
                     ) : rma.status === 'Shipped to Vendor' ? (
-                      <Button
-                        onClick={() => onUpdateRmaStatus(rma.id, 'Credit Approved', rma.unitCost * rma.quantity)}
-                        className="px-2.5 py-1.5 bg-success/10 hover:bg-success/15 text-success-deep border border-success/20 text-xs font-bold rounded-lg cursor-pointer"
-                      >
-                        Approve Credit
-                      </Button>
+                      <div className="flex items-center gap-1.5">
+                        <Button
+                          onClick={() => onUpdateRmaStatus(rma.id, 'Credit Approved', rma.unitCost * rma.quantity)}
+                          className="px-2.5 py-1.5 bg-success/10 hover:bg-success/15 text-success-deep border border-success/20 text-xs font-bold rounded-lg cursor-pointer"
+                        >
+                          Approve Credit
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            if (window.confirm(`Mark ${rma.partName} × ${rma.quantity} as Replacement Received? Stock will increase by ${rma.quantity}.`)) {
+                              onUpdateRmaStatus(rma.id, 'Replacement Received');
+                            }
+                          }}
+                          className="px-2.5 py-1.5 bg-brand/10 hover:bg-brand/15 text-brand border border-brand/20 text-xs font-bold rounded-lg cursor-pointer"
+                        >
+                          Replacement Received
+                        </Button>
+                      </div>
+                    ) : rma.status === 'Replacement Received' ? (
+                      <span className="text-xs text-brand font-extrabold">↻ Replacement back in stock</span>
                     ) : null}
                   </div>
                 </div>
@@ -381,12 +439,24 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
 
                     <td className="p-3 text-right">
                       {rma.status === 'Shipped to Vendor' && (
-                        <Button
-                          onClick={() => onUpdateRmaStatus(rma.id, 'Credit Approved', rma.unitCost * rma.quantity)}
-                          className="px-2 py-1 bg-success/10 hover:bg-success/15 text-success-deep border border-success/20 text-xs font-bold rounded"
-                        >
-                          Approve Credit
-                        </Button>
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Button
+                            onClick={() => onUpdateRmaStatus(rma.id, 'Credit Approved', rma.unitCost * rma.quantity)}
+                            className="px-2 py-1 bg-success/10 hover:bg-success/15 text-success-deep border border-success/20 text-xs font-bold rounded"
+                          >
+                            Approve Credit
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              if (window.confirm(`Mark ${rma.partName} × ${rma.quantity} as Replacement Received? Stock will increase by ${rma.quantity}.`)) {
+                                onUpdateRmaStatus(rma.id, 'Replacement Received');
+                              }
+                            }}
+                            className="px-2 py-1 bg-brand/10 hover:bg-brand/15 text-brand border border-brand/20 text-xs font-bold rounded"
+                          >
+                            Replacement Received
+                          </Button>
+                        </div>
                       )}
                     </td>
                   </tr>
@@ -405,6 +475,14 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
               <FileText className="w-4 h-4 text-brand" />
               <span>Purchase Orders (POs)</span>
             </h2>
+            <Button
+              type="button"
+              onClick={() => setShowPoModal(true)}
+              className="inline-flex items-center gap-1.5 bg-brand hover:bg-brand-deep text-white text-xs font-bold rounded-lg px-3 py-2 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Create PO</span>
+            </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -415,7 +493,11 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                     <span className="font-mono font-bold text-brand">{po.poNumber}</span>
                     <p className="text-ink font-semibold">{po.supplierName}</p>
                   </div>
-                  <span className="bg-brand-soft text-brand border border-brand/20 px-2 py-0.5 rounded font-bold">{po.status}</span>
+                  <span className={`px-2 py-0.5 rounded font-bold border ${
+                    po.status === 'Received'
+                      ? 'bg-success/10 text-success-deep border-success/30'
+                      : 'bg-brand-soft text-brand border-brand/20'
+                  }`}>{po.status}</span>
                 </div>
 
                 <div className="space-y-1">
@@ -431,6 +513,22 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                   <span className="text-muted">Total PO Value:</span>
                   <span className="text-success-deep font-mono text-sm">{po.totalCost.toLocaleString()} {currency}</span>
                 </div>
+
+                {po.status !== 'Received' && onReceivePurchaseOrder && (
+                  <div className="flex justify-end pt-1">
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        if (window.confirm(`Receive ${po.poNumber}? ${po.items.reduce((s, it) => s + it.quantity, 0)} unit(s) will be added to stock.`)) {
+                          onReceivePurchaseOrder(po.id);
+                        }
+                      }}
+                      className="px-3 py-1.5 bg-success/10 hover:bg-success/15 text-success-deep border border-success/30 text-xs font-bold rounded-lg cursor-pointer"
+                    >
+                      Receive & Restock
+                    </Button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -815,6 +913,116 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                 className="bg-brand hover:bg-brand-deep text-white"
               >
                 Save Changes
+              </Button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Create Purchase Order modal */}
+      {showPoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-3 sm:p-5" onClick={() => { setShowPoModal(false); resetPoForm(); }}>
+          <form
+            onSubmit={handleCreatePoSubmit}
+            onClick={(e) => e.stopPropagation()}
+            className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-xl"
+          >
+            <div className="flex items-center justify-between border-b border-line px-4 py-3">
+              <div>
+                <h3 className="text-sm font-extrabold text-ink">Create Purchase Order</h3>
+                <p className="text-xs text-muted">Order parts from a supplier — receiving adds them to stock.</p>
+              </div>
+              <button type="button" onClick={() => { setShowPoModal(false); resetPoForm(); }} className="rounded-lg p-1 text-muted hover:bg-surface hover:text-ink" aria-label="Close">✕</button>
+            </div>
+
+            <div className="flex-1 min-h-0 space-y-3 overflow-y-auto p-4">
+              <div>
+                <label className="mb-1 block text-xs font-extrabold text-ink uppercase tracking-wider">Supplier</label>
+                <select
+                  value={poSupplierId}
+                  onChange={(e) => setPoSupplierId(e.target.value)}
+                  className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm text-ink outline-none focus:border-brand"
+                >
+                  <option value="">Choose supplier…</option>
+                  {suppliers.map((s) => (
+                    <option key={s.id} value={s.id}>{s.name} {s.code ? `(${s.code})` : ''}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <div className="mb-1 flex items-center justify-between">
+                  <label className="text-xs font-extrabold text-ink uppercase tracking-wider">Items</label>
+                  <Button
+                    type="button"
+                    onClick={() => setPoItems((prev) => [...prev, { partId: '', partName: '', quantity: 1, unitCost: 0 }])}
+                    className="px-2 py-1 bg-brand/10 text-brand border border-brand/20 text-xs font-bold rounded-lg cursor-pointer"
+                  >
+                    + Add Line
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {poItems.map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-2 rounded-xl border border-line bg-surface p-2">
+                      <select
+                        value={item.partId}
+                        onChange={(e) => {
+                          const part = parts.find((p) => p.id === e.target.value);
+                          setPoItems((prev) =>
+                            prev.map((it, i) =>
+                              i === idx
+                                ? { ...it, partId: e.target.value, partName: part ? part.name : '', unitCost: part ? Number(part.costPrice || part.sellingPrice * 0.6 || 0) : it.unitCost }
+                                : it
+                            )
+                          );
+                        }}
+                        className="min-w-0 flex-1 rounded-lg border border-line bg-white px-2 py-1.5 text-xs text-ink outline-none focus:border-brand"
+                      >
+                        <option value="">Part…</option>
+                        {parts.map((p) => (
+                          <option key={p.id} value={p.id}>{p.name} (stock {p.quantityInStock})</option>
+                        ))}
+                      </select>
+                      <input
+                        type="number"
+                        min={1}
+                        value={item.quantity}
+                        onChange={(e) => setPoItems((prev) => prev.map((it, i) => (i === idx ? { ...it, quantity: Math.max(1, Number(e.target.value) || 1) } : it)))}
+                        className="w-16 rounded-lg border border-line bg-white px-2 py-1.5 text-center font-mono text-xs text-ink outline-none focus:border-brand"
+                        aria-label={`Qty line ${idx + 1}`}
+                      />
+                      <input
+                        type="number"
+                        min={0}
+                        step={500}
+                        value={item.unitCost}
+                        onChange={(e) => setPoItems((prev) => prev.map((it, i) => (i === idx ? { ...it, unitCost: Math.max(0, Number(e.target.value) || 0) } : it)))}
+                        className="w-24 rounded-lg border border-line bg-white px-2 py-1.5 text-right font-mono text-xs text-ink outline-none focus:border-brand"
+                        aria-label={`Unit cost line ${idx + 1}`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setPoItems((prev) => prev.filter((_, i) => i !== idx))}
+                        className="shrink-0 rounded-lg p-1 text-muted hover:bg-line hover:text-danger"
+                        aria-label={`Remove line ${idx + 1}`}
+                      >✕</button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between rounded-xl bg-brand/5 border border-brand/20 px-4 py-3">
+                <span className="text-xs font-extrabold text-ink uppercase tracking-wider">PO Total</span>
+                <span className="font-mono text-base font-black text-brand">{poTotal.toLocaleString()} {currency}</span>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 border-t border-line px-4 py-3">
+              <Button type="button" variant="outline" onClick={() => { setShowPoModal(false); resetPoForm(); }}>
+                Cancel
+              </Button>
+              <Button type="submit" className="bg-brand hover:bg-brand-deep text-white">
+                Create PO
               </Button>
             </div>
           </form>

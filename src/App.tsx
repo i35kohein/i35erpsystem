@@ -1410,6 +1410,47 @@ export default function App() {
     saveDocument('suppliers', supplier).catch(reportSaveError);
   };
 
+  // --- Purchase Orders (feature wiring: create + receive → restock) ---
+  const handleAddPurchaseOrder = (po: PurchaseOrder) => {
+    setPurchaseOrders((prev) => [po, ...prev]);
+    saveDocument('purchaseOrders', po).catch(reportSaveError);
+    addToast(`PO ${po.poNumber} created for ${po.supplierName} · ${po.totalCost.toLocaleString()} MMK`, 'success', 'Purchase Order');
+  };
+
+  // Mark a PO as Received and add its items back into parts stock (the flow was
+  // display-only before — nothing ever wrote purchaseOrders or restocked).
+  const handleReceivePurchaseOrder = (poId: string) => {
+    const po = purchaseOrders.find((p) => p.id === poId);
+    if (!po) return;
+    if (po.status === 'Received') {
+      addToast(`${po.poNumber} is already received.`, 'info', 'Purchase Order');
+      return;
+    }
+    const nowIso = new Date().toISOString();
+    let restocked = 0;
+    setParts((prev) =>
+      prev.map((part) => {
+        const line = po.items.find((it) => it.partId === part.id);
+        if (!line) return part;
+        restocked += line.quantity;
+        const updated = {
+          ...part,
+          quantityInStock: Number(part.quantityInStock || 0) + line.quantity,
+        };
+        saveDocument('parts', updated).catch(reportSaveError);
+        return updated;
+      })
+    );
+    const updatedPo: PurchaseOrder = {
+      ...po,
+      status: 'Received',
+      receivedAt: nowIso,
+    };
+    setPurchaseOrders((prev) => prev.map((p) => (p.id === poId ? updatedPo : p)));
+    saveDocument('purchaseOrders', updatedPo).catch(reportSaveError);
+    addToast(`${po.poNumber} received — ${restocked} unit(s) added to stock.`, 'success', 'PO Received');
+  };
+
   const handleUpdateSupplier = (supplier: Supplier) => {
     setSuppliers((prev) => prev.map((s) => (s.id === supplier.id ? supplier : s)));
     saveDocument('suppliers', supplier).catch(reportSaveError);
@@ -1428,6 +1469,7 @@ export default function App() {
   };
 
   const handleUpdateRmaStatus = (rmaId: string, status: RmaStatus, creditAmount?: number) => {
+    const rma = rmas.find((r) => r.id === rmaId);
     setRmas((prev) =>
       prev.map((r) => {
         if (r.id === rmaId) {
@@ -1442,6 +1484,23 @@ export default function App() {
         return r;
       })
     );
+    // Replacement Received → the replacement part comes back into stock.
+    if (status === 'Replacement Received' && rma) {
+      const qty = Number(rma.quantity || 0);
+      if (qty > 0) {
+        setParts((prev) =>
+          prev.map((p) => {
+            if (p.id === rma.partId) {
+              const updated = { ...p, quantityInStock: Number(p.quantityInStock || 0) + qty };
+              saveDocument('parts', updated).catch(reportSaveError);
+              return updated;
+            }
+            return p;
+          })
+        );
+        addToast(`Replacement received — ${qty} × ${rma.partName} added back to stock.`, 'success', 'RMA Replacement');
+      }
+    }
   };
 
   const handleMarkPaid = (workOrder: WorkOrder, paymentMethod: string) => {
@@ -2372,6 +2431,8 @@ export default function App() {
                   onUpdateSupplier={handleUpdateSupplier}
                   onDeleteSupplier={handleDeleteSupplier}
                   onUpdateRmaStatus={handleUpdateRmaStatus}
+                  onAddPurchaseOrder={handleAddPurchaseOrder}
+                  onReceivePurchaseOrder={handleReceivePurchaseOrder}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
                   statusFilter={statusFilter}
