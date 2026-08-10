@@ -278,11 +278,15 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                         {outcomeMeta.label}
                       </span>
 
-                      {wo.serviceType && (
-                        <span className="px-2 py-0.5 text-xs font-bold bg-surface text-ink border border-line rounded-md">
-                          {wo.serviceType}
-                        </span>
-                      )}
+                      {(() => {
+                        const repairsLabel = (wo.selectedRepairs || []).map((r) => r.name).filter(Boolean).join(', ');
+                        const label = repairsLabel || wo.serviceType;
+                        return label ? (
+                          <span className="px-2 py-0.5 text-xs font-bold bg-surface text-ink border border-line rounded-md">
+                            {label}
+                          </span>
+                        ) : null;
+                      })()}
 
                       {wo.priority && wo.priority !== 'Normal' && (
                         <span className="px-2 py-0.5 text-xs font-extrabold bg-danger/15 text-danger rounded-md">

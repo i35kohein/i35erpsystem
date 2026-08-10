@@ -403,15 +403,20 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
     filteredWorkOrders.forEach((wo) => {
       const s = (wo.serviceType || '').toLowerCase();
       const desc = (wo.symptomsReported || '').toLowerCase();
+      const repairs = (wo.selectedRepairs || []).map((r) => r.name).join(' ').toLowerCase();
+      const hay = `${s} ${desc} ${repairs}`;
       const rev = wo.subtotal || wo.totalAmount || 0;
 
-      if (s.includes('screen') || s.includes('display') || s.includes('oled') || desc.includes('screen') || desc.includes('cracked') || desc.includes('glass')) {
+      // Classify by the actual repair names first (selectedRepairs), then
+      // symptoms, then serviceType — serviceType alone is usually just
+      // 'Standard Modular' and would dump everything into the wrong bucket.
+      if (hay.includes('display') || hay.includes('oled') || hay.includes('screen') || hay.includes('cracked')) {
         stats[0].count += 1;
         stats[0].revenue += rev;
-      } else if (s.includes('battery') || s.includes('charging') || s.includes('power') || desc.includes('battery') || desc.includes('charge')) {
+      } else if (hay.includes('battery') || hay.includes('charging') || hay.includes('charge') || hay.includes('power')) {
         stats[1].count += 1;
         stats[1].revenue += rev;
-      } else if (s.includes('soldering') || s.includes('board') || s.includes('ic') || s.includes('micro') || desc.includes('short')) {
+      } else if (hay.includes('board') || hay.includes('soldering') || hay.includes('ic') || hay.includes('micro') || hay.includes('short') || hay.includes('wifi') || hay.includes('baseband') || hay.includes('network')) {
         stats[2].count += 1;
         stats[2].revenue += rev;
       } else {

@@ -348,8 +348,8 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
 
                       {/* Symptoms / Service */}
                       <td className="py-3 px-3 hidden lg:table-cell">
-                        <p className="text-xs text-ink line-clamp-1 max-w-[180px]" title={wo.symptomsReported || wo.serviceType}>
-                          {wo.symptomsReported || wo.serviceType || 'General Repair'}
+                        <p className="text-xs text-ink line-clamp-1 max-w-[180px]" title={wo.symptomsReported || (wo.selectedRepairs || []).map((r) => r.name).join(', ') || wo.serviceType}>
+                          {wo.symptomsReported || (wo.selectedRepairs || []).map((r) => r.name).join(', ') || wo.serviceType || 'General Repair'}
                         </p>
                       </td>
 

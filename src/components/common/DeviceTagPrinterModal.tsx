@@ -910,8 +910,8 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                   </div>
                   <div className="text-right space-y-0.5">
                     <p className="font-mono text-xs font-bold text-black">{workOrder.orderNumber}</p>
-                    <span className="text-xs font-black bg-black text-white px-1.5 py-0.5 rounded inline-block">
-                      {workOrder.serviceType}
+                    <span className="max-w-[110px] truncate text-xs font-black bg-black text-white px-1.5 py-0.5 rounded inline-block" title={(workOrder.selectedRepairs || []).map((r) => r.name).join(', ') || workOrder.serviceType}>
+                      {(workOrder.selectedRepairs || []).map((r) => r.name).filter(Boolean).join(', ') || workOrder.serviceType}
                     </span>
                   </div>
                 </div>

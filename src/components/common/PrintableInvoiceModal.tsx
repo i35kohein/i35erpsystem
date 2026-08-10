@@ -245,7 +245,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
 
               <div className="text-xs space-y-0.5 pt-1">
                 <p><span className="text-muted">Date Issued:</span> <strong>{formattedDate}</strong></p>
-                <p><span className="text-muted">Service Type:</span> <strong>{workOrder.serviceType || 'Standard Modular'}</strong></p>
+                <p><span className="text-muted">Services:</span> <strong>{(workOrder.selectedRepairs || []).map((r) => r.name).filter(Boolean).join(', ') || workOrder.serviceType || 'Standard Modular'}</strong></p>
                 
                 {/* Payment Status Badge */}
                 <div className="pt-1.5">
