@@ -302,13 +302,6 @@ body {
   animation: none !important;
 }
 
-.basic-ui [class*="bg-gradient"],
-.basic-ui [class*="from-"],
-.basic-ui [class*="via-"],
-.basic-ui [class*="to-"] {
-  background-image: none !important;
-}
-
 .basic-ui header {
   background: var(--card-bg) !important;
   border-color: var(--border) !important;

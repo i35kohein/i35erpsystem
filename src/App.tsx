@@ -2435,6 +2435,7 @@ export default function App() {
                   suppliers={suppliers}
                   systemSettings={systemSettings}
                   deviceModels={inventoryDeviceModels}
+                  priceCatalog={priceCatalog.catalog}
                   inventoryCategories={inventoryCategoryOptions}
                   onAddPart={handleAddPart}
                   onUpdatePart={handleUpdatePart}

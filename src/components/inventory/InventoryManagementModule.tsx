@@ -18,8 +18,8 @@ import {Boxes,
   PackageCheck,
   PackageX,
   Check,
+  Folder,
   Sparkles,
-  ArrowRight,
   Edit2,
   Eye,
   Trash2,
@@ -29,6 +29,8 @@ import {Boxes,
   Printer,
   MoreHorizontal} from 'lucide-react';
 import { PartItem, PartQualityTier, Supplier, SystemSettings, RmaItem } from '../../types';
+import { ModelRepairPrice } from '../../types/priceCatalog';
+import { getModelPriceCatalogItems } from '../../utils/priceCatalogLookup';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 import { confirmDialog } from '../common/ConfirmDialog';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
@@ -76,6 +78,7 @@ interface InventoryManagementModuleProps {
   suppliers: Supplier[];
   systemSettings?: SystemSettings;
   deviceModels?: string[];
+  priceCatalog?: ModelRepairPrice[];
   inventoryCategories?: string[];
   onAddPart: (part: PartItem) => void;
   onUpdatePart?: (part: PartItem) => void;
@@ -163,6 +166,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   suppliers,
   systemSettings,
   deviceModels,
+  priceCatalog = [],
   inventoryCategories = [],
   onAddPart,
   onUpdatePart,
@@ -626,6 +630,13 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
   const isBackGlassCategory = /back\s*glass/i.test(newPartData.category || '');
   const selectedPartModel = newPartData.deviceCompatibility?.[0] || '';
+  // Active-device card stats: repair services + distinct categories from the price catalog.
+  const selectedModelStats = useMemo(() => {
+    const model = selectedPartModel;
+    if (!model) return { services: 0, categories: 0 };
+    const items = getModelPriceCatalogItems(model, priceCatalog || []);
+    return { services: items.length, categories: new Set(items.map((i) => i.group).filter(Boolean)).size };
+  }, [selectedPartModel, priceCatalog]);
   const availableBackGlassColors = selectedPartModel ? getAvailableColorsForModel(selectedPartModel) : [];
   const existingLocationBins = useMemo(
     () => [...new Set([
@@ -1963,24 +1974,52 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 <label className="block font-bold text-ink">Device Model</label>
                 <span className="font-medium text-xs text-muted">Price List · {activeDeviceModels.length} models</span>
               </div>
-              <Button
-                type="button"
+              {/* Active Device card — Ko Hein 2026-08-10: gradient card with selected
+                  model + services/categories counts + Switch Model button */}
+              <div
+                role="button"
+                tabIndex={0}
                 onClick={() => setIsDeviceModelChooserOpen(true)}
-                aria-haspopup="dialog"
-                className="flex h-24 w-full items-center justify-between rounded-xl border border-brand/30 bg-brand-soft/60 px-4 text-left transition-colors hover:border-brand hover:bg-brand-soft focus:outline-none "
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setIsDeviceModelChooserOpen(true); } }}
+                className="w-full min-w-0 cursor-pointer bg-gradient-to-br from-brand/8 via-white to-white border border-line rounded-2xl px-4 sm:px-5 py-3.5 shadow-2xs flex items-center justify-between gap-3 transition-colors hover:border-brand/40"
                 title="Choose a model from the Price List"
               >
-                <span className="flex min-w-0 items-center gap-2">
-                  <Smartphone className="h-6 w-6 shrink-0 text-brand" />
-                  <span className="min-w-0">
-                    <span className="block text-sm font-extrabold text-brand">Select Device Model</span>
-                    <span className={`mt-1 block truncate text-xs font-medium ${newPartData.deviceCompatibility?.[0] ? 'text-ink' : 'text-muted'}`}>
-                      {newPartData.deviceCompatibility?.[0] || (activeDeviceModels.length ? 'Choose from Price List' : 'No models in Price List')}
-                    </span>
-                  </span>
-                </span>
-                <ArrowRight className="h-5 w-5 shrink-0 text-brand" />
-              </Button>
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                  <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-2xl bg-brand text-white flex items-center justify-center shadow-md shrink-0">
+                    <Smartphone className="w-5 h-5 sm:w-7 sm:h-7" />
+                  </div>
+                  <div className="min-w-0">
+                    {selectedPartModel ? (
+                      <>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[10px] font-extrabold uppercase tracking-widest text-brand-deep bg-brand/10 px-2 py-0.5 rounded-full">Active Device</span>
+                          <span className="text-[11px] font-bold text-muted">{selectedModelStats.services} Services</span>
+                          <span className="hidden sm:inline text-[11px] font-bold text-success/80">{selectedModelStats.categories} Categories</span>
+                        </div>
+                        <h2 className="text-lg sm:text-2xl font-black text-ink tracking-tight truncate mt-0.5">{selectedPartModel}</h2>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[10px] font-extrabold uppercase tracking-widest text-brand-deep bg-brand/10 px-2 py-0.5 rounded-full">Device Model</span>
+                          <span className="text-[11px] font-bold text-muted">Price List · {activeDeviceModels.length} models</span>
+                        </div>
+                        <h2 className="text-lg sm:text-2xl font-black text-ink tracking-tight truncate mt-0.5">Select Device Model</h2>
+                        <p className="text-xs font-medium text-muted truncate">{activeDeviceModels.length ? 'Choose from Price List' : 'No models in Price List'}</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); setIsDeviceModelChooserOpen(true); }}
+                  className="shrink-0 min-h-10 px-3.5 sm:px-4 rounded-xl bg-brand hover:bg-brand-deep text-white font-extrabold text-xs border border-brand transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-2xs"
+                  title="Choose a model from the Price List"
+                >
+                  <Folder className="w-3.5 h-3.5" />
+                  <span>{selectedPartModel ? 'Switch Model' : 'Select Model'}</span>
+                </Button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
