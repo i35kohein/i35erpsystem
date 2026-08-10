@@ -444,13 +444,12 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   // absolutely-positioned dropdowns (Ko Hein 2026-08-10: "Storage Location Bin drawer menu cant see").
   const [binMenuAnchor, setBinMenuAnchor] = useState<{ top: number; left: number; width: number } | null>(null);
   const [editBinMenuAnchor, setEditBinMenuAnchor] = useState<{ top: number; left: number; width: number } | null>(null);
-  // Bin menu placement: open UPWARD when there is no room below (Ko Hein 2026-08-10: "အပေါ်တက်အောင်လုပ်ပေး").
+  // Bin menu placement: always open UPWARD (Ko Hein 2026-08-10: "drop အောက်မကျပဲ အပေါ်တက်အောင်လုပ်ပေး").
   const computeBinAnchor = (el: HTMLElement): { top: number; left: number; width: number } => {
     const r = el.getBoundingClientRect();
     const estH = Math.min(existingLocationBins.length || 1, 5) * 30 + 14;
-    const openUp = r.bottom + estH > window.innerHeight - 12;
     return {
-      top: openUp ? Math.max(8, r.top - estH - 4) : r.bottom + 4,
+      top: Math.max(8, r.top - estH - 4),
       left: r.left,
       width: r.width,
     };
