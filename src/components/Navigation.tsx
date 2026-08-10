@@ -405,7 +405,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                       aria-label={item.badge !== undefined && (typeof item.badge === 'string' || item.badge > 0) ? `${item.label} (${item.badge} pending)` : item.label}
                     >
                       <div className={`flex items-center min-w-0 ${effectiveCollapsed ? 'justify-center' : 'flex-1'}`}>
-                        <ItemIcon className={`${effectiveCollapsed ? 'w-6 h-6' : 'w-4 h-4'} shrink-0 ${isActive ? 'text-brand' : 'text-muted'}`} />
+                        <ItemIcon className={`${effectiveCollapsed ? 'w-8 h-8' : 'w-4 h-4'} shrink-0 ${isActive ? 'text-brand' : 'text-muted'}`} />
                         {!effectiveCollapsed && <span className="truncate text-xs ml-2.5">{item.label}</span>}
                       </div>
 
