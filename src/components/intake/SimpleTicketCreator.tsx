@@ -163,6 +163,38 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
     setMatchedCustomer(null);
   };
 
+  // Load an existing ticket into this form for editing (Ko Hein 2026-08-10).
+  const loadTicket = (wo: WorkOrder) => {
+    const diag = wo.beforeDiagnostics || [];
+    setForm({
+      name: wo.customerName || '',
+      phone: wo.customerPhone || '',
+      model: wo.deviceModel || '',
+      color: wo.deviceColor || '',
+      imei: wo.imei || wo.serialNumber || '',
+      date: (wo.createdAt || new Date().toISOString()).slice(0, 10),
+      error: '',
+      repairs: wo.selectedRepairs || [],
+      passcode: wo.passcode || '',
+      reply: wo.symptomsReported || '',
+      checks: DIAGNOSTIC_NAMES.map((_name, i) => {
+        const d = diag[i];
+        return {
+          status: d?.status === 'Pass' || d?.status === 'Fail' ? (d.status as 'Pass' | 'Fail') : 'N/A',
+          note: d?.note || '',
+        };
+      }),
+    });
+    setEditingId(wo.id);
+  };
+
+  // All Pass / All N/A for the 21-point checklist (Ko Hein 2026-08-10)
+  const setAllChecks = (status: 'Pass' | 'N/A') =>
+    setForm((f) => ({
+      ...f,
+      checks: f.checks.map((c) => ({ ...c, status, note: status === 'N/A' ? '' : c.note })),
+    }));
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Color is required (Ko Hein 2026-08-10): block save + open the color picker.
@@ -265,9 +297,49 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
 
   const checkedCount = form.checks.filter((c) => c.status === 'Pass').length;
   const editTarget = editingId ? workOrders.find((w) => w.id === editingId) : null;
+  // Recent tickets available for editing (newest first).
+  const editableTickets = useMemo(
+    () =>
+      [...workOrders]
+        .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')))
+        .slice(0, 30),
+    [workOrders]
+  );
 
   return (
     <div className="mx-auto max-w-4xl space-y-4">
+      {/* Edit existing ticket — reload it into this form (Ko Hein 2026-08-10) */}
+      {editableTickets.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <select
+            value={editingId || ''}
+            onChange={(e) => {
+              const id = e.target.value;
+              if (!id) { resetForm(); return; }
+              const wo = workOrders.find((w) => w.id === id);
+              if (wo) loadTicket(wo);
+            }}
+            aria-label="Edit existing ticket"
+            className="rounded-lg border border-line bg-white px-3 py-2 text-xs font-bold text-ink outline-none transition-colors hover:border-brand/40"
+          >
+            <option value="">✏️ Edit existing ticket…</option>
+            {editableTickets.map((wo) => (
+              <option key={wo.id} value={wo.id}>
+                {wo.orderNumber || wo.id} · {wo.deviceModel || 'Unknown'} · {wo.customerName || '—'}
+              </option>
+            ))}
+          </select>
+          {editingId && (
+            <button
+              type="button"
+              onClick={resetForm}
+              className="rounded-lg border border-line bg-surface px-3 py-2 text-xs font-bold text-ink transition-colors hover:bg-line cursor-pointer"
+            >
+              + New Ticket
+            </button>
+          )}
+        </div>
+      )}
       {/* Paper sheet */}
       <div className="print:border-0 print:shadow-none overflow-hidden rounded-2xl border border-line bg-white shadow-xs">
         <header className="flex items-center justify-between gap-4 border-b border-line px-4 py-3 sm:px-7">
@@ -416,7 +488,23 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
           <div className="lg:mt-0">
             <div className="flex items-center justify-between border-b border-line pb-2">
               <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted">Phone Testing & Checking</span>
-              <span className="shrink-0 font-mono text-[11px] font-black text-brand">{checkedCount}/{DIAGNOSTIC_NAMES.length}</span>
+              <span className="flex shrink-0 items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setAllChecks('Pass')}
+                  className="no-print rounded-lg border border-success/30 bg-success/10 px-2 py-0.5 text-[10px] font-black text-success-deep transition-colors hover:bg-success/20 cursor-pointer"
+                >
+                  All Pass
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAllChecks('N/A')}
+                  className="no-print rounded-lg border border-line bg-surface px-2 py-0.5 text-[10px] font-black text-muted transition-colors hover:bg-line cursor-pointer"
+                >
+                  All N/A
+                </button>
+                <span className="font-mono text-[11px] font-black text-brand">{checkedCount}/{DIAGNOSTIC_NAMES.length}</span>
+              </span>
             </div>
             <div className="mt-0 grid grid-cols-1 gap-x-4 sm:grid-cols-2 sm:gap-x-8">
               {DIAGNOSTIC_NAMES.map((name, i) => (
