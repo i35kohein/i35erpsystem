@@ -7,7 +7,7 @@ import {Sparkles, Plus, Search, Filter, AlertTriangle, CheckCircle2, Info, Alert
   TrendingUp,
   Grid, Smartphone, Layers, ScanLine, ListFilter, Activity, Users, Boxes, Coins, ShieldAlert,
   Table as TableIcon, LayoutGrid, Flame, Camera} from 'lucide-react';
-import { subscribeToCollection, fetchCloudCollection, saveDocument, deleteDocument } from './lib/supabase';
+import { subscribeToCollection, refreshCollection, refreshAllCollections, flushOfflineQueue, saveDocument, deleteDocument } from './lib/supabase';
 import { setActiveUserId, notifyAccountChanged } from './utils/accountSettings';
 
 // ---- AI repair-type classification (Spareparts Change vs Hardware Repair) ----
@@ -476,21 +476,30 @@ export default function App() {
     let cancelled = false;
     const refresh = async () => {
       if (cancelled || document.visibilityState !== 'visible') return;
-      try {
-        const [freshWos, freshParts] = await Promise.all([
-          fetchCloudCollection<WorkOrder>('workOrders'),
-          fetchCloudCollection<PartItem>('parts'),
-        ]);
-        if (cancelled) return;
-        setWorkOrders(freshWos);
-        setParts(freshParts);
-      } catch {
-        // offline — keep current state, retry next tick
-      }
+      // Route through the shared collection cache so the 45s refresh, realtime
+      // events and offline-optimistic writes all stay consistent (bug #1/#2).
+      await Promise.allSettled([
+        refreshCollection<WorkOrder>('workOrders'),
+        refreshCollection<PartItem>('parts'),
+      ]);
     };
+    // Push any queued offline writes first, then re-fetch.
+    const refreshWithFlush = async () => {
+      if (cancelled) return;
+      await flushOfflineQueue();
+      await refresh();
+    };
+    void refreshWithFlush(); // startup: flush leftovers from a previous session
     const id = window.setInterval(refresh, 45_000);
-    // Manual refresh from the topbar database icon (OfflineSyncStatusBadge).
-    const handleRefreshRequest = () => refresh();
+    // Manual refresh from the topbar database icon (OfflineSyncStatusBadge):
+    // flush queued writes, then re-fetch every subscribed collection.
+    const handleRefreshRequest = () => {
+      void (async () => {
+        if (cancelled) return;
+        await flushOfflineQueue();
+        refreshAllCollections();
+      })();
+    };
     window.addEventListener('erp-refresh-request', handleRefreshRequest);
     return () => {
       cancelled = true;
