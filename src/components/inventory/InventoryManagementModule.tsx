@@ -1450,7 +1450,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         />
                       </th>
                     )}
-                    <th className="w-[26%] min-w-[220px] px-2 py-2 bg-surface">
+                    <th className="w-[28%] min-w-[220px] px-2 py-2 bg-surface">
                       <div className="flex items-center gap-1">
                         <button type="button" onClick={() => toggleSort('name')} className="inline-flex items-center gap-1 hover:text-brand transition-colors cursor-pointer uppercase font-mono text-xs focus:outline-none" title="Sort by part name">
                           Part Name & SKU
@@ -1550,7 +1550,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       </button>
                     </th>
                     {inlineEditMode && <th className="w-[13%] min-w-[110px] px-1.5 py-2 bg-surface">Supplier</th>}
-                    <th className="w-[16%] min-w-[110px] px-2 py-2 bg-surface hidden md:table-cell">Bin</th>
+                    <th className="w-[10%] min-w-[96px] px-2 py-2 bg-surface hidden md:table-cell">Bin</th>
                     {!inlineEditMode && <th className="w-[12%] min-w-[80px] px-2 py-2 text-right bg-surface">Detail</th>}
                   </tr>
                 </thead>
@@ -1576,7 +1576,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                           </td>
                         )}
                         {/* Part Name & SKU */}
-                        <td className="w-[26%] min-w-[220px] px-2 py-2 space-y-1">
+                        <td className="w-[28%] min-w-[220px] px-2 py-2 space-y-1">
                           <div className="flex items-start space-x-2">
                             <div className="p-1 rounded-md bg-brand/10 text-brand-deep shrink-0 mt-0.5">
                               <Cpu className="w-3 h-3" />
@@ -1722,7 +1722,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         ) : null}
 
                         {/* Location Bin */}
-                        <td className="w-[16%] min-w-[110px] px-1.5 py-2 hidden md:table-cell">
+                        <td className="w-[10%] min-w-[96px] px-1.5 py-2 hidden md:table-cell">
                           {inlineEditMode ? (
                             <div className="flex min-w-0 flex-col gap-0.5 text-xs font-bold uppercase tracking-wide text-muted">
                               <span>Bin</span>

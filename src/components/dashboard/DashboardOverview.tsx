@@ -182,6 +182,8 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
   const dateFilter = externalDateFilter || internalDateFilter;
 
   const [internalSubTab, setInternalSubTab] = useState<'status-queue' | 'repair-data' | 'tech-kpi' | 'inventory' | 'finance' | 'warranty-watch'>('status-queue');
+  // Dashboard inventory snapshot owner filter — APP (shop) vs KZH (Ko Hein) (Ko Hein 2026-08-10)
+  const [dashOwner, setDashOwner] = useState<'ALL' | 'APP' | 'KZH'>('ALL');
   // Controlled from App navbar when provided; falls back to internal state.
   const activeDashboardSubTab = activeSubTab || internalSubTab;
   const setActiveDashboardSubTab = (tab: typeof activeDashboardSubTab) => {
@@ -342,7 +344,8 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
 
   // Filter ONLY Repair-Related Low Stock Parts
   const repairLowStockParts = useMemo(() => {
-    return parts.filter((p) => {
+    const ownerParts = dashOwner === 'ALL' ? parts : parts.filter((p) => (p.owner || 'APP') === dashOwner);
+    return ownerParts.filter((p) => {
       const isLow = p.quantityInStock <= p.reorderPoint;
       const isRepairPart = REPAIR_CATEGORIES_KEYWORDS.some((cat) => 
         p.category.toLowerCase().includes(cat) ||
@@ -350,7 +353,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
       );
       return isLow && isRepairPart;
     });
-  }, [parts]);
+  }, [parts, dashOwner]);
 
   const activeRepairs = filteredWorkOrders.filter((w) => w.status !== 'Taken Out' && w.status !== 'Finished' && w.status !== 'Cant Repair' && w.status !== 'Customer Not Repair');
   // "Ready for Pickup" = Finished only. Taken Out tickets have already been
@@ -463,12 +466,13 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
 
   // Inventory & RMA Analytics
   const inventoryAnalytics = useMemo(() => {
-    const totalValuation = parts.reduce((sum, p) => sum + (p.costPrice || (p.sellingPrice * 0.6)) * p.quantityInStock, 0);
-    const totalItems = parts.reduce((sum, p) => sum + p.quantityInStock, 0);
-    const lowStockCount = parts.filter((p) => p.quantityInStock <= p.reorderPoint).length;
+    const ownerParts = dashOwner === 'ALL' ? parts : parts.filter((p) => (p.owner || 'APP') === dashOwner);
+    const totalValuation = ownerParts.reduce((sum, p) => sum + (p.costPrice || (p.sellingPrice * 0.6)) * p.quantityInStock, 0);
+    const totalItems = ownerParts.reduce((sum, p) => sum + p.quantityInStock, 0);
+    const lowStockCount = ownerParts.filter((p) => p.quantityInStock <= p.reorderPoint).length;
 
     return { totalValuation, totalItems, lowStockCount };
-  }, [parts]);
+  }, [parts, dashOwner]);
 
   // Top Selling Parts — by units sold across revenue-eligible tickets
   // (includes labor service lines so the list shows data even before part
@@ -898,9 +902,23 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
 
             {/* Inventory Snapshot */}
             <div className="flex flex-col min-h-[210px] bg-white border border-line rounded-2xl p-4 shadow-2xs">
-              <div className="flex items-center space-x-2 mb-3">
-                <Boxes className="w-4 h-4 text-warning" />
+              <div className="flex items-center gap-2 mb-3">
+                <Boxes className="w-4 h-4 text-warning shrink-0" />
                 <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Inventory</h3>
+                <div className="ml-auto flex items-center gap-1">
+                  {(['ALL', 'APP', 'KZH'] as const).map((owner) => (
+                    <button
+                      key={owner}
+                      type="button"
+                      onClick={() => setDashOwner(owner)}
+                      className={`rounded px-1.5 py-0.5 text-[9px] font-black uppercase transition-colors cursor-pointer ${
+                        dashOwner === owner ? 'bg-brand text-white' : 'bg-surface text-muted hover:bg-line hover:text-ink'
+                      }`}
+                    >
+                      {owner}
+                    </button>
+                  ))}
+                </div>
               </div>
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between text-xs">
