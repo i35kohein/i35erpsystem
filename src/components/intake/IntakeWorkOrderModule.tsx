@@ -87,7 +87,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   const [isDetailModalOpen, setIsDetailModalOpen] = useState<boolean>(false);
   const [isCameraScannerOpen, setIsCameraScannerOpen] = useState<boolean>(false);
   const [ticketToDelete, setTicketToDelete] = useState<WorkOrder | null>(null);
-  const [localViewMode, setLocalViewMode] = useState<'table' | 'cards'>('table');
+  const [localViewMode, setLocalViewMode] = useState<'table' | 'cards'>('cards');
   const viewMode = propViewMode !== undefined ? propViewMode : localViewMode;
   const setViewMode = (v: 'table' | 'cards') => (propSetViewMode ? propSetViewMode(v) : setLocalViewMode(v));
 

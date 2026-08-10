@@ -257,10 +257,8 @@ export default function App() {
   const inventoryMoreAnchorRef = useRef<HTMLButtonElement | null>(null);
   const [inventoryScanQuery, setInventoryScanQuery] = useState('');
   const [inventoryLowStockOnly, setInventoryLowStockOnly] = useState(false);
-  const [qaViewMode, setQaViewMode] = useState<'table' | 'cards'>('table');
-  const [intakeViewMode, setIntakeViewMode] = useState<'table' | 'cards'>(() =>
-    typeof window !== 'undefined' && window.innerWidth < 768 ? 'cards' : 'table'
-  );
+  const [qaViewMode, setQaViewMode] = useState<'table' | 'cards'>('cards');
+  const [intakeViewMode, setIntakeViewMode] = useState<'table' | 'cards'>('cards');
   const [intakeSortByPriority, setIntakeSortByPriority] = useState(false);
   const [intakeScanRequest, setIntakeScanRequest] = useState(0);
   const inventoryScanSubmitRef = useRef<(() => void) | null>(null);
