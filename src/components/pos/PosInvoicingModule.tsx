@@ -748,7 +748,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                     )}
                                   </td>
 
-                                  {/* Unit Price — editable, strike-through if discounted */}
+                                  {/* Unit Price — show original (strike) + discounted side by side if discounted */}
                                   <td className="border border-line px-1 py-1 text-center">
                                     {isEditing ? (
                                       <input
@@ -760,9 +760,16 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                         className="w-full text-center text-xs font-mono font-bold text-ink bg-surface border border-brand rounded px-1 py-0.5 outline-none"
                                       />
                                     ) : (
-                                      <span className={`font-mono tabular-nums ${li.lineItemDiscountPercent ? 'text-muted line-through' : 'text-muted'}`}>
-                                        {li.unitPrice.toLocaleString()}
-                                      </span>
+                                      <div className="flex flex-col items-center gap-0">
+                                        {li.lineItemDiscountPercent ? (
+                                          <React.Fragment>
+                                            <span className="font-mono text-[10px] text-muted line-through">{li.unitPrice.toLocaleString()}</span>
+                                            <span className="font-mono text-[11px] font-black text-brand">{Math.round(li.unitPrice * (1 - li.lineItemDiscountPercent / 100)).toLocaleString()}</span>
+                                          </React.Fragment>
+                                        ) : (
+                                          <span className="font-mono text-muted tabular-nums">{li.unitPrice.toLocaleString()}</span>
+                                        )}
+                                      </div>
                                     )}
                                   </td>
 
@@ -788,23 +795,33 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                     )}
                                   </td>
 
-                                  {/* Amount = final after discount */}
+                                  {/* Amount = original → discount → final */}
                                   <td className="border border-line px-2 py-1.5 text-right font-mono font-black text-ink tabular-nums whitespace-nowrap">
                                     <div className="flex flex-col items-end gap-0">
-                                      <span className="inline-flex items-center gap-1.5">
-                                        {effectiveTotal.toLocaleString()}
-                                        <button
-                                          type="button"
-                                          onClick={() => handleRemoveInventoryPartFromWorkOrder(li.id)}
-                                          aria-label={`Remove ${li.description}`}
-                                          title="Remove line item"
-                                          className="text-muted hover:text-danger p-0.5 rounded transition-colors cursor-pointer focus:outline-none"
-                                        >
-                                          <X className="w-3 h-3" />
-                                        </button>
-                                      </span>
-                                      {itemDiscountAmt > 0 && (
-                                        <span className="text-[10px] font-semibold text-success">-{itemDiscountAmt.toLocaleString()} off</span>
+                                      {li.lineItemDiscountPercent ? (
+                                        <React.Fragment>
+                                          <span className="text-[10px] text-muted line-through">{lineTotal.toLocaleString()}</span>
+                                          <span className="font-extrabold text-success-deep text-[10px]">-{itemDiscountAmt.toLocaleString()} ({li.lineItemDiscountPercent}%)</span>
+                                          <span className="font-black text-ink text-xs">{effectiveTotal.toLocaleString()}</span>
+                                        </React.Fragment>
+                                      ) : (
+                                        <React.Fragment>
+                                          <span className="inline-flex items-center gap-1.5">
+                                            {effectiveTotal.toLocaleString()}
+                                            <button
+                                              type="button"
+                                              onClick={() => handleRemoveInventoryPartFromWorkOrder(li.id)}
+                                              aria-label={`Remove ${li.description}`}
+                                              title="Remove line item"
+                                              className="text-muted hover:text-danger p-0.5 rounded transition-colors cursor-pointer focus:outline-none"
+                                            >
+                                              <X className="w-3 h-3" />
+                                            </button>
+                                          </span>
+                                          {itemDiscountAmt > 0 && (
+                                            <span className="text-[10px] font-semibold text-success">-{itemDiscountAmt.toLocaleString()} off</span>
+                                          )}
+                                        </React.Fragment>
                                       )}
                                     </div>
                                   </td>
