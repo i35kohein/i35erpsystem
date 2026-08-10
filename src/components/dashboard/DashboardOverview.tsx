@@ -94,7 +94,7 @@ const TrendChart: React.FC<{
   };
 
   return (
-    <div className="w-full h-80 mt-4 -ml-4">
+    <div className="w-full h-64 mt-4 -ml-4">
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-line)" />
@@ -182,8 +182,8 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
   const dateFilter = externalDateFilter || internalDateFilter;
 
   const [internalSubTab, setInternalSubTab] = useState<'status-queue' | 'repair-data' | 'tech-kpi' | 'inventory' | 'finance' | 'warranty-watch'>('status-queue');
-  // Dashboard inventory snapshot owner filter — APP (shop) vs KZH (Ko Hein) (Ko Hein 2026-08-10)
-  const [dashOwner, setDashOwner] = useState<'ALL' | 'APP' | 'KZH'>('ALL');
+  // Dashboard inventory snapshot owner filter default — APP (shop) vs KZH (Ko Hein)
+  const [dashOwner] = useState<'ALL' | 'APP' | 'KZH'>('ALL');
   // Controlled from App navbar when provided; falls back to internal state.
   const activeDashboardSubTab = activeSubTab || internalSubTab;
   const setActiveDashboardSubTab = (tab: typeof activeDashboardSubTab) => {
@@ -778,223 +778,144 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
         </div>
       </div>
 
-          {/* Analytics Grid — stage, devices, categories, finance, inventory, tech, warranty */}
-          <div className="grid auto-rows-fr grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3.5">
+          {/* Compact Dashboard Summary */}
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-3.5">
 
-            {/* Stage Distribution */}
+            {/* Repair Health */}
             <div className="flex flex-col min-h-[210px] bg-white border border-line rounded-2xl p-4 shadow-2xs">
               <div className="flex items-center space-x-2 mb-3">
                 <ListFilter className="w-4 h-4 text-brand" />
-                <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Stage Distribution</h3>
+                <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Repair Health</h3>
               </div>
-              <div className="space-y-2.5">
+              <div className="space-y-2.5 text-xs">
                 {[
-                  { label: 'Received', count: filteredWorkOrders.filter((w) => w.status === 'Receive').length, bar: 'bg-brand', text: 'text-brand' },
-                  { label: 'In Progress', count: filteredWorkOrders.filter((w) => w.status === 'In Progress').length, bar: 'bg-purple', text: 'text-purple' },
-                  { label: 'Pending', count: filteredWorkOrders.filter((w) => w.status === 'Pending').length, bar: 'bg-warning', text: 'text-warning' },
-                  { label: 'Finished', count: filteredWorkOrders.filter((w) => w.status === 'Finished').length, bar: 'bg-success', text: 'text-success-deep' },
-                  { label: 'Taken Out', count: filteredWorkOrders.filter((w) => w.status === 'Taken Out').length, bar: 'bg-line', text: 'text-muted' },
-                ].map((s) => {
-                  const pct = filteredWorkOrders.length > 0 ? Math.round((s.count / filteredWorkOrders.length) * 100) : 0;
+                  { label: 'Received', count: filteredWorkOrders.filter((w) => w.status === 'Receive').length, color: 'bg-brand' },
+                  { label: 'In Progress', count: filteredWorkOrders.filter((w) => w.status === 'In Progress').length, color: 'bg-purple' },
+                  { label: 'Pending', count: filteredWorkOrders.filter((w) => w.status === 'Pending').length, color: 'bg-warning' },
+                  { label: 'Finished', count: filteredWorkOrders.filter((w) => w.status === 'Finished').length, color: 'bg-success' },
+                  { label: 'Taken Out', count: filteredWorkOrders.filter((w) => w.status === 'Taken Out').length, color: 'bg-line' },
+                ].map((stage) => {
+                  const pct = filteredWorkOrders.length > 0 ? Math.round((stage.count / filteredWorkOrders.length) * 100) : 0;
                   return (
-                    <div key={s.label} className="space-y-1">
+                    <div key={stage.label} className="space-y-1">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="font-bold text-ink">{s.label}</span>
-                        <span className={`font-mono font-black ${s.text}`}>{s.count} · {pct}%</span>
+                        <span className="font-semibold text-ink">{stage.label}</span>
+                        <span className="font-mono font-black text-muted">{stage.count}</span>
                       </div>
                       <div className="w-full h-1.5 bg-line rounded-full overflow-hidden">
-                        <div className={`h-full ${s.bar} rounded-full transition-all duration-500`} style={{ width: `${pct}%` }} />
+                        <div className={`${stage.color} h-full rounded-full`} style={{ width: `${pct}%` }} />
                       </div>
                     </div>
                   );
                 })}
               </div>
-            </div>
 
-            {/* Top Repair Devices */}
-            <div className="flex flex-col min-h-[210px] bg-white border border-line rounded-2xl p-4 shadow-2xs">
-              <div className="flex items-center space-x-2 mb-3">
-                <Smartphone className="w-4 h-4 text-purple" />
-                <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Top Repair Devices</h3>
-              </div>
-              {topRepairDevices.length === 0 ? (
-                <p className="text-xs text-muted text-center py-8">No tickets in range</p>
-              ) : (
-                <div className="space-y-2">
-                  {topRepairDevices.slice(0, 5).map((dev, idx) => {
-                    const maxCount = topRepairDevices[0]?.count || 1;
-                    const barPct = Math.max(8, Math.round((dev.count / maxCount) * 100));
-                    return (
-                      <div key={dev.name} className="space-y-1">
-                        <div className="flex items-center justify-between gap-2 text-xs">
-                          <span className="font-bold text-ink truncate">{idx + 1}. {dev.name}</span>
-                          <span className="font-mono font-black text-ink shrink-0">{dev.count} tickets</span>
-                        </div>
-                        <div className="w-full h-1.5 bg-line rounded-full overflow-hidden">
-                          <div className="h-full bg-purple rounded-full" style={{ width: `${barPct}%` }} />
-                        </div>
-                      </div>
-                    );
-                  })}
+              <div className="pt-4 border-t border-line space-y-3 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-ink">Top device</span>
+                  <span className="font-mono font-black text-muted">{topRepairDevices[0]?.count ?? 0} tickets</span>
                 </div>
-              )}
-            </div>
-
-            {/* Repair Categories */}
-            <div className="flex flex-col min-h-[210px] bg-white border border-line rounded-2xl p-4 shadow-2xs">
-              <div className="flex items-center space-x-2 mb-3">
-                <Activity className="w-4 h-4 text-brand" />
-                <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Repair Categories</h3>
+                {topRepairDevices.slice(0, 3).map((dev, idx) => (
+                  <div key={dev.name} className="flex items-center justify-between gap-2">
+                    <span className="truncate text-sm font-semibold text-ink">{idx + 1}. {dev.name}</span>
+                    <span className="text-xs text-muted">{dev.count}</span>
+                  </div>
+                ))}
               </div>
-              {topRepairCategories.length === 0 ? (
-                <p className="text-xs text-muted text-center py-8">No data</p>
-              ) : (
-                <div className="space-y-2.5">
-                  {topRepairCategories.slice(0, 4).map((cat) => (
-                    <div key={cat.id} className="flex items-center justify-between gap-2">
-                      <div className="flex items-center space-x-2 min-w-0">
-                        <span className={`w-7 h-7 rounded-lg ${cat.bgLight} ${cat.textCol} flex items-center justify-center shrink-0`}>
-                          <cat.icon className="w-3.5 h-3.5" />
-                        </span>
-                        <span className="text-xs font-bold text-ink truncate">{cat.label}</span>
-                      </div>
-                      <div className="flex items-center space-x-2 shrink-0">
-                        <span className="font-mono text-xs font-black text-ink">{cat.count}</span>
-                        <span className="text-[11px] font-bold text-muted w-11 text-right">{cat.percentage}%</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
 
-            {/* Financial Snapshot */}
+            {/* Financial Pulse */}
             <div className="flex flex-col min-h-[210px] bg-white border border-line rounded-2xl p-4 shadow-2xs">
               <div className="flex items-center space-x-2 mb-3">
                 <Coins className="w-4 h-4 text-success" />
-                <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Financial Snapshot</h3>
+                <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Financial Pulse</h3>
               </div>
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted font-medium">Collected</span>
-                  <span className="font-mono font-black text-success-deep">{financialAnalytics.totalCollected.toLocaleString()} {currency}</span>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="p-3 bg-surface rounded-2xl space-y-1">
+                  <span className="text-muted">Collected</span>
+                  <p className="font-black text-ink">{financialAnalytics.totalCollected.toLocaleString()} {currency}</p>
                 </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted font-medium">Unpaid Balance</span>
-                  <span className="font-mono font-black text-danger">{financialAnalytics.totalUnpaidBalance.toLocaleString()} {currency}</span>
+                <div className="p-3 bg-surface rounded-2xl space-y-1">
+                  <span className="text-muted">Unpaid</span>
+                  <p className="font-black text-danger">{financialAnalytics.totalUnpaidBalance.toLocaleString()} {currency}</p>
                 </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted font-medium">Paid Tickets</span>
-                  <span className="font-mono font-black text-ink">{financialAnalytics.paidCount}</span>
+                <div className="p-3 bg-surface rounded-2xl space-y-1">
+                  <span className="text-muted">Avg ticket</span>
+                  <p className="font-black text-ink">{avgTicketValue.toLocaleString()} {currency}</p>
                 </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted font-medium">Unpaid Tickets</span>
-                  <span className="font-mono font-black text-ink">{financialAnalytics.unpaidCount}</span>
+                <div className="p-3 bg-surface rounded-2xl space-y-1">
+                  <span className="text-muted">Margin</span>
+                  <p className={`font-black ${marginPercent < 0 ? 'text-danger' : 'text-success-deep'}`}>{marginPercent}%</p>
                 </div>
-                <div className="pt-2 border-t border-line">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted font-medium">Margin</span>
-                    <span className={`font-mono font-black ${marginPercent < 0 ? 'text-danger' : 'text-success-deep'}`}>{marginPercent}%</span>
-                  </div>
+              </div>
+
+              <div className="pt-4 border-t border-line space-y-2 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted">Paid tickets</span>
+                  <span className="font-bold text-ink">{financialAnalytics.paidCount}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted">Unpaid tickets</span>
+                  <span className="font-bold text-ink">{financialAnalytics.unpaidCount}</span>
                 </div>
               </div>
             </div>
 
-            {/* Inventory Snapshot */}
+            {/* Inventory & Warranty */}
             <div className="flex flex-col min-h-[210px] bg-white border border-line rounded-2xl p-4 shadow-2xs">
               <div className="flex items-center gap-2 mb-3">
                 <Boxes className="w-4 h-4 text-warning shrink-0" />
-                <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Inventory</h3>
-                <div className="ml-auto flex items-center gap-1">
-                  {(['ALL', 'APP', 'KZH'] as const).map((owner) => (
-                    <button
-                      key={owner}
-                      type="button"
-                      onClick={() => setDashOwner(owner)}
-                      className={`rounded px-1.5 py-0.5 text-[9px] font-black uppercase transition-colors cursor-pointer ${
-                        dashOwner === owner ? 'bg-brand text-white' : 'bg-surface text-muted hover:bg-line hover:text-ink'
-                      }`}
-                    >
-                      {owner}
-                    </button>
-                  ))}
+                <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Inventory & Warranty</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="p-3 bg-surface rounded-2xl space-y-1">
+                  <span className="text-muted">Stock value</span>
+                  <p className="font-black text-ink">{inventoryAnalytics.totalValuation.toLocaleString()} {currency}</p>
+                </div>
+                <div className="p-3 bg-surface rounded-2xl space-y-1">
+                  <span className="text-muted">Total items</span>
+                  <p className="font-black text-ink">{inventoryAnalytics.totalItems}</p>
+                </div>
+                <div className="p-3 bg-surface rounded-2xl space-y-1">
+                  <span className="text-muted">Low stock</span>
+                  <p className={`font-black ${inventoryAnalytics.lowStockCount > 0 ? 'text-warning' : 'text-success-deep'}`}>{inventoryAnalytics.lowStockCount}</p>
+                </div>
+                <div className="p-3 bg-surface rounded-2xl space-y-1">
+                  <span className="text-muted">Repair parts low</span>
+                  <p className={`font-black ${repairLowStockParts.length > 0 ? 'text-danger' : 'text-success-deep'}`}>{repairLowStockParts.length}</p>
                 </div>
               </div>
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted font-medium">Total Items</span>
-                  <span className="font-mono font-black text-ink">{inventoryAnalytics.totalItems}</span>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted font-medium">Stock Value</span>
-                  <span className="font-mono font-black text-ink">{inventoryAnalytics.totalValuation.toLocaleString()} {currency}</span>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted font-medium">Low Stock</span>
-                  <span className={`font-mono font-black ${inventoryAnalytics.lowStockCount > 0 ? 'text-warning' : 'text-success-deep'}`}>
-                    {inventoryAnalytics.lowStockCount} SKUs
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted font-medium">Repair Parts Low</span>
-                  <span className={`font-mono font-black ${repairLowStockParts.length > 0 ? 'text-danger' : 'text-success-deep'}`}>
-                    {repairLowStockParts.length}
-                  </span>
-                </div>
-              </div>
-            </div>
 
-            {/* Technician Load */}
-            <div className="flex flex-col min-h-[210px] bg-white border border-line rounded-2xl p-4 shadow-2xs">
-              <div className="flex items-center space-x-2 mb-3">
-                <Users className="w-4 h-4 text-brand" />
-                <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Technician Load</h3>
-              </div>
-              {techLoadData.length === 0 ? (
-                <p className="text-xs text-muted text-center py-8">No technicians</p>
-              ) : (
-                <div className="space-y-2.5">
-                  {techLoadData.map(({ tech, activeCount }) => {
-                    const maxLoad = Math.max(...techLoadData.map((t) => t.activeCount), 1);
-                    const pct = Math.max(8, Math.round((activeCount / maxLoad) * 100));
-                    return (
-                      <div key={tech.id} className="space-y-1">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="font-bold text-ink truncate">{tech.name}</span>
-                          <span className="font-mono font-black text-ink">{activeCount} jobs</span>
-                        </div>
-                        <div className="w-full h-1.5 bg-line rounded-full overflow-hidden">
-                          <div className="h-full bg-brand rounded-full" style={{ width: `${pct}%` }} />
-                        </div>
-                      </div>
-                    );
-                  })}
+              <div className="pt-4 border-t border-line space-y-2 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted">Pending RMAs</span>
+                  <span className="font-bold text-ink">{pendingRmas.length}</span>
                 </div>
-              )}
-            </div>
-
-            {/* Warranty Watch */}
-            <div className="flex flex-col min-h-[210px] bg-white border border-line rounded-2xl p-4 shadow-2xs">
-              <div className="flex items-center space-x-2 mb-3">
-                <ShieldAlert className="w-4 h-4 text-purple" />
-                <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Warranty Watch</h3>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted">Expiring soon</span>
+                  <span className="font-bold text-warning">{expiringSoonWorkOrders.length}</span>
+                </div>
               </div>
-              {expiringSoonWorkOrders.length === 0 ? (
-                <p className="text-xs text-muted text-center py-8">No warranties expiring soon</p>
-              ) : (
-                <div className="space-y-2">
-                  {expiringSoonWorkOrders.slice(0, 4).map((item) => (
-                    <div key={item.wo.id} className="flex items-center justify-between gap-2 text-xs">
+
+              {expiringSoonWorkOrders.length > 0 ? (
+                <div className="mt-3 space-y-2 text-xs">
+                  {expiringSoonWorkOrders.slice(0, 3).map((item) => (
+                    <div key={item.wo.id} className="flex items-center justify-between gap-2">
                       <div className="min-w-0">
-                        <p className="font-bold text-ink truncate">{item.wo.customerName}</p>
-                        <p className="text-[11px] text-muted truncate">{item.wo.deviceModel}</p>
+                        <p className="font-semibold text-ink truncate">{item.wo.orderNumber}</p>
+                        <p className="text-muted truncate">{item.wo.customerName}</p>
                       </div>
-                      <span className={`font-mono font-black shrink-0 ${item.isCritical ? 'text-danger' : 'text-warning'}`}>
+                      <span className={`px-2 py-0.5 rounded-full text-[11px] ${item.isCritical ? 'bg-danger text-white' : 'bg-warning/15 text-warning'}`}>
                         {item.remainingDays}d
                       </span>
                     </div>
                   ))}
+                  <Button type="button" onClick={() => setActiveDashboardSubTab('warranty-watch')} className="w-full bg-brand hover:bg-brand-deep text-white text-xs font-bold py-2 rounded-xl">
+                    View full warranty roster
+                  </Button>
                 </div>
+              ) : (
+                <div className="mt-3 text-xs text-muted">No warranties nearing expiry in this period.</div>
               )}
             </div>
           </div>
