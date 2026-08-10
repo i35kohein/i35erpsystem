@@ -6,7 +6,7 @@ import {Sparkles, Plus, Search, Filter, AlertTriangle, CheckCircle2, Info, Alert
   Printer, List,
   TrendingUp,
   Grid, Smartphone, Layers, ScanLine, ListFilter, Activity, Users, Boxes, Coins, ShieldAlert,
-  Table as TableIcon, LayoutGrid, Flame, Camera} from 'lucide-react';
+  Table as TableIcon, LayoutGrid, Flame, Camera, ClipboardCheck} from 'lucide-react';
 import { subscribeToCollection, refreshCollection, refreshAllCollections, flushOfflineQueue, saveDocument, deleteDocument } from './lib/supabase';
 import { setActiveUserId, notifyAccountChanged } from './utils/accountSettings';
 
@@ -1876,6 +1876,29 @@ export default function App() {
 
                 {/* Date Filter Dropdown */}
                 <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
+
+                {/* Scan + Simple Ticket — navbar (Ko Hein 2026-08-10); Table/Grid stay in roster chips row */}
+                <div className="flex items-center gap-1.5">
+                  <Button
+                    type="button"
+                    onClick={() => setIntakeScanRequest((n) => n + 1)}
+                    className="!h-8 !min-h-8 px-2.5 bg-brand hover:bg-brand-deep text-white font-extrabold text-xs rounded-lg flex items-center gap-1.5 cursor-pointer shrink-0 active:scale-95"
+                    title="Scan Device Barcode or QR Code"
+                  >
+                    <Camera className="w-3.5 h-3.5 text-white" />
+                    <span className="hidden md:inline">Scan</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    type="button"
+                    onClick={() => setActiveTab('simple-ticket')}
+                    className="!h-8 !min-h-8 px-2.5 rounded-lg border-line bg-white text-ink hover:border-brand hover:text-brand font-bold text-xs flex items-center gap-1.5 cursor-pointer shrink-0"
+                    title="Open Simple Ticket form"
+                  >
+                    <ClipboardCheck className="w-3.5 h-3.5" />
+                    <span className="hidden md:inline">Simple</span>
+                  </Button>
+                </div>
 
                 </div>              </>
             )}

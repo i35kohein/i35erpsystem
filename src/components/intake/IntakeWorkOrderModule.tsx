@@ -14,13 +14,11 @@ import { TicketDetailInspectorModal } from '../common/TicketDetailInspectorModal
 import { confirmDialog } from '../common/ConfirmDialog';
 import type { TicketPrefillData } from './CreateTicketSoloPage';
 import {ClipboardList, Stethoscope, 
-  Camera,
   Inbox,
   Ticket,
   SlidersHorizontal,
   LayoutGrid,
   Table as TableIcon,
-  ClipboardCheck,
   User,
   Wrench,
   Clock,
@@ -250,7 +248,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           })}
           </div>
 
-          {/* Compact controls — far right of the chips row (Ko Hein 2026-08-10) */}
+          {/* Compact Table|Grid toggle — far right of the chips row (Ko Hein) */}
           <div className="flex items-center gap-1">
             <div className="bg-surface p-0.5 rounded-lg border border-line flex items-center gap-0.5">
               <Button
@@ -274,25 +272,6 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                 <LayoutGrid className="w-3.5 h-3.5" />
               </Button>
             </div>
-            <Button
-              type="button"
-              onClick={() => setIsCameraScannerOpen(true)}
-              className="!h-7 !min-h-7 px-2 rounded-lg bg-brand hover:bg-brand-deep text-white font-extrabold text-[11px] flex items-center gap-1 cursor-pointer active:scale-95"
-              title="Scan Device Barcode or QR Code"
-            >
-              <Camera className="w-3.5 h-3.5 text-white" />
-              <span className="hidden sm:inline">Scan</span>
-            </Button>
-            <Button
-              variant="outline"
-              type="button"
-              onClick={() => onNavigateToTab?.('simple-ticket')}
-              className="!h-7 !min-h-7 px-2 rounded-lg border-line bg-white text-ink hover:border-brand hover:text-brand font-bold text-[11px] flex items-center gap-1 cursor-pointer"
-              title="Open Simple Ticket form"
-            >
-              <ClipboardCheck className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Simple</span>
-            </Button>
           </div>
         </div>
       </div>
