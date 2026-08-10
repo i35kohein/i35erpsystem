@@ -1601,11 +1601,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                           )}
                         </td>
 
-                        {/* Owner — APP / KZH */}
-                        <td className="w-[64px] px-1.5 py-2 hidden md:table-cell">
-                          <OwnerBadge owner={part.owner} />
-                        </td>
-
                         {/* Stock Level & Visual Bar */}
                         <td className="w-[96px] min-w-[96px] pr-2 py-2">
                           {inlineEditMode ? (
@@ -1648,6 +1643,11 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                               />
                             </div>}
                           </div>}
+                        </td>
+
+                        {/* Owner — APP / KZH */}
+                        <td className="w-[64px] px-1.5 py-2 hidden md:table-cell">
+                          <OwnerBadge owner={part.owner} />
                         </td>
 
                         {/* Selling price only — profit belongs in the Profit tab. */}
