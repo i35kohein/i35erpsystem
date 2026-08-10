@@ -16,7 +16,6 @@ import type { TicketPrefillData } from './CreateTicketSoloPage';
 import {ClipboardList, Stethoscope, 
   Inbox,
   Ticket,
-  SlidersHorizontal,
   LayoutGrid,
   Table as TableIcon,
   User,
@@ -299,19 +298,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           </div>
 
           <div className="flex items-center space-x-2 flex-wrap">
-            {/* Sort By Urgency Toggle — desktop only (mobile: in filter drawer) */}
-            <Button
-              type="button"
-              onClick={() => setSortByPriority(!sortByPriority)}
-              className={`hidden md:inline-flex h-8 px-3 border text-xs font-bold rounded-lg transition-all items-center space-x-1.5 cursor-pointer ${
-                sortByPriority 
-                  ? 'bg-brand text-white border-brand shadow-2xs' 
-                  : 'bg-surface text-ink border-line hover:bg-surface'
-              }`}
-            >
-              <SlidersHorizontal className="w-3.5 h-3.5 shrink-0" />
-              <span>Priority First</span>
-            </Button>
+            {/* Priority First toggle removed 2026-08-10 (Ko Hein) */}
           </div>
         </div>
 
