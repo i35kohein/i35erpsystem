@@ -2636,13 +2636,8 @@ export default function App() {
                   onRecordSupplierPayment={handleRecordSupplierPayment}
                   onUpdatePayoutStatus={handleUpdatePayoutStatus}
                   onSettleInventoryFund={handleSettleInventoryFund}
-                  dateFilter={dateFilter.preset === 'today' ? 'TODAY' : dateFilter.preset === '7days' ? 'THIS_WEEK' : dateFilter.preset === '30days' ? 'THIS_MONTH' : 'ALL'}
-                  setDateFilter={(f) => {
-                    if (f === 'TODAY') setDateFilter({ preset: 'today' });
-                    else if (f === 'THIS_WEEK') setDateFilter({ preset: '7days' });
-                    else if (f === 'THIS_MONTH') setDateFilter({ preset: '30days' });
-                    else setDateFilter({ preset: 'all' });
-                  }}
+                  dateFilter={dateFilter}
+                  setDateFilter={setDateFilter}
                 />
               )}
 

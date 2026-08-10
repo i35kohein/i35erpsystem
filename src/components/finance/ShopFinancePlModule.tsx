@@ -26,6 +26,7 @@ import {
 import { getActivePaymentMethods } from '../../data/seedData';
 import { Button , Input } from '../ui';
 import { toast } from '../../lib/toast';
+import { DateFilterState, filterByDateRange } from '../common/DateFilterSelector';
 
 interface ShopFinancePlModuleProps {
   workOrders: WorkOrder[];
@@ -40,8 +41,8 @@ interface ShopFinancePlModuleProps {
   onRecordSupplierPayment: (debtId: string, paymentAmount: number, paymentMethod: string, note: string) => void;
   onUpdatePayoutStatus: (payoutId: string, status: 'Pending' | 'Approved' | 'Paid') => void;
   onSettleInventoryFund?: (ids: string[]) => void;
-  dateFilter: string;
-  setDateFilter: (filter: string) => void;
+  dateFilter: DateFilterState;
+  setDateFilter?: (filter: DateFilterState) => void;
 }
 
 export interface ShopFinancePlModuleHandle {
@@ -101,55 +102,19 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
   const [paymentMethodInput, setPaymentMethodInput] = useState<string>('Bank Transfer');
   const [paymentNoteInput, setPaymentNoteInput] = useState<string>('Supplier Invoice Payment');
 
-  // Local-time date string (Myanmar +06:30). UTC ISO dates compared via
-  // toISOString().split('T')[0] bucket tickets created 00:00–06:30 MMT under
-  // yesterday — inconsistent with the local THIS_MONTH clock (audit P2).
-  const toLocalDateStr = (iso: string) => {
-    const d = new Date(iso);
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  };
-
   // Filtered Work Orders by Date
   const filteredWorkOrders = useMemo(() => {
-    return workOrders.filter((wo) => {
-      if (dateFilter === 'TODAY') {
-        return toLocalDateStr(wo.createdAt) === toLocalDateStr(new Date().toISOString());
-      }
-      if (dateFilter === 'THIS_WEEK') {
-        const woDate = new Date(wo.createdAt);
-        const now = new Date();
-        const diffDays = (now.getTime() - woDate.getTime()) / (1000 * 3600 * 24);
-        return diffDays >= 0 && diffDays <= 7;
-      }
-      if (dateFilter === 'THIS_MONTH') {
-        const woDate = new Date(wo.createdAt);
-        const now = new Date();
-        return woDate.getMonth() === now.getMonth() && woDate.getFullYear() === now.getFullYear();
-      }
-      return true; // ALL
-    });
+    return filterByDateRange(workOrders, dateFilter);
   }, [workOrders, dateFilter]);
 
   // Expenses must respect the same date window as revenue/COGS — otherwise
   // Net Profit for TODAY/THIS_WEEK/THIS_MONTH subtracts all-time expenses
   // (e.g. months of rent) from one day's profit (audit P1).
   const dateFilteredExpenses = useMemo(() => {
-    return expenses.filter((exp) => {
-      if (dateFilter === 'TODAY') {
-        return toLocalDateStr(exp.date) === toLocalDateStr(new Date().toISOString());
-      }
-      if (dateFilter === 'THIS_WEEK') {
-        const expDate = new Date(exp.date).getTime();
-        const diffDays = (Date.now() - expDate) / (1000 * 3600 * 24);
-        return diffDays >= 0 && diffDays <= 7;
-      }
-      if (dateFilter === 'THIS_MONTH') {
-        const expDate = new Date(exp.date);
-        const now = new Date();
-        return expDate.getMonth() === now.getMonth() && expDate.getFullYear() === now.getFullYear();
-      }
-      return true; // ALL
-    });
+    return filterByDateRange(
+      expenses.map((expense) => ({ ...expense, createdAt: expense.date })),
+      dateFilter
+    );
   }, [expenses, dateFilter]);
 
   // Inventory Fund: parts taken from stock awaiting settlement (internal debt
