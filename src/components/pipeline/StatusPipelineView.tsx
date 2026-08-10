@@ -840,9 +840,17 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                             <span className="font-mono bg-danger/15 px-1.5 py-0.5 rounded text-danger">{hoursInStatus}h</span>
                           </div>
                         ) : (
-                          <div className={`flex items-center space-x-1 text-xs ${ageChipClass}`}>
-                            <Clock className={`w-3 h-3 shrink-0 ${ageChipIconClass}`} />
-                            <span><strong className="text-ink">{hoursInStatus < 1 ? '< 1h' : `${hoursInStatus}h`}</strong></span>
+                          <div className={`flex items-center justify-between text-xs ${ageChipClass}`}>
+                            <span className="flex items-center space-x-1">
+                              <Clock className={`w-3 h-3 shrink-0 ${ageChipIconClass}`} />
+                              <span><strong className="text-ink">{hoursInStatus < 1 ? '< 1h' : `${hoursInStatus}h`}</strong></span>
+                            </span>
+                            <span
+                              className="font-mono text-muted shrink-0"
+                              title={`Voucher opened: ${new Date(wo.createdAt || Date.now()).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}`}
+                            >
+                              {new Date(wo.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </span>
                           </div>
                         )}
 

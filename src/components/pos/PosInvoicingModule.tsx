@@ -7,6 +7,7 @@ import {CreditCard,
   CheckCircle2, 
   Printer, 
   ShieldCheck, 
+  BadgePercent,
   Plus,
   FileText,
   Landmark,
@@ -28,7 +29,6 @@ import {CreditCard,
   Wrench,
   Percent,
   Search,
-  CircleDot,
 } from 'lucide-react';
 import { WorkOrder, Customer, SystemSettings, PartItem, WorkOrderLineItem } from '../../types';
 import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
@@ -40,6 +40,8 @@ import { getActivePaymentMethods } from '../../data/seedData';
 import { PrintableInvoiceModal } from '../common/PrintableInvoiceModal';
 import { CustomerNotificationModal } from '../common/CustomerNotificationModal';
 import { toast } from '../../lib/toast';
+
+const DISCOUNT_OPTIONS = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
 
 const normalizeText = (value: string) =>
   value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim();
@@ -177,6 +179,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   // Price List repair picker (Ko Hein 2026-08-10)
   const [isAddRepairFromPriceListOpen, setIsAddRepairFromPriceListOpen] = useState(false);
   const [posCatalogSelection, setPosCatalogSelection] = useState<string[]>([]);
+  const [posCatalogDiscounts, setPosCatalogDiscounts] = useState<Record<string, number>>({});
+  const [posDiscountMenuFor, setPosDiscountMenuFor] = useState<string | null>(null);
+  const [posDiscountAnchor, setPosDiscountAnchor] = useState<{ top: number; left: number } | null>(null);
+  const [posCustomDiscountInput, setPosCustomDiscountInput] = useState('');
   const [priceSearchQuery, setPriceSearchQuery] = useState('');
   const [selectedGroupFilter, setSelectedGroupFilter] = useState<string>('ALL');
 
@@ -509,8 +515,16 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     setIsAddCustomRepairOpen(false);
   };
 
+  const updatePosCatalogDiscount = (categoryKey: string, newDiscountPercent: number) => {
+    const clamped = Math.min(100, Math.max(0, Number.isFinite(newDiscountPercent) ? newDiscountPercent : 0));
+    setPosCatalogDiscounts((prev) => ({
+      ...prev,
+      [categoryKey]: clamped,
+    }));
+  };
+
   // Add selected repairs from Price List as line items (Ko Hein 2026-08-10)
-  const handleAddRepairsFromPriceList = (catalogItems: ModelRepairCatalogItem[]) => {
+  const handleAddRepairsFromPriceList = (catalogItems: Array<ModelRepairCatalogItem & { discountPercent?: number }>) => {
     if (!selectedWo || !onSaveWorkOrder || catalogItems.length === 0) return;
     const newLines: WorkOrderLineItem[] = catalogItems.map((item) => ({
       id: `pricelist-${Date.now()}-${item.categoryKey}`,
@@ -519,6 +533,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
       unitPrice: item.price,
       quantity: 1,
       isLabor: true,
+      lineItemDiscountPercent: item.discountPercent || undefined,
     }));
     const nextLineItems = [...(selectedWo.lineItems || []), ...newLines];
     const totals = recalculateTotals(nextLineItems, selectedWo.discountAmount, selectedWo.depositAmount, selectedWo.subtotal);
@@ -779,13 +794,20 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     {/* Itemized sheet — repair rows + internal system-part rows together */}
                     {(laborItems.length > 0 || partsItems.length > 0) && (
                       <div className="border border-line-strong rounded-lg overflow-hidden bg-white">
-                        <table className="w-full border-collapse text-[11px]">
+                        <table className="w-full table-fixed border-collapse text-[11px]">
+                          <colgroup>
+                            <col className="w-[52%]" />
+                            <col className="w-[7%]" />
+                            <col className="w-[15%]" />
+                            <col className="w-[9%]" />
+                            <col className="w-[17%]" />
+                          </colgroup>
                           <thead>
                             <tr className="bg-surface/80">
                               <th className="border border-line px-2 py-1 text-left font-black text-muted text-[10px] uppercase tracking-wide">Item</th>
-                              <th className="border border-line px-2 py-1 text-center font-black text-muted text-[10px] uppercase tracking-wide w-12">Qty</th>
-                              <th className="border border-line px-2 py-1 text-center font-black text-muted text-[10px] uppercase tracking-wide w-28">Original Price</th>
-                              <th className="border border-line px-2 py-1 text-center font-black text-muted text-[10px] uppercase tracking-wide w-14">Disc%</th>
+                              <th className="border border-line px-2 py-1 text-center font-black text-muted text-[10px] uppercase tracking-wide">Qty</th>
+                              <th className="border border-line px-2 py-1 text-center font-black text-muted text-[10px] uppercase tracking-wide">Original Price</th>
+                              <th className="border border-line px-2 py-1 text-center font-black text-muted text-[10px] uppercase tracking-wide">Disc%</th>
                               <th className="border border-line px-2 py-1 text-right font-black text-muted text-[10px] uppercase tracking-wide">Amount</th>
                             </tr>
                           </thead>
@@ -793,9 +815,6 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                             {laborItems.map((li) => {
                               const isEditing = isSheetEditMode;
                               const hasDiscount = Boolean(li.lineItemDiscountPercent);
-                              const discountedUnitPrice = hasDiscount
-                                ? Math.round(li.unitPrice * (1 - li.lineItemDiscountPercent! / 100))
-                                : li.unitPrice;
                               const lineTotal = li.unitPrice * li.quantity;
                               const itemDiscountAmt = hasDiscount ? Math.round(lineTotal * (li.lineItemDiscountPercent! / 100)) : 0;
                               const effectiveTotal = lineTotal - itemDiscountAmt;
@@ -817,7 +836,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                         min={1}
                                         value={li.quantity}
                                         onChange={(e) => handleUpdateLineItem(li.id, 'quantity', Number(e.target.value))}
-                                        className="w-full text-center text-xs font-mono font-bold text-ink bg-transparent border-0 rounded px-1 py-0.5 outline-none focus:ring-0 focus:border-0"
+                                        className="!h-5 !min-h-0 w-full text-center text-xs font-mono font-bold text-ink bg-transparent border-0 rounded px-1 py-0 outline-none focus:ring-0 focus:border-0"
                                       />
                                     ) : (
                                       <span className="text-muted tabular-nums">{li.quantity}</span>
@@ -833,19 +852,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                         step={500}
                                         value={li.unitPrice}
                                         onChange={(e) => handleUpdateLineItem(li.id, 'unitPrice', Number(e.target.value))}
-                                        className="w-full text-center text-xs font-mono font-bold text-ink bg-transparent border-0 rounded px-1 py-0.5 outline-none focus:ring-0 focus:border-0"
+                                        className="!h-5 !min-h-0 w-full text-center text-xs font-mono font-bold text-ink bg-transparent border-0 rounded px-1 py-0 outline-none focus:ring-0 focus:border-0"
                                       />
                                     ) : (
-                                      <div className="flex flex-col items-center gap-0">
-                                        {hasDiscount ? (
-                                          <React.Fragment>
-                                            <span className="font-mono text-[10px] text-muted line-through">{li.unitPrice.toLocaleString()}</span>
-                                            <span className="font-mono text-[11px] font-black text-ink">{discountedUnitPrice.toLocaleString()}</span>
-                                          </React.Fragment>
-                                        ) : (
-                                          <span className="font-mono text-muted tabular-nums">{li.unitPrice.toLocaleString()}</span>
-                                        )}
-                                      </div>
+                                      <span className="font-mono text-muted tabular-nums">{li.unitPrice.toLocaleString()}</span>
                                     )}
                                   </td>
 
@@ -860,7 +870,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                           value={li.lineItemDiscountPercent ?? ''}
                                           onChange={(e) => handleUpdateLineItem(li.id, 'lineItemDiscountPercent', Number(e.target.value))}
                                           placeholder="0"
-                                          className="w-full text-center text-xs font-mono font-bold text-ink bg-transparent border-0 rounded px-1 py-0.5 outline-none focus:ring-0 focus:border-0"
+                                          className="!h-5 !min-h-0 w-full text-center text-xs font-mono font-bold text-ink bg-transparent border-0 rounded px-1 py-0 outline-none focus:ring-0 focus:border-0"
                                         />
                                         <Percent className="w-3 h-3 text-muted shrink-0" />
                                       </div>
@@ -873,33 +883,28 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
                                   {/* Amount = original → discount → final */}
                                   <td className="border border-line px-2 py-1.5 text-right font-mono font-black text-ink tabular-nums whitespace-nowrap">
-                                    <div className="flex flex-col items-end gap-0">
-                                      {hasDiscount ? (
-                                        <React.Fragment>
-                                          <span className="text-[10px] text-muted line-through">{lineTotal.toLocaleString()}</span>
-                                          <span className="font-extrabold text-success-deep text-[10px]">-{itemDiscountAmt.toLocaleString()} ({displayDiscountPct}%)</span>
-                                          <span className="font-black text-ink text-xs">{effectiveTotal.toLocaleString()}</span>
-                                        </React.Fragment>
-                                      ) : (
-                                        <React.Fragment>
-                                          <span>{effectiveTotal.toLocaleString()}</span>
-                                          {itemDiscountAmt > 0 && (
-                                            <span className="text-[10px] font-semibold text-success">-{itemDiscountAmt.toLocaleString()} off</span>
-                                          )}
-                                        </React.Fragment>
-                                      )}
-                                      {isEditing && (
-                                        <Button
-                                          type="button"
-                                          variant="iconGhost"
-                                          onClick={() => handleRemoveInventoryPartFromWorkOrder(li.id)}
-                                          aria-label={`Remove ${li.description}`}
-                                          title="Remove line item"
-                                          className="!h-5 !min-h-5 w-5 text-muted hover:text-danger p-0 rounded transition-colors cursor-pointer focus:outline-none"
-                                        >
-                                          <X className="w-3 h-3" />
-                                        </Button>
-                                      )}
+                                    <div className="flex items-center justify-end gap-1">
+                                      <div className="flex min-w-0 flex-col items-end gap-0">
+                                        {hasDiscount ? (
+                                          <React.Fragment>
+                                            <span className="font-black text-ink text-xs">{effectiveTotal.toLocaleString()}</span>
+                                          </React.Fragment>
+                                        ) : (
+                                          <React.Fragment>
+                                            <span>{effectiveTotal.toLocaleString()}</span>
+                                          </React.Fragment>
+                                        )}
+                                      </div>
+                                      <Button
+                                        type="button"
+                                        variant="iconGhost"
+                                        onClick={() => handleRemoveInventoryPartFromWorkOrder(li.id)}
+                                        aria-label={`Remove ${li.description}`}
+                                        title="Remove line item"
+                                        className={`!h-5 !min-h-5 w-5 text-muted hover:text-danger p-0 rounded transition-colors cursor-pointer focus:outline-none ${isEditing ? '' : 'invisible pointer-events-none'}`}
+                                      >
+                                        <X className="w-3 h-3" />
+                                      </Button>
                                     </div>
                                   </td>
                                 </tr>
@@ -908,9 +913,6 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                             {partsItems.map((li) => {
                               const isEditing = isSheetEditMode;
                               const hasDiscount = Boolean(li.lineItemDiscountPercent);
-                              const discountedUnitPrice = hasDiscount
-                                ? Math.round(li.unitPrice * (1 - li.lineItemDiscountPercent! / 100))
-                                : li.unitPrice;
                               const lineTotal = li.unitPrice * li.quantity;
                               const itemDiscountAmt = hasDiscount ? Math.round(lineTotal * (li.lineItemDiscountPercent! / 100)) : 0;
                               const effectiveTotal = lineTotal - itemDiscountAmt;
@@ -931,7 +933,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                         min={1}
                                         value={li.quantity}
                                         onChange={(e) => handleUpdateLineItem(li.id, 'quantity', Number(e.target.value))}
-                                        className="w-full text-center text-xs font-mono font-bold text-ink bg-transparent border-0 rounded px-1 py-0.5 outline-none focus:ring-0 focus:border-0"
+                                        className="!h-5 !min-h-0 w-full text-center text-xs font-mono font-bold text-ink bg-transparent border-0 rounded px-1 py-0 outline-none focus:ring-0 focus:border-0"
                                       />
                                     ) : (
                                       <span className="text-muted tabular-nums">{li.quantity}</span>
@@ -945,19 +947,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                         step={500}
                                         value={li.unitPrice}
                                         onChange={(e) => handleUpdateLineItem(li.id, 'unitPrice', Number(e.target.value))}
-                                        className="w-full text-center text-xs font-mono font-bold text-ink bg-transparent border-0 rounded px-1 py-0.5 outline-none focus:ring-0 focus:border-0"
+                                        className="!h-5 !min-h-0 w-full text-center text-xs font-mono font-bold text-ink bg-transparent border-0 rounded px-1 py-0 outline-none focus:ring-0 focus:border-0"
                                       />
                                     ) : (
-                                      <div className="flex flex-col items-center gap-0">
-                                        {hasDiscount ? (
-                                          <React.Fragment>
-                                            <span className="font-mono text-[10px] text-muted line-through">{li.unitPrice.toLocaleString()}</span>
-                                            <span className="font-mono text-[11px] font-black text-ink">{discountedUnitPrice.toLocaleString()}</span>
-                                          </React.Fragment>
-                                        ) : (
-                                          <span className="font-mono text-muted tabular-nums">{li.unitPrice.toLocaleString()}</span>
-                                        )}
-                                      </div>
+                                      <span className="font-mono text-muted tabular-nums">{li.unitPrice.toLocaleString()}</span>
                                     )}
                                   </td>
                                   <td className="border border-line px-1 py-1 text-center">
@@ -970,7 +963,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                           value={li.lineItemDiscountPercent ?? ''}
                                           onChange={(e) => handleUpdateLineItem(li.id, 'lineItemDiscountPercent', Number(e.target.value))}
                                           placeholder="0"
-                                          className="w-full text-center text-xs font-mono font-bold text-ink bg-transparent border-0 rounded px-1 py-0.5 outline-none focus:ring-0 focus:border-0"
+                                          className="!h-5 !min-h-0 w-full text-center text-xs font-mono font-bold text-ink bg-transparent border-0 rounded px-1 py-0 outline-none focus:ring-0 focus:border-0"
                                         />
                                         <Percent className="w-3 h-3 text-muted shrink-0" />
                                       </div>
@@ -981,33 +974,28 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                     )}
                                   </td>
                                   <td className="border border-line px-2 py-1.5 text-right font-mono font-black text-ink tabular-nums whitespace-nowrap">
-                                    <div className="flex flex-col items-end gap-0">
-                                      {hasDiscount ? (
-                                        <React.Fragment>
-                                          <span className="text-[10px] text-muted line-through">{lineTotal.toLocaleString()}</span>
-                                          <span className="font-extrabold text-success-deep text-[10px]">-{itemDiscountAmt.toLocaleString()} ({displayDiscountPct}%)</span>
-                                          <span className="font-black text-ink text-xs">{effectiveTotal.toLocaleString()}</span>
-                                        </React.Fragment>
-                                      ) : (
-                                        <React.Fragment>
-                                          <span>{effectiveTotal.toLocaleString()}</span>
-                                          {itemDiscountAmt > 0 && (
-                                            <span className="text-[10px] font-semibold text-success">-{itemDiscountAmt.toLocaleString()} off</span>
-                                          )}
-                                        </React.Fragment>
-                                      )}
-                                      {isEditing && (
-                                        <Button
-                                          type="button"
-                                          variant="iconGhost"
-                                          onClick={() => handleRemoveInventoryPartFromWorkOrder(li.id)}
-                                          aria-label={`Remove ${itemName}`}
-                                          title="Remove system part"
-                                          className="!h-5 !min-h-5 w-5 text-muted hover:text-danger p-0 rounded transition-colors cursor-pointer focus:outline-none"
-                                        >
-                                          <X className="w-3 h-3" />
-                                        </Button>
-                                      )}
+                                    <div className="flex items-center justify-end gap-1">
+                                      <div className="flex min-w-0 flex-col items-end gap-0">
+                                        {hasDiscount ? (
+                                          <React.Fragment>
+                                            <span className="font-black text-ink text-xs">{effectiveTotal.toLocaleString()}</span>
+                                          </React.Fragment>
+                                        ) : (
+                                          <React.Fragment>
+                                            <span>{effectiveTotal.toLocaleString()}</span>
+                                          </React.Fragment>
+                                        )}
+                                      </div>
+                                      <Button
+                                        type="button"
+                                        variant="iconGhost"
+                                        onClick={() => handleRemoveInventoryPartFromWorkOrder(li.id)}
+                                        aria-label={`Remove ${itemName}`}
+                                        title="Remove system part"
+                                        className={`!h-5 !min-h-5 w-5 text-muted hover:text-danger p-0 rounded transition-colors cursor-pointer focus:outline-none ${isEditing ? '' : 'invisible pointer-events-none'}`}
+                                      >
+                                        <X className="w-3 h-3" />
+                                      </Button>
                                     </div>
                                   </td>
                                 </tr>
@@ -1134,7 +1122,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           <td className="border-b border-line px-3 py-2 text-right font-mono font-bold text-success-deep tabular-nums">-{selectedWo.depositAmount.toLocaleString()} {currency}</td>
                         </tr>
                       )}
-                      <tr className="bg-ink text-white">
+                      <tr className="bg-ink text-white hover:bg-ink hover:text-white">
                         <td className="px-3 py-2.5 text-xs font-black uppercase tracking-wide">Amount Due (Customer)</td>
                         <td className="px-3 py-2.5 text-right font-mono text-lg font-black tabular-nums">
                           {selectedWo.totalAmount.toLocaleString()} {currency}
@@ -2136,6 +2124,15 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
       {isAddRepairFromPriceListOpen && selectedWo && (() => {
         const catalogItems = getModelPriceCatalogItems(selectedWo.deviceModel || '', priceCatalog);
         const matchedModelName = catalogItems.length > 0 ? catalogItems[0].modelMatchedName : selectedWo.deviceModel;
+        const selectedCatalogItems = catalogItems.filter(
+          (item) => posCatalogSelection.includes(item.categoryKey) && item.price > 0
+        ).map((item) => ({ ...item, discountPercent: posCatalogDiscounts[item.categoryKey] || 0 }));
+        const selectedCatalogTotal = selectedCatalogItems.reduce((sum, item) => sum + item.price, 0);
+        const selectedCatalogFinalTotal = selectedCatalogItems.reduce(
+          (sum, item) => sum + Math.round(item.price * (1 - (item.discountPercent || 0) / 100)),
+          0
+        );
+        const selectedCatalogSaved = selectedCatalogTotal - selectedCatalogFinalTotal;
         const filteredItems = catalogItems.filter((item) => {
           const matchesSearch =
             !priceSearchQuery ||
@@ -2146,53 +2143,50 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
         });
         return (
           <div
-            className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 p-0 sm:items-center sm:p-4"
             onClick={() => setIsAddRepairFromPriceListOpen(false)}
             role="presentation"
           >
             <div
-              className="bg-white border border-line rounded-2xl max-w-2xl w-full p-6 space-y-4 text-xs shadow-2xl relative max-h-[80vh] min-h-[400px] flex flex-col"
+              className="flex max-h-[88vh] w-full max-w-lg flex-col rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <Button
-                type="button"
-                onClick={() => setIsAddRepairFromPriceListOpen(false)}
-                className="absolute right-4 top-4 text-muted hover:text-ink p-1 rounded-lg hover:bg-surface cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </Button>
-
-              <div className="border-b border-line pb-3 space-y-1">
-                <h3 className="text-base font-black text-ink flex items-center space-x-2">
-                  <CircleDot className="w-5 h-5 text-brand" />
-                  <span>Price Catalog Repair Selector ({matchedModelName})</span>
-                </h3>
-                <p className="text-xs text-muted">
-                  Select repair services with verified catalog pricing in MMK for {matchedModelName}
-                </p>
+              <div className="flex items-center justify-between border-b border-line px-4 py-3">
+                <div className="min-w-0">
+                  <h3 className="text-sm font-extrabold text-ink">Add Repairs & Details</h3>
+                  <p className="truncate text-xs text-muted">Repairs for {matchedModelName}</p>
+                </div>
+                <Button
+                  type="button"
+                  variant="iconGhost"
+                  onClick={() => setIsAddRepairFromPriceListOpen(false)}
+                  className="rounded-lg p-1 text-muted hover:bg-surface hover:text-ink"
+                  aria-label="Close"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
 
-              {/* Filter & Search Bar */}
-              <div className="space-y-2">
+              {/* Search + group pills — same feel as Simple Ticket */}
+              <div className="space-y-2 border-b border-line px-4 py-3">
                 <div className="relative">
-                  <Search className="w-4 h-4 text-muted absolute left-3 top-2.5" />
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
                   <Input
                     type="text"
                     value={priceSearchQuery}
                     onChange={(e) => setPriceSearchQuery(e.target.value)}
-                    placeholder={`Search repairs for ${matchedModelName} (e.g. Battery, Display, Face ID)...`}
-                    className="w-full bg-surface border border-line rounded-xl pl-9 pr-3 py-2.5 text-sm font-medium focus:bg-white focus:outline-none transition-all"
+                    placeholder="Search repairs (e.g. Battery, Display, Face ID)..."
+                    className="w-full rounded-xl border border-line bg-surface py-2.5 pl-9 pr-3 text-sm font-medium outline-none transition-colors focus:bg-white"
                   />
                 </div>
 
-                {/* Category Group Filter Pills */}
-                <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs">
+                <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
                   {['ALL', 'Battery', 'Display', 'Housing', 'Charging', 'Audio', 'Logic Board', 'Network', 'Sensors & Keys'].map((grp) => (
                     <Button
                       key={grp}
                       type="button"
                       onClick={() => setSelectedGroupFilter(grp)}
-                      className={`px-3 py-1 rounded-lg font-bold shrink-0 transition-all cursor-pointer ${
+                      className={`shrink-0 rounded-lg px-3 py-1 font-bold transition-all cursor-pointer ${
                         selectedGroupFilter === grp
                           ? 'bg-brand text-white shadow-2xs'
                           : 'bg-surface text-muted hover:text-ink hover:bg-line'
@@ -2204,8 +2198,8 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 </div>
               </div>
 
-              {/* Price Catalog Repair List */}
-              <div className="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[220px]">
+              {/* Repair list — Simple Ticket card grid */}
+              <div className="h-[248px] overflow-y-auto px-4 py-3">
                 {filteredItems.length === 0 ? (
                   <div className="p-8 text-center text-muted text-xs space-y-1">
                     <FileText className="w-8 h-8 mx-auto opacity-40 text-brand" />
@@ -2213,85 +2207,228 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     <p>Try a different search or group filter.</p>
                   </div>
                 ) : (
-                  filteredItems.map((item) => {
-                    const isSelected = posCatalogSelection.includes(item.categoryKey);
-                    const alreadyInWo = (selectedWo.lineItems || []).some(
-                      (li) => li.description?.toLowerCase() === item.name.toLowerCase()
-                    );
-                    return (
-                      <Button
-                        type="button"
-                        key={item.categoryKey}
-                        onClick={() => {
-                          if (alreadyInWo) return;
-                          setPosCatalogSelection((prev) =>
-                            prev.includes(item.categoryKey)
-                              ? prev.filter((k) => k !== item.categoryKey)
-                              : [...prev, item.categoryKey]
-                          );
-                        }}
-                        className={`w-full text-left p-3 rounded-xl border text-xs cursor-pointer flex justify-between items-center transition-all ${
-                          alreadyInWo
-                            ? 'border-line bg-surface/50 opacity-60'
-                            : isSelected
-                              ? 'border-brand bg-brand-soft text-brand font-bold shadow-2xs'
-                              : 'border-line bg-white text-ink hover:bg-surface'
-                        }`}
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div
-                            className={`w-5 h-5 rounded-md flex items-center justify-center border transition-all ${
-                              isSelected ? 'bg-brand border-brand text-white' : alreadyInWo ? 'border-line-strong bg-surface' : 'border-line-strong bg-white'
-                            }`}
-                          >
-                            {isSelected && <Check className="w-3.5 h-3.5" />}
-                            {alreadyInWo && !isSelected && <Check className="w-3.5 h-3.5 text-muted" />}
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {filteredItems.map((item) => {
+                      const isSelected = posCatalogSelection.includes(item.categoryKey);
+                      const discountPct = posCatalogDiscounts[item.categoryKey] || 0;
+                      const finalPrice = Math.round(item.price * (1 - discountPct / 100));
+                      const alreadyInWo = (selectedWo.lineItems || []).some(
+                        (li) => li.description?.toLowerCase() === item.name.toLowerCase()
+                      );
+                      return (
+                        <div
+                          key={item.categoryKey}
+                          role="button"
+                          tabIndex={alreadyInWo ? -1 : 0}
+                          aria-pressed={isSelected}
+                          onClick={() => {
+                            if (alreadyInWo) return;
+                            setPosCatalogSelection((prev) => {
+                              if (prev.includes(item.categoryKey)) {
+                                setPosCatalogDiscounts((discounts) => {
+                                  const next = { ...discounts };
+                                  delete next[item.categoryKey];
+                                  return next;
+                                });
+                                if (posDiscountMenuFor === item.categoryKey) {
+                                  setPosDiscountMenuFor(null);
+                                  setPosDiscountAnchor(null);
+                                }
+                                return prev.filter((k) => k !== item.categoryKey);
+                              }
+                              return [...prev, item.categoryKey];
+                            });
+                          }}
+                          onKeyDown={(e) => {
+                            if (alreadyInWo) return;
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              setPosCatalogSelection((prev) => {
+                                if (prev.includes(item.categoryKey)) {
+                                  setPosCatalogDiscounts((discounts) => {
+                                    const next = { ...discounts };
+                                    delete next[item.categoryKey];
+                                    return next;
+                                  });
+                                  return prev.filter((k) => k !== item.categoryKey);
+                                }
+                                return [...prev, item.categoryKey];
+                              });
+                            }
+                          }}
+                          className={`group relative flex min-h-[92px] cursor-pointer select-none flex-col gap-1.5 rounded-2xl border-2 bg-white p-2.5 shadow-2xs transition-colors focus:outline-none ${
+                            alreadyInWo
+                              ? 'border-line bg-surface/50 opacity-60 cursor-not-allowed'
+                              : isSelected
+                                ? 'border-brand bg-brand/5'
+                                : 'border-line hover:border-brand/50'
+                          }`}
+                        >
+                          <div className="flex min-w-0 items-center justify-between gap-2">
+                            <h3 className="min-w-0 truncate text-[11px] font-extrabold leading-snug text-ink" title={item.name}>{item.name}</h3>
                           </div>
-                          <div>
-                            <span className="block font-extrabold text-ink text-xs">{item.name}</span>
-                            <div className="flex items-center space-x-2 text-xs text-muted pt-0.5 font-medium">
-                              <span className="px-1.5 py-0.5 bg-surface rounded text-ink font-semibold">{item.group}</span>
-                              <span>Warranty: {item.warranty}</span>
-                              {alreadyInWo && <span className="text-muted font-semibold">· Already in invoice</span>}
+                          <div className="flex min-w-0 items-center justify-between gap-2">
+                            <span className="truncate text-[10px] font-extrabold uppercase tracking-wider text-muted">{item.group}</span>
+                            <span className="inline-flex shrink-0 items-center space-x-0.5 rounded-full border border-success/30 bg-success/10 px-1 py-px text-[10px] font-extrabold text-success-deep">
+                              <ShieldCheck className="h-1.5 w-1.5 shrink-0 text-success" />
+                              <span>{item.warranty}</span>
+                            </span>
+                          </div>
+                          <div className="mt-auto flex items-center justify-between gap-2 border-t border-line pt-1.5">
+                            <div className="min-w-0 leading-tight">
+                              <div className="flex items-baseline gap-1.5">
+                                <span className="font-mono text-xs font-black text-ink">{finalPrice.toLocaleString()}</span>
+                                <span className={`font-mono text-[10px] font-bold text-muted line-through ${discountPct > 0 ? 'visible' : 'invisible'}`}>{item.price.toLocaleString()}</span>
+                              </div>
+                              <div className="h-3.5 overflow-hidden">
+                                {discountPct > 0 ? (
+                                  <span className="text-[9px] font-extrabold text-success">−{(item.price - finalPrice).toLocaleString()} · {discountPct}%</span>
+                                ) : (
+                                  <span className="text-[9px] font-extrabold text-muted">
+                                    {alreadyInWo ? 'Already in invoice' : isSelected ? 'Selected' : 'Tap to add'}
+                                  </span>
+                                )}
+                              </div>
                             </div>
+                            <Button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (alreadyInWo || !isSelected) return;
+                                const rect = e.currentTarget.getBoundingClientRect();
+                                const popupWidth = 176;
+                                let left = rect.right - popupWidth;
+                                left = Math.max(8, Math.min(left, window.innerWidth - popupWidth - 8));
+                                setPosDiscountAnchor({ top: rect.bottom + 6, left });
+                                setPosDiscountMenuFor(item.categoryKey);
+                              }}
+                              title={discountPct > 0 ? `${discountPct}% discount applied` : 'Add discount'}
+                              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition-all cursor-pointer active:scale-95 ${
+                                isSelected
+                                  ? discountPct > 0
+                                    ? 'border-brand bg-brand text-white'
+                                    : 'border-line bg-white text-muted hover:border-brand hover:text-brand'
+                                  : 'invisible'
+                              }`}
+                            >
+                              <BadgePercent className="h-4 w-4" />
+                            </Button>
                           </div>
                         </div>
-
-                        <div className="text-right">
-                          <span className="font-mono font-black text-sm text-brand">
-                            {item.price.toLocaleString()} MMK
-                          </span>
-                        </div>
-                      </Button>
-                    );
-                  })
+                      );
+                    })}
+                  </div>
                 )}
               </div>
 
-              {/* Apply button */}
-              <div className="pt-2 border-t border-line flex items-center justify-between">
-                <span className="text-xs text-muted font-semibold">
-                  Selected: <strong className="text-ink">{posCatalogSelection.length} repair(s)</strong>
-                </span>
+              {/* Summary + Done */}
+              <div className="grid grid-cols-2 gap-2 border-t border-line px-4 py-3 text-center text-xs sm:grid-cols-4">
+                <div className="rounded-lg bg-surface p-2">
+                  <span className="block font-semibold text-muted">Items</span>
+                  <span className="font-extrabold text-ink">{posCatalogSelection.length}</span>
+                </div>
+                <div className="rounded-lg bg-surface p-2">
+                  <span className="block font-semibold text-muted">Base</span>
+                  <span className="font-extrabold text-ink">{selectedCatalogTotal.toLocaleString()}</span>
+                </div>
+                <div className="rounded-lg bg-surface p-2">
+                  <span className="block font-semibold text-muted">Discount</span>
+                  <span className="font-extrabold text-danger">{selectedCatalogSaved > 0 ? `-${selectedCatalogSaved.toLocaleString()}` : '0'}</span>
+                </div>
+                <div className="rounded-lg bg-brand p-2 text-white">
+                  <span className="block text-[10px] font-bold uppercase opacity-90">Final</span>
+                  <span className="font-black">{selectedCatalogFinalTotal.toLocaleString()} MMK</span>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 border-t border-line px-4 py-3">
                 <Button
                   type="button"
                   onClick={() => {
-                    const selected = catalogItems.filter(
-                      (item) => posCatalogSelection.includes(item.categoryKey) && item.price > 0
-                    );
-                    if (selected.length > 0) {
-                      handleAddRepairsFromPriceList(selected);
+                    if (selectedCatalogItems.length > 0) {
+                      handleAddRepairsFromPriceList(selectedCatalogItems);
                     }
                     setPosCatalogSelection([]);
+                    setPosCatalogDiscounts({});
+                    setPosDiscountMenuFor(null);
+                    setPosDiscountAnchor(null);
+                    setPosCustomDiscountInput('');
                     setPriceSearchQuery('');
                     setSelectedGroupFilter('ALL');
                   }}
                   disabled={posCatalogSelection.length === 0}
-                  className="px-6 py-2.5 bg-brand text-white font-bold rounded-xl text-xs hover:bg-brand-deep transition-colors shadow-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="rounded-xl bg-brand px-5 py-2 text-xs font-black text-white transition hover:bg-brand-deep disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                 >
-                  Apply Selected Repairs ({posCatalogSelection.length})
+                  Done ({posCatalogSelection.length})
                 </Button>
               </div>
+
+              {/* Anchored discount popup — same as Simple Ticket */}
+              {posDiscountMenuFor && posDiscountAnchor && (
+                <div
+                  className="discount-popup fixed z-[80] w-44 rounded-2xl border border-line bg-white p-2 shadow-xl"
+                  style={{ top: posDiscountAnchor.top, left: posDiscountAnchor.left }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-center justify-between gap-2 px-1 pb-2">
+                    <p className="text-xs font-extrabold text-ink">Discount</p>
+                    <span className="max-w-[110px] truncate text-xs font-bold text-muted">
+                      {catalogItems.find((item) => item.categoryKey === posDiscountMenuFor)?.name || ''}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {DISCOUNT_OPTIONS.map((pct) => (
+                      <Button
+                        key={pct}
+                        type="button"
+                        onClick={() => {
+                          updatePosCatalogDiscount(posDiscountMenuFor, pct);
+                          setPosDiscountMenuFor(null);
+                          setPosDiscountAnchor(null);
+                        }}
+                        className={`flex h-7 w-7 min-w-7 items-center justify-center rounded-full text-[10px] font-extrabold transition-all cursor-pointer active:scale-90 ${
+                          (posCatalogDiscounts[posDiscountMenuFor] || 0) === pct
+                            ? 'border border-brand bg-brand text-white'
+                            : 'border border-line bg-white text-ink hover:border-brand hover:text-brand'
+                        }`}
+                        title={pct === 0 ? 'No discount' : `${pct}% off`}
+                      >
+                        {pct === 0 ? '0' : pct}
+                      </Button>
+                    ))}
+                  </div>
+                  <div className="mt-2 border-t border-line pt-2">
+                    <Input
+                      type="number"
+                      inputMode="numeric"
+                      placeholder="Custom %"
+                      value={posCustomDiscountInput}
+                      onChange={(e) => setPosCustomDiscountInput(e.target.value)}
+                      onBlur={() => {
+                        const value = Number(posCustomDiscountInput);
+                        if (value >= 1 && value <= 100) {
+                          updatePosCatalogDiscount(posDiscountMenuFor, value);
+                          setPosCustomDiscountInput('');
+                          setPosDiscountMenuFor(null);
+                          setPosDiscountAnchor(null);
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          const value = Number(posCustomDiscountInput);
+                          if (value >= 1 && value <= 100) {
+                            updatePosCatalogDiscount(posDiscountMenuFor, value);
+                            setPosCustomDiscountInput('');
+                            setPosDiscountMenuFor(null);
+                            setPosDiscountAnchor(null);
+                          }
+                        }
+                      }}
+                      className="w-full rounded-lg border border-line bg-surface px-2 py-1.5 text-center font-mono text-xs font-bold text-ink outline-none"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         );

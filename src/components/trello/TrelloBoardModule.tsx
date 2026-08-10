@@ -208,7 +208,15 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
                     >
                       {/* Top row: order # + priority */}
                       <div className="flex items-center justify-between gap-1.5">
-                        <span className="font-mono text-[11px] font-extrabold text-ink truncate">{wo.orderNumber || wo.id.slice(0, 8)}</span>
+                        <div className="flex items-center gap-1 min-w-0">
+                          <span className="font-mono text-[11px] font-extrabold text-ink truncate">{wo.orderNumber || wo.id.slice(0, 8)}</span>
+                          <span
+                            className="text-[9px] font-mono text-muted shrink-0"
+                            title={`Voucher opened: ${new Date(wo.createdAt || Date.now()).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}`}
+                          >
+                            {new Date(wo.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </span>
+                        </div>
                         <PriorityBadge priority={wo.priority} size="xs" />
                       </div>
 
