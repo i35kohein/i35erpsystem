@@ -306,6 +306,18 @@ export const REALISTIC_COLOR_MAP: Record<string, RealisticColorInfo> = {
     border: 'border-slate-600',
     shadow: '0 6px 16px rgba(47, 62, 78, 0.45)'
   },
+  'Blue': {
+    name: 'Blue',
+    gradient: 'linear-gradient(135deg, #2E63E6 0%, #4F82F2 50%, #1C3FA8 100%)',
+    border: 'border-blue-600',
+    shadow: '0 6px 16px rgba(46, 99, 230, 0.45)'
+  },
+  'Midnight Green': {
+    name: 'Midnight Green',
+    gradient: 'linear-gradient(135deg, #2F3B33 0%, #4A5A4E 50%, #1C261F 100%)',
+    border: 'border-emerald-900',
+    shadow: '0 6px 16px rgba(47, 59, 51, 0.5)'
+  },
   'Ultramarine': {
     name: 'Ultramarine',
     gradient: 'linear-gradient(135deg, #3B52A4 0%, #6377D5 50%, #293B7B 100%)',
