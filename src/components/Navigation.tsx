@@ -7,7 +7,6 @@ import {LogOut,
   Truck,
   CreditCard,
   Users,
-  ShieldCheck,
   X,
   Plus,
   PanelLeftClose,
@@ -16,7 +15,7 @@ import {LogOut,
   Settings,
   PhoneCall,
   DollarSign,
-  Trello, ClipboardCheck} from 'lucide-react';
+  Trello, ClipboardCheck, Stethoscope} from 'lucide-react';
 import { WorkOrder, SystemSettings, AppUser } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { UserRoleSwitcher } from './common/UserRoleSwitcher';
@@ -106,7 +105,7 @@ export const Navigation: React.FC<NavigationProps> = ({
         {
           id: 'qa',
           label: t('navQa'),
-          icon: ShieldCheck,
+          icon: Stethoscope,
         },
         {
           id: 'follow-up',
