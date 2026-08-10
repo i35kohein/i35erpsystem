@@ -344,7 +344,7 @@ export const Navigation: React.FC<NavigationProps> = ({
               } font-bold ${activeTab === 'create-ticket' ? 'bg-brand-deep' : 'hover:bg-brand-deep'}`}
             >
               <div className="flex items-center justify-center min-w-0">
-                <Plus className={`w-4 h-4 shrink-0 ${effectiveCollapsed ? '' : 'mr-2'}`} />
+                <Plus className={`${effectiveCollapsed ? '!w-8 !h-8' : 'w-4 h-4'} shrink-0 ${effectiveCollapsed ? '' : 'mr-2'}`} />
                 {!effectiveCollapsed && <span className="truncate text-xs">+ Intake Ticket</span>}
               </div>
             </Button>
@@ -366,7 +366,7 @@ export const Navigation: React.FC<NavigationProps> = ({
               }`}
             >
               <div className="flex items-center justify-center min-w-0">
-                <LayoutDashboard className={`w-4 h-4 shrink-0 ${activeTab === 'dashboard' ? 'text-brand' : 'text-muted'}`} />
+                <LayoutDashboard className={`${effectiveCollapsed ? '!w-8 !h-8' : 'w-4 h-4'} shrink-0 ${activeTab === 'dashboard' ? 'text-brand' : 'text-muted'}`} />
                 {!effectiveCollapsed && <span className="truncate text-xs ml-2.5">Dashboard</span>}
               </div>
             </Button>
@@ -405,7 +405,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                       aria-label={item.badge !== undefined && (typeof item.badge === 'string' || item.badge > 0) ? `${item.label} (${item.badge} pending)` : item.label}
                     >
                       <div className={`flex items-center min-w-0 ${effectiveCollapsed ? 'justify-center' : 'flex-1'}`}>
-                        <ItemIcon className={`${effectiveCollapsed ? 'w-8 h-8' : 'w-4 h-4'} shrink-0 ${isActive ? 'text-brand' : 'text-muted'}`} />
+                        <ItemIcon className={`${effectiveCollapsed ? '!w-8 !h-8' : 'w-4 h-4'} shrink-0 ${isActive ? 'text-brand' : 'text-muted'}`} />
                         {!effectiveCollapsed && <span className="truncate text-xs ml-2.5">{item.label}</span>}
                       </div>
 
