@@ -100,7 +100,7 @@ interface PosInvoicingModuleProps {
   customers: Customer[];
   parts?: PartItem[];
   systemSettings?: SystemSettings;
-  onMarkPaid: (workOrder: WorkOrder, method: string) => void;
+  onMarkPaid: (workOrder: WorkOrder, method: string, completedAtIso?: string) => void;
   onOpenPrintTag?: (wo: WorkOrder) => void;
   onSaveWorkOrder?: (wo: WorkOrder) => void;
   searchQuery?: string;
@@ -136,6 +136,12 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   const isIpad = useIsIpad();
   const [paymentMethod, setPaymentMethod] = useState<string>(activePaymentMethods[0]?.name || 'Cash');
   const [cashTendered, setCashTendered] = useState<number>(0);
+  // Backdate checkout support (Ko Hein 2026-08-10): default today, staff can
+  // pick an earlier date when re-entering past data.
+  const [checkoutDate, setCheckoutDate] = useState<string>(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  });
   const [copiedAccount, setCopiedAccount] = useState(false);
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
@@ -409,7 +415,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     }
     setIsProcessingPayment(true);
     try {
-      onMarkPaid(selectedWo, finalMethod);
+      const checkoutIso = checkoutDate
+        ? new Date(`${checkoutDate}T17:30:00`).toISOString() // 17:30 local = 12:00 UTC (stable day anchor)
+        : undefined;
+      onMarkPaid(selectedWo, finalMethod, checkoutIso);
       // Reuse the intake A4 voucher printer (same document as intake) with PAID badge.
       if (onOpenPrintTag) {
         const paidWo = { ...selectedWo, isPaid: true, paymentMethod: finalMethod as any };
@@ -1243,6 +1252,17 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               <div className="flex justify-between">
                 <span className="text-muted">Method</span>
                 <span className="font-bold text-ink">{paymentMethod}</span>
+              </div>
+              {/* Backdate checkout (Ko Hein 2026-08-10) */}
+              <div className="flex items-center justify-between gap-2 border-t border-line pt-2">
+                <span className="text-muted">Checkout Date</span>
+                <input
+                  type="date"
+                  value={checkoutDate}
+                  onChange={(e) => setCheckoutDate(e.target.value)}
+                  className="rounded-lg border border-line bg-surface px-2 py-1.5 text-xs font-bold text-ink outline-none [color-scheme:light]"
+                  aria-label="Checkout date"
+                />
               </div>
               {paymentMethod === 'Cash' && cashTendered > 0 && (
                 <>

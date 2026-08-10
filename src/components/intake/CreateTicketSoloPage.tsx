@@ -144,6 +144,12 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
 
   // Phone suggestion dropdown open state
   const [phoneSuggestOpen, setPhoneSuggestOpen] = useState(false);
+  // Backdate intake support (Ko Hein 2026-08-10): default today, staff can pick
+  // an earlier date when re-entering past tickets.
+  const [receivedDate, setReceivedDate] = useState<string>(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  });
   // Intake 21-point comment modal (QA-style ⋮)
   const [diagCommentId, setDiagCommentId] = useState<string | null>(null);
   // Custom confirm for Mark All Pass (no browser default dialog)
@@ -503,7 +509,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           statusChange: 'Receive'
         }
       ],
-      createdAt: baseWorkOrder?.createdAt || nowIso,
+      createdAt: baseWorkOrder?.createdAt || (receivedDate ? `${receivedDate}T09:00:00.000Z` : nowIso),
       updatedAt: nowIso,
       estimatedCompletion: baseWorkOrder?.estimatedCompletion || new Date(Date.now() + 86400000).toISOString(),
       intakeChecklist: baseWorkOrder?.intakeChecklist || (() => {
@@ -860,6 +866,17 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                   className="w-full bg-white border border-line rounded-xl pl-9 pr-3 py-2.5 text-sm text-ink focus:outline-none font-semibold transition-all"
                 />
               </div>
+            </div>
+
+            <div>
+              <label htmlFor="field-received-date" className="block text-muted mb-1 font-medium">Received Date</label>
+              <Input
+                id="field-received-date"
+                type="date"
+                value={receivedDate}
+                onChange={(e) => setReceivedDate(e.target.value)}
+                className="w-full bg-white border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none font-semibold transition-all [color-scheme:light]"
+              />
             </div>
 
             <div>

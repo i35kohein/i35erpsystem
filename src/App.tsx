@@ -1521,7 +1521,7 @@ export default function App() {
     }
   };
 
-  const handleMarkPaid = (workOrder: WorkOrder, paymentMethod: string) => {
+  const handleMarkPaid = (workOrder: WorkOrder, paymentMethod: string, completedAtIso?: string) => {
     const current = workOrders.find((w) => w.id === workOrder.id) || workOrder;
     // Idempotency guard: a double click / race must not consume stock twice or
     // create duplicate Inventory Consumption expenses for the same ticket.
@@ -1538,7 +1538,7 @@ export default function App() {
             isPaid: true,
             paymentMethod: paymentMethod as any,
             status: 'Taken Out' as WorkOrderStatus,
-            completedAt: w.completedAt || new Date().toISOString(),
+            completedAt: w.completedAt || completedAtIso || new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           };
           saveDocument('workOrders', updated).catch(reportSaveError);
