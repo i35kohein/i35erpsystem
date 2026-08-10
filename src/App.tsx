@@ -2605,6 +2605,7 @@ export default function App() {
                   workOrders={activeWorkOrders}
                   customers={rosterCustomers}
                   parts={parts}
+                  technicians={technicians}
                   systemSettings={systemSettings}
                   onMarkPaid={handleMarkPaid}
                   onOpenPrintTag={(wo) => setPrintableTagWo(wo)}

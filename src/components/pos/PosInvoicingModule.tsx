@@ -39,7 +39,7 @@ import {CreditCard,
   Percent,
   Search,
 } from 'lucide-react';
-import { WorkOrder, Customer, SystemSettings, PartItem, WorkOrderLineItem } from '../../types';
+import { WorkOrder, Customer, SystemSettings, PartItem, WorkOrderLineItem, Technician } from '../../types';
 import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
 import { ModelRepairPrice } from '../../types/priceCatalog';
 import { PriorityBadge } from '../common/PriorityBadge';
@@ -131,6 +131,7 @@ interface PosInvoicingModuleProps {
   workOrders: WorkOrder[];
   customers: Customer[];
   parts?: PartItem[];
+  technicians?: Technician[];
   systemSettings?: SystemSettings;
   onMarkPaid: (workOrder: WorkOrder, method: string, completedAtIso?: string) => void;
   onOpenPrintTag?: (wo: WorkOrder) => void;
@@ -155,6 +156,7 @@ const repairSummaryOf = (wo: WorkOrder): string => {
 export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   workOrders,
   parts = [],
+  technicians = [],
   systemSettings,
   onMarkPaid,
   onOpenPrintTag,
@@ -316,8 +318,29 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   // Computed: labor vs parts breakdown for customer / system views (Ko Hein 2026-08-10)
   const laborItems = useMemo(() => (selectedWo?.lineItems || []).filter((li) => li.isLabor), [selectedWo]);
   const partsItems = useMemo(() => (selectedWo?.lineItems || []).filter((li) => !li.isLabor && li.partId), [selectedWo]);
-  const partsSubtotal = useMemo(() => partsItems.reduce((s, li) => s + li.unitPrice * li.quantity, 0), [partsItems]);
   const partsCostTotal = useMemo(() => partsItems.reduce((s, li) => s + (li.unitCost || 0) * li.quantity, 0), [partsItems]);
+  // Estimated technician commission for this ticket — mirrors App.tsx handleMarkPaid
+  // (Ko Hein 2026-08-11): commission base = labor revenue after per-item discounts.
+  const estCommission = useMemo(() => {
+    if (!selectedWo) return 0;
+    const techId = selectedWo.assignedTechId || (selectedWo as WorkOrder & { qaTechnicianId?: string }).qaTechnicianId;
+    const tech = techId ? technicians.find((t) => t.id === techId) : undefined;
+    if (!tech) return 0;
+    const repairType =
+      selectedWo.repairTypeAI ||
+      (selectedWo.serviceType === 'Micro-Soldering' ? ('hardware' as const) : ('spareparts' as const));
+    const rate =
+      repairType === 'hardware'
+        ? tech.commissionRateHardware || tech.commissionRate || 0
+        : tech.commissionRateParts || tech.commissionRate || 0;
+    if (rate <= 0) return 0;
+    const laborRevenue = laborItems.reduce((s, li) => {
+      const lineTotal = (Number(li.unitPrice) || 0) * (Number(li.quantity) || 0);
+      const disc = li.lineItemDiscountPercent ? Math.round(lineTotal * (li.lineItemDiscountPercent / 100)) : 0;
+      return s + lineTotal - disc;
+    }, 0);
+    return Math.round(laborRevenue * (rate / 100));
+  }, [selectedWo, technicians, laborItems]);
   const perItemDiscountTotal = useMemo(
     () => laborItems.reduce((s, li) => {
       if (!li.lineItemDiscountPercent) return s;
@@ -1012,12 +1035,11 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                               const effectiveTotal = lineTotal - itemDiscountAmt;
                               const displayDiscountPct = li.lineItemDiscountPercent || 0;
                               const itemName = li.description || li.partName;
-                              const LineIcon = getLineItemIcon(itemName);
                               return (
                                 <tr key={li.id} className="bg-surface/30">
                                   <td className="border border-line px-2 py-1.5">
                                     <div className="flex items-center gap-1">
-                                      <LineIcon className="w-3.5 h-3.5 text-muted shrink-0" />
+                                      <PackageCheck className="w-3.5 h-3.5 text-muted shrink-0" />
                                       <span className="font-bold text-ink min-w-0 truncate">{itemName}</span>
                                     </div>
                                   </td>
@@ -1224,15 +1246,13 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         </td>
                       </tr>
 
-                      {/* System section (with parts) */}
+                      {/* System section — profit breakdown (Ko Hein 2026-08-11)
+                          Gross Profit = Amount Due (Customer) − Parts Cost
+                          Net Profit   = Gross Profit − Tech Commission */}
                       {partsItems.length > 0 && (
                         <>
                           <tr className="bg-surface/30">
                             <td className="border border-line px-2 py-1 text-[10px] font-extrabold text-muted uppercase tracking-wider" colSpan={2}>System (incl. Parts)</td>
-                          </tr>
-                          <tr>
-                            <td className="border border-line px-2 py-1.5 text-muted">System Total (incl. parts)</td>
-                            <td className="border border-line px-2 py-1.5 text-right font-mono text-ink tabular-nums">{(selectedWo.subtotal + partsSubtotal).toLocaleString()} {currency}</td>
                           </tr>
                           <tr>
                             <td className="border border-line px-2 py-1.5 text-muted">Parts Cost (deducted)</td>
@@ -1240,8 +1260,20 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           </tr>
                           <tr>
                             <td className="border border-line px-2 py-1.5 text-success-deep font-bold">Gross Profit</td>
-                            <td className="border border-line px-2 py-1.5 text-right font-mono font-black text-success-deep tabular-nums">+{(selectedWo.subtotal + partsSubtotal - partsCostTotal - selectedWo.discountAmount).toLocaleString()} {currency}</td>
+                            <td className="border border-line px-2 py-1.5 text-right font-mono font-black text-success-deep tabular-nums">+{(Math.max(0, (selectedWo.totalAmount || 0) - partsCostTotal)).toLocaleString()} {currency}</td>
                           </tr>
+                          {estCommission > 0 && (
+                            <tr>
+                              <td className="border border-line px-2 py-1.5 text-muted">Tech Commission</td>
+                              <td className="border border-line px-2 py-1.5 text-right font-mono text-muted tabular-nums">-{estCommission.toLocaleString()} {currency}</td>
+                            </tr>
+                          )}
+                          {estCommission > 0 && (
+                            <tr className="bg-surface/20">
+                              <td className="border border-line px-2 py-1.5 text-ink font-bold">Net Profit</td>
+                              <td className="border border-line px-2 py-1.5 text-right font-mono font-black text-ink tabular-nums">+{Math.max(0, (selectedWo.totalAmount || 0) - partsCostTotal - estCommission).toLocaleString()} {currency}</td>
+                            </tr>
+                          )}
                         </>
                       )}
                     </tbody>
