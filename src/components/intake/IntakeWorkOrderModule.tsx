@@ -19,7 +19,7 @@ import {ClipboardList, Stethoscope,
   Ticket,
   LayoutGrid,
   Table as TableIcon,
-  User,
+  UserCheck,
   Wrench,
   Clock,
   CheckCircle2,
@@ -70,10 +70,12 @@ interface IntakeWorkOrderModuleProps {
 
 export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   workOrders,
+  technicians,
   currentUser,
   onSelectPrintTag,
   onOpenNewWorkOrder,
   onDeleteWorkOrder,
+  onSaveWorkOrder,
   searchQuery,
   filterStatus: propFilterStatus,
   setFilterStatus: propSetFilterStatus,
@@ -92,6 +94,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   const [isDetailModalOpen, setIsDetailModalOpen] = useState<boolean>(false);
   const [isCameraScannerOpen, setIsCameraScannerOpen] = useState<boolean>(false);
   const [ticketToDelete, setTicketToDelete] = useState<WorkOrder | null>(null);
+  const [techAssignOpenId, setTechAssignOpenId] = useState<string | null>(null);
   const [localViewMode, setLocalViewMode] = useState<'table' | 'cards'>('cards');
   const viewMode = propViewMode !== undefined ? propViewMode : localViewMode;
   const setViewMode = (v: 'table' | 'cards') => (propSetViewMode ? propSetViewMode(v) : setLocalViewMode(v));
@@ -118,6 +121,20 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   useEffect(() => {
     if (scanRequested > 0) setIsCameraScannerOpen(true);
   }, [scanRequested]);
+
+  // Tech assignment from the roster (Ko Hein 2026-08-10)
+  const handleAssignTech = (wo: WorkOrder, techId: string) => {
+    if (!onSaveWorkOrder) return;
+    const isUnassign = techId === 'unassigned';
+    const tech = isUnassign ? null : technicians?.find((t) => t.id === techId) || null;
+    onSaveWorkOrder({
+      ...wo,
+      assignedTechId: isUnassign ? '' : techId,
+      assignedTechName: isUnassign ? '' : tech?.name || '',
+      updatedAt: new Date().toISOString(),
+    });
+    setTechAssignOpenId(null);
+  };
 
   const getPriorityWeight = (priority: string) => {
     switch (priority) {
@@ -361,15 +378,46 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                         </p>
                       </td>
 
-                      {/* Assigned Tech */}
-                      <td className="py-3 px-3 hidden lg:table-cell">
-                        <div className="flex items-center space-x-1.5">
-                          <div className="w-5 h-5 rounded-full bg-line text-muted font-bold text-xs flex items-center justify-center shrink-0">
-                            {(wo.assignedTechName || 'U').charAt(0)}
-                          </div>
-                          <span className="text-xs text-ink font-medium truncate max-w-[100px]">
-                            {wo.assignedTechName || 'Unassigned'}
-                          </span>
+                      {/* Assigned Tech — clickable dropdown (Ko Hein 2026-08-10) */}
+                      <td className="py-3 px-3 hidden lg:table-cell" onClick={(e) => e.stopPropagation()}>
+                        <div className="relative">
+                          <button
+                            type="button"
+                            onClick={() => setTechAssignOpenId(techAssignOpenId === wo.id ? null : wo.id)}
+                            className="flex items-center space-x-1.5 text-left hover:opacity-80 transition-opacity"
+                            title="Assign technician"
+                          >
+                            <div className="w-5 h-5 rounded-full bg-line text-muted font-bold text-xs flex items-center justify-center shrink-0">
+                              {(wo.assignedTechName || 'U').charAt(0)}
+                            </div>
+                            <span className="text-xs text-ink font-medium truncate max-w-[100px]">
+                              {wo.assignedTechName || 'Unassigned'}
+                            </span>
+                          </button>
+                          {techAssignOpenId === wo.id && (
+                            <>
+                              <div className="fixed inset-0 z-40" onClick={() => setTechAssignOpenId(null)} role="presentation" aria-hidden="true" />
+                              <div className="absolute left-0 top-full z-50 mt-1 w-44 rounded-xl border border-line bg-white p-1 shadow-xl">
+                                <button
+                                  type="button"
+                                  onClick={() => handleAssignTech(wo, 'unassigned')}
+                                  className={`w-full px-2.5 py-1.5 text-left text-xs font-bold rounded-lg hover:bg-surface ${!wo.assignedTechId ? 'text-brand bg-brand/5' : ''}`}
+                                >
+                                  Unassigned
+                                </button>
+                                {(technicians || []).map((t) => (
+                                  <button
+                                    key={t.id}
+                                    type="button"
+                                    onClick={() => handleAssignTech(wo, t.id)}
+                                    className={`w-full px-2.5 py-1.5 text-left text-xs font-bold rounded-lg hover:bg-surface ${wo.assignedTechId === t.id ? 'text-brand bg-brand/5' : ''}`}
+                                  >
+                                    {t.name}
+                                  </button>
+                                ))}
+                              </div>
+                            </>
+                          )}
                         </div>
                       </td>
 
@@ -564,10 +612,41 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
 
                   {/* Footer: tech + amount */}
                   <div className="mt-2 flex items-center justify-between border-t border-line/60 pt-1.5">
-                    <span className="flex items-center space-x-1 text-[11px] font-bold text-brand min-w-0 truncate">
-                      <User className="w-3 h-3 shrink-0" />
-                      <span className="truncate max-w-[80px]">{wo.assignedTechName || 'Unassigned'}</span>
-                    </span>
+                    <div className="relative min-w-0" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        type="button"
+                        onClick={() => setTechAssignOpenId(techAssignOpenId === wo.id ? null : wo.id)}
+                        className="flex items-center space-x-1 text-[11px] font-bold text-brand min-w-0 truncate hover:opacity-80 transition-opacity"
+                        title="Assign technician"
+                      >
+                        <UserCheck className="w-3 h-3 shrink-0" />
+                        <span className="truncate max-w-[80px]">{wo.assignedTechName || 'Unassigned'}</span>
+                      </button>
+                      {techAssignOpenId === wo.id && (
+                        <>
+                          <div className="fixed inset-0 z-40" onClick={() => setTechAssignOpenId(null)} role="presentation" aria-hidden="true" />
+                          <div className="absolute left-0 bottom-full z-50 mb-1 w-40 rounded-xl border border-line bg-white p-1 shadow-xl">
+                            <button
+                              type="button"
+                              onClick={() => handleAssignTech(wo, 'unassigned')}
+                              className={`w-full px-2 py-1.5 text-left text-xs font-bold rounded-lg hover:bg-surface ${!wo.assignedTechId ? 'text-brand bg-brand/5' : ''}`}
+                            >
+                              Unassigned
+                            </button>
+                            {(technicians || []).map((t) => (
+                              <button
+                                key={t.id}
+                                type="button"
+                                onClick={() => handleAssignTech(wo, t.id)}
+                                className={`w-full px-2 py-1.5 text-left text-xs font-bold rounded-lg hover:bg-surface ${wo.assignedTechId === t.id ? 'text-brand bg-brand/5' : ''}`}
+                              >
+                                {t.name}
+                              </button>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </div>
                     <span className="font-mono text-[11px] font-black text-success-deep">
                       {(wo.totalAmount || wo.subtotal || 0).toLocaleString()} MMK
                     </span>
