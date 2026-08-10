@@ -255,7 +255,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                 variant="ghost"
                 type="button"
                 onClick={() => setViewMode('table')}
-                className={`!h-7 !min-h-7 w-7 px-0 rounded-md flex items-center justify-center cursor-pointer ${viewMode === 'table' ? 'bg-brand text-white shadow-2xs' : 'text-muted hover:text-ink'}`}
+                className={`!h-7 !min-h-7 w-7 px-0 rounded-md flex items-center justify-center cursor-pointer hover:bg-transparent! ${viewMode === 'table' ? 'bg-brand text-white shadow-2xs' : 'text-muted hover:text-ink'}`}
                 title="Table View"
                 aria-label="Table View"
               >
@@ -265,7 +265,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                 variant="ghost"
                 type="button"
                 onClick={() => setViewMode('cards')}
-                className={`!h-7 !min-h-7 w-7 px-0 rounded-md flex items-center justify-center cursor-pointer ${viewMode === 'cards' ? 'bg-brand text-white shadow-2xs' : 'text-muted hover:text-ink'}`}
+                className={`!h-7 !min-h-7 w-7 px-0 rounded-md flex items-center justify-center cursor-pointer hover:bg-transparent! ${viewMode === 'cards' ? 'bg-brand text-white shadow-2xs' : 'text-muted hover:text-ink'}`}
                 title="Cards Grid View"
                 aria-label="Cards Grid View"
               >
