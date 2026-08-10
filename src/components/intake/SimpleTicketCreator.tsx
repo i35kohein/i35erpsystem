@@ -13,6 +13,8 @@ interface SimpleTicketCreatorProps {
   priceCatalog?: ModelRepairPrice[];
   systemSettings?: SystemSettings;
   onSaveWorkOrder: (wo: WorkOrder) => void;
+  /** Open the Sticker Tag Voucher printer (same as New Intake Ticket) */
+  onSelectPrintTag?: (wo: WorkOrder) => void;
 }
 
 interface FormState {
@@ -53,10 +55,12 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   priceCatalog = [],
   systemSettings,
   onSaveWorkOrder,
+  onSelectPrintTag,
 }) => {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [savedFlash, setSavedFlash] = useState(false);
+  const [lastSavedWo, setLastSavedWo] = useState<WorkOrder | null>(null);
   const [isModelModalOpen, setIsModelModalOpen] = useState(false);
   // Same sequential order-number scheme as New Intake Ticket (max existing + 1,
   // prefix from Settings) so the two forms never collide or duplicate numbers.
@@ -285,13 +289,10 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
     (base as any).simpleTicket = true;
 
     onSaveWorkOrder(base);
+    setLastSavedWo(base);
     setSavedFlash(true);
-    // Same as New Intake Ticket Registration: after saving, print the ticket.
-    // Some browsers block window.print() after an async save — guarded, and the
-    // flash message now carries an explicit Print button as fallback (bug #11).
-    window.setTimeout(() => {
-      try { window.print(); } catch { /* blocked — use the flash Print button */ }
-    }, 450);
+    // Same as New Intake Ticket Registration: print goes through the Sticker Tag
+    // Voucher modal (onSelectPrintTag) — no raw window.print (Ko Hein 2026-08-10).
     if (!editingId) resetForm();
   };
 
@@ -566,13 +567,15 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
           {savedFlash && (
             <div role="status" className="no-print mt-4 flex flex-wrap items-center justify-center gap-3 rounded-2xl bg-success/10 px-4 py-3 text-center text-sm font-bold text-success-deep">
               <span>{editingId ? 'Ticket updated and saved to the database.' : 'Inspection saved to the database.'}</span>
-              <button
-                type="button"
-                onClick={() => { try { window.print(); } catch { /* ignore */ } }}
-                className="rounded-lg border border-success/40 bg-white px-3 py-1.5 text-xs font-black text-success-deep transition hover:bg-success/10"
-              >
-                🖨 Print Ticket
-              </button>
+              {onSelectPrintTag && lastSavedWo && (
+                <button
+                  type="button"
+                  onClick={() => onSelectPrintTag(lastSavedWo)}
+                  className="rounded-lg border border-success/40 bg-white px-3 py-1.5 text-xs font-black text-success-deep transition hover:bg-success/10"
+                >
+                  🖨 Print Ticket
+                </button>
+              )}
             </div>
           )}
         </form>

@@ -2401,6 +2401,7 @@ export default function App() {
                   priceCatalog={priceCatalog.catalog}
                   systemSettings={systemSettings}
                   onSaveWorkOrder={handleSaveWorkOrder}
+                  onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
                 />
               )}
 
