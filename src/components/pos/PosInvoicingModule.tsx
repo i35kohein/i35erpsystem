@@ -24,6 +24,8 @@ import {CreditCard,
   Pencil,
   Wrench,
   Percent,
+  Search,
+  CircleDot,
 } from 'lucide-react';
 import { WorkOrder, Customer, SystemSettings, PartItem, WorkOrderLineItem } from '../../types';
 import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
@@ -174,6 +176,9 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
   // Price List repair picker (Ko Hein 2026-08-10)
   const [isAddRepairFromPriceListOpen, setIsAddRepairFromPriceListOpen] = useState(false);
+  const [posCatalogSelection, setPosCatalogSelection] = useState<string[]>([]);
+  const [priceSearchQuery, setPriceSearchQuery] = useState('');
+  const [selectedGroupFilter, setSelectedGroupFilter] = useState<string>('ALL');
 
   // Invoice-level discount input (Ko Hein 2026-08-10)
   const [invoiceDiscountInput, setInvoiceDiscountInput] = useState<string>('');
@@ -1883,121 +1888,166 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
         </div>
       )}
 
-      {/* Price List Repair Picker — select from catalog (Ko Hein 2026-08-10) */}
+      {/* Price List Repair Picker — intake-style modal (Ko Hein 2026-08-10) */}
       {isAddRepairFromPriceListOpen && selectedWo && (() => {
         const catalogItems = getModelPriceCatalogItems(selectedWo.deviceModel || '', priceCatalog as any);
+        const matchedModelName = catalogItems.length > 0 ? catalogItems[0].modelMatchedName : selectedWo.deviceModel;
+        const filteredItems = catalogItems.filter((item) => {
+          const matchesSearch =
+            !priceSearchQuery ||
+            item.name.toLowerCase().includes(priceSearchQuery.toLowerCase()) ||
+            item.group.toLowerCase().includes(priceSearchQuery.toLowerCase());
+          const matchesGroup = selectedGroupFilter === 'ALL' || item.group === selectedGroupFilter;
+          return matchesSearch && matchesGroup && item.price > 0;
+        });
         return (
           <div
-            className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center pt-[env(safe-area-inset-top)]"
+            className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
             onClick={() => setIsAddRepairFromPriceListOpen(false)}
             role="presentation"
           >
             <div
-              className="bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md h-[85dvh] sm:h-auto p-5 space-y-4 overflow-y-auto shadow-xl animate-i35-slide-up"
+              className="bg-white border border-line rounded-2xl max-w-2xl w-full p-6 space-y-4 text-xs shadow-2xl relative max-h-[85vh] flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Header */}
-              <div className="flex items-center justify-between gap-2">
-                <div className="min-w-0">
-                  <h3 className="font-extrabold text-sm text-ink">Add Repair from Price List</h3>
-                  <p className="text-xs text-muted truncate">
-                    {selectedWo.deviceModel || 'Unknown device'} — select repairs to add
-                  </p>
+              <button
+                type="button"
+                onClick={() => setIsAddRepairFromPriceListOpen(false)}
+                className="absolute right-4 top-4 text-muted hover:text-ink p-1 rounded-lg hover:bg-surface cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="border-b border-line pb-3 space-y-1">
+                <h3 className="text-base font-black text-ink flex items-center space-x-2">
+                  <CircleDot className="w-5 h-5 text-brand" />
+                  <span>Price Catalog Repair Selector ({matchedModelName})</span>
+                </h3>
+                <p className="text-xs text-muted">
+                  Select repair services with verified catalog pricing in MMK for {matchedModelName}
+                </p>
+              </div>
+
+              {/* Filter & Search Bar */}
+              <div className="space-y-2">
+                <div className="relative">
+                  <Search className="w-4 h-4 text-muted absolute left-3 top-2.5" />
+                  <input
+                    type="text"
+                    value={priceSearchQuery}
+                    onChange={(e) => setPriceSearchQuery(e.target.value)}
+                    placeholder={`Search repairs for ${matchedModelName} (e.g. Battery, Display, Face ID)...`}
+                    className="w-full bg-surface border border-line rounded-xl pl-9 pr-3 py-2.5 text-sm font-medium focus:bg-white focus:outline-none transition-all"
+                  />
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setIsAddRepairFromPriceListOpen(false)}
-                  aria-label="Close price list"
-                  className="text-muted hover:text-ink p-1.5 rounded transition-colors cursor-pointer focus:outline-none"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+
+                {/* Category Group Filter Pills */}
+                <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs">
+                  {['ALL', 'Battery', 'Display', 'Housing', 'Charging', 'Audio', 'Logic Board', 'Network', 'Sensors & Keys'].map((grp) => (
+                    <button
+                      key={grp}
+                      type="button"
+                      onClick={() => setSelectedGroupFilter(grp)}
+                      className={`px-3 py-1 rounded-lg font-bold shrink-0 transition-all cursor-pointer ${
+                        selectedGroupFilter === grp
+                          ? 'bg-brand text-white shadow-2xs'
+                          : 'bg-surface text-muted hover:text-ink hover:bg-line'
+                      }`}
+                    >
+                      {grp}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              {/* Group filter chips */}
-              <div className="flex flex-wrap gap-1">
-                {['ALL', ...new Set(catalogItems.map((i) => i.group))].map((g) => (
-                  <button
-                    key={g}
-                    type="button"
-                    className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-colors cursor-pointer ${
-                      g === 'ALL' ? 'bg-brand/10 text-brand' : 'bg-surface text-muted hover:text-ink'
-                    }`}
-                    onClick={() => {/* group filter — simple inline toggle would need state, skip for now */}}
-                  >
-                    {g}
-                  </button>
-                ))}
-              </div>
-
-              {/* Catalog items list */}
-              <div className="space-y-1.5 max-h-[400px] overflow-y-auto">
-                {catalogItems.length === 0 ? (
+              {/* Price Catalog Repair List */}
+              <div className="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[220px]">
+                {filteredItems.length === 0 ? (
                   <div className="p-8 text-center text-muted text-xs space-y-1">
                     <FileText className="w-8 h-8 mx-auto opacity-40 text-brand" />
-                    <p className="font-extrabold text-ink">No price catalog for this model</p>
-                    <p>Set up prices in Price List settings first.</p>
+                    <p className="font-extrabold text-ink">No matching repairs found</p>
+                    <p>Try a different search or group filter.</p>
                   </div>
                 ) : (
-                  catalogItems
-                    .filter((item) => item.price > 0)
-                    .map((item) => {
-                      const alreadyExists = (selectedWo.lineItems || []).some(
-                        (li) => li.description?.toLowerCase() === item.name.toLowerCase()
-                      );
-                      return (
-                        <div
-                          key={item.categoryKey}
-                          className={`flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl border transition-all ${
-                            alreadyExists ? 'border-line bg-surface/50 opacity-60' : 'border-line bg-white'
-                          }`}
-                        >
-                          <div className="min-w-0">
-                            <p className="text-xs font-extrabold text-ink truncate">{item.name}</p>
-                            <div className="flex items-center gap-1.5 mt-0.5">
-                              <span className="text-[10px] font-semibold text-muted bg-surface px-1.5 py-px rounded">
-                                {item.group}
-                              </span>
-                              <span className="text-[10px] font-semibold text-muted">{item.warranty}</span>
+                  filteredItems.map((item) => {
+                    const isSelected = posCatalogSelection.includes(item.categoryKey);
+                    const alreadyInWo = (selectedWo.lineItems || []).some(
+                      (li) => li.description?.toLowerCase() === item.name.toLowerCase()
+                    );
+                    return (
+                      <button
+                        type="button"
+                        key={item.categoryKey}
+                        onClick={() => {
+                          if (alreadyInWo) return;
+                          setPosCatalogSelection((prev) =>
+                            prev.includes(item.categoryKey)
+                              ? prev.filter((k) => k !== item.categoryKey)
+                              : [...prev, item.categoryKey]
+                          );
+                        }}
+                        className={`w-full text-left p-3 rounded-xl border text-xs cursor-pointer flex justify-between items-center transition-all ${
+                          alreadyInWo
+                            ? 'border-line bg-surface/50 opacity-60'
+                            : isSelected
+                              ? 'border-brand bg-brand-soft text-brand font-bold shadow-2xs'
+                              : 'border-line bg-white text-ink hover:bg-surface'
+                        }`}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div
+                            className={`w-5 h-5 rounded-md flex items-center justify-center border transition-all ${
+                              isSelected ? 'bg-brand border-brand text-white' : alreadyInWo ? 'border-line-strong bg-surface' : 'border-line-strong bg-white'
+                            }`}
+                          >
+                            {isSelected && <Check className="w-3.5 h-3.5" />}
+                            {alreadyInWo && !isSelected && <Check className="w-3.5 h-3.5 text-muted" />}
+                          </div>
+                          <div>
+                            <span className="block font-extrabold text-ink text-xs">{item.name}</span>
+                            <div className="flex items-center space-x-2 text-xs text-muted pt-0.5 font-medium">
+                              <span className="px-1.5 py-0.5 bg-surface rounded text-ink font-semibold">{item.group}</span>
+                              <span>Warranty: {item.warranty}</span>
+                              {alreadyInWo && <span className="text-muted font-semibold">· Already in invoice</span>}
                             </div>
                           </div>
-                          <div className="text-right shrink-0">
-                            <span className="font-mono font-black text-sm text-brand block">
-                              {item.price.toLocaleString()}
-                            </span>
-                            {alreadyExists && (
-                              <span className="text-[10px] text-muted font-semibold">Already added</span>
-                            )}
-                          </div>
                         </div>
-                      );
-                    })
+
+                        <div className="text-right">
+                          <span className="font-mono font-black text-sm text-brand">
+                            {item.price.toLocaleString()} MMK
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })
                 )}
               </div>
 
-              {/* Quick-add single repair buttons */}
-              {catalogItems.filter((i) => i.price > 0).length > 0 && (
-                <div className="space-y-1.5">
-                  <p className="text-[11px] font-bold text-muted">Tap to add a repair:</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {catalogItems
-                      .filter((item) => item.price > 0 && !(selectedWo.lineItems || []).some(
-                        (li) => li.description?.toLowerCase() === item.name.toLowerCase()
-                      ))
-                      .slice(0, 12)
-                      .map((item) => (
-                        <button
-                          key={item.categoryKey}
-                          type="button"
-                          onClick={() => handleAddRepairsFromPriceList([item])}
-                          className="px-2.5 py-1.5 rounded-lg bg-brand-soft hover:bg-brand/15 border border-brand/30 text-xs font-extrabold text-brand transition-all cursor-pointer active:scale-95"
-                        >
-                          {item.name.split(' ').slice(0, 3).join(' ')} +{item.price.toLocaleString()}
-                        </button>
-                      ))}
-                  </div>
-                </div>
-              )}
+              {/* Apply button */}
+              <div className="pt-2 border-t border-line flex items-center justify-between">
+                <span className="text-xs text-muted font-semibold">
+                  Selected: <strong className="text-ink">{posCatalogSelection.length} repair(s)</strong>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const selected = catalogItems.filter(
+                      (item) => posCatalogSelection.includes(item.categoryKey) && item.price > 0
+                    );
+                    if (selected.length > 0) {
+                      handleAddRepairsFromPriceList(selected);
+                    }
+                    setPosCatalogSelection([]);
+                    setPriceSearchQuery('');
+                    setSelectedGroupFilter('ALL');
+                  }}
+                  disabled={posCatalogSelection.length === 0}
+                  className="px-6 py-2.5 bg-brand text-white font-bold rounded-xl text-xs hover:bg-brand-deep transition-colors shadow-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Apply Selected Repairs ({posCatalogSelection.length})
+                </button>
+              </div>
             </div>
           </div>
         );
