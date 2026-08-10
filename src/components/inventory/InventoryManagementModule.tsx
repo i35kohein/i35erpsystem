@@ -28,7 +28,7 @@ import {Boxes,
   ChevronDown,
   Printer,
   MoreHorizontal} from 'lucide-react';
-import { PartItem, PartQualityTier, Supplier, SystemSettings, RmaItem } from '../../types';
+import { PartItem, PartOwner, PartQualityTier, Supplier, SystemSettings, RmaItem } from '../../types';
 import { ModelRepairPrice } from '../../types/priceCatalog';
 import { getModelPriceCatalogItems } from '../../utils/priceCatalogLookup';
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
@@ -161,6 +161,20 @@ function paginateTags(parts: PartItem[], perPage = 18): PartItem[][] {
   return pages;
 }
 
+/** Stock owner badge — APP (shop, brand blue) vs KZH (Ko Hein, green). */
+const OwnerBadge = ({ owner }: { owner?: string }) => {
+  const o = owner || 'APP';
+  return o === 'KZH' ? (
+    <span className="inline-flex items-center gap-1 rounded-md border border-success/30 bg-success/10 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-success-deep">
+      KZH
+    </span>
+  ) : (
+    <span className="inline-flex items-center gap-1 rounded-md border border-brand/30 bg-brand-soft px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-brand">
+      APP
+    </span>
+  );
+};
+
 export const InventoryManagementModule: React.FC<InventoryManagementModuleProps> = ({
   parts,
   suppliers,
@@ -237,6 +251,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const [showInlineSaveConfirm, setShowInlineSaveConfirm] = useState(false);
   const [isInlineSaving, setIsInlineSaving] = useState(false);
   const [localLowStockOnly, setLocalLowStockOnly] = useState(false);
+  const [ownerFilter, setOwnerFilter] = useState<'ALL' | PartOwner>('ALL');
   const showLowStockOnly = propShowLowStockOnly !== undefined ? propShowLowStockOnly : localLowStockOnly;
   const setShowLowStockOnly = (v: boolean) => {
     if (propOnSetLowStockOnly) propOnSetLowStockOnly(v);
@@ -524,6 +539,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     supplierName: '',
     locationBin: '',
     isSerialized: false,
+    owner: 'APP' as const,
   });
 
   const categories = useMemo(() => {
@@ -796,7 +812,17 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       'Genuine': 0,
     };
 
+    const ownerCounts: Record<string, number> = { APP: 0, KZH: 0 };
+    const ownerValuation: Record<string, { cost: number; retail: number }> = {
+      APP: { cost: 0, retail: 0 },
+      KZH: { cost: 0, retail: 0 },
+    };
+
     parts.forEach((p) => {
+      const owner = p.owner || 'APP';
+      ownerCounts[owner] = (ownerCounts[owner] || 0) + 1;
+      ownerValuation[owner].cost += Number(p.costPrice || 0) * Number(p.quantityInStock || 0);
+      ownerValuation[owner].retail += (p.sellingPrice || 0) * Number(p.quantityInStock || 0);
       totalCostValuation += Number(p.costPrice || 0) * Number(p.quantityInStock || 0);
       totalRetailValuation += p.sellingPrice * p.quantityInStock;
       if (p.quantityInStock <= p.reorderPoint) {
@@ -820,6 +846,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       lowStockCount,
       outOfStockCount,
       qualityCounts,
+      ownerCounts,
+      ownerValuation,
     };
   }, [parts]);
 
@@ -835,6 +863,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           (device) => isSameDeviceModel(device, selectedModelFilter)
         );
       const matchesLowStock = !showLowStockOnly || part.quantityInStock <= part.reorderPoint;
+      const matchesOwner = ownerFilter === 'ALL' || (part.owner || 'APP') === ownerFilter;
       
       const query = activeSearchQuery.toLowerCase().trim();
       const matchesSearch =
@@ -845,7 +874,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         part.locationBin.toLowerCase().includes(query) ||
         part.deviceCompatibility.some((d) => d.toLowerCase().includes(query));
 
-      return matchesQuality && matchesCategory && matchesModel && matchesLowStock && matchesSearch;
+      return matchesQuality && matchesCategory && matchesModel && matchesLowStock && matchesSearch && matchesOwner;
     }).sort((a, b) => {
       if (sortKey === 'stock') {
         const diff = a.quantityInStock - b.quantityInStock;
@@ -867,7 +896,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       if (byCategory !== 0) return byCategory;
       return (a.name || '').localeCompare(b.name || '', undefined, { numeric: true, sensitivity: 'base' });
     });
-  }, [parts, selectedQuality, selectedCategory, selectedModelFilter, showLowStockOnly, activeSearchQuery, sortKey, sortDir]);
+  }, [parts, selectedQuality, selectedCategory, selectedModelFilter, showLowStockOnly, activeSearchQuery, sortKey, sortDir, ownerFilter]);
 
   const paginatedParts = filteredParts;
 
@@ -895,6 +924,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       supplierName: newPartData.supplierName || '',
       locationBin: newPartData.locationBin || '',
       isSerialized: newPartData.isSerialized || false,
+      owner: (newPartData.owner as PartOwner) || 'APP',
     };
 
     onAddPart(part);
@@ -1053,6 +1083,10 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 {categories.length} Categories
               </span>
             </div>
+            <div className="flex items-center gap-1.5 mt-1.5">
+              <span className="rounded bg-brand/10 px-1.5 py-0.5 text-[10px] font-black text-brand">APP {metrics.ownerCounts.APP || 0}</span>
+              <span className="rounded bg-success/10 px-1.5 py-0.5 text-[10px] font-black text-success-deep">KZH {metrics.ownerCounts.KZH || 0}</span>
+            </div>
           </div>
         </div>
 
@@ -1075,6 +1109,14 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 <span className="font-mono font-black text-success">
                   {metrics.totalRetailValuation.toLocaleString()} {currency}
                 </span>
+              </div>
+              <div className="flex justify-between text-xs border-t border-surface pt-1 mt-1">
+                <span className="text-muted font-medium">APP Cost:</span>
+                <span className="font-mono font-bold text-ink">{metrics.ownerValuation.APP.cost.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-muted font-medium">KZH Cost:</span>
+                <span className="font-mono font-bold text-ink">{metrics.ownerValuation.KZH.cost.toLocaleString()}</span>
               </div>
             </div>
             <div className="text-xs text-brand font-extrabold text-right pt-1 border-t border-surface mt-1">
@@ -1122,6 +1164,27 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       {/* VIEW MODE 1: STOCK TABLE */}
       {viewMode === 'stock' && (
         <>
+
+        {/* Owner filter — APP (shop) vs KZH (Ko Hein) stock (Ko Hein 2026-08-10) */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {(['ALL', 'APP', 'KZH'] as const).map((owner) => {
+            const count = owner === 'ALL' ? parts.length : parts.filter((p) => (p.owner || 'APP') === owner).length;
+            const active = ownerFilter === owner;
+            return (
+              <button
+                key={owner}
+                type="button"
+                onClick={() => setOwnerFilter(owner)}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold transition-all cursor-pointer ${
+                  active ? 'bg-brand text-white shadow-2xs' : 'bg-surface text-muted hover:bg-line hover:text-ink'
+                }`}
+              >
+                {owner === 'ALL' ? 'All Owners' : owner}
+                <span className={`rounded-full px-1.5 text-[10px] font-black ${active ? 'bg-white/20' : 'bg-white'}`}>{count}</span>
+              </button>
+            );
+          })}
+        </div>
 
         {/* Bulk actions bar — appears when parts are selected (stock table only) */}
         {selectedPartIds.size > 0 && !inlineEditMode && (
@@ -1204,6 +1267,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   setShowLowStockOnly(false);
                   setSearchQuery('');
                   setSelectedModelFilter('ALL');
+                  setOwnerFilter('ALL');
                 }}
                 className="mt-2 px-3 py-1.5 bg-brand text-white font-bold rounded-xl text-xs"
               >
@@ -1264,6 +1328,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-1.5">
+                      <OwnerBadge owner={part.owner} />
                       {qualityBadge}
                       {part.locationBin && (
                         <span className="inline-flex items-center gap-1 rounded-md border border-line bg-surface px-1.5 py-0.5 text-xs font-extrabold text-brand">
@@ -1418,6 +1483,18 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                                     ))}
                                   </select>
                                 </div>
+                                <div>
+                                  <p className="text-[10px] font-extrabold uppercase tracking-wide text-muted mb-1">Owner</p>
+                                  <select
+                                    value={ownerFilter}
+                                    onChange={(e) => setOwnerFilter(e.target.value as 'ALL' | PartOwner)}
+                                    className="w-full rounded-lg border border-line bg-white px-2 py-1.5 text-xs font-semibold text-ink outline-none "
+                                  >
+                                    <option value="ALL">All Owners</option>
+                                    <option value="APP">APP — Shop</option>
+                                    <option value="KZH">KZH — Ko Hein</option>
+                                  </select>
+                                </div>
                                 <label className="flex items-center gap-1.5 text-xs font-bold text-ink cursor-pointer pt-1.5 mt-1 border-t border-line">
                                   <input
                                     type="checkbox"
@@ -1448,6 +1525,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         Stock
                         {sortKey === 'stock' && <SortArrow dir={sortDir} />}
                       </button>
+                    </th>
+                    <th className="w-[64px] px-1.5 py-2 bg-surface hidden md:table-cell">
+                      <span className="uppercase font-mono text-xs text-muted">Owner</span>
                     </th>
                     <th className="w-[104px] px-1.5 py-2 bg-surface">
                       <button type="button" onClick={() => toggleSort('price')} className="inline-flex items-center gap-1 hover:text-brand transition-colors cursor-pointer uppercase font-mono text-xs focus:outline-none" title="Sort by selling price">
@@ -1519,6 +1599,11 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                               <span>{part.qualityTier}</span>
                             </span>
                           )}
+                        </td>
+
+                        {/* Owner — APP / KZH */}
+                        <td className="w-[64px] px-1.5 py-2 hidden md:table-cell">
+                          <OwnerBadge owner={part.owner} />
                         </td>
 
                         {/* Stock Level & Visual Bar */}
@@ -2023,6 +2108,37 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <div className="mb-1 flex h-4 items-center">
+                  <label className="block font-bold text-ink">Owner</label>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => applyPartSpecification({ owner: 'APP' })}
+                    className={`rounded-xl border px-3 py-2 text-left transition-all cursor-pointer ${
+                      (newPartData.owner || 'APP') === 'APP'
+                        ? 'border-brand bg-brand-soft text-brand ring-1 ring-brand/30'
+                        : 'border-line bg-white text-muted hover:border-brand/40'
+                    }`}
+                  >
+                    <span className="block text-xs font-black uppercase tracking-wide">APP</span>
+                    <span className="block text-[10px] font-semibold opacity-80">Shop stock</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyPartSpecification({ owner: 'KZH' })}
+                    className={`rounded-xl border px-3 py-2 text-left transition-all cursor-pointer ${
+                      (newPartData.owner || 'APP') === 'KZH'
+                        ? 'border-success bg-success/10 text-success-deep ring-1 ring-success/30'
+                        : 'border-line bg-white text-muted hover:border-success/40'
+                    }`}
+                  >
+                    <span className="block text-xs font-black uppercase tracking-wide">KZH</span>
+                    <span className="block text-[10px] font-semibold opacity-80">Ko Hein stock</span>
+                  </button>
+                </div>
+              </div>
               <div>
                 <div className="mb-1 flex h-4 items-center">
                   <label className="block font-bold text-ink">Category</label>
@@ -2395,6 +2511,36 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   onChange={(e) => setEditingPart({ ...editingPart, name: e.target.value })}
                   className="w-full bg-surface border border-line rounded-xl p-2.5 text-xs font-bold text-ink"
                 />
+              </div>
+
+              <div>
+                <label className="block font-bold text-ink mb-1">Owner</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingPart({ ...editingPart, owner: 'APP' })}
+                    className={`rounded-xl border px-3 py-2 text-left transition-all cursor-pointer ${
+                      (editingPart.owner || 'APP') === 'APP'
+                        ? 'border-brand bg-brand-soft text-brand ring-1 ring-brand/30'
+                        : 'border-line bg-white text-muted hover:border-brand/40'
+                    }`}
+                  >
+                    <span className="block text-xs font-black uppercase tracking-wide">APP</span>
+                    <span className="block text-[10px] font-semibold opacity-80">Shop stock</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditingPart({ ...editingPart, owner: 'KZH' })}
+                    className={`rounded-xl border px-3 py-2 text-left transition-all cursor-pointer ${
+                      (editingPart.owner || 'APP') === 'KZH'
+                        ? 'border-success bg-success/10 text-success-deep ring-1 ring-success/30'
+                        : 'border-line bg-white text-muted hover:border-success/40'
+                    }`}
+                  >
+                    <span className="block text-xs font-black uppercase tracking-wide">KZH</span>
+                    <span className="block text-[10px] font-semibold opacity-80">Ko Hein stock</span>
+                  </button>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">

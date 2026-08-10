@@ -218,10 +218,14 @@ export interface WorkOrder {
   inventorySettledAt?: string;
 }
 
+export type PartOwner = 'APP' | 'KZH';
+
 export interface PartItem {
   id: string;
   sku: string;
   name: string;
+  /** Stock owner — APP (shop) or KZH (Ko Hein) (Ko Hein 2026-08-10); legacy rows default to APP. */
+  owner?: PartOwner;
   applePartNumber?: string;
   category: string; // e.g., Display, Battery, Charging Port, Logic Board Chip, Back Glass
   deviceCompatibility: string[]; // e.g., ["iPhone 13", "iPhone 13 Pro"]
