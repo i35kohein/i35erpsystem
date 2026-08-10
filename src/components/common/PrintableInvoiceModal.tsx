@@ -41,6 +41,20 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
 
   const partsSubtotal = partsItems.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
   const laborSubtotal = laborItems.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+  const laborDiscount = laborItems.reduce((sum, item) => {
+    const lineTotal = item.unitPrice * item.quantity;
+    const disc = item.lineItemDiscountPercent ? Math.round(lineTotal * (item.lineItemDiscountPercent / 100)) : 0;
+    return sum + disc;
+  }, 0);
+  const customerTotal = Math.max(0, laborSubtotal - laborDiscount + workOrder.taxAmount - workOrder.discountAmount - (workOrder.depositAmount || 0));
+
+  // Precompute line item discounts for display
+  const laborItemsWithTotals = laborItems.map((item) => ({
+    item,
+    lineTotal: item.unitPrice * item.quantity,
+    disc: item.lineItemDiscountPercent ? Math.round(item.unitPrice * item.quantity * (item.lineItemDiscountPercent / 100)) : 0,
+    effTotal: item.unitPrice * item.quantity - (item.lineItemDiscountPercent ? Math.round(item.unitPrice * item.quantity * (item.lineItemDiscountPercent / 100)) : 0),
+  }));
 
   const formattedDate = new Date(workOrder.createdAt || Date.now()).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -331,13 +345,16 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">
-                  {workOrder.lineItems && workOrder.lineItems.length > 0 ? (
-                    workOrder.lineItems.map((item, idx) => (
+                  {laborItemsWithTotals.length > 0 ? (
+                    laborItemsWithTotals.map(({ item, lineTotal, disc, effTotal }, idx) => (
                       <tr key={item.id || idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-surface/50'}>
                         <td className="p-3">
                           <p className="font-bold text-ink">{item.description}</p>
                           {item.partQuality && (
                             <span className="text-xs text-muted">{item.partQuality}</span>
+                          )}
+                          {disc > 0 && (
+                            <span className="text-xs font-semibold text-success-deep">• {item.lineItemDiscountPercent}% discount applied</span>
                           )}
                         </td>
                         <td className="p-3">
@@ -350,7 +367,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
                         <td className="p-3 text-center font-mono text-muted">{item.quantity}</td>
                         <td className="p-3 text-right font-mono text-muted">{item.unitPrice.toLocaleString()} {currency}</td>
                         <td className="p-3 text-right font-mono font-bold text-ink">
-                          {(item.unitPrice * item.quantity).toLocaleString()} {currency}
+                          {effTotal.toLocaleString()} {currency}
                         </td>
                       </tr>
                     ))
@@ -396,22 +413,18 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
             {/* Calculations Breakdown */}
             <div className="sm:w-1/2 w-full space-y-2 text-right">
               <div className="bg-white p-4 rounded-xl border border-line space-y-2 shadow-2xs font-mono">
-                {partsSubtotal > 0 && (
-                  <div className="flex justify-between text-muted">
-                    <span>Parts Subtotal:</span>
-                    <span>{partsSubtotal.toLocaleString()} {currency}</span>
+                {laborDiscount > 0 && (
+                  <div className="flex justify-between text-success-deep font-semibold">
+                    <span>Per-item Discounts:</span>
+                    <span>-{laborDiscount.toLocaleString()} {currency}</span>
                   </div>
                 )}
                 {laborSubtotal > 0 && (
                   <div className="flex justify-between text-muted">
-                    <span>Labor Subtotal:</span>
+                    <span>Repair Subtotal:</span>
                     <span>{laborSubtotal.toLocaleString()} {currency}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-muted">
-                  <span>Subtotal:</span>
-                  <span>{workOrder.subtotal.toLocaleString()} {currency}</span>
-                </div>
 
                 {workOrder.discountAmount > 0 && (
                   <div className="flex justify-between text-success-deep font-semibold">
@@ -439,7 +452,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
                     {workOrder.isPaid ? 'Total Amount Paid:' : 'Final Balance Due:'}
                   </span>
                   <span className="font-black text-lg text-brand">
-                    {workOrder.totalAmount.toLocaleString()} {currency}
+                    {customerTotal.toLocaleString()} {currency}
                   </span>
                 </div>
               </div>

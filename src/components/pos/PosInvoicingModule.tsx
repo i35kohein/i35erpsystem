@@ -21,6 +21,7 @@ import {CreditCard,
   UserCheck,
   ChevronsLeft,
   ChevronsRight,
+  ChevronsDown,
   Pencil,
   Wrench,
   Percent,
@@ -271,6 +272,9 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   // Per-transaction reset shared by every ticket-selection path (expanded rows
   // AND the collapsed queue) so a previous customer's cash/split never leaks
   // into the next checkout (audit P2).
+  // Per-transaction reset shared by every ticket-selection path (expanded rows
+  // AND the collapsed queue) so a previous customer's cash/split never leaks
+  // into the next checkout (audit P2).
   const resetTransactionState = () => {
     setCashTendered(0);
     setSplitPayments([
@@ -278,6 +282,21 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
       { method: activePaymentMethods[1]?.name || 'Cash', amount: 0 },
     ]);
   };
+
+  // Computed: labor vs parts breakdown for customer / system views (Ko Hein 2026-08-10)
+  const laborItems = useMemo(() => (selectedWo?.lineItems || []).filter((li) => li.isLabor), [selectedWo]);
+  const partsItems = useMemo(() => (selectedWo?.lineItems || []).filter((li) => !li.isLabor && li.partId), [selectedWo]);
+  const laborSubtotal = useMemo(() => laborItems.reduce((s, li) => s + li.unitPrice * li.quantity, 0), [laborItems]);
+  const partsSubtotal = useMemo(() => partsItems.reduce((s, li) => s + li.unitPrice * li.quantity, 0), [partsItems]);
+  const partsCostTotal = useMemo(() => partsItems.reduce((s, li) => s + (li.unitCost || 0) * li.quantity, 0), [partsItems]);
+  const perItemDiscountTotal = useMemo(
+    () => laborItems.reduce((s, li) => {
+      if (!li.lineItemDiscountPercent) return s;
+      return s + Math.round(li.unitPrice * li.quantity * (li.lineItemDiscountPercent / 100));
+    }, 0),
+    [laborItems]
+  );
+
   const filteredInventoryParts = useMemo(() => {
     const ownerFiltered = posOwner === 'ALL' ? parts : parts.filter((part) => (part.owner || 'APP') === posOwner);
     if (!selectedWo) return ownerFiltered;
@@ -658,124 +677,232 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 </div>
               )}
 
-              {/* Itemized Line Items — Excel-style table (Ko Hein) */}
+              {/* Itemized Line Items — Labor/Repair + System Parts (Ko Hein 2026-08-10) */}
               <div className="space-y-2">
-                <h3 className="font-bold text-brand text-xs">Itemized Labor & Parts</h3>
-                <div className="border border-line-strong rounded-lg overflow-hidden bg-white">
-                  <table className="w-full border-collapse text-xs">
-                    <thead>
-                      <tr className="bg-surface">
-                        <th className="border border-line px-2 py-1.5 text-left font-extrabold text-muted text-[11px] uppercase tracking-wide">Item</th>
-                        <th className="border border-line px-2 py-1.5 text-center font-extrabold text-muted text-[11px] uppercase tracking-wide w-14">Qty</th>
-                        <th className="border border-line px-2 py-1.5 text-center font-extrabold text-muted text-[11px] uppercase tracking-wide w-24">Unit Price</th>
-                        <th className="border border-line px-2 py-1.5 text-center font-extrabold text-muted text-[11px] uppercase tracking-wide w-16">Disc%</th>
-                        <th className="border border-line px-2 py-1.5 text-right font-extrabold text-muted text-[11px] uppercase tracking-wide">Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {selectedWo.lineItems.map((li) => {
-                        const isEditing = editingLineId === li.id;
-                        const isPart = li.partId && !li.isLabor;
-                        const lineTotal = li.unitPrice * li.quantity;
-                        const itemDiscountAmt = li.lineItemDiscountPercent ? Math.round(lineTotal * (li.lineItemDiscountPercent / 100)) : 0;
-                        const effectiveTotal = lineTotal - itemDiscountAmt;
-                        return (
-                          <tr key={li.id} className={`${isPart ? 'bg-brand-soft/60' : 'bg-white'} ${isEditing ? 'ring-2 ring-brand/30' : ''}`}>
-                            {/* Item name + edit toggle */}
-                            <td className="border border-line px-2 py-1.5">
-                              <div className="flex items-center gap-1">
-                                <span className="font-bold text-ink min-w-0 truncate">{li.description}</span>
-                                {isPart && <span className="text-[10px] font-semibold text-muted shrink-0">· Part</span>}
-                                <button
-                                  type="button"
-                                  onClick={() => setEditingLineId(isEditing ? null : li.id)}
-                                  className={`shrink-0 p-0.5 rounded transition-colors cursor-pointer focus:outline-none ${isEditing ? 'text-brand' : 'text-muted hover:text-brand'}`}
-                                  title={isEditing ? 'Done editing' : 'Edit price / qty / discount'}
-                                >
-                                  {isEditing ? <Check className="w-3 h-3" /> : <Pencil className="w-3 h-3" />}
-                                </button>
-                              </div>
-                            </td>
-
-                            {/* Qty — editable */}
-                            <td className="border border-line px-1 py-1 text-center">
-                              {isEditing ? (
-                                <input
-                                  type="number"
-                                  min={1}
-                                  value={li.quantity}
-                                  onChange={(e) => handleUpdateLineItem(li.id, 'quantity', Number(e.target.value))}
-                                  className="w-full text-center text-xs font-mono font-bold text-ink bg-surface border border-brand rounded px-1 py-0.5 outline-none"
-                                />
-                              ) : (
-                                <span className="text-muted tabular-nums">{li.quantity}</span>
-                              )}
-                            </td>
-
-                            {/* Unit Price — editable */}
-                            <td className="border border-line px-1 py-1 text-center">
-                              {isEditing ? (
-                                <input
-                                  type="number"
-                                  min={0}
-                                  step={500}
-                                  value={li.unitPrice}
-                                  onChange={(e) => handleUpdateLineItem(li.id, 'unitPrice', Number(e.target.value))}
-                                  className="w-full text-center text-xs font-mono font-bold text-ink bg-surface border border-brand rounded px-1 py-0.5 outline-none"
-                                />
-                              ) : (
-                                <span className="font-mono text-muted tabular-nums">{li.unitPrice.toLocaleString()}</span>
-                              )}
-                            </td>
-
-                            {/* Per-item discount % — editable */}
-                            <td className="border border-line px-1 py-1 text-center">
-                              {isEditing ? (
-                                <div className="flex items-center gap-0.5">
-                                  <input
-                                    type="number"
-                                    min={0}
-                                    max={100}
-                                    value={li.lineItemDiscountPercent || ''}
-                                    onChange={(e) => handleUpdateLineItem(li.id, 'lineItemDiscountPercent', Number(e.target.value))}
-                                    placeholder="0"
-                                    className="w-full text-center text-xs font-mono font-bold text-ink bg-surface border border-brand rounded px-1 py-0.5 outline-none"
-                                  />
-                                  <Percent className="w-3 h-3 text-muted shrink-0" />
-                                </div>
-                              ) : (
-                                <span className={`font-mono tabular-nums ${li.lineItemDiscountPercent ? 'text-success-deep font-bold' : 'text-muted'}`}>
-                                  {li.lineItemDiscountPercent ? `${li.lineItemDiscountPercent}%` : '—'}
-                                </span>
-                              )}
-                            </td>
-
-                            {/* Amount + remove */}
-                            <td className="border border-line px-2 py-1.5 text-right font-mono font-black text-ink tabular-nums whitespace-nowrap">
-                              <div className="flex flex-col items-end gap-0">
-                                <span className="inline-flex items-center gap-1.5">
-                                  {effectiveTotal.toLocaleString()}
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRemoveInventoryPartFromWorkOrder(li.id)}
-                                    aria-label={`Remove ${li.description}`}
-                                    title="Remove line item"
-                                    className="text-muted hover:text-danger p-0.5 rounded transition-colors cursor-pointer focus:outline-none"
-                                  >
-                                    <X className="w-3 h-3" />
-                                  </button>
-                                </span>
-                                {itemDiscountAmt > 0 && (
-                                  <span className="text-[10px] font-semibold text-success">-{itemDiscountAmt.toLocaleString()} off</span>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-brand text-xs">Itemized Labor & Parts</h3>
+                  <span className="text-[10px] text-muted font-semibold">
+                    {laborItems.length} repair{laborItems.length !== 1 ? 's' : ''}{partsItems.length > 0 ? ` · ${partsItems.length} part${partsItems.length !== 1 ? 's' : ''}` : ''}
+                  </span>
                 </div>
+
+                {/* Repair Items (Customer invoice) */}
+                {laborItems.length === 0 && partsItems.length === 0 ? (
+                  <div className="p-6 text-center text-muted text-xs border border-dashed border-line-strong rounded-lg bg-surface/30">
+                    <Wrench className="w-6 h-6 mx-auto mb-1.5 opacity-40 text-brand" />
+                    <p className="font-extrabold text-ink">No items added yet</p>
+                    <p>Use Add Part, Custom, or Price List below to add line items.</p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Repair Items Table */}
+                    {laborItems.length > 0 && (
+                      <div className="border border-line-strong rounded-lg overflow-hidden bg-white">
+                        <table className="w-full border-collapse text-xs">
+                          <thead>
+                            <tr className="bg-surface">
+                              <th className="border border-line px-2 py-1.5 text-left font-extrabold text-muted text-[11px] uppercase tracking-wide">Repair / Service</th>
+                              <th className="border border-line px-2 py-1.5 text-center font-extrabold text-muted text-[11px] uppercase tracking-wide w-14">Qty</th>
+                              <th className="border border-line px-2 py-1.5 text-center font-extrabold text-muted text-[11px] uppercase tracking-wide w-24">Unit Price</th>
+                              <th className="border border-line px-2 py-1.5 text-center font-extrabold text-muted text-[11px] uppercase tracking-wide w-16">Disc%</th>
+                              <th className="border border-line px-2 py-1.5 text-right font-extrabold text-muted text-[11px] uppercase tracking-wide">Amount</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {laborItems.map((li) => {
+                              const isEditing = editingLineId === li.id;
+                              const lineTotal = li.unitPrice * li.quantity;
+                              const itemDiscountAmt = li.lineItemDiscountPercent ? Math.round(lineTotal * (li.lineItemDiscountPercent / 100)) : 0;
+                              const effectiveTotal = lineTotal - itemDiscountAmt;
+                              const originalPrice = li.lineItemDiscountPercent ? lineTotal : null;
+                              return (
+                                <tr key={li.id} className={`bg-white ${isEditing ? 'ring-2 ring-brand/30' : ''}`}>
+                                  {/* Item name + edit toggle */}
+                                  <td className="border border-line px-2 py-1.5">
+                                    <div className="flex items-center gap-1">
+                                      <span className="font-bold text-ink min-w-0 truncate">{li.description}</span>
+                                      <button
+                                        type="button"
+                                        onClick={() => setEditingLineId(isEditing ? null : li.id)}
+                                        className={`shrink-0 p-0.5 rounded transition-colors cursor-pointer focus:outline-none ${isEditing ? 'text-brand' : 'text-muted hover:text-brand'}`}
+                                        title={isEditing ? 'Done editing' : 'Edit price / qty / discount'}
+                                      >
+                                        {isEditing ? <Check className="w-3 h-3" /> : <Pencil className="w-3 h-3" />}
+                                      </button>
+                                    </div>
+                                  </td>
+
+                                  {/* Qty — editable */}
+                                  <td className="border border-line px-1 py-1 text-center">
+                                    {isEditing ? (
+                                      <input
+                                        type="number"
+                                        min={1}
+                                        value={li.quantity}
+                                        onChange={(e) => handleUpdateLineItem(li.id, 'quantity', Number(e.target.value))}
+                                        className="w-full text-center text-xs font-mono font-bold text-ink bg-surface border border-brand rounded px-1 py-0.5 outline-none"
+                                      />
+                                    ) : (
+                                      <span className="text-muted tabular-nums">{li.quantity}</span>
+                                    )}
+                                  </td>
+
+                                  {/* Unit Price — editable, strike-through if discounted */}
+                                  <td className="border border-line px-1 py-1 text-center">
+                                    {isEditing ? (
+                                      <input
+                                        type="number"
+                                        min={0}
+                                        step={500}
+                                        value={li.unitPrice}
+                                        onChange={(e) => handleUpdateLineItem(li.id, 'unitPrice', Number(e.target.value))}
+                                        className="w-full text-center text-xs font-mono font-bold text-ink bg-surface border border-brand rounded px-1 py-0.5 outline-none"
+                                      />
+                                    ) : (
+                                      <span className={`font-mono tabular-nums ${li.lineItemDiscountPercent ? 'text-muted line-through' : 'text-muted'}`}>
+                                        {li.unitPrice.toLocaleString()}
+                                      </span>
+                                    )}
+                                  </td>
+
+                                  {/* Per-item discount % — editable */}
+                                  <td className="border border-line px-1 py-1 text-center">
+                                    {isEditing ? (
+                                      <div className="flex items-center gap-0.5">
+                                        <input
+                                          type="number"
+                                          min={0}
+                                          max={100}
+                                          value={li.lineItemDiscountPercent || ''}
+                                          onChange={(e) => handleUpdateLineItem(li.id, 'lineItemDiscountPercent', Number(e.target.value))}
+                                          placeholder="0"
+                                          className="w-full text-center text-xs font-mono font-bold text-ink bg-surface border border-brand rounded px-1 py-0.5 outline-none"
+                                        />
+                                        <Percent className="w-3 h-3 text-muted shrink-0" />
+                                      </div>
+                                    ) : (
+                                      <span className={`font-mono tabular-nums ${li.lineItemDiscountPercent ? 'text-success-deep font-bold' : 'text-muted'}`}>
+                                        {li.lineItemDiscountPercent ? `${li.lineItemDiscountPercent}%` : '—'}
+                                      </span>
+                                    )}
+                                  </td>
+
+                                  {/* Amount = final after discount */}
+                                  <td className="border border-line px-2 py-1.5 text-right font-mono font-black text-ink tabular-nums whitespace-nowrap">
+                                    <div className="flex flex-col items-end gap-0">
+                                      <span className="inline-flex items-center gap-1.5">
+                                        {effectiveTotal.toLocaleString()}
+                                        <button
+                                          type="button"
+                                          onClick={() => handleRemoveInventoryPartFromWorkOrder(li.id)}
+                                          aria-label={`Remove ${li.description}`}
+                                          title="Remove line item"
+                                          className="text-muted hover:text-danger p-0.5 rounded transition-colors cursor-pointer focus:outline-none"
+                                        >
+                                          <X className="w-3 h-3" />
+                                        </button>
+                                      </span>
+                                      {itemDiscountAmt > 0 && (
+                                        <span className="text-[10px] font-semibold text-success">-{itemDiscountAmt.toLocaleString()} off</span>
+                                      )}
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+
+                    {/* System Parts Section — hidden from customer invoice */}
+                    {partsItems.length > 0 && (
+                      <div className="border border-dashed border-line rounded-lg overflow-hidden bg-surface/30">
+                        <div
+                          className="px-2.5 py-1.5 flex items-center justify-between cursor-pointer select-none hover:bg-surface transition-colors"
+                          onClick={() => setEditingLineId(editingLineId === '__parts_toggle' ? null : '__parts_toggle')}
+                        >
+                          <span className="text-[11px] font-extrabold text-muted flex items-center gap-1.5">
+                            <PackageCheck className="w-3 h-3 text-brand shrink-0" />
+                            System Parts Used ({partsItems.length}) — hidden from customer invoice
+                          </span>
+                          <ChevronsDown className={`w-3 h-3 text-muted transition-transform ${editingLineId === '__parts_toggle' ? '' : '-rotate-90'}`} />
+                        </div>
+                        {editingLineId === '__parts_toggle' && (
+                          <div className="border-t border-dashed border-line">
+                            <table className="w-full border-collapse text-xs">
+                              <thead>
+                                <tr className="bg-surface/50">
+                                  <th className="border border-line px-2 py-1 text-left font-extrabold text-muted text-[10px] uppercase">Part</th>
+                                  <th className="border border-line px-2 py-1 text-center font-extrabold text-muted text-[10px] uppercase w-14">Qty</th>
+                                  <th className="border border-line px-2 py-1 text-right font-extrabold text-muted text-[10px] uppercase w-20">Unit Cost</th>
+                                  <th className="border border-line px-2 py-1 text-right font-extrabold text-muted text-[10px] uppercase w-24">Sell Price</th>
+                                  <th className="border border-line px-2 py-1 text-right font-extrabold text-muted text-[10px] uppercase w-16">Subtotal</th>
+                                  <th className="border border-line px-2 py-1 text-center w-8"></th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {partsItems.map((li) => {
+                                  const costTotal = (li.unitCost || 0) * li.quantity;
+                                  const sellTotal = li.unitPrice * li.quantity;
+                                  const margin = sellTotal - costTotal;
+                                  return (
+                                    <tr key={li.id} className="bg-white">
+                                      <td className="border border-line px-2 py-1">
+                                        <span className="font-semibold text-ink text-[10px]">{li.description || li.partName}</span>
+                                      </td>
+                                      <td className="border border-line px-2 py-1 text-center text-muted tabular-nums text-[10px]">{li.quantity}</td>
+                                      <td className="border border-line px-2 py-1 text-right font-mono text-muted tabular-nums text-[10px]">{costTotal.toLocaleString()}</td>
+                                      <td className="border border-line px-2 py-1 text-right font-mono text-muted tabular-nums text-[10px]">{sellTotal.toLocaleString()}</td>
+                                      <td className="border border-line px-2 py-1 text-right font-mono text-ink font-bold tabular-nums text-[10px]">{sellTotal.toLocaleString()}</td>
+                                      <td className="border border-line px-2 py-1 text-center">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleRemoveInventoryPartFromWorkOrder(li.id)}
+                                          aria-label={`Remove ${li.description}`}
+                                          className="text-muted hover:text-danger p-0.5 rounded transition-colors cursor-pointer focus:outline-none"
+                                        >
+                                          <X className="w-2.5 h-2.5" />
+                                        </button>
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                              <tfoot>
+                                <tr className="bg-surface/50">
+                                  <td colSpan={4} className="border border-line px-2 py-1 text-right font-extrabold text-[10px] text-muted">Parts Total</td>
+                                  <td className="border border-line px-2 py-1 text-right font-mono font-black text-ink tabular-nums text-[10px]">{partsSubtotal.toLocaleString()}</td>
+                                  <td></td>
+                                </tr>
+                                <tr className="bg-surface/50">
+                                  <td colSpan={4} className="border border-line px-2 py-1 text-right font-extrabold text-[10px] text-muted">Parts Cost</td>
+                                  <td className="border border-line px-2 py-1 text-right font-mono font-black text-warning tabular-nums text-[10px]">-{partsCostTotal.toLocaleString()}</td>
+                                  <td></td>
+                                </tr>
+                                <tr className="bg-surface/50">
+                                  <td colSpan={4} className="border border-line px-2 py-1 text-right font-extrabold text-[10px] text-success-deep">Parts Profit</td>
+                                  <td className="border border-line px-2 py-1 text-right font-mono font-black text-success-deep tabular-nums text-[10px]">+{(partsSubtotal - partsCostTotal).toLocaleString()}</td>
+                                  <td></td>
+                                </tr>
+                              </tfoot>
+                            </table>
+          
+                            {/* Deduct from total reminder */}
+                            <div className="px-2.5 py-1.5 bg-warning/5 border-t border-dashed border-line">
+                              <div className="flex items-center gap-1.5">
+                                <Coins className="w-3 h-3 text-warning shrink-0" />
+                                <span className="text-[10px] font-semibold text-warning">
+                                  Parts cost {partsCostTotal.toLocaleString()} {currency} deducted from system profit. Customer invoice shows repair items only.
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
 
                 {/* Add buttons row */}
@@ -868,14 +995,24 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   </div>
                 )}
 
-                {/* Calculation Summary — Excel-style table (Ko Hein) */}
+                {/* Calculation Summary — Customer & System totals (Ko Hein 2026-08-10) */}
                 <div className="border border-line-strong rounded-lg overflow-hidden bg-white text-xs">
                   <table className="w-full border-collapse">
                     <tbody>
-                      <tr>
-                        <td className="border border-line px-2 py-1.5 text-muted">Subtotal</td>
-                        <td className="border border-line px-2 py-1.5 text-right font-mono text-ink tabular-nums">{selectedWo.subtotal.toLocaleString()} {currency}</td>
+                      {/* Customer-facing section */}
+                      <tr className="bg-surface/30">
+                        <td className="border border-line px-2 py-1 text-[10px] font-extrabold text-muted uppercase tracking-wider" colSpan={2}>Customer Invoice</td>
                       </tr>
+                      <tr>
+                        <td className="border border-line px-2 py-1.5 text-muted">Repair Subtotal ({laborItems.length} item{laborItems.length !== 1 ? 's' : ''})</td>
+                        <td className="border border-line px-2 py-1.5 text-right font-mono text-ink tabular-nums">{laborSubtotal.toLocaleString()} {currency}</td>
+                      </tr>
+                      {perItemDiscountTotal > 0 && (
+                        <tr>
+                          <td className="border border-line px-2 py-1.5 text-success-deep">Per-item Discounts</td>
+                          <td className="border border-line px-2 py-1.5 text-right font-mono text-success-deep tabular-nums">-{perItemDiscountTotal.toLocaleString()} {currency}</td>
+                        </tr>
+                      )}
                       <tr>
                         <td className="border border-line px-2 py-1.5 text-muted">Sales Tax ({Math.round(taxRate * 100)}%)</td>
                         <td className="border border-line px-2 py-1.5 text-right font-mono text-ink tabular-nums">{selectedWo.taxAmount.toLocaleString()} {currency}</td>
@@ -920,17 +1057,34 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         </tr>
                       )}
                       <tr className="bg-brand-soft">
-                        <td className="border border-line px-2 py-2 text-sm font-extrabold text-ink">Amount Due Now</td>
-                        <td className="border border-line px-2 py-2 text-right font-mono text-base font-black text-brand tabular-nums">{selectedWo.totalAmount.toLocaleString()} {currency}</td>
+                        <td className="border border-line px-2 py-2 text-sm font-extrabold text-ink">Amount Due (Customer)</td>
+                        <td className="border border-line px-2 py-2 text-right font-mono text-base font-black text-brand tabular-nums">
+                          {(() => {
+                            const custTotal = Math.max(0, laborSubtotal - perItemDiscountTotal + selectedWo.taxAmount - selectedWo.discountAmount - selectedWo.depositAmount);
+                            return `${custTotal.toLocaleString()} ${currency}`;
+                          })()}
+                        </td>
                       </tr>
-                      {selectedWo.inventoryConsumptionAmount > 0 && selectedWo.inventorySettlementStatus !== 'settled' && (
-                        <tr className="bg-warning/5">
-                          <td className="border border-line px-2 py-1.5 text-warning font-bold flex items-center gap-1">
-                            <Coins className="w-3 h-3 text-warning shrink-0" />
-                            Parts cost from stock — settle Inventory Fund
-                          </td>
-                          <td className="border border-line px-2 py-1.5 text-right font-mono font-black text-warning tabular-nums">{selectedWo.inventoryConsumptionAmount.toLocaleString()} {currency}</td>
-                        </tr>
+
+                      {/* System section (with parts) */}
+                      {partsItems.length > 0 && (
+                        <>
+                          <tr className="bg-surface/30">
+                            <td className="border border-line px-2 py-1 text-[10px] font-extrabold text-muted uppercase tracking-wider" colSpan={2}>System (incl. Parts)</td>
+                          </tr>
+                          <tr>
+                            <td className="border border-line px-2 py-1.5 text-muted">System Total (incl. parts)</td>
+                            <td className="border border-line px-2 py-1.5 text-right font-mono text-ink tabular-nums">{selectedWo.subtotal.toLocaleString()} {currency}</td>
+                          </tr>
+                          <tr>
+                            <td className="border border-line px-2 py-1.5 text-muted">Parts Cost (deducted)</td>
+                            <td className="border border-line px-2 py-1.5 text-right font-mono text-warning tabular-nums">-{partsCostTotal.toLocaleString()} {currency}</td>
+                          </tr>
+                          <tr>
+                            <td className="border border-line px-2 py-1.5 text-success-deep font-bold">Gross Profit</td>
+                            <td className="border border-line px-2 py-1.5 text-right font-mono font-black text-success-deep tabular-nums">+{(selectedWo.subtotal - partsCostTotal).toLocaleString()} {currency}</td>
+                          </tr>
+                        </>
                       )}
                     </tbody>
                   </table>
