@@ -66,12 +66,9 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
     setMenuPos(null);
   }, []);
 
-  const open = useCallback(() => {
+  const computeMenuPos = useCallback(() => {
     const rect = buttonRef.current?.getBoundingClientRect();
-    if (!rect) {
-      setIsOpen(true);
-      return;
-    }
+    if (!rect) return false;
     const spaceBelow = window.innerHeight - rect.bottom;
     const spaceAbove = rect.top;
     // Respect an explicit `top` placement, but auto-flip when the preferred
@@ -89,30 +86,47 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
     // Clamp inside the viewport so phones never get an off-screen menu.
     left = Math.max(VIEWPORT_MARGIN, Math.min(left, window.innerWidth - MENU_WIDTH - VIEWPORT_MARGIN));
 
-    setMenuPos({ top: placeTop ? rect.top - 8 : rect.bottom + 8, left, placeTop });
-    setIsOpen(true);
+    setMenuPos((prev) => {
+      const next = { top: placeTop ? rect.top - 8 : rect.bottom + 8, left, placeTop };
+      // Skip identical positions to avoid re-render loops on every scroll tick.
+      return prev && prev.top === next.top && prev.left === next.left && prev.placeTop === next.placeTop ? prev : next;
+    });
+    return true;
   }, [menuPlacement, menuAlign]);
 
-  // Close on scroll/resize while open so fixed coordinates never go stale.
+  const open = useCallback(() => {
+    setIsOpen(true);
+    // Compute the position one frame AFTER opening so the layout has settled
+    // (browser focus-scroll into view, container reflow, etc.). Computing it
+    // synchronously in the click handler can leave the menu offset from the
+    // button when the scrollable topbar moves before paint (Ko Hein 2026-08-11).
+    requestAnimationFrame(() => {
+      computeMenuPos();
+    });
+  }, [computeMenuPos]);
+
+  // While open, re-anchor the menu on ANY scroll of the button's scrollable
+  // ancestors (the topbar action row is overflow-x-auto) so it follows the
+  // button instead of going stale — fixes the dropdown not lining up with its
+  // trigger. Also re-anchor on resize/orientationchange.
   useEffect(() => {
     if (!isOpen) return;
-    const onViewportChange = (e: Event) => {
+    const reAnchor = (e: Event) => {
       // Ignore scrolls INSIDE the open menu — its own option list must be able
-      // to scroll freely (e.g. 40+ model/category options) without the menu
-      // closing itself on the first wheel/touch tick.
+      // to scroll freely without re-anchoring every tick.
       const target = e.target as Node | null;
       if (target && menuRef.current?.contains(target)) return;
-      close();
+      computeMenuPos();
     };
-    window.addEventListener('scroll', onViewportChange, true);
-    window.addEventListener('resize', onViewportChange);
-    window.addEventListener('orientationchange', onViewportChange);
+    window.addEventListener('scroll', reAnchor, true);
+    window.addEventListener('resize', reAnchor);
+    window.addEventListener('orientationchange', reAnchor);
     return () => {
-      window.removeEventListener('scroll', onViewportChange, true);
-      window.removeEventListener('resize', onViewportChange);
-      window.removeEventListener('orientationchange', onViewportChange);
+      window.removeEventListener('scroll', reAnchor, true);
+      window.removeEventListener('resize', reAnchor);
+      window.removeEventListener('orientationchange', reAnchor);
     };
-  }, [isOpen, close]);
+  }, [isOpen, computeMenuPos]);
 
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
