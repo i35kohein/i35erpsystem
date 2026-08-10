@@ -288,6 +288,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                     <tbody className="divide-y divide-line">
               {filteredCustomers.map((cust) => {
                 const custOrders = getCustomerWorkOrders(cust);
+                const custSpent = custOrders.reduce((sum, wo) => sum + (wo.totalAmount || 0), 0);
                 const isExpanded = expandedCustomerIds.includes(cust.id);
                 const isSelected = selectedCustomer?.id === cust.id;
 
@@ -331,7 +332,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                       </button>
                     </td>
                     <td className="px-3 py-2.5 text-right font-bold text-success-deep hidden sm:table-cell">
-                      {cust.totalSpent.toLocaleString()} {systemSettings.currencySymbol}
+                      {custSpent.toLocaleString()} {systemSettings.currencySymbol}
                     </td>
                     <td className="px-3 py-2.5 text-right">
                       <div className="flex items-center justify-end space-x-1.5">

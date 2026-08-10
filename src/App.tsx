@@ -1446,6 +1446,12 @@ export default function App() {
 
   const handleMarkPaid = (workOrder: WorkOrder, paymentMethod: string) => {
     const current = workOrders.find((w) => w.id === workOrder.id) || workOrder;
+    // Idempotency guard: a double click / race must not consume stock twice or
+    // create duplicate Inventory Consumption expenses for the same ticket.
+    if (current.isPaid) {
+      addToast(`${current.orderNumber} is already paid — nothing to record.`, 'info', 'Already Paid');
+      return;
+    }
     handleConsumeInventoryFromWorkOrder(current, paymentMethod);
     setWorkOrders((prev) =>
       prev.map((w) => {
@@ -1464,6 +1470,24 @@ export default function App() {
         return w;
       })
     );
+    // Keep the stored customer record's totals in sync (CRM list + Telegram bot
+    // read the stored totalSpent — it was frozen at 0 for every customer).
+    const norm = (p: string) => (p || '').replace(/\D/g, '');
+    const cust = customers.find(
+      (c) =>
+        c.id === current.customerId ||
+        (current.customerPhone && c.phone && norm(c.phone) === norm(current.customerPhone)) ||
+        (current.customerName && c.name?.toLowerCase() === (current.customerName || '').toLowerCase())
+    );
+    if (cust) {
+      const updatedCust: Customer = {
+        ...cust,
+        totalSpent: Number(cust.totalSpent || 0) + Number(current.totalAmount || 0),
+        totalOrdersCount: Number(cust.totalOrdersCount || 0) + 1,
+      };
+      setCustomers((prev) => prev.map((c) => (c.id === cust.id ? updatedCust : c)));
+      saveDocument('customers', updatedCust).catch(reportSaveError);
+    }
     addToast(`Payment recorded for ${workOrder.orderNumber} via ${paymentMethod} — Moved to Takeout`, 'success', 'Payment Received');
   };
 
