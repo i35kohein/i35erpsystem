@@ -76,3 +76,12 @@ html[data-theme="dark-slate"] {
   --color-warning: #f1c21b;          /* Carbon yellow-30 */
   --color-danger: #ff8389;           /* Carbon red-40 */
 }
+
+/* Solid warning fills (`bg-warning text-white`) need a dark-enough amber for
+ * white text — both themes fail otherwise (light #ff9500 ≈ 2.4:1, dark
+ * #f1c21b ≈ 1.9:1). Covers the inventory Low-Stock toggle, QA 'Cant Test'
+ * circle, dashboard CTA, timeline nodes, portal badges, leaderboard rank.
+ */
+.bg-warning.text-white {
+  background-color: #92400e; /* amber-800 — white text ≈ 5.3:1 (WCAG AA) */
+}

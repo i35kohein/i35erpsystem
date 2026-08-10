@@ -21,9 +21,17 @@ export default defineConfig(() => {
     build: {
       rollupOptions: {
         output: {
-          manualChunks: {
-            'vendor-react': ['react', 'react-dom'],
-            'vendor-icons': ['lucide-react'],
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              // motion first: its entry 'motion/react' contains '/react/' — would
+              // otherwise land in vendor-react and create a circular chunk.
+              if (id.includes('motion')) return 'vendor-motion';
+              if (id.includes('/react-dom/') || id.includes('/react/')) return 'vendor-react';
+              if (id.includes('@supabase')) return 'vendor-supabase';
+              if (id.includes('@radix-ui')) return 'vendor-radix';
+              if (id.includes('lucide-react')) return 'vendor-icons';
+              if (id.includes('clsx') || id.includes('class-variance-authority') || id.includes('tailwind-merge')) return 'vendor-utils';
+            }
           },
         },
       },
