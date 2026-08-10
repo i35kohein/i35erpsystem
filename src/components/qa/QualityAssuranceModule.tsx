@@ -3,7 +3,7 @@ import { useIsIpad } from '../../hooks/useIsIpad';
 import {ShieldCheck, 
   CheckCircle2, 
   X,
-  ClipboardCheck,
+  Stethoscope,
   Camera,
   UserCheck,
   StickyNote,
@@ -425,11 +425,11 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                               variant="ghost"
                               type="button"
                               onClick={(e) => { e.stopPropagation(); openQa(); }}
-                              className="!h-7 !min-h-7 w-7 px-0 border border-line bg-brand-soft text-brand hover:bg-white rounded-lg"
+                              className="!h-7 !min-h-7 w-7 px-0 rounded-full border border-line bg-brand-soft text-brand hover:bg-white"
                               title="Run 21-Point Diagnostic"
                               aria-label={`Run 21-point diagnostic for ${wo.orderNumber}`}
                             >
-                              <ClipboardCheck className="h-3.5 w-3.5" />
+                              <Stethoscope className="h-3.5 w-3.5" />
                             </Button>
                           ) : null}
                         </div>
