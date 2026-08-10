@@ -214,17 +214,8 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
 
   return (
     <div className="space-y-3">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-line shadow-xs">
-        <div className="module-subheader">
-          <h1 className="text-lg font-bold text-ink flex items-center space-x-2">
-            <Truck className="w-5 h-5 text-brand" />
-            <span className="hidden sm:inline">Suppliers & RMAs</span>
-            <span className="sm:hidden">Suppliers & RMAs</span>
-          </h1>
-          <p className="text-xs text-muted">Vendor orders, returns, and credits</p>
-        </div>
-
+      {/* Header — compact: title lives in the navbar (Ko Hein) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-3 rounded-2xl border border-line shadow-xs">
         {/* Subtab Toggle — full-width equal 3-column segmented on mobile */}
         <div className="bg-surface p-1.5 rounded-2xl border border-line grid grid-cols-3 gap-1.5 overflow-x-auto no-scrollbar text-xs shadow-2xs w-full md:flex md:items-center md:w-auto md:overflow-visible">
           <Button

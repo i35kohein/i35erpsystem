@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useIsIpad } from '../../hooks/useIsIpad';
-import {ShieldCheck, 
-  CheckCircle2, 
+import {CheckCircle2, 
   X,
   Stethoscope,
   Camera,
@@ -273,16 +272,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
   return (
     <div className={`space-y-3 text-xs ${isIpad ? 'flex min-h-0 flex-1 flex-col' : ''}`}>
       {/* Header */}
-      <div className="module-subheader flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-line shadow-xs">
-        <div>
-          <h1 className="text-lg font-bold text-ink flex items-center space-x-2">
-            <ShieldCheck className="w-5 h-5 text-success" />
-            <span className="hidden sm:inline">QA & Warranty Checks</span>
-            <span className="sm:hidden">QA & Warranty</span>
-          </h1>
-          <p className="text-xs text-muted">Final check before pickup.</p>
-        </div>
-
+      <div className="flex items-center justify-end gap-4 bg-white p-3 rounded-2xl border border-line shadow-xs">
         <div className="flex items-center gap-2">
           {/* Table | Cards view toggle (Ko Hein 2026-08-10) */}
           <div className="bg-surface p-0.5 rounded-lg border border-line flex items-center gap-0.5">

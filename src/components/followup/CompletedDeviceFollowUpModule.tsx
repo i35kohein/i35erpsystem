@@ -245,39 +245,19 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
 
   return (
     <div className="space-y-3 pb-4">
-      {/* Top Banner / Dashboard Overview */}
-      <div className="bg-white border border-line rounded-2xl p-5 shadow-2xs space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="module-subheader">
-            <div className="flex items-center space-x-2">
-              <span className="p-2 bg-brand-soft text-brand rounded-xl">
-                <UserCheck className="w-5 h-5" />
-              </span>
-              <div>
-                <h2 className="text-base font-extrabold text-ink tracking-tight">
-                  <span className="hidden sm:inline">Follow-Ups</span>
-                  <span className="sm:hidden">Follow-Ups</span>
-                </h2>
-                <p className="text-xs text-muted">
-                  Conduct post-service quality calls for repaired & delivered devices. Tickets appear here starting <strong className="text-brand">7 days</strong> after delivery.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-2 w-full md:w-auto md:shrink-0">
-            <div className="relative w-full md:w-auto">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-              <Input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search ticket, customer, device..."
-                className="pl-8 pr-3 h-10 bg-surface border border-line rounded-xl text-xs focus:outline-none focus:bg-white transition-all w-full md:w-64"
-              />
-            </div>
-          </div>
+      {/* Header — compact: title lives in the navbar (Ko Hein) */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-3 rounded-2xl border border-line shadow-xs">
+        <div className="relative w-full md:w-auto">
+          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+          <Input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search ticket, customer, device..."
+            className="pl-8 pr-3 h-10 bg-surface border border-line rounded-xl text-xs focus:outline-none focus:bg-white transition-all w-full md:w-64"
+          />
         </div>
+      </div>
 
         {/* Analytics Key Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3 pt-2">
@@ -341,7 +321,6 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
             </div>
           </div>
         </div>
-      </div>
 
       {/* Filter Tabs Bar */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white border border-line p-3 rounded-2xl shadow-2xs">

@@ -208,17 +208,8 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
 
   return (
     <div className="space-y-3 text-xs">
-      {/* Header — compact on mobile: subtitle hidden, tabs slimmer */}
+      {/* Header — compact: title lives in the navbar (Ko Hein) */}
       <div className="module-toolbar flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 bg-white p-1.5 sm:p-2 rounded-xl border border-line shadow-xs">
-        <div className="module-subheader">
-          <h1 className="text-base sm:text-lg font-bold text-ink flex items-center space-x-2">
-            <Users className="w-4 h-4 sm:w-5 sm:h-5 text-brand" />
-            <span className="hidden sm:inline">Customers & Staff</span>
-            <span className="sm:hidden truncate">Customers & Staff</span>
-          </h1>
-          <p className="hidden sm:block text-xs text-muted">Retail, B2B, and wholesale customers</p>
-        </div>
-
         <div className="flex items-center gap-1 overflow-x-auto rounded-lg border border-line bg-surface p-1 text-xs no-scrollbar">
           <Button
             type="button"
