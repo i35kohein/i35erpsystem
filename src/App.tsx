@@ -590,7 +590,7 @@ export default function App() {
     if (!token) { setAuthChecking(false); return; }
     (async () => {
       try {
-        const res = await fetch('/api/auth/verify', { headers: { 'x-session-token': token } });
+        const res = await fetch('/api/auth/verify', { method: 'POST', headers: { 'x-session-token': token } });
         if (!res.ok) {
           localStorage.removeItem('i35_session_token');
           localStorage.removeItem('i35_session_user');
