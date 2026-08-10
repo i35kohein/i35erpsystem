@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ChevronDown, Search, BadgePercent, ShieldCheck } from 'lucide-react';
 import { WorkOrder, DiagnosticItemResult, AppleDeviceCategory, SelectedRepairItem, SystemSettings } from '../../types';
+import { toast } from '../../lib/toast';
 import { ModelRepairPrice } from '../../types/priceCatalog';
 import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
 import { DIAGNOSTIC_NAMES, getAvailableColorsForModel, getRealisticColorStyle } from './deviceData';
@@ -164,6 +165,12 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Color is required (Ko Hein 2026-08-10): block save + open the color picker.
+    if (!form.color.trim()) {
+      toast('Select a device color to save the ticket.', 'error', 'Color Required');
+      setIsColorOpen(true);
+      return;
+    }
     const now = new Date().toISOString();
     const diagnostics: DiagnosticItemResult[] = DIAGNOSTIC_NAMES.map((name, i) => ({
       id: `simple-diag-${Date.now()}-${i}`,

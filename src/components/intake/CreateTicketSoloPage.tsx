@@ -379,6 +379,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
     const errs: Record<string, string> = {};
     if (!customerName.trim()) errs['field-customer-name'] = 'Customer name is required.';
     if (!deviceModel.trim()) errs['intake-device'] = 'Select a device model to continue.';
+    if (!deviceColor.trim()) errs['field-color'] = 'Select a device color to continue.';
     if (imei.trim() && imei.trim().length !== 15) errs['field-imei'] = 'IMEI must be exactly 15 digits.';
     setFieldErrors(errs);
     if (Object.keys(errs).length > 0) {
@@ -387,6 +388,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         'field-customer-name': 'intake-customer',
         'field-customer-phone': 'intake-customer',
         'intake-device': 'intake-device',
+        'field-color': 'intake-device',
         'field-imei': 'intake-device',
       };
       scrollToSection(sectionMap[firstKey] || 'intake-customer');
@@ -972,13 +974,18 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               <div className="grow bg-white p-3.5 rounded-xl border border-line text-xs font-bold text-ink flex items-center justify-between">
                 <div className="space-y-0.5">
                   <span className="block text-xs text-muted">Selected Color:</span>
-                  <span className="text-sm font-extrabold text-ink">{deviceColor}</span>
+                  <span className={`text-sm font-extrabold ${deviceColor ? 'text-ink' : 'text-warning'}`}>
+                    {deviceColor || 'Select color…'}
+                  </span>
                 </div>
                 <div 
                   className={`w-11 h-11 rounded-full border-2 border-white shadow-xs ${activeColorStyle.border}`}
                   style={{ background: activeColorStyle.gradient }}
                 />
               </div>
+              {fieldErrors['field-color'] && (
+                <p role="alert" className="mt-1 text-xs font-semibold text-danger">{fieldErrors['field-color']}</p>
+              )}
             </Button>
           ) : (
             <div className="w-full p-3 bg-surface rounded-xl border border-line space-y-2.5 flex flex-col">
