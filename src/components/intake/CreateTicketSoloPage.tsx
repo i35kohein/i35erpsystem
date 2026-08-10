@@ -1514,7 +1514,15 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               className="hidden"
               onChange={(e) => {
                 const files = Array.from(e.target.files || []);
-                files.forEach((file) => {
+                // Cap total intake photos — keeps JSONB writes under request-size limits (bug #7).
+                const MAX_INTAKE_PHOTOS = 6;
+                const room = MAX_INTAKE_PHOTOS - intakePhotos.length;
+                if (room <= 0) {
+                  toast.error(`Max ${MAX_INTAKE_PHOTOS} photos — remove one to add another.`, 'Photo Limit');
+                  e.target.value = '';
+                  return;
+                }
+                files.slice(0, room).forEach((file) => {
                   if (file.size > 8_000_000) {
                     toast.error(`${file.name} is over 8MB — skipping. Use a smaller photo.`, 'Photo Too Large');
                     return;

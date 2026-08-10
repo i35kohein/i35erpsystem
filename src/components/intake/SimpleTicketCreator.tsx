@@ -230,7 +230,11 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
     onSaveWorkOrder(base);
     setSavedFlash(true);
     // Same as New Intake Ticket Registration: after saving, print the ticket.
-    setTimeout(() => { window.print(); setSavedFlash(false); }, 600);
+    // Some browsers block window.print() after an async save — guarded, and the
+    // flash message now carries an explicit Print button as fallback (bug #11).
+    window.setTimeout(() => {
+      try { window.print(); } catch { /* blocked — use the flash Print button */ }
+    }, 450);
     if (!editingId) resetForm();
   };
 
@@ -447,9 +451,16 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
           </div>
 
           {savedFlash && (
-            <p role="status" className="no-print mt-4 rounded-2xl bg-success/10 px-4 py-3 text-center text-sm font-bold text-success-deep">
-              {editingId ? 'Ticket updated and saved to the database.' : 'Inspection saved to the database.'}
-            </p>
+            <div role="status" className="no-print mt-4 flex flex-wrap items-center justify-center gap-3 rounded-2xl bg-success/10 px-4 py-3 text-center text-sm font-bold text-success-deep">
+              <span>{editingId ? 'Ticket updated and saved to the database.' : 'Inspection saved to the database.'}</span>
+              <button
+                type="button"
+                onClick={() => { try { window.print(); } catch { /* ignore */ } }}
+                className="rounded-lg border border-success/40 bg-white px-3 py-1.5 text-xs font-black text-success-deep transition hover:bg-success/10"
+              >
+                🖨 Print Ticket
+              </button>
+            </div>
           )}
         </form>
       </div>

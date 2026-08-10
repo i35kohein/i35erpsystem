@@ -24,6 +24,52 @@ if (typeof window !== 'undefined') {
   }
 }
 
+// Lightweight client error reporting (bug #9): capture uncaught errors and
+// unhandled promise rejections and post them to the server error log.
+// Fire-and-forget, batched + debounced to avoid spamming the endpoint.
+let errorQueue: unknown[] = [];
+let errorFlushTimer: number | null = null;
+function queueClientError(entry: unknown) {
+  errorQueue.push(entry);
+  if (errorQueue.length > 20) errorQueue = errorQueue.slice(-20);
+  if (errorFlushTimer != null) return;
+  errorFlushTimer = window.setTimeout(() => {
+    errorFlushTimer = null;
+    const batch = errorQueue;
+    errorQueue = [];
+    try {
+      void fetch('/api/error-log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source: 'client', batch }),
+      }).catch(() => { /* offline / server down — drop silently */ });
+    } catch {
+      /* ignore */
+    }
+  }, 3000);
+}
+if (typeof window !== 'undefined') {
+  window.addEventListener('error', (event) => {
+    queueClientError({
+      type: 'uncaught',
+      message: event.message || String(event.error || ''),
+      file: event.filename,
+      line: event.lineno,
+      col: event.colno,
+      href: window.location.href,
+    });
+  });
+  window.addEventListener('unhandledrejection', (event) => {
+    const reason = event.reason;
+    queueClientError({
+      type: 'unhandledrejection',
+      message: reason instanceof Error ? reason.message : String(reason),
+      stack: reason instanceof Error ? reason.stack : undefined,
+      href: window.location.href,
+    });
+  });
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider>

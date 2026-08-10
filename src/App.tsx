@@ -1496,6 +1496,31 @@ export default function App() {
     addToast(`QA Post-Repair Checklist completed for ${workOrderId}`, 'success', 'QA Passed');
   };
 
+  // Reopen QA: clear a Finished ticket's passed post-repair checklist so it
+  // flows back into the QA queue for re-inspection (bug #12). Status stays
+  // Finished — the QA roster picks it up via the missing checklist.
+  const handleReopenQa = (workOrderId: string) => {
+    const target = workOrders.find((w) => w.id === workOrderId);
+    if (!target) return;
+    setWorkOrders((prev) =>
+      prev.map((w) => {
+        if (w.id === workOrderId) {
+          const updated = {
+            ...w,
+            postRepairChecklist: undefined,
+            afterRepairPhotos: undefined,
+            updatedAt: new Date().toISOString(),
+          };
+          saveDocument('workOrders', updated).catch(reportSaveError);
+          return updated;
+        }
+        return w;
+      })
+    );
+    addToast(`${target.orderNumber || target.id} moved back to QA queue — re-run the 21-point check.`, 'info', 'QA Reopened');
+    setActiveTab('qa');
+  };
+
   const handleAddCustomer = (cust: Customer) => {
     setCustomers((prev) => [cust, ...prev]);
     saveDocument('customers', cust).catch(reportSaveError);
@@ -2232,6 +2257,7 @@ export default function App() {
                     setActiveTab('create-ticket');
                   }}
                   onNavigateToTab={(tab) => setActiveTab(tab as any)}
+                  onReopenQa={handleReopenQa}
                   viewMode={intakeViewMode}
                   setViewMode={setIntakeViewMode}
                   sortByPriority={intakeSortByPriority}
@@ -2260,6 +2286,7 @@ export default function App() {
                   onDeleteWorkOrder={handleDeleteWorkOrder}
                   onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
                   onNavigateToTab={(tab) => setActiveTab(tab as any)}
+                  onReopenQa={handleReopenQa}
                   techFilter={techFilter}
                   setTechFilter={setTechFilter}
                   dateFilter={dateFilter}

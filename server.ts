@@ -4,7 +4,7 @@ import path from "path";
 import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
-import { randomBytes } from "crypto";
+import { randomBytes, createHash, timingSafeEqual } from "crypto";
 
 async function startServer() {
   const app = express();
@@ -49,14 +49,34 @@ async function startServer() {
 
 
   // Simple email/password auth — credentials from .env
-  // POST /api/auth/login { email, password } -> { user } | 401
+  // POST /api/auth/login { email, password } -> { user } | 401 | 429
   // Persistent auth sessions: tokens survive server restarts (written to
   // auth-tokens.json in cwd) and expire after TOKEN_TTL_DAYS.
+  // Tokens are stored SHA-256 hashed (raw token only lives in the client).
+  // Brute-force protection: per-IP rate limit + lockout after repeated failures.
   const AUTH_TOKENS_FILE = path.join(process.cwd(), "auth-tokens.json");
   const TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+  const hashToken = (token: string) => createHash("sha256").update(token).digest("hex");
   const authTokens: Record<string, { email: string; expiresAt: number }> = (() => {
     try {
-      return JSON.parse(fs.readFileSync(AUTH_TOKENS_FILE, "utf8"));
+      const raw = JSON.parse(fs.readFileSync(AUTH_TOKENS_FILE, "utf8"));
+      // Migration: pre-hash tokens were stored raw (48-char hex keys). Re-key them.
+      const migrated: Record<string, { email: string; expiresAt: number }> = {};
+      let needsSave = false;
+      for (const [key, val] of Object.entries(raw)) {
+        if (!val || typeof val !== "object") continue;
+        migrated[key.length === 64 ? key : hashToken(key)] = val as any;
+        if (key.length !== 64) needsSave = true;
+      }
+      // Persist the migration immediately so raw tokens never stay on disk.
+      if (needsSave) {
+        try {
+          fs.writeFileSync(AUTH_TOKENS_FILE, JSON.stringify(migrated));
+        } catch (err) {
+          console.error("Auth token migration save failed:", err);
+        }
+      }
+      return migrated;
     } catch {
       return {};
     }
@@ -69,14 +89,27 @@ async function startServer() {
     }
   };
   const isTokenValid = (token: string) => {
-    const entry = authTokens[token];
+    const entry = authTokens[hashToken(token)];
     if (!entry) return false;
     if (entry.expiresAt < Date.now()) {
-      delete authTokens[token];
+      delete authTokens[hashToken(token)];
       saveAuthTokens();
       return false;
     }
     return true;
+  };
+  // --- Brute-force protection: per-IP attempt tracking ---
+  const LOGIN_WINDOW_MS = Number(process.env.LOGIN_RATE_WINDOW_MS) || 60_000;
+  const LOGIN_MAX_ATTEMPTS = Number(process.env.LOGIN_MAX_ATTEMPTS) || 5; // per window
+  const LOGIN_LOCKOUT_MS = Number(process.env.LOGIN_LOCKOUT_MS) || 15 * 60_000;
+  const LOGIN_LOCKOUT_THRESHOLD = Number(process.env.LOGIN_LOCKOUT_THRESHOLD) || 10; // failures before lockout
+  const loginAttempts = new Map<string, { count: number; firstAt: number; lockedUntil: number }>();
+  const getClientIp = (req: express.Request) =>
+    (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() || req.ip || req.socket?.remoteAddress || "unknown";
+  const safeEqual = (a: string, b: string) => {
+    const ba = Buffer.from(a);
+    const bb = Buffer.from(b);
+    return ba.length === bb.length && timingSafeEqual(ba, bb);
   };
   app.post("/api/auth/login", async (req, res) => {
     const { email, password } = req.body || {};
@@ -86,20 +119,61 @@ async function startServer() {
       res.status(503).json({ success: false, error: "Auth not configured on server" });
       return;
     }
-    if (String(email || "").trim().toLowerCase() === authEmail && password === authPass) {
+    const ip = getClientIp(req);
+    const now = Date.now();
+    let rec = loginAttempts.get(ip);
+    if (!rec || now - rec.firstAt > LOGIN_WINDOW_MS) {
+      rec = { count: 0, firstAt: now, lockedUntil: 0 };
+      loginAttempts.set(ip, rec);
+    }
+    if (rec.lockedUntil > now) {
+      const mins = Math.ceil((rec.lockedUntil - now) / 60_000);
+      res.status(429).json({ success: false, error: `Too many failed attempts — locked for ${mins} min. Try again later.` });
+      return;
+    }
+    if (rec.count >= LOGIN_MAX_ATTEMPTS) {
+      res.status(429).json({ success: false, error: "Too many login attempts — wait a minute and try again." });
+      return;
+    }
+    const emailOk = safeEqual(String(email || "").trim().toLowerCase(), authEmail);
+    const passOk = safeEqual(String(password || ""), authPass);
+    if (emailOk && passOk) {
+      loginAttempts.delete(ip);
       const token = randomBytes(24).toString("hex");
-      authTokens[token] = { email: authEmail, expiresAt: Date.now() + TOKEN_TTL_MS };
+      authTokens[hashToken(token)] = { email: authEmail, expiresAt: Date.now() + TOKEN_TTL_MS };
       saveAuthTokens();
       res.json({ success: true, token, user: { email: authEmail, name: "Ko Hein" } });
     } else {
+      rec.count += 1;
+      if (rec.count >= LOGIN_LOCKOUT_THRESHOLD) {
+        rec.lockedUntil = now + LOGIN_LOCKOUT_MS;
+        rec.count = 0;
+        saveAuthTokens();
+        res.status(429).json({ success: false, error: "Too many failed attempts — account locked for 15 minutes." });
+        return;
+      }
+      loginAttempts.set(ip, rec);
       res.status(401).json({ success: false, error: "Invalid email or password" });
     }
   });
   app.post("/api/auth/logout", (req, res) => {
     const token = (req.headers["x-session-token"] as string) || "";
-    delete authTokens[token];
+    delete authTokens[hashToken(token)];
     saveAuthTokens();
     res.json({ success: true });
+  });
+  // Log out every device except the caller (admin "kick devices" action).
+  // Sending no token revokes ALL sessions.
+  app.post("/api/auth/logout-all", (req, res) => {
+    const token = (req.headers["x-session-token"] as string) || "";
+    const currentHash = token ? hashToken(token) : "";
+    const keep = currentHash && authTokens[currentHash] ? { [currentHash]: authTokens[currentHash] } : {};
+    const revoked = Object.keys(authTokens).length - Object.keys(keep).length;
+    for (const key of Object.keys(authTokens)) {
+      if (!keep[key]) delete authTokens[key];
+    }
+    saveAuthTokens();
+    res.json({ success: true, revoked });
   });
   app.post("/api/auth/verify", (req, res) => {
     const token = (req.headers["x-session-token"] as string) || "";
@@ -162,7 +236,7 @@ Return ONLY valid JSON.`;
 Details:
 - Device: ${deviceName}
 - Status: ${status}
-- Total Quote/Cost: ${totalCost ? `$${totalCost}` : "N/A"}
+- Total Quote/Cost: ${totalCost != null && totalCost !== "" ? `${Number(totalCost).toLocaleString()} MMK` : "N/A"}
 - Repair Notes: ${notes || "No special notes"}
 
 Keep SMS under 160 characters if channel is SMS, or concise paragraph if Email. Include call to action (e.g. reply to approve, or drop by for pickup).
@@ -595,13 +669,25 @@ ${JSON.stringify(context)}`;
       try {
         const context = await fetchErpContext(text);
         const systemPrompt = `${TELEGRAM_SYSTEM_PROMPT}\n\nLIVE ERP CONTEXT:\n${context}`;
-        return await callAiProvider({
-          provider,
-          apiKey: key,
-          model: provider === "openrouter" ? "anthropic/claude-opus-5" : undefined,
-          systemPrompt,
-          messages,
-        });
+        // Model override via TELEGRAM_AI_MODEL (env). If unset, OpenRouter falls
+        // back to the provider default; on failure we retry once WITHOUT the
+        // override so a bad pinned model can't break the bot (bug #10).
+        const override = (process.env.TELEGRAM_AI_MODEL || "").trim();
+        try {
+          return await callAiProvider({
+            provider,
+            apiKey: key,
+            model: override || (provider === "openrouter" ? "anthropic/claude-opus-5" : undefined),
+            systemPrompt,
+            messages,
+          });
+        } catch (firstErr: any) {
+          if (override || provider === "openrouter") {
+            console.error("Telegram AI primary model failed, retrying with default:", firstErr?.message);
+            return await callAiProvider({ provider, apiKey: key, model: undefined, systemPrompt, messages });
+          }
+          throw firstErr;
+        }
       } catch (err: any) {
         console.error("Telegram AI error:", err);
         return "AI ခေါ်တဲ့အခါ အမှားဖြစ်သွားပါတယ် — နောက်တစ်ခါ ပြန်စမ်းကြည့်ပါ။";
@@ -652,6 +738,31 @@ ${JSON.stringify(context)}`;
     console.log("Telegram bot disabled — set TELEGRAM_BOT_TOKEN to enable.");
   }
 
+  // Lightweight client error logging (bug #9) — append JSONL, capped at 1000 lines.
+  const ERROR_LOG_FILE = path.join(process.cwd(), "error-log.jsonl");
+  app.post("/api/error-log", (req, res) => {
+    try {
+      const entry = {
+        t: new Date().toISOString(),
+        ...(req.body && typeof req.body === "object" ? req.body : { raw: String(req.body || "").slice(0, 500) }),
+      };
+      fs.appendFileSync(ERROR_LOG_FILE, JSON.stringify(entry) + "\n");
+      const lines = fs.readFileSync(ERROR_LOG_FILE, "utf8").split("\n").filter(Boolean);
+      if (lines.length > 1000) {
+        fs.writeFileSync(ERROR_LOG_FILE, lines.slice(-1000).join("\n") + "\n");
+      }
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Error log write failed:", err);
+      res.status(500).json({ success: false });
+    }
+  });
+
+  // Unknown /api/* routes → JSON 404 (not the SPA HTML fallback) — bug #5.
+  app.use("/api", (req, res) => {
+    res.status(404).json({ success: false, error: `API endpoint not found: ${req.method} ${req.path}` });
+  });
+
   // --- Vite Middleware or Static Production Serving ---
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
@@ -679,7 +790,13 @@ ${JSON.stringify(context)}`;
 
     app.use((req, res, next) => {
       if (req.method !== "GET" && req.method !== "HEAD") return next();
-      const urlPath = decodeURIComponent((req.path || "/").split("?")[0]);
+      // Malformed percent-encoding would throw — fall back to the raw path (bug #6).
+      let urlPath: string;
+      try {
+        urlPath = decodeURIComponent((req.path || "/").split("?")[0]);
+      } catch {
+        urlPath = req.path || "/";
+      }
       if (urlPath.includes("..")) return next();
       const relPath = urlPath === "/" ? "index.html" : urlPath.replace(/^\//, "");
       const filePath = path.join(distPath, relPath);

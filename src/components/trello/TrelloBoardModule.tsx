@@ -2,7 +2,8 @@ import React, { useState, useMemo } from 'react';
 import {
   UserCheck,
   DollarSign,
-  Stethoscope } from 'lucide-react';
+  Stethoscope,
+  RotateCcw } from 'lucide-react';
 import { WorkOrder, Technician, SystemSettings, WorkOrderStatus } from '../../types';
 import { PriorityBadge } from '../common/PriorityBadge';
 import { TicketDetailInspectorModal } from '../common/TicketDetailInspectorModal';
@@ -22,6 +23,8 @@ interface TrelloBoardProps {
   setTechFilter?: (t: string) => void;
   dateFilter?: any;
   setDateFilter?: (d: any) => void;
+  /** Reopen QA: clear the passed checklist so the ticket flows back into QA (bug #12) */
+  onReopenQa?: (id: string) => void;
 }
 
 const STAGE_COLUMNS: { id: WorkOrderStatus; title: string; dot: string; border: string; headerBg: string }[] = [
@@ -44,6 +47,7 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
   onDeleteWorkOrder,
   onSelectPrintTag,
   onNavigateToTab,
+  onReopenQa,
   techFilter: propTechFilter,
   dateFilter: propDateFilter,
 }) => {
@@ -297,6 +301,22 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
                                 <Stethoscope className="w-3.5 h-3.5" />
                               </button>
                             ) : null)}
+                          {wo.status === 'Finished' && wo.postRepairChecklist && onReopenQa && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (window.confirm(`Reopen QA for ${wo.orderNumber}? It goes back to the QA queue for re-inspection.`)) {
+                                  onReopenQa(wo.id);
+                                }
+                              }}
+                              title="Reopen QA — re-run the 21-point check"
+                              aria-label={`Reopen QA for ${wo.orderNumber}`}
+                              className="!h-6 !min-h-6 w-6 rounded-full border border-warning/40 bg-warning/10 text-warning flex items-center justify-center hover:bg-warning/20 transition-colors shrink-0"
+                            >
+                              <RotateCcw className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                           <span className="font-mono text-[11px] font-black text-success-deep">{totalAmt.toLocaleString()} MMK</span>
                         </div>
                       </div>

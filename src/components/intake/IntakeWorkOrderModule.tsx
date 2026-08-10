@@ -25,7 +25,7 @@ import {ClipboardList, ClipboardCheck, Stethoscope,
   CheckCircle2,
   MoveDiagonal2,
   Printer,
-  Flame, DollarSign } from 'lucide-react';
+  Flame, DollarSign, RotateCcw } from 'lucide-react';
 import {WorkOrder, 
   PartItem, 
   Customer, 
@@ -61,6 +61,8 @@ interface IntakeWorkOrderModuleProps {
   setSortByPriority?: (v: boolean) => void;
   /** Increment to open the barcode/QR scanner from outside (drawer) */
   scanRequested?: number;
+  /** Reopen QA: clear the passed checklist so the ticket flows back into QA (bug #12) */
+  onReopenQa?: (id: string) => void;
 }
 
 
@@ -82,6 +84,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   sortByPriority: propSortByPriority,
   setSortByPriority: propSetSortByPriority,
   scanRequested = 0,
+  onReopenQa,
 }) => {
   const [selectedWorkOrder, setSelectedWorkOrder] = useState<WorkOrder | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState<boolean>(false);
@@ -487,6 +490,23 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                               <Stethoscope className="w-3.5 h-3.5" />
                             </Button>
                             ) : null)}
+                          {wo.status === 'Finished' && wo.postRepairChecklist && onReopenQa && (
+                            <Button
+                              variant="ghost"
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (window.confirm(`Reopen QA for ${wo.orderNumber || wo.id}? It goes back to the QA queue for re-inspection.`)) {
+                                  onReopenQa(wo.id);
+                                }
+                              }}
+                              className="!h-7 !min-h-7 w-7 px-0 rounded-full border border-warning/40 bg-warning/10 text-warning hover:bg-warning/20"
+                              title="Reopen QA — re-run the 21-point check"
+                              aria-label={`Reopen QA for ${wo.orderNumber || wo.id}`}
+                            >
+                              <RotateCcw className="w-3.5 h-3.5" />
+                            </Button>
+                          )}
                           <Button
                             variant="ghost"
                             type="button"

@@ -1,6 +1,7 @@
 import React from 'react';
-import {Edit2, Plus, Trash2, UserPlus} from 'lucide-react';
+import {Edit2, Plus, Trash2, UserPlus, LogOut} from 'lucide-react';
 import { Button } from '../../ui';
+import { toast } from '../../../lib/toast';
 
 import type { SystemSettings } from '../../../types';
 import type { AppUser } from '../../../types';
@@ -16,6 +17,30 @@ interface UsersTabProps {
 }
 
 const UsersTab: React.FC<UsersTabProps> = ({ users, currentUser, handleOpenAddUser, handleOpenEditUser, onDeleteUser }) => {
+  // Sign out every logged-in device except the current one (bug #8).
+  const handleLogoutAllDevices = async () => {
+    const token = localStorage.getItem('i35_session_token');
+    if (!token) {
+      toast('No active session found.', 'info', 'Sign Out All Devices');
+      return;
+    }
+    if (!window.confirm('Sign out all other devices? Every session except this one will be revoked immediately.')) return;
+    try {
+      const res = await fetch('/api/auth/logout-all', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-session-token': token },
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        toast(data.error || 'Request failed.', 'error', 'Sign Out All Devices');
+        return;
+      }
+      toast(`Revoked ${data.revoked ?? 0} other session(s). This device stays signed in.`, 'success', 'Devices Signed Out');
+    } catch {
+      toast('Cannot reach server — check connection.', 'error', 'Sign Out All Devices');
+    }
+  };
+
   return (
         <div className="space-y-6">
           <div className="bg-white p-6 rounded-2xl border border-line-strong shadow-2xs space-y-6">
@@ -36,6 +61,18 @@ const UsersTab: React.FC<UsersTabProps> = ({ users, currentUser, handleOpenAddUs
                 <Plus className="w-4 h-4" />
                 <span>Add New User Account</span>
               </Button>
+
+              {currentUser?.role === 'Admin' && (
+                <Button
+                  type="button"
+                  onClick={handleLogoutAllDevices}
+                  variant="outline"
+                  className="shrink-0 flex items-center space-x-1.5 border-warning/40 text-warning hover:bg-warning/10"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign Out All Devices</span>
+                </Button>
+              )}
             </div>
 
             {/* Role Rules Banner */}

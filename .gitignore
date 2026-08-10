@@ -13,3 +13,4 @@ backups/
 
 # Runtime auth tokens (local dev only)
 auth-tokens.json
+error-log.jsonl

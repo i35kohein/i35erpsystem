@@ -136,8 +136,19 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
   const [qaAfterPhotos, setQaAfterPhotos] = useState<string[]>([]);
   const beforePhotoInputRef = React.useRef<HTMLInputElement>(null);
   const afterPhotoInputRef = React.useRef<HTMLInputElement>(null);
-  const handlePhotoFiles = (files: FileList | null, setter: React.Dispatch<React.SetStateAction<string[]>>) => {
-    Array.from(files || []).forEach((file) => {
+  // Photo count cap per set (before/after) — keeps JSONB writes well under
+  // Supabase request-size limits (bug #7).
+  const MAX_PHOTOS_PER_SET = 4;
+  const [photoLimitNotice, setPhotoLimitNotice] = useState('');
+  const handlePhotoFiles = (files: FileList | null, setter: React.Dispatch<React.SetStateAction<string[]>>, setterName: 'before' | 'after') => {
+    const current = setterName === 'before' ? qaBeforePhotos : qaAfterPhotos;
+    const room = MAX_PHOTOS_PER_SET - current.length;
+    if (room <= 0) {
+      setPhotoLimitNotice(`Max ${MAX_PHOTOS_PER_SET} ${setterName}-repair photos. Remove one to add another.`);
+      setTimeout(() => setPhotoLimitNotice(''), 4000);
+      return;
+    }
+    Array.from(files || []).slice(0, room).forEach((file) => {
       if (file.size > 8_000_000) return;
       void compressImageFile(file).then((dataUrl) => {
         if (dataUrl) setter((prev) => [...prev, dataUrl]);
@@ -522,7 +533,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                         capture="environment"
                         multiple
                         className="hidden"
-                        onChange={(e) => { handlePhotoFiles(e.target.files, setQaBeforePhotos); e.target.value = ''; }}
+                        onChange={(e) => { handlePhotoFiles(e.target.files, setQaBeforePhotos, 'before'); e.target.value = ''; }}
                       />
                       <button
                         type="button"
@@ -562,7 +573,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                         capture="environment"
                         multiple
                         className="hidden"
-                        onChange={(e) => { handlePhotoFiles(e.target.files, setQaAfterPhotos); e.target.value = ''; }}
+                        onChange={(e) => { handlePhotoFiles(e.target.files, setQaAfterPhotos, 'after'); e.target.value = ''; }}
                       />
                       <button
                         type="button"
@@ -576,6 +587,11 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     </div>
                   </div>
                 </div>
+                {photoLimitNotice && (
+                  <p role="status" className="mt-2 rounded-lg bg-warning/10 px-3 py-1.5 text-[11px] font-bold text-warning">
+                    {photoLimitNotice}
+                  </p>
+                )}
               </div>
 
               {/* 21-Point checklist — PHONE TESTING & CHECKING style (Ko Hein) */}
