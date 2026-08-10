@@ -2608,6 +2608,7 @@ export default function App() {
                 <QualityAssuranceModule
                   workOrders={activeWorkOrders}
                   technicians={technicians}
+                  users={users}
                   currentUser={currentUser}
                   onSavePostRepairChecklist={handleSavePostRepairChecklist}
                   onErrorReturn={(id) => handleUpdateWorkOrderStatus(id, 'In Progress')}

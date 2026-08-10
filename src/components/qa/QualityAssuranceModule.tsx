@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useIsIpad } from '../../hooks/useIsIpad';
 import {CheckCircle2, 
   X,
@@ -36,6 +36,8 @@ interface QualityAssuranceModuleProps {
   setViewMode?: (v: 'table' | 'cards') => void;
   /** Move a Taken Out ticket back for an Error Return (Ko Hein) */
   onErrorReturn?: (workOrderId: string) => void;
+  /** System Users & Role Access Control list — Inspector dropdown source (Ko Hein 2026-08-10) */
+  users?: AppUser[];
 }
 
 export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
@@ -49,6 +51,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
   viewMode: propViewMode,
   onNavigateToTab,
   onErrorReturn,
+  users = [],
 }) => {
   // Only finished tasks are shown in QA & Warranty Inspection module
   const finishedWorkOrders = workOrders.filter(
@@ -58,6 +61,16 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
   );
 
   const isTechnicianUser = currentUser?.role === 'Technician';
+
+  // Inspector list comes from System Users & Role Access Control (users collection),
+  // falling back to the technician roster when no system users exist (Ko Hein 2026-08-10).
+  const inspectorOptions = useMemo(() => {
+    const userOpts = users
+      .filter((u) => u.status !== 'Inactive')
+      .map((u) => ({ value: u.technicianId || u.id, label: u.name || u.email || u.id }));
+    if (userOpts.length > 0) return userOpts;
+    return technicians.map((t) => ({ value: t.id, label: t.name }));
+  }, [users, technicians]);
   const myTechName = currentUser?.technicianName || currentUser?.name || '';
   const myTechId = currentUser?.technicianId || '';
 
@@ -128,7 +141,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
       speakerClarityPass: true,
       enclosureAlignmentPass: true,
       cleanAndSanitized: true,
-      qaTechnicianId: technicians[0]?.id || 'tech-1',
+      qaTechnicianId: inspectorOptions[0]?.value || 'tech-1',
       notes: '',
     }
   );
@@ -185,7 +198,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
         speakerClarityPass: true,
         enclosureAlignmentPass: true,
         cleanAndSanitized: true,
-        qaTechnicianId: technicians[0]?.id || 'tech-1',
+        qaTechnicianId: inspectorOptions[0]?.value || 'tech-1',
         notes: '',
       });
     }
@@ -746,10 +759,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     <CustomDropdownMenu
                       value={qaData.qaTechnicianId}
                       onChange={(value) => setQaData({ ...qaData, qaTechnicianId: value })}
-                      options={technicians.map((technician) => ({
-                        value: technician.id,
-                        label: technician.name,
-                      }))}
+                      options={inspectorOptions}
                       placeholder="Select inspector"
                       className="w-full"
                       buttonClassName="!h-6 !min-h-6 w-full text-[11px]"
