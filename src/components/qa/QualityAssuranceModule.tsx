@@ -7,7 +7,7 @@ import {ShieldCheck,
   Camera,
   UserCheck,
   StickyNote,
-  DollarSign, RotateCcw } from 'lucide-react';
+  DollarSign, RotateCcw, Table as TableIcon, LayoutGrid } from 'lucide-react';
 import { WorkOrder, PostRepairChecklist, Technician, DiagnosticItemResult, DiagnosticStatus, AppUser, SystemSettings } from '../../types';
 import { Button } from '../ui';
 import { DIAGNOSTIC_NAMES } from '../intake/deviceData';
@@ -132,6 +132,8 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
 
   // 21-Point Post-Repair Diagnostic Checklist State
   const [qaDiagnostics, setQaDiagnostics] = useState<DiagnosticItemResult[]>([]);
+  // Roster view mode (Ko Hein 2026-08-10)
+  const [qaViewMode, setQaViewMode] = useState<'table' | 'cards'>('table');
   // Before / After repair photos (uploaded in QA modal)
   const [qaBeforePhotos, setQaBeforePhotos] = useState<string[]>([]);
   const [qaAfterPhotos, setQaAfterPhotos] = useState<string[]>([]);
@@ -281,18 +283,123 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
           <p className="text-xs text-muted">Final check before pickup.</p>
         </div>
 
-        <div className="bg-success/10 text-success-deep font-mono font-bold px-3 py-1 rounded-full border border-success/20">
-          QA Control • Zero Defect Standard
+        <div className="flex items-center gap-2">
+          {/* Table | Cards view toggle (Ko Hein 2026-08-10) */}
+          <div className="bg-surface p-0.5 rounded-lg border border-line flex items-center gap-0.5">
+            <Button
+              variant="ghost"
+              type="button"
+              onClick={() => setQaViewMode('table')}
+              className={`!h-7 !min-h-7 w-7 px-0 rounded-md flex items-center justify-center cursor-pointer hover:bg-transparent! ${qaViewMode === 'table' ? 'bg-brand text-white shadow-2xs' : 'text-muted hover:text-ink'}`}
+              title="Table View"
+              aria-label="Table View"
+            >
+              <TableIcon className="w-3.5 h-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              type="button"
+              onClick={() => setQaViewMode('cards')}
+              className={`!h-7 !min-h-7 w-7 px-0 rounded-md flex items-center justify-center cursor-pointer hover:bg-transparent! ${qaViewMode === 'cards' ? 'bg-brand text-white shadow-2xs' : 'text-muted hover:text-ink'}`}
+              title="Cards Grid View"
+              aria-label="Cards Grid View"
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+
+          <div className="bg-success/10 text-success-deep font-mono font-bold px-3 py-1 rounded-full border border-success/20">
+            QA Control • Zero Defect Standard
+          </div>
         </div>
       </div>
 
-      {/* QA Roster Table — click a row to run the 21-Point Diagnostic */}
+      {/* QA Roster — click a row/card to run the 21-Point Diagnostic */}
       <div className="bg-white border border-line rounded-2xl shadow-2xs overflow-hidden">
         {filteredWorkOrders.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-10 text-center text-muted space-y-2">
             <CheckCircle2 className="w-8 h-8 text-success mx-auto opacity-50" />
             <p className="font-semibold text-xs">No Finished Devices Pending QA Control</p>
             <p className="text-xs">Devices moved to 'Finished' status in the repair pipeline automatically flow into QA Control for final inspection.</p>
+          </div>
+        ) : qaViewMode === 'cards' ? (
+          /* CARDS GRID VIEW (Ko Hein 2026-08-10) */
+          <div className="grid grid-cols-1 gap-3 p-3 sm:grid-cols-2 xl:grid-cols-3">
+            {filteredWorkOrders.map((wo) => {
+              const createdDate = new Date(wo.createdAt || Date.now()).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+              });
+              const openQaCard = () => {
+                setSelectedWoId(wo.id);
+                setIsQaModalOpen(true);
+              };
+              const repairs = (wo.selectedRepairs || []).map((r) => r.name).filter(Boolean).join(', ') || wo.symptomsReported || wo.serviceType || 'General Repair';
+              return (
+                <div
+                  key={wo.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={openQaCard}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openQaCard(); } }}
+                  className="group flex cursor-pointer flex-col gap-2 rounded-2xl border border-line bg-white p-3 shadow-2xs transition-colors hover:border-brand/40 focus:outline-none"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono font-black text-brand text-xs">{wo.orderNumber || wo.id}</span>
+                    <span className="text-[10px] font-bold text-muted">{createdDate}</span>
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="truncate text-sm font-extrabold text-ink">{wo.deviceModel || 'Unknown Device'}</h3>
+                    <p className="truncate text-xs text-muted">{wo.customerName}{wo.customerPhone ? ` · ${wo.customerPhone}` : ''}</p>
+                  </div>
+                  <p className="line-clamp-1 text-[11px] font-medium text-ink/80">{repairs}</p>
+                  <div className="mt-auto flex items-center justify-between gap-2 border-t border-line pt-2">
+                    <span className="rounded-md border border-warning/20 bg-warning/10 px-1.5 py-0.5 text-xs font-bold uppercase text-warning">QA Pending</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-mono font-extrabold text-xs text-ink">{wo.totalAmount.toLocaleString()} MMK</span>
+                      {(wo as WorkOrder).status === 'Taken Out' && onErrorReturn ? (
+                        <Button
+                          variant="ghost"
+                          type="button"
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            const ok = await confirmDialog({ title: 'Error Return', message: `Error Return ${wo.orderNumber}? The ticket reopens for repair.`, confirmLabel: 'Error Return', danger: false });
+                            if (ok) onErrorReturn(wo.id);
+                          }}
+                          className="!h-6 !min-h-6 w-6 px-0 rounded-full border border-warning/40 bg-warning/10 text-warning hover:bg-warning/20"
+                          title="Error Return — customer brought the device back"
+                          aria-label={`Error Return ${wo.orderNumber}`}
+                        >
+                          <RotateCcw className="w-3 h-3" />
+                        </Button>
+                      ) : ((wo as WorkOrder).status === 'Finished' || (wo as WorkOrder).status === 'Taken Out') && wo.postRepairChecklist ? (
+                        <Button
+                          variant="ghost"
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); onNavigateToTab?.('pos'); }}
+                          className="!h-6 !min-h-6 w-6 px-0 rounded-full bg-success text-white hover:bg-success/90 border border-success"
+                          title="Go to POS checkout"
+                          aria-label={`Checkout ${wo.orderNumber}`}
+                        >
+                          <DollarSign className="w-3 h-3" />
+                        </Button>
+                      ) : wo.status === 'Finished' ? (
+                        <Button
+                          variant="ghost"
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); openQaCard(); }}
+                          className="!h-6 !min-h-6 w-6 px-0 rounded-full border border-line bg-brand-soft text-brand hover:bg-white"
+                          title="Run 21-Point Diagnostic"
+                          aria-label={`Run 21-point diagnostic for ${wo.orderNumber}`}
+                        >
+                          <Stethoscope className="w-3 h-3" />
+                        </Button>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ) : (
                   <div className="overflow-x-auto">

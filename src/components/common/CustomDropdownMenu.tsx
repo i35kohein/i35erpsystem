@@ -199,9 +199,16 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
             {triggerIcon}
           </span>
         ) : (
-          <span className="truncate max-w-[120px] sm:max-w-[170px]">
-            {selectedOption ? selectedOption.label : placeholder}
-          </span>
+          <>
+            {triggerIcon && (
+              <span className="flex h-4 w-4 shrink-0 items-center justify-center text-brand">
+                {triggerIcon}
+              </span>
+            )}
+            <span className="truncate max-w-[120px] sm:max-w-[170px]">
+              {selectedOption ? selectedOption.label : placeholder}
+            </span>
+          </>
         )}
         <span className={`${iconOnly ? 'sr-only' : 'flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-line'}`}>
           <ChevronDown className={`h-3.5 w-3.5 text-muted transition-transform ${isOpen ? 'rotate-180 text-brand' : ''}`} />

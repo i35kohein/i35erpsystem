@@ -2140,6 +2140,7 @@ export default function App() {
                   value={customerTypeFilter}
                   onChange={(val) => setCustomerTypeFilter(val)}
                   buttonClassName="!px-2.5 !py-1.5 !h-10 text-xs"
+                  triggerIcon={<Users className="w-3.5 h-3.5" />}
                   options={[
                     { value: 'ALL', label: 'All Account Types' },
                     { value: 'Retail', label: 'Retail' },
@@ -2160,6 +2161,7 @@ export default function App() {
                   value={statusFilter}
                   onChange={(val) => setStatusFilter(val)}
                   buttonClassName="!px-2.5 !py-1.5 !h-10 text-xs"
+                  triggerIcon={<ListFilter className="w-3.5 h-3.5" />}
                   options={[
                     { value: 'ALL', label: 'All RMA Statuses' },
                     { value: 'Draft', label: 'Draft' },
@@ -2181,6 +2183,7 @@ export default function App() {
                   value={statusFilter}
                   onChange={(val) => setStatusFilter(val)}
                   buttonClassName="!px-2.5 !py-1.5 !h-10 text-xs"
+                  triggerIcon={<ListFilter className="w-3.5 h-3.5" />}
                   options={[
                     { value: 'ALL', label: 'All QA Statuses' },
                     { value: 'Pending QA', label: 'Pending QA' },
