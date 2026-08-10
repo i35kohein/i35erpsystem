@@ -444,6 +444,17 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   // absolutely-positioned dropdowns (Ko Hein 2026-08-10: "Storage Location Bin drawer menu cant see").
   const [binMenuAnchor, setBinMenuAnchor] = useState<{ top: number; left: number; width: number } | null>(null);
   const [editBinMenuAnchor, setEditBinMenuAnchor] = useState<{ top: number; left: number; width: number } | null>(null);
+  // Bin menu placement: open UPWARD when there is no room below (Ko Hein 2026-08-10: "အပေါ်တက်အောင်လုပ်ပေး").
+  const computeBinAnchor = (el: HTMLElement): { top: number; left: number; width: number } => {
+    const r = el.getBoundingClientRect();
+    const estH = Math.min(existingLocationBins.length || 1, 5) * 30 + 14;
+    const openUp = r.bottom + estH > window.innerHeight - 12;
+    return {
+      top: openUp ? Math.max(8, r.top - estH - 4) : r.bottom + 4,
+      left: r.left,
+      width: r.width,
+    };
+  };
 
   // Warranty Claim Modal state
   const [claimingWarrantyPart, setClaimingWarrantyPart] = useState<PartItem | null>(null);
@@ -2317,13 +2328,11 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     type="text"
                     value={newPartData.locationBin || ''}
                     onFocus={(e) => {
-                      const r = e.currentTarget.getBoundingClientRect();
-                      setBinMenuAnchor({ top: r.bottom + 4, left: r.left, width: r.width });
+                      setBinMenuAnchor(computeBinAnchor(e.currentTarget));
                       setIsLocationBinMenuOpen(true);
                     }}
                     onChange={(e) => {
-                      const r = e.currentTarget.getBoundingClientRect();
-                      setBinMenuAnchor({ top: r.bottom + 4, left: r.left, width: r.width });
+                      setBinMenuAnchor(computeBinAnchor(e.currentTarget));
                       setNewPartData({ ...newPartData, locationBin: e.target.value });
                       setIsLocationBinMenuOpen(true);
                     }}
@@ -2333,9 +2342,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   <Button
                     type="button"
                     onClick={(e) => {
-                      const wrap = e.currentTarget.closest('div.relative');
-                      const r = wrap ? wrap.getBoundingClientRect() : e.currentTarget.getBoundingClientRect();
-                      setBinMenuAnchor({ top: r.bottom + 4, left: r.left, width: r.width });
+                      const wrap = e.currentTarget.closest('div.relative') as HTMLElement | null;
+                      setBinMenuAnchor(computeBinAnchor(wrap || e.currentTarget));
                       setIsLocationBinMenuOpen((open) => !open);
                     }}
                     variant="ghost"
@@ -2593,13 +2601,11 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     type="text"
                     value={editingPart.locationBin}
                     onFocus={(e) => {
-                      const r = e.currentTarget.getBoundingClientRect();
-                      setEditBinMenuAnchor({ top: r.bottom + 4, left: r.left, width: r.width });
+                      setEditBinMenuAnchor(computeBinAnchor(e.currentTarget));
                       setIsEditLocationBinMenuOpen(true);
                     }}
                     onChange={(e) => {
-                      const r = e.currentTarget.getBoundingClientRect();
-                      setEditBinMenuAnchor({ top: r.bottom + 4, left: r.left, width: r.width });
+                      setEditBinMenuAnchor(computeBinAnchor(e.currentTarget));
                       setEditingPart({ ...editingPart, locationBin: e.target.value });
                       setIsEditLocationBinMenuOpen(true);
                     }}
@@ -2609,9 +2615,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   <Button variant="ghost"
                     type="button"
                     onClick={(e) => {
-                      const wrap = e.currentTarget.closest('div.relative');
-                      const r = wrap ? wrap.getBoundingClientRect() : e.currentTarget.getBoundingClientRect();
-                      setEditBinMenuAnchor({ top: r.bottom + 4, left: r.left, width: r.width });
+                      const wrap = e.currentTarget.closest('div.relative') as HTMLElement | null;
+                      setEditBinMenuAnchor(computeBinAnchor(wrap || e.currentTarget));
                       setIsEditLocationBinMenuOpen((open) => !open);
                     }}
                     className="absolute right-1.5 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-muted hover:bg-white hover:text-brand"
