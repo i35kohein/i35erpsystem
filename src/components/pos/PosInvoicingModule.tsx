@@ -234,6 +234,8 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     // Cant Repair / Customer Not Repair tickets so the Diagnostic-Fee-Only
     // quick action is reachable (they never get a QA checklist).
     if (wo.status !== 'Finished' && wo.status !== 'Taken Out' && wo.status !== 'Cant Repair' && wo.status !== 'Customer Not Repair') return false;
+    // Exclude already-paid tickets from the checkout queue (Ko Hein 2026-08-10)
+    if (wo.isPaid) return false;
     const isDiagnosticDone =
       Boolean(wo.postRepairChecklist) ||
       wo.status === 'Cant Repair' ||
@@ -364,6 +366,20 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     if (!selectedWo || !selectedInventoryPart) return;
 
     const qty = Math.max(1, Math.floor(Number(inventoryPartQty) || 1));
+    const availableStock = selectedInventoryPart.quantityInStock || 0;
+    const existingQty = (selectedWo.lineItems || [])
+      .filter((item) => item.partId === selectedInventoryPart.id)
+      .reduce((sum, item) => sum + (item.quantity || 0), 0);
+    const totalNeeded = existingQty + qty;
+
+    if (totalNeeded > availableStock) {
+      toast.error(
+        `Only ${availableStock} in stock (${existingQty} already in ticket). Cannot add ${qty} more.`,
+        'Insufficient Stock'
+      );
+      return;
+    }
+
     const partLineId = `${selectedInventoryPart.id}-${Date.now()}`;
     const existingLines = [...(selectedWo.lineItems || [])];
     const samePartIndex = existingLines.findIndex(
@@ -713,23 +729,14 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           <tbody>
                             {laborItems.map((li) => {
                               const isEditing = editingLineId === li.id;
-                              // For old WOs: calculate discount from stored subtotal/discountAmount
-                              const hasLineItemDiscount = Boolean(li.lineItemDiscountPercent);
-                              const hasWODiscount = !hasLineItemDiscount && selectedWo.discountAmount > 0 && selectedWo.subtotal > 0;
-                              const woDiscountPct = hasWODiscount
-                                ? Math.round((selectedWo.discountAmount / selectedWo.subtotal) * 100)
-                                : 0;
-                              const hasDiscount = hasLineItemDiscount || hasWODiscount;
-                              const originalUnitPrice = hasWODiscount
-                                ? Math.round(selectedWo.subtotal / laborItems.length)
-                                : li.unitPrice;
-                              const discountedUnitPrice = hasLineItemDiscount
+                              const hasDiscount = Boolean(li.lineItemDiscountPercent);
+                              const discountedUnitPrice = hasDiscount
                                 ? Math.round(li.unitPrice * (1 - li.lineItemDiscountPercent! / 100))
-                                : (hasWODiscount ? li.unitPrice : li.unitPrice);
-                              const displayDiscountPct = li.lineItemDiscountPercent || woDiscountPct;
-                              const lineTotal = originalUnitPrice * li.quantity;
-                              const itemDiscountAmt = hasDiscount ? lineTotal - discountedUnitPrice * li.quantity : 0;
-                              const effectiveTotal = hasDiscount ? discountedUnitPrice * li.quantity : li.unitPrice * li.quantity;
+                                : li.unitPrice;
+                              const lineTotal = li.unitPrice * li.quantity;
+                              const itemDiscountAmt = hasDiscount ? Math.round(lineTotal * (li.lineItemDiscountPercent! / 100)) : 0;
+                              const effectiveTotal = lineTotal - itemDiscountAmt;
+                              const displayDiscountPct = li.lineItemDiscountPercent || 0;
                               return (
                                 <tr key={li.id} className={`bg-white ${isEditing ? 'ring-2 ring-brand/30' : ''}`}>
                                   {/* Item name + edit toggle */}
@@ -777,7 +784,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                       <div className="flex flex-col items-center gap-0">
                                         {hasDiscount ? (
                                           <React.Fragment>
-                                            <span className="font-mono text-[10px] text-muted line-through">{originalUnitPrice.toLocaleString()}</span>
+                                            <span className="font-mono text-[10px] text-muted line-through">{li.unitPrice.toLocaleString()}</span>
                                             <span className="font-mono text-[11px] font-black text-brand">{discountedUnitPrice.toLocaleString()}</span>
                                           </React.Fragment>
                                         ) : (
@@ -1127,7 +1134,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           </tr>
                           <tr>
                             <td className="border border-line px-2 py-1.5 text-success-deep font-bold">Gross Profit</td>
-                            <td className="border border-line px-2 py-1.5 text-right font-mono font-black text-success-deep tabular-nums">+{(selectedWo.subtotal + partsSubtotal - partsCostTotal).toLocaleString()} {currency}</td>
+                            <td className="border border-line px-2 py-1.5 text-right font-mono font-black text-success-deep tabular-nums">+{(selectedWo.subtotal + partsSubtotal - partsCostTotal - selectedWo.discountAmount).toLocaleString()} {currency}</td>
                           </tr>
                         </>
                       )}

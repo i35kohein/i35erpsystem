@@ -33,7 +33,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
   const shopEmail = systemSettings?.shopEmail || 'support-brand@applerepairpro.com';
   const shopAddress = systemSettings?.shopAddress || '1 Infinite Loop, Suite 100, Cupertino, CA 95014';
   const currency = systemSettings?.currencySymbol || 'MMK';
-  const taxRate = systemSettings?.taxRatePercent || 6;
+  const taxRate = systemSettings?.taxPercentage ?? systemSettings?.taxRatePercent ?? 6;
 
   // Calculate Parts vs Labor breakdowns
   const partsItems = workOrder.lineItems?.filter((item) => !item.isLabor) || [];
@@ -56,7 +56,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
     effTotal: item.unitPrice * item.quantity - (item.lineItemDiscountPercent ? Math.round(item.unitPrice * item.quantity * (item.lineItemDiscountPercent / 100)) : 0),
   }));
 
-  const formattedDate = new Date(workOrder.createdAt || Date.now()).toLocaleDateString('en-US', {
+  const formattedDate = new Date(workOrder.completedAt || workOrder.createdAt || Date.now()).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
