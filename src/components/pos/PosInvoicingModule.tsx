@@ -376,6 +376,39 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     return { subtotal: Math.round(computedSubtotal), taxAmount, totalAmount };
   };
 
+  // Self-heal legacy tickets (Ko Hein 2026-08-11): old-format work orders
+  // stored unitPrice = FINAL price + a duplicate discountAmount. When such a
+  // ticket is selected in POS (e.g. stale cache from before the migration),
+  // recover the ORIGINAL price, set per-item discount %, zero discountAmount
+  // and persist — so it displays as Original − Discount = Final everywhere.
+  useEffect(() => {
+    if (!selectedWo || !onSaveWorkOrder) return;
+    const lis = selectedWo.lineItems || [];
+    const dis = Number(selectedWo.discountAmount) || 0;
+    if (dis <= 0) return;
+    const hasPct = lis.some((li) => li.isLabor && Boolean(li.lineItemDiscountPercent));
+    if (hasPct) return; // already new format
+    const finalSum = lis.reduce((s, li) => s + (Number(li.unitPrice) || 0) * (1 - ((Number(li.lineItemDiscountPercent) || 0) / 100)) * (Number(li.quantity) || 1), 0);
+    const origSum = Math.max(Number(selectedWo.subtotal) || 0, finalSum + dis);
+    if (finalSum <= 0 || origSum <= finalSum) return;
+    const ratio = origSum / finalSum;
+    const discPct = Math.max(0, Math.min(99, Math.round((1 - finalSum / origSum) * 100)));
+    const newLis = lis.map((li) => ({
+      ...li,
+      unitPrice: Math.round((Number(li.unitPrice) || 0) * ratio),
+      ...(li.isLabor ? { lineItemDiscountPercent: discPct } : {}),
+    }));
+    onSaveWorkOrder({
+      ...selectedWo,
+      lineItems: newLis,
+      discountAmount: 0,
+      subtotal: origSum,
+      totalAmount: Math.round(finalSum),
+      updatedAt: new Date().toISOString(),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedWo?.id]);
+
   const handleAddInventoryPartToWorkOrder = () => {
     if (!selectedWo || !selectedInventoryPart) return;
 
