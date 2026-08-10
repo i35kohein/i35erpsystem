@@ -713,12 +713,23 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           <tbody>
                             {laborItems.map((li) => {
                               const isEditing = editingLineId === li.id;
-                              const discountedUnitPrice = li.lineItemDiscountPercent
-                                ? Math.round(li.unitPrice * (1 - li.lineItemDiscountPercent / 100))
+                              // Look up original price from selectedRepairs (backward compat) or lineItemDiscountPercent
+                              const matchingRepair = (selectedWo.selectedRepairs || []).find(
+                                (r) => r.name?.toLowerCase() === li.description?.toLowerCase()
+                              );
+                              const hasDiscount = li.lineItemDiscountPercent || (matchingRepair && matchingRepair.discountPercent > 0);
+                              const originalUnitPrice = matchingRepair && matchingRepair.discountPercent > 0
+                                ? matchingRepair.basePrice
                                 : li.unitPrice;
-                              const lineTotal = li.unitPrice * li.quantity;
-                              const itemDiscountAmt = li.lineItemDiscountPercent ? Math.round(lineTotal * (li.lineItemDiscountPercent / 100)) : 0;
-                              const effectiveTotal = lineTotal - itemDiscountAmt;
+                              const discountedUnitPrice = hasDiscount
+                                ? (li.lineItemDiscountPercent
+                                    ? Math.round(li.unitPrice * (1 - li.lineItemDiscountPercent / 100))
+                                    : matchingRepair?.finalPrice || li.unitPrice)
+                                : li.unitPrice;
+                              const displayDiscountPercent = li.lineItemDiscountPercent || (matchingRepair?.discountPercent) || 0;
+                              const lineTotal = originalUnitPrice * li.quantity;
+                              const itemDiscountAmt = lineTotal - discountedUnitPrice * li.quantity;
+                              const effectiveTotal = discountedUnitPrice * li.quantity;
                               return (
                                 <tr key={li.id} className={`bg-white ${isEditing ? 'ring-2 ring-brand/30' : ''}`}>
                                   {/* Item name + edit toggle */}
@@ -764,9 +775,9 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                       />
                                     ) : (
                                       <div className="flex flex-col items-center gap-0">
-                                        {li.lineItemDiscountPercent ? (
+                                        {hasDiscount ? (
                                           <React.Fragment>
-                                            <span className="font-mono text-[10px] text-muted line-through">{li.unitPrice.toLocaleString()}</span>
+                                            <span className="font-mono text-[10px] text-muted line-through">{originalUnitPrice.toLocaleString()}</span>
                                             <span className="font-mono text-[11px] font-black text-brand">{discountedUnitPrice.toLocaleString()}</span>
                                           </React.Fragment>
                                         ) : (
@@ -784,7 +795,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                           type="number"
                                           min={0}
                                           max={100}
-                                          value={li.lineItemDiscountPercent || ''}
+                                          value={li.lineItemDiscountPercent ?? ''}
                                           onChange={(e) => handleUpdateLineItem(li.id, 'lineItemDiscountPercent', Number(e.target.value))}
                                           placeholder="0"
                                           className="w-full text-center text-xs font-mono font-bold text-ink bg-surface border border-brand rounded px-1 py-0.5 outline-none"
@@ -792,8 +803,8 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                         <Percent className="w-3 h-3 text-muted shrink-0" />
                                       </div>
                                     ) : (
-                                      <span className={`font-mono tabular-nums ${li.lineItemDiscountPercent ? 'text-success-deep font-bold' : 'text-muted'}`}>
-                                        {li.lineItemDiscountPercent ? `${li.lineItemDiscountPercent}%` : '—'}
+                                      <span className={`font-mono tabular-nums ${hasDiscount ? 'text-success-deep font-bold' : 'text-muted'}`}>
+                                        {hasDiscount ? `${displayDiscountPercent}%` : '—'}
                                       </span>
                                     )}
                                   </td>
@@ -801,10 +812,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                   {/* Amount = original → discount → final */}
                                   <td className="border border-line px-2 py-1.5 text-right font-mono font-black text-ink tabular-nums whitespace-nowrap">
                                     <div className="flex flex-col items-end gap-0">
-                                      {li.lineItemDiscountPercent ? (
+                                      {hasDiscount ? (
                                         <React.Fragment>
                                           <span className="text-[10px] text-muted line-through">{lineTotal.toLocaleString()}</span>
-                                          <span className="font-extrabold text-success-deep text-[10px]">-{itemDiscountAmt.toLocaleString()} ({li.lineItemDiscountPercent}%)</span>
+                                          <span className="font-extrabold text-success-deep text-[10px]">-{itemDiscountAmt.toLocaleString()} ({displayDiscountPercent}%)</span>
                                           <span className="font-black text-ink text-xs">{effectiveTotal.toLocaleString()}</span>
                                         </React.Fragment>
                                       ) : (
