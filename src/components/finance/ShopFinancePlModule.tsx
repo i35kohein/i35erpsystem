@@ -468,7 +468,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
               </div>
             </div>
 
-            {/* COGS & Gross Profit Card */}
+            {/* Parts Cost & Gross Profit Card */}
             <div className="relative flex min-h-[168px] flex-col bg-white p-5 rounded-2xl border border-line shadow-2xs space-y-2">
               <div className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-2xl bg-brand-soft text-brand flex items-center justify-center">
                 <Coins className="w-6 h-6" />
@@ -490,7 +490,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
               </div>
               <div className="mt-auto pt-2 border-t border-surface text-xs font-bold space-y-0.5">
                 <div className="flex justify-between text-muted">
-                  <span>Parts COGS Cost:</span>
+                  <span>Parts Cost:</span>
                   <span className="text-danger font-mono">-{financialSummary.cogsTotal.toLocaleString()} {currency}</span>
                 </div>
                 <div className="flex justify-between text-success-deep">
@@ -500,13 +500,13 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
               </div>
             </div>
 
-            {/* OpEx Overhead Card */}
+            {/* Expenses Card */}
             <div className="relative flex min-h-[168px] flex-col bg-white p-5 rounded-2xl border border-line shadow-2xs space-y-2">
               <div className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-2xl bg-danger/10 text-danger flex items-center justify-center">
                 <Receipt className="w-6 h-6" />
               </div>
               <div className="pr-14">
-                <span className="text-xs font-bold uppercase tracking-wider text-muted leading-4">Operating Expenses (OpEx)</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-muted leading-4">Total Expenses</span>
                 <div className="text-2xl font-black text-danger font-mono leading-none mt-2">
                   {financialSummary.totalOpEx.toLocaleString()} {currency}
                 </div>
@@ -535,7 +535,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
               </div>
               <div className="mt-auto pt-2 border-t border-surface text-xs text-muted flex justify-between font-bold gap-2">
                 <span>Net Formula:</span>
-                <span>Gross Profit - OpEx</span>
+                <span>Gross Profit - Expenses</span>
               </div>
             </div>
           </div>
@@ -1099,7 +1099,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
             <div className="flex justify-between items-center border-b border-line pb-3">
               <h3 className="text-base font-extrabold text-ink flex items-center space-x-2">
                 <Receipt className="w-5 h-5 text-danger" />
-                <span>Record New Shop Operating Expense (OpEx)</span>
+                <span>Record New Shop Expense</span>
               </h3>
               <Button variant="ghost"
                 type="button"
@@ -1416,16 +1416,17 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
               { id: 'category' as const, label: 'Profit by Category' },
               { id: 'ticket' as const, label: 'Sold by Ticket' },
             ].map((st) => (
-              <button
+              <Button
                 key={st.id}
                 type="button"
                 onClick={() => setPartsSubTab(st.id)}
+                variant="ghost"
                 className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-colors cursor-pointer ${
                   partsSubTab === st.id ? 'bg-brand text-white shadow-2xs' : 'bg-surface text-muted hover:bg-surface/80 hover:text-ink'
                 }`}
               >
                 {st.label}
-              </button>
+              </Button>
             ))}
           </div>
 
@@ -1452,7 +1453,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
             </div>
             <div className="p-4 bg-white border border-line rounded-xl shadow-2xs">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-muted">Parts COGS</span>
+                <span className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-muted">Parts Cost</span>
                 <span className="w-7 h-7 rounded-lg bg-danger/10 text-danger flex items-center justify-center"><Coins className="w-3.5 h-3.5" /></span>
               </div>
               <p className="text-2xl font-black text-danger mt-2 tabular-nums">-{financialSummary.cogsTotal.toLocaleString()} {currency}</p>
@@ -1480,7 +1481,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
               <div className="rounded-2xl bg-ink text-white p-5 shadow-lg">
                 <div className="flex items-center justify-between gap-2 mb-4">
                   <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-white/60">Parts Profit Summary</span>
-                  <span className="text-[10px] font-bold text-white/40">Parts Revenue − Parts COGS</span>
+                  <span className="text-[10px] font-bold text-white/40">Parts Revenue − Parts Cost</span>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0">
                   <div className="grid grid-cols-2 flex-1 gap-3 text-center">
@@ -1489,7 +1490,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                       <span className="block text-sm font-black tabular-nums mt-0.5">{financialSummary.partsSalesIncome.toLocaleString()} {currency}</span>
                     </div>
                     <div className="rounded-xl bg-white/10 px-2 py-2.5">
-                      <span className="block text-[9px] font-extrabold uppercase tracking-wider text-white/50">Parts COGS</span>
+                      <span className="block text-[9px] font-extrabold uppercase tracking-wider text-white/50">Parts Cost</span>
                       <span className="block text-sm font-black tabular-nums text-danger mt-0.5">-{financialSummary.cogsTotal.toLocaleString()} {currency}</span>
                     </div>
                   </div>
@@ -1533,7 +1534,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                       <th className="p-3 text-center">Tickets</th>
                       <th className="p-3 text-center">Units</th>
                       <th className="p-3 text-center">Revenue</th>
-                      <th className="p-3 text-center">COGS</th>
+                      <th className="p-3 text-center">Parts Cost</th>
                       <th className="p-3 text-center">Profit</th>
                       <th className="p-3 text-right">Margin</th>
                     </tr>
@@ -1619,7 +1620,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                       <th className="p-3">Parts Category</th>
                       <th className="p-3 text-center">Units</th>
                       <th className="p-3 text-center">Revenue</th>
-                      <th className="p-3 text-center">COGS</th>
+                      <th className="p-3 text-center">Parts Cost</th>
                       <th className="p-3 text-center">Profit</th>
                       <th className="p-3 text-right">Margin</th>
                     </tr>
@@ -1662,7 +1663,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                       <th className="p-3">Device / Customer</th>
                       <th className="p-3 text-center">Parts Units</th>
                       <th className="p-3 text-center">Parts Revenue</th>
-                      <th className="p-3 text-center">Parts COGS</th>
+                      <th className="p-3 text-center">Parts Cost</th>
                       <th className="p-3 text-right">Parts Profit</th>
                     </tr>
                   </thead>

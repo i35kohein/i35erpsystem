@@ -2288,7 +2288,12 @@ export default function App() {
 
             {activeTab === 'finance' && (
               <div className="hidden md:flex items-center gap-2">
-                <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact iconOnly />
+                <DateFilterSelector
+                  filter={dateFilter}
+                  onChange={setDateFilter}
+                  compact
+                  buttonClassName="!h-10 !min-h-10 !min-w-[150px] !rounded-xl !border-line-strong !bg-white !px-3 !text-xs !font-extrabold !shadow-2xs hover:!border-brand/40 hover:!bg-brand-soft"
+                />
                 <Button
                   type="button"
                   onClick={() => financeModuleRef.current?.openAddExpense()}

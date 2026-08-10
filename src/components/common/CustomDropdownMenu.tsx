@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronDown, Check } from 'lucide-react';
+import { Button } from '../ui';
 
 export interface DropdownOption {
   value: string;
@@ -144,9 +145,10 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
           {options.map((option) => {
             const isSelected = option.value === value;
             return (
-              <button
+              <Button
                 key={option.value}
                 type="button"
+                variant="ghost"
                 role="option"
                 aria-selected={isSelected}
                 onClick={() => {
@@ -170,7 +172,7 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
                   )}
                   {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
                 </div>
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -180,9 +182,10 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
 
   return (
     <div ref={containerRef} className={`relative inline-block text-left ${className}`}>
-      <button
+      <Button
         ref={buttonRef}
         type="button"
+        variant="ghost"
         onClick={() => (isOpen ? close() : open())}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
@@ -213,7 +216,7 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
         <span className={`${iconOnly ? 'sr-only' : 'flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-line'}`}>
           <ChevronDown className={`h-3.5 w-3.5 text-muted transition-transform ${isOpen ? 'rotate-180 text-brand' : ''}`} />
         </span>
-      </button>
+      </Button>
 
       {/* Portal to body: immune to ancestor clipping/overflow and viewport escape */}
       {isOpen && menu && createPortal(menu, document.body)}

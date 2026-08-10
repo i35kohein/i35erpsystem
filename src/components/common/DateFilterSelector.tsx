@@ -16,6 +16,7 @@ interface DateFilterSelectorProps {
   value?: DateFilterState;
   onChange: (newFilter: DateFilterState) => void;
   className?: string;
+  buttonClassName?: string;
   compact?: boolean;
   iconOnly?: boolean;
 }
@@ -25,6 +26,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
   value,
   onChange,
   className = '',
+  buttonClassName = '',
   compact = false,
   iconOnly = false,
 }) => {
@@ -159,6 +161,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
             size="md"
             triggerIcon={<Calendar className="h-3.5 w-3.5" />}
             ariaLabel="Filter by date"
+            buttonClassName={buttonClassName}
             options={[
               { value: 'all', label: 'All Dates' },
               { value: 'today', label: 'Today' },
