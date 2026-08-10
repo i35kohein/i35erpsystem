@@ -8,14 +8,15 @@ import {CreditCard,
   Printer, 
   ShieldCheck, 
   BadgePercent,
-  Battery,
-  MonitorSmartphone,
-  PlugZap,
+  Zap,
+  Layers,
+  Power,
   Volume2,
+  Mic,
   Cpu,
   Wifi,
-  Fingerprint,
-  Box,
+  Scan,
+  ListChecks,
   Plus,
   FileText,
   Landmark,
@@ -56,15 +57,16 @@ const normalizeText = (value: string) =>
 
 const getLineItemIcon = (description: string) => {
   const text = normalizeText(description);
-  if (text.includes('battery')) return Battery;
-  if (text.includes('display') || text.includes('screen') || text.includes('lcd') || text.includes('oled')) return MonitorSmartphone;
-  if (text.includes('charging') || text.includes('charge') || text.includes('port')) return PlugZap;
-  if (text.includes('speaker') || text.includes('audio') || text.includes('mic')) return Volume2;
-  if (text.includes('logic') || text.includes('ic') || text.includes('board') || text.includes('power')) return Cpu;
-  if (text.includes('network') || text.includes('wifi') || text.includes('bluetooth') || text.includes('baseband')) return Wifi;
-  if (text.includes('face id') || text.includes('touch id') || text.includes('finger')) return Fingerprint;
-  if (text.includes('backglass') || text.includes('housing') || text.includes('glass')) return Box;
-  return Wrench;
+  if (text.includes('battery')) return Zap;
+  if (text.includes('display') || text.includes('touch') || text.includes('lcd')) return Smartphone;
+  if (text.includes('backglass') || text.includes('housing')) return Layers;
+  if (text.includes('charing') || text.includes('charging') || text.includes('flex')) return Power;
+  if (text.includes('speaker') || text.includes('ear') || text.includes('ring')) return Volume2;
+  if (text.includes('mic')) return Mic;
+  if (text.includes('logic') || text.includes('rf layer') || text.includes('no power')) return Cpu;
+  if (text.includes('network') || text.includes('wifi') || text.includes('pay') || text.includes('nfc')) return Wifi;
+  if (text.includes('face id') || text.includes('key') || text.includes('sensor')) return Scan;
+  return ListChecks;
 };
 
 const INVENTORY_CATEGORY_GROUPS: Array<{ match: RegExp; categories: string[] }> = [
