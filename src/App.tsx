@@ -1,4 +1,4 @@
-import  {useState, useRef, useEffect, useMemo, lazy, Suspense} from 'react';
+import  {useState, useRef, useEffect, useMemo, Suspense} from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { createPortal } from 'react-dom';
 import {Sparkles, Plus, Search, Filter, AlertTriangle, CheckCircle2, Info, AlertCircle, X, RotateCcw, Save, SlidersHorizontal, Edit2,
@@ -81,32 +81,35 @@ import { Button , Input } from './components/ui';
 import { ModuleLoadingSkeleton } from './components/common/ModuleLoadingSkeleton';
 import { useLanguage } from './context/LanguageContext';
 import { Navigation } from './components/Navigation';
-// Heavy modules are code-split (React.lazy) so the initial bundle stays lean.
-const DashboardOverview = lazy(() => import('./components/dashboard/DashboardOverview').then((m) => ({ default: m.DashboardOverview })));
-const IntakeWorkOrderModule = lazy(() => import('./components/intake/IntakeWorkOrderModule').then((m) => ({ default: m.IntakeWorkOrderModule })));
-const SimpleTicketCreator = lazy(() => import('./components/intake/SimpleTicketCreator'));
-const CreateTicketSoloPage = lazy(() => import('./components/intake/CreateTicketSoloPage').then((m) => ({ default: m.CreateTicketSoloPage })));
-const TrelloBoardModule = lazy(() => import('./components/trello/TrelloBoardModule').then((m) => ({ default: m.TrelloBoardModule })));
-const InventoryManagementModule = lazy(() => import('./components/inventory/InventoryManagementModule').then((m) => ({ default: m.InventoryManagementModule })));
-const SupplierRmaModule = lazy(() => import('./components/suppliers/SupplierRmaModule').then((m) => ({ default: m.SupplierRmaModule })));
-const PosInvoicingModule = lazy(() => import('./components/pos/PosInvoicingModule').then((m) => ({ default: m.PosInvoicingModule })));
-const CrmCustomerPortalModule = lazy(() => import('./components/crm/CrmCustomerPortalModule').then((m) => ({ default: m.CrmCustomerPortalModule })));
-const QualityAssuranceModule = lazy(() => import('./components/qa/QualityAssuranceModule').then((m) => ({ default: m.QualityAssuranceModule })));
-const PriceCatalogModule = lazy(() => import('./components/prices/PriceCatalogModule').then((m) => ({ default: m.PriceCatalogModule })));
-const SystemManagementSettingsModule = lazy(() => import('./components/settings/SystemManagementSettingsModule').then((m) => ({ default: m.SystemManagementSettingsModule })));
-const CustomerFacingWebPortal = lazy(() => import('./components/portal/CustomerFacingWebPortal').then((m) => ({ default: m.CustomerFacingWebPortal })));
-// Small/modals stay eager-loaded (used in the root render).
-// Modal / tab modules below are also code-split (React.lazy) so their chunks
+// Heavy modules are code-split (lazyWithRetry) so the initial bundle stays lean
+// and chunk load errors auto-retry before forcing a reload.
+import { lazyWithRetry } from './lib/lazyWithRetry';
+
+const DashboardOverview = lazyWithRetry(() => import('./components/dashboard/DashboardOverview').then((m) => ({ default: m.DashboardOverview })), 'DashboardOverview');
+const IntakeWorkOrderModule = lazyWithRetry(() => import('./components/intake/IntakeWorkOrderModule').then((m) => ({ default: m.IntakeWorkOrderModule })), 'IntakeWorkOrderModule');
+const SimpleTicketCreator = lazyWithRetry(() => import('./components/intake/SimpleTicketCreator'), 'SimpleTicketCreator');
+const CreateTicketSoloPage = lazyWithRetry(() => import('./components/intake/CreateTicketSoloPage').then((m) => ({ default: m.CreateTicketSoloPage })), 'CreateTicketSoloPage');
+const TrelloBoardModule = lazyWithRetry(() => import('./components/trello/TrelloBoardModule').then((m) => ({ default: m.TrelloBoardModule })), 'TrelloBoardModule');
+const InventoryManagementModule = lazyWithRetry(() => import('./components/inventory/InventoryManagementModule').then((m) => ({ default: m.InventoryManagementModule })), 'InventoryManagementModule');
+const SupplierRmaModule = lazyWithRetry(() => import('./components/suppliers/SupplierRmaModule').then((m) => ({ default: m.SupplierRmaModule })), 'SupplierRmaModule');
+const PosInvoicingModule = lazyWithRetry(() => import('./components/pos/PosInvoicingModule').then((m) => ({ default: m.PosInvoicingModule })), 'PosInvoicingModule');
+const CrmCustomerPortalModule = lazyWithRetry(() => import('./components/crm/CrmCustomerPortalModule').then((m) => ({ default: m.CrmCustomerPortalModule })), 'CrmCustomerPortalModule');
+const QualityAssuranceModule = lazyWithRetry(() => import('./components/qa/QualityAssuranceModule').then((m) => ({ default: m.QualityAssuranceModule })), 'QualityAssuranceModule');
+const PriceCatalogModule = lazyWithRetry(() => import('./components/prices/PriceCatalogModule').then((m) => ({ default: m.PriceCatalogModule })), 'PriceCatalogModule');
+const SystemManagementSettingsModule = lazyWithRetry(() => import('./components/settings/SystemManagementSettingsModule').then((m) => ({ default: m.SystemManagementSettingsModule })), 'SystemManagementSettingsModule');
+const CustomerFacingWebPortal = lazyWithRetry(() => import('./components/portal/CustomerFacingWebPortal').then((m) => ({ default: m.CustomerFacingWebPortal })), 'CustomerFacingWebPortal');
+
+// Modal / tab modules below are also code-split (lazyWithRetry) so their chunks
 // only download when actually opened (AI chat, tag printing, recycle bin,
 // Cmd+K search, follow-up & finance tabs).
-const AiDiagnosticAssistantModal = lazy(() => import('./components/ai/AiDiagnosticAssistantModal').then((m) => ({ default: m.AiDiagnosticAssistantModal })));
-const DeviceTagPrinterModal = lazy(() => import('./components/common/DeviceTagPrinterModal').then((m) => ({ default: m.DeviceTagPrinterModal })));
-const RecycleBinModal = lazy(() => import('./components/common/RecycleBinModal').then((m) => ({ default: m.RecycleBinModal })));
-const CompletedDeviceFollowUpModule = lazy(() => import('./components/followup/CompletedDeviceFollowUpModule').then((m) => ({ default: m.CompletedDeviceFollowUpModule })));
-const ShopFinancePlModule = lazy(() => import('./components/finance/ShopFinancePlModule').then((m) => ({ default: m.ShopFinancePlModule })));
+const AiDiagnosticAssistantModal = lazyWithRetry(() => import('./components/ai/AiDiagnosticAssistantModal').then((m) => ({ default: m.AiDiagnosticAssistantModal })), 'AiDiagnosticAssistantModal');
+const DeviceTagPrinterModal = lazyWithRetry(() => import('./components/common/DeviceTagPrinterModal').then((m) => ({ default: m.DeviceTagPrinterModal })), 'DeviceTagPrinterModal');
+const RecycleBinModal = lazyWithRetry(() => import('./components/common/RecycleBinModal').then((m) => ({ default: m.RecycleBinModal })), 'RecycleBinModal');
+const CompletedDeviceFollowUpModule = lazyWithRetry(() => import('./components/followup/CompletedDeviceFollowUpModule').then((m) => ({ default: m.CompletedDeviceFollowUpModule })), 'CompletedDeviceFollowUpModule');
+const ShopFinancePlModule = lazyWithRetry(() => import('./components/finance/ShopFinancePlModule').then((m) => ({ default: m.ShopFinancePlModule })), 'ShopFinancePlModule');
 import { usePriceCatalog } from './hooks/usePriceCatalog';
 import { useIsIpad } from './hooks/useIsIpad';
-const GlobalSearchModal = lazy(() => import('./components/common/GlobalSearchModal').then((m) => ({ default: m.GlobalSearchModal })));
+const GlobalSearchModal = lazyWithRetry(() => import('./components/common/GlobalSearchModal').then((m) => ({ default: m.GlobalSearchModal })), 'GlobalSearchModal');
 import { HoverTooltip } from './components/common/HoverTooltip';
 import { registerToastHandler, unregisterToastHandler } from './lib/toast';
 import { LoginPage } from './components/auth/LoginPage';

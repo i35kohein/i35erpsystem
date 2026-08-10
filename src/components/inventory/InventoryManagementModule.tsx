@@ -620,21 +620,31 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   );
 
   const generatePartName = (part: Partial<PartItem>) => {
-    const model = part.deviceCompatibility?.[0]?.trim();
+    const devices = (part.deviceCompatibility || []).map((d) => d?.trim()).filter(Boolean);
     const category = part.category?.trim();
     const quality = part.qualityTier?.trim();
     const isBackGlass = Boolean(category && /back\s*glass/i.test(category));
     const color = isBackGlass ? part.backGlassColor?.trim() : '';
-    return model && category && quality ? [model, category, color, quality].filter(Boolean).join(' - ') : '';
+    if (!category || !quality) return '';
+
+    // Single device: "iPhone 14 - Battery - Original"
+    if (devices.length === 1) {
+      return [devices[0], category, color, quality].filter(Boolean).join(' - ');
+    }
+    // Multi-device: "Battery - Original" (no device prefix — shown as chips)
+    if (devices.length > 1) {
+      return [category, color, quality].filter(Boolean).join(' - ');
+    }
+    return '';
   };
 
   const generatePartSku = (part: Partial<PartItem>) => {
-    const model = part.deviceCompatibility?.[0]?.trim();
+    const devices = (part.deviceCompatibility || []).map((d) => d?.trim()).filter(Boolean);
     const category = part.category?.trim();
     const quality = part.qualityTier?.trim();
     const isBackGlass = Boolean(category && /back\s*glass/i.test(category));
     const color = isBackGlass ? part.backGlassColor?.trim() : '';
-    if (!model || !category || !quality || (isBackGlass && !color)) return '';
+    if (!category || !quality || (isBackGlass && !color)) return '';
 
     const toSkuCode = (value: string) => value
       .replace(/iPhone/gi, 'IP')
@@ -644,7 +654,15 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       .replace(/[^a-z0-9]+/gi, '')
       .toUpperCase();
 
-    return [model, category, color, quality].filter(Boolean).map(toSkuCode).join('-');
+    // Single device: "IP14-BATTERY-ORIGINAL"
+    if (devices.length === 1) {
+      return [devices[0], category, color, quality].filter(Boolean).map(toSkuCode).join('-');
+    }
+    // Multi-device: "MULTI-BATTERY-ORIGINAL"
+    if (devices.length > 1) {
+      return ['MULTI', category, color, quality].filter(Boolean).map(toSkuCode).join('-');
+    }
+    return '';
   };
 
   const applyPartSpecification = (changes: Partial<PartItem>) => {
@@ -653,8 +671,12 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       if (changes.category !== undefined && !/back\s*glass/i.test(changes.category)) {
         next.backGlassColor = undefined;
       }
-      if (changes.deviceCompatibility !== undefined && /back\s*glass/i.test(next.category || '')) {
-        next.backGlassColor = undefined;
+      // Clear backGlassColor when switching devices or going multi-device
+      if (changes.deviceCompatibility !== undefined) {
+        const deviceCount = next.deviceCompatibility?.length || 0;
+        if (deviceCount !== 1 || /back\s*glass/i.test(next.category || '')) {
+          next.backGlassColor = undefined;
+        }
       }
       return {
         ...next,
@@ -665,8 +687,10 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   };
 
   const isBackGlassCategory = /back\s*glass/i.test(newPartData.category || '');
+  const isMultiDevice = (newPartData.deviceCompatibility?.length || 0) > 1;
   const selectedPartModel = newPartData.deviceCompatibility?.[0] || '';
-  const availableBackGlassColors = selectedPartModel ? getAvailableColorsForModel(selectedPartModel) : [];
+  // Back glass colors are model-specific — only show for single-device parts
+  const availableBackGlassColors = (selectedPartModel && !isMultiDevice) ? getAvailableColorsForModel(selectedPartModel) : [];
   const existingLocationBins = useMemo(
     () => [...new Set([
       ...(systemSettings?.inventoryBinNames || []),
@@ -745,10 +769,10 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   useEffect(() => {
     setNewPartData((current) => {
       const category = current.category && categories.includes(current.category) ? current.category : '';
-      const currentModel = current.deviceCompatibility?.[0] || '';
-      const deviceCompatibility = activeDeviceModels.includes(currentModel)
-        ? current.deviceCompatibility
-        : [];
+      // Filter out devices no longer in the catalog (keeps valid multi-device selections)
+      const deviceCompatibility = (current.deviceCompatibility || []).filter(
+        (device) => activeDeviceModels.includes(device)
+      );
       return { ...current, category, deviceCompatibility };
     });
   }, [activeDeviceModels, categories]);
@@ -914,8 +938,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const paginatedParts = filteredParts;
 
   const handleSaveNewPart = () => {
-    if (!newPartData.name || !newPartData.sku || !newPartData.category || !newPartData.qualityTier || !newPartData.supplierId || !newPartData.deviceCompatibility?.[0] || (isBackGlassCategory && !newPartData.backGlassColor)) {
-      toast.error('Add at least one device model, category, quality tier, and supplier. Back Glass parts also need a color. Then enter the part name and SKU.', 'Incomplete Part Details');
+    const needsColor = isBackGlassCategory && !isMultiDevice;
+    if (!newPartData.name || !newPartData.sku || !newPartData.category || !newPartData.qualityTier || !newPartData.supplierId || !newPartData.deviceCompatibility?.[0] || (needsColor && !newPartData.backGlassColor)) {
+      toast.error('Add at least one device model, category, quality tier, and supplier. Single-device Back Glass parts also need a color. Then enter the part name and SKU.', 'Incomplete Part Details');
       return;
     }
 
@@ -2219,7 +2244,11 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     })}
                   </div>
                 ) : (
-                  <p className="text-xs font-medium text-muted">Select a device model first to choose the correct back glass color.</p>
+                  <p className="text-xs font-medium text-muted">
+                    {isMultiDevice
+                      ? 'Back glass colors are model-specific. Select a single device to choose a color.'
+                      : 'Select a device model first to choose the correct back glass color.'}
+                  </p>
                 )}
               </div>
             )}

@@ -38,21 +38,22 @@ import { confirmDialog } from '../common/ConfirmDialog';
 
 import { Suspense } from 'react';
 import { ModuleLoadingSkeleton } from '../common/ModuleLoadingSkeleton';
+import { lazyWithRetry } from '../../lib/lazyWithRetry';
 
-const TabQaLazy = React.lazy(() => import('./tabs/TabQa').then((m) => ({ default: m.default })));
-const TabNotificationsLazy = React.lazy(() => import('./tabs/TabNotifications').then((m) => ({ default: m.default })));
-const TabPaymentLazy = React.lazy(() => import('./tabs/TabPayment').then((m) => ({ default: m.default })));
-const TabPricingLazy = React.lazy(() => import('./tabs/TabPricing').then((m) => ({ default: m.default })));
-const TabIntakeLazy = React.lazy(() => import('./tabs/TabIntake').then((m) => ({ default: m.default })));
-const TabThemeLazy = React.lazy(() => import('./tabs/TabTheme').then((m) => ({ default: m.default })));
-const TabShopLazy = React.lazy(() => import('./tabs/TabShop').then((m) => ({ default: m.default })));
-const TabAiLazy = React.lazy(() => import('./tabs/TabAi').then((m) => ({ default: m.default })));
+const TabQaLazy = lazyWithRetry(() => import('./tabs/TabQa').then((m) => ({ default: m.default })), 'TabQa');
+const TabNotificationsLazy = lazyWithRetry(() => import('./tabs/TabNotifications').then((m) => ({ default: m.default })), 'TabNotifications');
+const TabPaymentLazy = lazyWithRetry(() => import('./tabs/TabPayment').then((m) => ({ default: m.default })), 'TabPayment');
+const TabPricingLazy = lazyWithRetry(() => import('./tabs/TabPricing').then((m) => ({ default: m.default })), 'TabPricing');
+const TabIntakeLazy = lazyWithRetry(() => import('./tabs/TabIntake').then((m) => ({ default: m.default })), 'TabIntake');
+const TabThemeLazy = lazyWithRetry(() => import('./tabs/TabTheme').then((m) => ({ default: m.default })), 'TabTheme');
+const TabShopLazy = lazyWithRetry(() => import('./tabs/TabShop').then((m) => ({ default: m.default })), 'TabShop');
+const TabAiLazy = lazyWithRetry(() => import('./tabs/TabAi').then((m) => ({ default: m.default })), 'TabAi');
 
-const TabRecycleLazy = React.lazy(() => import('./tabs/TabRecycle').then((m) => ({ default: m.default })));
-const TabPosLazy = React.lazy(() => import('./tabs/TabPos').then((m) => ({ default: m.default })));
-const TabInventoryLazy = React.lazy(() => import('./tabs/TabInventory').then((m) => ({ default: m.default })));
-const TabTechniciansLazy = React.lazy(() => import('./tabs/TabTechnicians').then((m) => ({ default: m.default })));
-const TabUsersLazy = React.lazy(() => import('./tabs/TabUsers').then((m) => ({ default: m.default })));
+const TabRecycleLazy = lazyWithRetry(() => import('./tabs/TabRecycle').then((m) => ({ default: m.default })), 'TabRecycle');
+const TabPosLazy = lazyWithRetry(() => import('./tabs/TabPos').then((m) => ({ default: m.default })), 'TabPos');
+const TabInventoryLazy = lazyWithRetry(() => import('./tabs/TabInventory').then((m) => ({ default: m.default })), 'TabInventory');
+const TabTechniciansLazy = lazyWithRetry(() => import('./tabs/TabTechnicians').then((m) => ({ default: m.default })), 'TabTechnicians');
+const TabUsersLazy = lazyWithRetry(() => import('./tabs/TabUsers').then((m) => ({ default: m.default })), 'TabUsers');
 
 interface SystemManagementSettingsModuleProps {
   settings: SystemSettings;

@@ -5,6 +5,7 @@ import './index.css';
 import './carbon-coat.css';
 import { ThemeProvider } from './context/ThemeContext.tsx';
 import { LanguageProvider } from './context/LanguageContext.tsx';
+import { ErrorBoundary } from './components/common/ErrorBoundary.tsx';
 
 // ERP is deliberately online-only. Remove the legacy offline worker and its
 // cache once so previous browser data cannot be shown or uploaded later.
@@ -72,10 +73,12 @@ if (typeof window !== 'undefined') {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider>
-      <LanguageProvider>
-        <App />
-      </LanguageProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <LanguageProvider>
+          <App />
+        </LanguageProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   </StrictMode>,
 );
