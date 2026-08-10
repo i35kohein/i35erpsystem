@@ -8,6 +8,14 @@ import {CreditCard,
   Printer, 
   ShieldCheck, 
   BadgePercent,
+  Battery,
+  MonitorSmartphone,
+  PlugZap,
+  Volume2,
+  Cpu,
+  Wifi,
+  Fingerprint,
+  Box,
   Plus,
   FileText,
   Landmark,
@@ -45,6 +53,19 @@ const DISCOUNT_OPTIONS = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
 
 const normalizeText = (value: string) =>
   value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim();
+
+const getLineItemIcon = (description: string) => {
+  const text = normalizeText(description);
+  if (text.includes('battery')) return Battery;
+  if (text.includes('display') || text.includes('screen') || text.includes('lcd') || text.includes('oled')) return MonitorSmartphone;
+  if (text.includes('charging') || text.includes('charge') || text.includes('port')) return PlugZap;
+  if (text.includes('speaker') || text.includes('audio') || text.includes('mic')) return Volume2;
+  if (text.includes('logic') || text.includes('ic') || text.includes('board') || text.includes('power')) return Cpu;
+  if (text.includes('network') || text.includes('wifi') || text.includes('bluetooth') || text.includes('baseband')) return Wifi;
+  if (text.includes('face id') || text.includes('touch id') || text.includes('finger')) return Fingerprint;
+  if (text.includes('backglass') || text.includes('housing') || text.includes('glass')) return Box;
+  return Wrench;
+};
 
 const INVENTORY_CATEGORY_GROUPS: Array<{ match: RegExp; categories: string[] }> = [
   {
@@ -377,32 +398,68 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   };
 
   // Self-heal legacy tickets (Ko Hein 2026-08-11): old-format work orders
-  // stored unitPrice = FINAL price + a duplicate discountAmount. When such a
-  // ticket is selected in POS (e.g. stale cache from before the migration),
-  // recover the ORIGINAL price, set per-item discount %, zero discountAmount
-  // and persist — so it displays as Original − Discount = Final everywhere.
+  // saved line items with unitPrice = FINAL price. The discount info either
+  // lives in a duplicate discountAmount (format A) or only in selectedRepairs
+  // (format B: basePrice + discountPercent). When such a ticket is selected
+  // in POS (e.g. stale cache / pre-migration data), recover the ORIGINAL
+  // price + per-item discount % and persist — so it displays as
+  // Original − Discount = Final everywhere.
   useEffect(() => {
     if (!selectedWo || !onSaveWorkOrder) return;
     const lis = selectedWo.lineItems || [];
     const dis = Number(selectedWo.discountAmount) || 0;
-    if (dis <= 0) return;
-    const hasPct = lis.some((li) => li.isLabor && Boolean(li.lineItemDiscountPercent));
-    if (hasPct) return; // already new format
-    const finalSum = lis.reduce((s, li) => s + (Number(li.unitPrice) || 0) * (1 - ((Number(li.lineItemDiscountPercent) || 0) / 100)) * (Number(li.quantity) || 1), 0);
-    const origSum = Math.max(Number(selectedWo.subtotal) || 0, finalSum + dis);
-    if (finalSum <= 0 || origSum <= finalSum) return;
-    const ratio = origSum / finalSum;
-    const discPct = Math.max(0, Math.min(99, Math.round((1 - finalSum / origSum) * 100)));
-    const newLis = lis.map((li) => ({
-      ...li,
-      unitPrice: Math.round((Number(li.unitPrice) || 0) * ratio),
-      ...(li.isLabor ? { lineItemDiscountPercent: discPct } : {}),
-    }));
+    const labor = lis.filter((li) => li.isLabor);
+    if (labor.some((li) => Boolean(li.lineItemDiscountPercent))) return; // already new format
+    const reps = ((selectedWo.selectedRepairs || []) as Array<{ name?: string; basePrice?: number; discountPercent?: number }>).filter((r) => r && r.name);
+    const repByName = new Map(reps.map((r) => [String(r.name).toLowerCase().trim(), r]));
+    const anyRepDisc = reps.some((r) => (Number(r.discountPercent) || 0) > 0);
+    if (dis <= 0 && !anyRepDisc) return; // nothing to fix
+
+    const qtyOf = (li: any) => Number(li.quantity) || 1;
+    let origSum = 0;
+    let finalSum = 0;
+    const newLis = lis.map((li) => {
+      const qty = qtyOf(li);
+      if (li.isLabor) {
+        const rep = repByName.get(String(li.description || '').toLowerCase().trim());
+        if (rep && Number(rep.basePrice) > 0) {
+          const unit = Number(rep.basePrice);
+          const pct = Math.max(0, Math.min(99, Number(rep.discountPercent) || 0));
+          origSum += unit * qty;
+          finalSum += unit * (1 - pct / 100) * qty;
+          return { ...li, unitPrice: unit, lineItemDiscountPercent: pct || undefined };
+        }
+        const unit = Number(li.unitPrice) || 0;
+        origSum += unit * qty;
+        finalSum += unit * qty;
+        return li;
+      }
+      finalSum += (Number(li.unitPrice) || 0) * qty; // parts tracked, not charged
+      return li;
+    });
+    // Format A fallback: recover from duplicate discountAmount
+    if (dis > 0 && origSum === finalSum) {
+      const liFinal = labor.reduce((s, li) => s + (Number(li.unitPrice) || 0) * qtyOf(li), 0);
+      if (liFinal > 0) {
+        const ratio = (liFinal + dis) / liFinal;
+        const discPct = Math.max(0, Math.min(99, Math.round((1 - liFinal / (liFinal + dis)) * 100)));
+        newLis.forEach((li) => {
+          if (li.isLabor && !li.lineItemDiscountPercent) {
+            li.unitPrice = Math.round((Number(li.unitPrice) || 0) * ratio);
+            li.lineItemDiscountPercent = discPct || undefined;
+          }
+        });
+        origSum = Math.round(liFinal * ratio);
+        finalSum = liFinal;
+      }
+    }
+    if (origSum <= 0) return;
+    const newSubtotal = newLis.filter((li) => li.isLabor).reduce((s, li) => s + (Number(li.unitPrice) || 0) * qtyOf(li), 0);
     onSaveWorkOrder({
       ...selectedWo,
       lineItems: newLis,
       discountAmount: 0,
-      subtotal: origSum,
+      subtotal: newSubtotal || origSum,
       totalAmount: Math.round(finalSum),
       updatedAt: new Date().toISOString(),
     });
@@ -852,11 +909,13 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                               const itemDiscountAmt = hasDiscount ? Math.round(lineTotal * (li.lineItemDiscountPercent! / 100)) : 0;
                               const effectiveTotal = lineTotal - itemDiscountAmt;
                               const displayDiscountPct = li.lineItemDiscountPercent || 0;
+                              const LineIcon = getLineItemIcon(li.description);
                               return (
                                 <tr key={li.id} className="bg-white">
                                   {/* Item name + edit toggle */}
                                   <td className="border border-line px-2 py-1.5">
                                     <div className="flex items-center gap-1">
+                                      <LineIcon className="w-3.5 h-3.5 text-muted shrink-0" />
                                       <span className="font-bold text-ink min-w-0 truncate">{li.description}</span>
                                     </div>
                                   </td>
@@ -951,11 +1010,12 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                               const effectiveTotal = lineTotal - itemDiscountAmt;
                               const displayDiscountPct = li.lineItemDiscountPercent || 0;
                               const itemName = li.description || li.partName;
+                              const LineIcon = getLineItemIcon(itemName);
                               return (
                                 <tr key={li.id} className="bg-surface/30">
                                   <td className="border border-line px-2 py-1.5">
                                     <div className="flex items-center gap-1">
-                                      <PackageCheck className="w-3 h-3 text-muted shrink-0" />
+                                      <LineIcon className="w-3.5 h-3.5 text-muted shrink-0" />
                                       <span className="font-bold text-ink min-w-0 truncate">{itemName}</span>
                                     </div>
                                   </td>
