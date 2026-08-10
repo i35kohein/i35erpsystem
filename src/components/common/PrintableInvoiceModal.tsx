@@ -39,7 +39,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
   const partsItems = workOrder.lineItems?.filter((item) => !item.isLabor) || [];
   const laborItems = workOrder.lineItems?.filter((item) => item.isLabor) || [];
 
-  const partsSubtotal = partsItems.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+  const _partsSubtotal = partsItems.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
   const laborSubtotal = laborItems.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
   const laborDiscount = laborItems.reduce((sum, item) => {
     const lineTotal = item.unitPrice * item.quantity;
@@ -346,7 +346,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
                 </thead>
                 <tbody className="divide-y divide-line">
                   {laborItemsWithTotals.length > 0 ? (
-                    laborItemsWithTotals.map(({ item, lineTotal, disc, effTotal }, idx) => (
+                    laborItemsWithTotals.map(({ item, disc, effTotal }, idx) => (
                       <tr key={item.id || idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-surface/50'}>
                         <td className="p-3">
                           <p className="font-bold text-ink">{item.description}</p>

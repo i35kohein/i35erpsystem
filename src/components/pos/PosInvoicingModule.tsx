@@ -348,7 +348,8 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   }, [filteredInventoryParts, selectedInventoryPart]);
 
   const recalculateTotals = (lineItems: WorkOrder['lineItems'], discountAmount: number, depositAmount: number) => {
-    const subtotal = lineItems.reduce((sum, item) => {
+    const laborItems = lineItems.filter((li) => li.isLabor);
+    const subtotal = laborItems.reduce((sum, item) => {
       const lineTotal = (Number(item.unitPrice) || 0) * (Number(item.quantity) || 0);
       const itemDiscount = item.lineItemDiscountPercent ? lineTotal * (item.lineItemDiscountPercent / 100) : 0;
       return sum + lineTotal - itemDiscount;
@@ -714,7 +715,6 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                               const lineTotal = li.unitPrice * li.quantity;
                               const itemDiscountAmt = li.lineItemDiscountPercent ? Math.round(lineTotal * (li.lineItemDiscountPercent / 100)) : 0;
                               const effectiveTotal = lineTotal - itemDiscountAmt;
-                              const originalPrice = li.lineItemDiscountPercent ? lineTotal : null;
                               return (
                                 <tr key={li.id} className={`bg-white ${isEditing ? 'ring-2 ring-brand/30' : ''}`}>
                                   {/* Item name + edit toggle */}
@@ -845,7 +845,6 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                 {partsItems.map((li) => {
                                   const costTotal = (li.unitCost || 0) * li.quantity;
                                   const sellTotal = li.unitPrice * li.quantity;
-                                  const margin = sellTotal - costTotal;
                                   return (
                                     <tr key={li.id} className="bg-white">
                                       <td className="border border-line px-2 py-1">
@@ -1050,6 +1049,23 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           </div>
                         </td>
                       </tr>
+                      {(() => {
+                        const totalDisc = perItemDiscountTotal + selectedWo.discountAmount;
+                        const discPct = laborSubtotal > 0 ? Math.round((totalDisc / laborSubtotal) * 100) : 0;
+                        if (totalDisc > 0 && discPct >= 40) {
+                          return (
+                            <tr>
+                              <td colSpan={2} className="border border-line px-2 py-1">
+                                <div className="flex items-center gap-1 text-warning text-[10px] font-bold">
+                                  <AlertTriangle className="w-3 h-3 shrink-0" />
+                                  Total discount {discPct}% — over {discPct >= 70 ? '70% (near full discount!)' : '40% (high discount)'}
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        }
+                        return null;
+                      })()}
                       {selectedWo.depositAmount > 0 && (
                         <tr>
                           <td className="border border-line px-2 py-1.5 text-success-deep">Upfront Deposit Paid</td>
@@ -1059,10 +1075,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       <tr className="bg-brand-soft">
                         <td className="border border-line px-2 py-2 text-sm font-extrabold text-ink">Amount Due (Customer)</td>
                         <td className="border border-line px-2 py-2 text-right font-mono text-base font-black text-brand tabular-nums">
-                          {(() => {
-                            const custTotal = Math.max(0, laborSubtotal - perItemDiscountTotal + selectedWo.taxAmount - selectedWo.discountAmount - selectedWo.depositAmount);
-                            return `${custTotal.toLocaleString()} ${currency}`;
-                          })()}
+                          {selectedWo.totalAmount.toLocaleString()} {currency}
                         </td>
                       </tr>
 
@@ -1074,7 +1087,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           </tr>
                           <tr>
                             <td className="border border-line px-2 py-1.5 text-muted">System Total (incl. parts)</td>
-                            <td className="border border-line px-2 py-1.5 text-right font-mono text-ink tabular-nums">{selectedWo.subtotal.toLocaleString()} {currency}</td>
+                            <td className="border border-line px-2 py-1.5 text-right font-mono text-ink tabular-nums">{(selectedWo.subtotal + partsSubtotal).toLocaleString()} {currency}</td>
                           </tr>
                           <tr>
                             <td className="border border-line px-2 py-1.5 text-muted">Parts Cost (deducted)</td>
@@ -1082,7 +1095,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           </tr>
                           <tr>
                             <td className="border border-line px-2 py-1.5 text-success-deep font-bold">Gross Profit</td>
-                            <td className="border border-line px-2 py-1.5 text-right font-mono font-black text-success-deep tabular-nums">+{(selectedWo.subtotal - partsCostTotal).toLocaleString()} {currency}</td>
+                            <td className="border border-line px-2 py-1.5 text-right font-mono font-black text-success-deep tabular-nums">+{(selectedWo.subtotal + partsSubtotal - partsCostTotal).toLocaleString()} {currency}</td>
                           </tr>
                         </>
                       )}
@@ -2044,7 +2057,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
       {/* Price List Repair Picker — intake-style modal (Ko Hein 2026-08-10) */}
       {isAddRepairFromPriceListOpen && selectedWo && (() => {
-        const catalogItems = getModelPriceCatalogItems(selectedWo.deviceModel || '', priceCatalog as any);
+        const catalogItems = getModelPriceCatalogItems(selectedWo.deviceModel || '', priceCatalog);
         const matchedModelName = catalogItems.length > 0 ? catalogItems[0].modelMatchedName : selectedWo.deviceModel;
         const filteredItems = catalogItems.filter((item) => {
           const matchesSearch =
