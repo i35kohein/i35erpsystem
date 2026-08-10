@@ -106,6 +106,8 @@ export interface WorkOrderLineItem {
   unitPrice: number;
   quantity: number;
   isLabor: boolean;
+  /** Per-item discount percentage (0–100). Applied on top of unitPrice × quantity. */
+  lineItemDiscountPercent?: number;
 }
 
 export interface MicroSolderingLog {

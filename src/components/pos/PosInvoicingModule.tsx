@@ -21,6 +21,9 @@ import {CreditCard,
   UserCheck,
   ChevronsLeft,
   ChevronsRight,
+  Pencil,
+  Wrench,
+  Percent,
 } from 'lucide-react';
 import { WorkOrder, Customer, SystemSettings, PartItem, WorkOrderLineItem } from '../../types';
 import { PriorityBadge } from '../common/PriorityBadge';
@@ -158,6 +161,18 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   const [isMobileCheckoutFullOpen, setIsMobileCheckoutFullOpen] = useState(false);
   // Left (ticket queue) panel collapse toggle
   const [isQueueCollapsed, setIsQueueCollapsed] = useState(false);
+
+  // Custom repair / service line item form (Ko Hein 2026-08-10)
+  const [isAddCustomRepairOpen, setIsAddCustomRepairOpen] = useState(false);
+  const [customRepairName, setCustomRepairName] = useState('');
+  const [customRepairPrice, setCustomRepairPrice] = useState<number>(0);
+  const [customRepairQty, setCustomRepairQty] = useState<number>(1);
+
+  // Invoice-level discount input (Ko Hein 2026-08-10)
+  const [invoiceDiscountInput, setInvoiceDiscountInput] = useState<string>('');
+
+  // Line item inline editing (Ko Hein 2026-08-10)
+  const [editingLineId, setEditingLineId] = useState<string | null>(null);
 
   // POS keyboard-first: focus the cash tendered field the moment the payment
   // confirmation panel opens, so staff can type the amount immediately.
@@ -302,10 +317,14 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   }, [filteredInventoryParts, selectedInventoryPart]);
 
   const recalculateTotals = (lineItems: WorkOrder['lineItems'], discountAmount: number, depositAmount: number) => {
-    const subtotal = lineItems.reduce((sum, item) => sum + (Number(item.unitPrice) || 0) * (Number(item.quantity) || 0), 0);
+    const subtotal = lineItems.reduce((sum, item) => {
+      const lineTotal = (Number(item.unitPrice) || 0) * (Number(item.quantity) || 0);
+      const itemDiscount = item.lineItemDiscountPercent ? lineTotal * (item.lineItemDiscountPercent / 100) : 0;
+      return sum + lineTotal - itemDiscount;
+    }, 0);
     const taxAmount = Math.round(subtotal * taxRate);
-    const totalAmount = Math.max(0, subtotal + taxAmount - discountAmount - depositAmount);
-    return { subtotal, taxAmount, totalAmount };
+    const totalAmount = Math.max(0, Math.round(subtotal) + taxAmount - discountAmount - depositAmount);
+    return { subtotal: Math.round(subtotal), taxAmount, totalAmount };
   };
 
   const handleAddInventoryPartToWorkOrder = () => {
@@ -376,6 +395,76 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
       updatedAt: new Date().toISOString(),
     };
     onSaveWorkOrder(updatedWo);
+  };
+
+  // Update a single line item field (price, qty, or per-item discount) (Ko Hein 2026-08-10)
+  const handleUpdateLineItem = (lineItemId: string, field: 'unitPrice' | 'quantity' | 'lineItemDiscountPercent', value: number) => {
+    if (!selectedWo || !onSaveWorkOrder) return;
+    const nextLineItems = (selectedWo.lineItems || []).map((item) => {
+      if (item.id !== lineItemId) return item;
+      if (field === 'unitPrice') return { ...item, unitPrice: Math.max(0, value) };
+      if (field === 'quantity') return { ...item, quantity: Math.max(1, Math.floor(value)) };
+      if (field === 'lineItemDiscountPercent') return { ...item, lineItemDiscountPercent: Math.min(100, Math.max(0, value)) };
+      return item;
+    });
+    const totals = recalculateTotals(nextLineItems, selectedWo.discountAmount, selectedWo.depositAmount);
+    onSaveWorkOrder({
+      ...selectedWo,
+      lineItems: nextLineItems,
+      subtotal: totals.subtotal,
+      taxAmount: totals.taxAmount,
+      totalAmount: totals.totalAmount,
+      updatedAt: new Date().toISOString(),
+    });
+  };
+
+  // Add custom repair / service line item (Ko Hein 2026-08-10)
+  const handleAddCustomRepair = () => {
+    if (!selectedWo || !onSaveWorkOrder) return;
+    const name = customRepairName.trim();
+    const price = Math.max(0, Number(customRepairPrice) || 0);
+    const qty = Math.max(1, Math.floor(Number(customRepairQty) || 1));
+    if (!name || price <= 0) {
+      toast.error('Enter a repair name and price greater than 0.', 'Incomplete');
+      return;
+    }
+    const newLine: WorkOrderLineItem = {
+      id: `custom-${Date.now()}`,
+      description: name,
+      unitCost: 0,
+      unitPrice: price,
+      quantity: qty,
+      isLabor: true,
+    };
+    const nextLineItems = [...(selectedWo.lineItems || []), newLine];
+    const totals = recalculateTotals(nextLineItems, selectedWo.discountAmount, selectedWo.depositAmount);
+    onSaveWorkOrder({
+      ...selectedWo,
+      lineItems: nextLineItems,
+      subtotal: totals.subtotal,
+      taxAmount: totals.taxAmount,
+      totalAmount: totals.totalAmount,
+      updatedAt: new Date().toISOString(),
+    });
+    setCustomRepairName('');
+    setCustomRepairPrice(0);
+    setCustomRepairQty(1);
+    setIsAddCustomRepairOpen(false);
+  };
+
+  // Update whole-invoice discount (Ko Hein 2026-08-10)
+  const handleUpdateInvoiceDiscount = (newDiscount: number) => {
+    if (!selectedWo || !onSaveWorkOrder) return;
+    const discount = Math.max(0, Number(newDiscount) || 0);
+    const totals = recalculateTotals(selectedWo.lineItems, discount, selectedWo.depositAmount);
+    onSaveWorkOrder({
+      ...selectedWo,
+      discountAmount: discount,
+      subtotal: totals.subtotal,
+      taxAmount: totals.taxAmount,
+      totalAmount: totals.totalAmount,
+      updatedAt: new Date().toISOString(),
+    });
   };
 
   // Tendered amount depends on the active method: split = sum of splits,
@@ -541,52 +630,109 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     <thead>
                       <tr className="bg-surface">
                         <th className="border border-line px-2 py-1.5 text-left font-extrabold text-muted text-[11px] uppercase tracking-wide">Item</th>
-                        <th className="border border-line px-2 py-1.5 text-right font-extrabold text-muted text-[11px] uppercase tracking-wide">Qty</th>
-                        <th className="border border-line px-2 py-1.5 text-right font-extrabold text-muted text-[11px] uppercase tracking-wide">Unit</th>
+                        <th className="border border-line px-2 py-1.5 text-center font-extrabold text-muted text-[11px] uppercase tracking-wide w-14">Qty</th>
+                        <th className="border border-line px-2 py-1.5 text-center font-extrabold text-muted text-[11px] uppercase tracking-wide w-24">Unit Price</th>
+                        <th className="border border-line px-2 py-1.5 text-center font-extrabold text-muted text-[11px] uppercase tracking-wide w-16">Disc%</th>
                         <th className="border border-line px-2 py-1.5 text-right font-extrabold text-muted text-[11px] uppercase tracking-wide">Amount</th>
                       </tr>
                     </thead>
                     <tbody>
                       {selectedWo.lineItems.map((li) => {
-                        // Match line item to its original repair quote so we can
-                        // show the ORIGINAL price (before any discount).
-                        const quote = (selectedWo.selectedRepairs || []).find(
-                          (r) => r && r.name && r.name.toLowerCase() === String(li.description || '').toLowerCase()
-                        );
-                        const originalPrice = quote && typeof quote.basePrice === 'number' && quote.basePrice > 0
-                          ? quote.basePrice
-                          : li.unitPrice;
-                        const hasDiscount = quote && typeof quote.discountPercent === 'number' && quote.discountPercent > 0;
+                        const isEditing = editingLineId === li.id;
                         const isPart = li.partId && !li.isLabor;
+                        const lineTotal = li.unitPrice * li.quantity;
+                        const itemDiscountAmt = li.lineItemDiscountPercent ? Math.round(lineTotal * (li.lineItemDiscountPercent / 100)) : 0;
+                        const effectiveTotal = lineTotal - itemDiscountAmt;
                         return (
-                          <tr key={li.id} className={isPart ? 'bg-brand-soft/60' : 'bg-white'}>
-                            <td className={`border border-line px-2 py-1.5 font-bold text-ink ${hasDiscount ? '' : ''}`}>
-                              {li.description}
-                              {isPart && <span className="ml-1.5 text-[10px] font-semibold text-muted">· Inventory Part</span>}
-                              {hasDiscount && quote && (
-                                <span className="ml-1.5 text-[10px] font-semibold text-success">· {quote.discountPercent}% off</span>
+                          <tr key={li.id} className={`${isPart ? 'bg-brand-soft/60' : 'bg-white'} ${isEditing ? 'ring-2 ring-brand/30' : ''}`}>
+                            {/* Item name + edit toggle */}
+                            <td className="border border-line px-2 py-1.5">
+                              <div className="flex items-center gap-1">
+                                <span className="font-bold text-ink min-w-0 truncate">{li.description}</span>
+                                {isPart && <span className="text-[10px] font-semibold text-muted shrink-0">· Part</span>}
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingLineId(isEditing ? null : li.id)}
+                                  className={`shrink-0 p-0.5 rounded transition-colors cursor-pointer focus:outline-none ${isEditing ? 'text-brand' : 'text-muted hover:text-brand'}`}
+                                  title={isEditing ? 'Done editing' : 'Edit price / qty / discount'}
+                                >
+                                  {isEditing ? <Check className="w-3 h-3" /> : <Pencil className="w-3 h-3" />}
+                                </button>
+                              </div>
+                            </td>
+
+                            {/* Qty — editable */}
+                            <td className="border border-line px-1 py-1 text-center">
+                              {isEditing ? (
+                                <input
+                                  type="number"
+                                  min={1}
+                                  value={li.quantity}
+                                  onChange={(e) => handleUpdateLineItem(li.id, 'quantity', Number(e.target.value))}
+                                  className="w-full text-center text-xs font-mono font-bold text-ink bg-surface border border-brand rounded px-1 py-0.5 outline-none"
+                                />
+                              ) : (
+                                <span className="text-muted tabular-nums">{li.quantity}</span>
                               )}
                             </td>
-                            <td className="border border-line px-2 py-1.5 text-right text-muted tabular-nums">{li.quantity}</td>
-                            <td className="border border-line px-2 py-1.5 text-right font-mono text-muted tabular-nums">
-                              {hasDiscount && <s>{originalPrice.toLocaleString()}</s>}
-                              {!hasDiscount && originalPrice.toLocaleString()}
+
+                            {/* Unit Price — editable */}
+                            <td className="border border-line px-1 py-1 text-center">
+                              {isEditing ? (
+                                <input
+                                  type="number"
+                                  min={0}
+                                  step={500}
+                                  value={li.unitPrice}
+                                  onChange={(e) => handleUpdateLineItem(li.id, 'unitPrice', Number(e.target.value))}
+                                  className="w-full text-center text-xs font-mono font-bold text-ink bg-surface border border-brand rounded px-1 py-0.5 outline-none"
+                                />
+                              ) : (
+                                <span className="font-mono text-muted tabular-nums">{li.unitPrice.toLocaleString()}</span>
+                              )}
                             </td>
+
+                            {/* Per-item discount % — editable */}
+                            <td className="border border-line px-1 py-1 text-center">
+                              {isEditing ? (
+                                <div className="flex items-center gap-0.5">
+                                  <input
+                                    type="number"
+                                    min={0}
+                                    max={100}
+                                    value={li.lineItemDiscountPercent || ''}
+                                    onChange={(e) => handleUpdateLineItem(li.id, 'lineItemDiscountPercent', Number(e.target.value))}
+                                    placeholder="0"
+                                    className="w-full text-center text-xs font-mono font-bold text-ink bg-surface border border-brand rounded px-1 py-0.5 outline-none"
+                                  />
+                                  <Percent className="w-3 h-3 text-muted shrink-0" />
+                                </div>
+                              ) : (
+                                <span className={`font-mono tabular-nums ${li.lineItemDiscountPercent ? 'text-success-deep font-bold' : 'text-muted'}`}>
+                                  {li.lineItemDiscountPercent ? `${li.lineItemDiscountPercent}%` : '—'}
+                                </span>
+                              )}
+                            </td>
+
+                            {/* Amount + remove */}
                             <td className="border border-line px-2 py-1.5 text-right font-mono font-black text-ink tabular-nums whitespace-nowrap">
-                              <span className="inline-flex items-center gap-1.5">
-                                {(li.unitPrice * li.quantity).toLocaleString()}
-                                {isPart && (
+                              <div className="flex flex-col items-end gap-0">
+                                <span className="inline-flex items-center gap-1.5">
+                                  {effectiveTotal.toLocaleString()}
                                   <button
                                     type="button"
                                     onClick={() => handleRemoveInventoryPartFromWorkOrder(li.id)}
                                     aria-label={`Remove ${li.description}`}
-                                    title="Remove inventory part"
+                                    title="Remove line item"
                                     className="text-muted hover:text-danger p-0.5 rounded transition-colors cursor-pointer focus:outline-none"
                                   >
                                     <X className="w-3 h-3" />
                                   </button>
+                                </span>
+                                {itemDiscountAmt > 0 && (
+                                  <span className="text-[10px] font-semibold text-success">-{itemDiscountAmt.toLocaleString()} off</span>
                                 )}
-                              </span>
+                              </div>
                             </td>
                           </tr>
                         );
@@ -596,17 +742,83 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 </div>
               </div>
 
-                <button
-                  type="button"
-                  onClick={() => setIsAddPartOpen(true)}
-                  className="w-full flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg border border-line-strong bg-white hover:bg-surface transition-colors cursor-pointer focus:outline-none"
-                >
-                  <span className="flex items-center gap-1.5 text-xs font-extrabold text-ink">
-                    <PackageCheck className="w-3.5 h-3.5 text-brand shrink-0" />
-                    Add Inventory Part Used
-                  </span>
-                  <Plus className="w-3.5 h-3.5 text-muted shrink-0" />
-                </button>
+                {/* Add buttons row */}
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsAddPartOpen(true)}
+                    className="flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg border border-line-strong bg-white hover:bg-surface transition-colors cursor-pointer focus:outline-none"
+                  >
+                    <span className="flex items-center gap-1.5 text-xs font-extrabold text-ink">
+                      <PackageCheck className="w-3.5 h-3.5 text-brand shrink-0" />
+                      Add Part
+                    </span>
+                    <Plus className="w-3.5 h-3.5 text-muted shrink-0" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsAddCustomRepairOpen(!isAddCustomRepairOpen)}
+                    className={`flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg border transition-colors cursor-pointer focus:outline-none ${
+                      isAddCustomRepairOpen ? 'border-brand bg-brand-soft' : 'border-line-strong bg-white hover:bg-surface'
+                    }`}
+                  >
+                    <span className="flex items-center gap-1.5 text-xs font-extrabold text-ink">
+                      <Wrench className="w-3.5 h-3.5 text-brand shrink-0" />
+                      Add Repair
+                    </span>
+                    <Plus className="w-3.5 h-3.5 text-muted shrink-0" />
+                  </button>
+                </div>
+
+                {/* Custom Repair Form (Ko Hein 2026-08-10) */}
+                {isAddCustomRepairOpen && (
+                  <div className="p-3 bg-brand-soft/50 border border-brand/30 rounded-xl space-y-2.5 animate-fadeIn">
+                    <div className="flex items-center gap-2">
+                      <Wrench className="w-4 h-4 text-brand shrink-0" />
+                      <span className="text-xs font-extrabold text-ink">Add Custom Repair / Service</span>
+                    </div>
+                    <div className="grid grid-cols-[1fr_80px_80px] gap-2">
+                      <Input
+                        value={customRepairName}
+                        onChange={(e) => setCustomRepairName(e.target.value)}
+                        placeholder="Repair name (e.g. Screen Replacement)"
+                        className="bg-white border border-line rounded-lg p-2 text-xs font-bold text-ink"
+                      />
+                      <Input
+                        type="number"
+                        min={0}
+                        step={500}
+                        value={customRepairPrice || ''}
+                        onChange={(e) => setCustomRepairPrice(Number(e.target.value))}
+                        placeholder="Price"
+                        className="bg-white border border-line rounded-lg p-2 text-xs font-mono font-bold text-ink"
+                      />
+                      <Input
+                        type="number"
+                        min={1}
+                        value={customRepairQty}
+                        onChange={(e) => setCustomRepairQty(Math.max(1, Number(e.target.value) || 1))}
+                        placeholder="Qty"
+                        className="bg-white border border-line rounded-lg p-2 text-xs font-mono font-bold text-ink"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-mono text-muted">
+                        Total: <strong className="text-ink">{((customRepairPrice || 0) * (customRepairQty || 1)).toLocaleString()} {currency}</strong>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleAddCustomRepair}
+                        disabled={!customRepairName.trim() || !customRepairPrice}
+                        className="px-3 py-1.5 rounded-lg bg-brand hover:bg-brand-deep text-white text-xs font-extrabold transition-all cursor-pointer active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1"
+                      >
+                        <Plus className="w-3 h-3" />
+                        Add to Invoice
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {/* Calculation Summary — Excel-style table (Ko Hein) */}
                 <div className="border border-line-strong rounded-lg overflow-hidden bg-white text-xs">
@@ -620,12 +832,39 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         <td className="border border-line px-2 py-1.5 text-muted">Sales Tax ({Math.round(taxRate * 100)}%)</td>
                         <td className="border border-line px-2 py-1.5 text-right font-mono text-ink tabular-nums">{selectedWo.taxAmount.toLocaleString()} {currency}</td>
                       </tr>
-                      {selectedWo.discountAmount > 0 && (
-                        <tr>
-                          <td className="border border-line px-2 py-1.5 text-success-deep">Discount</td>
-                          <td className="border border-line px-2 py-1.5 text-right font-mono text-success-deep tabular-nums">-{selectedWo.discountAmount.toLocaleString()} {currency}</td>
-                        </tr>
-                      )}
+                      {/* Invoice Discount — editable (Ko Hein 2026-08-10) */}
+                      <tr>
+                        <td className="border border-line px-2 py-1.5 text-success-deep flex items-center gap-1">
+                          <Percent className="w-3 h-3 shrink-0" />
+                          Invoice Discount
+                        </td>
+                        <td className="border border-line px-2 py-1.5">
+                          <div className="flex items-center gap-1 justify-end">
+                            <input
+                              type="number"
+                              min={0}
+                              step={1000}
+                              value={invoiceDiscountInput || selectedWo.discountAmount || ''}
+                              onChange={(e) => setInvoiceDiscountInput(e.target.value)}
+                              onBlur={() => {
+                                const val = Number(invoiceDiscountInput) || 0;
+                                handleUpdateInvoiceDiscount(val);
+                                setInvoiceDiscountInput('');
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  const val = Number(invoiceDiscountInput) || 0;
+                                  handleUpdateInvoiceDiscount(val);
+                                  setInvoiceDiscountInput('');
+                                }
+                              }}
+                              placeholder={selectedWo.discountAmount ? selectedWo.discountAmount.toLocaleString() : '0'}
+                              className="w-24 text-right text-xs font-mono font-bold text-success-deep bg-surface border border-line rounded px-1.5 py-0.5 outline-none focus:border-success"
+                            />
+                            <span className="text-success-deep font-mono tabular-nums text-xs shrink-0">{currency}</span>
+                          </div>
+                        </td>
+                      </tr>
                       {selectedWo.depositAmount > 0 && (
                         <tr>
                           <td className="border border-line px-2 py-1.5 text-success-deep">Upfront Deposit Paid</td>
