@@ -1654,12 +1654,12 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     );
 
   return (
-    <div className={`space-y-2 ${isIpad ? 'flex min-h-0 flex-1 flex-col' : ''}`}>
-      <div className={`flex flex-col md:flex-row gap-2 text-xs pb-16 md:pb-0 ${isIpad ? 'md:flex-1 md:min-h-0' : ''}`}>
+    <div className={`space-y-2 md:h-[calc(100dvh-58px)] md:min-h-0 md:overflow-hidden ${isIpad ? 'flex min-h-0 flex-1 flex-col' : ''}`}>
+      <div className={`flex flex-col md:h-full md:min-h-0 md:overflow-hidden md:flex-row gap-2 text-xs pb-16 md:pb-0 ${isIpad ? 'md:flex-1' : ''}`}>
         {/* Left Column: Select Work Order to Checkout (collapsible, hugs sidebar) */}
         <div className={`bg-white border border-line rounded-xl p-2.5 space-y-2 shadow-xs shrink-0 ${
           isQueueCollapsed ? 'md:w-32' : 'md:w-[340px]'
-        } ${isIpad ? 'md:flex md:flex-col md:min-h-0' : 'md:self-stretch md:flex md:flex-col md:min-h-0'}`}>
+        } ${isIpad ? 'md:flex md:h-full md:flex-col md:min-h-0' : 'md:h-full md:self-stretch md:flex md:flex-col md:min-h-0 md:overflow-hidden'}`}>
           <div className="flex justify-between items-center border-b border-line pb-2">
             {!isQueueCollapsed ? (
               <>
@@ -1694,7 +1694,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
           </div>
 
           {!isQueueCollapsed && (
-          <div className={`space-y-2 overflow-y-auto ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:flex-1 md:max-h-none' : 'min-h-[360px] max-h-[calc(100dvh-280px)] md:max-h-none md:flex-1 md:min-h-0'}`}>
+          <div className={`space-y-2 overflow-y-auto pr-1 ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:flex-1 md:max-h-none' : 'min-h-[360px] max-h-[calc(100dvh-280px)] md:max-h-none md:flex-1 md:min-h-0'}`}>
             {filteredWorkOrders.length === 0 ? (
               <div className="flex min-h-0 flex-1 flex-col items-center justify-center p-8 text-center text-muted space-y-2 bg-surface rounded-xl border border-dashed border-line-strong my-4">
                 <CheckCircle2 className="w-8 h-8 mx-auto text-success opacity-70" />
@@ -1770,7 +1770,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
           )}
 
           {isQueueCollapsed && filteredWorkOrders.length > 0 && (
-            <div className={`space-y-1.5 ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:flex-1 md:max-h-none' : 'min-h-[360px] max-h-[calc(100dvh-280px)] overflow-y-auto'}`}>
+            <div className={`space-y-1.5 overflow-y-auto pr-1 ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:flex-1 md:max-h-none' : 'min-h-[360px] max-h-[calc(100dvh-280px)] md:max-h-none md:flex-1 md:min-h-0'}`}>
               {filteredWorkOrders.map((wo) => {
                 const isSel = wo.id === selectedWoId;
                 return (
@@ -1805,7 +1805,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
         </div>
 
         {/* Right Column: Dynamic Invoice & Terminal Checkout (8 cols) */}
-        <div className={`hidden md:block flex-1 min-w-0 bg-white border border-line rounded-xl p-3 pb-24 md:pb-3 space-y-3 shadow-xs ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:overflow-y-auto' : ''}`}>
+        <div className={`hidden md:block flex-1 min-w-0 bg-white border border-line rounded-xl p-3 pb-24 md:pb-3 space-y-3 shadow-xs md:h-full md:min-h-0 md:overflow-hidden ${isIpad ? 'md:flex md:flex-col' : ''}`}>
                     {renderCheckoutPanel()}
         </div>
       </div>

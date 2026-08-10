@@ -51,6 +51,7 @@ export interface ShopFinancePlModuleHandle {
 export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFinancePlModuleProps>(({
   workOrders,
   parts,
+  technicians = [],
   expenses,
   supplierDebts,
   technicianPayouts,
@@ -167,6 +168,31 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
       .filter((li) => li.partId && !li.isLabor && li.quantity > 0)
       .reduce((s, li) => s + li.unitPrice * li.quantity, 0);
   const partsRevenueTotal = fundTickets.reduce((s, wo) => s + partsRevenueOf(wo), 0);
+
+  // Technician commission per ticket — mirrors App.tsx handleMarkPaid / POS
+  // System section (Ko Hein 2026-08-11): base = labor revenue after per-item
+  // discounts × tech rate (spareparts vs hardware).
+  const commissionOf = (wo: WorkOrder) => {
+    const techId = wo.assignedTechId || (wo as WorkOrder & { qaTechnicianId?: string }).qaTechnicianId;
+    const tech = techId ? technicians.find((t) => t.id === techId) : undefined;
+    if (!tech) return 0;
+    const repairType =
+      wo.repairTypeAI ||
+      (wo.serviceType === 'Micro-Soldering' ? ('hardware' as const) : ('spareparts' as const));
+    const rate =
+      repairType === 'hardware'
+        ? tech.commissionRateHardware || tech.commissionRate || 0
+        : tech.commissionRateParts || tech.commissionRate || 0;
+    if (rate <= 0) return 0;
+    const laborRevenue = (wo.lineItems || [])
+      .filter((li) => li.isLabor)
+      .reduce((s, li) => {
+        const lineTotal = (Number(li.unitPrice) || 0) * (Number(li.quantity) || 0);
+        const disc = li.lineItemDiscountPercent ? Math.round(lineTotal * (li.lineItemDiscountPercent / 100)) : 0;
+        return s + lineTotal - disc;
+      }, 0);
+    return Math.round(laborRevenue * (rate / 100));
+  };
 
   // Financial Calculations
   const financialSummary = useMemo(() => {
@@ -1437,6 +1463,37 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
             </div>
           </div>
 
+          {/* Net profit after tech commission — Ko Hein's formula:
+              Net Profit = Amount Due (Customer) − Parts Cost − Tech Commission (2026-08-11) */}
+          {(() => {
+            const rows = partsTickets.map(({ wo, cost }) => {
+              const amountDue = wo.totalAmount || wo.subtotal || 0;
+              const grossProfit = Math.max(0, amountDue - cost);
+              return { grossProfit, commission: commissionOf(wo) };
+            });
+            const grossTotal = rows.reduce((s, r) => s + r.grossProfit, 0);
+            const commissionTotal = rows.reduce((s, r) => s + r.commission, 0);
+            const netTotal = Math.max(0, grossTotal - commissionTotal);
+            return (
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-brand/30 bg-gradient-to-r from-brand-soft/50 to-surface">
+                <div>
+                  <span className="text-xs font-bold text-muted uppercase block">Net Parts Profit (after Tech Commission)</span>
+                  <p className="text-xl font-black text-brand mt-0.5">+{netTotal.toLocaleString()} {currency}</p>
+                </div>
+                <div className="flex gap-4 sm:gap-6 text-xs font-mono shrink-0">
+                  <div className="text-right">
+                    <span className="text-muted block text-[10px] uppercase font-black">Gross Profit</span>
+                    <span className="font-bold text-success-deep">+{grossTotal.toLocaleString()} {currency}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-muted block text-[10px] uppercase font-black">Tech Commission</span>
+                    <span className="font-bold text-danger">-{commissionTotal.toLocaleString()} {currency}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
           {/* Sales by day — which day, how many units, what was sold, how much profit */}
           <div className="space-y-2">
             <h4 className="font-extrabold text-xs text-ink uppercase tracking-wider">Sales by Day ({partsSalesByDay.length} days)</h4>
@@ -1580,25 +1637,35 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                       <th className="p-3">Ticket</th>
                       <th className="p-3">Device / Customer</th>
                       <th className="p-3 text-center">Parts Units</th>
-                      <th className="p-3 text-center">Parts Revenue</th>
-                      <th className="p-3 text-center">Parts COGS</th>
-                      <th className="p-3 text-right">Parts Profit</th>
+                      <th className="p-3 text-center">Parts Cost</th>
+                      <th className="p-3 text-center">Amount Due</th>
+                      <th className="p-3 text-center">Gross Profit</th>
+                      <th className="p-3 text-center">Tech Commission</th>
+                      <th className="p-3 text-right">Net Profit</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-line">
-                    {partsTickets.map(({ wo, units, revenue, cost }) => (
-                      <tr key={wo.id} className="hover:bg-surface">
-                        <td className="p-3 font-mono font-bold text-brand">{wo.orderNumber}</td>
-                        <td className="p-3">
-                          <span className="font-bold text-ink block">{wo.deviceModel}</span>
-                          <span className="text-xs text-muted">{wo.customerName}</span>
-                        </td>
-                        <td className="p-3 text-center font-mono font-bold">{units}</td>
-                        <td className="p-3 text-center font-mono text-success-deep">{revenue.toLocaleString()} {currency}</td>
-                        <td className="p-3 text-center font-mono text-danger">{cost.toLocaleString()} {currency}</td>
-                        <td className="p-3 text-right font-mono font-black text-success-deep">+{(revenue - cost).toLocaleString()} {currency}</td>
-                      </tr>
-                    ))}
+                    {partsTickets.map(({ wo, units, cost }) => {
+                      const amountDue = wo.totalAmount || wo.subtotal || 0;
+                      const grossProfit = Math.max(0, amountDue - cost);
+                      const commission = commissionOf(wo);
+                      const netProfit = Math.max(0, grossProfit - commission);
+                      return (
+                        <tr key={wo.id} className="hover:bg-surface">
+                          <td className="p-3 font-mono font-bold text-brand">{wo.orderNumber}</td>
+                          <td className="p-3">
+                            <span className="font-bold text-ink block">{wo.deviceModel}</span>
+                            <span className="text-xs text-muted">{wo.customerName}</span>
+                          </td>
+                          <td className="p-3 text-center font-mono font-bold">{units}</td>
+                          <td className="p-3 text-center font-mono text-danger">{cost.toLocaleString()} {currency}</td>
+                          <td className="p-3 text-center font-mono text-ink">{amountDue.toLocaleString()} {currency}</td>
+                          <td className="p-3 text-center font-mono font-bold text-success-deep">+{grossProfit.toLocaleString()} {currency}</td>
+                          <td className="p-3 text-center font-mono text-muted">-{commission.toLocaleString()} {currency}</td>
+                          <td className="p-3 text-right font-mono font-black text-success-deep">+{netProfit.toLocaleString()} {currency}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
