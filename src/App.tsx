@@ -6,7 +6,7 @@ import {Sparkles, Plus, Search, Filter, AlertTriangle, CheckCircle2, Info, Alert
   Printer, List,
   TrendingUp,
   Grid, Smartphone, Layers, ScanLine, ListFilter, Activity, Users, Boxes, Coins, ShieldAlert,
-  Table as TableIcon, LayoutGrid, Flame, Camera} from 'lucide-react';
+  Table as TableIcon, LayoutGrid, Flame, Camera, ClipboardCheck} from 'lucide-react';
 import { subscribeToCollection, refreshCollection, refreshAllCollections, flushOfflineQueue, saveDocument, deleteDocument } from './lib/supabase';
 import { setActiveUserId, notifyAccountChanged } from './utils/accountSettings';
 
@@ -1892,6 +1892,56 @@ export default function App() {
                 <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
 
                 </div>              </>
+            )}
+
+            {/* Work Intake: view mode + scan + Simple Ticket — moved from the module
+                header into the top navbar to keep the body clean (Ko Hein 2026-08-10) */}
+            {activeTab === 'intake' && (
+              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                <div className="bg-surface p-1 rounded-xl border border-line flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    type="button"
+                    onClick={() => setIntakeViewMode('table')}
+                    className={`px-2.5 h-9 rounded-lg text-xs font-extrabold flex items-center space-x-1.5 cursor-pointer ${intakeViewMode === 'table' ? 'bg-brand text-white shadow-2xs' : 'text-muted hover:text-ink'}`}
+                    title="Table View"
+                    aria-label="Table View"
+                  >
+                    <TableIcon className="w-3.5 h-3.5 shrink-0" />
+                    <span className="hidden sm:inline">Table</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    type="button"
+                    onClick={() => setIntakeViewMode('cards')}
+                    className={`px-2.5 h-9 rounded-lg text-xs font-extrabold flex items-center space-x-1.5 cursor-pointer ${intakeViewMode === 'cards' ? 'bg-brand text-white shadow-2xs' : 'text-muted hover:text-ink'}`}
+                    title="Cards Grid View"
+                    aria-label="Cards Grid View"
+                  >
+                    <LayoutGrid className="w-3.5 h-3.5 shrink-0" />
+                    <span className="hidden sm:inline">Grid</span>
+                  </Button>
+                </div>
+                <Button
+                  type="button"
+                  onClick={() => setIntakeScanRequest((n) => n + 1)}
+                  className="h-9 px-2.5 bg-brand hover:bg-brand-deep text-white font-extrabold text-xs rounded-xl flex items-center space-x-1.5 cursor-pointer shrink-0 active:scale-95 shadow-2xs"
+                  title="Scan Device Barcode or QR Code"
+                >
+                  <Camera className="w-3.5 h-3.5 text-white shrink-0" />
+                  <span className="hidden md:inline">Scan</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => setActiveTab('simple-ticket')}
+                  className="h-9 px-2.5 border-line bg-white text-ink hover:border-brand hover:text-brand font-bold text-xs rounded-xl flex items-center space-x-1.5 cursor-pointer shrink-0"
+                  title="Open Simple Ticket form"
+                >
+                  <ClipboardCheck className="w-3.5 h-3.5 shrink-0" />
+                  <span className="hidden md:inline">Simple Ticket</span>
+                </Button>
+              </div>
             )}
 
 

@@ -13,13 +13,10 @@ import { Button } from '../ui';
 import { TicketDetailInspectorModal } from '../common/TicketDetailInspectorModal';
 import { confirmDialog } from '../common/ConfirmDialog';
 import type { TicketPrefillData } from './CreateTicketSoloPage';
-import {ClipboardList, ClipboardCheck, Stethoscope, 
-  Camera,
+import {ClipboardList, Stethoscope, 
   Inbox,
   Ticket,
   SlidersHorizontal,
-  LayoutGrid,
-  Table as TableIcon,
   User,
   Wrench,
   Clock,
@@ -65,8 +62,6 @@ interface IntakeWorkOrderModuleProps {
   /** Reopen QA: clear the passed checklist so the ticket flows back into QA (bug #12) */
   onReopenQa?: (id: string) => void;
 }
-
-
 
 export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   workOrders,
@@ -208,66 +203,6 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                 </p>
               </div>
             </div>
-          </div>
-
-          <div className="hidden md:flex flex-col sm:flex-row gap-2 w-full md:w-auto md:shrink-0 sm:items-stretch md:items-center">
-            {/* View Mode Switcher — desktop only (mobile: in filter drawer) */}
-            <div className="bg-surface p-1 rounded-xl border border-line flex items-center gap-1 w-full md:w-auto">
-              <Button
-                variant="ghost"
-                type="button"
-                onClick={() => setViewMode('table')}
-                className={`flex-1 md:flex-none px-2.5 sm:px-3 h-9 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center md:justify-start space-x-1.5 cursor-pointer ${
-                  viewMode === 'table'
-                    ? 'bg-brand text-white shadow-2xs'
-                    : 'text-muted hover:text-ink'
-                }`}
-                title="Table View"
-                aria-label="Table View"
-              >
-                <TableIcon className="w-3.5 h-3.5 shrink-0" />
-                <span>Table</span>
-              </Button>
-              <Button
-                variant="ghost"
-                type="button"
-                onClick={() => setViewMode('cards')}
-                className={`flex-1 md:flex-none px-2.5 sm:px-3 h-9 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center md:justify-start space-x-1.5 cursor-pointer ${
-                  viewMode === 'cards'
-                    ? 'bg-brand text-white shadow-2xs'
-                    : 'text-muted hover:text-ink'
-                }`}
-                title="Cards Grid View"
-                aria-label="Cards Grid View"
-              >
-                <LayoutGrid className="w-3.5 h-3.5 shrink-0" />
-                <span>Grid Cards</span>
-              </Button>
-            </div>
-
-            <Button
-              type="button"
-              onClick={() => setIsCameraScannerOpen(true)}
-              className="w-full md:w-auto bg-brand hover:bg-brand-deep text-white flex items-center justify-center md:justify-start space-x-1.5"
-              title="Scan Device Barcode or QR Code"
-            >
-              <Camera className="w-3.5 h-3.5 text-white shrink-0" />
-              <span className="hidden sm:inline">Scan Barcode / QR</span>
-              <span className="sm:hidden">Scan</span>
-            </Button>
-
-            {/* Simple Ticket — quick link to the paper intake form (Ko Hein) */}
-            <Button
-              variant="outline"
-              type="button"
-              onClick={() => onNavigateToTab?.('simple-ticket')}
-              className="w-full md:w-auto border-line bg-white text-ink hover:border-brand hover:text-brand flex items-center justify-center md:justify-start space-x-1.5"
-              title="Open Simple Ticket form"
-            >
-              <ClipboardCheck className="w-3.5 h-3.5 shrink-0" />
-              <span className="hidden sm:inline">Simple Ticket</span>
-              <span className="sm:hidden">Simple</span>
-            </Button>
           </div>
         </div>
 
