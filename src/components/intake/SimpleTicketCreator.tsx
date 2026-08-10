@@ -15,6 +15,8 @@ interface SimpleTicketCreatorProps {
   onSaveWorkOrder: (wo: WorkOrder) => void;
   /** Open the Sticker Tag Voucher printer (same as New Intake Ticket) */
   onSelectPrintTag?: (wo: WorkOrder) => void;
+  /** Jump to another tab (e.g. Work Intake) after saving (Ko Hein 2026-08-10) */
+  onNavigateToTab?: (tab: string) => void;
 }
 
 interface FormState {
@@ -56,6 +58,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   systemSettings,
   onSaveWorkOrder,
   onSelectPrintTag,
+  onNavigateToTab,
 }) => {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -574,6 +577,15 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                   className="rounded-lg border border-success/40 bg-white px-3 py-1.5 text-xs font-black text-success-deep transition hover:bg-success/10"
                 >
                   🖨 Print Ticket
+                </button>
+              )}
+              {onNavigateToTab && (
+                <button
+                  type="button"
+                  onClick={() => onNavigateToTab('intake')}
+                  className="rounded-lg border border-success/40 bg-white px-3 py-1.5 text-xs font-black text-success-deep transition hover:bg-success/10"
+                >
+                  → Work Intake
                 </button>
               )}
             </div>

@@ -2402,6 +2402,7 @@ export default function App() {
                   systemSettings={systemSettings}
                   onSaveWorkOrder={handleSaveWorkOrder}
                   onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
+                  onNavigateToTab={(tab) => setActiveTab(tab as any)}
                 />
               )}
 
