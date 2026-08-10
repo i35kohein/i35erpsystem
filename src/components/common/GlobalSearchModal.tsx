@@ -64,7 +64,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
     });
     parts.slice(0, 2000).forEach((p) => {
       if (inText(p.name, p.sku, p.category)) {
-        items.push({ kind: 'part', id: p.id, label: p.name, sub: `${p.sku || ''}${p.category ? ' · ' + p.category : ''} · ${p.quantityInStock} in stock`, tab: 'inventory' });
+        items.push({ kind: 'part', id: p.id, label: p.name, sub: `${p.sku || ''}${p.category ? ' · ' + p.category : ''} · ${p.quantityInStock} in stock · ${p.owner || 'APP'}`, tab: 'inventory' });
       }
     });
     customers.slice(0, 1000).forEach((c) => {

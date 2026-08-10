@@ -560,10 +560,16 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     return [...new Set(inventoryCategories.filter(Boolean))];
   }, [inventoryCategories]);
 
+  // Owner-filtered parts (APP/KZH) — drives chips across ALL views (Ko Hein 2026-08-10).
+  const ownerParts = useMemo(
+    () => (ownerFilter === 'ALL' ? parts : parts.filter((p) => (p.owner || 'APP') === ownerFilter)),
+    [parts, ownerFilter]
+  );
+
   // Profit breakdown by category (current stock valuation: cost × stock vs retail × stock)
   const profitByCategory = useMemo(() => {
     const map = new Map<string, { skus: number; cost: number; retail: number }>();
-    parts.forEach((p) => {
+    ownerParts.forEach((p) => {
       const cat = p.category || 'Uncategorized';
       const e = map.get(cat) || { skus: 0, cost: 0, retail: 0 };
       e.skus += 1;
@@ -581,7 +587,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         margin: e.retail ? Math.round(((e.retail - e.cost) / e.retail) * 100) : 0,
       }))
       .sort((a, b) => b.profit - a.profit);
-  }, [parts]);
+  }, [ownerParts]);
 
   // Memoized filter-option lists (badge counts are expensive — computed once per data change, not per tap/render)
   const modelFilterOptions = useMemo(
@@ -694,12 +700,12 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const matrixCategoryTotals = useMemo(() => {
     const totals: Record<string, number> = {};
     matrixCategories.forEach((category) => {
-      totals[category] = parts
+      totals[category] = ownerParts
         .filter((p) => p.category === category)
         .reduce((sum, p) => sum + Number(p.quantityInStock || 0), 0);
     });
     return totals;
-  }, [matrixCategories, parts]);
+  }, [matrixCategories, ownerParts]);
 
   const matrixGrandTotal = useMemo(
     () => Object.values(matrixCategoryTotals).reduce((a, b) => a + b, 0),
@@ -814,7 +820,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
   // Analytics Metrics
   const metrics = useMemo(() => {
-    const totalCount = parts.length;
+    const totalCount = ownerParts.length;
     let totalCostValuation = 0;
     let totalRetailValuation = 0;
     let lowStockCount = 0;
@@ -832,7 +838,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       KZH: { cost: 0, retail: 0 },
     };
 
-    parts.forEach((p) => {
+    ownerParts.forEach((p) => {
       const owner = p.owner || 'APP';
       ownerCounts[owner] = (ownerCounts[owner] || 0) + 1;
       ownerValuation[owner].cost += Number(p.costPrice || 0) * Number(p.quantityInStock || 0);
@@ -863,7 +869,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       ownerCounts,
       ownerValuation,
     };
-  }, [parts]);
+  }, [ownerParts]);
 
 
   // Filter Parts
@@ -1175,10 +1181,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
 
 
-      {/* VIEW MODE 1: STOCK TABLE */}
-      {viewMode === 'stock' && (
-        <>
-
         {/* Owner filter — APP (shop) vs KZH (Ko Hein) stock (Ko Hein 2026-08-10) */}
         <div className="flex flex-wrap items-center gap-1.5">
           {(['ALL', 'APP', 'KZH'] as const).map((owner) => {
@@ -1199,6 +1201,10 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             );
           })}
         </div>
+      {/* VIEW MODE 1: STOCK TABLE */}
+      {viewMode === 'stock' && (
+        <>
+
 
         {/* Bulk actions bar — appears when parts are selected (stock table only) */}
         {selectedPartIds.size > 0 && !inlineEditMode && (
@@ -1986,7 +1992,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         const merge = matrixMergeGroups[category]?.[model];
                         // Cell is consumed by the rowSpan of the row above it.
                         if (merge && !merge.isFirst) return null;
-                        const matchingParts = parts.filter((part) =>
+                        const matchingParts = ownerParts.filter((part) =>
                           part.category === category && part.deviceCompatibility.some((device) => device.toLowerCase() === model.toLowerCase())
                         );
                         const quantity = matchingParts.reduce((total, part) => total + part.quantityInStock, 0);
@@ -3262,7 +3268,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                           const merge = matrixMergeGroups[category]?.[model];
                           // Cell is consumed by the rowSpan of the row above it.
                           if (merge && !merge.isFirst) return null;
-                          const matchingParts = parts.filter((part) =>
+                          const matchingParts = ownerParts.filter((part) =>
                             part.category === category && part.deviceCompatibility.some((device) => device.toLowerCase() === model.toLowerCase())
                           );
                           const quantity = matchingParts.reduce((total, part) => total + part.quantityInStock, 0);

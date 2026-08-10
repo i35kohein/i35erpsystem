@@ -64,6 +64,16 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
   const currency = systemSettings?.currencySymbol || 'MMK';
   const activePaymentMethods = getActivePaymentMethods(systemSettings).filter((m) => m.enabled);
   const [activeTab, setActiveTab] = useState<'overview' | 'revenue' | 'expenses' | 'inventory-asset' | 'commissions' | 'accounts-payable' | 'inventory-fund' | 'parts-revenue'>('overview');
+  // Parts Value owner filter — APP (shop) vs KZH (Ko Hein) (Ko Hein 2026-08-10)
+  const [partsOwner, setPartsOwner] = useState<'ALL' | 'APP' | 'KZH'>('ALL');
+  const ownerFilteredParts = useMemo(
+    () => (partsOwner === 'ALL' ? parts : parts.filter((p) => (p.owner || 'APP') === partsOwner)),
+    [parts, partsOwner]
+  );
+  const partsAssetTotal = useMemo(
+    () => ownerFilteredParts.reduce((sum, p) => sum + (p.costPrice || 0) * (p.quantityInStock || 0), 0),
+    [ownerFilteredParts]
+  );
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
   const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
   const [selectedDebtForPayment, setSelectedDebtForPayment] = useState<SupplierDebtRecord | null>(null);
@@ -817,16 +827,32 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
       {/* SUB-VIEW 4: PARTS INVENTORY ASSET VALUATION */}
       {activeTab === 'inventory-asset' && (
         <div className="bg-white border border-line rounded-2xl p-5 space-y-5 shadow-xs">
-          <div className="flex justify-between items-center pb-3 border-b border-line">
-            <div>
+          <div className="flex justify-between items-center gap-3 pb-3 border-b border-line">
+            <div className="min-w-0">
               <h3 className="font-extrabold text-base text-ink">Parts Value</h3>
               <p className="text-xs text-muted font-medium">Tracking tied-up capital in unsold screen displays, batteries, chips & slow vs fast movers</p>
             </div>
-            <div className="text-right font-mono">
-              <span className="text-xs text-muted">Asset Valuation:</span>
-              <span className="block text-lg font-black text-ink">
-                {financialSummary.totalInventoryAssetValue.toLocaleString()} {currency}
-              </span>
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="flex items-center gap-1">
+                {(['ALL', 'APP', 'KZH'] as const).map((owner) => (
+                  <button
+                    key={owner}
+                    type="button"
+                    onClick={() => setPartsOwner(owner)}
+                    className={`rounded-lg px-2 py-1 text-xs font-bold transition-colors cursor-pointer ${
+                      partsOwner === owner ? 'bg-brand text-white shadow-2xs' : 'bg-surface text-muted hover:bg-line hover:text-ink'
+                    }`}
+                  >
+                    {owner}
+                  </button>
+                ))}
+              </div>
+              <div className="text-right font-mono">
+                <span className="text-xs text-muted">Asset Valuation:</span>
+                <span className="block text-lg font-black text-ink">
+                  {partsAssetTotal.toLocaleString()} {currency}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -844,7 +870,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
-                {parts.map((part) => {
+                {ownerFilteredParts.map((part) => {
                   const assetCostVal = part.costPrice * part.quantityInStock;
                   const retailVal = part.sellingPrice * part.quantityInStock;
                   const marginVal = retailVal - assetCostVal;
@@ -852,8 +878,21 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                   return (
                     <tr key={part.id} className="hover:bg-surface">
                       <td className="p-3">
-                        <span className="font-extrabold text-ink block">{part.name}</span>
-                        <span className="font-mono text-xs text-brand">{part.sku}</span>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`rounded px-1.5 py-0.5 text-[9px] font-black uppercase ${
+                              (part.owner || 'APP') === 'KZH'
+                                ? 'bg-success/10 text-success-deep border border-success/30'
+                                : 'bg-brand-soft text-brand border border-brand/30'
+                            }`}
+                          >
+                            {part.owner || 'APP'}
+                          </span>
+                          <span className="min-w-0">
+                            <span className="font-extrabold text-ink block">{part.name}</span>
+                            <span className="font-mono text-xs text-brand">{part.sku}</span>
+                          </span>
+                        </div>
                       </td>
                       <td className="p-3">
                         <span className="bg-surface text-ink font-bold px-2 py-0.5 rounded text-xs border border-line">
@@ -870,7 +909,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                 })}
               </tbody>
             </table>
-            {parts.length === 0 && (
+            {ownerFilteredParts.length === 0 && (
               <div className="p-8 text-center text-xs text-muted space-y-1">
                 <Boxes className="w-6 h-6 mx-auto opacity-50" />
                 <p className="font-extrabold text-sm text-ink">No inventory assets tracked yet</p>

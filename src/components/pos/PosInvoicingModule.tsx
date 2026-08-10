@@ -132,6 +132,8 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 }) => {
   const currency = systemSettings?.currencySymbol || 'MMK';
   const activePaymentMethods = getActivePaymentMethods(systemSettings).filter((m) => m.enabled);
+  // Parts owner filter — APP (shop) vs KZH (Ko Hein) (Ko Hein 2026-08-10)
+  const [posOwner, setPosOwner] = useState<'ALL' | 'APP' | 'KZH'>('ALL');
   const [selectedWoId, setSelectedWoId] = useState<string>(workOrders[0]?.id || '');
   const isIpad = useIsIpad();
   const [paymentMethod, setPaymentMethod] = useState<string>(activePaymentMethods[0]?.name || 'Cash');
@@ -250,7 +252,8 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     ]);
   };
   const filteredInventoryParts = useMemo(() => {
-    if (!selectedWo) return parts;
+    const ownerFiltered = posOwner === 'ALL' ? parts : parts.filter((part) => (part.owner || 'APP') === posOwner);
+    if (!selectedWo) return ownerFiltered;
 
     const model = selectedWo.deviceModel || '';
     // Include ALL line items (labor + parts) so a "Battery" labor line or a
@@ -273,7 +276,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
       )
     );
 
-    return parts.filter((part) => {
+    return ownerFiltered.filter((part) => {
       const matchesModel =
         !model ||
         part.deviceCompatibility.some((device) => isSameDeviceModel(device, model));
@@ -284,7 +287,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
       return matchesModel && matchesCategory;
     });
-  }, [parts, selectedWo]);
+  }, [parts, selectedWo, posOwner]);
 
   const selectedInventoryPart = filteredInventoryParts.find((part) => part.id === inventoryPartId) || filteredInventoryParts[0] || null;
   const taxRate = ((systemSettings?.taxPercentage ?? 6) || 0) / 100;
@@ -1346,6 +1349,22 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               </button>
             </div>
 
+            {/* Owner filter — APP / KZH (Ko Hein 2026-08-10) */}
+            <div className="flex items-center gap-1">
+              {(['ALL', 'APP', 'KZH'] as const).map((owner) => (
+                <button
+                  key={owner}
+                  type="button"
+                  onClick={() => setPosOwner(owner)}
+                  className={`rounded-lg px-2 py-1 text-xs font-bold transition-colors cursor-pointer ${
+                    posOwner === owner ? 'bg-brand text-white shadow-2xs' : 'bg-surface text-muted hover:bg-line hover:text-ink'
+                  }`}
+                >
+                  {owner}
+                </button>
+              ))}
+            </div>
+
             {/* Automatic — visual part list (Ko Hein) */}
             <div>
               <p className="text-[11px] font-bold text-muted mb-1.5">Automatic — tap a part</p>
@@ -1372,6 +1391,15 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       <div className="min-w-0">
                         <p className="text-xs font-extrabold text-ink truncate">{part.name}</p>
                         <p className={`text-[11px] font-semibold ${low ? 'text-warning' : 'text-muted'}`}>
+                          <span
+                            className={`mr-1.5 rounded px-1 py-px text-[9px] font-black uppercase ${
+                              (part.owner || 'APP') === 'KZH'
+                                ? 'bg-success/10 text-success-deep border border-success/30'
+                                : 'bg-brand-soft text-brand border border-brand/30'
+                            }`}
+                          >
+                            {part.owner || 'APP'}
+                          </span>
                           Stock: {part.quantityInStock}{low ? ' — Low' : ''}
                         </p>
                       </div>
