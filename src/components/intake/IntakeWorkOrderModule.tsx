@@ -509,7 +509,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpenTicketDetail(wo); }
                   }}
-                  className={`group cursor-pointer rounded-xl border bg-white p-3 shadow-2xs transition-all hover:shadow-md hover:border-brand/50 select-none ${
+                  className={`group cursor-pointer rounded-xl border bg-white p-3 shadow-2xs transition-all hover:shadow-md hover:border-brand/50 select-none !min-h-[auto] ${
                     sortByPriority && getPriorityWeight(wo.priority) >= 4 ? 'border-danger/30 ring-1 ring-danger/20' : 'border-line'
                   }`}
                 >
