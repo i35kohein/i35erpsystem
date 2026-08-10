@@ -1870,7 +1870,7 @@ export default function App() {
             {/* Dynamic Filters depending on Active Tab */}
             {activeTab === 'intake' && (
               <>
-                <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
+                <div className="hidden md:flex items-center gap-2">
                 {/* Status Dropdown removed 2026-08-10 (Ko Hein) — roster has quick status
                     chips + filter indicator; status still resettable via those chips. */}
 
@@ -1909,8 +1909,8 @@ export default function App() {
 
             {activeTab === 'dashboard' && (
               <>
-                <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
-                {!isIpad && <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />}
+                <div className="hidden md:flex items-center gap-2">
+                <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
                 </div>
               </>
             )}
@@ -1954,7 +1954,7 @@ export default function App() {
 
             {activeTab === 'trello' && (
               <>
-                <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
+                <div className="hidden md:flex items-center gap-2">
                   <CustomDropdownMenu
                     value={techFilter}
                     onChange={(val) => setTechFilter(val)}
@@ -1973,7 +1973,7 @@ export default function App() {
             {activeTab === 'inventory' && (
               <>
               {/* Desktop/tablet row (sm+): search + view switcher + Add Part + ⋯ */}
-              <div className={`hidden sm:flex items-center gap-1.5 sm:gap-2 shrink-0 ${isIpad ? 'hidden' : ''}`}>
+              <div className={`hidden sm:flex items-center gap-1.5 sm:gap-2 shrink-0`}>
               {/* Scan / search — leftmost */}
               <div className="shrink-0">
                 <div className="relative">
@@ -1998,7 +1998,7 @@ export default function App() {
               </div>
 
               {/* Stock / Profit / Matrix — desktop only (mobile: in ⋯ menu) */}
-              <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-1.5 sm:gap-2 shrink-0'}>
+              <div className="hidden md:flex items-center gap-1.5 sm:gap-2 shrink-0">
                 {(['stock', 'profit', 'matrix'] as const).map((v) => (
                   <button
                     key={v}
@@ -2027,7 +2027,7 @@ export default function App() {
               </Button>
 
               {/* More actions — Print Tags + Edit (⋯) */}
-              <div className={isIpad ? 'hidden' : 'relative block shrink-0'}>
+              <div className={'relative block shrink-0'}>
                 <button
                   type="button"
                   ref={inventoryMoreAnchorRef}
@@ -2135,7 +2135,7 @@ export default function App() {
 
             {activeTab === 'crm' && (
               <>
-                <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
+                <div className="hidden md:flex items-center gap-2">
                 <CustomDropdownMenu
                   value={customerTypeFilter}
                   onChange={(val) => setCustomerTypeFilter(val)}
@@ -2155,7 +2155,7 @@ export default function App() {
 
             {activeTab === 'suppliers' && (
               <>
-                <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
+                <div className="hidden md:flex items-center gap-2">
                 <CustomDropdownMenu
                   value={statusFilter}
                   onChange={(val) => setStatusFilter(val)}
@@ -2176,7 +2176,7 @@ export default function App() {
 
             {activeTab === 'qa' && (
               <>
-                <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
+                <div className="hidden md:flex items-center gap-2">
                 <CustomDropdownMenu
                   value={statusFilter}
                   onChange={(val) => setStatusFilter(val)}
@@ -2193,7 +2193,7 @@ export default function App() {
             )}
 
             {activeTab === 'finance' && (
-              <div className={isIpad ? 'hidden' : 'hidden lg:flex items-center gap-2'}>
+              <div className="hidden md:flex items-center gap-2">
                 <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact />
                 <Button
                   type="button"
@@ -2270,7 +2270,7 @@ export default function App() {
             <button
               type="button"
               onClick={() => setIsFilterDrawerOpen(true)}
-              className={`sm:hidden relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand transition-all cursor-pointer ${isIpad ? 'hidden' : ''}`}
+              className={`sm:hidden relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand transition-all cursor-pointer`}
               title="Open filters"
               aria-label="Open filters"
             >

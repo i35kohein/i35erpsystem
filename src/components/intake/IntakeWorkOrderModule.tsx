@@ -188,27 +188,11 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   return (
     <div className="space-y-3 flex min-h-0 flex-1 flex-col">
       {/* Top Header Banner & Actions */}
-      <div className="bg-white border border-line rounded-2xl p-5 shadow-xs space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-line">
-          <div className="module-subheader space-y-1">
-            <div className="flex items-center space-x-2.5">
-              <span className="p-2.5 bg-brand/10 text-brand rounded-xl">
-                <ClipboardList className="w-5 h-5" />
-              </span>
-              <div>
-                <h1 className="text-lg font-black text-ink">
-                  Work Intake
-                </h1>
-                <p className="text-xs text-muted">
-                  All active repair tickets
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="bg-white border border-line rounded-2xl p-3 sm:p-4 shadow-xs space-y-3">
+        {/* Title header removed 2026-08-10 (Ko Hein) — navbar already shows 'Work Intake';
+            this removes the dead space above the chips row */}
 
-        {/* Quick Stats Filter Chips — compact text pills */}
-        {/* Quick Stats Filter Chips + compact view/scan/simple controls (right-aligned) */}
+        {/* Quick Stats Filter Chips + compact Table/Grid controls (right-aligned) */}
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap gap-1.5">
           {[
