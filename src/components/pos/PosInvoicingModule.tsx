@@ -748,7 +748,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                 placeholder="Amount MMK"
                                 className="w-full bg-surface border border-line rounded-lg p-1.5 text-xs font-mono font-bold text-ink outline-none"
                               />
-                              <Button
+                              <Button variant="ghost"
                                 type="button"
                                 onClick={() => {
                                   const updated = [...splitPayments];
@@ -764,7 +764,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
                             {/* Remove Row Button if > 2 */}
                             {splitPayments.length > 2 && (
-                              <Button
+                              <Button variant="ghost"
                                 type="button"
                                 onClick={() => setSplitPayments(splitPayments.filter((_, i) => i !== idx))}
                                 className="p-1.5 text-danger hover:bg-danger/10 rounded-lg transition-colors cursor-pointer shrink-0"
@@ -805,7 +805,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           </div>
 
                           {splitPayments.length < 4 && (
-                            <Button
+                            <Button variant="ghost"
                               type="button"
                               onClick={() => {
                                 const currentTotal = splitPayments.reduce((acc, curr) => acc + (curr.amount || 0), 0);

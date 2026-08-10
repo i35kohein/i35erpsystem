@@ -45,7 +45,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                   </div>
 
                   {formData.shopLogoUrl && (
-                    <Button
+                    <Button variant="ghost"
                       type="button"
                       onClick={() => setFormData({ ...formData, shopLogoUrl: '' })}
                       className="text-xs font-bold text-red-500 hover:text-danger flex items-center space-x-1 cursor-pointer"
@@ -118,7 +118,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                     Quick Preset Icons / Badges:
                   </label>
                   <div className="flex flex-wrap gap-2">
-                    <Button
+                    <Button variant="ghost"
                       type="button"
                       onClick={() => setFormData({ 
                         ...formData, 
@@ -128,7 +128,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                     >
                       <span> Apple Metallic Badge</span>
                     </Button>
-                    <Button
+                    <Button variant="ghost"
                       type="button"
                       onClick={() => setFormData({ 
                         ...formData, 
@@ -138,7 +138,7 @@ const ShopTab: React.FC<ShopTabProps> = ({ formData, setFormData, handleSaveSett
                     >
                       <span>⚡ Tech Circuit Chip</span>
                     </Button>
-                    <Button
+                    <Button variant="ghost"
                       type="button"
                       onClick={() => setFormData({ 
                         ...formData, 

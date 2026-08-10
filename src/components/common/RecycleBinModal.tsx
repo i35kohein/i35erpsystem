@@ -92,7 +92,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
               </>
             )}
 
-            <Button
+            <Button variant="ghost"
               type="button"
               onClick={onClose}
               className="p-2 rounded-xl text-muted hover:text-ink hover:bg-line/50 transition-colors cursor-pointer"
@@ -118,7 +118,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
 
             {/* Mobile Restore All & Empty buttons */}
             <div className="flex sm:hidden items-center space-x-2 w-full justify-end">
-              <Button
+              <Button variant="ghost"
                 type="button"
                 onClick={onRestoreAll}
                 className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-success/10 text-success-deep border border-success/30 text-xs font-bold"
@@ -126,7 +126,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>Restore All</span>
               </Button>
-              <Button
+              <Button variant="ghost"
                 type="button"
                 onClick={() => setConfirmEmptyOpen(true)}
                 className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-danger/10 text-danger border border-danger/30 text-xs font-bold"

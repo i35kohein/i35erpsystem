@@ -237,7 +237,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
 
           {/* Action Buttons */}
           <div className="flex items-center space-x-2 pt-2 border-t border-line">
-            <Button
+            <Button variant="ghost"
               type="button"
               onClick={handleCopy}
               className="flex-1 py-3 bg-surface hover:bg-line text-ink font-extrabold text-xs rounded-2xl transition-all flex items-center justify-center space-x-1.5 cursor-pointer active:scale-95 border border-line-strong"

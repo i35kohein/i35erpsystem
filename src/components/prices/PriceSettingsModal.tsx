@@ -504,7 +504,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
               className="hidden"
               onChange={handleImportCsv}
             />
-            <Button
+            <Button variant="ghost"
               type="button"
               onClick={() => importInputRef.current?.click()}
               className="px-3 py-1.5 rounded-lg bg-brand-soft hover:bg-brand/15 text-brand font-bold text-xs transition-all flex items-center space-x-1.5 border border-brand/30 cursor-pointer"
@@ -513,14 +513,14 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
               <FileUp className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Import CSV</span>
             </Button>
-            <Button
+            <Button variant="ghost"
               onClick={handleExportJson}
               className="px-3 py-1.5 rounded-lg bg-surface hover:bg-line text-ink font-bold text-xs transition-all flex items-center space-x-1.5 border border-line cursor-pointer"
             >
               <Download className="w-3.5 h-3.5 text-brand" />
               <span className="hidden sm:inline">Export JSON</span>
             </Button>
-            <Button
+            <Button variant="ghost"
               onClick={async () => {
                 const ok = await confirmDialog({ title: 'Reset Price Catalog', message: 'Reset all price tables, folder settings, and categories back to factory defaults?', confirmLabel: 'Reset Catalog', danger: true });
                 if (!ok) return;
@@ -560,7 +560,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                       </label>
                       <div className="flex items-center space-x-2">
                         {renameModel && !isRenamingModel && (
-                          <Button
+                          <Button variant="ghost"
                             type="button"
                             onClick={() => {
                               setIsRenamingModel(true);
@@ -573,7 +573,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                           </Button>
                         )}
                         {deleteModel && catalog.length > 1 && (
-                          <Button
+                          <Button variant="ghost"
                             type="button"
                             onClick={handleDeleteModelClick}
                             className="text-xs font-bold text-danger hover:underline flex items-center space-x-1"
@@ -833,7 +833,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                                 >
                                   Save
                                 </Button>
-                                <Button
+                                <Button variant="ghost"
                                   type="button"
                                   onClick={() => setEditingCategoryKey(null)}
                                   className="px-2.5 py-1 bg-line text-ink rounded-md text-xs font-bold cursor-pointer"
@@ -853,7 +853,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                           <td className="py-2.5 px-4 text-right">
                             {!isEditing && (
                               <div className="flex items-center justify-end space-x-2">
-                                <Button
+                                <Button variant="ghost"
                                   type="button"
                                   onClick={() => handleStartEditingCategory(cat)}
                                   className="p-1.5 hover:bg-line text-brand rounded-lg transition-all cursor-pointer"
@@ -862,7 +862,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                                   <Edit3 className="w-3.5 h-3.5" />
                                 </Button>
                                 {deleteCategory && (
-                                  <Button
+                                  <Button variant="ghost"
                                     type="button"
                                     onClick={() => handleDeleteCategoryClick(cat.key, cat.label)}
                                     className="p-1.5 hover:bg-danger/10 text-danger rounded-lg transition-all cursor-pointer"
@@ -1008,7 +1008,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                                 {folder.name}
                               </h4>
                               {renameFolder && (
-                                <Button
+                                <Button variant="ghost"
                                   type="button"
                                   onClick={() => handleStartEditingFolder(folder)}
                                   className="text-brand hover:text-brand/80 p-0.5 cursor-pointer"

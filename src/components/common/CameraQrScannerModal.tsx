@@ -238,7 +238,7 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
               {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
             </Button>
 
-            <Button
+            <Button variant="ghost"
               onClick={() => {
                 stopScanner();
                 onClose();
@@ -429,7 +429,7 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
                   </div>
                 </div>
 
-                <Button
+                <Button variant="ghost"
                   onClick={handleResetScan}
                   className="px-2.5 py-1 bg-white border border-success/40 hover:bg-success/10 text-success-deep font-bold text-xs rounded-xl flex items-center space-x-1 cursor-pointer"
                 >

@@ -50,7 +50,7 @@ const RecycleTab: React.FC<RecycleTabProps> = ({ onOpenRecycleBin, archivedCount
             <div className="p-4 bg-surface rounded-xl border border-line space-y-1">
               <span className="text-xs text-muted font-bold block">Action Manager</span>
               {onOpenRecycleBin ? (
-                <Button
+                <Button variant="ghost"
                   type="button"
                   onClick={onOpenRecycleBin}
                   className="mt-2 text-xs font-bold text-brand hover:underline flex items-center space-x-1 cursor-pointer"

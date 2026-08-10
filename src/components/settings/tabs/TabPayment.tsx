@@ -28,7 +28,7 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ currentPaymentMethods, handleTo
             </div>
 
             <div className="flex items-center space-x-2 shrink-0">
-              <Button
+              <Button variant="ghost"
                 type="button"
                 onClick={() => handleSetAllPaymentMethodsState(true)}
                 className="px-3 py-1.5 bg-success/10 hover:bg-success/15 text-success-deep font-bold text-xs rounded-xl border border-success/30 transition-all flex items-center space-x-1 cursor-pointer"
@@ -44,7 +44,7 @@ const PaymentTab: React.FC<PaymentTabProps> = ({ currentPaymentMethods, handleTo
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Custom Gateway</span>
               </Button>
-              <Button
+              <Button variant="ghost"
                 type="button"
                 onClick={handleResetPaymentMethods}
                 className="px-3 py-1.5 bg-surface hover:bg-line text-ink font-bold text-xs rounded-xl border border-line-strong transition-all flex items-center space-x-1 cursor-pointer"

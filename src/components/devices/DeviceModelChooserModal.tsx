@@ -61,7 +61,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
 
           <div className="flex items-center space-x-2">
             {onOpenSettings && (
-              <Button
+              <Button variant="ghost"
                 type="button"
                 onClick={() => {
                   onClose();
@@ -73,7 +73,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                 <span className="hidden sm:inline">Folder Settings</span>
               </Button>
             )}
-            <Button
+            <Button variant="ghost"
               onClick={onClose}
               className="w-8 h-8 rounded-full text-muted hover:text-ink hover:bg-surface transition-colors cursor-pointer flex items-center justify-center"
             >
@@ -134,7 +134,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
               className="w-full pl-9 pr-4 py-2 bg-surface border border-line rounded-lg text-xs font-bold text-ink focus:outline-none "
             />
             {deviceSearchQuery && (
-              <Button
+              <Button variant="ghost"
                 type="button"
                 onClick={() => setDeviceSearchQuery('')}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-extrabold text-muted hover:text-ink"

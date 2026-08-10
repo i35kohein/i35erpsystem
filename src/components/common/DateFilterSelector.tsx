@@ -264,7 +264,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
               <Calendar className="w-4 h-4 text-brand" />
               <span className="font-extrabold text-xs text-ink">Select Custom Date Range</span>
             </div>
-            <Button
+            <Button variant="ghost"
               onClick={() => setShowCalendarModal(false)}
               className="p-1 rounded-full text-muted hover:text-ink hover:bg-surface transition-all cursor-pointer"
             >
@@ -274,7 +274,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
 
           {/* Month Navigation */}
           <div className="flex items-center justify-between mb-3 px-1">
-            <Button
+            <Button variant="ghost"
               type="button"
               onClick={handlePrevMonth}
               className="p-1.5 rounded-lg border border-line hover:bg-surface text-ink transition-all cursor-pointer"
@@ -284,7 +284,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
             <span className="font-bold text-xs text-ink">
               {monthNames[currentMonth]} {currentYear}
             </span>
-            <Button
+            <Button variant="ghost"
               type="button"
               onClick={handleNextMonth}
               className="p-1.5 rounded-lg border border-line hover:bg-surface text-ink transition-all cursor-pointer"
@@ -351,7 +351,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
               )}
             </div>
             {(tempStartDate || tempEndDate) && (
-              <Button
+              <Button variant="ghost"
                 type="button"
                 onClick={() => {
                   setTempStartDate(undefined);

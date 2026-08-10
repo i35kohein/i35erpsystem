@@ -366,7 +366,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                           </Button>
                         )}
                         {(cloudCustomerIds?.has(cust.id) ?? true) ? (
-                          <Button
+                          <Button variant="ghost"
                             type="button"
                             onClick={async (e) => {
                               e.stopPropagation();
@@ -414,7 +414,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                                       <span className={`px-1.5 py-0.5 text-xs font-bold rounded-full border ${getStatusBadgeStyle(wo.status)}`}>
                                         {wo.status}
                                       </span>
-                                      <Button
+                                      <Button variant="ghost"
                                         type="button"
                                         onClick={(e) => {
                                           e.stopPropagation();
@@ -484,7 +484,7 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                 <Users className="w-4 h-4 text-brand" />
                 <span>{editingCustomer ? 'Edit Customer Account' : 'Register New Customer Account'}</span>
               </h4>
-              <Button
+              <Button variant="ghost"
                 type="button"
                 onClick={() => setIsAddCustomerModalOpen(false)}
                 aria-label="Close add customer"

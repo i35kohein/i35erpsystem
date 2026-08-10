@@ -1805,7 +1805,7 @@ export default function App() {
             {/* System Settings Header Actions */}
             {activeTab === 'settings' && (
               <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
-                <Button
+                <Button variant="ghost"
                   type="button"
                   onClick={() => settingsResetRef.current?.()}
                   className="h-10 px-2.5 sm:px-3 bg-surface hover:bg-line text-ink font-bold text-xs rounded-xl border border-line-strong transition-all flex items-center space-x-1 sm:space-x-1.5 cursor-pointer shadow-2xs active:scale-95"
@@ -1856,7 +1856,7 @@ export default function App() {
                   className="w-full h-10 bg-surface text-xs text-ink placeholder-muted pl-7 pr-5 rounded-xl border border-line focus:bg-white focus:outline-none transition-all shadow-2xs"
                 />
                 {searchQuery && (
-                  <Button
+                  <Button variant="ghost"
                     onClick={() => setSearchQuery('')}
                     className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-muted hover:text-ink"
                   >

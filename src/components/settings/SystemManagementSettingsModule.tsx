@@ -883,7 +883,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             className="w-full bg-white border border-line text-xs text-ink placeholder-muted pl-8 pr-7 py-2 rounded-xl focus:outline-none transition-all"
           />
           {settingsTabQuery && (
-            <Button
+            <Button variant="ghost"
               type="button"
               onClick={() => setSettingsTabQuery('')}
               aria-label="Clear settings search"
@@ -1124,7 +1124,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                   </p>
                 </div>
               </div>
-              <Button
+              <Button variant="ghost"
                 type="button"
                 onClick={() => setTechModalOpen(false)}
                 className="p-1.5 text-muted hover:text-ink hover:bg-surface rounded-lg cursor-pointer"
@@ -1281,7 +1281,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             </div>
             <p className="text-xs text-muted">Remove this technician? Their active tickets stay.</p>
             <div className="flex items-center justify-end space-x-2 pt-2">
-              <Button
+              <Button variant="ghost"
                 type="button"
                 onClick={() => setDeleteConfirmId(null)}
                 className="px-3 py-1.5 bg-surface text-ink font-bold text-xs rounded-xl cursor-pointer"
@@ -1313,7 +1313,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                   {editingUser ? 'Edit User Account & Permissions' : 'Add New System User'}
                 </h3>
               </div>
-              <Button
+              <Button variant="ghost"
                 type="button"
                 onClick={() => setUserModalOpen(false)}
                 className="p-1 text-muted hover:text-ink rounded-lg cursor-pointer"

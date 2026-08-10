@@ -105,7 +105,7 @@ export const RightFilterDrawer: React.FC<RightFilterDrawerProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
           <p id={titleId.current} className="text-sm font-extrabold text-ink">{title}</p>
-          <Button
+          <Button variant="ghost"
             type="button"
             onClick={onClose}
             aria-label="Close filters"
@@ -121,7 +121,7 @@ export const RightFilterDrawer: React.FC<RightFilterDrawerProps> = ({
         {/* Sticky footer (P1) */}
         {onReset && (
           <div className="flex items-center gap-2 border-t border-line bg-white px-4 pt-2.5 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-            <Button
+            <Button variant="ghost"
               type="button"
               onClick={onReset}
               disabled={resetDisabled}

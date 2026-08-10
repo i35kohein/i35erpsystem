@@ -533,7 +533,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                   </p>
                 </div>
               </div>
-              <Button
+              <Button variant="ghost"
                 onClick={() => setIsLogModalOpen(false)}
                 className="p-1 rounded-lg text-muted hover:bg-surface hover:text-ink transition-colors"
               >
@@ -634,7 +634,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                   <label className="font-bold text-warning block">Customer Satisfaction Rating</label>
                   <div className="flex items-center space-x-2 pt-1">
                     {[1, 2, 3, 4, 5].map((star) => (
-                      <Button
+                      <Button variant="ghost"
                         key={star}
                         type="button"
                         onClick={() => setFormRating(star)}
@@ -673,7 +673,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
 
                 <div className="flex flex-wrap gap-1.5 pb-1">
                   {quickNotesTemplates.map((tmpl, idx) => (
-                    <Button
+                    <Button variant="ghost"
                       key={idx}
                       type="button"
                       onClick={() => setFormNotes(tmpl)}
@@ -743,7 +743,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                   </p>
                 </div>
               </div>
-              <Button
+              <Button variant="ghost"
                 onClick={() => setHistoryModalWo(null)}
                 className="p-1 rounded-lg text-muted hover:bg-surface hover:text-ink transition-colors"
               >
@@ -812,7 +812,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
             </div>
 
             <div className="pt-2 text-right">
-              <Button
+              <Button variant="ghost"
                 type="button"
                 onClick={() => setHistoryModalWo(null)}
                 className="px-4 py-2 bg-surface border border-line text-ink font-bold rounded-xl text-xs hover:bg-line transition-all cursor-pointer"

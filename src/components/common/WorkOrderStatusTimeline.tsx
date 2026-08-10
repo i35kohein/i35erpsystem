@@ -392,7 +392,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
               <Activity className="w-4 h-4 text-brand" />
               <span>Record Status Transition or Technical Audit Entry</span>
             </span>
-            <Button
+            <Button variant="ghost"
               type="button"
               onClick={() => setIsAddingLog(false)}
               className="text-xs text-muted hover:text-ink font-bold"
@@ -475,7 +475,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
           </div>
 
           <div className="flex justify-end space-x-2 pt-1">
-            <Button
+            <Button variant="ghost"
               type="button"
               onClick={() => setIsAddingLog(false)}
               className="px-3.5 py-1.5 bg-white border border-line hover:bg-surface text-ink font-bold text-xs rounded-xl transition-all cursor-pointer"

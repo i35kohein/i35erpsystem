@@ -220,7 +220,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
               )}
 
               {/* Sort Order Toggle */}
-              <Button
+              <Button variant="ghost"
                 type="button"
                 onClick={() => setSortOrder(prev => prev === 'NEWEST' ? 'OLDEST' : 'NEWEST')}
                 className="px-2.5 py-1 bg-white border border-line hover:border-brand text-ink font-bold text-xs rounded-xl flex items-center space-x-1 cursor-pointer transition-all shadow-2xs"
@@ -412,7 +412,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
 
                       {/* Printable Invoice Action */}
                       {onPrintInvoice && (
-                        <Button
+                        <Button variant="ghost"
                           type="button"
                           onClick={() => onPrintInvoice(wo)}
                           className="px-3 py-1.5 bg-white hover:bg-brand-soft border border-line hover:border-brand text-brand font-bold text-xs rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer shadow-2xs active:scale-95"
@@ -425,7 +425,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
 
                       {/* Expand Repair Logs Button */}
                       {(wo.repairLogs?.length || 0) > 0 && (
-                        <Button
+                        <Button variant="ghost"
                           type="button"
                           onClick={() => toggleExpandLogs(wo.id)}
                           className="px-2.5 py-1.5 bg-surface hover:bg-line text-ink font-bold text-xs rounded-xl transition-all flex items-center space-x-1 cursor-pointer"
@@ -454,7 +454,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
         <div className="p-8 text-center text-muted bg-surface rounded-2xl border border-dashed border-line">
           <Search className="w-6 h-6 text-muted/50 mx-auto mb-2" />
           <p className="font-semibold text-xs">No repair history matched your search filter.</p>
-          <Button
+          <Button variant="ghost"
             type="button"
             onClick={() => {
               setSearchTerm('');

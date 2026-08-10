@@ -121,7 +121,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                 </div>
               </div>
 
-              <Button
+              <Button variant="ghost"
                 type="button"
                 onClick={() => setActiveSubTab('shop')}
                 className="px-3 py-1.5 bg-surface hover:bg-line text-brand font-extrabold text-xs rounded-xl border border-line-strong transition-all flex items-center space-x-1 shrink-0 cursor-pointer"

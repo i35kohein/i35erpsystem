@@ -124,7 +124,7 @@ const TechniciansTab: React.FC<TechniciansTabProps> = ({ formData, setFormData, 
                       </div>
 
                       <div className="flex items-center space-x-1 shrink-0">
-                        <Button
+                        <Button variant="ghost"
                           type="button"
                           onClick={() => handleOpenEditTech(tech)}
                           className="p-1.5 text-muted hover:text-brand hover:bg-white rounded-lg transition-all cursor-pointer"
@@ -132,7 +132,7 @@ const TechniciansTab: React.FC<TechniciansTabProps> = ({ formData, setFormData, 
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </Button>
-                        <Button
+                        <Button variant="ghost"
                           type="button"
                           onClick={() => setDeleteConfirmId(tech.id)}
                           className="p-1.5 text-muted hover:text-danger hover:bg-white rounded-lg transition-all cursor-pointer"

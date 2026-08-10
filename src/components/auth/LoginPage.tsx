@@ -78,7 +78,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   placeholder="••••••••"
                   className="w-full rounded-xl border border-line-strong bg-white py-2.5 pl-10 pr-10 text-sm font-semibold text-ink outline-none transition "
                 />
-                <Button
+                <Button variant="ghost"
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-ink"

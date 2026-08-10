@@ -466,9 +466,9 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <Button type="button" onClick={clearConversation} disabled={isLoading} title="New conversation" aria-label="New conversation" className="p-2 text-muted hover:text-brand hover:bg-brand-soft rounded-lg disabled:opacity-40"><RotateCcw className="w-4 h-4" /></Button>
-            <Button type="button" onClick={onOpenAiSettings} title="AI provider settings" aria-label="AI provider settings" className="p-2 text-muted hover:text-brand hover:bg-brand-soft rounded-lg"><Settings2 className="w-4 h-4" /></Button>
-            <Button type="button" onClick={onClose} title="Close assistant" aria-label="Close assistant" className="p-2 text-muted hover:text-ink hover:bg-brand-soft rounded-lg"><X className="w-4 h-4" /></Button>
+            <Button variant="ghost" type="button" onClick={clearConversation} disabled={isLoading} title="New conversation" aria-label="New conversation" className="p-2 text-muted hover:text-brand hover:bg-brand-soft rounded-lg disabled:opacity-40"><RotateCcw className="w-4 h-4" /></Button>
+            <Button variant="ghost" type="button" onClick={onOpenAiSettings} title="AI provider settings" aria-label="AI provider settings" className="p-2 text-muted hover:text-brand hover:bg-brand-soft rounded-lg"><Settings2 className="w-4 h-4" /></Button>
+            <Button variant="ghost" type="button" onClick={onClose} title="Close assistant" aria-label="Close assistant" className="p-2 text-muted hover:text-ink hover:bg-brand-soft rounded-lg"><X className="w-4 h-4" /></Button>
           </div>
         </div>
 
@@ -479,7 +479,7 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
           </div>
           <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
           {QUICK_PROMPTS.map(({ label, prompt, icon: Icon }) => (
-            <Button key={label} type="button" disabled={isLoading} onClick={() => sendMessage(prompt)} className="px-2.5 py-1.5 bg-surface border border-line text-ink rounded-lg text-xs font-bold flex items-center gap-1.5 shrink-0 hover:border-brand hover:bg-brand-soft disabled:opacity-50">
+            <Button variant="ghost" key={label} type="button" disabled={isLoading} onClick={() => sendMessage(prompt)} className="px-2.5 py-1.5 bg-surface border border-line text-ink rounded-lg text-xs font-bold flex items-center gap-1.5 shrink-0 hover:border-brand hover:bg-brand-soft disabled:opacity-50">
               <Icon className="w-3.5 h-3.5 text-brand" /> {label}
             </Button>
           ))}
@@ -500,7 +500,7 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
                 {message.role === 'assistant' && <span className="block mb-1 text-xs font-bold uppercase tracking-wide text-muted">{message.source === 'ai' ? 'AI analysis' : 'Live ERP analysis'}</span>}
                 {message.content}
                 {message.role === 'assistant' && (
-                  <Button type="button" onClick={() => void copyMessage(message.content)} aria-label="Copy response" title="Copy response" className="absolute -right-8 top-1.5 p-1 text-muted opacity-0 group-hover:opacity-100 hover:text-brand">
+                  <Button variant="ghost" type="button" onClick={() => void copyMessage(message.content)} aria-label="Copy response" title="Copy response" className="absolute -right-8 top-1.5 p-1 text-muted opacity-0 group-hover:opacity-100 hover:text-brand">
                     <Copy className="w-3.5 h-3.5" />
                   </Button>
                 )}

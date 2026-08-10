@@ -363,13 +363,13 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                       <span className="text-xs text-success-deep font-extrabold">+{(rma.vendorCreditAmount || 0).toLocaleString()} {currency} Credit</span>
                     ) : rma.status === 'Shipped to Vendor' ? (
                       <div className="flex items-center gap-1.5">
-                        <Button
+                        <Button variant="ghost"
                           onClick={() => onUpdateRmaStatus(rma.id, 'Credit Approved', rma.unitCost * rma.quantity)}
                           className="px-2.5 py-1.5 bg-success/10 hover:bg-success/15 text-success-deep border border-success/20 text-xs font-bold rounded-lg cursor-pointer"
                         >
                           Approve Credit
                         </Button>
-                        <Button
+                        <Button variant="ghost"
                           onClick={async () => {
                             const ok = await confirmDialog({ title: 'Replacement Received', message: `Mark ${rma.partName} × ${rma.quantity} as Replacement Received? Stock will increase by ${rma.quantity}.`, confirmLabel: 'Mark Received' });
                             if (ok) onUpdateRmaStatus(rma.id, 'Replacement Received');
@@ -440,13 +440,13 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                     <td className="p-3 text-right">
                       {rma.status === 'Shipped to Vendor' && (
                         <div className="flex items-center justify-end gap-1.5">
-                          <Button
+                          <Button variant="ghost"
                             onClick={() => onUpdateRmaStatus(rma.id, 'Credit Approved', rma.unitCost * rma.quantity)}
                             className="px-2 py-1 bg-success/10 hover:bg-success/15 text-success-deep border border-success/20 text-xs font-bold rounded"
                           >
                             Approve Credit
                           </Button>
-                          <Button
+                          <Button variant="ghost"
                             onClick={async () => {
                               const ok = await confirmDialog({ title: 'Replacement Received', message: `Mark ${rma.partName} × ${rma.quantity} as Replacement Received? Stock will increase by ${rma.quantity}.`, confirmLabel: 'Mark Received' });
                               if (ok) onUpdateRmaStatus(rma.id, 'Replacement Received');
@@ -515,7 +515,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
 
                 {po.status !== 'Received' && onReceivePurchaseOrder && (
                   <div className="flex justify-end pt-1">
-                    <Button
+                    <Button variant="ghost"
                       type="button"
                       onClick={async () => {
                         const ok = await confirmDialog({ title: 'Receive Purchase Order', message: `Receive ${po.poNumber}? ${po.items.reduce((s, it) => s + it.quantity, 0)} unit(s) will be added to stock.`, confirmLabel: 'Receive & Restock' });
@@ -572,14 +572,14 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                       <span className="bg-surface text-ink border border-line px-2 py-0.5 rounded font-mono text-xs inline-block mt-0.5">{sup.code}</span>
                     </div>
                     <div className="flex items-center space-x-1">
-                      <Button
+                      <Button variant="ghost"
                         onClick={() => setEditingSupplier(sup)}
                         title="Edit Supplier"
                         className="p-1.5 text-muted hover:text-brand hover:bg-surface rounded-lg transition-colors cursor-pointer"
                       >
                         <Edit2 className="w-3.5 h-3.5" />
                       </Button>
-                      <Button
+                      <Button variant="ghost"
                         onClick={() => handleDeleteSupplierClick(sup.id, sup.name)}
                         title="Delete Supplier"
                         className="p-1.5 text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors cursor-pointer"
@@ -738,7 +738,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                 <Truck className="w-4 h-4 text-brand" />
                 <span>Register New Supplier Vendor</span>
               </h4>
-              <Button
+              <Button variant="ghost"
                 type="button"
                 onClick={() => setShowAddSupplierModal(false)}
                 className="text-muted hover:text-ink cursor-pointer"
@@ -834,7 +834,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                 <Truck className="w-4 h-4 text-brand" />
                 <span>Edit Supplier Vendor Profile</span>
               </h4>
-              <Button
+              <Button variant="ghost"
                 type="button"
                 onClick={() => setEditingSupplier(null)}
                 className="text-muted hover:text-ink cursor-pointer"
@@ -951,7 +951,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
               <div>
                 <div className="mb-1 flex items-center justify-between">
                   <label className="text-xs font-extrabold text-ink uppercase tracking-wider">Items</label>
-                  <Button
+                  <Button variant="ghost"
                     type="button"
                     onClick={() => setPoItems((prev) => [...prev, { partId: '', partName: '', quantity: 1, unitCost: 0 }])}
                     className="px-2 py-1 bg-brand/10 text-brand border border-brand/20 text-xs font-bold rounded-lg cursor-pointer"

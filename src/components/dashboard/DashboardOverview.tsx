@@ -1146,7 +1146,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
                 <Boxes className="w-4 h-4 text-brand" />
                 <span>Top Selling Parts</span>
               </h3>
-              <Button
+              <Button variant="ghost"
                 type="button"
                 onClick={() => onNavigateToTab('inventory')}
                 size="sm"

@@ -80,7 +80,7 @@ export const TechnicianDetailModal: React.FC<TechnicianDetailModalProps> = ({
               </div>
             </div>
           </div>
-          <Button
+          <Button variant="ghost"
             onClick={onClose}
             className="p-2 rounded-xl hover:bg-surface text-muted hover:text-ink transition-all cursor-pointer shrink-0"
             aria-label="Close"
@@ -175,7 +175,7 @@ export const TechnicianDetailModal: React.FC<TechnicianDetailModalProps> = ({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <h4 className="font-extrabold text-xs text-ink uppercase tracking-wider">Active Tickets ({activeOrders.length})</h4>
-              <Button
+              <Button variant="ghost"
                 onClick={() => { onClose(); onNavigateToTab('pipeline'); }}
                 className="text-xs font-bold text-brand hover:underline cursor-pointer"
               >

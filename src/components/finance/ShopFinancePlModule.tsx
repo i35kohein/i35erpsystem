@@ -1060,7 +1060,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                 <Receipt className="w-5 h-5 text-danger" />
                 <span>Record New Shop Operating Expense (OpEx)</span>
               </h3>
-              <Button
+              <Button variant="ghost"
                 type="button"
                 onClick={() => setShowAddExpenseModal(false)}
                 className="text-muted hover:text-ink"
@@ -1274,7 +1274,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
           </div>
 
           {pendingFundTickets.length > 0 && (
-            <Button
+            <Button variant="ghost"
               type="button"
               onClick={() => onSettleInventoryFund?.(pendingFundTickets.map((wo) => wo.id))}
               className="w-full p-3 bg-warning/10 border border-warning/30 rounded-xl text-xs font-extrabold text-warning hover:bg-warning/15 transition-all cursor-pointer flex items-center justify-center gap-1.5"

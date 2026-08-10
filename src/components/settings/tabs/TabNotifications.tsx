@@ -32,7 +32,7 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
               </div>
 
               <div className="flex items-center space-x-2 shrink-0">
-                <Button
+                <Button variant="ghost"
                   type="button"
                   onClick={handleResetNotificationTemplates}
                   className="px-3 py-2 bg-surface hover:bg-line text-ink font-bold text-xs rounded-xl transition-all border border-line-strong flex items-center space-x-1.5 cursor-pointer"
@@ -199,7 +199,7 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
                         <span className="px-2.5 py-1 bg-brand-soft text-brand font-mono text-xs font-bold rounded-lg border border-brand/30">
                           Key: {tmpl.key}
                         </span>
-                        <Button
+                        <Button variant="ghost"
                           type="button"
                           onClick={() => handleDeleteNotificationTemplate(tmpl.id)}
                           className="p-2 text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-all cursor-pointer"
@@ -224,7 +224,7 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
                           { tag: '{shopName}', label: 'Shop Name' },
                           { tag: '{shopPhone}', label: 'Shop Phone' },
                         ].map((v) => (
-                          <Button
+                          <Button variant="ghost"
                             key={v.tag}
                             type="button"
                             onClick={() => handleInsertVariable(tmpl.id, v.tag)}

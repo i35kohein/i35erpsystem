@@ -72,7 +72,7 @@ export const OfflineSyncStatusBadge: React.FC = () => {
         <div className="absolute right-0 top-9 z-[70] w-64 rounded-xl border border-line bg-white p-3 shadow-xl text-xs">
           <div className="flex items-center justify-between border-b border-line pb-2 mb-2">
             <span className="font-extrabold text-ink">Live Database Status</span>
-            <Button
+            <Button variant="ghost"
               type="button"
               onClick={() => setOpen(false)}
               aria-label="Close status panel"

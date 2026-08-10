@@ -234,7 +234,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
           </div>
 
           {onExitPortalMode && (
-            <Button
+            <Button variant="ghost"
               onClick={onExitPortalMode}
               className="flex items-center space-x-1.5 px-3 py-1.5 bg-surface hover:bg-line text-ink font-bold text-xs rounded-xl border border-line transition-all cursor-pointer"
             >
@@ -343,7 +343,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             )}
 
             {onExitPortalMode && (
-              <Button
+              <Button variant="ghost"
                 onClick={onExitPortalMode}
                 className="hidden sm:flex items-center space-x-1 px-3 py-1.5 bg-surface hover:bg-line text-ink font-bold rounded-xl border border-line transition-all cursor-pointer"
               >
@@ -816,7 +816,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             {currentWorkOrder.estimateStatus !== 'Approved' ? (
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-line">
                 {(currentWorkOrder.status === 'Receive' || currentWorkOrder.status === 'Pending') && (
-                  <Button
+                  <Button variant="ghost"
                     onClick={() => setRejectionModalOpen(true)}
                     className="w-full sm:w-auto px-5 py-3 bg-white border border-line text-danger hover:bg-danger/10 font-extrabold rounded-xl transition-all cursor-pointer active:scale-95 focus-visible:outline-none "
                   >
@@ -1032,7 +1032,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 <ThumbsDown className="w-5 h-5" />
                 <h3 className="font-extrabold text-base text-ink">Decline Estimate / Request Callback</h3>
               </div>
-              <Button
+              <Button variant="ghost"
                 onClick={() => setRejectionModalOpen(false)}
                 className="p-1 text-muted hover:text-ink rounded-lg"
               >
@@ -1148,7 +1148,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   <Printer className="w-3.5 h-3.5" />
                   <span>Print</span>
                 </Button>
-                <Button
+                <Button variant="ghost"
                   onClick={() => setPrintModalOpen(false)}
                   className="p-1 text-muted hover:text-ink"
                 >

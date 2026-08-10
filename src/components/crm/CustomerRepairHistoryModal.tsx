@@ -78,7 +78,7 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
             </div>
           </div>
 
-          <Button
+          <Button variant="ghost"
             onClick={onClose}
             className="p-2 text-muted hover:text-ink hover:bg-line rounded-xl transition-colors cursor-pointer"
           >

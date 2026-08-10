@@ -104,7 +104,7 @@ function DiagnosticSoftAlert({ tone, title, subtitle, body, noticeLabel, noticeB
   return (
     <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className={`bg-white border ${isWarn ? 'border-warning/30' : 'border-danger/30'} rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative`}>
-        <Button
+        <Button variant="ghost"
           type="button"
           onClick={onClose}
           className="absolute right-4 top-4 text-muted hover:text-ink p-1 rounded-lg hover:bg-surface transition-colors"
@@ -144,7 +144,7 @@ function DiagnosticSoftAlert({ tone, title, subtitle, body, noticeLabel, noticeB
             <span>{inspectLabel}</span>
           </Button>
 
-          <Button
+          <Button variant="ghost"
             type="button"
             onClick={onOverride}
             className="w-full sm:w-auto py-2.5 px-3 bg-surface hover:bg-line text-muted font-extrabold rounded-xl text-xs border border-line transition-all cursor-pointer"
@@ -603,7 +603,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
           )}
 
           {onClearAllWorkOrders && workOrders.length > 0 && (
-            <Button
+            <Button variant="ghost"
               type="button"
               onClick={async () => {
                 const ok = await confirmDialog({ title: 'Clear All Tickets', message: `Are you sure you want to clear all ${workOrders.length} tickets from the system?`, confirmLabel: 'Clear All Tickets', danger: true });
@@ -867,7 +867,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                             {tech?.name?.split(' ')[0] || 'Unassigned'}
                           </span>
                           {isTechnicianUser && myTechId ? (
-                            <Button
+                            <Button variant="ghost"
                               type="button"
                               onClick={() => handleQuickAssign(wo, myTechId)}
                               className="text-brand hover:underline flex items-center space-x-0.5 font-semibold cursor-pointer min-h-8"
@@ -909,7 +909,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                               <span>Checkout</span>
                             </Button>
                           ) : stage.id === 'Pending' ? (
-                            <Button
+                            <Button variant="ghost"
                               type="button"
                               onClick={() => {
                                 setNotifWo(wo);
@@ -922,7 +922,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                               <span>Notify</span>
                             </Button>
                           ) : (
-                            <Button
+                            <Button variant="ghost"
                               type="button"
                               onClick={() => setAddLogModalWo(wo)}
                               className="flex-1 py-1.5 px-1 bg-brand/10 hover:bg-brand/15 text-brand-deep font-extrabold rounded-lg border border-brand/20 text-center flex items-center justify-center space-x-0.5 truncate min-h-10"
@@ -1008,7 +1008,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
       {addLogModalWo && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border border-line-strong rounded-2xl max-w-md w-full p-6 space-y-4 text-xs shadow-2xl relative">
-            <Button onClick={() => setAddLogModalWo(null)} aria-label="Close repair log" className="absolute right-4 top-4 text-muted hover:text-ink">
+            <Button variant="ghost" onClick={() => setAddLogModalWo(null)} aria-label="Close repair log" className="absolute right-4 top-4 text-muted hover:text-ink">
               <X className="w-5 h-5" />
             </Button>
 
@@ -1043,7 +1043,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
       {moveStageModalWo && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border border-line-strong rounded-2xl max-w-sm w-full p-6 space-y-4 text-xs shadow-2xl relative">
-            <Button onClick={() => setMoveStageModalWo(null)} aria-label="Close move to stage" className="absolute right-4 top-4 text-muted hover:text-ink">
+            <Button variant="ghost" onClick={() => setMoveStageModalWo(null)} aria-label="Close move to stage" className="absolute right-4 top-4 text-muted hover:text-ink">
               <X className="w-5 h-5" />
             </Button>
 
@@ -1089,7 +1089,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
           cue until the far-right columns are reached. */}
       {!showAllStages ? (
         <div className="md:hidden">
-          <Button
+          <Button variant="ghost"
             type="button"
             onClick={() => setShowAllStages(true)}
             className="flex w-full items-center justify-center gap-1.5 rounded-full border border-dashed border-danger/30 bg-danger/10 px-3 py-2.5 text-xs font-extrabold text-danger transition-colors cursor-pointer active:scale-[0.99]"
@@ -1112,7 +1112,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
       {checkoutModalWo && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border border-line-strong rounded-2xl max-w-md w-full p-6 space-y-4 text-xs shadow-2xl relative">
-            <Button onClick={() => setCheckoutModalWo(null)} aria-label="Close checkout" className="absolute right-4 top-4 text-muted hover:text-ink">
+            <Button variant="ghost" onClick={() => setCheckoutModalWo(null)} aria-label="Close checkout" className="absolute right-4 top-4 text-muted hover:text-ink">
               <X className="w-5 h-5" />
             </Button>
 
@@ -1181,7 +1181,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                   Ticket <strong className="text-brand font-mono">{afterDiagModalWo.orderNumber}</strong> • {afterDiagModalWo.deviceModel}
                 </p>
               </div>
-              <Button onClick={() => setAfterDiagModalWo(null)} aria-label="Close post-diagnosis" className="!h-8 !min-h-8 w-8 px-0 text-muted hover:text-ink shrink-0">
+              <Button variant="ghost" onClick={() => setAfterDiagModalWo(null)} aria-label="Close post-diagnosis" className="!h-8 !min-h-8 w-8 px-0 text-muted hover:text-ink shrink-0">
                 <X className="w-4 h-4" />
               </Button>
             </div>

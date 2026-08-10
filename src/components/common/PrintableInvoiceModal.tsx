@@ -173,7 +173,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
           </div>
 
           <div className="flex items-center space-x-2">
-            <Button
+            <Button variant="ghost"
               type="button"
               onClick={handlePopoutPrint}
               title="Open print in new window if direct print is blocked"
@@ -190,7 +190,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
               <Printer className="w-4 h-4" />
               <span>Print Invoice</span>
             </Button>
-            <Button
+            <Button variant="ghost"
               type="button"
               onClick={onClose}
               className="p-1.5 text-muted hover:text-ink hover:bg-line rounded-xl transition-colors cursor-pointer"
@@ -477,7 +477,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
             Invoice ready for printing or digital distribution.
           </span>
           <div className="flex items-center space-x-2">
-            <Button
+            <Button variant="ghost"
               type="button"
               onClick={onClose}
               className="px-4 py-2 bg-white border border-line-strong text-ink font-semibold text-xs rounded-xl hover:bg-surface transition-colors cursor-pointer"

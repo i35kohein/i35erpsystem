@@ -156,7 +156,7 @@ const UsersTab: React.FC<UsersTabProps> = ({ users, currentUser, handleOpenAddUs
                         </div>
 
                         <div className="flex items-center space-x-1">
-                          <Button
+                          <Button variant="ghost"
                             type="button"
                             onClick={() => handleOpenEditUser(usr)}
                             className="p-1.5 text-brand hover:bg-brand-soft rounded-lg transition-colors cursor-pointer"
@@ -165,7 +165,7 @@ const UsersTab: React.FC<UsersTabProps> = ({ users, currentUser, handleOpenAddUs
                             <Edit2 className="w-4 h-4" />
                           </Button>
                           {usr.id !== 'usr-admin-1' && usr.id !== currentUser?.id && (
-                            <Button
+                            <Button variant="ghost"
                               type="button"
                               onClick={async () => {
                                 if (await confirmDialog({ title: 'Delete User Account', message: `Delete user account "${usr.name}"? This cannot be undone.`, confirmLabel: 'Delete User', danger: true })) {

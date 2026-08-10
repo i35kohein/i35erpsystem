@@ -705,7 +705,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                               </div>
                               <div className="flex items-center gap-1 shrink-0">
                                 <WarrantyPill warranty={item.warranty} size="md" />
-                                <Button
+                                <Button variant="ghost"
                                   type="button"
                                   onClick={() => handleToggleCartItem(item.categoryKey, item.label, item.price, item.warranty)}
                                   className="bg-transparent text-muted hover:text-danger hover:bg-transparent p-1 rounded transition-colors cursor-pointer shrink-0 focus-visible:outline-none "
@@ -803,7 +803,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                           </div>
                           <div className="flex items-center gap-1 shrink-0">
                             <WarrantyPill warranty={item.warranty} size="md" />
-                            <Button
+                            <Button variant="ghost"
                               type="button"
                               onClick={() => handleToggleCartItem(item.categoryKey, item.label, item.price, item.warranty)}
                               className="bg-transparent text-muted hover:text-danger hover:bg-transparent p-1 rounded transition-colors cursor-pointer shrink-0 focus-visible:outline-none "
@@ -1210,7 +1210,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
             </div>
 
             {cart.size > 0 && (
-              <Button
+              <Button variant="ghost"
                 type="button"
                 onClick={handleClearCart}
                 className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 bg-danger/10 hover:bg-danger/20 text-danger text-xs font-extrabold rounded-lg border border-danger/20 transition-all cursor-pointer"

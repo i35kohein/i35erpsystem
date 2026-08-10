@@ -125,7 +125,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
             className="h-12 w-full bg-transparent text-sm text-ink placeholder-muted focus:outline-none"
             aria-label="Search tickets, parts, customers"
           />
-          <Button type="button" onClick={onClose} aria-label="Close search" className="shrink-0 text-muted hover:text-ink cursor-pointer">
+          <Button variant="ghost" type="button" onClick={onClose} aria-label="Close search" className="shrink-0 text-muted hover:text-ink cursor-pointer">
             <X className="h-4 w-4" />
           </Button>
         </div>
