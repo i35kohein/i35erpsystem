@@ -259,15 +259,10 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
             </div>
 
             {filterStatus !== 'ALL' && (
+              /* Active-filter indicator only — no Clear button (Ko Hein 2026-08-10) */
               <div className="flex items-center space-x-1.5 text-xs bg-brand-soft text-brand px-3 py-1 rounded-lg border border-brand/20">
+                <span className="h-1.5 w-1.5 rounded-full bg-brand animate-pulse" aria-hidden="true" />
                 <span>Filter: <strong>{filterStatus}</strong></span>
-                <Button
-                  type="button"
-                  onClick={() => setFilterStatus('ALL')}
-                  className="text-xs font-bold underline hover:opacity-80 cursor-pointer ml-1"
-                >
-                  Clear
-                </Button>
               </div>
             )}
           </div>
