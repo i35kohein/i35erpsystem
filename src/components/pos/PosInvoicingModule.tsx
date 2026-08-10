@@ -39,9 +39,6 @@ import { PrintableInvoiceModal } from '../common/PrintableInvoiceModal';
 import { CustomerNotificationModal } from '../common/CustomerNotificationModal';
 import { toast } from '../../lib/toast';
 
-const isSameDeviceModel = (left: string, right: string) =>
-  left.trim().toLocaleLowerCase() === right.trim().toLocaleLowerCase();
-
 const normalizeText = (value: string) =>
   value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim();
 
@@ -325,7 +322,11 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     return ownerFiltered.filter((part) => {
       const matchesModel =
         !model ||
-        part.deviceCompatibility.some((device) => isSameDeviceModel(device, model));
+        part.deviceCompatibility.some((device) => {
+          const d = device.trim().toLowerCase();
+          const m = model.trim().toLowerCase();
+          return d === m || d.includes(m) || m.includes(d);
+        });
 
       const matchesCategory =
         matchedCategories.length === 0 ||
@@ -1826,8 +1827,14 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               {filteredInventoryParts.filter((part) => part.quantityInStock > 0).length === 0 ? (
                 <div className="p-8 text-center text-muted text-xs space-y-1">
                   <PackageCheck className="w-8 h-8 mx-auto opacity-40 text-brand" />
-                  <p className="font-extrabold text-ink">No parts in stock</p>
-                  <p>Add parts in Inventory first.</p>
+                  <p className="font-extrabold text-ink">
+                    {parts.length === 0 ? 'No parts in database' : 'No compatible parts in stock'}
+                  </p>
+                  <p>
+                    {parts.length === 0
+                      ? 'Add parts in Inventory module first.'
+                      : `Try a different device model or change the owner filter.`}
+                  </p>
                 </div>
               ) : (
                 filteredInventoryParts.filter((part) => part.quantityInStock > 0).map((part) => {

@@ -160,6 +160,11 @@ export const Navigation: React.FC<NavigationProps> = ({
           icon: Users,
         },
         {
+          id: 'mermaid',
+          label: 'Mermaid',
+          icon: Tag,
+        },
+        {
           id: 'settings',
           label: t('navSettings'),
           icon: Settings,

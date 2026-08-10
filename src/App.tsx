@@ -98,10 +98,11 @@ const QualityAssuranceModule = lazyWithRetry(() => import('./components/qa/Quali
 const PriceCatalogModule = lazyWithRetry(() => import('./components/prices/PriceCatalogModule').then((m) => ({ default: m.PriceCatalogModule })), 'PriceCatalogModule');
 const SystemManagementSettingsModule = lazyWithRetry(() => import('./components/settings/SystemManagementSettingsModule').then((m) => ({ default: m.SystemManagementSettingsModule })), 'SystemManagementSettingsModule');
 const CustomerFacingWebPortal = lazyWithRetry(() => import('./components/portal/CustomerFacingWebPortal').then((m) => ({ default: m.CustomerFacingWebPortal })), 'CustomerFacingWebPortal');
+const MermaidModule = lazyWithRetry(() => import('./components/mermaid/MermaidModule').then((m) => ({ default: m.MermaidModule })), 'MermaidModule');
 
 // Modal / tab modules below are also code-split (lazyWithRetry) so their chunks
 // only download when actually opened (AI chat, tag printing, recycle bin,
-// Cmd+K search, follow-up & finance tabs).
+// Cmd+K search, follow-up & finance tabs.
 const AiDiagnosticAssistantModal = lazyWithRetry(() => import('./components/ai/AiDiagnosticAssistantModal').then((m) => ({ default: m.AiDiagnosticAssistantModal })), 'AiDiagnosticAssistantModal');
 const DeviceTagPrinterModal = lazyWithRetry(() => import('./components/common/DeviceTagPrinterModal').then((m) => ({ default: m.DeviceTagPrinterModal })), 'DeviceTagPrinterModal');
 const RecycleBinModal = lazyWithRetry(() => import('./components/common/RecycleBinModal').then((m) => ({ default: m.RecycleBinModal })), 'RecycleBinModal');
@@ -195,7 +196,7 @@ export default function App() {
     // Restore tab from URL hash (#/pipeline) so deep links & reloads land correctly
     if (typeof window !== 'undefined') {
       const h = window.location.hash.replace(/^#\/?/, '');
-      if (h && ['dashboard','intake','simple-ticket','trello','qa','follow-up','price-catalog','pos','finance','inventory','suppliers','crm','settings','create-ticket'].includes(h)) return h;
+      if (h && ['dashboard','intake','simple-ticket','trello','qa','follow-up','price-catalog','pos','finance','inventory','suppliers','crm','settings','create-ticket','mermaid'].includes(h)) return h;
     }
     return 'dashboard';
   });
