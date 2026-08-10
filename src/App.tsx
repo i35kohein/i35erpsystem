@@ -603,6 +603,24 @@ export default function App() {
     })();
   }, []);
 
+  // Auto-select the matching role profile when a staff account logs in
+  // (multi-user auth: email → users collection record). Applied once per login so
+  // manual role switches via the sidebar keep working.
+  const appliedAuthEmailRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!authUser) {
+      appliedAuthEmailRef.current = null;
+      return;
+    }
+    const email = authUser.email.toLowerCase();
+    if (appliedAuthEmailRef.current === email) return;
+    const match = users.find((u) => u.email?.toLowerCase() === email);
+    if (match) {
+      appliedAuthEmailRef.current = email;
+      setCurrentUser(match);
+    }
+  }, [authUser, users]);
+
   const handleLogout = () => {
     const token = localStorage.getItem('i35_session_token');
     if (token) { fetch('/api/auth/logout', { method: 'POST', headers: { 'x-session-token': token } }).catch(() => {}); }

@@ -111,6 +111,16 @@ async function startServer() {
     const bb = Buffer.from(b);
     return ba.length === bb.length && timingSafeEqual(ba, bb);
   };
+  // Extra staff logins (server-only credentials file — never synced to clients).
+  // Format: { "<email>": { "passwordHash": "<sha256 hex>", "name": "...", "role": "..." } }
+  const CREDENTIALS_FILE = path.join(process.cwd(), "credentials.json");
+  const extraUsers: Record<string, { passwordHash: string; name: string; role?: string }> = (() => {
+    try {
+      return JSON.parse(fs.readFileSync(CREDENTIALS_FILE, "utf8"));
+    } catch {
+      return {};
+    }
+  })();
   app.post("/api/auth/login", async (req, res) => {
     const { email, password } = req.body || {};
     const authEmail = (process.env.AUTH_EMAIL || "").trim().toLowerCase();
@@ -143,7 +153,19 @@ async function startServer() {
       authTokens[hashToken(token)] = { email: authEmail, expiresAt: Date.now() + TOKEN_TTL_MS };
       saveAuthTokens();
       res.json({ success: true, token, user: { email: authEmail, name: "Ko Hein" } });
-    } else {
+      return;
+    }
+    // Staff logins from credentials.json (hashed passwords, server-only file).
+    const cred = extraUsers[String(email || "").trim().toLowerCase()];
+    if (cred && safeEqual(createHash("sha256").update(String(password || "")).digest("hex"), cred.passwordHash)) {
+      loginAttempts.delete(ip);
+      const token = randomBytes(24).toString("hex");
+      authTokens[hashToken(token)] = { email: String(email || "").trim().toLowerCase(), expiresAt: Date.now() + TOKEN_TTL_MS };
+      saveAuthTokens();
+      res.json({ success: true, token, user: { email: String(email || "").trim().toLowerCase(), name: cred.name || "Staff" } });
+      return;
+    }
+    {
       rec.count += 1;
       if (rec.count >= LOGIN_LOCKOUT_THRESHOLD) {
         rec.lockedUntil = now + LOGIN_LOCKOUT_MS;
