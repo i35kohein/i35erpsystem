@@ -363,6 +363,11 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
   const savedAmount = Math.max(0, baseTotal - finalEstimate);
   const repairCount = selectedRepairs.length;
   const overallDiscountPercent = baseTotal > 0 ? Math.round((savedAmount / baseTotal) * 100) : 0;
+  // Sales tax applied at intake (Ko Hein 2026-08-11) — totalAmount includes
+  // tax so POS/Finance agree (previously taxAmount was stored 0).
+  const taxRate = ((systemSettings?.taxPercentage ?? 6) || 0) / 100;
+  const taxAmountFor = (net: number) => Math.round(net * taxRate);
+  const totalWithTax = finalEstimate + taxAmountFor(finalEstimate);
 
   const updateRepairDiscount = (repairId: string, newDiscountPercent: number) => {
     setSelectedRepairs(prev => prev.map(item => {
@@ -494,8 +499,8 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       depositAmount: baseWorkOrder?.depositAmount || 0,
       discountAmount: 0,
       discountFormat: 'new',
-      taxAmount: baseWorkOrder?.taxAmount || 0,
-      totalAmount: finalEstimate,
+      taxAmount: isEditMode ? (baseWorkOrder?.taxAmount ?? taxAmountFor(finalEstimate)) : taxAmountFor(finalEstimate),
+      totalAmount: isEditMode && baseWorkOrder?.totalAmount ? baseWorkOrder.totalAmount : totalWithTax,
       isPaid: baseWorkOrder?.isPaid || false,
       paidAmount: baseWorkOrder?.paidAmount,
       paymentMethod: baseWorkOrder?.paymentMethod,

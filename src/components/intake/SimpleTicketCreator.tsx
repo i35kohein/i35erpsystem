@@ -102,6 +102,11 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   const baseTotal = form.repairs.reduce((sum, r) => sum + r.basePrice, 0);
   const finalEstimate = form.repairs.reduce((sum, r) => sum + r.finalPrice, 0);
   const savedAmount = Math.max(0, baseTotal - finalEstimate);
+  // Sales tax applied at intake (Ko Hein 2026-08-11): totalAmount includes
+  // tax so POS/Finance agree — the old code stored taxAmount: 0 and the POS
+  // summary showed the tax rate but a 0 amount.
+  const taxRate = ((systemSettings?.taxPercentage ?? 6) || 0) / 100;
+  const taxAmountFor = (net: number) => Math.round(net * taxRate);
 
   const closeRepairs = () => { setIsRepairsOpen(false); setRepairSearch(''); setRepairGroup('ALL'); };
 
@@ -313,12 +318,13 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
       lineItems: [...preservedLines, ...newLaborLines],
       // Financials: keep stored totals unless the repair list changed; parts
       // lines are preserved but never added to the customer total (audit B-1).
+      // Tax is included in totalAmount (Ko Hein 2026-08-11).
       subtotal: repairsChanged ? laborSubtotal : (existing?.subtotal ?? laborSubtotal),
       depositAmount: existing?.depositAmount || 0,
       discountAmount: existing?.discountAmount || 0,
       discountFormat: existing?.discountFormat || 'new',
-      taxAmount: existing?.taxAmount || 0,
-      totalAmount: repairsChanged ? laborFinal : (existing?.totalAmount ?? laborFinal),
+      taxAmount: repairsChanged ? taxAmountFor(laborFinal) : (existing?.taxAmount ?? taxAmountFor(laborFinal)),
+      totalAmount: repairsChanged ? laborFinal + taxAmountFor(laborFinal) : (existing?.totalAmount ?? laborFinal + taxAmountFor(laborFinal)),
       intakeChecklist: existing?.intakeChecklist || {
         powerOn: false,
         screenDisplay: false,
