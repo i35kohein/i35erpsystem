@@ -751,7 +751,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                         <button
                           type="button"
                           onClick={() => handleDiagnosticStatusChange(item.id, 'Pass')}
-                          className={`min-w-0 truncate text-left text-xs font-semibold transition-colors cursor-pointer hover:underline ${isPass ? 'text-success-deep' : isFail ? 'text-danger' : isCantTest ? 'text-warning' : 'text-muted hover:text-success-deep'}`}
+                          className={`!min-h-0 min-w-0 truncate text-left text-xs font-semibold leading-tight transition-colors cursor-pointer hover:underline ${isPass ? 'text-success-deep' : isFail ? 'text-danger' : isCantTest ? 'text-warning' : 'text-muted hover:text-success-deep'}`}
                           title={`Mark ${item.name} as Pass`}
                           aria-label={`Mark ${item.name} as Pass`}
                         >
@@ -762,7 +762,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           value={item.note || ''}
                           onChange={(e) => handleDiagnosticNoteChange(item.id, e.target.value)}
                           placeholder={isPass ? 'ok' : isFail ? 'issue…' : isCantTest ? 'note' : 'n/a'}
-                          className="ml-auto h-5 min-w-0 flex-1 rounded bg-transparent px-1 text-[11px] outline-none transition-colors placeholder:text-muted/60 focus:bg-[#d9f99d]/40"
+                          className="ml-auto !h-5 !min-h-5 min-w-0 flex-1 rounded bg-transparent px-1 text-[11px] outline-none transition-colors placeholder:text-muted/60 focus:bg-[#d9f99d]/40"
                         />
                       </div>
                     );
