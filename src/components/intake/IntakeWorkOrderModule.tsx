@@ -2,7 +2,6 @@ import React, { useEffect, useState, useMemo, lazy, Suspense } from 'react';
 import { createPortal } from 'react-dom';
 import { DateFilterState, filterByDateRange } from '../common/DateFilterSelector';
 
-import { timeAgoShort } from '../../utils/timeAgo';
 import { StatusBadge } from '../common/StatusBadge';
 import { PriorityBadge } from '../common/PriorityBadge';
 
@@ -466,19 +465,26 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
               </thead>
               <tbody className="divide-y divide-line">
                 {filteredOrders.map((wo) => {
-                  const createdDate = timeAgoShort(wo.createdAt);
                   const createdDateFull = new Date(wo.createdAt || Date.now()).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
+                    year: 'numeric',
+                  });
+                  const createdDateTime = new Date(wo.createdAt || Date.now()).toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
                   });
                   const totalAmount = wo.totalAmount || wo.subtotal || 0;
 
                   return (
                     <tr key={wo.id} className="hover:bg-surface transition-colors">
-                      {/* Ticket # & Date */}
+                      {/* Ticket # & Date — real date, not relative (Ko Hein 2026-08-11) */}
                       <td className="py-3 px-3">
                         <p className="font-mono font-black text-brand text-xs">{wo.orderNumber || wo.id}</p>
-                        <span className="text-xs text-muted" title={createdDateFull}>{createdDate}</span>
+                        <span className="text-xs text-muted" title={createdDateTime}>{createdDateFull}</span>
                       </td>
 
                       {/* Customer */}
