@@ -110,17 +110,18 @@ export function getLaborRevenue(wo: WorkOrder) {
     }, 0);
 }
 
-/** Total parts COST consumed on a ticket (non-labor lines × unitCost). */
+/** Total parts VALUE on a ticket at SELLING price (non-labor lines × unitPrice).
+ *  Ko Hein 2026-08-11: the repair price list already includes parts, so the
+ *  parts deduction in the POS System block and the commission base use the
+ *  SELLING price. Stock/expense bookkeeping still uses purchase cost. */
 export function getPartsCost(wo: WorkOrder) {
   return (wo.lineItems || [])
     .filter((i) => !i.isLabor)
-    .reduce((sum, i) => sum + (i.unitCost || 0) * (i.quantity || 1), 0);
+    .reduce((sum, i) => sum + (i.unitPrice || 0) * (i.quantity || 1), 0);
 }
 
-/** Commission base (Ko Hein 2026-08-11): profit AFTER parts cost =
- *  Amount Due (Customer) − Parts Cost. Commission % is applied to this, NOT
- *  to raw labor revenue — a ticket that used a 400k display pays commission
- *  only on what the shop actually keeps. */
+/** Commission base (Ko Hein 2026-08-11): profit AFTER parts (selling price) =
+ *  Amount Due (Customer) − Parts Amount. Commission % is applied to this. */
 export function getCommissionBase(wo: WorkOrder) {
   return Math.max(0, (wo.totalAmount || wo.subtotal || 0) - getPartsCost(wo));
 }

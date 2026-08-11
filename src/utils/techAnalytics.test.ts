@@ -134,9 +134,10 @@ describe('computeTechStats', () => {
     expect(stats.liveCompleted).toBe(1);
     expect(stats.revenue).toBe(200000);
     expect(stats.laborRevenue).toBe(50000);
-    // spareparts job → parts rate 10%; base = profit AFTER parts cost
-    // (Ko Hein 2026-08-11): totalAmount 200000 − partsCost 30000 = 170000 × 10%.
-    expect(stats.estCommission).toBe(17000);
+    // spareparts job → parts rate 10%; base = profit AFTER parts at SELLING
+    // price (Ko Hein 2026-08-11): totalAmount 200000 − parts selling 100000
+    // = 100000 × 10%.
+    expect(stats.estCommission).toBe(10000);
     // audit D-P3: successRate is windowed — the static tech.warrantyReturnCount
     // is all-time and no longer dilutes a perfect window. This ticket has no
     // follow-up Issue Reported / warrantyReturnAt → 100%.

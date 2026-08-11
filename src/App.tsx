@@ -1749,13 +1749,13 @@ export default function App() {
             const disc = li.lineItemDiscountPercent ? Math.round(lineTotal * (li.lineItemDiscountPercent / 100)) : 0;
             return s + lineTotal - disc;
           }, 0);
-        // Commission base = profit AFTER parts cost (Ko Hein 2026-08-11):
-        // Amount Due (Customer) − Parts Cost. A ticket that used a 400k display
-        // pays commission only on what the shop actually keeps — not on raw
-        // labor revenue. Mirrors POS estCommission + techAnalytics.
+        // Commission base = profit AFTER parts (Ko Hein 2026-08-11): Amount Due
+        // (Customer) − Parts at SELLING price — matches the POS System block,
+        // where the parts deduction is shown at selling price (the repair price
+        // list already includes parts). Mirrors POS estCommission + techAnalytics.
         const partsCost = (current.lineItems || [])
           .filter((li) => !li.isLabor)
-          .reduce((s, li) => s + (Number(li.unitCost) || 0) * (Number(li.quantity) || 1), 0);
+          .reduce((s, li) => s + (Number(li.unitPrice) || 0) * (Number(li.quantity) || 1), 0);
         const commissionBase = Math.max(0, (current.totalAmount || 0) - partsCost);
         const commissionAmt = Math.round(commissionBase * (rate / 100));
         if (commissionAmt > 0) {
