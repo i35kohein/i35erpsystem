@@ -5,6 +5,7 @@ import { toast } from '../../lib/toast';
 import { ModelRepairPrice } from '../../types/priceCatalog';
 import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
 import { DIAGNOSTIC_NAMES, getAvailableColorsForModel, getRealisticColorStyle } from './deviceData';
+import { nextOrderNumber as nextOrderNumberFrom, uniqueId } from '../../utils/orderNumbers';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
 
 interface SimpleTicketCreatorProps {
@@ -67,18 +68,10 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   const [isModelModalOpen, setIsModelModalOpen] = useState(false);
   // Same sequential order-number scheme as New Intake Ticket (max existing + 1,
   // prefix from Settings) so the two forms never collide or duplicate numbers.
+  // Shared module-scoped helper (audit B P2): strict WO-YYYY-NNNN regex + an
+  // issued-numbers Set that survives same-tick double creates.
   const ticketPrefix = systemSettings?.ticketPrefix || 'WO-';
-  const nextOrderNumber = (): string => {
-    const year = new Date().getFullYear();
-    const maxExistingNum = workOrders.reduce((max, wo) => {
-      const match = /(\d+)\s*$/.exec(wo.orderNumber || '');
-      return match ? Math.max(max, parseInt(match[1], 10)) : max;
-    }, 1000);
-    const usedNumbers = new Set(workOrders.map((w) => w.orderNumber).filter(Boolean));
-    let nextNum = maxExistingNum + 1;
-    while (usedNumbers.has(`${ticketPrefix}${year}-${nextNum}`)) nextNum += 1;
-    return `${ticketPrefix}${year}-${nextNum}`;
-  };
+  const nextOrderNumber = (): string => nextOrderNumberFrom(workOrders, ticketPrefix);
   // Reactive preview: recomputes once workOrders finish loading (useState would
   // freeze the initial empty-list value → off-by-one preview number).
   const previewNumber = useMemo(nextOrderNumber, [workOrders, ticketPrefix]);
@@ -212,7 +205,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
     }
     const now = new Date().toISOString();
     const diagnostics: DiagnosticItemResult[] = DIAGNOSTIC_NAMES.map((name, i) => ({
-      id: `simple-diag-${Date.now()}-${i}`,
+      id: `simple-diag-${uniqueId('diag')}-${i}`,
       name,
       status: form.checks[i].status as DiagnosticItemResult['status'],
       note: form.checks[i].note || undefined,
@@ -242,7 +235,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
       (li) => !li.isLabor || !formLaborNames.has(String(li.description || '').toLowerCase().trim())
     );
     const newLaborLines: WorkOrder['lineItems'] = form.repairs.map((r) => ({
-      id: `li-${r.id}`,
+      id: uniqueId('li'),
       description: r.name,
       unitCost: Math.round(r.basePrice * 0.5),
       unitPrice: r.basePrice,
@@ -272,7 +265,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
 
     const base: WorkOrder = {
       ...(existing || ({} as WorkOrder)), // preserve everything not edited below
-      id: editingId || `wo-${Date.now()}`,
+      id: editingId || uniqueId('wo'),
       orderNumber: editingId
         ? (workOrders.find((w) => w.id === editingId)?.orderNumber || nextOrderNumber())
         : nextOrderNumber(),

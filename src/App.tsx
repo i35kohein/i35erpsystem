@@ -625,12 +625,27 @@ export default function App() {
     (async () => {
       try {
         const res = await fetch('/api/auth/verify', { method: 'POST', headers: { 'x-session-token': token } });
-        if (!res.ok) {
+        // Audit G P2: verify must check the response BODY (success flag), not
+        // just HTTP status — and the server re-stamps the current user info so
+        // a stale localStorage role/permission snapshot can't outlive a server
+        // change (role revoked / user deleted / email updated).
+        let body: { success?: boolean; user?: { email?: string; name?: string } } = {};
+        try { body = await res.json(); } catch { /* non-JSON */ }
+        if (!res.ok || !body.success) {
           localStorage.removeItem('i35_session_token');
           localStorage.removeItem('i35_session_user');
           setAuthUser(null);
           setActiveUserId(null);
           notifyAccountChanged();
+          return;
+        }
+        if (body.user?.email) {
+          const freshUser = {
+            email: body.user.email,
+            name: body.user.name || '',
+          };
+          localStorage.setItem('i35_session_user', JSON.stringify(freshUser));
+          setAuthUser(freshUser);
         }
       } catch { /* offline: keep session */ }
       setAuthChecking(false);
@@ -715,6 +730,10 @@ export default function App() {
   // completed orders trickle through the queue without API bursts. The verdict
   // is persisted as repairTypeAI; failures get aiClassifyFailed (no retry loop).
   const aiClassifyInFlight = useRef<Set<string>>(new Set());
+  // In-flight guard for handleMarkPaid (audit B/D P2): synchronously prevents
+  // same-tick double-charge races that could double-consume stock, duplicate
+  // expenses and double-accrue commission.
+  const markingPaidRef = useRef<Set<string>>(new Set());
   useEffect(() => {
     const provider = systemSettings.aiProvider || 'local';
     if (provider === 'local') return;
@@ -729,19 +748,29 @@ export default function App() {
     );
     if (!candidate) return;
     aiClassifyInFlight.current.add(candidate.id);
+    const candidateId = candidate.id;
     classifyRepairWithAI(candidate, systemSettings).then(({ verdict, configError }) => {
-      aiClassifyInFlight.current.delete(candidate.id);
+      aiClassifyInFlight.current.delete(candidateId);
       // Config issue (no API key on server) — do NOT mark the ticket failed:
       // it stays eligible for retry once a key is configured (audit E-4). Only
       // genuine provider failures get aiClassifyFailed.
       if (configError && !verdict) return;
-      const updated = {
-        ...candidate,
-        repairTypeAI: verdict || undefined,
-        aiClassifyFailed: verdict ? false : true,
-      };
-      setWorkOrders((prev) => prev.map((w) => (w.id === candidate.id ? updated : w)));
-      saveDocument('workOrders', updated).catch(reportSaveError);
+      // Fresh-merge write (audit B P2): merge into the CURRENT state instead
+      // of saving the pre-fetch snapshot — a QA/status/line-item edit that
+      // landed while the network call was in flight must not be clobbered.
+      setWorkOrders((prev) =>
+        prev.map((w) => {
+          if (w.id !== candidateId) return w;
+          const updated = {
+            ...w,
+            repairTypeAI: verdict || undefined,
+            aiClassifyFailed: verdict ? false : true,
+            updatedAt: new Date().toISOString(),
+          };
+          saveDocument('workOrders', updated).catch(reportSaveError);
+          return updated;
+        })
+      );
     });
   }, [workOrders, systemSettings.aiProvider, systemSettings.aiModel, systemSettings.aiApiKey, systemSettings.aiBaseUrl]);
 
@@ -767,21 +796,30 @@ export default function App() {
     let failed = 0;
     for (const wo of pending) {
       aiClassifyInFlight.current.add(wo.id);
+      const woId = wo.id;
       const { verdict, configError } = await classifyRepairWithAI(wo, systemSettings);
-      aiClassifyInFlight.current.delete(wo.id);
+      aiClassifyInFlight.current.delete(woId);
       // Config issue → leave the ticket un-flagged so it can be retried later
       // (audit E-4); do not burn a permanent aiClassifyFailed on it.
       if (configError && !verdict) {
         failed++;
         continue;
       }
-      const updated = {
-        ...wo,
-        repairTypeAI: verdict || undefined,
-        aiClassifyFailed: verdict ? false : true,
-      };
-      setWorkOrders((prev) => prev.map((w) => (w.id === wo.id ? updated : w)));
-      saveDocument('workOrders', updated).catch(reportSaveError);
+      // Fresh-merge write (audit B P2): merge into current state so a ticket
+      // edited while the scan was running keeps its newer fields.
+      setWorkOrders((prev) =>
+        prev.map((w) => {
+          if (w.id !== woId) return w;
+          const updated = {
+            ...w,
+            repairTypeAI: verdict || undefined,
+            aiClassifyFailed: verdict ? false : true,
+            updatedAt: new Date().toISOString(),
+          };
+          saveDocument('workOrders', updated).catch(reportSaveError);
+          return updated;
+        })
+      );
       if (verdict) classified++;
       else failed++;
       await new Promise((r) => setTimeout(r, 200));
@@ -1173,12 +1211,22 @@ export default function App() {
     }
     // Preserve independently managed inventory data when another settings
     // draft (for example the print or shop form) is saved from an older draft.
+    // Truthiness-aware merge (audit E P2): `??` only guards undefined, so a
+    // STALE EMPTY ARRAY from an older/offline snapshot would wipe the
+    // categories/tiers/bins another admin added. Only non-empty incoming
+    // values replace the current list.
     const mergedSettings: SystemSettings = {
       ...systemSettings,
       ...newSettings,
-      inventoryCategories: newSettings.inventoryCategories ?? systemSettings.inventoryCategories,
-      inventoryQualityTiers: newSettings.inventoryQualityTiers ?? systemSettings.inventoryQualityTiers,
-      inventoryBinNames: newSettings.inventoryBinNames ?? systemSettings.inventoryBinNames,
+      inventoryCategories: newSettings.inventoryCategories?.length
+        ? newSettings.inventoryCategories
+        : systemSettings.inventoryCategories,
+      inventoryQualityTiers: newSettings.inventoryQualityTiers?.length
+        ? newSettings.inventoryQualityTiers
+        : systemSettings.inventoryQualityTiers,
+      inventoryBinNames: newSettings.inventoryBinNames?.length
+        ? newSettings.inventoryBinNames
+        : systemSettings.inventoryBinNames,
     };
     setSystemSettings(mergedSettings);
     saveDocument('systemSettings', { id: 'global', ...mergedSettings }).catch(reportSaveError);
@@ -1601,14 +1649,27 @@ export default function App() {
   };
 
   const handleMarkPaid = (workOrder: WorkOrder, paymentMethod: string, completedAtIso?: string) => {
+    // Synchronous idempotency guard (audit B/D P2): a same-tick double call
+    // (or a parallel call from another surface) must not consume stock twice,
+    // duplicate the Inventory Consumption expense, double-accrue commission or
+    // double-count the customer totals. The render-closure isPaid check alone
+    // races — two invocations can both observe isPaid === false.
+    if (markingPaidRef.current.has(workOrder.id)) {
+      addToast(`${workOrder.orderNumber || workOrder.id} is already being processed — no double charge.`, 'info', 'Already Paid');
+      return;
+    }
     const current = workOrders.find((w) => w.id === workOrder.id) || workOrder;
-    // Idempotency guard: a double click / race must not consume stock twice or
-    // create duplicate Inventory Consumption expenses for the same ticket.
     if (current.isPaid) {
       addToast(`${current.orderNumber} is already paid — nothing to record.`, 'info', 'Already Paid');
       return;
     }
-    handleConsumeInventoryFromWorkOrder(current, paymentMethod);
+    markingPaidRef.current.add(workOrder.id);
+    try {
+      handleConsumeInventoryFromWorkOrder(current, paymentMethod);
+    } catch (err) {
+      markingPaidRef.current.delete(workOrder.id);
+      throw err;
+    }
     setWorkOrders((prev) =>
       prev.map((w) => {
         if (w.id === workOrder.id) {
@@ -1703,6 +1764,8 @@ export default function App() {
       }
     }
     addToast(`Payment recorded for ${workOrder.orderNumber} via ${paymentMethod} — Moved to Takeout`, 'success', 'Payment Received');
+    // Release the in-flight guard once the state writes have been queued.
+    window.setTimeout(() => markingPaidRef.current.delete(workOrder.id), 1500);
   };
 
 
@@ -1747,6 +1810,12 @@ export default function App() {
             ...w,
             postRepairChecklist: undefined,
             afterRepairPhotos: undefined,
+            // Audit P2 (QA gate bypass): the old diagnostics from the previous
+            // inspection were left in place, so the ticket could be marked
+            // Finished again without a re-inspection (checkIsAfterDiagnosticCompleted
+            // saw the stale Pass/Fail entries). Clear them too — the re-opened
+            // ticket must pass the full post-repair gate again.
+            afterDiagnostics: undefined,
             updatedAt: new Date().toISOString(),
           };
           saveDocument('workOrders', updated).catch(reportSaveError);
@@ -1858,19 +1927,19 @@ export default function App() {
 
   const currentTab = getTabInfo(activeTab);
 
-  if (!isOnline) {
-    return (
-      <main className="flex min-h-dvh w-full items-center justify-center bg-surface p-5 text-ink">
-        <section className="w-full max-w-sm rounded-2xl border border-line bg-white p-6 text-center shadow-sm">
-          <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
-            <AlertTriangle className="h-5 w-5" />
-          </div>
-          <h1 className="text-base font-bold">Internet connection required</h1>
-          <p className="mt-1 text-xs leading-5 text-faint">This ERP uses live Supabase data only. Reconnect to open the system.</p>
-        </section>
-      </main>
-    );
-  }
+  // Transient offline (audit B P2): keep the app mounted and state alive — a
+  // flaky connection (shop Wi-Fi / hotspot) must not destroy half-entered
+  // forms. The offline queue handles writes; we only show a non-blocking
+  // banner. The full-screen block below is replaced by the banner overlay
+  // rendered inside the layout (see OfflineBanner), so mid-form state survives.
+  const offlineBanner = !isOnline ? (
+    <div className="pointer-events-none fixed inset-x-0 top-0 z-[95] flex justify-center pt-3">
+      <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-4 py-2 text-xs font-bold text-amber-700 shadow-md">
+        <AlertTriangle className="h-3.5 w-3.5" />
+        <span>Offline — changes are queued locally and will sync when reconnected</span>
+      </div>
+    </div>
+  ) : null;
 
   if (authChecking) {
     return (
@@ -1886,6 +1955,8 @@ export default function App() {
 
   return (
     <div className="basic-ui h-screen h-dvh w-full bg-surface text-ink font-sans antialiased flex flex-col lg:flex-row overflow-hidden selection:bg-brand selection:text-white">
+      {/* Transient-offline banner (audit B P2) — app stays mounted, state kept */}
+      {offlineBanner}
       {/* Persistent Left Sidebar Navigation */}
       <Navigation
         activeTab={activeTab}

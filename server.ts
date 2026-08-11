@@ -116,7 +116,21 @@ async function startServer() {
   const LOGIN_LOCKOUT_THRESHOLD = Number(process.env.LOGIN_LOCKOUT_THRESHOLD) || 10; // failures before lockout
   const loginAttempts = new Map<string, { count: number; firstAt: number; lockedUntil: number }>();
   const getClientIp = (req: express.Request) =>
-    (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() || req.ip || req.socket?.remoteAddress || "unknown";
+    // Audit G P2: X-Forwarded-For is client-spoofable — anyone can rotate the
+    // header and bypass the per-IP login rate limit/lockout. Only honor it
+    // when the request actually came through a trusted proxy (behind Caddy on
+    // the VPS the socket peer is 127.0.0.1/172.18.x.x), otherwise use the
+    // socket address directly.
+    (() => {
+      const peer = req.socket?.remoteAddress || "unknown";
+      const peerClean = peer.replace(/^::ffff:/, "");
+      const isTrustedProxy = peerClean === "127.0.0.1" || peerClean === "::1" || peerClean.startsWith("172.") || peerClean.startsWith("10.");
+      if (isTrustedProxy) {
+        const fwd = (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim();
+        if (fwd) return fwd;
+      }
+      return peerClean || "unknown";
+    })();
   const safeEqual = (a: string, b: string) => {
     const ba = Buffer.from(a);
     const bb = Buffer.from(b);
@@ -204,6 +218,16 @@ async function startServer() {
       res.status(401).json({ success: false, error: "Valid session token required." });
       return;
     }
+    // Audit E/G P2: only the owner/admin may kick every other device. The
+    // server knows the admin email from env — check the token's session email
+    // against it. (The client UI already hides the button for non-admins, but
+    // the endpoint must enforce it too.)
+    const sessionEmail = (authTokens[hashToken(token)]?.email || "").toLowerCase().trim();
+    const adminEmail = (process.env.AUTH_EMAIL || "").toLowerCase().trim();
+    if (!adminEmail || sessionEmail !== adminEmail) {
+      res.status(403).json({ success: false, error: "Only the admin can sign out all devices." });
+      return;
+    }
     const currentHash = hashToken(token);
     const keep = authTokens[currentHash] ? { [currentHash]: authTokens[currentHash] } : {};
     const revoked = Object.keys(authTokens).length - Object.keys(keep).length;
@@ -216,7 +240,11 @@ async function startServer() {
   app.post("/api/auth/verify", (req, res) => {
     const token = (req.headers["x-session-token"] as string) || "";
     if (isTokenValid(token)) {
-      res.json({ success: true });
+      // Return the current session user (audit G P2) so the client can
+      // re-hydrate authUser from the server instead of trusting stale
+      // localStorage role/permission snapshots.
+      const entry = authTokens[hashToken(token)];
+      res.json({ success: true, user: { email: entry?.email || "", name: entry?.email || "" } });
     } else {
       res.status(401).json({ success: false });
     }

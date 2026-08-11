@@ -23,12 +23,18 @@ echo "==> [1b/4] Precompressing assets (Brotli)..."
 node scripts/precompress.mjs
 
 echo "==> [2/4] Uploading to VPS ($HOST:$REMOTE_DIR)..."
+# Backup the CURRENT live release to dist.prev BEFORE overwriting it (audit G
+# P2): the old code ran the backup after rsync, so dist.prev was a copy of the
+# NEW build — rollback.sh could never restore the previous good release.
+ssh -i "$KEY" "$HOST" "cd $REMOTE_DIR && rm -rf dist.prev && cp -r dist dist.prev"
+
 # NOTE: `dist` without trailing slash => lands in $REMOTE_DIR/dist (server expects that layout)
 rsync -az -e "ssh -i $KEY" dist package.json package-lock.json "$HOST:$REMOTE_DIR/"
 
 echo "==> [3/4] Installing deps + restarting service..."
-# Keep the previous release for instant rollback (rollback.sh swaps dist.prev).
-ssh -i "$KEY" "$HOST" "cd $REMOTE_DIR && rm -rf dist.prev && cp -r dist dist.prev && npm install --omit=dev --no-audit --no-fund && systemctl restart i35erp"
+# dist.prev already holds the previous release (backed up before upload), so
+# rollback.sh can swap it back if the new build fails the health check.
+ssh -i "$KEY" "$HOST" "cd $REMOTE_DIR && npm install --omit=dev --no-audit --no-fund && systemctl restart i35erp"
 
 echo "==> [4/4] Health check..."
 sleep 3

@@ -62,6 +62,7 @@ import {
   DIAGNOSTIC_NAMES,
   getRealisticColorStyle } from './deviceData';
 import { toast } from '../../lib/toast';
+import { nextOrderNumber as nextOrderNumberFrom, uniqueId } from '../../utils/orderNumbers';
 
 export interface TicketPrefillData {
   model?: string;
@@ -429,20 +430,10 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
     const prefix = systemSettings?.ticketPrefix || 'WO-';
     const baseWorkOrder = editWorkOrder || null;
     // Order numbers must never be reused: derive from the highest existing number
-    // across ALL tickets (never the filtered list length) + current year.
-    const maxExistingNum = workOrders.reduce((max, wo) => {
-      const match = /(\d+)\s*$/.exec(wo.orderNumber || '');
-      return match ? Math.max(max, parseInt(match[1], 10)) : max;
-    }, 1000);
-    // Collision guard: two rapid submits (or a stale workOrders prop) could compute
-    // the same next number. Keep bumping until the number is actually unused.
-    let nextNum = maxExistingNum + 1;
-    const usedNumbers = new Set(workOrders.map((wo) => wo.orderNumber).filter(Boolean));
-    const year = new Date().getFullYear();
-    while (usedNumbers.has(`${prefix}${year}-${nextNum}`)) {
-      nextNum += 1;
-    }
-    const newOrderNumber = baseWorkOrder?.orderNumber || `${prefix}${year}-${nextNum}`;
+    // across ALL tickets (never the filtered list length) + current year. Shared
+    // module-scoped helper (audit B P2): strict WO-YYYY-NNNN regex + issued-numbers
+    // Set so same-tick double submits and legacy wo-<timestamp> ids can't collide.
+    const newOrderNumber = baseWorkOrder?.orderNumber || nextOrderNumberFrom(workOrders, prefix);
     const nowIso = new Date().toISOString();
     const formattedDate = new Date().toLocaleString('en-US', {
       month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true
@@ -450,9 +441,9 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
 
     const newWorkOrder: WorkOrder = {
       ...(baseWorkOrder || {}),
-      id: baseWorkOrder?.id || `wo-${Date.now()}`,
+      id: baseWorkOrder?.id || uniqueId('wo'),
       orderNumber: newOrderNumber,
-      customerId: baseWorkOrder?.customerId || (matchedCustomer ? matchedCustomer.id : `cust-${Date.now()}`),
+      customerId: baseWorkOrder?.customerId || (matchedCustomer ? matchedCustomer.id : uniqueId('cust')),
       customerName,
       customerPhone,
       customerEmail: baseWorkOrder?.customerEmail || '',

@@ -86,12 +86,26 @@ async function isStaleQueuedWrite(collectionName: string, queued: { id: string }
 }
 
 export async function fetchCloudCollection<T>(collectionName: string): Promise<T[]> {
-  const { data, error } = await supabase
-    .from('erp_records')
-    .select('data')
-    .eq('collection_name', collectionName);
-  if (error) throw error;
-  return (data || []).map((row) => row.data as T);
+  // Audit G P2: without a limit, Supabase truncates silently at 1000 rows per
+  // request — a shop with more parts/tickets/customers would silently lose
+  // the tail of every collection. Order by updated_at so a bounded fetch still
+  // returns the most-recently-changed rows, and page through with an offset.
+  const pageSize = 1000;
+  const rows: any[] = [];
+  let offset = 0;
+  for (;;) {
+    const { data, error } = await supabase
+      .from('erp_records')
+      .select('data')
+      .eq('collection_name', collectionName)
+      .order('updated_at', { ascending: true })
+      .range(offset, offset + pageSize - 1);
+    if (error) throw error;
+    rows.push(...(data || []));
+    if (!data || data.length < pageSize) break;
+    offset += pageSize;
+  }
+  return rows.map((row) => row.data as T);
 }
 
 function browserOnline() {
