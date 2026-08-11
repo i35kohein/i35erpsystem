@@ -482,7 +482,9 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       lineItems: selectedRepairs.map(r => ({
         id: `li-${r.id}`,
         description: r.name,
-        unitCost: Math.round(r.basePrice * 0.5),
+        // Audit (Ko Hein 2026-08-11): no fabricated 50% cost on labor lines —
+        // real parts cost enters via POS when the actual part used is added.
+        unitCost: 0,
         unitPrice: r.basePrice,
         quantity: 1,
         isLabor: true,

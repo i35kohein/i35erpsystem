@@ -134,16 +134,18 @@ describe('computeTechStats', () => {
     expect(stats.liveCompleted).toBe(1);
     expect(stats.revenue).toBe(200000);
     expect(stats.laborRevenue).toBe(50000);
-    // spareparts job → parts rate 10%
-    expect(stats.estCommission).toBe(5000);
+    // spareparts job → parts rate 10%; base = profit AFTER parts cost
+    // (Ko Hein 2026-08-11): totalAmount 200000 − partsCost 30000 = 170000 × 10%.
+    expect(stats.estCommission).toBe(17000);
     // audit D-P3: successRate is windowed — the static tech.warrantyReturnCount
     // is all-time and no longer dilutes a perfect window. This ticket has no
     // follow-up Issue Reported / warrantyReturnAt → 100%.
     expect(stats.successRate).toBe(100);
   });
   it('est commission uses hardware rate for micro-soldering', () => {
-    const wo = baseWo({ status: 'Finished', serviceType: 'Micro-Soldering', lineItems: [{ id: 'l1', description: 'Board', isLabor: true, unitCost: 0, unitPrice: 100000, quantity: 1 }] });
+    const wo = baseWo({ status: 'Finished', serviceType: 'Micro-Soldering', totalAmount: 100000, subtotal: 100000, lineItems: [{ id: 'l1', description: 'Board', isLabor: true, unitCost: 0, unitPrice: 100000, quantity: 1 }] });
     const stats = computeTechStats([wo], tech({ commissionRateParts: 10, commissionRateHardware: 15 }));
+    // base = totalAmount 100000 − partsCost 0 = 100000 × 15%
     expect(stats.estCommission).toBe(15000);
   });
   it('no fabricated numbers when no data', () => {

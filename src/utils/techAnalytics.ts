@@ -110,6 +110,21 @@ export function getLaborRevenue(wo: WorkOrder) {
     }, 0);
 }
 
+/** Total parts COST consumed on a ticket (non-labor lines × unitCost). */
+export function getPartsCost(wo: WorkOrder) {
+  return (wo.lineItems || [])
+    .filter((i) => !i.isLabor)
+    .reduce((sum, i) => sum + (i.unitCost || 0) * (i.quantity || 1), 0);
+}
+
+/** Commission base (Ko Hein 2026-08-11): profit AFTER parts cost =
+ *  Amount Due (Customer) − Parts Cost. Commission % is applied to this, NOT
+ *  to raw labor revenue — a ticket that used a 400k display pays commission
+ *  only on what the shop actually keeps. */
+export function getCommissionBase(wo: WorkOrder) {
+  return Math.max(0, (wo.totalAmount || wo.subtotal || 0) - getPartsCost(wo));
+}
+
 export interface TechStats {
   tech: Technician;
   activeOrders: WorkOrder[];
@@ -154,11 +169,13 @@ export function computeTechStats(workOrders: WorkOrder[], tech: Technician): Tec
   const commissionRateParts = tech.commissionRateParts ?? tech.commissionRate ?? 0;
   const commissionRateHardware = tech.commissionRateHardware ?? tech.commissionRate ?? 0;
   const hasCommission = commissionRateParts > 0 || commissionRateHardware > 0;
+  // Commission base = profit AFTER parts cost (Ko Hein 2026-08-11) — see
+  // getCommissionBase. Applied per ticket so the dashboard matches POS/Finance.
   const estCommission = hasCommission && finishedOrders.length > 0
     ? Math.round(
         finishedOrders.reduce((sum, wo) => {
           const rate = getRepairType(wo) === 'hardware' ? commissionRateHardware : commissionRateParts;
-          return sum + getLaborRevenue(wo) * (rate / 100);
+          return sum + getCommissionBase(wo) * (rate / 100);
         }, 0)
       )
     : null;

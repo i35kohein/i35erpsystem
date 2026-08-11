@@ -383,13 +383,11 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
         ? tech.commissionRateHardware || tech.commissionRate || 0
         : tech.commissionRateParts || tech.commissionRate || 0;
     if (rate <= 0) return 0;
-    const laborRevenue = laborItems.reduce((s, li) => {
-      const lineTotal = (Number(li.unitPrice) || 0) * (Number(li.quantity) || 0);
-      const disc = li.lineItemDiscountPercent ? Math.round(lineTotal * (li.lineItemDiscountPercent / 100)) : 0;
-      return s + lineTotal - disc;
-    }, 0);
-    return Math.round(laborRevenue * (rate / 100));
-  }, [selectedWo, technicians, laborItems]);
+    // Commission base = profit AFTER parts cost (Ko Hein 2026-08-11):
+    // Amount Due (Customer) − Parts Cost. Mirrors App.tsx handleMarkPaid.
+    const commissionBase = Math.max(0, (selectedWo.totalAmount || 0) - partsCostTotal);
+    return Math.round(commissionBase * (rate / 100));
+  }, [selectedWo, technicians, partsCostTotal]);
   const perItemDiscountTotal = useMemo(
     () => laborItems.reduce((s, li) => {
       if (!li.lineItemDiscountPercent) return s;

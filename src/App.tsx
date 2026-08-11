@@ -1740,7 +1740,8 @@ export default function App() {
             ? tech.commissionRateHardware || tech.commissionRate || 0
             : tech.commissionRateParts || tech.commissionRate || 0;
 
-        // Commission base = labor revenue (repair items after per-item discounts)
+        // Labor revenue (kept for the payout record display — commission itself
+        // is based on profit after parts cost below).
         const laborRevenue = (current.lineItems || [])
           .filter((li) => li.isLabor)
           .reduce((s, li) => {
@@ -1748,8 +1749,15 @@ export default function App() {
             const disc = li.lineItemDiscountPercent ? Math.round(lineTotal * (li.lineItemDiscountPercent / 100)) : 0;
             return s + lineTotal - disc;
           }, 0);
-
-        const commissionAmt = Math.round(laborRevenue * (rate / 100));
+        // Commission base = profit AFTER parts cost (Ko Hein 2026-08-11):
+        // Amount Due (Customer) − Parts Cost. A ticket that used a 400k display
+        // pays commission only on what the shop actually keeps — not on raw
+        // labor revenue. Mirrors POS estCommission + techAnalytics.
+        const partsCost = (current.lineItems || [])
+          .filter((li) => !li.isLabor)
+          .reduce((s, li) => s + (Number(li.unitCost) || 0) * (Number(li.quantity) || 1), 0);
+        const commissionBase = Math.max(0, (current.totalAmount || 0) - partsCost);
+        const commissionAmt = Math.round(commissionBase * (rate / 100));
         if (commissionAmt > 0) {
           const now = new Date();
           const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -1760,6 +1768,7 @@ export default function App() {
               ...existingPayout,
               totalTicketsClosed: (existingPayout.totalTicketsClosed || 0) + 1,
               totalLaborRevenue: (existingPayout.totalLaborRevenue || 0) + laborRevenue,
+              totalPartsCost: (existingPayout.totalPartsCost || 0) + partsCost,
               commissionAmount: (existingPayout.commissionAmount || 0) + commissionAmt,
               netPayout: ((existingPayout.netPayout || 0) + commissionAmt),
             };
@@ -1773,6 +1782,7 @@ export default function App() {
               period,
               totalTicketsClosed: 1,
               totalLaborRevenue: laborRevenue,
+              totalPartsCost: partsCost,
               commissionRatePercent: rate,
               commissionAmount: commissionAmt,
               netPayout: commissionAmt,
