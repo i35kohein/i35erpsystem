@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, lazy, Suspense } from 'react';
-import { ChevronDown, Search, BadgePercent, ShieldCheck, Camera, X, Sparkles } from 'lucide-react';
+import { ChevronDown, Search, BadgePercent, ShieldCheck, Camera, X, Sparkles, CheckCircle2, Printer, List } from 'lucide-react';
 import { WorkOrder, DiagnosticItemResult, AppleDeviceCategory, SelectedRepairItem, SystemSettings, CustomerType, RepairPriority, Technician } from '../../types';
 import { toast } from '../../lib/toast';
 import { ModelRepairPrice } from '../../types/priceCatalog';
@@ -93,6 +93,9 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [savedFlash, setSavedFlash] = useState(false);
   const [lastSavedWo, setLastSavedWo] = useState<WorkOrder | null>(null);
+  // Full success screen after save (Ko Hein 2026-08-11) — same as Create
+  // Ticket: Print / Work Intake / Create Another.
+  const [showSuccess, setShowSuccess] = useState(false);
   const [isModelModalOpen, setIsModelModalOpen] = useState(false);
   // Same sequential order-number scheme as New Intake Ticket (max existing + 1,
   // prefix from Settings) so the two forms never collide or duplicate numbers.
@@ -221,6 +224,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
     setForm({ ...EMPTY_FORM, date: new Date().toISOString().slice(0, 10) });
     setEditingId(null);
     setMatchedCustomer(null);
+    setShowSuccess(false);
   };
 
   // Load an existing ticket into this form for editing (Ko Hein 2026-08-10).
@@ -430,6 +434,9 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
     onSaveWorkOrder(base);
     setLastSavedWo(base);
     setSavedFlash(true);
+    // Success screen (Ko Hein 2026-08-11): same choice as Create Ticket —
+    // Print / Work Intake / Create Another.
+    setShowSuccess(true);
     // Same as New Intake Ticket Registration: print goes through the Sticker Tag
     // Voucher modal (onSelectPrintTag) — no raw window.print (Ko Hein 2026-08-10).
     if (!editingId) resetForm();
@@ -456,6 +463,80 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
 
   return (
     <div className="mx-auto max-w-4xl space-y-4">
+      {/* Success screen (Ko Hein 2026-08-11) — mirrors Create Ticket: after
+          save offer Print / Work Intake / Create Another. */}
+      {showSuccess && lastSavedWo && (
+        <div className="bg-white border border-line-strong rounded-2xl p-8 shadow-sm space-y-6 text-center">
+          <div className="w-16 h-16 bg-success/10 text-success-deep rounded-2xl flex items-center justify-center mx-auto shadow-inner">
+            <CheckCircle2 className="w-8 h-8" />
+          </div>
+
+          <div className="space-y-1">
+            <span className="font-mono text-sm font-extrabold text-brand px-3 py-1 bg-brand-soft rounded-full">
+              {lastSavedWo.orderNumber}
+            </span>
+            <h1 className="text-2xl font-black text-ink pt-2">
+              {editingId ? 'Repair Ticket Successfully Updated!' : 'Repair Ticket Successfully Created!'}
+            </h1>
+            <p className="text-xs text-muted">
+              {editingId ? 'Updated' : 'Registered'} {lastSavedWo.deviceModel} for {lastSavedWo.customerName}
+            </p>
+          </div>
+
+          <div className="bg-surface p-5 rounded-2xl border border-line-strong text-left text-xs space-y-3 max-w-md mx-auto">
+            <div className="flex justify-between items-center">
+              <span className="text-muted">Customer Phone:</span>
+              <span className="font-semibold text-ink">{lastSavedWo.customerPhone || '—'}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-muted">Device:</span>
+              <span className="font-semibold text-ink">{lastSavedWo.deviceModel} · {lastSavedWo.deviceColor || '—'}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-muted">Warranty:</span>
+              <span className="font-semibold text-ink">{lastSavedWo.warrantyLabel || `${lastSavedWo.warrantyDays || 90} Days Standard Warranty`}</span>
+            </div>
+            <div className="flex justify-between items-center border-t border-line-strong pt-2.5">
+              <span className="text-muted font-bold">Total Estimate:</span>
+              <span className="font-black text-brand text-base">{(lastSavedWo.totalAmount || 0).toLocaleString()} {systemSettings?.currencySymbol || 'MMK'}</span>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            {!editingId && onSelectPrintTag && (
+              <button
+                type="button"
+                onClick={() => onSelectPrintTag(lastSavedWo)}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl border border-line-strong bg-white px-5 py-2.5 text-xs font-black text-ink transition hover:bg-surface cursor-pointer"
+              >
+                <Printer className="w-4 h-4 text-brand shrink-0" />
+                <span className="truncate">Print Sticker Tag Voucher</span>
+              </button>
+            )}
+
+            {onNavigateToTab && (
+              <button
+                type="button"
+                onClick={() => onNavigateToTab('intake')}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-xs font-black text-white transition hover:bg-brand-deep cursor-pointer"
+              >
+                <List className="w-4 h-4 shrink-0" />
+                <span className="truncate">{editingId ? 'Back to Work Intake' : 'View in Work Orders List'}</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={resetForm}
+              className="w-full sm:w-auto rounded-xl border border-line-strong bg-white px-5 py-2.5 text-xs font-black text-ink transition hover:bg-surface cursor-pointer"
+            >
+              {editingId ? 'Discard Changes' : '+ Create Another Ticket'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {!showSuccess && (<>
       {/* Edit existing ticket — reload it into this form (Ko Hein 2026-08-10) */}
       {editableTickets.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
@@ -1220,6 +1301,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
           />
         </Suspense>
       )}
+      </>)}
     </div>
   );
 };
