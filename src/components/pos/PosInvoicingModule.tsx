@@ -178,6 +178,8 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   // Add Inventory Part modal mode (Ko Hein 2026-08-11): Auto = exact device
   // + repair-category filtered suggestions; Manual = every part for the device.
   const [posPartMode, setPosPartMode] = useState<'auto' | 'manual'>('auto');
+  // Manual-mode search query (Ko Hein 2026-08-11).
+  const [posPartSearch, setPosPartSearch] = useState('');
   const [selectedWoId, setSelectedWoId] = useState<string>(workOrders[0]?.id || '');
   const isIpad = useIsIpad();
   const [paymentMethod, setPaymentMethod] = useState<string>(activePaymentMethods[0]?.name || 'Cash');
@@ -2167,7 +2169,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
           role="presentation"
         >
           <div
-            className="bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md max-h-[85dvh] sm:max-h-[520px] p-5 space-y-4 overflow-y-auto shadow-xl animate-i35-slide-up"
+            className="bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md h-[80dvh] sm:h-[520px] flex flex-col p-4 space-y-3 shadow-xl animate-i35-slide-up"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -2187,47 +2189,59 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               </Button>
             </div>
 
-            {/* Owner filter — APP / KZH (Ko Hein 2026-08-10) */}
-            <div className="flex items-center gap-1">
+            {/* Owner filter — compact text-only pills (Ko Hein 2026-08-11) */}
+            <div className="flex items-center gap-2">
               {(['ALL', 'APP', 'KZH'] as const).map((owner) => (
-                <Button
+                <button
                   key={owner}
                   type="button"
-                  variant="ghost"
                   onClick={() => setPosOwner(owner)}
-                  className={`rounded-lg px-2 py-1 text-xs font-bold transition-colors cursor-pointer ${
-                    posOwner === owner ? 'bg-ink text-white shadow-2xs' : 'bg-surface text-muted hover:bg-line hover:text-ink'
+                  className={`text-[11px] font-extrabold tracking-wide uppercase transition-colors cursor-pointer ${
+                    posOwner === owner ? 'text-ink underline underline-offset-4 decoration-2' : 'text-muted hover:text-ink'
                   }`}
                 >
                   {owner}
-                </Button>
+                </button>
               ))}
+              <span className="ml-auto text-[11px] font-semibold text-muted truncate">
+                {selectedWo?.deviceModel || 'Device'}
+              </span>
             </div>
 
             {/* Sub-tabs: Auto (exact device + repair category) / Manual (all for device) — Ko Hein 2026-08-11 */}
-            <div className="flex items-center gap-1 bg-surface rounded-xl p-1">
+            <div className="flex items-center gap-1 bg-surface rounded-lg p-0.5">
               {([['auto', 'Auto'], ['manual', 'Manual']] as const).map(([mode, label]) => (
-                <Button
+                <button
                   key={mode}
                   type="button"
-                  variant="ghost"
                   onClick={() => setPosPartMode(mode)}
-                  className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-extrabold transition-colors cursor-pointer ${
-                    posPartMode === mode ? 'bg-white text-ink shadow-2xs' : 'text-muted hover:text-ink'
+                  className={`flex-1 rounded-md px-2 py-1 text-xs font-extrabold transition-colors cursor-pointer ${
+                    posPartMode === mode ? 'bg-white text-ink shadow-sm' : 'text-muted hover:text-ink'
                   }`}
                 >
                   {label}
-                </Button>
+                </button>
               ))}
             </div>
 
+            {/* Manual-mode search (Ko Hein 2026-08-11) */}
+            {posPartMode === 'manual' && (
+              <div className="relative">
+                <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
+                <input
+                  type="text"
+                  value={posPartSearch}
+                  onChange={(e) => setPosPartSearch(e.target.value)}
+                  placeholder="Search parts…"
+                  className="w-full rounded-lg border border-line bg-white pl-8 pr-3 py-1.5 text-xs font-semibold text-ink outline-none transition-colors placeholder:text-muted focus:border-brand/40"
+                />
+              </div>
+            )}
+
             {/* Part list — Auto mode (exact device + repair category) */}
             {posPartMode === 'auto' && (
-            <div>
-              <p className="text-[11px] font-bold text-muted mb-1.5">
-                {selectedWo?.deviceModel || 'Device'} · matched repair category — tap a part
-              </p>
-              <div className="space-y-1.5">
+            <div className="min-h-0 flex-1 overflow-y-auto -mx-1 px-1">
+              <div className="space-y-1">
               {filteredInventoryParts.filter((part) => part.quantityInStock > 0).length === 0 ? (
                 <div className="p-8 text-center text-muted text-xs space-y-1">
                   <PackageCheck className="w-8 h-8 mx-auto opacity-40 text-ink" />
@@ -2245,34 +2259,29 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   const isSelected = inventoryPartId === part.id;
                   const low = part.quantityInStock <= part.reorderPoint;
                   return (
-                    <Button
+                    <button
                       key={part.id}
                       type="button"
-                      variant="outline"
                       onClick={() => setInventoryPartId(part.id)}
-                      className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border text-left text-ink transition-all cursor-pointer focus:outline-none active:scale-[0.99] ${
+                      className={`w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg border text-left text-ink transition-all cursor-pointer focus:outline-none ${
                         isSelected ? 'border-ink bg-surface ring-1 ring-ink/10' : 'border-line bg-white hover:bg-surface'
                       }`}
                     >
-                      <div className="min-w-0">
-                        <p className="text-xs font-extrabold text-ink truncate">{part.name}</p>
-                        <p className={`text-[11px] font-semibold ${low ? 'text-warning' : 'text-muted'}`}>
-                          <span
-                            className={`mr-1.5 rounded px-1 py-px text-[9px] font-black uppercase ${
-                              (part.owner || 'APP') === 'KZH'
-                                ? 'bg-success/10 text-success-deep border border-success/30'
-                                : 'bg-surface text-ink border border-line'
-                            }`}
-                          >
-                            {part.owner || 'APP'}
-                          </span>
-                          {part.category} · Stock: {part.quantityInStock}{low ? ' — Low' : ''}
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-bold text-ink truncate">{part.name}</p>
+                        <p className={`text-[10px] font-semibold ${low ? 'text-warning' : 'text-muted'}`}>
+                          {part.category} · {part.owner || 'APP'} · Stock: {part.quantityInStock}{low ? ' — Low' : ''}
                         </p>
                       </div>
-                      <span className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${isSelected ? 'border-success' : 'border-line-strong'}`}>
-                        {isSelected && <span className="w-2 h-2 rounded-full bg-success" />}
-                      </span>
-                    </Button>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-[11px] font-black text-brand tabular-nums">
+                          {Number(part.sellingPrice || 0).toLocaleString()} {currency}
+                        </span>
+                        <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-success' : 'border-line-strong'}`}>
+                          {isSelected && <span className="w-2 h-2 rounded-full bg-success" />}
+                        </span>
+                      </div>
+                    </button>
                   );
                 })
               )}
@@ -2280,55 +2289,54 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
             </div>
             )}
 
-            {/* Manual mode — every part for the exact device model, any category */}
+            {/* Manual mode — every part for the exact device model, any category, searchable */}
             {posPartMode === 'manual' && (
-            <div>
-              <p className="text-[11px] font-bold text-muted mb-1.5">
-                {selectedWo?.deviceModel || 'Device'} · all inventory parts — tap a part
-              </p>
-              <div className="space-y-1.5">
-              {filteredInventoryParts.filter((part) => part.quantityInStock > 0).length === 0 ? (
-                <div className="p-8 text-center text-muted text-xs space-y-1">
-                  <PackageCheck className="w-8 h-8 mx-auto opacity-40 text-ink" />
-                  <p className="font-extrabold text-ink">No parts for this device</p>
-                  <p>Add parts in Inventory module first, or change the owner filter.</p>
-                </div>
-              ) : (
-                filteredInventoryParts.filter((part) => part.quantityInStock > 0).map((part) => {
+            <div className="min-h-0 flex-1 overflow-y-auto -mx-1 px-1">
+              <div className="space-y-1">
+              {(() => {
+                const q = posPartSearch.trim().toLowerCase();
+                const list = filteredInventoryParts.filter(
+                  (part) => part.quantityInStock > 0 && (!q || part.name.toLowerCase().includes(q) || part.category.toLowerCase().includes(q))
+                );
+                if (list.length === 0) {
+                  return (
+                    <div className="p-8 text-center text-muted text-xs space-y-1">
+                      <PackageCheck className="w-8 h-8 mx-auto opacity-40 text-ink" />
+                      <p className="font-extrabold text-ink">{posPartSearch ? 'No parts match your search' : 'No parts for this device'}</p>
+                      <p>Add parts in Inventory module first, or change the owner filter.</p>
+                    </div>
+                  );
+                }
+                return list.map((part) => {
                   const isSelected = inventoryPartId === part.id;
                   const low = part.quantityInStock <= part.reorderPoint;
                   return (
-                    <Button
+                    <button
                       key={part.id}
                       type="button"
-                      variant="outline"
                       onClick={() => setInventoryPartId(part.id)}
-                      className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border text-left text-ink transition-all cursor-pointer focus:outline-none active:scale-[0.99] ${
+                      className={`w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg border text-left text-ink transition-all cursor-pointer focus:outline-none ${
                         isSelected ? 'border-ink bg-surface ring-1 ring-ink/10' : 'border-line bg-white hover:bg-surface'
                       }`}
                     >
-                      <div className="min-w-0">
-                        <p className="text-xs font-extrabold text-ink truncate">{part.name}</p>
-                        <p className={`text-[11px] font-semibold ${low ? 'text-warning' : 'text-muted'}`}>
-                          <span
-                            className={`mr-1.5 rounded px-1 py-px text-[9px] font-black uppercase ${
-                              (part.owner || 'APP') === 'KZH'
-                                ? 'bg-success/10 text-success-deep border border-success/30'
-                                : 'bg-surface text-ink border border-line'
-                            }`}
-                          >
-                            {part.owner || 'APP'}
-                          </span>
-                          {part.category} · Stock: {part.quantityInStock}{low ? ' — Low' : ''}
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-bold text-ink truncate">{part.name}</p>
+                        <p className={`text-[10px] font-semibold ${low ? 'text-warning' : 'text-muted'}`}>
+                          {part.category} · {part.owner || 'APP'} · Stock: {part.quantityInStock}{low ? ' — Low' : ''}
                         </p>
                       </div>
-                      <span className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${isSelected ? 'border-success' : 'border-line-strong'}`}>
-                        {isSelected && <span className="w-2 h-2 rounded-full bg-success" />}
-                      </span>
-                    </Button>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-[11px] font-black text-brand tabular-nums">
+                          {Number(part.sellingPrice || 0).toLocaleString()} {currency}
+                        </span>
+                        <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-success' : 'border-line-strong'}`}>
+                          {isSelected && <span className="w-2 h-2 rounded-full bg-success" />}
+                        </span>
+                      </div>
+                    </button>
                   );
-                })
-              )}
+                });
+              })()}
               </div>
             </div>
             )}
