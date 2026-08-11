@@ -373,6 +373,11 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   const laborItems = useMemo(() => displayLineItems.filter((li) => li.isLabor), [displayLineItems]);
   const partsItems = useMemo(() => displayLineItems.filter((li) => !li.isLabor && li.partId), [displayLineItems]);
   const partsCostTotal = useMemo(() => partsItems.reduce((s, li) => s + (li.unitCost || 0) * li.quantity, 0), [partsItems]);
+  // Parts at SELLING price (internal inventory margin view, Ko Hein 2026-08-11):
+  // the customer does NOT pay parts separately (repair price includes parts),
+  // but the shop still earns the markup between selling and purchase price.
+  const partsSellTotal = useMemo(() => partsItems.reduce((s, li) => s + (li.unitPrice || 0) * li.quantity, 0), [partsItems]);
+  const partsProfitTotal = useMemo(() => Math.max(0, partsSellTotal - partsCostTotal), [partsSellTotal, partsCostTotal]);
   // Estimated technician commission for this ticket — mirrors App.tsx handleMarkPaid
   // (Ko Hein 2026-08-11): commission base = labor revenue after per-item discounts.
   const estCommission = useMemo(() => {
@@ -1450,6 +1455,15 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                             <tr>
                               <td className="border border-line px-2 py-1.5 text-muted">Parts Cost (deducted)</td>
                               <td className="border border-line px-2 py-1.5 text-right font-mono text-warning tabular-nums">-{partsCostTotal.toLocaleString()} {currency}</td>
+                            </tr>
+                          )}
+                          {partsItems.length > 0 && (
+                            <tr>
+                              <td className="border border-line px-2 py-1.5 text-muted">
+                                Parts Profit (internal){' '}
+                                <span className="text-[10px] font-semibold text-faint">(sell {partsSellTotal.toLocaleString()} − cost {partsCostTotal.toLocaleString()})</span>
+                              </td>
+                              <td className="border border-line px-2 py-1.5 text-right font-mono text-success-deep tabular-nums">+{partsProfitTotal.toLocaleString()} {currency}</td>
                             </tr>
                           )}
                           <tr>
