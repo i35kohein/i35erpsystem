@@ -769,41 +769,41 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                   })}
                 </div>
               </div>
-              {/* Inspector — technician + notes in one compact row */}
-              <div className="flex flex-col sm:flex-row gap-2 rounded-xl border border-line bg-surface/80 p-2.5">
-                <div className="flex items-center gap-2 sm:w-56 shrink-0">
-                  <span className="w-7 h-7 rounded-full bg-brand/10 text-brand flex items-center justify-center shrink-0">
-                    <UserCheck className="w-3.5 h-3.5" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-bold text-muted uppercase tracking-wider">Inspector</p>
-                    <CustomDropdownMenu
-                      value={qaData.qaTechnicianId}
-                      onChange={(value) => setQaData({ ...qaData, qaTechnicianId: value })}
-                      options={inspectorOptions}
-                      placeholder="Select inspector"
-                      className="w-full"
-                      buttonClassName="!h-6 !min-h-6 w-full text-[11px]"
-                      menuAlign="left"
-                      menuPlacement="bottom"
-                      size="sm"
-                    />
-                  </div>
+            </div>
+            {/* Inspector — pinned footer so 'who inspects' is always visible (Ko Hein 2026-08-11) */}
+            <div className="shrink-0 flex flex-col sm:flex-row gap-2 border-t border-line bg-surface/60 p-2.5">
+              <div className="flex items-center gap-2 sm:w-64 shrink-0">
+                <span className="w-7 h-7 rounded-full bg-brand/10 text-brand flex items-center justify-center shrink-0">
+                  <UserCheck className="w-3.5 h-3.5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-bold text-muted uppercase tracking-wider">Inspector</p>
+                  <CustomDropdownMenu
+                    value={qaData.qaTechnicianId}
+                    onChange={(value) => setQaData({ ...qaData, qaTechnicianId: value })}
+                    options={inspectorOptions}
+                    placeholder="Select inspector"
+                    className="w-full"
+                    buttonClassName="!h-6 !min-h-6 w-full text-[11px]"
+                    menuAlign="left"
+                    menuPlacement="top"
+                    size="sm"
+                  />
                 </div>
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <span className="w-7 h-7 rounded-full bg-surface border border-line text-muted flex items-center justify-center shrink-0">
-                    <StickyNote className="w-3.5 h-3.5" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-bold text-muted uppercase tracking-wider">Notes</p>
-                    <Input
-                      type="text"
-                      value={qaData.notes}
-                      onChange={(e) => setQaData({ ...qaData, notes: e.target.value })}
-                      placeholder="Final QA notes…"
-                      className="!h-6 !min-h-6 w-full rounded-md bg-white border border-line px-2 text-[11px] text-ink focus:outline-none "
-                    />
-                  </div>
+              </div>
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <span className="w-7 h-7 rounded-full bg-surface border border-line text-muted flex items-center justify-center shrink-0">
+                  <StickyNote className="w-3.5 h-3.5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-bold text-muted uppercase tracking-wider">Notes</p>
+                  <Input
+                    type="text"
+                    value={qaData.notes}
+                    onChange={(e) => setQaData({ ...qaData, notes: e.target.value })}
+                    placeholder="Final QA notes…"
+                    className="!h-6 !min-h-6 w-full rounded-md bg-white border border-line px-2 text-[11px] text-ink focus:outline-none "
+                  />
                 </div>
               </div>
             </div>
