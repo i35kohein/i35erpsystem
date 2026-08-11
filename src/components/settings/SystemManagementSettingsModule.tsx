@@ -297,11 +297,17 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
         reset: () => setFormData(settings),
         save: () => {
           onUpdateSettings(formData);
+          // Save All Settings must save EVERYTHING (Ko Hein 2026-08-11):
+          // flush an open technician modal's edits (commission rates, etc.).
+          if (techModalOpenRef.current && techFormNameRef.current.trim() && saveTechFormRef.current) {
+            saveTechFormRef.current();
+          }
           setIsSavedBanner(true);
           setTimeout(() => setIsSavedBanner(false), 3000);
         },
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData, settings, onUpdateSettings, onRegisterActions]);
 
   // Payment Method Helpers
@@ -663,6 +669,13 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
     commissionRateParts: 10,
     commissionRateHardware: 15,
   });
+  // Refs mirroring the tech modal state so the (earlier-registered) Save All
+  // Settings action can flush pending technician edits (Ko Hein 2026-08-11).
+  const techModalOpenRef = React.useRef(false);
+  const techFormNameRef = React.useRef('');
+  const saveTechFormRef = React.useRef<(() => void) | null>(null);
+  techModalOpenRef.current = techModalOpen;
+  techFormNameRef.current = techFormData.name;
 
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
@@ -743,11 +756,13 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
     return Math.max(0, Math.min(50, parsed));
   };
 
-  // Submit Technician Form
-  const handleTechSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Submit Technician Form — shared so the global "Save All Settings" action
+  // can also flush an open technician modal (Ko Hein 2026-08-11: Save All
+  // Settings must save EVERYTHING, including commission rates).
+  const saveTechForm = () => {
     if (!techFormData.name.trim()) return;
-
+    // Keep the latest save function reachable from the global Save All action.
+    saveTechFormRef.current = saveTechForm;
     if (editingTech) {
       const updated: Technician = {
         ...editingTech,
@@ -810,6 +825,12 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
     }
 
     setTechModalOpen(false);
+  };
+
+  // Form submit wrapper (keeps the modal's native submit behavior).
+  const handleTechSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    saveTechForm();
   };
 
   // Handle Delete Tech
