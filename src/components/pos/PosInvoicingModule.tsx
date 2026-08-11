@@ -275,7 +275,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   // Computed: labor vs parts breakdown for customer / system views (Ko Hein 2026-08-10)
   const displayLineItems = lineItemDraft ?? selectedWo?.lineItems ?? [];
   const laborItems = useMemo(() => displayLineItems.filter((li) => li.isLabor), [displayLineItems]);
-  const partsItems = useMemo(() => displayLineItems.filter((li) => !li.isLabor && li.partId), [displayLineItems]);
+  const partsItems = useMemo(() => displayLineItems.filter((li) => !li.isLabor && (li.partId || li.partName)), [displayLineItems]);
   // Parts value at SELLING price (Ko Hein 2026-08-11): repair price list
   // already includes parts, so the parts deduction uses the selling price.
   // Stock/expense bookkeeping (handleConsumeInventoryFromWorkOrder) still
