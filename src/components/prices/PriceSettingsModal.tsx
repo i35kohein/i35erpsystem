@@ -78,7 +78,7 @@ interface PriceSettingsModalProps {
     importedCategories?: RepairCategoryDef[],
     replaceCategories?: boolean,
   ) => Promise<number>;
-  addModel: (modelName: string, folderId?: string, cloneFromModel?: string) => void;
+  addModel: (modelName: string, folderId?: string, cloneFromModel?: string, modelCodes?: string) => void;
   renameModel?: (oldName: string, newName: string) => void;
   deleteModel?: (modelName: string) => void;
   resetToDefaults: () => void;
@@ -125,6 +125,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
 }) => {
   const [selectedModel, setSelectedModel] = useState<string>(catalog[0]?.model || 'iPhone 15 Pro Max');
   const [newModelInput, setNewModelInput] = useState('');
+  const [newModelCodesInput, setNewModelCodesInput] = useState('');
   const [cloneModelSource, setCloneModelSource] = useState<string>('');
   const [isRenamingModel, setIsRenamingModel] = useState(false);
   const [renameModelInput, setRenameModelInput] = useState('');
@@ -218,10 +219,11 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
   const handleAddNewModel = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newModelInput.trim()) return;
-    addModel(newModelInput.trim(), undefined, cloneModelSource || undefined);
+    addModel(newModelInput.trim(), undefined, cloneModelSource || undefined, newModelCodesInput.trim());
     setSelectedModel(newModelInput.trim());
     triggerToast(`Added new model "${newModelInput.trim()}" to catalog.`);
     setNewModelInput('');
+    setNewModelCodesInput('');
     setCloneModelSource('');
   };
 
@@ -650,7 +652,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                       >
                         {catalog.map((m) => (
                           <option key={m.model} value={m.model}>
-                            {m.model} ({Object.values(m.prices).filter((p) => p !== null).length} Active Services)
+                            {m.model}{m.modelCodes && m.modelCodes.length > 0 ? ` [${m.modelCodes.join(', ')}]` : ''} ({Object.values(m.prices).filter((p) => p !== null).length} Active Services)
                           </option>
                         ))}
                       </select>
@@ -667,7 +669,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
 
                 {/* Add New Model Form with Clone Option */}
                 <div className="pt-3 border-t border-line">
-                  <form onSubmit={handleAddNewModel} className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 items-end">
+                  <form onSubmit={handleAddNewModel} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 items-end">
                     <div>
                       <label className="text-xs font-extrabold text-ink block mb-1">New Model Name</label>
                       <Input
@@ -675,6 +677,17 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                         placeholder="e.g. iPhone 16 Pro, iPad Air 6"
                         value={newModelInput}
                         onChange={(e) => setNewModelInput(e.target.value)}
+                        className="w-full px-3 py-1.5 bg-white border border-line rounded-lg text-xs font-medium focus:outline-none text-ink"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-extrabold text-ink block mb-1">Model Codes (comma-separated)</label>
+                      <Input
+                        type="text"
+                        placeholder="e.g. A2197, A2200, A2198"
+                        value={newModelCodesInput}
+                        onChange={(e) => setNewModelCodesInput(e.target.value)}
                         className="w-full px-3 py-1.5 bg-white border border-line rounded-lg text-xs font-medium focus:outline-none text-ink"
                       />
                     </div>

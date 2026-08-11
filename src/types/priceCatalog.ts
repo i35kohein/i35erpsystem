@@ -6,6 +6,8 @@ export interface RepairCategoryDef {
 
 export interface ModelRepairPrice {
   model: string;
+  /** Apple model identifiers, e.g. ['A2197','A2200'] (Ko Hein 2026-08-11). */
+  modelCodes?: string[];
   prices: Record<string, number | null>; // categoryKey -> price amount
   warranties: Record<string, string>; // categoryKey -> warranty string
 }

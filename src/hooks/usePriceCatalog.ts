@@ -193,7 +193,7 @@ export function usePriceCatalog(globalCurrencySymbol?: string, onUpdateGlobalCur
   };
 
   // Model operations
-  const addModel = (modelName: string, _folderId?: string, cloneFromModel?: string) => {
+  const addModel = (modelName: string, _folderId?: string, cloneFromModel?: string, modelCodes?: string) => {
     const trimmed = modelName.trim();
     if (!trimmed) return;
     if (catalog.some((m) => m.model.toLowerCase() === trimmed.toLowerCase())) return;
@@ -216,10 +216,17 @@ export function usePriceCatalog(globalCurrencySymbol?: string, onUpdateGlobalCur
       });
     }
 
+    // Model codes (Ko Hein 2026-08-11): 'A2197, A2200' -> ['A2197','A2200']
+    const parsedCodes = (modelCodes || '')
+      .split(/[,;\s]+/)
+      .map((c) => c.trim().toUpperCase())
+      .filter(Boolean);
+
     const docId = trimmed.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
     const newEntry: ModelRepairPrice & { id: string } = {
       id: docId,
       model: trimmed,
+      modelCodes: parsedCodes.length > 0 ? parsedCodes : undefined,
       prices: basePrices,
       warranties: baseWarranties,
     };

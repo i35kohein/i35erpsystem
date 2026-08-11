@@ -193,7 +193,12 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                             isSelected ? 'font-extrabold text-ink' : 'font-semibold text-ink'
                           }`}
                         >
-                          <span className="truncate">{item.model}</span>
+                          <span className="min-w-0 flex-1 truncate">{item.model}</span>
+                          {item.modelCodes && item.modelCodes.length > 0 && (
+                            <span className="shrink-0 font-mono text-[10px] font-black text-brand/70">
+                              {item.modelCodes.join(' · ')}
+                            </span>
+                          )}
                           {isSelected && <Check className="h-4 w-4 shrink-0 text-success stroke-[3]" />}
                         </Button>
                       );

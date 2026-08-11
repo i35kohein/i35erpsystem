@@ -1036,6 +1036,15 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
               <h2 className="text-lg sm:text-2xl font-black text-ink tracking-tight truncate mt-0.5">
                 {selectedDevice}
               </h2>
+              {activeDeviceData?.modelCodes && activeDeviceData.modelCodes.length > 0 && (
+                <div className="flex flex-wrap items-center gap-1 mt-1">
+                  {activeDeviceData.modelCodes.map((code) => (
+                    <span key={code} className="inline-flex items-center rounded-md border border-brand/20 bg-brand-soft px-1.5 py-0.5 font-mono text-[10px] font-black text-brand">
+                      {code}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           <Button
