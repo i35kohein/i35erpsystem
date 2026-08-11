@@ -608,9 +608,9 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
             </div>
 
             {/* Modal body: photos + 21-point checklist + inspector */}
-            <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-3">
+            <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-2.5">
               {/* Before / After repair photos */}
-              <div className="space-y-2 rounded-xl border border-line bg-surface p-3">
+              <div className="space-y-2 rounded-xl border border-line bg-surface p-2.5">
                 <div className="flex flex-wrap gap-4">
                   {/* Before */}
                   <div className="flex-1 min-w-[200px] space-y-1.5">
@@ -620,7 +620,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     </h4>
                     <div className="flex flex-wrap gap-2">
                       {qaBeforePhotos.map((photo, idx) => (
-                        <div key={idx} className="relative w-16 h-16 rounded-lg overflow-hidden border border-line group">
+                        <div key={idx} className="relative w-14 h-14 rounded-lg overflow-hidden border border-line group">
                           <img src={photo} alt={`Before photo ${idx + 1}`} className="w-full h-full object-cover" />
                           <Button
                             type="button"
@@ -644,7 +644,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                       <Button
                         type="button"
                         onClick={() => beforePhotoInputRef.current?.click()}
-                        className="w-16 h-16 rounded-lg border-2 border-dashed border-line hover:border-brand flex flex-col items-center justify-center text-muted hover:text-brand text-[9px] gap-0.5 bg-white transition-all"
+                        className="w-14 h-14 rounded-lg border-2 border-dashed border-line hover:border-brand flex flex-col items-center justify-center text-muted hover:text-brand text-[9px] gap-0.5 bg-white transition-all"
                         title="Add before photo"
                       >
                         <Camera className="w-4 h-4" />
@@ -660,7 +660,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     </h4>
                     <div className="flex flex-wrap gap-2">
                       {qaAfterPhotos.map((photo, idx) => (
-                        <div key={idx} className="relative w-16 h-16 rounded-lg overflow-hidden border border-line group">
+                        <div key={idx} className="relative w-14 h-14 rounded-lg overflow-hidden border border-line group">
                           <img src={photo} alt={`After photo ${idx + 1}`} className="w-full h-full object-cover" />
                           <Button
                             type="button"
@@ -684,7 +684,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                       <Button
                         type="button"
                         onClick={() => afterPhotoInputRef.current?.click()}
-                        className="w-16 h-16 rounded-lg border-2 border-dashed border-line hover:border-success flex flex-col items-center justify-center text-muted hover:text-success-deep text-[9px] gap-0.5 bg-white transition-all"
+                        className="w-14 h-14 rounded-lg border-2 border-dashed border-line hover:border-success flex flex-col items-center justify-center text-muted hover:text-success-deep text-[9px] gap-0.5 bg-white transition-all"
                         title="Add after photo"
                       >
                         <Camera className="w-4 h-4" />
@@ -730,13 +730,13 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     const isFail = item.status === 'Fail';
                     const isCantTest = item.status === 'Cant Test';
                     return (
-                      <div key={item.id} className="flex min-h-7 items-center gap-2 border-b border-line/60 py-1.5">
+                      <div key={item.id} className="flex min-h-6 items-center gap-1.5 border-b border-line/50 py-1">
                         <Button
                           type="button"
                           onClick={() => cycleStatus(item.id, item.status)}
                           title={isPass ? 'Pass — tap for Fail' : isFail ? 'Fail — tap for N/A' : isCantTest ? 'Cant Test — tap for N/A' : 'Not checked — tap for Pass'}
                           aria-label={`Change status for ${item.name}`}
-                          className={`flex !h-4 !w-4 !min-h-4 !min-w-4 shrink-0 items-center justify-center rounded-full border text-[10px] font-black leading-none transition-colors cursor-pointer ${
+                          className={`flex !h-3.5 !w-3.5 !min-h-3.5 !min-w-3.5 shrink-0 items-center justify-center rounded-full border text-[9px] font-black leading-none transition-colors cursor-pointer ${
                             isPass
                               ? 'border-success bg-success text-white'
                               : isFail
@@ -762,7 +762,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           value={item.note || ''}
                           onChange={(e) => handleDiagnosticNoteChange(item.id, e.target.value)}
                           placeholder={isPass ? 'ok' : isFail ? 'issue…' : isCantTest ? 'note' : 'n/a'}
-                          className="ml-auto h-6 min-w-0 flex-1 rounded-md bg-transparent px-1.5 text-xs outline-none transition-colors placeholder:text-muted/60 focus:bg-[#d9f99d]/40"
+                          className="ml-auto h-5 min-w-0 flex-1 rounded bg-transparent px-1 text-[11px] outline-none transition-colors placeholder:text-muted/60 focus:bg-[#d9f99d]/40"
                         />
                       </div>
                     );
