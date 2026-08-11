@@ -4,9 +4,11 @@
 set -euo pipefail
 
 KEY="$HOME/.ssh/n8ndigitalocean"
-HOST="root@192.34.62.199"
+# Live production droplet (SGP1) — matches deploy.sh (audit G-3: was pointing
+# at the old NYC rollback-only droplet 192.34.62.199).
+HOST="root@178.128.62.242"
 REMOTE_DIR="/opt/i35erp"
-PUBLIC_URL="http://192.34.62.199:3100"
+PUBLIC_URL="http://178.128.62.242:3100"
 
 echo "==> Rolling back to the previous release..."
 ssh -i "$KEY" "$HOST" "cd $REMOTE_DIR && if [ ! -d dist.prev ]; then echo 'No previous release found (dist.prev missing).'; exit 1; fi && rm -rf dist.old && cp -r dist dist.old && rm -rf dist && cp -r dist.prev dist && systemctl restart i35erp"

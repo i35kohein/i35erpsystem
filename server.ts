@@ -98,6 +98,17 @@ async function startServer() {
     }
     return true;
   };
+  // Auth gate for paid-LLM routes (audit G-1): every AI endpoint requires a
+  // valid session token so the server's paid API keys can't be used as a free
+  // proxy by anyone who can reach the port.
+  const requireAuth = (req: express.Request, res: express.Response): boolean => {
+    const token = (req.headers["x-session-token"] as string) || "";
+    if (!isTokenValid(token)) {
+      res.status(401).json({ success: false, error: "Authentication required." });
+      return false;
+    }
+    return true;
+  };
   // --- Brute-force protection: per-IP attempt tracking ---
   const LOGIN_WINDOW_MS = Number(process.env.LOGIN_RATE_WINDOW_MS) || 60_000;
   const LOGIN_MAX_ATTEMPTS = Number(process.env.LOGIN_MAX_ATTEMPTS) || 5; // per window
@@ -185,11 +196,16 @@ async function startServer() {
     res.json({ success: true });
   });
   // Log out every device except the caller (admin "kick devices" action).
-  // Sending no token revokes ALL sessions.
+  // A VALID session token is required — otherwise anyone could silently log
+  // out every staff member (audit G-2).
   app.post("/api/auth/logout-all", (req, res) => {
     const token = (req.headers["x-session-token"] as string) || "";
-    const currentHash = token ? hashToken(token) : "";
-    const keep = currentHash && authTokens[currentHash] ? { [currentHash]: authTokens[currentHash] } : {};
+    if (!isTokenValid(token)) {
+      res.status(401).json({ success: false, error: "Valid session token required." });
+      return;
+    }
+    const currentHash = hashToken(token);
+    const keep = authTokens[currentHash] ? { [currentHash]: authTokens[currentHash] } : {};
     const revoked = Object.keys(authTokens).length - Object.keys(keep).length;
     for (const key of Object.keys(authTokens)) {
       if (!keep[key]) delete authTokens[key];
@@ -208,6 +224,7 @@ async function startServer() {
 
   // AI Repair Diagnostics & Panic Log Analyzer
   app.post("/api/gemini/diagnose", async (req, res) => {
+    if (!requireAuth(req, res)) return;
     try {
       const { deviceModel, symptoms, panicLog, errorCodes } = req.body;
       const ai = getGeminiClient();
@@ -241,7 +258,7 @@ Return ONLY valid JSON.`;
       res.json({ success: true, diagnosis: parsed });
     } catch (err: any) {
       console.error("Gemini diagnose error:", err);
-      res.status(500).json({ success: false, error: err.message || "Failed to generate AI diagnostic analysis" });
+      res.status(500).json({ success: false, error: "Failed to generate AI diagnostic analysis" });
     }
   });
 
@@ -250,6 +267,7 @@ Return ONLY valid JSON.`;
 
   // AI Draft Customer Notification
   app.post("/api/gemini/draft-message", async (req, res) => {
+    if (!requireAuth(req, res)) return;
     try {
       const { customerName, deviceName, status, totalCost, notes, channel } = req.body;
       const ai = getGeminiClient();
@@ -276,12 +294,13 @@ Return JSON with key "message".`;
       res.json({ success: true, message: parsed.message });
     } catch (err: any) {
       console.error("Gemini draft message error:", err);
-      res.status(500).json({ success: false, error: err.message || "Failed to draft notification" });
+      res.status(500).json({ success: false, error: "Failed to draft notification" });
     }
   });
 
   // ERP-aware AI chat supporting mainstream and OpenAI-compatible custom APIs.
   app.post("/api/ai/chat", async (req, res) => {
+    if (!requireAuth(req, res)) return;
     try {
       const { provider, apiKey, model, baseUrl, systemPrompt, messages, context } = req.body;
       // DeepSeek / OpenRouter are configured once on the server, never exposed
@@ -312,7 +331,7 @@ ${JSON.stringify(context)}`;
       res.json({ success: true, answer });
     } catch (err: any) {
       console.error("ERP AI chat error:", err);
-      res.status(500).json({ success: false, error: err.message || "AI assistant request failed." });
+      res.status(500).json({ success: false, error: "AI assistant request failed" });
     }
   });
 

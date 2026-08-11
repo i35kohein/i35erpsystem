@@ -22,9 +22,10 @@ async function classifyRepairWithAI(wo: WorkOrder, settings: SystemSettings): Pr
   if (provider === 'local') return null;
   const repairs = (wo.selectedRepairs || []).map((r) => r.name).join(', ') || '—';
   try {
+    const token = localStorage.getItem('i35_session_token') || '';
     const res = await fetch('/api/ai/chat', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'x-session-token': token },
       body: JSON.stringify({
         provider,
         // DeepSeek uses the server-only DEEPSEEK_API_KEY — never send a key from the browser.
@@ -324,12 +325,20 @@ export default function App() {
 
   // User Management Handlers
   const handleAddUser = (newUser: AppUser) => {
+    if (currentUser.role !== 'Admin') {
+      addToast('🔒 Access Denied: Only Admin accounts can create users.', 'error', 'Permission Denied');
+      return;
+    }
     setUsers((prev) => [...prev, newUser]);
     saveDocument('users', newUser).catch(reportSaveError);
     addToast(`User account "${newUser.name}" (${newUser.role}) created successfully!`, 'success');
   };
 
   const handleUpdateUser = (updatedUser: AppUser) => {
+    if (currentUser.role !== 'Admin') {
+      addToast('🔒 Access Denied: Only Admin accounts can edit users.', 'error', 'Permission Denied');
+      return;
+    }
     setUsers((prev) => prev.map((u) => (u.id === updatedUser.id ? updatedUser : u)));
     saveDocument('users', updatedUser).catch(reportSaveError);
     if (currentUser.id === updatedUser.id) {
@@ -362,6 +371,19 @@ export default function App() {
       }
     }
   };
+
+  // Settings access (audit E-1): Admin or an explicit canAccessSettings grant.
+  // The settings tab used to be reachable by ANY role via #/settings deep link.
+  const canAccessSettings =
+    currentUser?.role === 'Admin' || Boolean(currentUser?.permissions?.canAccessSettings);
+
+  // Render guard: non-privileged roles are bounced away from #/settings even on
+  // deep links or role switches (audit E-1).
+  useEffect(() => {
+    if (activeTab === 'settings' && !canAccessSettings) {
+      setActiveTab('dashboard');
+    }
+  }, [activeTab, canAccessSettings]);
 
   // Persistent Price Catalog Hook with global currency sync
   const priceCatalog = usePriceCatalog(systemSettings.currencySymbol, (newSymbol) => {
@@ -1119,6 +1141,18 @@ export default function App() {
 
   // --- Handlers ---
   const handleUpdateSettings = (newSettings: SystemSettings) => {
+    // Settings writes are admin-scoped (audit E-1): the tab was reachable by
+    // any role via deep link, and this handler had no authorization check.
+    // canEditPrices keeps the price-catalog currency picker working for
+    // non-admin staff with that permission.
+    if (
+      currentUser.role !== 'Admin' &&
+      !currentUser.permissions?.canAccessSettings &&
+      !currentUser.permissions?.canEditPrices
+    ) {
+      addToast('🔒 Access Denied: Only Admin accounts can change settings.', 'error', 'Permission Denied');
+      return;
+    }
     // Preserve independently managed inventory data when another settings
     // draft (for example the print or shop form) is saved from an older draft.
     const mergedSettings: SystemSettings = {
@@ -1133,11 +1167,19 @@ export default function App() {
   };
 
   const handleAddTechnician = (tech: Technician) => {
+    if (currentUser.role !== 'Admin') {
+      addToast('🔒 Access Denied: Only Admin accounts can add technicians.', 'error', 'Permission Denied');
+      return;
+    }
     setTechnicians((prev) => [...prev, tech]);
     saveDocument('technicians', tech).catch(reportSaveError);
   };
 
   const handleUpdateTechnician = (tech: Technician) => {
+    if (currentUser.role !== 'Admin') {
+      addToast('🔒 Access Denied: Only Admin accounts can edit technicians.', 'error', 'Permission Denied');
+      return;
+    }
     setTechnicians((prev) => prev.map((t) => (t.id === tech.id ? tech : t)));
     saveDocument('technicians', tech).catch(reportSaveError);
   };
@@ -1200,6 +1242,10 @@ export default function App() {
 
   // Restore All Archived Work Orders
   const handleRestoreAllWorkOrders = () => {
+    if (currentUser.role !== 'Admin') {
+      addToast('🔒 Access Denied: Only Admin accounts can restore archived work orders.', 'error', 'Permission Denied');
+      return;
+    }
     const count = archivedWorkOrders.length;
     if (count === 0) return;
     setWorkOrders((prev) =>
@@ -1217,6 +1263,10 @@ export default function App() {
 
   // Empty Recycle Bin
   const handleEmptyRecycleBin = () => {
+    if (currentUser.role !== 'Admin') {
+      addToast('🔒 Access Denied: Only Admin accounts can empty the recycle bin.', 'error', 'Permission Denied');
+      return;
+    }
     const archived = workOrders.filter((w) => w.isArchived);
     archived.forEach((w) => {
       deleteDocument('workOrders', w.id).catch(reportSaveError);
@@ -2698,7 +2748,7 @@ export default function App() {
                 />
               )}
 
-              {activeTab === 'settings' && (
+              {activeTab === 'settings' && canAccessSettings && (
                 <SystemManagementSettingsModule
                   initialSubTab={settingsInitialSubTab}
                   settings={systemSettings}

@@ -375,9 +375,10 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
       if (!isExternalAi) {
         answer = localAnswer(trimmed);
       } else {
+        const token = localStorage.getItem('i35_session_token') || '';
         const response = await fetch('/api/ai/chat', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'x-session-token': token },
           body: JSON.stringify({
             provider: systemSettings.aiProvider,
             // DeepSeek uses the server-only DEEPSEEK_API_KEY. Never send a key
