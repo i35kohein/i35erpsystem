@@ -26,7 +26,7 @@ import {CreditCard,
   Wrench,
   Percent,
 } from 'lucide-react';
-import { WorkOrder, Customer, SystemSettings, PartItem, WorkOrderLineItem, Technician } from '../../types';
+import { WorkOrder, Customer, SystemSettings, PartItem, WorkOrderLineItem, Technician, SelectedRepairItem } from '../../types';
 import { ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
 import { ModelRepairPrice } from '../../types/priceCatalog';
 import { PriorityBadge } from '../common/PriorityBadge';
@@ -597,8 +597,19 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     if (!selectedWo || !onSaveWorkOrder) return;
 
     // audit A-P2-3: remove from the pending draft when present.
-    const nextLineItems = (pendingWoRef.current?.lineItems ?? selectedWo.lineItems ?? []).filter((item) => item.id !== lineItemId);
-    commitLineItems(nextLineItems, { immediate: true });
+    const sourceItems = pendingWoRef.current?.lineItems ?? selectedWo.lineItems ?? [];
+    const removedItem = sourceItems.find((item) => item.id === lineItemId);
+    const nextLineItems = sourceItems.filter((item) => item.id !== lineItemId);
+    // Also drop the matching entry from selectedRepairs so the ticket doesn't
+    // keep advertising a repair that is no longer on the invoice (Ko Hein
+    // 2026-08-11: deleting a repair at checkout left it in selectedRepairs,
+    // which other views/screens re-surface as if it were still on the ticket).
+    const nextRepairs = (selectedWo.selectedRepairs || []).filter((r) => {
+      if (!removedItem) return true;
+      const name = String(removedItem.description || '').trim().toLowerCase();
+      return !name || String(r.name || '').trim().toLowerCase() !== name;
+    });
+    commitLineItems(nextLineItems, { immediate: true, selectedRepairs: nextRepairs });
   };
 
   // Commit (or schedule) a full work-order save for the given line items.
@@ -607,7 +618,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   // edits can't race each other's full-document PATCHes (audit A-P2-3).
   const commitLineItems = (
     nextLineItems: WorkOrder['lineItems'],
-    opts: { immediate?: boolean; discountAmount?: number; depositAmount?: number } = {}
+    opts: { immediate?: boolean; discountAmount?: number; depositAmount?: number; selectedRepairs?: SelectedRepairItem[] } = {}
   ) => {
     if (!selectedWo || !onSaveWorkOrderRef.current) return;
     const discount = opts.discountAmount !== undefined ? opts.discountAmount : selectedWo.discountAmount || 0;
@@ -616,6 +627,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     const updatedWo: WorkOrder = {
       ...selectedWo,
       lineItems: nextLineItems,
+      ...(opts.selectedRepairs !== undefined ? { selectedRepairs: opts.selectedRepairs } : {}),
       discountAmount: discount,
       depositAmount: deposit,
       subtotal: totals.subtotal,
@@ -720,9 +732,25 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
       isLabor: true,
       lineItemDiscountPercent: item.discountPercent || undefined,
     }));
+    // Keep selectedRepairs in sync so the ticket advertises exactly what is
+    // on the invoice (Ko Hein 2026-08-11, mirrors the delete-side fix).
+    const existingRepairs = selectedWo.selectedRepairs || [];
+    const existingNames = new Set(existingRepairs.map((r) => String(r.name || '').trim().toLowerCase()));
+    const addedRepairs = catalogItems
+      .filter((item) => !existingNames.has(String(item.name || '').trim().toLowerCase()))
+      .map((item) => ({
+        id: item.categoryKey,
+        name: item.name,
+        basePrice: item.price,
+        discountPercent: item.discountPercent || 0,
+        finalPrice: Math.round(item.price * (1 - (item.discountPercent || 0) / 100)),
+      }));
     // audit A-P2-3: append to the pending draft (if any) and save once.
     const nextLineItems = [...(pendingWoRef.current?.lineItems ?? selectedWo.lineItems ?? []), ...newLines];
-    commitLineItems(nextLineItems, { immediate: true });
+    commitLineItems(nextLineItems, {
+      immediate: true,
+      selectedRepairs: [...existingRepairs, ...addedRepairs],
+    });
     setIsAddRepairFromPriceListOpen(false);
     // audit A-P2-5: clear picker selection on every exit path (Done / X / backdrop).
     setPosCatalogSelection([]);
