@@ -389,8 +389,8 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
       (selectedWo.serviceType === 'Micro-Soldering' ? ('hardware' as const) : ('spareparts' as const));
     const rate =
       repairType === 'hardware'
-        ? tech.commissionRateHardware || tech.commissionRate || 0
-        : tech.commissionRateParts || tech.commissionRate || 0;
+        ? tech.commissionRateHardware ?? tech.commissionRate ?? 0
+        : tech.commissionRateParts ?? tech.commissionRate ?? 0;
     if (rate <= 0) return 0;
     // Commission base = profit AFTER parts cost (Ko Hein 2026-08-11):
     // Amount Due (Customer) − Parts Cost. Mirrors App.tsx handleMarkPaid.

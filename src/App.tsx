@@ -1737,8 +1737,8 @@ export default function App() {
           (current.serviceType === 'Micro-Soldering' ? ('hardware' as const) : ('spareparts' as const));
         const rate =
           repairType === 'hardware'
-            ? tech.commissionRateHardware || tech.commissionRate || 0
-            : tech.commissionRateParts || tech.commissionRate || 0;
+            ? tech.commissionRateHardware ?? tech.commissionRate ?? 0
+            : tech.commissionRateParts ?? tech.commissionRate ?? 0;
 
         // Labor revenue (kept for the payout record display — commission itself
         // is based on profit after parts cost below).
