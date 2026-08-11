@@ -610,17 +610,17 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
             {/* Modal body: photos + 21-point checklist + inspector */}
             <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-2.5">
               {/* Before / After repair photos */}
-              <div className="space-y-2 rounded-xl border border-line bg-surface p-2.5">
-                <div className="flex flex-wrap gap-4">
+              <div className="space-y-1.5 rounded-lg border border-line bg-surface p-2">
+                <div className="flex flex-wrap gap-2">
                   {/* Before */}
-                  <div className="flex-1 min-w-[200px] space-y-1.5">
+                  <div className="flex-1 min-w-[160px] space-y-1">
                     <h4 className="text-[11px] font-extrabold text-ink flex items-center gap-1.5">
                       <Camera className="w-3.5 h-3.5 text-brand" />
                       <span>Before-Repair Photos</span>
                     </h4>
                     <div className="flex flex-wrap gap-2">
                       {qaBeforePhotos.map((photo, idx) => (
-                        <div key={idx} className="relative w-14 h-14 rounded-lg overflow-hidden border border-line group">
+                        <div key={idx} className="relative w-12 h-12 rounded-lg overflow-hidden border border-line group">
                           <img src={photo} alt={`Before photo ${idx + 1}`} className="w-full h-full object-cover" />
                           <Button
                             type="button"
@@ -644,7 +644,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                       <Button
                         type="button"
                         onClick={() => beforePhotoInputRef.current?.click()}
-                        className="w-14 h-14 rounded-lg border-2 border-dashed border-line hover:border-brand flex flex-col items-center justify-center text-muted hover:text-brand text-[9px] gap-0.5 bg-white transition-all"
+                        className="w-12 h-12 rounded-lg border-2 border-dashed border-line hover:border-brand flex flex-col items-center justify-center text-muted hover:text-brand text-[9px] gap-0.5 bg-white transition-all"
                         title="Add before photo"
                       >
                         <Camera className="w-4 h-4" />
@@ -653,14 +653,14 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     </div>
                   </div>
                   {/* After */}
-                  <div className="flex-1 min-w-[200px] space-y-1.5">
+                  <div className="flex-1 min-w-[160px] space-y-1">
                     <h4 className="text-[11px] font-extrabold text-ink flex items-center gap-1.5">
                       <Camera className="w-3.5 h-3.5 text-success-deep" />
                       <span>After-Repair Photos</span>
                     </h4>
                     <div className="flex flex-wrap gap-2">
                       {qaAfterPhotos.map((photo, idx) => (
-                        <div key={idx} className="relative w-14 h-14 rounded-lg overflow-hidden border border-line group">
+                        <div key={idx} className="relative w-12 h-12 rounded-lg overflow-hidden border border-line group">
                           <img src={photo} alt={`After photo ${idx + 1}`} className="w-full h-full object-cover" />
                           <Button
                             type="button"
@@ -684,7 +684,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                       <Button
                         type="button"
                         onClick={() => afterPhotoInputRef.current?.click()}
-                        className="w-14 h-14 rounded-lg border-2 border-dashed border-line hover:border-success flex flex-col items-center justify-center text-muted hover:text-success-deep text-[9px] gap-0.5 bg-white transition-all"
+                        className="w-12 h-12 rounded-lg border-2 border-dashed border-line hover:border-success flex flex-col items-center justify-center text-muted hover:text-success-deep text-[9px] gap-0.5 bg-white transition-all"
                         title="Add after photo"
                       >
                         <Camera className="w-4 h-4" />
