@@ -150,44 +150,58 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
     };
 
     filteredWorkOrders.forEach((wo) => {
-      // Calculate from line items if available
+      // Revenue is REAL money only (audit A-3): unpaid / in-progress tickets
+      // are not income yet — they must not inflate revenue, COGS or units.
+      const isPaid = Boolean(wo.isPaid) || (Number(wo.paidAmount) > 0);
+      if (!isPaid) return;
+      // Customer revenue per ticket = the amount actually collected. Per the
+      // pricing model the customer pays ONLY the labor lines (after per-item
+      // and invoice discounts) — parts are bundled into the labor charge and
+      // are INTERNAL tracking, never extra customer revenue. So the simplest
+      // correct revenue = totalAmount (audit A-3).
+      const collected = Number(wo.paidAmount) || wo.totalAmount || 0;
+
       if (wo.lineItems && wo.lineItems.length > 0) {
         wo.lineItems.forEach((li) => {
-          const lineTotal = li.unitPrice * li.quantity;
-          const lineCost = li.unitCost * li.quantity;
-
           if (li.isLabor) {
-            laborIncome += lineTotal;
+            // Labor revenue = the COLLECTED amount below (post-discount); the
+            // line loop only feeds the internal parts P&L.
           } else {
-            partsSalesIncome += lineTotal;
-            cogsTotal += lineCost;
+            // Internal parts P&L only — selling price vs cost for parts
+            // actually sold on PAID tickets. Never added to customer revenue.
+            partsSalesIncome += li.unitPrice * li.quantity;
+            cogsTotal += li.unitCost * li.quantity;
             partsUnitsSold += li.quantity;
           }
         });
+        // Customer revenue = amount collected (labor after discounts); parts
+        // are bundled, so they never appear in totalRevenue (audit A-3).
+        laborIncome += collected;
       } else {
-        // Fallback ratio
-        laborIncome += wo.totalAmount * 0.45;
-        partsSalesIncome += wo.totalAmount * 0.55;
-        cogsTotal += wo.totalAmount * 0.25;
+        // Fallback for tickets without line items: whole collected amount is
+        // customer revenue; no parts information to split (audit A-3 — no more
+        // fabricated 45/55/25 ratios).
+        laborIncome += collected;
       }
 
-      // Payment method breakdown
-      if (wo.isPaid || wo.paidAmount && wo.paidAmount > 0) {
-        const amount = wo.paidAmount || wo.totalAmount;
-        const method = (wo.paymentMethod || '').toString();
-        if (method === 'Cash') {
-          paymentMethodsBreakdown.cashDrawer += amount;
-        } else if (method === 'Credit Card' || method === 'Apple Pay') {
-          paymentMethodsBreakdown.cardPos += amount;
-        } else if (method.startsWith('Split Payment') || method === 'Net 30') {
-          paymentMethodsBreakdown.other += amount;
-        } else {
-          paymentMethodsBreakdown.mobileBanking += amount;
-        }
+      // Payment method breakdown (already gated on isPaid above)
+      const amount = wo.paidAmount || wo.totalAmount;
+      const method = (wo.paymentMethod || '').toString();
+      if (method === 'Cash') {
+        paymentMethodsBreakdown.cashDrawer += amount;
+      } else if (method === 'Credit Card' || method === 'Apple Pay') {
+        paymentMethodsBreakdown.cardPos += amount;
+      } else if (method.startsWith('Split Payment') || method === 'Net 30') {
+        paymentMethodsBreakdown.other += amount;
+      } else {
+        paymentMethodsBreakdown.mobileBanking += amount;
       }
     });
 
-    const totalRevenue = laborIncome + partsSalesIncome;
+    // totalRevenue = CUSTOMER revenue only (labor collected). Parts selling
+    // price is an internal metric (partsSalesIncome) and never inflates the
+    // shop's revenue. Gross Profit = Amount Due − Parts Cost (POS formula).
+    const totalRevenue = laborIncome;
     const grossProfit = totalRevenue - cogsTotal;
     const grossMarginPercent = totalRevenue > 0 ? Math.round((grossProfit / totalRevenue) * 100) : 0;
 
@@ -246,6 +260,10 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
   const partsCategoryProfit = useMemo(() => {
     const map = new Map<string, { units: number; revenue: number; cost: number }>();
     filteredWorkOrders.forEach((wo) => {
+      // Only parts actually SOLD on PAID tickets count (audit A-3) — unpaid
+      // tickets' parts are still in the customer's device / not yet income.
+      const isPaid = Boolean(wo.isPaid) || (Number(wo.paidAmount) > 0);
+      if (!isPaid) return;
       (wo.lineItems || []).forEach((li) => {
         if (li.partId && !li.isLabor && li.quantity > 0) {
           const part = parts.find((p) => p.id === li.partId);
@@ -266,6 +284,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
   // Parts sold per ticket (only tickets with part line items)
   const partsTickets = useMemo(() => {
     return filteredWorkOrders
+      .filter((wo) => Boolean(wo.isPaid) || (Number(wo.paidAmount) > 0)) // paid only (audit A-3)
       .map((wo) => {
         const lines = (wo.lineItems || []).filter((li) => li.partId && !li.isLabor && li.quantity > 0);
         if (!lines.length) return null;
@@ -292,6 +311,9 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
       items: { name: string; qty: number; revenue: number; cost: number }[];
     }>();
     filteredWorkOrders.forEach((wo) => {
+      // Parts grouped by day — PAID tickets only (audit A-3)
+      const isPaid = Boolean(wo.isPaid) || (Number(wo.paidAmount) > 0);
+      if (!isPaid) return;
       const ts = wo.inventoryConsumedAt || wo.completedAt || wo.updatedAt || wo.createdAt;
       if (!ts) return;
       const d = new Date(ts);
@@ -423,11 +445,11 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
               </div>
               <div className="mt-auto pt-2 border-t border-surface text-xs font-bold space-y-0.5">
                 <div className="flex justify-between text-brand">
-                  <span>Labor Income:</span>
+                  <span>Customer Paid (Labor):</span>
                   <span>{financialSummary.laborIncome.toLocaleString()} {currency}</span>
                 </div>
                 <div className="flex justify-between text-muted">
-                  <span>Parts Sales:</span>
+                  <span>Parts Revenue (internal):</span>
                   <span>{financialSummary.partsSalesIncome.toLocaleString()} {currency}</span>
                 </div>
               </div>
@@ -666,9 +688,11 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
               </div>
             </div>
 
-            {/* Parts Sales Income Card */}
+            {/* Parts Sales Income Card — internal parts P&L (audit A-3): parts
+                are bundled into the labor charge; this is the internal parts
+                revenue at selling price, NOT extra customer revenue. */}
             <div className="p-4 bg-success/10 border border-success/30 rounded-2xl space-y-2">
-              <span className="text-xs font-bold text-success-deep uppercase tracking-wider block">Parts Sales Revenue</span>
+              <span className="text-xs font-bold text-success-deep uppercase tracking-wider block">Parts Revenue (Internal)</span>
               <div className="text-2xl font-black text-success-deep font-mono">
                 {financialSummary.partsSalesIncome.toLocaleString()} {currency}
               </div>

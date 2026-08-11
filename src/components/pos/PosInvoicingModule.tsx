@@ -403,7 +403,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     }
   }, [filteredInventoryParts, selectedInventoryPart]);
 
-  const recalculateTotals = (lineItems: WorkOrder['lineItems'], discountAmount: number, depositAmount: number, _storedSubtotal?: number) => {
+  const recalculateTotals = (lineItems: WorkOrder['lineItems'], discountAmount: number, depositAmount: number, discountFormat?: WorkOrder['discountFormat']) => {
     const laborItems = lineItems.filter((li) => li.isLabor);
     let computedSubtotal = 0;
     for (const item of laborItems) {
@@ -411,12 +411,11 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
       const itemDiscount = item.lineItemDiscountPercent ? lineTotal * (item.lineItemDiscountPercent / 100) : 0;
       computedSubtotal += lineTotal - itemDiscount;
     }
-    // Old WOs: when NO line item has per-item discount %, the unitPrice is already
-    // the FINAL price and the stored discountAmount is a duplicate of the embedded
-    // discount — ignore it. New WOs (with lineItemDiscountPercent) use discountAmount
-    // as an additional invoice-level discount.
-    const hasPerItemDiscount = laborItems.some((li) => Boolean(li.lineItemDiscountPercent));
-    const effectiveDiscount = hasPerItemDiscount ? discountAmount : 0;
+    // Invoice-level discount (Ko Hein 2026-08-11, audit A-1): always subtract
+    // discountAmount for new-format tickets. Legacy tickets (unitPrice = FINAL
+    // price, discountAmount = duplicate of embedded discount) carry the explicit
+    // 'legacy' flag (self-heal stamps it); they must NOT get a second deduction.
+    const effectiveDiscount = discountFormat === 'legacy' ? 0 : discountAmount;
     const taxAmount = Math.round(computedSubtotal * taxRate);
     const totalAmount = Math.max(0, Math.round(computedSubtotal) + taxAmount - effectiveDiscount - depositAmount);
     return { subtotal: Math.round(computedSubtotal), taxAmount, totalAmount };
@@ -428,9 +427,13 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   // (format B: basePrice + discountPercent). When such a ticket is selected
   // in POS (e.g. stale cache / pre-migration data), recover the ORIGINAL
   // price + per-item discount % and persist — so it displays as
-  // Original − Discount = Final everywhere.
+  // Original − Discount = Final everywhere. New-format tickets (explicit
+  // discountFormat 'new' OR stored total already matches new-format math) are
+  // NEVER healed — their discountAmount is a real invoice-level discount
+  // (audit A-1/A-2 guards).
   useEffect(() => {
     if (!selectedWo || !onSaveWorkOrder) return;
+    if (selectedWo.discountFormat === 'new') return; // never heal new-format tickets
     const lis = selectedWo.lineItems || [];
     const dis = Number(selectedWo.discountAmount) || 0;
     const labor = lis.filter((li) => li.isLabor);
@@ -439,6 +442,46 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     const repByName = new Map(reps.map((r) => [String(r.name).toLowerCase().trim(), r]));
     const anyRepDisc = reps.some((r) => (Number(r.discountPercent) || 0) > 0);
     if (dis <= 0 && !anyRepDisc) return; // nothing to fix
+
+    // New-format guard (audit A-1): if the stored total already matches
+    // round(subtotal) + tax − discountAmount − deposit, this ticket's
+    // discountAmount is a REAL invoice-level discount that was already
+    // applied — healing it would corrupt the price.
+    const newFormatTotal =
+      Math.round(Number(selectedWo.subtotal) || 0) +
+      Math.round(Number(selectedWo.taxAmount) || 0) -
+      dis -
+      (Number(selectedWo.depositAmount) || 0);
+    if (Math.abs((Number(selectedWo.totalAmount) || 0) - newFormatTotal) <= 1) return;
+
+    // Legacy evidence: a legacy ticket's unitPrice is the FINAL (discounted)
+    // price, so its selectedRepairs basePrice is HIGHER than unitPrice. A
+    // new-format ticket stores unitPrice == basePrice (original). If no labor
+    // line shows that legacy signature, this is a new-format ticket with a
+    // real invoice discount — never run legacy recovery on it (audit A-1/P1-2).
+    // Data is cloud-only and fully migrated, so any ticket with discountAmount
+    // and no per-item discounts is a new-format A-1 victim.
+    const legacyEvidence = labor.some((li) => {
+      const rep = repByName.get(String(li.description || '').toLowerCase().trim());
+      return rep && Number(rep.basePrice) > 0 && Number(rep.basePrice) > (Number(li.unitPrice) || 0) + 0.5;
+    });
+    if (dis > 0 && !legacyEvidence) {
+      // A-1 victim repair: new-format ticket (unitPrice == basePrice) whose
+      // stored totalAmount never had the invoice discount subtracted (the
+      // old recalculateTotals ignored discountAmount when no line had a
+      // per-item discount). Recompute totals in place, KEEP discountAmount,
+      // stamp 'new' — the discount now applies (audit A-1).
+      const totals = recalculateTotals(lis, dis, Number(selectedWo.depositAmount) || 0, 'new');
+      onSaveWorkOrder({
+        ...selectedWo,
+        subtotal: totals.subtotal,
+        taxAmount: totals.taxAmount,
+        totalAmount: totals.totalAmount,
+        discountFormat: 'new',
+        updatedAt: new Date().toISOString(),
+      });
+      return;
+    }
 
     const qtyOf = (li: any) => Number(li.quantity) || 1;
     let origSum = 0;
@@ -459,7 +502,8 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
         finalSum += unit * qty;
         return li;
       }
-      finalSum += (Number(li.unitPrice) || 0) * qty; // parts tracked, not charged
+      // Parts are INTERNAL tracking only — never charged to the customer, so
+      // they contribute nothing to the customer total (audit A-2).
       return li;
     });
     // Format A fallback: recover from duplicate discountAmount
@@ -480,12 +524,19 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     }
     if (origSum <= 0) return;
     const newSubtotal = newLis.filter((li) => li.isLabor).reduce((s, li) => s + (Number(li.unitPrice) || 0) * qtyOf(li), 0);
+    // Recompute tax + total consistently: total = labor final + tax − deposit.
+    // Parts stay out of the customer total; discountAmount is zeroed because the
+    // discount now lives in per-item % (audit A-2).
+    const healedTax = Math.round(finalSum * taxRate);
+    const healedTotal = Math.max(0, Math.round(finalSum) + healedTax - (Number(selectedWo.depositAmount) || 0));
     onSaveWorkOrder({
       ...selectedWo,
       lineItems: newLis,
       discountAmount: 0,
+      discountFormat: 'new',
       subtotal: newSubtotal || origSum,
-      totalAmount: Math.round(finalSum),
+      taxAmount: healedTax,
+      totalAmount: healedTotal,
       updatedAt: new Date().toISOString(),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -546,7 +597,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
       ];
     }
 
-    const totals = recalculateTotals(nextLineItems, selectedWo.discountAmount, selectedWo.depositAmount, selectedWo.subtotal);
+    const totals = recalculateTotals(nextLineItems, selectedWo.discountAmount, selectedWo.depositAmount, selectedWo.discountFormat);
     const updatedWo: WorkOrder = {
       ...selectedWo,
       lineItems: nextLineItems,
@@ -563,7 +614,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     if (!selectedWo || !onSaveWorkOrder) return;
 
     const nextLineItems = (selectedWo.lineItems || []).filter((item) => item.id !== lineItemId);
-    const totals = recalculateTotals(nextLineItems, selectedWo.discountAmount, selectedWo.depositAmount, selectedWo.subtotal);
+    const totals = recalculateTotals(nextLineItems, selectedWo.discountAmount, selectedWo.depositAmount, selectedWo.discountFormat);
     const updatedWo: WorkOrder = {
       ...selectedWo,
       lineItems: nextLineItems,
@@ -585,7 +636,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
       if (field === 'lineItemDiscountPercent') return { ...item, lineItemDiscountPercent: Math.min(100, Math.max(0, value)) };
       return item;
     });
-    const totals = recalculateTotals(nextLineItems, selectedWo.discountAmount, selectedWo.depositAmount, selectedWo.subtotal);
+    const totals = recalculateTotals(nextLineItems, selectedWo.discountAmount, selectedWo.depositAmount, selectedWo.discountFormat);
     onSaveWorkOrder({
       ...selectedWo,
       lineItems: nextLineItems,
@@ -615,7 +666,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
       isLabor: true,
     };
     const nextLineItems = [...(selectedWo.lineItems || []), newLine];
-    const totals = recalculateTotals(nextLineItems, selectedWo.discountAmount, selectedWo.depositAmount, selectedWo.subtotal);
+    const totals = recalculateTotals(nextLineItems, selectedWo.discountAmount, selectedWo.depositAmount, selectedWo.discountFormat);
     onSaveWorkOrder({
       ...selectedWo,
       lineItems: nextLineItems,
@@ -651,7 +702,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
       lineItemDiscountPercent: item.discountPercent || undefined,
     }));
     const nextLineItems = [...(selectedWo.lineItems || []), ...newLines];
-    const totals = recalculateTotals(nextLineItems, selectedWo.discountAmount, selectedWo.depositAmount, selectedWo.subtotal);
+    const totals = recalculateTotals(nextLineItems, selectedWo.discountAmount, selectedWo.depositAmount, selectedWo.discountFormat);
     onSaveWorkOrder({
       ...selectedWo,
       lineItems: nextLineItems,
@@ -667,7 +718,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   const handleUpdateInvoiceDiscount = (newDiscount: number) => {
     if (!selectedWo || !onSaveWorkOrder) return;
     const discount = Math.max(0, Number(newDiscount) || 0);
-    const totals = recalculateTotals(selectedWo.lineItems, discount, selectedWo.depositAmount, selectedWo.subtotal);
+    const totals = recalculateTotals(selectedWo.lineItems, discount, selectedWo.depositAmount, selectedWo.discountFormat);
     onSaveWorkOrder({
       ...selectedWo,
       discountAmount: discount,

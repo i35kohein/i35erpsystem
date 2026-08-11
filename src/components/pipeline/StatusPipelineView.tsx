@@ -430,12 +430,18 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
       isPaid: true,
       paidAmount: amount,
       paymentMethod,
+      // Anchor the warranty clock at checkout (audit D-1): completedAt is
+      // stamped here so the single save below carries it — no second write.
+      ...(!checkoutModalWo.completedAt ? { completedAt: new Date().toISOString() } : {}),
       repairLogs: [newLog, ...(checkoutModalWo.repairLogs || [])],
       updatedAt: new Date().toISOString()
     };
 
+    // Single atomic save (audit D-1): the full object already carries
+    // isPaid + paidAmount + paymentMethod + log + completedAt. The second
+    // onUpdateWorkOrderStatus call was a stale-state race that clobbered the
+    // payment data (whichever write landed last on Supabase won).
     if (onSaveWorkOrder) onSaveWorkOrder(updatedWo);
-    onUpdateWorkOrderStatus(checkoutModalWo.id, 'Taken Out');
     setCheckoutModalWo(null);
     toast.success(`Payment of ${amount.toLocaleString()} MMK confirmed. Ticket moved to Taken Out.`, 'Payment Confirmed');
   };
@@ -1349,11 +1355,19 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
             const updatedWo: WorkOrder = {
               ...targetWo,
               status: targetStatus,
+              // Anchor the warranty clock for Finished/Taken Out (audit D-1) —
+              // handleSaveWorkOrder also stamps it, but stamp here so the log
+              // entry always has the complete object.
+              ...((targetStatus === 'Finished' || targetStatus === 'Taken Out') && !targetWo.completedAt
+                ? { completedAt: new Date().toISOString() }
+                : {}),
               repairLogs: [newLog, ...(targetWo.repairLogs || [])],
               updatedAt: new Date().toISOString()
             };
+            // Single save only (audit D-1): the extra onUpdateWorkOrderStatus
+            // call wrote a stale object (no log entry) that could clobber this
+            // one on the server.
             if (onSaveWorkOrder) onSaveWorkOrder(updatedWo);
-            onUpdateWorkOrderStatus(targetWo.id, targetStatus);
           }}
         />
       )}
@@ -1399,11 +1413,14 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
             const updatedWo: WorkOrder = {
               ...targetWo,
               status: targetStatus,
+              ...((targetStatus === 'Finished' || targetStatus === 'Taken Out') && !targetWo.completedAt
+                ? { completedAt: new Date().toISOString() }
+                : {}),
               repairLogs: [newLog, ...(targetWo.repairLogs || [])],
               updatedAt: new Date().toISOString()
             };
+            // Single save only (audit D-1) — see override above.
             if (onSaveWorkOrder) onSaveWorkOrder(updatedWo);
-            onUpdateWorkOrderStatus(targetWo.id, targetStatus);
           }}
         />
       )}

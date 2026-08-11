@@ -167,6 +167,14 @@ export interface WorkOrder {
   subtotal: number;
   depositAmount: number;
   discountAmount: number;
+  /** Discount accounting format (Ko Hein 2026-08-11):
+   *  'new'  = unitPrice is the ORIGINAL price; per-item discounts live in
+   *           lineItemDiscountPercent; discountAmount is an EXTRA invoice-level
+   *           discount that must always be subtracted from the total.
+   *  'legacy' = unitPrice is the FINAL price; discountAmount (if any) is a
+   *           duplicate of the embedded discount and must be IGNORED.
+   *  Missing = treated as 'new' (all DB tickets were migrated to new format). */
+  discountFormat?: 'new' | 'legacy';
   taxAmount: number;
   totalAmount: number;
   paidAmount?: number;

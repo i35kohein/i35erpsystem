@@ -1227,23 +1227,30 @@ export default function App() {
 
   const handleSaveWorkOrder = (wo: WorkOrder) => {
     const isUpdate = workOrders.some((x) => x.id === wo.id);
-    if (checkIsDiagnosticCompleted(wo)) {
-      setToasts((prev) => prev.filter((t) => t.workOrderId !== wo.id));
+    // Anchor the warranty clock the moment a repair completes, mirroring
+    // handleUpdateWorkOrderStatus — so single-save flows (POS checkout, soft
+    // overrides) stamp completedAt without a second race-prone write (audit D-1).
+    const withCompletedAt =
+      (wo.status === 'Finished' || wo.status === 'Taken Out') && !wo.completedAt
+        ? { ...wo, completedAt: wo.completedAt || new Date().toISOString() }
+        : wo;
+    if (checkIsDiagnosticCompleted(withCompletedAt)) {
+      setToasts((prev) => prev.filter((t) => t.workOrderId !== withCompletedAt.id));
     }
     setWorkOrders((prev) => {
-      const idx = prev.findIndex((x) => x.id === wo.id);
+      const idx = prev.findIndex((x) => x.id === withCompletedAt.id);
       if (idx >= 0) {
         const copy = [...prev];
-        copy[idx] = wo;
+        copy[idx] = withCompletedAt;
         return copy;
       }
-      return [wo, ...prev];
+      return [withCompletedAt, ...prev];
     });
-    saveDocument('workOrders', wo).catch(reportSaveError);
+    saveDocument('workOrders', withCompletedAt).catch(reportSaveError);
     if (isUpdate) {
-      addToast(`Work order ${wo.id} updated successfully`, 'success', 'Work Order Saved');
+      addToast(`Work order ${withCompletedAt.id} updated successfully`, 'success', 'Work Order Saved');
     } else {
-      addToast(`Work order ${wo.id} created for ${wo.customerName}`, 'success', 'Work Order Created');
+      addToast(`Work order ${withCompletedAt.id} created for ${withCompletedAt.customerName}`, 'success', 'Work Order Created');
     }
   };
 

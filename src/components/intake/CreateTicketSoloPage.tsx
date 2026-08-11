@@ -495,6 +495,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       subtotal: baseTotal,
       depositAmount: baseWorkOrder?.depositAmount || 0,
       discountAmount: 0,
+      discountFormat: 'new',
       taxAmount: baseWorkOrder?.taxAmount || 0,
       totalAmount: finalEstimate,
       isPaid: baseWorkOrder?.isPaid || false,
