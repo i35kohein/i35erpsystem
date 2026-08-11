@@ -545,10 +545,10 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                         </p>
                       </td>
 
-                      {/* Symptoms / Service */}
+                      {/* Symptoms / Service — repairs only, no intake note (Ko Hein 2026-08-11) */}
                       <td className="py-3 px-3 hidden lg:table-cell">
-                        <p className="text-xs text-ink line-clamp-1 max-w-[180px]" title={wo.symptomsReported || (wo.selectedRepairs || []).map((r) => r.name).join(', ') || wo.serviceType}>
-                          {wo.symptomsReported || (wo.selectedRepairs || []).map((r) => r.name).join(', ') || wo.serviceType || 'General Repair'}
+                        <p className="text-xs text-ink line-clamp-1 max-w-[180px]" title={(wo.selectedRepairs || []).map((r) => r.name).join(', ') || wo.serviceType}>
+                          {(wo.selectedRepairs || []).map((r) => r.name).join(', ') || wo.serviceType || 'General Repair'}
                         </p>
                       </td>
 
@@ -695,7 +695,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           <div className="workspace-panel__scroll grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 content-start rounded-xl p-1">
             {filteredOrders.map((wo) => {
               const woColorStyle = getRealisticColorStyle(wo.deviceColor);
-              const summary = wo.symptomsReported || (wo.selectedRepairs || []).map((r) => r.name).join(', ') || wo.serviceType || 'General Repair';
+              const summary = (wo.selectedRepairs || []).map((r) => r.name).join(', ') || wo.serviceType || 'General Repair';
 
               return (
                 <div
