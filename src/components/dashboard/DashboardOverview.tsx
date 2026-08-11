@@ -1634,7 +1634,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
                               )}
                               {item.isExpired && (
                                 <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-line text-muted text-xs font-bold rounded-lg">
-                                  <span>Expired ({Math.abs(item.remainingDays)}d ago)</span>
+                                  <span>Expired {item.expiryDateFormatted}</span>
                                 </span>
                               )}
                               {item.isActive && (

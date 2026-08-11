@@ -424,6 +424,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                   const completedDate = new Date(wo.completedAt || wo.updatedAt || wo.createdAt).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
+                    year: 'numeric',
                   });
 
                   return (

@@ -326,6 +326,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
               const createdDate = new Date(wo.createdAt || Date.now()).toLocaleDateString('en-US', {
                 month: 'short',
                 day: 'numeric',
+                year: 'numeric',
               });
               const openQaCard = () => {
                 setSelectedWoId(wo.id);
@@ -419,6 +420,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                   const createdDate = new Date(wo.createdAt || Date.now()).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
+                    year: 'numeric',
                   });
                   const openQa = () => {
                     setSelectedWoId(wo.id);

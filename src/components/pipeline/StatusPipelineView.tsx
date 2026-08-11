@@ -855,7 +855,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                               className="font-mono text-muted shrink-0"
                               title={`Voucher opened: ${new Date(wo.createdAt || Date.now()).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}`}
                             >
-                              {new Date(wo.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                              {new Date(wo.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                             </span>
                           </div>
                         )}

@@ -1454,7 +1454,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                         )}
                       </td>
                       <td className="p-3 font-mono text-muted">
-                        {wo.inventoryConsumedAt ? new Date(wo.inventoryConsumedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}
+                        {wo.inventoryConsumedAt ? new Date(wo.inventoryConsumedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
                       </td>
                       <td className="p-3">
                         <span className={`text-xs font-black px-2.5 py-1 rounded-md ${
@@ -1475,7 +1475,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                           </Button>
                         ) : (
                           <span className="text-xs text-success-deep font-bold">
-                            ✓ {wo.inventorySettledAt ? new Date(wo.inventorySettledAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''}
+                            ✓ {wo.inventorySettledAt ? new Date(wo.inventorySettledAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
                           </span>
                         )}
                       </td>
