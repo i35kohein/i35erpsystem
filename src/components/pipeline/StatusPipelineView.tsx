@@ -1015,6 +1015,25 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
           onPrint={onSelectPrintTag}
           onEdit={onOpenNewWorkOrder ? (wo) => onOpenNewWorkOrder({ editWorkOrder: wo }) : undefined}
           onDelete={onDeleteWorkOrder}
+          onAddLog={(wo, note) => {
+            const formattedDate = new Date().toLocaleString('en-US', {
+              month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true
+            });
+            const newLog: RepairLogEntry = {
+              id: `log-${Date.now()}`,
+              timestamp: formattedDate,
+              author: currentUser?.name || 'Technician Update',
+              note,
+              statusChange: wo.status,
+            };
+            const updatedWo: WorkOrder = {
+              ...wo,
+              repairLogs: [newLog, ...(wo.repairLogs || [])],
+              updatedAt: new Date().toISOString(),
+            };
+            if (onSaveWorkOrder) onSaveWorkOrder(updatedWo);
+            setDetailModalWo(updatedWo);
+          }}
         />
       )}
 

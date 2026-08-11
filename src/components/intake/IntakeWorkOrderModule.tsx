@@ -36,6 +36,7 @@ import {WorkOrder,
   Customer, 
   Technician,
   AppUser,
+  RepairLogEntry,
   WorkOrderStatus} from '../../types';
 import { getRealisticColorStyle } from './deviceData';
 
@@ -771,6 +772,23 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           onPrint={onSelectPrintTag}
           onEdit={onOpenNewWorkOrder ? (wo) => onOpenNewWorkOrder({ editWorkOrder: wo }) : undefined}
           onDelete={onDeleteWorkOrder}
+          onAddLog={(wo, note) => {
+            const formattedDate = new Date().toLocaleString('en-US', {
+              month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true
+            });
+            const newLog: RepairLogEntry = {
+              id: `log-${Date.now()}`,
+              timestamp: formattedDate,
+              author: currentUser?.name || 'Technician Update',
+              note,
+              statusChange: wo.status,
+            };
+            onSaveWorkOrder({
+              ...wo,
+              repairLogs: [newLog, ...(wo.repairLogs || [])],
+              updatedAt: new Date().toISOString(),
+            });
+          }}
         />
       )}
       {/* Confirm Delete Modal */}

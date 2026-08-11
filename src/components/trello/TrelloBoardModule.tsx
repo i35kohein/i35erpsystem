@@ -4,7 +4,7 @@ import {
   DollarSign,
   Stethoscope,
   RotateCcw } from 'lucide-react';
-import { WorkOrder, Technician, SystemSettings, WorkOrderStatus } from '../../types';
+import { WorkOrder, Technician, SystemSettings, WorkOrderStatus, RepairLogEntry } from '../../types';
 import { PriorityBadge } from '../common/PriorityBadge';
 import { TicketDetailInspectorModal } from '../common/TicketDetailInspectorModal';
 import { confirmDialog } from '../common/ConfirmDialog';
@@ -363,6 +363,26 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
           onPrint={onSelectPrintTag}
           onEdit={undefined}
           onDelete={onDeleteWorkOrder}
+          onAddLog={(wo, note) => {
+            const formattedDate = new Date().toLocaleString('en-US', {
+              month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true
+            });
+            const newLog: RepairLogEntry = {
+              id: `log-${Date.now()}`,
+              timestamp: formattedDate,
+              author: currentUser?.name || 'Technician Update',
+              note,
+              statusChange: wo.status,
+            };
+            if (onSaveWorkOrder) {
+              onSaveWorkOrder({
+                ...wo,
+                repairLogs: [newLog, ...(wo.repairLogs || [])],
+                updatedAt: new Date().toISOString(),
+              });
+            }
+            setDetailWo({ ...wo, repairLogs: [newLog, ...(wo.repairLogs || [])] });
+          }}
         />
       )}
     </div>

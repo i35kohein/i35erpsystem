@@ -24,6 +24,8 @@ interface TicketDetailInspectorModalProps {
   onPrint?: (workOrder: WorkOrder) => void;
   onEdit?: (workOrder: WorkOrder) => void;
   onDelete?: (id: string) => void;
+  /** Add a manual log entry to the ticket (Ko Hein 2026-08-11). */
+  onAddLog?: (workOrder: WorkOrder, note: string) => void;
 }
 
 export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProps> = ({
@@ -33,8 +35,11 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
   onPrint,
   onEdit,
   onDelete,
+  onAddLog,
 }) => {
   const [activeTab, setActiveTab] = React.useState<'details' | 'log'>('details');
+  const [logDraft, setLogDraft] = React.useState('');
+  const [isSavingLog, setIsSavingLog] = React.useState(false);
   const rawNotes = workOrder.symptomsReported || '';
   const cleanNotes = rawNotes
     .split('\n')
@@ -370,6 +375,43 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                   {repairLogs.length} {repairLogs.length === 1 ? 'event' : 'events'}
                 </span>
               </div>
+
+              {/* Add log entry (Ko Hein 2026-08-11) */}
+              {onAddLog && (
+                <div className="border-b border-line bg-surface/60 px-4 py-3">
+                  <div className="flex items-end gap-2">
+                    <div className="min-w-0 flex-1">
+                      <label htmlFor="inspector-log-note" className="mb-1 block text-[10px] font-black uppercase tracking-wider text-muted">
+                        Add Log Entry
+                      </label>
+                      <textarea
+                        id="inspector-log-note"
+                        value={logDraft}
+                        onChange={(e) => setLogDraft(e.target.value)}
+                        placeholder="e.g. Replaced battery, waiting on customer approval…"
+                        rows={2}
+                        className="w-full resize-none rounded-lg border border-line bg-white px-3 py-2 text-xs font-medium text-ink outline-none placeholder:text-muted/60 focus:border-brand focus:ring-2 focus:ring-brand/20"
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      disabled={!logDraft.trim() || isSavingLog}
+                      onClick={() => {
+                        if (!logDraft.trim() || !onAddLog) return;
+                        setIsSavingLog(true);
+                        onAddLog(workOrder, logDraft.trim());
+                        setLogDraft('');
+                        // Parent re-opens modal with updated wo via its own state;
+                        // reset the flag on the next tick so the input stays usable.
+                        setTimeout(() => setIsSavingLog(false), 300);
+                      }}
+                      className="shrink-0 rounded-lg bg-brand px-4 py-2 text-xs font-extrabold text-white transition-colors hover:bg-brand-deep disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      Add Log
+                    </Button>
+                  </div>
+                </div>
+              )}
 
               {repairLogs.length > 0 ? (
                 <ol className="divide-y divide-line">
