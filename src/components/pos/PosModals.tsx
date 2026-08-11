@@ -154,8 +154,8 @@ export interface PosAddPartModalProps {
   deviceModel: string;
   owner: 'ALL' | 'APP' | 'KZH';
   onOwnerChange: (o: 'ALL' | 'APP' | 'KZH') => void;
-  mode: 'auto' | 'manual';
-  onModeChange: (m: 'auto' | 'manual') => void;
+  mode: 'auto' | 'manual' | 'external';
+  onModeChange: (m: 'auto' | 'manual' | 'external') => void;
   search: string;
   onSearchChange: (s: string) => void;
   filteredParts: PartItem[];
@@ -165,6 +165,14 @@ export interface PosAddPartModalProps {
   onQtyChange: (q: number) => void;
   onAdd: () => void;
   onClose: () => void;
+  /** External part (bought outside, not in inventory) — Ko Hein 2026-08-11 */
+  externalName: string;
+  onExternalNameChange: (s: string) => void;
+  externalCost: number;
+  onExternalCostChange: (n: number) => void;
+  externalSell: number;
+  onExternalSellChange: (n: number) => void;
+  onAddExternal: () => void;
 }
 
 export const PosAddPartModal: React.FC<PosAddPartModalProps> = ({
@@ -184,6 +192,13 @@ export const PosAddPartModal: React.FC<PosAddPartModalProps> = ({
   onQtyChange,
   onAdd,
   onClose,
+  externalName,
+  onExternalNameChange,
+  externalCost,
+  onExternalCostChange,
+  externalSell,
+  onExternalSellChange,
+  onAddExternal,
 }) => {
   if (!isOpen) return null;
   const inStock = filteredParts.filter((part) => part.quantityInStock > 0);
@@ -234,9 +249,9 @@ export const PosAddPartModal: React.FC<PosAddPartModalProps> = ({
           </span>
         </div>
 
-        {/* Sub-tabs: Auto (exact device + repair category) / Manual (all for device) — Ko Hein 2026-08-11 */}
+        {/* Sub-tabs: Auto (exact device + repair category) / Manual (all for device) / External (bought outside) — Ko Hein 2026-08-11 */}
         <div className="flex items-center gap-1 bg-surface rounded-lg p-0.5">
-          {([['auto', 'Auto'], ['manual', 'Manual']] as const).map(([m, label]) => (
+          {([['auto', 'Auto'], ['manual', 'Manual'], ['external', 'External']] as const).map(([m, label]) => (
             <button
               key={m}
               type="button"
@@ -249,6 +264,69 @@ export const PosAddPartModal: React.FC<PosAddPartModalProps> = ({
             </button>
           ))}
         </div>
+
+        {/* External part form — bought outside, not in inventory (Ko Hein 2026-08-11) */}
+        {mode === 'external' && (
+          <div className="space-y-2">
+            <div className="space-y-1">
+              <label className="block text-[11px] font-bold text-muted">Part Name</label>
+              <input
+                type="text"
+                value={externalName}
+                onChange={(e) => onExternalNameChange(e.target.value)}
+                placeholder="e.g. Battery 11 Pro (bought outside)"
+                autoFocus
+                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-xs font-semibold text-ink outline-none transition-colors placeholder:text-muted focus:border-brand/40"
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="space-y-1">
+                <label className="block text-[11px] font-bold text-muted">Cost (ဝယ်ရင်)</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={externalCost || ''}
+                  onChange={(e) => onExternalCostChange(Math.max(0, Number(e.target.value) || 0))}
+                  placeholder="0"
+                  className="w-full rounded-lg border border-line bg-white px-3 py-2 text-xs font-mono font-bold text-ink outline-none transition-colors placeholder:text-muted focus:border-brand/40"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="block text-[11px] font-bold text-muted">Sell Price</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={externalSell || ''}
+                  onChange={(e) => onExternalSellChange(Math.max(0, Number(e.target.value) || 0))}
+                  placeholder="0"
+                  className="w-full rounded-lg border border-line bg-white px-3 py-2 text-xs font-mono font-bold text-ink outline-none transition-colors placeholder:text-muted focus:border-brand/40"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="block text-[11px] font-bold text-muted">Qty</label>
+                <input
+                  type="number"
+                  min={1}
+                  value={qty || ''}
+                  onChange={(e) => onQtyChange(Math.max(1, Math.floor(Number(e.target.value) || 1)))}
+                  placeholder="1"
+                  className="w-full rounded-lg border border-line bg-white px-3 py-2 text-xs font-mono font-bold text-ink outline-none transition-colors placeholder:text-muted focus:border-brand/40"
+                />
+              </div>
+            </div>
+            <Button
+              type="button"
+              disabled={!externalName.trim() || externalSell <= 0}
+              onClick={onAddExternal}
+              className="w-full h-10 bg-ink hover:bg-ink/90 text-white font-extrabold text-xs rounded-lg disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Add External Part to Ticket
+            </Button>
+            <p className="text-[10px] font-semibold text-muted leading-snug">
+              Adds a part line without touching stock — for parts bought outside inventory. Cost goes to expenses; sell price shows in the parts deduction.
+            </p>
+          </div>
+        )}
 
         {/* Manual-mode search (Ko Hein 2026-08-11) */}
         {mode === 'manual' && (
@@ -265,6 +343,7 @@ export const PosAddPartModal: React.FC<PosAddPartModalProps> = ({
         )}
 
         {/* Part list — Auto mode (exact device + repair category) */}
+        {mode !== 'external' && (<>
         <div className="min-h-0 flex-1 overflow-y-auto -mx-1 px-1">
           <div className="space-y-1">
             {inStock.length === 0 ? (
@@ -331,6 +410,7 @@ export const PosAddPartModal: React.FC<PosAddPartModalProps> = ({
             </Button>
           </div>
         )}
+        </>)}
       </div>
     </div>
   );

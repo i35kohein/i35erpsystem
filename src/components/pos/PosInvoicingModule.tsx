@@ -77,7 +77,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   const [posOwner, setPosOwner] = useState<'ALL' | 'APP' | 'KZH'>('ALL');
   // Add Inventory Part modal mode (Ko Hein 2026-08-11): Auto = exact device
   // + repair-category filtered suggestions; Manual = every part for the device.
-  const [posPartMode, setPosPartMode] = useState<'auto' | 'manual'>('auto');
+  const [posPartMode, setPosPartMode] = useState<'auto' | 'manual' | 'external'>('auto');
   // Manual-mode search query (Ko Hein 2026-08-11).
   const [posPartSearch, setPosPartSearch] = useState('');
   const [selectedWoId, setSelectedWoId] = useState<string>(workOrders[0]?.id || '');
@@ -100,6 +100,10 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   const [inventoryPartId, setInventoryPartId] = useState<string>('');
   const [inventoryPartQty, setInventoryPartQty] = useState<number>(1);
   const [isAddPartOpen, setIsAddPartOpen] = useState(false);
+  // External part (bought outside inventory) — Ko Hein 2026-08-11
+  const [externalPartName, setExternalPartName] = useState('');
+  const [externalPartCost, setExternalPartCost] = useState(0);
+  const [externalPartSell, setExternalPartSell] = useState(0);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isMobileCheckoutFullOpen, setIsMobileCheckoutFullOpen] = useState(false);
   // Left (ticket queue) panel collapse toggle
@@ -367,7 +371,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   }, [parts, selectedWo, posOwner]);
 
   // The list shown in the modal depends on the active sub-tab.
-  const filteredInventoryParts = posPartMode === 'manual' ? manualInventoryParts : autoInventoryParts;
+  const filteredInventoryParts = posPartMode === 'manual' ? manualInventoryParts : posPartMode === 'auto' ? autoInventoryParts : [];
 
   const selectedInventoryPart = filteredInventoryParts.find((part) => part.id === inventoryPartId) || filteredInventoryParts[0] || null;
   const taxRate = ((systemSettings?.taxPercentage ?? 6) || 0) / 100;
@@ -591,6 +595,33 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     // audit A-P2-3: commit once (immediate) — totals recomputed inside.
     commitLineItems(nextLineItems, { immediate: true });
     setInventoryPartQty(1);
+  };
+
+  // External part — bought outside inventory, added without touching stock
+  // (Ko Hein 2026-08-11). No partId => no stock deduction, no inventory-fund
+  // debt; unitCost goes to expenses, unitPrice shows in the parts deduction.
+  const handleAddExternalPartToWorkOrder = () => {
+    if (!selectedWo || !onSaveWorkOrder) return;
+    const name = externalPartName.trim();
+    const sell = Math.max(0, Number(externalPartSell) || 0);
+    if (!name || sell <= 0) return;
+    const qty = Math.max(1, Math.floor(Number(inventoryPartQty) || 1));
+    const externalLine: WorkOrderLineItem = {
+      id: `external-${Date.now()}`,
+      description: name,
+      partName: name,
+      unitCost: Math.max(0, Number(externalPartCost) || 0),
+      unitPrice: sell,
+      quantity: qty,
+      isLabor: false,
+    };
+    const existingLines = [...(pendingWoRef.current?.lineItems ?? selectedWo.lineItems ?? [])];
+    commitLineItems([...existingLines, externalLine], { immediate: true });
+    setExternalPartName('');
+    setExternalPartCost(0);
+    setExternalPartSell(0);
+    setInventoryPartQty(1);
+    setIsAddPartOpen(false);
   };
 
   const handleRemoveInventoryPartFromWorkOrder = (lineItemId: string) => {
@@ -2063,6 +2094,13 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
           setIsAddPartOpen(false);
         }}
         onClose={() => setIsAddPartOpen(false)}
+        externalName={externalPartName}
+        onExternalNameChange={setExternalPartName}
+        externalCost={externalPartCost}
+        onExternalCostChange={setExternalPartCost}
+        externalSell={externalPartSell}
+        onExternalSellChange={setExternalPartSell}
+        onAddExternal={handleAddExternalPartToWorkOrder}
       />
 
       {/* Digital Receipt Modal */}
