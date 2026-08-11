@@ -163,7 +163,7 @@ export function computeTechStats(workOrders: WorkOrder[], tech: Technician): Tec
       ? Number((durations.reduce((s, h) => s + h, 0) / durations.length).toFixed(1))
       : null;
 
-  const revenue = finishedOrders.reduce((sum, wo) => sum + (wo.subtotal || 0), 0);
+  const revenue = finishedOrders.reduce((sum, wo) => sum + (wo.totalAmount || wo.subtotal || 0), 0);
   const laborRevenue = finishedOrders.reduce((sum, wo) => sum + getLaborRevenue(wo), 0);
   // Split commission: Spareparts Change (Standard Modular / B2B) vs Hardware Repair (Micro-Soldering).
   // Legacy single commissionRate acts as fallback for both when the split fields aren't set.

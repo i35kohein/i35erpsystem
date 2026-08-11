@@ -256,7 +256,7 @@ export const TechnicianDetailModal: React.FC<TechnicianDetailModalProps> = ({
                           <span className="text-xs text-muted font-mono font-bold">{hours.toFixed(1)}h</span>
                         )}
                         <span className="font-extrabold text-ink text-xs">
-                          {(wo.subtotal || 0).toLocaleString()} MMK
+                          {(wo.totalAmount || wo.subtotal || 0).toLocaleString()} MMK
                         </span>
                         <StatusBadge status={wo.status} size="xs" />
                       </div>

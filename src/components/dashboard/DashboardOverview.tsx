@@ -301,10 +301,11 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
     (wo) => wo.inventoryConsumptionAmount && wo.inventorySettlementStatus !== 'settled'
   );
   const pendingFundTotal = pendingFundTickets.reduce((sum, wo) => sum + (wo.inventoryConsumptionAmount || 0), 0);
-  // Revenue-eligible statuses only: quoted subtotals on tickets that were
+  // Revenue-eligible statuses only: quoted amounts on tickets that were
   // never repaired (Cant Repair / Customer Not Repair) are NOT revenue, and
   // unpaid-but-finished work is still billed revenue (collected is tracked
-  // separately in the Finance tab).
+  // separately in the Finance tab). Amount = what the customer is actually
+  // billed (totalAmount after discounts; subtotal is the pre-discount sum).
   const REVENUE_STATUSES: WorkOrderStatus[] = ['Finished', 'Taken Out'];
   const revenueWorkOrders = useMemo(
     () => filteredWorkOrders.filter((w) => REVENUE_STATUSES.includes(w.status)),
@@ -313,7 +314,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
 
   // Financial calculations
   const totalRevenue = useMemo(() => {
-    return revenueWorkOrders.reduce((sum, wo) => sum + (wo.subtotal || wo.totalAmount || 0), 0);
+    return revenueWorkOrders.reduce((sum, wo) => sum + (wo.totalAmount || wo.subtotal || 0), 0);
   }, [revenueWorkOrders]);
 
   const totalPartsCost = useMemo(() => {
@@ -393,7 +394,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
       const model = (wo.deviceModel || 'Unknown Device').trim() || 'Unknown Device';
       const entry = byModel.get(model) || { count: 0, revenue: 0 };
       entry.count += 1;
-      if (isRevenue) entry.revenue += wo.subtotal || wo.totalAmount || 0;
+      if (isRevenue) entry.revenue += wo.totalAmount || wo.subtotal || 0;
       byModel.set(model, entry);
     });
     return Array.from(byModel.entries())
@@ -407,7 +408,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
   // quotes and open estimates are not revenue.
   const topRepairCategories = useMemo(() => {
     const revenueOrders = filteredWorkOrders.filter((wo) => REVENUE_STATUSES.includes(wo.status));
-    const totalRevenue = revenueOrders.reduce((sum, wo) => sum + (wo.subtotal || wo.totalAmount || 0), 0);
+    const totalRevenue = revenueOrders.reduce((sum, wo) => sum + (wo.totalAmount || wo.subtotal || 0), 0);
     const stats = [
       { id: 'screen', label: 'Screen & Display OLED', icon: Smartphone, color: 'bg-brand', textCol: 'text-brand', bgLight: 'bg-brand-soft', count: 0, revenue: 0 },
       { id: 'battery', label: 'Battery & Charging System', icon: Zap, color: 'bg-success', textCol: 'text-success', bgLight: 'bg-success/10', count: 0, revenue: 0 },
@@ -420,7 +421,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
       const desc = (wo.symptomsReported || '').toLowerCase();
       const repairs = (wo.selectedRepairs || []).map((r) => r.name).join(' ').toLowerCase();
       const hay = `${s} ${desc} ${repairs}`;
-      const rev = REVENUE_STATUSES.includes(wo.status) ? (wo.subtotal || wo.totalAmount || 0) : 0;
+      const rev = REVENUE_STATUSES.includes(wo.status) ? (wo.totalAmount || wo.subtotal || 0) : 0;
 
       // Classify by the actual repair names first (selectedRepairs), then
       // symptoms, then serviceType — serviceType alone is usually just
@@ -457,7 +458,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
     let unpaidCount = 0;
 
     filteredWorkOrders.forEach((wo) => {
-      const total = wo.subtotal || wo.totalAmount || 0;
+      const total = wo.totalAmount || wo.subtotal || 0;
       // Audit D-P3: a zero-total ticket (empty quote, still in Receive, never
       // priced) is NOT "Fully Settled" — skip it so paidCount isn't inflated.
       if (total <= 0) return;
@@ -568,7 +569,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
     workOrders.forEach((wo) => {
       const t = new Date(wo.createdAt || Date.now()).getTime();
       if (isNaN(t)) return;
-      const rev = isRevenueStatus(wo.status) ? wo.subtotal || wo.totalAmount || 0 : 0;
+      const rev = isRevenueStatus(wo.status) ? wo.totalAmount || wo.subtotal || 0 : 0;
       const rep = isRevenueStatus(wo.status) ? 1 : 0;
       if (t >= prevStartMs && t <= prevEndMs) {
         prevRev += rev;

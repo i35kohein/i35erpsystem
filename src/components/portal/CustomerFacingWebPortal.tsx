@@ -749,6 +749,22 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                     {/* audit C-P2: legacy/malformed rows can lack numeric fields */}
                     <span className="font-mono text-ink">{(currentWorkOrder.subtotal || 0).toLocaleString()} {systemSettings.currencySymbol}</span>
                   </div>
+                  {/* audit (Ko Hein 2026-08-11): per-item discounts (new format)
+                      must show too, otherwise Subtotal − Total looks like a math
+                      error. Sum the line-level discounts from the line items. */}
+                  {(() => {
+                    const perItem = (currentWorkOrder.lineItems || []).reduce((s, li) => {
+                      if (!li.lineItemDiscountPercent) return s;
+                      return s + Math.round(((li.unitPrice || 0) * (li.quantity || 1)) * (li.lineItemDiscountPercent / 100));
+                    }, 0);
+                    if (perItem <= 0) return null;
+                    return (
+                      <div className="flex justify-between text-success">
+                        <span>Discount on Repairs:</span>
+                        <span className="font-mono">-{perItem.toLocaleString()} {systemSettings.currencySymbol}</span>
+                      </div>
+                    );
+                  })()}
                   {currentWorkOrder.discountAmount > 0 && (
                     <div className="flex justify-between text-success">
                       <span>Discount Applied:</span>
@@ -870,6 +886,21 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 {/* audit C-P2: guard legacy rows missing numeric fields */}
                 <span className="font-mono text-ink">{(currentWorkOrder.subtotal || 0).toLocaleString()} {systemSettings.currencySymbol}</span>
               </div>
+              {/* audit (Ko Hein 2026-08-11): per-item discounts so the totals
+                  chain ties (Subtotal − Repair Discounts + Tax … = Total). */}
+              {(() => {
+                const perItem = (currentWorkOrder.lineItems || []).reduce((s, li) => {
+                  if (!li.lineItemDiscountPercent) return s;
+                  return s + Math.round(((li.unitPrice || 0) * (li.quantity || 1)) * (li.lineItemDiscountPercent / 100));
+                }, 0);
+                if (perItem <= 0) return null;
+                return (
+                  <div className="flex justify-between text-xs text-success">
+                    <span>Discount on Repairs:</span>
+                    <span className="font-mono">-{perItem.toLocaleString()} {systemSettings.currencySymbol}</span>
+                  </div>
+                );
+              })()}
               {currentWorkOrder.taxAmount > 0 && (
                 <div className="flex justify-between text-xs text-muted">
                   <span>Tax:</span>
