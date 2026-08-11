@@ -1458,7 +1458,16 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           </tr>
                           {estCommission > 0 && (
                             <tr>
-                              <td className="border border-line px-2 py-1.5 text-muted">Tech Commission</td>
+                              <td className="border border-line px-2 py-1.5 text-muted">
+                                Tech Commission{' '}
+                                <span className="text-[10px] font-bold text-ink">
+                                  ({(() => {
+                                    const techId = selectedWo.assignedTechId || (selectedWo as WorkOrder & { qaTechnicianId?: string }).qaTechnicianId;
+                                    const tech = techId ? technicians.find((t) => t.id === techId) : undefined;
+                                    return tech?.name || selectedWo.assignedTechName || 'Unassigned';
+                                  })()})
+                                </span>
+                              </td>
                               <td className="border border-line px-2 py-1.5 text-right font-mono text-muted tabular-nums">-{estCommission.toLocaleString()} {currency}</td>
                             </tr>
                           )}
