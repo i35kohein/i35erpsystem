@@ -167,6 +167,36 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
       .reduce((s, li) => s + li.unitPrice * li.quantity, 0);
   const partsRevenueTotal = fundTickets.reduce((s, wo) => s + partsRevenueOf(wo), 0);
 
+  // Owner split (Ko Hein 2026-08-11): stock is owned by APP (shop fund) or
+  // KZH (Ko Hein's own parts). Settlement must show WHO to pay — sum the
+  // consumed lines per owner using the parts owner map (legacy parts default
+  // to APP).
+  const ownerOfPart = useMemo(() => {
+    const m = new Map<string, PartItem['owner']>();
+    parts.forEach((p) => m.set(p.id, p.owner || 'APP'));
+    return m;
+  }, [parts]);
+  const ownerCostsOf = (wo: WorkOrder) => {
+    let kzh = 0;
+    let app = 0;
+    (wo.lineItems || []).forEach((li) => {
+      if (!li.partId || li.isLabor) return;
+      const cost = (Number(li.unitCost) || 0) * (Number(li.quantity) || 1);
+      if (ownerOfPart.get(li.partId) === 'KZH') kzh += cost;
+      else app += cost;
+    });
+    return { kzh, app };
+  };
+  const pendingOwnerTotals = pendingFundTickets.reduce(
+    (acc, wo) => {
+      const { kzh, app } = ownerCostsOf(wo);
+      acc.kzh += kzh;
+      acc.app += app;
+      return acc;
+    },
+    { kzh: 0, app: 0 }
+  );
+
   // Financial Calculations
   const financialSummary = useMemo(() => {
     let laborIncome = 0;
@@ -1349,6 +1379,11 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
               <div>
                 <span className="text-xs text-muted block">Pending Settlement</span>
                 <span className="text-lg font-black text-warning">{pendingFundTotal.toLocaleString()} {currency}</span>
+                {(pendingOwnerTotals.kzh > 0 || pendingOwnerTotals.app > 0) && (
+                  <span className="text-[10px] font-bold text-muted block mt-0.5">
+                    KZH {pendingOwnerTotals.kzh.toLocaleString()} · APP {pendingOwnerTotals.app.toLocaleString()}
+                  </span>
+                )}
               </div>
               <div className="h-8 w-px bg-line" />
               <div>
@@ -1378,6 +1413,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                   <th className="p-3">Parts Revenue</th>
                   <th className="p-3">Parts Cost</th>
                   <th className="p-3">Parts Margin</th>
+                  <th className="p-3">Owned By</th>
                   <th className="p-3">Consumed</th>
                   <th className="p-3">Status</th>
                   <th className="p-3 text-right">Action</th>
@@ -1388,6 +1424,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                   const pending = wo.inventorySettlementStatus !== 'settled';
                   const partsRev = partsRevenueOf(wo);
                   const partsCost = wo.inventoryConsumptionAmount || 0;
+                  const { kzh, app } = ownerCostsOf(wo);
                   return (
                     <tr key={wo.id} className="hover:bg-surface">
                       <td className="p-3 font-mono font-bold text-brand">{wo.orderNumber}</td>
@@ -1395,6 +1432,27 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                       <td className="p-3 font-mono font-bold text-success-deep">{partsRev.toLocaleString()} {currency}</td>
                       <td className="p-3 font-mono font-black text-ink">{partsCost.toLocaleString()} {currency}</td>
                       <td className="p-3 font-mono font-black text-brand">+{(partsRev - partsCost).toLocaleString()} {currency}</td>
+                      <td className="p-3">
+                        {kzh > 0 && app > 0 ? (
+                          <span className="inline-flex flex-col gap-0.5">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-black">
+                              <span className="px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 border border-violet-200">KZH</span>
+                              <span className="font-mono">{kzh.toLocaleString()} {currency}</span>
+                            </span>
+                            <span className="inline-flex items-center gap-1 text-[10px] font-black">
+                              <span className="px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-200">APP</span>
+                              <span className="font-mono">{app.toLocaleString()} {currency}</span>
+                            </span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-black">
+                            <span className={`px-1.5 py-0.5 rounded border ${kzh > 0 ? 'bg-violet-100 text-violet-700 border-violet-200' : 'bg-sky-100 text-sky-700 border-sky-200'}`}>
+                              {kzh > 0 ? 'KZH' : 'APP'}
+                            </span>
+                            <span className="font-mono">{(kzh || app).toLocaleString()} {currency}</span>
+                          </span>
+                        )}
+                      </td>
                       <td className="p-3 font-mono text-muted">
                         {wo.inventoryConsumedAt ? new Date(wo.inventoryConsumedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}
                       </td>

@@ -301,6 +301,25 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
     (wo) => wo.inventoryConsumptionAmount && wo.inventorySettlementStatus !== 'settled'
   );
   const pendingFundTotal = pendingFundTickets.reduce((sum, wo) => sum + (wo.inventoryConsumptionAmount || 0), 0);
+  // Owner split for the reminder (Ko Hein 2026-08-11): APP shop fund vs KZH
+  // (Ko Hein's own parts) — so the shop knows WHO to pay back.
+  const ownerOfPart = useMemo(() => {
+    const m = new Map<string, PartItem['owner']>();
+    parts.forEach((p) => m.set(p.id, p.owner || 'APP'));
+    return m;
+  }, [parts]);
+  const pendingOwnerTotals = pendingFundTickets.reduce(
+    (acc, wo) => {
+      (wo.lineItems || []).forEach((li) => {
+        if (!li.partId || li.isLabor) return;
+        const cost = (Number(li.unitCost) || 0) * (Number(li.quantity) || 1);
+        if (ownerOfPart.get(li.partId) === 'KZH') acc.kzh += cost;
+        else acc.app += cost;
+      });
+      return acc;
+    },
+    { kzh: 0, app: 0 }
+  );
   // Revenue-eligible statuses only: quoted amounts on tickets that were
   // never repaired (Cant Repair / Customer Not Repair) are NOT revenue, and
   // unpaid-but-finished work is still billed revenue (collected is tracked
@@ -611,6 +630,13 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
             <span className="font-bold text-warning min-w-0">
               Inventory fund reminder — {pendingFundTickets.length} ticket{pendingFundTickets.length > 1 ? 's' : ''} used parts worth{' '}
               <span className="font-black">{pendingFundTotal.toLocaleString()} {currency}</span> from stock, not settled yet
+              {(pendingOwnerTotals.kzh > 0 || pendingOwnerTotals.app > 0) && (
+                <span className="block text-[10px] font-black mt-0.5 text-ink/70">
+                  Pay back: <span className="text-violet-700">KZH {pendingOwnerTotals.kzh.toLocaleString()} {currency}</span>
+                  {' · '}
+                  <span className="text-sky-700">APP {pendingOwnerTotals.app.toLocaleString()} {currency}</span>
+                </span>
+              )}
             </span>
           </div>
           <div className="flex items-center gap-2 shrink-0">
