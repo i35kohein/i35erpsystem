@@ -3050,47 +3050,55 @@ export default function App() {
       {/* App-styled confirm modal (replaces window.confirm) */}
       <ConfirmDialogHost />
 
-      {/* Floating Toast Notification Container */}
-      <div className="fixed top-24 right-3 sm:right-6 z-[60] flex flex-col items-end gap-2.5 max-w-sm w-full pointer-events-none">
+      {/* Floating Toast Notification Container — bottom-right, compact, theme-following (Ko Hein 2026-08-11) */}
+      <div className="fixed bottom-4 right-3 sm:right-4 z-[60] flex flex-col items-end gap-2 max-w-[320px] w-full pointer-events-none">
         <AnimatePresence>
           {toasts.map((toast) => (
             <motion.div
               key={toast.id}
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              layout
+              initial={{ opacity: 0, y: 16, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              transition={{ duration: 0.2 }}
-              className={`pointer-events-auto flex items-start p-3.5 rounded-2xl shadow-2xl border backdrop-blur-md text-xs transition-all ${
+              exit={{ opacity: 0, y: 8, scale: 0.96 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+              className={`pointer-events-auto flex items-start gap-2.5 rounded-xl border p-2.5 shadow-lg backdrop-blur-sm ${
                 toast.type === 'success'
-                  ? 'bg-slate-900/95 text-white border-emerald-500/50 shadow-emerald-950/20'
+                  ? 'bg-[var(--card-bg)] border-emerald-500/40 text-[var(--text-main)]'
                   : toast.type === 'error'
-                  ? 'bg-slate-900/95 text-white border-rose-500/50 shadow-rose-950/20'
-                  : 'bg-slate-900/95 text-white border-blue-500/50 shadow-blue-950/20'
+                  ? 'bg-[var(--card-bg)] border-rose-500/40 text-[var(--text-main)]'
+                  : 'bg-[var(--card-bg)] border-sky-500/40 text-[var(--text-main)]'
               }`}
             >
-              <div className="mr-3 mt-0.5 shrink-0">
-                {toast.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
-                {toast.type === 'error' && <AlertCircle className="w-4 h-4 text-rose-400 animate-pulse" />}
-                {toast.type === 'info' && <Info className="w-4 h-4 text-blue-400" />}
-              </div>
-              <div className="flex-1 pr-2">
-                {toast.title && <div className="font-bold text-sm leading-tight mb-0.5">{toast.title}</div>}
-                <div className="text-xs text-slate-300 leading-snug">{toast.message}</div>
+              <span className={`mt-0.5 shrink-0 flex h-5 w-5 items-center justify-center rounded-full ${
+                toast.type === 'success'
+                  ? 'bg-emerald-500/15 text-emerald-500'
+                  : toast.type === 'error'
+                  ? 'bg-rose-500/15 text-rose-500'
+                  : 'bg-sky-500/15 text-sky-500'
+              }`}>
+                {toast.type === 'success' && <CheckCircle2 className="w-3 h-3" />}
+                {toast.type === 'error' && <AlertCircle className="w-3 h-3" />}
+                {toast.type === 'info' && <Info className="w-3 h-3" />}
+              </span>
+              <div className="min-w-0 flex-1 pr-1">
+                {toast.title && <div className="text-[11px] font-black leading-tight mb-0.5">{toast.title}</div>}
+                <div className="text-[11px] leading-snug text-[var(--text-secondary)]">{toast.message}</div>
                 {toast.persistent && (
-                  <div className="mt-2 flex items-center gap-1.5 text-xs text-rose-300 font-extrabold bg-rose-950/70 px-2 py-1 rounded-lg border border-rose-500/40">
-                    <AlertTriangle className="w-3.5 h-3.5 text-rose-400 shrink-0 animate-pulse" />
-                    <span>Persistent Notice • Non-dismissible until inspection complete</span>
+                  <div className="mt-1.5 inline-flex items-center gap-1 rounded-md bg-rose-500/10 px-1.5 py-0.5 text-[9px] font-extrabold text-rose-500 border border-rose-500/30">
+                    <AlertTriangle className="w-2.5 h-2.5 shrink-0" />
+                    <span>Persistent</span>
                   </div>
                 )}
               </div>
               {toast.dismissible !== false && (
-                <Button
+                <button
                   type="button"
                   onClick={() => removeToast(toast.id)}
-                  className="shrink-0 -mr-1 p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  aria-label="Dismiss notification"
+                  className="shrink-0 -mr-0.5 mt-0.5 p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--border-subtle)] transition-colors cursor-pointer"
                 >
-                  <X className="w-3.5 h-3.5" />
-                </Button>
+                  <X className="w-3 h-3" />
+                </button>
               )}
             </motion.div>
           ))}
