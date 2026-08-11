@@ -35,7 +35,9 @@ export const DEFAULT_DEVICE_FOLDERS: FolderConfig[] = [
   { id: 'iphone-x', name: 'iPhone X / XS / XR', family: 'iPhone', enabled: true },
   { id: 'iphone-8-se', name: 'iPhone 8 / SE Series', family: 'iPhone', enabled: true },
   { id: 'iphone-7-6', name: 'iPhone 7 / 6 Series', family: 'iPhone', enabled: true },
-  { id: 'ipad', name: 'iPad Series', family: 'iPad', enabled: true },
+  { id: 'ipad-pro', name: 'iPad Pro Series', family: 'iPad', enabled: true },
+  { id: 'ipad-air', name: 'iPad Air Series', family: 'iPad', enabled: true },
+  { id: 'ipad', name: 'iPad & iPad Mini Series', family: 'iPad', enabled: true },
   { id: 'apple-watch', name: 'Apple Watch Series', family: 'Apple Watch', enabled: true },
   { id: 'mac', name: 'Mac & MacBook', family: 'Mac', enabled: true },
   { id: 'other', name: 'Other Devices', family: 'Other', enabled: true },
@@ -43,8 +45,11 @@ export const DEFAULT_DEVICE_FOLDERS: FolderConfig[] = [
 
 export function getModelFolderId(modelName: string): string {
   const m = modelName.trim();
-  if (m.toLowerCase().includes('ipad')) return 'ipad';
-  if (m.toLowerCase().includes('watch')) return 'apple-watch';
+  const lower = m.toLowerCase();
+  if (lower.includes('ipad pro')) return 'ipad-pro';
+  if (lower.includes('ipad air')) return 'ipad-air';
+  if (lower.includes('ipad')) return 'ipad';
+  if (lower.includes('watch')) return 'apple-watch';
   if (m.toLowerCase().includes('mac')) return 'mac';
   if (m.includes('16')) return 'iphone-16';
   if (m.includes('15')) return 'iphone-15';
