@@ -47,6 +47,7 @@ export const Navigation: React.FC<NavigationProps> = ({
   workOrders,
   systemSettings,
   currentUser,
+  lowStockCount = 0,
   onOpenNewWorkOrder,
   onOpenRecycleBin,
   isCollapsed,
@@ -81,6 +82,25 @@ export const Navigation: React.FC<NavigationProps> = ({
     return Boolean(w.postRepairChecklist) || w.status === 'Cant Repair' || w.status === 'Customer Not Repair';
   }).length;
 
+  // Sidebar count badges (Ko Hein 2026-08-11): show pending-work counts so the
+  // shop sees at a glance what needs attention.
+  // QA: Finished/Taken Out devices still missing the 21-point QA checklist.
+  const qaPendingCount = myWorkOrders.filter((w) => {
+    if (w.isArchived || w.isPaid) return false;
+    if (w.status !== 'Finished' && w.status !== 'Taken Out') return false;
+    return !w.postRepairChecklist;
+  }).length;
+  // Finance: inventory-fund tickets awaiting settlement (parts used from stock).
+  const financePendingCount = myWorkOrders.filter(
+    (w) => !w.isArchived && w.inventoryConsumptionAmount && w.inventorySettlementStatus !== 'settled'
+  ).length;
+  // Follow-up: completed tickets past due for a follow-up call.
+  const followUpPendingCount = myWorkOrders.filter((w) => {
+    if (w.isArchived) return false;
+    if (w.status !== 'Finished' && w.status !== 'Taken Out') return false;
+    return Boolean(w.followUpStatus) && w.followUpStatus !== 'Satisfied';
+  }).length;
+
   const allNavGroups = [
     {
       title: t('navRepair'),
@@ -104,11 +124,15 @@ export const Navigation: React.FC<NavigationProps> = ({
           id: 'qa',
           label: t('navQa'),
           icon: Stethoscope,
+          badge: qaPendingCount > 0 ? qaPendingCount : undefined,
+          badgeColor: 'bg-warning text-white',
         },
         {
           id: 'follow-up',
           label: t('navFollowUp'),
           icon: PhoneCall,
+          badge: followUpPendingCount > 0 ? followUpPendingCount : undefined,
+          badgeColor: 'bg-purple text-white',
         },
         {
           id: 'price-catalog',
@@ -131,6 +155,8 @@ export const Navigation: React.FC<NavigationProps> = ({
           id: 'finance',
           label: 'Finance',
           icon: DollarSign,
+          badge: financePendingCount > 0 ? financePendingCount : undefined,
+          badgeColor: 'bg-warning text-white',
         },
       ],
     },
@@ -141,6 +167,8 @@ export const Navigation: React.FC<NavigationProps> = ({
           id: 'inventory',
           label: isCollapsed ? t('navPartsMatrix') : t('navPartsMatrix'),
           icon: Boxes,
+          badge: lowStockCount && lowStockCount > 0 ? lowStockCount : undefined,
+          badgeColor: 'bg-danger text-white',
         },
         {
           id: 'suppliers',
