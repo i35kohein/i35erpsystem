@@ -193,10 +193,10 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                             isSelected ? 'font-extrabold text-ink' : 'font-semibold text-ink'
                           }`}
                         >
-                          <span className="min-w-0 flex-1 truncate">
-                            {item.model}
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate">{item.model}</span>
                             {item.modelCodes && item.modelCodes.length > 0 && (
-                              <span className="ml-1.5 font-mono text-[10px] font-black text-brand/60">
+                              <span className="mt-0.5 block whitespace-normal font-mono text-[10px] font-black leading-tight text-brand/60">
                                 {item.modelCodes.join(', ')}
                               </span>
                             )}
