@@ -1914,9 +1914,12 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       </div>
                     </div>
 
-                    {/* Device + customer */}
+                    {/* Device + customer + open date (Ko Hein 2026-08-11) */}
                     <p className="mt-1.5 text-xs font-extrabold text-ink truncate">{wo.deviceModel}</p>
                     <p className="text-[11px] text-muted truncate">{wo.customerName} · {wo.customerPhone}</p>
+                    <p className="text-[10px] font-mono font-bold text-muted/80">
+                      {new Date(wo.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </p>
 
                     {/* Repair summary */}
                     <p className="mt-1 line-clamp-2 text-[11px] font-medium text-muted leading-snug">
