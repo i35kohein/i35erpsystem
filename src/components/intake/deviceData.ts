@@ -60,11 +60,39 @@ export const APPLE_MODEL_SERIES: AppleModelSeriesGroup[] = [
   },
   {
     series: 'MacBook Series',
-    models: ['MacBook Pro 16" (M3 Max)', 'MacBook Pro 14" (M3)', 'MacBook Air 15" (M3)', 'MacBook Air 13" (M2)']
+    models: [
+      'MacBook Pro 16" (M3 Max)',
+      'MacBook Pro 14" (M3)',
+      'MacBook Pro 14" (M2 Pro)',
+      'MacBook Pro 13" (M2)',
+      'MacBook Pro 16" (M1 Pro/Max)',
+      'MacBook Pro 14" (M1 Pro/Max)',
+      'MacBook Pro 13" (M1)',
+      'MacBook Air 15" (M3)',
+      'MacBook Air 13" (M3)',
+      'MacBook Air 15" (M2)',
+      'MacBook Air 13" (M2)',
+      'MacBook Air 13" (M1)',
+      'MacBook Air 13" (2020 Intel)',
+      'MacBook Air 13" (2018-2019)',
+    ]
   },
   {
     series: 'Apple Watch Series',
-    models: ['Apple Watch Ultra 2', 'Apple Watch Series 9', 'Apple Watch SE (2023)']
+    models: [
+      'Apple Watch Ultra 2',
+      'Apple Watch Ultra 1',
+      'Apple Watch Series 10',
+      'Apple Watch Series 9',
+      'Apple Watch Series 8',
+      'Apple Watch Series 7',
+      'Apple Watch Series 6',
+      'Apple Watch Series 5',
+      'Apple Watch Series 4',
+      'Apple Watch SE (2023)',
+      'Apple Watch SE (2022)',
+      'Apple Watch SE (2020)',
+    ]
   }
 ];
 
