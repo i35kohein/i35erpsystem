@@ -115,6 +115,7 @@ const NotificationsTab: React.FC<NotificationsTabProps> = ({ formData, setFormDa
                     onChange={(e) => setFormData({ ...formData, telegramBotToken: e.target.value })}
                     className="w-full bg-white border border-line-strong rounded-xl px-3 py-2 text-xs font-mono text-ink "
                   />
+                  <p className="text-[11px] text-muted mt-1 leading-snug">⚠️ The live bot reads the token from the server environment (TELEGRAM_BOT_TOKEN). This field is a local draft only — it is never saved to the cloud (audit E-4).</p>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-muted mb-1">Telegram Admin Chat ID / Channel ID</label>

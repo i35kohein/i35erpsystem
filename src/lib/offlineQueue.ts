@@ -56,6 +56,43 @@ function runStore<T>(
 export async function addToQueue(
   item: Omit<OfflineQueueItem, 'queueId' | 'queuedAt'>,
 ): Promise<number> {
+  // Coalesce (audit B-2): a newer write for the same document supersedes any
+  // older queued copy — replaying a stale snapshot after a successful live
+  // retry would permanently regress the record. Deletes supersede saves;
+  // saves supersede deletes (re-created doc).
+  const existing = await getQueue();
+  const idsOf = (data: unknown): string[] => {
+    if (!data) return [];
+    const arr = Array.isArray(data) ? data : [data];
+    return arr.map((d: any) => d?.id).filter(Boolean);
+  };
+  const touchedIds = new Set(idsOf(item.data));
+  const toRemove: number[] = [];
+  for (const q of existing) {
+    const qIds = idsOf(q.data);
+    const overlaps = qIds.some((id) => touchedIds.has(id));
+    if (!overlaps) continue; // different document — untouched
+    // Overlapping entries: only a delete that comes AFTER our write wins;
+    // a save for the same doc is superseded by the newer copy we're adding.
+    const incomingIsDelete = item.action === 'delete';
+    const existingIsDelete = q.action === 'delete';
+    if (incomingIsDelete) {
+      // delete wins over stale queued saves; identical delete → drop older
+      toRemove.push(q.queueId as number);
+      continue;
+    }
+    if (existingIsDelete) {
+      // re-creating a doc that was queued for deletion → drop the old delete
+      toRemove.push(q.queueId as number);
+      continue;
+    }
+    // save+batch overlap: older queued write is superseded by the newer one
+    toRemove.push(q.queueId as number);
+  }
+  // Drop superseded entries, then append the newest write (FIFO preserved).
+  for (const queueId of toRemove) {
+    await removeFromQueue(queueId);
+  }
   const queueId = await runStore('readwrite', (store) =>
     store.add({ ...item, queuedAt: Date.now() } as OfflineQueueItem),
   );

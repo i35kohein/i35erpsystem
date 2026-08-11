@@ -127,6 +127,9 @@ const AiTab: React.FC<AiTabProps> = ({ formData, setFormData, aiRescanning, aiRe
                   autoComplete="off"
                   className="w-full p-2.5 border border-line rounded-xl bg-white disabled:opacity-50"
                 />
+                <span className="block text-[11px] font-medium text-muted">
+                  Key ကို cloud ထဲ မသိမ်းပါ — server env key (DEEPSEEK/OPENROUTER/GEMINI/ANTHROPIC) ရှိရင် အဲ့ဒါ auto-fallback ဖြစ်တယ် (audit E-4).
+                </span>
               </label>
             )}
 

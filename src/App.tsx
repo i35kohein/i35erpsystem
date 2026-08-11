@@ -17,9 +17,13 @@ const AI_CLASSIFY_SYSTEM_PROMPT =
   'HARDWARE = board-level work (logic board, motherboard, IC or chip replacement, micro-soldering, reballing, jumpers, trace repair, water/liquid damage, no power, charging IC, audio IC, wifi IC, baseband, NAND, MOSFET, short circuit, boot loop).\n' +
   'If a ticket mixes both, choose board-level work if present. No explanations, no punctuation.';
 
-async function classifyRepairWithAI(wo: WorkOrder, settings: SystemSettings): Promise<'spareparts' | 'hardware' | null> {
+async function classifyRepairWithAI(wo: WorkOrder, settings: SystemSettings): Promise<{
+  verdict: 'spareparts' | 'hardware' | null;
+  /** true when the failure was a missing/not-configured API key (retry-able, never marks the ticket failed). */
+  configError: boolean;
+}> {
   const provider = settings.aiProvider || 'local';
-  if (provider === 'local') return null;
+  if (provider === 'local') return { verdict: null, configError: true };
   const repairs = (wo.selectedRepairs || []).map((r) => r.name).join(', ') || '—';
   try {
     const token = localStorage.getItem('i35_session_token') || '';
@@ -41,15 +45,19 @@ async function classifyRepairWithAI(wo: WorkOrder, settings: SystemSettings): Pr
         ],
       }),
     });
+    // 400 = API key not configured on the server (or rejected) — a config
+    // issue, NOT a ticket problem. Never flag the ticket as failed for this;
+    // it stays eligible for retry once a key is configured (audit E-4).
+    if (res.status === 400) return { verdict: null, configError: true };
     const text = await res.text();
     const data = text ? JSON.parse(text) : {};
-    if (!res.ok || !data.success || !data.answer) return null;
+    if (!res.ok || !data.success || !data.answer) return { verdict: null, configError: false };
     const answer = String(data.answer).trim().toUpperCase();
-    if (answer.includes('HARDWARE')) return 'hardware';
-    if (answer.includes('SPAREPARTS')) return 'spareparts';
-    return null;
+    if (answer.includes('HARDWARE')) return { verdict: 'hardware', configError: false };
+    if (answer.includes('SPAREPARTS')) return { verdict: 'spareparts', configError: false };
+    return { verdict: null, configError: false };
   } catch {
-    return null;
+    return { verdict: null, configError: false };
   }
 }
 
@@ -721,8 +729,12 @@ export default function App() {
     );
     if (!candidate) return;
     aiClassifyInFlight.current.add(candidate.id);
-    classifyRepairWithAI(candidate, systemSettings).then((verdict) => {
+    classifyRepairWithAI(candidate, systemSettings).then(({ verdict, configError }) => {
       aiClassifyInFlight.current.delete(candidate.id);
+      // Config issue (no API key on server) — do NOT mark the ticket failed:
+      // it stays eligible for retry once a key is configured (audit E-4). Only
+      // genuine provider failures get aiClassifyFailed.
+      if (configError && !verdict) return;
       const updated = {
         ...candidate,
         repairTypeAI: verdict || undefined,
@@ -755,8 +767,14 @@ export default function App() {
     let failed = 0;
     for (const wo of pending) {
       aiClassifyInFlight.current.add(wo.id);
-      const verdict = await classifyRepairWithAI(wo, systemSettings);
+      const { verdict, configError } = await classifyRepairWithAI(wo, systemSettings);
       aiClassifyInFlight.current.delete(wo.id);
+      // Config issue → leave the ticket un-flagged so it can be retried later
+      // (audit E-4); do not burn a permanent aiClassifyFailed on it.
+      if (configError && !verdict) {
+        failed++;
+        continue;
+      }
       const updated = {
         ...wo,
         repairTypeAI: verdict || undefined,

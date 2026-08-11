@@ -303,16 +303,22 @@ Return JSON with key "message".`;
     if (!requireAuth(req, res)) return;
     try {
       const { provider, apiKey, model, baseUrl, systemPrompt, messages, context } = req.body;
-      // DeepSeek / OpenRouter are configured once on the server, never exposed
-      // to the browser or committed with the application source. A browser
-      // provided key still wins when the user configures one in Settings → AI.
+      // Server-side key fallback for EVERY provider (audit E-4): the server's
+      // env keys are never exposed to the browser, and the browser-entered AI
+      // key is stripped from cloud saves (cloudSafeData) so it's gone after a
+      // reload. Falling back here means auto-classification keeps working even
+      // when the client sends no key. A browser-provided key still wins.
       const resolvedApiKey =
         apiKey ||
         (provider === "deepseek"
           ? process.env.DEEPSEEK_API_KEY
           : provider === "openrouter"
             ? process.env.OPENROUTER_API_KEY
-            : undefined);
+            : provider === "gemini"
+              ? process.env.GEMINI_API_KEY
+              : provider === "anthropic"
+                ? process.env.ANTHROPIC_API_KEY
+                : undefined);
       if (!resolvedApiKey) return res.status(400).json({ success: false, error: "AI API key is not configured on the server." });
 
       const instruction = `${systemPrompt || "You are a professional repair-shop operations copilot."}

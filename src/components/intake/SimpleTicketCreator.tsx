@@ -229,46 +229,83 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
       ? 'AirPods'
       : 'iPhone';
 
+    // EDIT MODE (audit B-1): build from the EXISTING ticket so untouched
+    // fields survive — workflow status, payment, QA checklists, after
+    // diagnostics, warranty, photos, repair logs, completedAt, technician
+    // assignment, customer linkage, deposit. The old code rebuilt the whole
+    // object from hardcoded defaults, silently erasing all of it on save.
+    const existing = editingId ? workOrders.find((w) => w.id === editingId) : null;
+    // Keep part lines + any labor lines NOT represented in the form (e.g. POS
+    // custom repairs) — only labor lines matching the form's repairs are rebuilt.
+    const formLaborNames = new Set(form.repairs.map((r) => String(r.name || '').toLowerCase().trim()));
+    const preservedLines = (existing?.lineItems || []).filter(
+      (li) => !li.isLabor || !formLaborNames.has(String(li.description || '').toLowerCase().trim())
+    );
+    const newLaborLines: WorkOrder['lineItems'] = form.repairs.map((r) => ({
+      id: `li-${r.id}`,
+      description: r.name,
+      unitCost: Math.round(r.basePrice * 0.5),
+      unitPrice: r.basePrice,
+      quantity: 1,
+      isLabor: true,
+      lineItemDiscountPercent: r.discountPercent || undefined,
+    }));
+    // If the form didn't change the repairs, keep the stored financial totals
+    // (they may include POS updates / parts / discounts). Only recompute the
+    // labor estimate when the repair list actually changed.
+    const repairsChanged =
+      JSON.stringify((existing?.selectedRepairs || []).map((r) => [r.name, r.basePrice, r.discountPercent])) !==
+      JSON.stringify(form.repairs.map((r) => [r.name, r.basePrice, r.discountPercent]));
+    const laborSubtotal = [...preservedLines, ...newLaborLines]
+      .filter((li) => li.isLabor)
+      .reduce((s, li) => s + (Number(li.unitPrice) || 0) * (Number(li.quantity) || 1), 0);
+    const laborFinal = [...preservedLines, ...newLaborLines]
+      .filter((li) => li.isLabor)
+      .reduce(
+        (s, li) =>
+          s +
+          (Number(li.unitPrice) || 0) *
+            (1 - (Number(li.lineItemDiscountPercent) || 0) / 100) *
+            (Number(li.quantity) || 1),
+        0
+      );
+
     const base: WorkOrder = {
+      ...(existing || ({} as WorkOrder)), // preserve everything not edited below
       id: editingId || `wo-${Date.now()}`,
       orderNumber: editingId
         ? (workOrders.find((w) => w.id === editingId)?.orderNumber || nextOrderNumber())
         : nextOrderNumber(),
-      customerId: '',
+      customerId: existing?.customerId || '',
       customerName: form.name.trim() || 'Walk-in Customer',
       customerPhone: form.phone.trim(),
-      customerEmail: '',
-      customerType: 'Retail',
+      customerEmail: existing?.customerEmail || '',
+      customerType: existing?.customerType || 'Retail',
       deviceCategory,
       deviceModel: form.model.trim() || 'Unknown Model',
       serialNumber: form.imei.trim(),
       imei: form.imei.trim() || undefined,
       deviceColor: form.color.trim(),
       passcode: form.passcode.trim(),
-      findMyStatus: 'UNKNOWN',
-      status: 'Receive',
-      priority: 'Normal',
-      assignedTechId: '',
-      serviceType: 'Standard Modular',
+      findMyStatus: existing?.findMyStatus || 'UNKNOWN',
+      status: existing?.status || 'Receive',
+      priority: existing?.priority || 'Normal',
+      assignedTechId: existing?.assignedTechId || '',
+      assignedTechName: existing?.assignedTechName,
+      serviceType: existing?.serviceType || 'Standard Modular',
       beforeDiagnostics: diagnostics,
       symptomsReported: [form.error.trim(), form.reply.trim()].filter(Boolean).join(' — '),
       selectedRepairs: form.repairs,
-      lineItems: form.repairs.map((r) => ({
-        id: `li-${r.id}`,
-        description: r.name,
-        unitCost: Math.round(r.basePrice * 0.5),
-        unitPrice: r.basePrice,
-        quantity: 1,
-        isLabor: true,
-        lineItemDiscountPercent: r.discountPercent || undefined,
-      })),
-      subtotal: baseTotal,
-      depositAmount: 0,
-      discountAmount: 0,
-      discountFormat: 'new',
-      taxAmount: 0,
-      totalAmount: finalEstimate,
-      intakeChecklist: {
+      lineItems: [...preservedLines, ...newLaborLines],
+      // Financials: keep stored totals unless the repair list changed; parts
+      // lines are preserved but never added to the customer total (audit B-1).
+      subtotal: repairsChanged ? laborSubtotal : (existing?.subtotal ?? laborSubtotal),
+      depositAmount: existing?.depositAmount || 0,
+      discountAmount: existing?.discountAmount || 0,
+      discountFormat: existing?.discountFormat || 'new',
+      taxAmount: existing?.taxAmount || 0,
+      totalAmount: repairsChanged ? laborFinal : (existing?.totalAmount ?? laborFinal),
+      intakeChecklist: existing?.intakeChecklist || {
         powerOn: false,
         screenDisplay: false,
         touchGrid: false,
@@ -284,10 +321,13 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
         liquidIndicatorTriggered: false,
         physicalDamageNotes: '',
       },
-      warrantyDays: systemSettings?.defaultWarrantyDays ?? 90,
-      intakePhotos: [],
-      estimatedCompletion: undefined,
-      isPaid: false,
+      warrantyDays: existing?.warrantyDays ?? systemSettings?.defaultWarrantyDays ?? 90,
+      warrantyLabel: existing?.warrantyLabel,
+      intakePhotos: existing?.intakePhotos || [],
+      estimatedCompletion: existing?.estimatedCompletion,
+      isPaid: existing?.isPaid || false,
+      paidAmount: existing?.paidAmount,
+      paymentMethod: existing?.paymentMethod,
       createdAt: editingId ? (workOrders.find((w) => w.id === editingId)?.createdAt || now) : form.date ? `${form.date}T09:00:00.000Z` : now,
       updatedAt: now,
     };

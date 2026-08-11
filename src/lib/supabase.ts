@@ -60,6 +60,31 @@ function toRows<T extends { id: string }>(collectionName: string, items: T[]): E
   }));
 }
 
+/**
+ * Stale-write guard (audit B-2): returns true when the queued copy of a
+ * document is OLDER than what already exists live. A successful live retry
+ * (or a newer save from another device) must not be regressed by replaying
+ * an older queued snapshot. Compare on updatedAt when present; without a
+ * timestamp we optimistically treat the queued write as fresh.
+ */
+async function isStaleQueuedWrite(collectionName: string, queued: { id: string }): Promise<boolean> {
+  const queuedUpdatedAt = (queued as any)?.updatedAt || (queued as any)?.updated_at;
+  if (!queuedUpdatedAt) return false;
+  const { data } = await supabase
+    .from('erp_records')
+    .select('data')
+    .eq('collection_name', collectionName)
+    .eq('id', queued.id)
+    .maybeSingle();
+  const live = (data as { data?: any } | null)?.data;
+  const liveUpdatedAt = live?.updatedAt || live?.updated_at;
+  if (!liveUpdatedAt) return false; // no live row → nothing to regress
+  const qTime = new Date(queuedUpdatedAt).getTime();
+  const lTime = new Date(liveUpdatedAt).getTime();
+  if (Number.isNaN(qTime) || Number.isNaN(lTime)) return false;
+  return lTime > qTime;
+}
+
 export async function fetchCloudCollection<T>(collectionName: string): Promise<T[]> {
   const { data, error } = await supabase
     .from('erp_records')
@@ -409,14 +434,28 @@ export async function flushOfflineQueue(): Promise<{ syncedCount: number; remain
       try {
         if (item.action === 'save') {
           const data = item.data as { id: string };
+          // Stale-write guard (audit B-2): if a NEWER version of this document
+          // already landed live (e.g. the user retried successfully while this
+          // copy was still queued), replaying this older snapshot would regress
+          // the record. Compare updatedAt before upserting.
+          if (isStaleQueuedWrite(item.collectionName, data)) {
+            await removeFromQueue(item.queueId);
+            syncedCount++;
+            continue;
+          }
           const { error } = await supabase.from('erp_records').upsert(toRows(item.collectionName, [data]), {
             onConflict: 'collection_name,id',
           });
           if (error) throw error;
         } else if (item.action === 'batch') {
           const items = (item.data as { id: string }[]) || [];
-          if (items.length > 0) {
-            const { error } = await supabase.from('erp_records').upsert(toRows(item.collectionName, items), {
+          // Drop any batch items superseded by newer live writes.
+          const fresh = [];
+          for (const it of items) {
+            if (!isStaleQueuedWrite(item.collectionName, it)) fresh.push(it);
+          }
+          if (fresh.length > 0) {
+            const { error } = await supabase.from('erp_records').upsert(toRows(item.collectionName, fresh), {
               onConflict: 'collection_name,id',
             });
             if (error) throw error;

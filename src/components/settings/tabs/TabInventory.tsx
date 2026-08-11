@@ -54,9 +54,10 @@ interface InventoryTabProps {
   handleSaveInventoryQualityTier: (t: string) => void;
   handleDeleteInventoryQualityTier: (t: string) => void;
   handleAddInventoryBin: () => void;
+  handleDeleteInventoryBin: (bin: string) => void;
 }
 
-const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, parts, suppliers, inventoryCategories, settings, onUpdateInventoryCategories, onUpdateSupplier, onDeleteSupplier, onUpdateSettings, inventoryDataTab, setInventoryDataTab, categoryDraft, setCategoryDraft, editingCategoryKey, setEditingCategoryKey, editingCategoryLabel, setEditingCategoryLabel, supplierDraft, setSupplierDraft, editingInventorySupplier, setEditingInventorySupplier, qualityTierDraft, setQualityTierDraft, editingQualityTier, setEditingQualityTier, editingQualityTierLabel, setEditingQualityTierLabel, binDraft, setBinDraft, expandedBinName, setExpandedBinName, inventoryQualityTiers, inventoryBinNames, partsByBin, handleAddInventoryCategory, handleSaveInventoryCategory, handleAddInventorySupplier, handleAddInventoryQualityTier, handleSaveInventoryQualityTier, handleDeleteInventoryQualityTier, handleAddInventoryBin }) => {
+const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, parts, suppliers, inventoryCategories, onUpdateInventoryCategories, onUpdateSupplier, onDeleteSupplier, inventoryDataTab, setInventoryDataTab, categoryDraft, setCategoryDraft, editingCategoryKey, setEditingCategoryKey, editingCategoryLabel, setEditingCategoryLabel, supplierDraft, setSupplierDraft, editingInventorySupplier, setEditingInventorySupplier, qualityTierDraft, setQualityTierDraft, editingQualityTier, setEditingQualityTier, editingQualityTierLabel, setEditingQualityTierLabel, binDraft, setBinDraft, expandedBinName, setExpandedBinName, inventoryQualityTiers, inventoryBinNames, partsByBin, handleAddInventoryCategory, handleSaveInventoryCategory, handleAddInventorySupplier, handleAddInventoryQualityTier, handleSaveInventoryQualityTier, handleDeleteInventoryQualityTier, handleAddInventoryBin, handleDeleteInventoryBin }) => {
   return (
         <div className="bg-white p-5 rounded-2xl border border-line-strong shadow-2xs space-y-6">
           <div>
@@ -235,7 +236,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                         <Button variant="ghost" type="button" onClick={() => setExpandedBinName((current) => current === bin ? null : bin)} className="rounded-lg p-1 text-muted hover:bg-surface" aria-label={isOpen ? `Collapse ${bin}` : `Expand ${bin}`}>
                           <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180 text-brand' : ''}`} />
                         </Button>
-                        <Button variant="ghost" type="button" onClick={() => onUpdateSettings({ ...settings, inventoryBinNames: inventoryBinNames.filter((item) => item !== bin) })} className="text-danger" aria-label={`Delete ${bin}`}>×</Button>
+                        <Button variant="ghost" type="button" onClick={() => handleDeleteInventoryBin(bin)} className="text-danger" aria-label={`Delete ${bin}`}>×</Button>
                       </div>
                     </div>
                     {isOpen && (

@@ -262,10 +262,33 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
     ]
   };
 
-  // Sync formData with settings prop when updated from Firestore
+  // Sync formData with settings prop when updated from Firestore (audit E-3):
+  // the old effect blind-replaced the draft on EVERY settings change, so any
+  // inventory-data op (which persists immediately, bypassing the draft) wiped
+  // all unsaved edits in other tabs. Inventory ops set suppressRef so their own
+  // settings round-trip doesn't clobber the draft.
+  const suppressSettingsSyncRef = React.useRef(false);
   React.useEffect(() => {
+    if (suppressSettingsSyncRef.current) {
+      suppressSettingsSyncRef.current = false;
+      return;
+    }
     setFormData(settings);
   }, [settings]);
+
+  // Inventory data ops persist immediately (they're used by the inventory
+  // module) but must merge into the DRAFT instead of replacing it, and must
+  // suppress the settings-sync effect — otherwise unsaved edits in other tabs
+  // (e.g. shop name typed but not saved) are silently discarded (audit E-3).
+  const persistInventoryField = <K extends keyof SystemSettings>(
+    key: K,
+    value: SystemSettings[K],
+    persist: () => void
+  ) => {
+    suppressSettingsSyncRef.current = true;
+    setFormData((prev) => ({ ...prev, [key]: value }));
+    persist();
+  };
 
   // Register navbar actions for Reset Draft and Save All Settings
   React.useEffect(() => {
@@ -773,8 +796,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
     if (!label || !onUpdateInventoryCategories) return;
     if (inventoryCategories.some((category) => category.toLowerCase() === label.toLowerCase())) return;
     const nextCategories = [...inventoryCategories, label];
-    onUpdateInventoryCategories(nextCategories);
-    setFormData((current) => ({ ...current, inventoryCategories: nextCategories }));
+    persistInventoryField('inventoryCategories', nextCategories, () => onUpdateInventoryCategories(nextCategories));
     setCategoryDraft('');
   };
 
@@ -783,8 +805,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
     if (!label || !onUpdateInventoryCategories) return;
     if (inventoryCategories.some((category) => category !== categoryToReplace && category.toLowerCase() === label.toLowerCase())) return;
     const nextCategories = inventoryCategories.map((category) => category === categoryToReplace ? label : category);
-    onUpdateInventoryCategories(nextCategories);
-    setFormData((current) => ({ ...current, inventoryCategories: nextCategories }));
+    persistInventoryField('inventoryCategories', nextCategories, () => onUpdateInventoryCategories(nextCategories));
     setEditingCategoryKey(null);
     setEditingCategoryLabel('');
   };
@@ -794,7 +815,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
     : ['Original', 'OEM', 'Genuine'];
 
   const saveInventoryQualityTiers = (tiers: string[]) => {
-    onUpdateSettings({ ...settings, inventoryQualityTiers: tiers });
+    persistInventoryField('inventoryQualityTiers', tiers, () => onUpdateSettings({ ...settings, inventoryQualityTiers: tiers }));
   };
 
   const handleAddInventorySupplier = (event: React.FormEvent) => {
@@ -836,8 +857,23 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   const handleAddInventoryBin = () => {
     const bin = binDraft.trim().toUpperCase();
     if (!bin || inventoryBinNames.some((item) => item.toLowerCase() === bin.toLowerCase())) return;
-    onUpdateSettings({ ...settings, inventoryBinNames: [...inventoryBinNames, bin] });
+    const nextBins = [...inventoryBinNames, bin];
+    persistInventoryField('inventoryBinNames', nextBins, () => onUpdateSettings({ ...settings, inventoryBinNames: nextBins }));
     setBinDraft('');
+  };
+
+  // Delete a storage bin (audit E-3): merged into the draft + persisted, with a
+  // confirm dialog matching categories/suppliers/tiers.
+  const handleDeleteInventoryBin = async (bin: string) => {
+    const ok = await confirmDialog({
+      title: 'Delete Storage Bin',
+      message: `Delete bin “${bin}”? Parts assigned to it keep their bin name until re-assigned.`,
+      confirmLabel: 'Delete Bin',
+      danger: true,
+    });
+    if (!ok) return;
+    const nextBins = inventoryBinNames.filter((item) => item !== bin);
+    persistInventoryField('inventoryBinNames', nextBins, () => onUpdateSettings({ ...settings, inventoryBinNames: nextBins }));
   };
 
   const handleSaveInventoryQualityTier = (tier: string) => {
@@ -1059,7 +1095,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
         </Suspense>
       )}      {activeSubTab === 'inventory' && (
         <Suspense fallback={<ModuleLoadingSkeleton />}>
-          <TabInventoryLazy formData={formData} setFormData={setFormData} parts={parts} suppliers={suppliers} inventoryCategories={inventoryCategories} settings={settings} isSavedBanner={isSavedBanner} onUpdateInventoryCategories={onUpdateInventoryCategories} onUpdateSupplier={onUpdateSupplier} onDeleteSupplier={onDeleteSupplier} onUpdatePart={onUpdatePart} onUpdateSettings={onUpdateSettings} setActiveSubTab={setActiveSubTab} isSectionOpen={isSectionOpen} toggleSection={toggleSection} inventoryDataTab={inventoryDataTab} setInventoryDataTab={setInventoryDataTab} categoryDraft={categoryDraft} setCategoryDraft={setCategoryDraft} editingCategoryKey={editingCategoryKey} setEditingCategoryKey={setEditingCategoryKey} editingCategoryLabel={editingCategoryLabel} setEditingCategoryLabel={setEditingCategoryLabel} supplierDraft={supplierDraft} setSupplierDraft={setSupplierDraft} editingInventorySupplier={editingInventorySupplier} setEditingInventorySupplier={setEditingInventorySupplier} qualityTierDraft={qualityTierDraft} setQualityTierDraft={setQualityTierDraft} editingQualityTier={editingQualityTier} setEditingQualityTier={setEditingQualityTier} editingQualityTierLabel={editingQualityTierLabel} setEditingQualityTierLabel={setEditingQualityTierLabel} binDraft={binDraft} setBinDraft={setBinDraft} expandedBinName={expandedBinName} setExpandedBinName={setExpandedBinName} inventoryQualityTiers={inventoryQualityTiers} inventoryBinNames={inventoryBinNames} partsByBin={partsByBin} handleAddInventoryCategory={handleAddInventoryCategory} handleSaveInventoryCategory={handleSaveInventoryCategory} handleAddInventorySupplier={handleAddInventorySupplier} handleAddInventoryQualityTier={handleAddInventoryQualityTier} handleSaveInventoryQualityTier={handleSaveInventoryQualityTier} handleDeleteInventoryQualityTier={handleDeleteInventoryQualityTier} handleAddInventoryBin={handleAddInventoryBin} />
+          <TabInventoryLazy formData={formData} setFormData={setFormData} parts={parts} suppliers={suppliers} inventoryCategories={inventoryCategories} settings={settings} isSavedBanner={isSavedBanner} onUpdateInventoryCategories={onUpdateInventoryCategories} onUpdateSupplier={onUpdateSupplier} onDeleteSupplier={onDeleteSupplier} onUpdatePart={onUpdatePart} onUpdateSettings={onUpdateSettings} setActiveSubTab={setActiveSubTab} isSectionOpen={isSectionOpen} toggleSection={toggleSection} inventoryDataTab={inventoryDataTab} setInventoryDataTab={setInventoryDataTab} categoryDraft={categoryDraft} setCategoryDraft={setCategoryDraft} editingCategoryKey={editingCategoryKey} setEditingCategoryKey={setEditingCategoryKey} editingCategoryLabel={editingCategoryLabel} setEditingCategoryLabel={setEditingCategoryLabel} supplierDraft={supplierDraft} setSupplierDraft={setSupplierDraft} editingInventorySupplier={editingInventorySupplier} setEditingInventorySupplier={setEditingInventorySupplier} qualityTierDraft={qualityTierDraft} setQualityTierDraft={setQualityTierDraft} editingQualityTier={editingQualityTier} setEditingQualityTier={setEditingQualityTier} editingQualityTierLabel={editingQualityTierLabel} setEditingQualityTierLabel={setEditingQualityTierLabel} binDraft={binDraft} setBinDraft={setBinDraft} expandedBinName={expandedBinName} setExpandedBinName={setExpandedBinName} inventoryQualityTiers={inventoryQualityTiers} inventoryBinNames={inventoryBinNames} partsByBin={partsByBin} handleAddInventoryCategory={handleAddInventoryCategory} handleSaveInventoryCategory={handleSaveInventoryCategory} handleAddInventorySupplier={handleAddInventorySupplier} handleAddInventoryQualityTier={handleAddInventoryQualityTier} handleSaveInventoryQualityTier={handleSaveInventoryQualityTier} handleDeleteInventoryQualityTier={handleDeleteInventoryQualityTier} handleAddInventoryBin={handleAddInventoryBin} handleDeleteInventoryBin={handleDeleteInventoryBin} />
         </Suspense>
       )}      {activeSubTab === 'pos' && (
         <Suspense fallback={<ModuleLoadingSkeleton />}>

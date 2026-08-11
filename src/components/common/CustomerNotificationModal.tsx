@@ -35,7 +35,16 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
   onLogNotificationSent,
   settings,
 }) => {
-  if (!isOpen || !workOrder) return null;
+  // Rules-of-Hooks fix (audit E-2): ALL hooks run on every render — the old
+  // `if (!isOpen || !workOrder) return null` before the hooks meant React saw
+  // 0 hooks on the closed render after 6 on the open render, which crashed the
+  // whole app into the ErrorBoundary. Hooks are gated with a mounted flag
+  // instead; the modal body only renders when open.
+  const [mounted, setMounted] = useState<boolean>(isOpen && !!workOrder);
+  useEffect(() => {
+    if (isOpen && workOrder) setMounted(true);
+    else if (!isOpen) setMounted(false);
+  }, [isOpen, workOrder]);
 
   const initialChannel = settings?.defaultNotificationChannel || 'Viber';
   const [channel, setChannel] = useState<'SMS' | 'Viber' | 'Telegram'>(initialChannel);
@@ -54,14 +63,20 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
   const currentTmplObj = activeTemplates.find((t) => t.id === selectedTemplateId) || activeTemplates[0];
 
   const [messageText, setMessageText] = useState(() => 
-    currentTmplObj ? applyTemplateVariables(currentTmplObj.templateText, workOrder, shopName, shopPhone) : ''
+    currentTmplObj && workOrder
+      ? applyTemplateVariables(currentTmplObj.templateText, workOrder, shopName, shopPhone)
+      : ''
   );
 
   useEffect(() => {
-    if (currentTmplObj) {
+    if (currentTmplObj && workOrder) {
       setMessageText(applyTemplateVariables(currentTmplObj.templateText, workOrder, shopName, shopPhone));
     }
   }, [selectedTemplateId, workOrder, settings]);
+
+  // Keep the modal open (not unmounting) while the workOrder prop flips to a
+  // different ticket; only close fully when isOpen goes false.
+  if (!mounted || !workOrder) return null;
 
   // Clean phone number format for Viber/SMS/Telegram
   const rawPhone = workOrder.customerPhone || '';
