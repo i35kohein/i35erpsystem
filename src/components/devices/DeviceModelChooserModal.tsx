@@ -151,7 +151,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
 
         {/* Folder / Model Grid Container — each series is a column (Ko Hein) */}
         <div className={`min-h-0 overflow-y-auto p-3.5 ${embedded ? 'flex-1' : 'max-h-[58vh]'}`}>
-          <div className="grid grid-cols-1 items-start gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 items-stretch gap-x-6 gap-y-4 sm:grid-cols-3">
           {(() => {
             const visibleFolders = enabledFolders.filter((f) => {
               if (activeFamilyTab !== 'All' && f.family !== activeFamilyTab) return false;
@@ -170,7 +170,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
               renderedFolderCount++;
 
               return (
-                <div key={folder.id} className="min-w-0">
+                <div key={folder.id} className="flex min-w-0 flex-col">
                   {/* Series text header (plain) */}
                   <p className="border-b border-line pb-1.5 text-[10px] font-black uppercase tracking-wider text-muted">
                     {folder.name}
