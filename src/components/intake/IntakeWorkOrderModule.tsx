@@ -434,7 +434,23 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           </div>
 
           <div className="flex items-center space-x-2 flex-wrap">
-            {/* Priority First toggle removed 2026-08-10 (Ko Hein) */}
+            {/* Date sort — visible in both table & card views (Ko Hein 2026-08-11) */}
+            <div className="flex items-center rounded-lg border border-line bg-white overflow-hidden">
+              <span className="pl-2.5 pr-1 text-[10px] font-black uppercase tracking-wider text-muted">Sort</span>
+              {(['latest', 'oldest'] as const).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setDateSort(s)}
+                  aria-pressed={dateSort === s}
+                  className={`px-2.5 py-1.5 text-[11px] font-extrabold transition-colors cursor-pointer ${
+                    dateSort === s ? 'bg-ink text-white' : 'text-muted hover:text-ink hover:bg-surface'
+                  }`}
+                >
+                  {s === 'latest' ? 'Latest' : 'Oldest'}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 

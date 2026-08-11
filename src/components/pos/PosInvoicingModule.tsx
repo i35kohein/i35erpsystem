@@ -108,6 +108,8 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   const [isMobileCheckoutFullOpen, setIsMobileCheckoutFullOpen] = useState(false);
   // Left (ticket queue) panel collapse toggle
   const [isQueueCollapsed, setIsQueueCollapsed] = useState(false);
+  // POS queue date sort (Ko Hein 2026-08-11): Latest (newest first) / Oldest.
+  const [posDateSort, setPosDateSort] = useState<'latest' | 'oldest'>('latest');
 
   // Custom repair / service line item form (Ko Hein 2026-08-10)
   const [isAddCustomRepairOpen, setIsAddCustomRepairOpen] = useState(false);
@@ -205,7 +207,16 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     return matchesSearch && matchesStatus;
   });
 
-  const selectedWo = filteredWorkOrders.find((w) => w.id === selectedWoId) || filteredWorkOrders[0] || null;
+  // POS queue date sort (Ko Hein 2026-08-11): Latest = newest first, Oldest = oldest first.
+  const sortedQueue = useMemo(() => {
+    return [...filteredWorkOrders].sort((a, b) => {
+      const tA = new Date(a.createdAt || 0).getTime();
+      const tB = new Date(b.createdAt || 0).getTime();
+      return posDateSort === 'oldest' ? tA - tB : tB - tA;
+    });
+  }, [filteredWorkOrders, posDateSort]);
+
+  const selectedWo = sortedQueue.find((w) => w.id === selectedWoId) || sortedQueue[0] || null;
 
   // Keep the selection in sync with the list — otherwise the right panel shows
   // the first ticket while the left queue highlights a stale id (audit P2).
@@ -1839,6 +1850,23 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               <>
                 <h2 className="font-bold text-ink text-xs">Ready to Checkout ({filteredWorkOrders.length})</h2>
                 <div className="flex items-center gap-1.5 shrink-0">
+                  {/* Date sort mini control (Ko Hein 2026-08-11) */}
+                  <div className="flex items-center rounded-md border border-line bg-white overflow-hidden">
+                    {(['latest', 'oldest'] as const).map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => setPosDateSort(s)}
+                        aria-pressed={posDateSort === s}
+                        title={s === 'latest' ? 'Newest tickets first' : 'Oldest tickets first'}
+                        className={`px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide transition-colors cursor-pointer ${
+                          posDateSort === s ? 'bg-ink text-white' : 'text-muted hover:text-ink hover:bg-surface'
+                        }`}
+                      >
+                        {s === 'latest' ? 'New' : 'Old'}
+                      </button>
+                    ))}
+                  </div>
                   <span className="text-xs font-mono font-bold bg-success/10 text-success-deep px-2 py-0.5 rounded-full border border-success/20">
                     Checkout
                   </span>
@@ -1876,7 +1904,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 <p className="text-xs text-muted">Appears here automatically after diagnostics.</p>
               </div>
             ) : (
-              filteredWorkOrders.map((wo) => {
+              sortedQueue.map((wo) => {
                 const isSelected = wo.id === selectedWoId;
                 const handleSelectWo = () => {
                   setSelectedWoId(wo.id);
@@ -1948,7 +1976,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
           {isQueueCollapsed && filteredWorkOrders.length > 0 && (
             <div className={`space-y-1.5 overflow-y-auto pr-1 ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:flex-1 md:max-h-none' : 'min-h-[360px] max-h-[calc(100dvh-280px)] md:max-h-none md:flex-1 md:min-h-0'}`}>
-              {filteredWorkOrders.map((wo) => {
+              {sortedQueue.map((wo) => {
                 const isSel = wo.id === selectedWoId;
                 return (
                   <Button
