@@ -2020,15 +2020,15 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
         </div>
 
         {/* Right Column: Dynamic Invoice & Terminal Checkout (8 cols) */}
-        <div className={`hidden md:block flex-1 min-w-0 bg-white border border-line rounded-xl p-3 pb-24 md:pb-3 space-y-3 shadow-xs md:h-full md:min-h-0 md:overflow-hidden ${isIpad ? 'md:flex md:flex-col' : ''}`}>
+        <div className={`hidden md:block flex-1 min-w-0 bg-white border border-line rounded-xl p-3 pb-24 md:pb-3 space-y-3 shadow-xs md:h-full md:min-h-0 md:overflow-y-auto ${isIpad ? 'md:flex md:flex-col' : ''}`}>
                     {renderCheckoutPanel()}
         </div>
       </div>
 
       {/* Mobile: full POS checkout popup — Pay tap opens the whole checkout (Ko Hein) */}
       {isMobileCheckoutFullOpen && selectedWo && (
-        <div className="fixed inset-0 z-50 md:hidden bg-white overflow-y-auto pt-[calc(env(safe-area-inset-top)+8px)] pb-28">
-          <div className="sticky top-0 z-10 flex justify-end px-3 pt-1.5">
+        <div className="fixed inset-0 z-50 md:hidden bg-white flex flex-col pt-[calc(env(safe-area-inset-top)+8px)]">
+          <div className="sticky top-0 z-10 flex justify-end px-3 pt-1.5 shrink-0">
             <Button
               type="button"
               onClick={() => setIsMobileCheckoutFullOpen(false)}
@@ -2038,9 +2038,31 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               <X className="w-4 h-4" />
             </Button>
           </div>
-          <div className="p-4">
+          {/* Scrollable content — Pay button stays pinned at the bottom */}
+          <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4">
             {renderCheckoutPanel()}
           </div>
+          {/* Pinned Pay button (Ko Hein 2026-08-11): always reachable, sheet scrolls above */}
+          {selectedWo && (
+            <div className="shrink-0 border-t border-line bg-white/95 backdrop-blur-sm px-4 pt-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] shadow-raised-top">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0 shrink-0">
+                  <p className="text-xs font-bold text-muted uppercase tracking-wide">Amount Due</p>
+                  <p className="font-mono font-black text-brand text-base leading-tight">{selectedWo.totalAmount.toLocaleString()} {currency}</p>
+                </div>
+                <Button
+                  type="button"
+                  onClick={() => setIsConfirmOpen(true)}
+                  disabled={isProcessingPayment || isPaymentShort || selectedWo.isPaid}
+                  variant="success"
+                  className="flex-1 max-w-[240px] py-3 hover:bg-success/90"
+                >
+                  <CreditCard className="w-4 h-4 shrink-0" />
+                  <span className="truncate">Pay & Print Receipt</span>
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
