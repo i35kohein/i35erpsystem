@@ -1373,11 +1373,15 @@ export default function App() {
   const handleUpdateWorkOrderStatus = (workOrderId: string, newStatus: WorkOrderStatus) => {
     const wo = workOrders.find((w) => w.id === workOrderId);
     if (wo && newStatus === 'Finished' && !checkIsAfterDiagnosticCompleted(wo)) {
+      // Audit B-P2: the transition is intentionally allowed (soft override
+      // flows exist in the pipeline/QA), so the messaging must match — a stuck
+      // persistent non-dismissible ERROR toast implied the transition was
+      // blocked. Downgrade to a dismissible info notice.
       addToast(
-        `Ticket ${wo.orderNumber || wo.id} (${wo.deviceModel}) was marked as Finished without a completed post-repair diagnostic checklist. Mandatory quality test required!`,
-        'error',
-        '🚨 Finished Diagnostic Pending',
-        { persistent: true, dismissible: false, workOrderId: wo.id }
+        `Ticket ${wo.orderNumber || wo.id} (${wo.deviceModel}) was marked as Finished WITHOUT a completed post-repair diagnostic checklist — run QA before checkout.`,
+        'info',
+        '⚠️ Finished Diagnostic Pending',
+        { persistent: true, dismissible: true, workOrderId: wo.id }
       );
     } else if (wo && ['Receive', 'In Progress', 'Pending'].includes(newStatus) && !checkIsBeforeDiagnosticCompleted(wo)) {
       addToast(

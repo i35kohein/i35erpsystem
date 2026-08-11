@@ -87,18 +87,23 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'Customer Not Repair':
     case 'Customer No Repair':
     case 'No Repair':
-      badgeStyle = 'bg-warning/10 text-warning border border-warning/30';
-      dotColor = 'bg-warning';
-      pingColor = 'bg-warning';
+      // Audit B-P3: unified with StatusChip — this is a declined/issue state,
+      // so it reads as danger in both components (was amber here, rose there).
+      badgeStyle = 'bg-danger/10 text-danger border border-danger/30';
+      dotColor = 'bg-danger';
+      pingColor = 'bg-danger';
       isPulsing = false;
       break;
 
     case 'Taken Out':
     case 'Paid':
     case 'Returned':
-      badgeStyle = 'bg-surface text-muted border border-line';
-      dotColor = 'bg-faint';
-      pingColor = 'bg-line';
+      // Audit B-P3: distinct completed tone (ink/success border) — the old
+      // bg-surface/muted style was identical to the unknown fallback, so a
+      // finished+paid ticket looked greyed-out/missing.
+      badgeStyle = 'bg-ink text-white border border-ink';
+      dotColor = 'bg-white';
+      pingColor = 'bg-ink';
       isPulsing = false;
       break;
 

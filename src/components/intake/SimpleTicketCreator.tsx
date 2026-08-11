@@ -26,6 +26,7 @@ interface FormState {
   model: string;
   color: string;
   imei: string;
+  serial: string; // audit B-P2: serial kept separate from IMEI
   date: string;
   error: string;
   repairs: SelectedRepairItem[];
@@ -35,7 +36,7 @@ interface FormState {
 }
 
 const EMPTY_FORM: FormState = {
-  name: '', phone: '', model: '', color: '', imei: '',
+  name: '', phone: '', model: '', color: '', imei: '', serial: '',
   date: new Date().toISOString().slice(0, 10),
   error: '', repairs: [], passcode: '', reply: '',
   checks: DIAGNOSTIC_NAMES.map(() => ({ status: 'N/A' as const, note: '' })),
@@ -171,7 +172,11 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
       phone: wo.customerPhone || '',
       model: wo.deviceModel || '',
       color: wo.deviceColor || '',
-      imei: wo.imei || wo.serialNumber || '',
+      // Audit B-P2: keep IMEI and serial SEPARATE — the old code stuffed the
+      // serial into the imei field, so editing a serial-only ticket wrote the
+      // serial into imei (and vice-versa), corrupting both identifiers.
+      imei: wo.imei || '',
+      serial: wo.serialNumber || '',
       date: (wo.createdAt || new Date().toISOString()).slice(0, 10),
       error: '',
       repairs: wo.selectedRepairs || [],
@@ -290,8 +295,8 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
       customerType: existing?.customerType || 'Retail',
       deviceCategory,
       deviceModel: form.model.trim() || 'Unknown Model',
-      serialNumber: form.imei.trim(),
-      imei: form.imei.trim() || undefined,
+      serialNumber: form.serial.trim() || existing?.serialNumber || '',
+      imei: form.imei.trim() || existing?.imei || undefined,
       deviceColor: form.color.trim(),
       passcode: form.passcode.trim(),
       findMyStatus: existing?.findMyStatus || 'UNKNOWN',
@@ -479,14 +484,26 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 <ChevronDown className="print:hidden h-4 w-4 shrink-0 text-muted" />
               </button>
             </label>
-            {/* IMEI */}
+            {/* IMEI — audit B-P2: separate field from Serial so editing one
+                never corrupts the other (the old single field wrote the same
+                value into both serialNumber and imei). */}
             <label className="flex items-center gap-3 py-2">
               <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">IMEI</span>
               <input
                 value={form.imei}
                 onChange={(e) => set('imei', e.target.value)}
                 inputMode="numeric"
-                placeholder="Serial / IMEI"
+                placeholder="15-digit IMEI"
+                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-muted"
+              />
+            </label>
+            {/* Serial Number */}
+            <label className="flex items-center gap-3 py-2">
+              <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Serial</span>
+              <input
+                value={form.serial}
+                onChange={(e) => set('serial', e.target.value)}
+                placeholder="Device serial number"
                 className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-muted"
               />
             </label>

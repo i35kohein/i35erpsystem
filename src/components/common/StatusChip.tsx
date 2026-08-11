@@ -29,8 +29,10 @@ export const StatusChip: React.FC<{ status: WorkOrderStatus; size?: 'xs' | 'sm' 
       : 'px-2 py-0.5 text-xs rounded-md';
   const tone = (() => {
     if (/finished|taken out|completed|done/i.test(s)) {
+      // Audit B-P3: Taken Out gets a distinct completed tone (ink) so a
+      // finished+paid ticket doesn't read as the unknown/neutral fallback.
       return /taken out/i.test(s)
-        ? 'bg-surface text-muted border-line'
+        ? 'bg-ink text-white border-ink'
         : 'bg-success/10 text-success-deep border-success/30';
     }
     if (/cant repair|customer not repair|cancel|reject|fail|issue/i.test(s)) {
