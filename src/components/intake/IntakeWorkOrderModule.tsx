@@ -29,7 +29,9 @@ import {ClipboardList, Stethoscope,
   RotateCcw,
   Ban,
   UserX,
-  PackageCheck } from 'lucide-react';
+  PackageCheck,
+  ArrowUp,
+  ArrowDown } from 'lucide-react';
 import {WorkOrder, 
   PartItem, 
   Customer, 
@@ -122,6 +124,8 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   const [localSortByPriority, setLocalSortByPriority] = useState<boolean>(false);
   const sortByPriority = propSortByPriority !== undefined ? propSortByPriority : localSortByPriority;
   const setSortByPriority = (v: boolean) => (propSetSortByPriority ? propSetSortByPriority(v) : setLocalSortByPriority(v));
+  // Date sort for the roster — Latest (newest first, default) / Oldest (Ko Hein 2026-08-11).
+  const [dateSort, setDateSort] = useState<'latest' | 'oldest'>('latest');
 
   // External scan trigger (mobile filter drawer → open scanner)
   useEffect(() => {
@@ -181,7 +185,10 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
       const weightDiff = getPriorityWeight(b.priority) - getPriorityWeight(a.priority);
       if (weightDiff !== 0) return weightDiff;
     }
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    // Date sort (Ko Hein 2026-08-11): Latest = newest first, Oldest = oldest first.
+    const tA = new Date(a.createdAt).getTime();
+    const tB = new Date(b.createdAt).getTime();
+    return dateSort === 'oldest' ? tA - tB : tB - tA;
   });
 
   // Technician users see only their own tickets — stat chips must match the
@@ -452,7 +459,28 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
             <table className="w-full text-left text-xs">
               <thead className="sticky top-0 z-10">
                 <tr className="border-b border-line text-muted font-bold text-xs uppercase tracking-wider bg-surface">
-                  <th className="py-2.5 px-3">Ticket # & Date</th>
+                  <th className="py-2.5 px-3">
+                    <span className="inline-flex items-center gap-1">
+                      Ticket # & Date
+                      {/* Date sort mini icon (Ko Hein 2026-08-11): Latest / Oldest */}
+                      <button
+                        type="button"
+                        onClick={() => setDateSort(dateSort === 'latest' ? 'oldest' : 'latest')}
+                        title={`Sort by date — ${dateSort === 'latest' ? 'Oldest first' : 'Latest first'}`}
+                        aria-label={`Sort by date — currently ${dateSort === 'latest' ? 'Latest first' : 'Oldest first'}`}
+                        className="inline-flex items-center gap-0.5 rounded px-1 py-0.5 transition-colors cursor-pointer hover:bg-brand/10 hover:text-brand"
+                      >
+                        {dateSort === 'latest' ? (
+                          <ArrowDown className="w-3 h-3" />
+                        ) : (
+                          <ArrowUp className="w-3 h-3" />
+                        )}
+                        <span className="text-[9px] font-black normal-case">
+                          {dateSort === 'latest' ? 'Latest' : 'Oldest'}
+                        </span>
+                      </button>
+                    </span>
+                  </th>
                   <th className="py-2.5 px-3">Customer & Contact</th>
                   <th className="py-2.5 px-3">Device & Serial/IMEI</th>
                   <th className="py-2.5 px-3 hidden lg:table-cell">Symptoms / Service</th>
