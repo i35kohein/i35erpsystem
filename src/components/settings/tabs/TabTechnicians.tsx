@@ -180,7 +180,7 @@ const TechniciansTab: React.FC<TechniciansTabProps> = ({ formData, setFormData, 
                       <div>
                         <p className="text-muted font-semibold">Commission</p>
                         <p className="font-extrabold text-ink text-xs">
-                          {(tech.commissionRateParts ?? tech.commissionRate ?? 10)}% SP · {(tech.commissionRateHardware ?? tech.commissionRate ?? 10)}% HW
+                          {(tech.commissionRateParts || tech.commissionRate || 10)}% SP · {(tech.commissionRateHardware || tech.commissionRate || 10)}% HW
                         </p>
                       </div>
                     </div>

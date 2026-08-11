@@ -724,8 +724,12 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
       specialty: tech.specialty || '',
       status: tech.status || 'Active',
       commissionRate: tech.commissionRate || 10,
-      commissionRateParts: tech.commissionRateParts ?? tech.commissionRate ?? 10,
-      commissionRateHardware: tech.commissionRateHardware ?? tech.commissionRate ?? 10,
+      // audit (Ko Hein 2026-08-11): `??` kept 0 — a tech with legacy
+      // commissionRate set but parts/hw fields 0 showed 0% in the modal while
+      // POS used the legacy rate. `||` falls back to the legacy rate so the
+      // modal matches what POS actually pays.
+      commissionRateParts: tech.commissionRateParts || tech.commissionRate || 10,
+      commissionRateHardware: tech.commissionRateHardware || tech.commissionRate || 10,
     });
     setTechModalOpen(true);
   };
