@@ -49,6 +49,13 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     window.location.reload();
   };
 
+  // audit F-P3: transient render errors (bad data row, momentary offline
+  // fetch) shouldn't brick the whole ERP until a manual reload — offer an
+  // in-place retry that clears the error state.
+  handleRetry = () => {
+    this.setState({ hasError: false, error: null });
+  };
+
   render() {
     if (this.state.hasError) {
       const isChunkError = this.state.error?.message?.includes('dynamically imported module') ||
@@ -84,6 +91,14 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
             <div className="flex gap-2">
               <Button
+                type="button"
+                onClick={this.handleRetry}
+                className="flex-1 inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-line bg-surface px-4 text-xs font-extrabold text-ink shadow-xs transition-all hover:bg-line active:scale-95"
+              >
+                Try Again
+              </Button>
+              <Button
+                type="button"
                 onClick={this.handleReload}
                 className="flex-1 inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-brand bg-brand px-4 text-xs font-extrabold text-white shadow-xs transition-all hover:bg-brand-deep active:scale-95"
               >

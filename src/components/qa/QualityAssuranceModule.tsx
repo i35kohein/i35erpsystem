@@ -116,11 +116,14 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
         .filter(Boolean)
         .join(' • ');
 
-  // After a QA pass the ticket leaves the roster (checklist stamped) — the
-  // re-anchor effect must NOT jump the open detail to a different ticket.
+  // Re-anchor guard: only re-target the open ticket when the ROSTER changes
+  // (not while the modal is open). Typing a search query in the navbar filters
+  // filteredWorkOrders; without this gate the effect would silently switch the
+  // inspector to the first remaining ticket mid-inspection (audit D-P2).
   const skipRetargetRef = useRef(false);
 
   useEffect(() => {
+    if (isQaModalOpen) return; // never retarget while inspecting (audit D-P2)
     if (skipRetargetRef.current) {
       skipRetargetRef.current = false;
       return;
@@ -128,7 +131,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
     if (selectedWoId && !filteredWorkOrders.some((workOrder) => workOrder.id === selectedWoId)) {
       setSelectedWoId(filteredWorkOrders[0]?.id || '');
     }
-  }, [filteredWorkOrders, selectedWoId]);
+  }, [filteredWorkOrders, selectedWoId, isQaModalOpen]);
 
   // Form State for Post Repair QA Checklist
   const [qaData, setQaData] = useState<PostRepairChecklist>(
@@ -182,12 +185,17 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
     const next = order[(idx + 1) % order.length];
     handleDiagnosticStatusChange(id, next);
   };
-  // Update QA form & 21-point checklist whenever selectedWoId changes
+  // Update QA form & 21-point checklist whenever the SELECTED TICKET changes.
+  // Deps are [selectedWoId] only (audit D-P2): selectedWo is re-derived each
+  // render so any unrelated workOrders update (realtime, another tab) produced
+  // a new object reference and wiped the inspector's in-progress verdicts.
+  // `technicians` was pure churn and is gone. The ticket is read fresh below.
   useEffect(() => {
-    if (!selectedWo) return;
+    const wo = filteredWorkOrders.find((w) => w.id === selectedWoId) || null;
+    if (!wo) return;
 
-    if (selectedWo.postRepairChecklist) {
-      setQaData(selectedWo.postRepairChecklist);
+    if (wo.postRepairChecklist) {
+      setQaData(wo.postRepairChecklist);
     } else {
       setQaData({
         trueToneTransferred: true,
@@ -204,24 +212,24 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
     }
 
     if (
-      selectedWo.postRepairChecklist &&
-      selectedWo.afterDiagnostics &&
-      selectedWo.afterDiagnostics.length > 0
+      wo.postRepairChecklist &&
+      wo.afterDiagnostics &&
+      wo.afterDiagnostics.length > 0
     ) {
       setQaDiagnostics(
-        selectedWo.afterDiagnostics.map((diagnostic) => ({
+        wo.afterDiagnostics.map((diagnostic) => ({
           ...diagnostic,
           note: diagnostic.note?.trim().toLowerCase() === 'qa verified ok' ? '' : diagnostic.note,
         })),
       );
     } else if (
-      (selectedWo.afterDiagnostics && selectedWo.afterDiagnostics.length > 0) ||
-      (selectedWo.beforeDiagnostics && selectedWo.beforeDiagnostics.length > 0)
+      (wo.afterDiagnostics && wo.afterDiagnostics.length > 0) ||
+      (wo.beforeDiagnostics && wo.beforeDiagnostics.length > 0)
     ) {
       const untestedDiagnostics =
-        selectedWo.afterDiagnostics && selectedWo.afterDiagnostics.length > 0
-          ? selectedWo.afterDiagnostics
-          : selectedWo.beforeDiagnostics;
+        wo.afterDiagnostics && wo.afterDiagnostics.length > 0
+          ? wo.afterDiagnostics
+          : wo.beforeDiagnostics;
 
       setQaDiagnostics(
         untestedDiagnostics.map((diagnostic) => ({
@@ -240,9 +248,10 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
         }))
       );
     }
-    setQaBeforePhotos(selectedWo.intakePhotos || []);
-    setQaAfterPhotos(selectedWo.afterRepairPhotos || []);
-  }, [selectedWoId, selectedWo, technicians]);
+    setQaBeforePhotos(wo.intakePhotos || []);
+    setQaAfterPhotos(wo.afterRepairPhotos || []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedWoId]);
 
   
 

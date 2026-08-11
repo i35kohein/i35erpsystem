@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 type TooltipState = {
   label: string;
@@ -14,6 +14,21 @@ export const HoverTooltip: React.FC = () => {
   const activeElementRef = useRef<HTMLElement | null>(null);
   const originalTitleRef = useRef<string | null>(null);
   const showTimerRef = useRef<number | null>(null);
+  const tipRef = useRef<HTMLDivElement>(null);
+
+  // audit F-P3: the anchor clamp only bounds the CENTER point; once the real
+  // tooltip width is known, re-clamp so the EDGES stay inside the viewport
+  // (right-edge buttons previously overflowed up to ~116px).
+  useLayoutEffect(() => {
+    if (!tooltip || !tipRef.current) return;
+    const w = tipRef.current.offsetWidth;
+    const minLeft = 12;
+    const maxLeft = window.innerWidth - w - 12;
+    const clamped = Math.max(minLeft, Math.min(tooltip.left, maxLeft));
+    if (clamped !== tooltip.left) {
+      setTooltip((t) => (t ? { ...t, left: clamped } : t));
+    }
+  }, [tooltip]);
 
   useEffect(() => {
     // Tooltips are a hover/fine-pointer affordance only. On touch, tapping an
@@ -123,6 +138,7 @@ export const HoverTooltip: React.FC = () => {
 
   return (
     <div
+      ref={tipRef}
       role="tooltip" className="fixed z-[1000] pointer-events-none max-w-64 px-2.5 py-1.5 bg-ink text-white text-xs font-semibold leading-tight text-center rounded-lg shadow-lg"
       style={{
         left: tooltip.left,

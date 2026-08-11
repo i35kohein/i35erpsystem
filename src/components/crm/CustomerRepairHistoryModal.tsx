@@ -37,12 +37,15 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
 
   if (!isOpen || !customer) return null;
 
-  // Find all work orders for this customer
+  // Find all work orders for this customer. Match on customerId, else
+  // digit-normalized phone — NEVER name alone (audit C-P2): two different
+  // customers with the same name (very common in Myanmar) would each see both
+  // customers' tickets, IMEIs, logs and totals.
+  const normPhone = (p?: string) => (p || '').replace(/\D/g, '');
   const customerOrders = workOrders.filter(
     (wo) =>
       wo.customerId === customer.id ||
-      (customer.phone && wo.customerPhone === customer.phone) ||
-      (customer.name && wo.customerName?.toLowerCase() === customer.name.toLowerCase())
+      (customer.phone && normPhone(wo.customerPhone) === normPhone(customer.phone))
   );
 
   // Filtered orders

@@ -63,6 +63,31 @@ const DEFAULT_QUALITY_TIERS = [
   'Genuine',
 ];
 
+// audit C-P2/C-P3: numeric sanitizer shared by the inline editor and the
+// add/edit part forms — rejects NaN and clamps negatives so a typo can never
+// silently zero out or corrupt stock/price figures (NaN was serialized to null
+// in Supabase and reloaded as 0, destroying the real stock count).
+const sanitizeNonNegativeNumber = (value: unknown, fallback: number): number => {
+  const n = Number(value);
+  return Number.isFinite(n) && n >= 0 ? n : fallback;
+};
+
+// audit C-P3: stock-bar width — reorderPoint 0 used to produce Infinity/NaN
+// CSS widths (bar pinned at 100% or blank). Fall back to a full/empty bar.
+const stockBarWidthPercent = (part: PartItem): number => {
+  if (!(part.reorderPoint > 0)) return part.quantityInStock > 0 ? 100 : 0;
+  return Math.min(100, Math.max(8, (part.quantityInStock / (part.reorderPoint * 3)) * 100));
+};
+
+// audit C-P3: RMA numbers come from a monotonically increasing sequence
+// (year + running counter seeded by the clock) instead of 900 random values,
+// which collided across modules and confused RMA lookups.
+let rmaSeqCounter = 0;
+const generateRmaNumber = () => {
+  rmaSeqCounter = Math.max(rmaSeqCounter + 1, Number(String(Date.now()).slice(-4)));
+  return `RMA-${new Date().getFullYear()}-${String(rmaSeqCounter).padStart(4, '0')}`;
+};
+
 type InlineDraft = {
   quantityInStock?: string;
   reorderPoint?: string;
@@ -204,6 +229,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   inlineEditMode: propInlineEditMode,
   setInlineEditMode: propSetInlineEditMode,
   stockView: propStockView,
+  setStockView: propSetStockView,
   isTagsPrintOpen: propIsTagsPrintOpen,
   setIsTagsPrintOpen: propSetIsTagsPrintOpen,
   scanQuery: propScanQuery,
@@ -295,6 +321,13 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       rating: Number(newSupplierForm.rating) || 5,
     };
 
+    // audit C-P3: block duplicate supplier codes — duplicates broke vendor reports.
+    const normalizedCode = createdSup.code.toLowerCase();
+    if (suppliers.some((s) => s.code.toLowerCase() === normalizedCode)) {
+      toast.error(`A supplier with code "${createdSup.code}" already exists. Codes must be unique.`, 'Duplicate Supplier Code');
+      return;
+    }
+
     if (onAddSupplier) {
       onAddSupplier(createdSup);
     }
@@ -314,6 +347,12 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const handleSaveEditSupplier = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!editingSupplier || !editingSupplier.name.trim()) return;
+    // audit C-P3: block duplicate supplier codes (case-insensitive) on edit too.
+    const normalizedCode = editingSupplier.code.trim().toLowerCase();
+    if (suppliers.some((s) => s.id !== editingSupplier.id && s.code.toLowerCase() === normalizedCode)) {
+      toast.error(`A supplier with code "${editingSupplier.code}" already exists. Codes must be unique.`, 'Duplicate Supplier Code');
+      return;
+    }
     if (onUpdateSupplier) {
       onUpdateSupplier(editingSupplier);
     }
@@ -484,23 +523,45 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     unitCost: 0,
   });
 
+  // audit C-P2: pre-fill the claim's supplier from the part's existing supplier
+  // when the modal opens — otherwise submitting without touching the supplier
+  // select silently wiped the part's supplierId/supplierName ("Supplier Vendor").
+  useEffect(() => {
+    if (!claimingWarrantyPart) return;
+    const existingSup = suppliers.find((s) => s.id === claimingWarrantyPart.supplierId);
+    setWarrantyForm((form) => ({
+      ...form,
+      supplierId: claimingWarrantyPart.supplierId || form.supplierId,
+      supplierName: existingSup?.name || claimingWarrantyPart.supplierName || form.supplierName,
+      quantity: 1,
+    }));
+  }, [claimingWarrantyPart, suppliers]);
+
   
 
   const handleSubmitWarrantyClaim = () => {
     if (!claimingWarrantyPart) return;
     const selectedSup = suppliers.find((s) => s.id === warrantyForm.supplierId);
-    const resolvedSupName = selectedSup?.name || warrantyForm.supplierName || 'Supplier Vendor';
+    const resolvedSupName = selectedSup?.name || warrantyForm.supplierName || claimingWarrantyPart.supplierName || 'Supplier Vendor';
+
+    // audit C-P2: cap the claim at on-hand stock — an oversized claim would
+    // otherwise inflate stock when "Replacement Received" adds it back later.
+    const claimQty = Math.max(1, Math.floor(Number(warrantyForm.quantity) || 1));
+    if (claimQty > (claimingWarrantyPart.quantityInStock || 0)) {
+      toast.error(`Claim quantity (${claimQty}) exceeds stock on hand (${claimingWarrantyPart.quantityInStock || 0}) for ${claimingWarrantyPart.name}.`, 'Invalid Claim Quantity');
+      return;
+    }
 
     const rmaRecord: RmaItem = {
       id: `rma-${Date.now()}`,
-      rmaNumber: `RMA-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`,
+      rmaNumber: generateRmaNumber(),
       partId: claimingWarrantyPart.id,
       partName: claimingWarrantyPart.name,
       partQuality: claimingWarrantyPart.qualityTier,
-      supplierId: warrantyForm.supplierId || selectedSup?.id || 'sup-1',
+      supplierId: warrantyForm.supplierId || selectedSup?.id || claimingWarrantyPart.supplierId || 'sup-1',
       supplierName: resolvedSupName,
-      quantity: Number(warrantyForm.quantity) || 1,
-      unitCost: Number(warrantyForm.unitCost) || claimingWarrantyPart.costPrice,
+      quantity: claimQty,
+      unitCost: Number.isFinite(Number(warrantyForm.unitCost)) ? Math.max(0, Number(warrantyForm.unitCost)) : (claimingWarrantyPart.costPrice || 0),
       reason: warrantyForm.reason || 'Parts Warranty Claim',
       status: 'Shipped to Vendor',
       trackingNumber: warrantyForm.trackingNumber || '',
@@ -511,11 +572,16 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       onAddRma(rmaRecord);
     }
 
-    if (onUpdatePart && (claimingWarrantyPart.supplierId !== warrantyForm.supplierId || claimingWarrantyPart.supplierName !== resolvedSupName)) {
+    // audit C-P2: 1) never wipe the part's supplier — only adopt a new one when
+    // the user explicitly picked a different supplier; 2) defective units leave
+    // the shelf at claim time (balanced by the "Replacement Received" increment).
+    if (onUpdatePart) {
+      const supplierChanged = Boolean(warrantyForm.supplierId && warrantyForm.supplierId !== claimingWarrantyPart.supplierId);
       onUpdatePart({
         ...claimingWarrantyPart,
-        supplierId: warrantyForm.supplierId,
-        supplierName: resolvedSupName,
+        supplierId: supplierChanged ? warrantyForm.supplierId : claimingWarrantyPart.supplierId,
+        supplierName: supplierChanged ? resolvedSupName : claimingWarrantyPart.supplierName,
+        quantityInStock: Math.max(0, (claimingWarrantyPart.quantityInStock || 0) - claimQty),
       });
     }
 
@@ -827,13 +893,20 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
   // Force the stock card grid below md (phones); user toggle wins on desktop.
   useEffect(() => {
-    const apply = () => {
-
-    };
+    // audit C-P3: this listener previously had an empty apply body — a no-op —
+    // so rotating/resizing never switched table ↔ cards. Now driven by matchMedia
+    // (cards below sm, table from sm up), mirroring the rest of the app's
+    // responsive stock view.
+    const mql = window.matchMedia('(max-width: 639px)');
+    const apply = () => propSetStockView?.(mql.matches ? 'cards' : 'table');
     apply();
+    mql.addEventListener('change', apply);
     window.addEventListener('resize', apply);
-    return () => window.removeEventListener('resize', apply);
-  }, []);
+    return () => {
+      mql.removeEventListener('change', apply);
+      window.removeEventListener('resize', apply);
+    };
+  }, [propSetStockView]);
 
   // Analytics Metrics
   const metrics = useMemo(() => {
@@ -858,6 +931,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     ownerParts.forEach((p) => {
       const owner = p.owner || 'APP';
       ownerCounts[owner] = (ownerCounts[owner] || 0) + 1;
+      // audit C-P2: legacy/typo owners (e.g. "WHOLESALE") crashed the whole
+      // metrics block — same ??= guard style as ownerCounts.
+      ownerValuation[owner] ??= { cost: 0, retail: 0 };
       ownerValuation[owner].cost += Number(p.costPrice || 0) * Number(p.quantityInStock || 0);
       ownerValuation[owner].retail += (p.sellingPrice || 0) * Number(p.quantityInStock || 0);
       totalCostValuation += Number(p.costPrice || 0) * Number(p.quantityInStock || 0);
@@ -944,6 +1020,14 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       return;
     }
 
+    // audit C-P3: block duplicate SKUs — barcode scan silently returned the
+    // first match when two parts shared a SKU.
+    const normalizedSku = (newPartData.sku || '').trim().toLowerCase();
+    if (parts.some((p) => p.sku.toLowerCase() === normalizedSku)) {
+      toast.error(`A part with SKU "${newPartData.sku}" already exists. SKUs must be unique.`, 'Duplicate SKU');
+      return;
+    }
+
     const part: PartItem = {
       id: `part-${Date.now()}`,
       sku: newPartData.sku || `SKU-${Date.now()}`,
@@ -953,11 +1037,13 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       deviceCompatibility: newPartData.deviceCompatibility || [],
       backGlassColor: newPartData.backGlassColor || undefined,
       qualityTier: (newPartData.qualityTier as PartQualityTier) || 'OEM',
-      quantityInStock: Number(newPartData.quantityInStock) || 0,
+      // audit C-P2: sanitize instead of `Number(x) || 0` (which allowed -5 and
+      // turned NaN into 0 silently).
+      quantityInStock: sanitizeNonNegativeNumber(newPartData.quantityInStock, 0),
       reservedQuantity: 0,
-      reorderPoint: Number(newPartData.reorderPoint) || 3,
-      costPrice: Number(newPartData.costPrice) || 0,
-      sellingPrice: Number(newPartData.sellingPrice) || 0,
+      reorderPoint: sanitizeNonNegativeNumber(newPartData.reorderPoint, 3),
+      costPrice: sanitizeNonNegativeNumber(newPartData.costPrice, 0),
+      sellingPrice: sanitizeNonNegativeNumber(newPartData.sellingPrice, 0),
       supplierId: newPartData.supplierId,
       supplierName: newPartData.supplierName || '',
       locationBin: newPartData.locationBin || '',
@@ -972,10 +1058,19 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
   const handleSaveEditPart = () => {
     if (!editingPart) return;
+    // audit C-P2: the edit modal stores raw Number(e.target.value) into state —
+    // NaN/negative values must not persist. Clamp on save.
+    const sanitized: PartItem = {
+      ...editingPart,
+      quantityInStock: sanitizeNonNegativeNumber(editingPart.quantityInStock, 0),
+      reorderPoint: sanitizeNonNegativeNumber(editingPart.reorderPoint, 0),
+      costPrice: sanitizeNonNegativeNumber(editingPart.costPrice, 0),
+      sellingPrice: sanitizeNonNegativeNumber(editingPart.sellingPrice, 0),
+    };
     if (onUpdatePart) {
-      onUpdatePart(editingPart);
+      onUpdatePart(sanitized);
     } else {
-      onUpdatePartStock(editingPart.id, editingPart.quantityInStock);
+      onUpdatePartStock(sanitized.id, sanitized.quantityInStock);
     }
     setEditingPart(null);
   };
@@ -1042,15 +1137,36 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       return;
     }
 
+    // audit C-P2: reject non-numeric / negative numeric edits up-front instead
+    // of saving NaN (→ null in Supabase → reloads as 0) or negative stock.
+    for (const { part } of inlineSaveReview) {
+      const draft = inlineDrafts[part.id];
+      if (!draft) continue;
+      const numericFields: Array<[string | undefined, string]> = [
+        [draft.quantityInStock, 'Stock'],
+        [draft.reorderPoint, 'Reorder point'],
+        [draft.costPrice, 'Purchase price'],
+        [draft.sellingPrice, 'Selling price'],
+      ];
+      for (const [raw, label] of numericFields) {
+        if (raw === undefined || raw.trim() === '') continue;
+        const n = Number(raw);
+        if (!Number.isFinite(n) || n < 0) {
+          toast.error(`${label} for "${part.name}" must be a non-negative number.`, 'Invalid Inline Edit');
+          return;
+        }
+      }
+    }
+
     setIsInlineSaving(true);
     try {
       inlineSaveReview.forEach(({ part }) => {
         const draft = inlineDrafts[part.id];
         if (!draft) return;
-        const parsedQuantity = draft.quantityInStock?.trim() ? Number(draft.quantityInStock) : part.quantityInStock;
-        const parsedReorder = draft.reorderPoint?.trim() ? Number(draft.reorderPoint) : part.reorderPoint;
-        const parsedCost = draft.costPrice?.trim() ? Number(draft.costPrice) : part.costPrice;
-        const parsedSelling = draft.sellingPrice?.trim() ? Number(draft.sellingPrice) : part.sellingPrice;
+        const parsedQuantity = draft.quantityInStock?.trim() ? sanitizeNonNegativeNumber(draft.quantityInStock, part.quantityInStock) : part.quantityInStock;
+        const parsedReorder = draft.reorderPoint?.trim() ? sanitizeNonNegativeNumber(draft.reorderPoint, part.reorderPoint) : part.reorderPoint;
+        const parsedCost = draft.costPrice?.trim() ? sanitizeNonNegativeNumber(draft.costPrice, part.costPrice) : part.costPrice;
+        const parsedSelling = draft.sellingPrice?.trim() ? sanitizeNonNegativeNumber(draft.sellingPrice, part.sellingPrice) : part.sellingPrice;
         const selectedSup = suppliers.find((supplier) => supplier.id === draft.supplierId);
         onUpdatePart({
           ...part,
@@ -1424,7 +1540,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       <div className="h-1.5 w-full overflow-hidden rounded-full bg-line">
                         <div
                           className={`h-full transition-all duration-300 ${isOut ? 'w-0 bg-danger' : isLow ? 'bg-warning' : 'bg-success'}`}
-                          style={isOut ? undefined : { width: `${Math.min(100, Math.max(8, (part.quantityInStock / (part.reorderPoint * 3)) * 100))}%` }}
+                          style={isOut ? undefined : { width: `${stockBarWidthPercent(part)}%` }}
                         />
                       </div>
                     </div>
@@ -1696,7 +1812,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                                 className={`h-full transition-all duration-300 ${
                                   isOut ? 'bg-danger w-0' : isLow ? 'bg-warning' : 'bg-success'
                                 }`}
-                                style={{ width: `${Math.min(100, Math.max(8, (part.quantityInStock / (part.reorderPoint * 3)) * 100))}%` }}
+                                style={{ width: `${stockBarWidthPercent(part)}%` }}
                               />
                             </div>}
                           </div>}
@@ -2885,6 +3001,11 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   }}
                   className="w-full bg-surface border border-line rounded-xl p-2.5 text-xs font-bold text-ink focus:bg-white focus:outline-none"
                 >
+                  {/* audit C-P2: "keep current" placeholder — submitting without
+                      changing the select must NOT wipe the part's supplier. */}
+                  <option value="">
+                    {claimingWarrantyPart.supplierId ? `Keep current supplier (${claimingWarrantyPart.supplierName || claimingWarrantyPart.supplierId})` : 'No supplier on this part — pick one…'}
+                  </option>
                   {suppliers.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.name} ({s.code}) - Avg RMA: {s.avgRmaTurnaroundDays}d

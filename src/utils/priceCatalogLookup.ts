@@ -26,11 +26,18 @@ export function getModelPriceCatalogItems(
   // 1. Direct exact match
   let matched = catalogToSearch.find((c) => c.model.toLowerCase() === lowerTarget);
 
-  // 2. Partial/Includes match
+  // 2. Partial/Includes match — LONGEST catalog model wins (audit A-P2-7): a
+  // bare "iphone 15" must never beat "iphone 15 pro max" when both match the
+  // target string. Filter to candidates that either contain the target or are
+  // contained in it, then pick by descending model-name length (most specific).
   if (!matched) {
-    matched = catalogToSearch.find(
-      (c) => lowerTarget.includes(c.model.toLowerCase()) || c.model.toLowerCase().includes(lowerTarget)
+    const candidates = catalogToSearch.filter(
+      (c) =>
+        lowerTarget.includes(c.model.toLowerCase()) ||
+        c.model.toLowerCase().includes(lowerTarget)
     );
+    candidates.sort((a, b) => b.model.length - a.model.length);
+    matched = candidates[0];
   }
 
   // 3. Fallback series match for newer models (e.g., iPhone 17 Pro Max -> iPhone 16 Pro Max / iPhone 15 Pro Max)

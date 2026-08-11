@@ -136,7 +136,10 @@ describe('computeTechStats', () => {
     expect(stats.laborRevenue).toBe(50000);
     // spareparts job → parts rate 10%
     expect(stats.estCommission).toBe(5000);
-    expect(stats.successRate).toBe(50); // 1 completed / (1 + 1 return)
+    // audit D-P3: successRate is windowed — the static tech.warrantyReturnCount
+    // is all-time and no longer dilutes a perfect window. This ticket has no
+    // follow-up Issue Reported / warrantyReturnAt → 100%.
+    expect(stats.successRate).toBe(100);
   });
   it('est commission uses hardware rate for micro-soldering', () => {
     const wo = baseWo({ status: 'Finished', serviceType: 'Micro-Soldering', lineItems: [{ id: 'l1', description: 'Board', isLabor: true, unitCost: 0, unitPrice: 100000, quantity: 1 }] });

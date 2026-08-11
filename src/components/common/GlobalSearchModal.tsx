@@ -39,6 +39,15 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
+  // audit F-P3: debounce the 5,000-item scan (2000 tickets + 2000 parts + 1000
+  // customers, several toLowerCase().includes() per record) so keystrokes on
+  // low-end phones don't rescan on every keypress.
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQuery(query), 120);
+    return () => clearTimeout(t);
+  }, [query]);
+
   useEffect(() => {
     if (open) {
       setQuery('');
@@ -48,7 +57,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   }, [open]);
 
   const results = useMemo<ResultItem[]>(() => {
-    const q = query.trim().toLowerCase();
+    const q = debouncedQuery.trim().toLowerCase();
     if (q.length < 2) return [];
     const inText = (...vals: (string | undefined)[]) => vals.some((v) => v && v.toLowerCase().includes(q));
     const items: ResultItem[] = [];
@@ -73,7 +82,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
       }
     });
     return items.slice(0, 30);
-  }, [query, workOrders, parts, customers]);
+  }, [debouncedQuery, workOrders, parts, customers]);
 
   useEffect(() => setCursor(0), [query]);
 
@@ -81,7 +90,9 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
-      if (e.key === 'ArrowDown') { e.preventDefault(); setCursor((c) => Math.min(c + 1, results.length - 1)); }
+      // audit F-P3: with zero results Math.min(c+1, -1) set cursor to -1;
+      // clamp to 0 and let Enter's results[cursor] guard stay valid.
+      if (e.key === 'ArrowDown') { e.preventDefault(); setCursor((c) => (results.length === 0 ? 0 : Math.min(c + 1, results.length - 1))); }
       if (e.key === 'ArrowUp') { e.preventDefault(); setCursor((c) => Math.max(c - 1, 0)); }
       if (e.key === 'Enter' && results[cursor]) {
         e.preventDefault();

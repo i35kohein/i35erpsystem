@@ -421,7 +421,9 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
     cart.forEach((item: CartItem) => {
       subtotal += item.price;
-      const discount = item.price * (item.discountPercent / 100);
+      // audit A-P2-8: MMK is integer kyat — round every discount (7% of
+      // 380,000 would otherwise leak 26,600.000000000004 into quotes/tickets).
+      const discount = Math.round(item.price * (item.discountPercent / 100));
       totalDiscountAmount += discount;
     });
 
@@ -523,7 +525,8 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
       ];
       let idx = 1;
       cart.forEach((item: CartItem) => {
-        const itemFinal = item.price - item.price * (item.discountPercent / 100);
+        // audit A-P2-8: integer MMK — round the final per-item price.
+        const itemFinal = Math.round(item.price - item.price * (item.discountPercent / 100));
         const disc =
           item.discountPercent > 0
             ? ` (was ${formatPrice(item.price)} · ${item.discountPercent}% Off)`
@@ -549,7 +552,8 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
     const selectedRepairsList = itemsList.map((item) => {
       const baseP = item.price;
       const discPct = item.discountPercent || 0;
-      const discAmt = baseP * (discPct / 100);
+      // audit A-P2-8: integer MMK — round discount and final price.
+      const discAmt = Math.round(baseP * (discPct / 100));
       const finalP = baseP - discAmt;
       return {
         id: item.categoryKey,
@@ -561,8 +565,11 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
     });
 
     const totalSub = selectedRepairsList.reduce((acc, r) => acc + r.basePrice, 0);
-    const totalDiscAmt = selectedRepairsList.reduce((acc, r) => acc + (r.basePrice * (r.discountPercent / 100)), 0);
-    const totalNetDue = totalSub - totalDiscAmt;
+    // audit A-P2-8/P2-13: derive totals from the SAME rounded list (no
+    // cartSummary fallback that could disagree with a fresh selection), and
+    // round the final due.
+    const totalDiscAmt = selectedRepairsList.reduce((acc, r) => acc + (r.basePrice - r.finalPrice), 0);
+    const totalNetDue = Math.round(totalSub - totalDiscAmt);
 
     onOpenNewWorkOrder({
       model: selectedDevice,
@@ -571,17 +578,23 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
       subtotal: totalSub,
       discountAmount: totalDiscAmt,
       discountPercent: totalSub > 0 ? Math.round((totalDiscAmt / totalSub) * 100) : 0,
-      price: totalNetDue > 0 ? totalNetDue : cartSummary.totalDue,
+      price: totalNetDue > 0 ? totalNetDue : 0,
     });
   };
 
-  // CSV Export
+  // CSV Export — quote-escape EVERY field so re-import survives commas/quotes
+  // in labels and warranty strings (audit A-P3-7).
+  const csvEscape = (value: string | number) => {
+    const s = String(value ?? '');
+    return `"${s.replace(/"/g, '""')}"`;
+  };
+
   const handleExportCsv = useCallback(() => {
-    const headers = ['Model', ...categories.map((c) => `${c.label} Price`), ...categories.map((c) => `${c.label} Warranty`)];
+    const headers = ['Model', ...categories.map((c) => `${c.label} Price`), ...categories.map((c) => `${c.label} Warranty`)].map(csvEscape);
     const rows = catalog.map((item) => {
       const priceVals = categories.map((c) => item.prices[c.key] ?? '');
       const warrantyVals = categories.map((c) => item.warranties[c.key] ?? '');
-      return [`"${item.model}"`, ...priceVals, ...warrantyVals].join(',');
+      return [csvEscape(item.model), ...priceVals.map(csvEscape), ...warrantyVals.map(csvEscape)].join(',');
     });
 
     const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows].join('\n');
@@ -592,7 +605,9 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
     document.body.appendChild(link);
     link.click();
     link.remove();
-  }, [catalog]);
+    // audit A-P3-8: categories is read above — must be a dependency so a
+    // renamed category label is reflected in exports.
+  }, [catalog, categories]);
 
   useEffect(() => {
     if (onRegisterExportHandler) {

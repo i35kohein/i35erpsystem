@@ -376,6 +376,9 @@ export const INITIAL_SUPPLIERS: Supplier[] = [
   },
 ];
 
+// audit G-P2: prices are MMK (DEFAULT_SYSTEM_SETTINGS.currencySymbol is MMK).
+// These were originally USD MobileSentrix figures — converted at ~4,500 MMK/USD
+// and rounded to realistic shop prices.
 export const INITIAL_PARTS: PartItem[] = [
   {
     id: 'part-101',
@@ -388,8 +391,8 @@ export const INITIAL_PARTS: PartItem[] = [
     quantityInStock: 8,
     reservedQuantity: 2,
     reorderPoint: 4,
-    costPrice: 195.00,
-    sellingPrice: 320.00,
+    costPrice: 875000,
+    sellingPrice: 1440000,
     supplierId: 'sup-1',
     supplierName: 'MobileSentrix',
     locationBin: 'BIN-A01',
@@ -406,8 +409,8 @@ export const INITIAL_PARTS: PartItem[] = [
     quantityInStock: 12,
     reservedQuantity: 1,
     reorderPoint: 5,
-    costPrice: 98.00,
-    sellingPrice: 189.00,
+    costPrice: 440000,
+    sellingPrice: 850000,
     supplierId: 'sup-2',
     supplierName: 'InjuredGadgets',
     locationBin: 'BIN-A02',
@@ -423,8 +426,8 @@ export const INITIAL_PARTS: PartItem[] = [
     quantityInStock: 19,
     reservedQuantity: 3,
     reorderPoint: 8,
-    costPrice: 22.00,
-    sellingPrice: 79.00,
+    costPrice: 100000,
+    sellingPrice: 355000,
     supplierId: 'sup-1',
     supplierName: 'MobileSentrix',
     locationBin: 'BIN-B04',
@@ -440,8 +443,8 @@ export const INITIAL_PARTS: PartItem[] = [
     quantityInStock: 3,
     reservedQuantity: 1,
     reorderPoint: 6,
-    costPrice: 12.50,
-    sellingPrice: 59.00,
+    costPrice: 55000,
+    sellingPrice: 265000,
     supplierId: 'sup-3',
     supplierName: 'Mengtor Apple Parts',
     locationBin: 'BIN-B01',
@@ -457,8 +460,8 @@ export const INITIAL_PARTS: PartItem[] = [
     quantityInStock: 25,
     reservedQuantity: 0,
     reorderPoint: 10,
-    costPrice: 8.50,
-    sellingPrice: 45.00,
+    costPrice: 38000,
+    sellingPrice: 200000,
     supplierId: 'sup-1',
     supplierName: 'MobileSentrix',
     locationBin: 'MICRO-BIN-02',
@@ -474,8 +477,8 @@ export const INITIAL_PARTS: PartItem[] = [
     quantityInStock: 15,
     reservedQuantity: 0,
     reorderPoint: 5,
-    costPrice: 24.00,
-    sellingPrice: 89.00,
+    costPrice: 108000,
+    sellingPrice: 400000,
     supplierId: 'sup-2',
     supplierName: 'InjuredGadgets',
     locationBin: 'BIN-A08',
@@ -492,8 +495,8 @@ export const INITIAL_PARTS: PartItem[] = [
     quantityInStock: 2,
     reservedQuantity: 1,
     reorderPoint: 2,
-    costPrice: 520.00,
-    sellingPrice: 780.00,
+    costPrice: 2340000,
+    sellingPrice: 3510000,
     supplierId: 'sup-1',
     supplierName: 'MobileSentrix',
     locationBin: 'MAC-BIN-01',
@@ -501,9 +504,13 @@ export const INITIAL_PARTS: PartItem[] = [
   }
 ];
 
+// audit G-P2: these ids live in the same `customers` collection space as
+// generate10TestTickets() (which uses cust-1..cust-10 for different people) —
+// give this seed a disjoint namespace so work orders can never link to the
+// wrong customer profile.
 export const INITIAL_CUSTOMERS: Customer[] = [
   {
-    id: 'cust-1',
+    id: 'cust-seed-1',
     name: 'Sarah Jenkins',
     email: 'sarah.j@gmail.com',
     phone: '(555) 234-5678',
@@ -514,7 +521,7 @@ export const INITIAL_CUSTOMERS: Customer[] = [
     createdAt: '2026-03-12T10:30:00Z',
   },
   {
-    id: 'cust-2',
+    id: 'cust-seed-2',
     name: 'Apex Creative Tech Solutions',
     company: 'Apex Creative LLC',
     email: 'it@apexcreative.io',
@@ -527,7 +534,7 @@ export const INITIAL_CUSTOMERS: Customer[] = [
     createdAt: '2025-11-04T09:15:00Z',
   },
   {
-    id: 'cust-3',
+    id: 'cust-seed-3',
     name: 'Bay Area Mobile Mail-In',
     company: 'Bay Repairs Wholesale',
     email: 'wholesale@bayrepairs.com',
@@ -540,7 +547,7 @@ export const INITIAL_CUSTOMERS: Customer[] = [
     createdAt: '2025-08-20T14:00:00Z',
   },
   {
-    id: 'cust-4',
+    id: 'cust-seed-4',
     name: 'Michael Chang',
     email: 'm.chang@techcorp.com',
     phone: '(555) 432-1098',
@@ -552,7 +559,7 @@ export const INITIAL_CUSTOMERS: Customer[] = [
     createdAt: '2026-04-10T11:20:00Z',
   },
   {
-    id: 'cust-5',
+    id: 'cust-seed-5',
     name: 'Horizon Design Studio',
     company: 'Horizon Media Inc',
     email: 'ops@horizondesign.co',
@@ -564,7 +571,7 @@ export const INITIAL_CUSTOMERS: Customer[] = [
     createdAt: '2026-01-15T08:45:00Z',
   },
   {
-    id: 'cust-6',
+    id: 'cust-seed-6',
     name: 'Amanda Ross',
     email: 'amanda.ross@icloud.com',
     phone: '(555) 654-3210',
@@ -593,7 +600,8 @@ export const INITIAL_RMAS: RmaItem[] = [
     supplierId: 'sup-2',
     supplierName: 'InjuredGadgets',
     quantity: 1,
-    unitCost: 98.00,
+    // audit G-P2: MMK to match the converted INITIAL_PARTS pricing
+    unitCost: 440000,
     reason: 'Intermittent touch ghosting on bottom left corner after 10 mins usage.',
     status: 'Shipped to Vendor',
     trackingNumber: '1Z9999990111223344',
@@ -608,10 +616,11 @@ export const INITIAL_RMAS: RmaItem[] = [
     supplierId: 'sup-3',
     supplierName: 'Mengtor Apple Parts',
     quantity: 2,
-    unitCost: 12.50,
+    // audit G-P2: MMK to match the converted INITIAL_PARTS pricing
+    unitCost: 55000,
     reason: 'Triggers iOS Important Battery Message & rapid drain in testing.',
     status: 'Credit Approved',
-    vendorCreditAmount: 25.00,
+    vendorCreditAmount: 110000,
     createdAt: '2026-07-12T10:00:00Z',
   }
 ];
@@ -623,10 +632,11 @@ export const INITIAL_POS: PurchaseOrder[] = [
     supplierId: 'sup-1',
     supplierName: 'MobileSentrix',
     items: [
-      { partId: 'part-101', partName: 'iPhone 14 Pro Max Super Retina XDR OLED', quantity: 5, unitCost: 195.00 },
-      { partId: 'part-105', partName: 'Hydra USB-C Controller IC Chip', quantity: 20, unitCost: 8.50 }
+      // audit G-P2: MMK to match the converted INITIAL_PARTS pricing
+      { partId: 'part-101', partName: 'iPhone 14 Pro Max Super Retina XDR OLED', quantity: 5, unitCost: 875000 },
+      { partId: 'part-105', partName: 'Hydra USB-C Controller IC Chip', quantity: 20, unitCost: 38000 }
     ],
-    totalCost: 1145.00,
+    totalCost: 5135000,
     status: 'Sent',
     createdAt: '2026-07-21T11:30:00Z'
   }

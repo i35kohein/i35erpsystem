@@ -573,11 +573,23 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
       ? technicians.find((t) => t.id === userFormData.technicianId)
       : technicians.find((t) => t.name && t.name.toLowerCase() === userFormData.name.trim().toLowerCase());
 
+    // audit E-P3: on edit, keep the existing email when the field is cleared —
+    // fabricating a fallback address would silently rewrite the account's login
+    // email and desync it from any credentials/auto-match. Also reject duplicate
+    // emails: login auto-match binds the first match, so two accounts sharing an
+    // email would resolve to the wrong profile.
+    const email = userFormData.email.trim()
+      || (editingUser ? editingUser.email : `${userFormData.name.toLowerCase().replace(/\s+/g, '')}@applerepairpro.com`);
+    if (users.some((u) => u.id !== (editingUser?.id || '') && u.email && u.email.toLowerCase() === email.toLowerCase())) {
+      toast.error('Another user already uses this email address.', 'Duplicate Email');
+      return;
+    }
+
     if (editingUser) {
       const updated: AppUser = {
         ...editingUser,
         name: userFormData.name.trim(),
-        email: userFormData.email.trim() || `${userFormData.name.toLowerCase().replace(/\s+/g, '')}@applerepairpro.com`,
+        email,
         phone: userFormData.phone.trim(),
         role: userFormData.role,
         technicianId: userFormData.role === 'Technician' ? (linkedTech?.id || userFormData.technicianId) : undefined,
@@ -591,7 +603,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
       const newUser: AppUser = {
         id: `usr-${Date.now()}`,
         name: userFormData.name.trim(),
-        email: userFormData.email.trim() || `${userFormData.name.toLowerCase().replace(/\s+/g, '')}@applerepairpro.com`,
+        email,
         phone: userFormData.phone.trim(),
         role: userFormData.role,
         technicianId: techId,
@@ -718,6 +730,15 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
     setTechModalOpen(true);
   };
 
+  // audit E-P3: clamp technician commission inputs to 0–50% and keep the
+  // previous value while the field is cleared — Number('') === 0 would
+  // silently zero out a saved rate on the save path.
+  const clampCommissionRate = (raw: string, previous: number) => {
+    const parsed = Number(raw);
+    if (raw === '' || Number.isNaN(parsed)) return previous;
+    return Math.max(0, Math.min(50, parsed));
+  };
+
   // Submit Technician Form
   const handleTechSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -732,9 +753,11 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
         level: techFormData.level,
         specialty: techFormData.specialty.trim(),
         status: techFormData.status,
-        commissionRate: Number(techFormData.commissionRate) || 0,
-        commissionRateParts: Number(techFormData.commissionRateParts) || 0,
-        commissionRateHardware: Number(techFormData.commissionRateHardware) || 0,
+        // audit E-P3: clamp on the save path too (state is already clamped on
+        // change; this guards against out-of-range/zeroed values sneaking in).
+        commissionRate: Math.max(0, Math.min(50, Number(techFormData.commissionRate) || 0)),
+        commissionRateParts: Math.max(0, Math.min(50, Number(techFormData.commissionRateParts) || 0)),
+        commissionRateHardware: Math.max(0, Math.min(50, Number(techFormData.commissionRateHardware) || 0)),
       };
       onUpdateTechnician(updated);
     } else {
@@ -1264,7 +1287,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                     <Input
                       type="number"
                       value={techFormData.commissionRateParts}
-                      onChange={(e) => setTechFormData({ ...techFormData, commissionRateParts: Number(e.target.value) })}
+                      onChange={(e) => setTechFormData({ ...techFormData, commissionRateParts: clampCommissionRate(e.target.value, techFormData.commissionRateParts) })}
                       min="0"
                       max="50"
                       className="w-full h-9 bg-white text-ink font-bold px-3 rounded-lg border border-line-strong focus:outline-none "
@@ -1277,7 +1300,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                     <Input
                       type="number"
                       value={techFormData.commissionRateHardware}
-                      onChange={(e) => setTechFormData({ ...techFormData, commissionRateHardware: Number(e.target.value) })}
+                      onChange={(e) => setTechFormData({ ...techFormData, commissionRateHardware: clampCommissionRate(e.target.value, techFormData.commissionRateHardware) })}
                       min="0"
                       max="50"
                       className="w-full h-9 bg-white text-ink font-bold px-3 rounded-lg border border-line-strong focus:outline-none "

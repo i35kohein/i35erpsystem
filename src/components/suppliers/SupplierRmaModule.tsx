@@ -15,6 +15,15 @@ import { Button , Input } from '../ui';
 import { toast } from '../../lib/toast';
 import { confirmDialog } from '../common/ConfirmDialog';
 
+// audit C-P3: RMA numbers come from a monotonically increasing sequence
+// (year + running counter seeded by the clock) instead of 900 random values,
+// which collided across modules and confused RMA lookups.
+let rmaSeqCounter = 0;
+const generateRmaNumber = () => {
+  rmaSeqCounter = Math.max(rmaSeqCounter + 1, Number(String(Date.now()).slice(-4)));
+  return `RMA-${new Date().getFullYear()}-${String(rmaSeqCounter).padStart(4, '0')}`;
+};
+
 interface SupplierRmaModuleProps {
   suppliers: Supplier[];
   rmas: RmaItem[];
@@ -124,6 +133,12 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
       avgRmaTurnaroundDays: Number(newSupplierForm.avgRmaTurnaroundDays) || 3,
       rating: 5,
     };
+    // audit C-P3: block duplicate supplier codes — duplicates broke vendor reports.
+    const normalizedCode = newSup.code.toLowerCase();
+    if (suppliers.some((s) => s.code.toLowerCase() === normalizedCode)) {
+      toast.error(`A supplier with code "${newSup.code}" already exists. Codes must be unique.`, 'Duplicate Supplier Code');
+      return;
+    }
     if (onAddSupplier) {
       onAddSupplier(newSup);
     }
@@ -182,16 +197,29 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
       return;
     }
 
+    // audit C-P2: cap the claim at on-hand stock — an oversized claim would
+    // otherwise inflate stock when "Replacement Received" adds it back later.
+    const qty = Number.isFinite(Number(newRmaData.quantity)) ? Math.max(1, Math.floor(Number(newRmaData.quantity))) : 1;
+    if (qty > Number(part.quantityInStock || 0)) {
+      toast.error(`Claim quantity (${qty}) exceeds on-hand stock (${part.quantityInStock || 0}) for ${part.name}.`, 'Invalid RMA Quantity');
+      return;
+    }
+
+    // audit C-P2: preserve a legitimate $0 unit cost — `Number(x) || part.costPrice`
+    // silently replaced 0 (free replacement credit) with the part's cost, and
+    // produced NaN credit when costPrice was missing on legacy rows.
+    const unitCost = Number.isFinite(Number(newRmaData.unitCost)) ? Math.max(0, Number(newRmaData.unitCost)) : 0;
+
     const rma: RmaItem = {
       id: `rma-${Date.now()}`,
-      rmaNumber: `RMA-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`,
+      rmaNumber: generateRmaNumber(),
       partId: part.id,
       partName: part.name,
       partQuality: part.qualityTier,
       supplierId: supplier.id,
       supplierName: supplier.name,
-      quantity: Number(newRmaData.quantity) || 1,
-      unitCost: Number(newRmaData.unitCost) || part.costPrice,
+      quantity: qty,
+      unitCost,
       reason: newRmaData.reason || 'Defective part on installation',
       status: (newRmaData.status as RmaStatus) || 'Shipped to Vendor',
       trackingNumber: newRmaData.trackingNumber || '',
@@ -200,6 +228,75 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
 
     onAddRma(rma);
     setShowNewRmaModal(false);
+  };
+
+  // audit C-P3: RMA status actions are no longer one-way/mutually-exclusive.
+  // After approving credit you can still mark the replacement received (both
+  // paths), and either terminal-ish state can be rolled back to Shipped so a
+  // misclick can be corrected. Credit amounts guard `unitCost || 0` so a $0
+  // cost RMA never computes NaN.
+  const renderRmaActions = (rma: RmaItem) => {
+    const creditAmount = (rma.unitCost || 0) * (rma.quantity || 0);
+    const markReplacementReceived = async () => {
+      const ok = await confirmDialog({ title: 'Replacement Received', message: `Mark ${rma.partName} × ${rma.quantity} as Replacement Received? Stock will increase by ${rma.quantity}.`, confirmLabel: 'Mark Received' });
+      if (ok) onUpdateRmaStatus(rma.id, 'Replacement Received');
+    };
+
+    if (rma.status === 'Shipped to Vendor') {
+      return (
+        <div className="flex items-center justify-end gap-1.5">
+          <Button variant="ghost"
+            onClick={() => onUpdateRmaStatus(rma.id, 'Credit Approved', creditAmount)}
+            className="px-2 py-1 bg-success/10 hover:bg-success/15 text-success-deep border border-success/20 text-xs font-bold rounded"
+          >
+            Approve Credit
+          </Button>
+          <Button variant="ghost"
+            onClick={markReplacementReceived}
+            className="px-2 py-1 bg-brand/10 hover:bg-brand/15 text-brand border border-brand/20 text-xs font-bold rounded"
+          >
+            Replacement Received
+          </Button>
+        </div>
+      );
+    }
+    if (rma.status === 'Credit Approved') {
+      return (
+        <div className="flex items-center justify-end gap-1.5">
+          <Button variant="ghost"
+            onClick={markReplacementReceived}
+            className="px-2 py-1 bg-brand/10 hover:bg-brand/15 text-brand border border-brand/20 text-xs font-bold rounded"
+          >
+            Replacement Received
+          </Button>
+          <Button variant="ghost"
+            onClick={() => onUpdateRmaStatus(rma.id, 'Shipped to Vendor')}
+            className="px-2 py-1 text-muted border border-line text-xs font-bold rounded"
+          >
+            ↺ Back to Shipped
+          </Button>
+        </div>
+      );
+    }
+    if (rma.status === 'Replacement Received') {
+      return (
+        <div className="flex items-center justify-end gap-1.5">
+          <Button variant="ghost"
+            onClick={() => onUpdateRmaStatus(rma.id, 'Credit Approved', creditAmount)}
+            className="px-2 py-1 bg-success/10 hover:bg-success/15 text-success-deep border border-success/20 text-xs font-bold rounded"
+          >
+            Approve Credit
+          </Button>
+          <Button variant="ghost"
+            onClick={() => onUpdateRmaStatus(rma.id, 'Shipped to Vendor')}
+            className="px-2 py-1 text-muted border border-line text-xs font-bold rounded"
+          >
+            ↺ Back to Shipped
+          </Button>
+        </div>
+      );
+    }
+    return null;
   };
 
   // Force the RMA card grid below md (phones); user toggle wins on desktop.
@@ -352,28 +449,15 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                     <span className="font-mono text-xs text-muted">{rma.trackingNumber || 'No tracking yet'}</span>
                     {rma.status === 'Credit Approved' ? (
                       <span className="text-xs text-success-deep font-extrabold">+{(rma.vendorCreditAmount || 0).toLocaleString()} {currency} Credit</span>
-                    ) : rma.status === 'Shipped to Vendor' ? (
-                      <div className="flex items-center gap-1.5">
-                        <Button variant="ghost"
-                          onClick={() => onUpdateRmaStatus(rma.id, 'Credit Approved', rma.unitCost * rma.quantity)}
-                          className="px-2.5 py-1.5 bg-success/10 hover:bg-success/15 text-success-deep border border-success/20 text-xs font-bold rounded-lg cursor-pointer"
-                        >
-                          Approve Credit
-                        </Button>
-                        <Button variant="ghost"
-                          onClick={async () => {
-                            const ok = await confirmDialog({ title: 'Replacement Received', message: `Mark ${rma.partName} × ${rma.quantity} as Replacement Received? Stock will increase by ${rma.quantity}.`, confirmLabel: 'Mark Received' });
-                            if (ok) onUpdateRmaStatus(rma.id, 'Replacement Received');
-                          }}
-                          className="px-2.5 py-1.5 bg-brand/10 hover:bg-brand/15 text-brand border border-brand/20 text-xs font-bold rounded-lg cursor-pointer"
-                        >
-                          Replacement Received
-                        </Button>
-                      </div>
                     ) : rma.status === 'Replacement Received' ? (
                       <span className="text-xs text-brand font-extrabold">↻ Replacement back in stock</span>
                     ) : null}
                   </div>
+                  {renderRmaActions(rma) && (
+                    <div className="flex flex-wrap items-center justify-end gap-1.5">
+                      {renderRmaActions(rma)}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -429,25 +513,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                     </td>
 
                     <td className="p-3 text-right">
-                      {rma.status === 'Shipped to Vendor' && (
-                        <div className="flex items-center justify-end gap-1.5">
-                          <Button variant="ghost"
-                            onClick={() => onUpdateRmaStatus(rma.id, 'Credit Approved', rma.unitCost * rma.quantity)}
-                            className="px-2 py-1 bg-success/10 hover:bg-success/15 text-success-deep border border-success/20 text-xs font-bold rounded"
-                          >
-                            Approve Credit
-                          </Button>
-                          <Button variant="ghost"
-                            onClick={async () => {
-                              const ok = await confirmDialog({ title: 'Replacement Received', message: `Mark ${rma.partName} × ${rma.quantity} as Replacement Received? Stock will increase by ${rma.quantity}.`, confirmLabel: 'Mark Received' });
-                              if (ok) onUpdateRmaStatus(rma.id, 'Replacement Received');
-                            }}
-                            className="px-2 py-1 bg-brand/10 hover:bg-brand/15 text-brand border border-brand/20 text-xs font-bold rounded"
-                          >
-                            Replacement Received
-                          </Button>
-                        </div>
-                      )}
+                      {renderRmaActions(rma)}
                     </td>
                   </tr>
                 ))}
@@ -960,7 +1026,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                           setPoItems((prev) =>
                             prev.map((it, i) =>
                               i === idx
-                                ? { ...it, partId: e.target.value, partName: part ? part.name : '', unitCost: part ? Number(part.costPrice || part.sellingPrice * 0.6 || 0) : it.unitCost }
+                                ? { ...it, partId: e.target.value, partName: part ? part.name : '', unitCost: part ? (Number.isFinite(Number(part.costPrice)) ? Number(part.costPrice) : 0) : it.unitCost }
                                 : it
                             )
                           );

@@ -115,8 +115,10 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
         id: item.id,
         name: item.description,
         basePrice: item.unitPrice * item.quantity,
-        discountPercent: 0,
-        finalPrice: item.unitPrice * item.quantity,
+        // audit F-P3: honor per-item discounts in the fallback so printed rows
+        // sum to the shown total instead of contradicting it.
+        discountPercent: item.lineItemDiscountPercent || 0,
+        finalPrice: Math.round(item.unitPrice * item.quantity * (1 - (item.lineItemDiscountPercent || 0) / 100)),
       }));
 
   const handlePrint = () => {
@@ -623,6 +625,28 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
             width: 76.2mm !important;
             max-width: 76.2mm !important;
             margin: 0 auto !important;
+            /* audit F-P3: keep the sticker on ONE 2-inch sheet — never split
+               across pages, and compress spacing so it fits 2in height. */
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
+            padding: 2mm !important;
+            font-size: 8.5px !important;
+            line-height: 1.05 !important;
+          }
+          .tag-printable-area p,
+          .tag-printable-area div {
+            font-size: 8.5px !important;
+            line-height: 1.05 !important;
+          }
+          .tag-printable-area .font-black.text-sm {
+            font-size: 9px !important;
+          }
+          .tag-printable-area svg {
+            width: 30px !important;
+            height: 30px !important;
+          }
+          .tag-printable-area .h-8 {
+            height: 20px !important;
           }
           /* A4 vouchers are always print-condensed, even when the screen
              preview uses Standard A4. This keeps the full 21-point list on
@@ -829,7 +853,11 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
           .a4-print-compact .print-shop-logo { border: none !important; }
           @page {
             size: ${paperSize === 'a4_voucher' ? 'A4 portrait' : '3in 2in'};
-            margin: ${paperSize === 'a4_voucher' ? '3.5mm' : '4mm'};
+            /* audit F-P3: zero margin for the 3x2 sticker — a 4mm margin left
+               only ~2.69in x 1.69in of printable area, clipping the 3in-wide
+               tag and spilling onto a second sheet. Printers that need margins
+               apply them via driver settings. */
+            margin: ${paperSize === 'a4_voucher' ? '3.5mm' : '0'};
           }
         }
       `}</style>

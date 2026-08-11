@@ -169,9 +169,26 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
   const [globalWarrantyTerm, setGlobalWarrantyTerm] = useState<string>('3 Month');
   const importInputRef = useRef<HTMLInputElement>(null);
 
+  // audit A-P2-3: per-cell drafts for the price table — type freely into a
+  // cell (draft state), commit the write on blur/Enter or on Save. No more
+  // full-document PATCH on every keystroke (raced/out-of-order writes used to
+  // revert edits, and clearing a field instantly nulled the price).
+  const [priceCellDrafts, setPriceCellDrafts] = useState<Record<string, string>>({});
+  const [warrantyCellDrafts, setWarrantyCellDrafts] = useState<Record<string, string>>({});
+
+  // Drafts belong to the selected model — reset when switching models.
+  useEffect(() => {
+    setPriceCellDrafts({});
+    setWarrantyCellDrafts({});
+  }, [selectedModel]);
+
   if (!isOpen) return null;
 
   const currentModelData = catalog.find((m) => m.model === selectedModel) || catalog[0];
+
+  // audit A-P3-9: factory reset only exists for demo seeding — keep the button
+  // visible but disabled on live ERP data (no more silent no-op + success toast).
+  const demoSeedEnabled = import.meta.env.VITE_ENABLE_DEMO_SEED === 'true';
 
   const triggerToast = (msg: string) => {
     setSaveMsg(msg);
@@ -186,7 +203,9 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
   }, {} as Record<string, number>);
 
   const handlePriceChange = (categoryKey: string, val: string) => {
-    const num = val.trim() === '' ? null : parseFloat(val.replace(/[^0-9.]/g, ''));
+    // audit A-P3-11: MMK is integer kyat — round after parse (parseFloat alone
+    // accepted 380000.5 and persisted decimal prices into totals).
+    const num = val.trim() === '' ? null : Math.round(parseFloat(val.replace(/[^0-9.]/g, '')));
     const currentWarranty = currentModelData?.warranties[categoryKey] || '3 Month';
     updatePriceAndWarranty(selectedModel, categoryKey, isNaN(num as number) ? null : num, currentWarranty);
   };
@@ -213,6 +232,15 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
     triggerToast(`Renamed model to "${renameModelInput.trim()}".`);
     setSelectedModel(renameModelInput.trim());
     setIsRenamingModel(false);
+  };
+
+  // Commit any still-typed cell drafts (used by Save & Close so a draft that
+  // never blurred is still persisted) (audit A-P2-3/P3-10).
+  const flushDrafts = () => {
+    Object.entries(priceCellDrafts).forEach(([key, val]) => handlePriceChange(key, val));
+    Object.entries(warrantyCellDrafts).forEach(([key, val]) => handleWarrantyChange(key, val));
+    setPriceCellDrafts({});
+    setWarrantyCellDrafts({});
   };
 
   const handleDeleteModelClick = async () => {
@@ -522,13 +550,16 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
             </Button>
             <Button variant="ghost"
               onClick={async () => {
+                if (!demoSeedEnabled) return;
                 const ok = await confirmDialog({ title: 'Reset Price Catalog', message: 'Reset all price tables, folder settings, and categories back to factory defaults?', confirmLabel: 'Reset Catalog', danger: true });
                 if (!ok) return;
                 resetToDefaults();
                 setAllFoldersEnabled(true);
                 triggerToast('Price catalog and preferences reset to factory defaults.');
               }}
-              className="px-3 py-1.5 rounded-lg bg-danger/10 hover:bg-danger/15 text-danger font-bold text-xs transition-all flex items-center space-x-1.5 border border-red-200 cursor-pointer"
+              disabled={!demoSeedEnabled}
+              title={demoSeedEnabled ? 'Reset all price tables, folder settings, and categories back to factory defaults.' : 'Disabled for live data — factory reset only runs in demo-seed mode (audit A-P3-9).'}
+              className="px-3 py-1.5 rounded-lg bg-danger/10 hover:bg-danger/15 text-danger font-bold text-xs transition-all flex items-center space-x-1.5 border border-red-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Reset Defaults</span>
@@ -712,8 +743,18 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                               <Input
                                 type="text"
                                 placeholder="e.g. 120000 or empty if N/A"
-                                value={currentPrice === null || currentPrice === undefined ? '' : currentPrice}
-                                onChange={(e) => handlePriceChange(cat.key, e.target.value)}
+                                value={priceCellDrafts[cat.key] !== undefined ? priceCellDrafts[cat.key] : (currentPrice === null || currentPrice === undefined ? '' : currentPrice)}
+                                onChange={(e) => setPriceCellDrafts((prev) => ({ ...prev, [cat.key]: e.target.value }))}
+                                onBlur={() => {
+                                  const draft = priceCellDrafts[cat.key];
+                                  if (draft !== undefined) {
+                                    handlePriceChange(cat.key, draft);
+                                    setPriceCellDrafts((prev) => { const next = { ...prev }; delete next[cat.key]; return next; });
+                                  }
+                                }}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+                                }}
                                 className="w-full px-3 py-1.5 bg-transparent border-none text-xs font-mono font-bold text-ink focus:outline-none"
                               />
                             </div>
@@ -722,8 +763,18 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                             <Input
                               type="text"
                               placeholder="e.g. 3 Month, 12 Month"
-                              value={currentWarranty}
-                              onChange={(e) => handleWarrantyChange(cat.key, e.target.value)}
+                              value={warrantyCellDrafts[cat.key] !== undefined ? warrantyCellDrafts[cat.key] : currentWarranty}
+                              onChange={(e) => setWarrantyCellDrafts((prev) => ({ ...prev, [cat.key]: e.target.value }))}
+                              onBlur={() => {
+                                const draft = warrantyCellDrafts[cat.key];
+                                if (draft !== undefined) {
+                                  handleWarrantyChange(cat.key, draft);
+                                  setWarrantyCellDrafts((prev) => { const next = { ...prev }; delete next[cat.key]; return next; });
+                                }
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+                              }}
                               className="w-full px-3 py-1.5 bg-surface border border-line focus:bg-white rounded-lg text-xs font-semibold text-ink transition-all"
                             />
                           </td>
@@ -1256,6 +1307,9 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
           <div className="flex items-center space-x-3">
             <Button
               onClick={() => {
+                // audit A-P2-3/P3-10: the button now genuinely commits any
+                // still-typed cell drafts (writes also happen on blur/Enter).
+                flushDrafts();
                 triggerToast('All changes saved.');
                 if (!embedded) {
                   setTimeout(() => {

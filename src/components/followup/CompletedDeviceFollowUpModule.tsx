@@ -102,6 +102,19 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
       matchesStatus = daysElapsed >= 30;
     } else if (statusFilter === '2_MONTHS') {
       matchesStatus = daysElapsed >= 60;
+    } else if (statusFilter === 'Callbacks Due') {
+      // Audit D-P3: reminder-driven view — latest record's nextFollowUpDate is
+      // today or earlier, and the ticket isn't Closed.
+      matchesStatus =
+        (currentFollowUpStatus !== 'Closed') &&
+        (() => {
+          const recs = wo.followUpRecords || [];
+          const latest = recs[recs.length - 1];
+          if (!latest?.nextFollowUpDate) return false;
+          const due = new Date(latest.nextFollowUpDate).getTime();
+          if (isNaN(due)) return false;
+          return due <= new Date().setHours(23, 59, 59, 999);
+        })();
     } else if (statusFilter !== 'ALL') {
       matchesStatus = currentFollowUpStatus === statusFilter;
     }
@@ -125,6 +138,18 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
   ).length;
   const noAnswerCount = followUpEligible.filter((wo) => wo.followUpStatus === 'No Answer').length;
   const callbackScheduledCount = followUpEligible.filter((wo) => wo.followUpStatus === 'Callback Scheduled').length;
+  // Callbacks due today or earlier (audit D-P3): nextFollowUpDate is stored and
+  // displayed but never drove the roster — a callback scheduled for today could
+  // sit silently. Due = the ticket's LATEST follow-up record's next date <= today.
+  const callbackDueCount = followUpEligible.filter((wo) => {
+    if ((wo.followUpStatus || 'Pending Call') === 'Closed') return false;
+    const recs = wo.followUpRecords || [];
+    const latest = recs[recs.length - 1];
+    if (!latest?.nextFollowUpDate) return false;
+    const due = new Date(latest.nextFollowUpDate).getTime();
+    if (isNaN(due)) return false;
+    return due <= new Date().setHours(23, 59, 59, 999);
+  }).length;
   const closedCount = followUpEligible.filter((wo) => (wo.followUpStatus || 'Pending Call') === 'Closed').length;
 
   // Average Rating calculation
@@ -326,7 +351,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white border border-line p-3 rounded-2xl shadow-2xs">
         <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
           {[
-            { id: 'ALL', label: `All 7+ Day Due (${followUpEligible.length})` },
+            { id: 'ALL', label: `All 7+ Day Due (${followUpEligible.filter((wo) => (wo.followUpStatus || 'Pending Call') !== 'Closed').length})` },
             { id: '1_MONTH', label: `1 Month (30 Days) (${count30Days})` },
             { id: '2_MONTHS', label: `2 Months (60 Days) (${count60Days})` },
             { id: 'Pending Call', label: `Pending Call (${pendingCallsCount})` },
@@ -334,6 +359,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
             { id: 'Issue Reported', label: `Issue Reported (${issueReportedCount})` },
             { id: 'No Answer', label: `No Answer (${noAnswerCount})` },
             { id: 'Callback Scheduled', label: `Callback Scheduled (${callbackScheduledCount})` },
+            { id: 'Callbacks Due', label: `Callbacks Due (${callbackDueCount})` },
             { id: 'Closed', label: `Closed (${closedCount})` },
           ].map((tab) => (
             <Button

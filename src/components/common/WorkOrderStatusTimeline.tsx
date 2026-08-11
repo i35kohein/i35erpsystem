@@ -209,6 +209,16 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
   const handleAddNewTransitionLog = () => {
     if (!newLogNote.trim()) return;
 
+    // Audit B-P2: in CRM the timeline is rendered without save/status
+    // callbacks — this used to silently swallow the log entry (validated,
+    // closed, saved nothing). Block with a clear message instead.
+    if (!onSaveWorkOrder && !onUpdateStatus) {
+      setNewLogNote('');
+      setIsAddingLog(false);
+      if (typeof window !== 'undefined') window.alert?.('Save is unavailable here — open the ticket from Intake/Pipeline to publish transition logs.');
+      return;
+    }
+
     const formattedDate = new Date().toLocaleString('en-US', {
       month: 'short',
       day: 'numeric',

@@ -1397,6 +1397,10 @@ export default function App() {
           const updated = {
             ...w,
             status: newStatus,
+            // Stamp the status-change clock ONLY on a real status transition
+            // (audit D-P2): updatedAt is bumped by every save (logs, assign,
+            // QA), so bottleneck age must not anchor to it.
+            statusChangedAt: newStatus !== w.status ? new Date().toISOString() : w.statusChangedAt,
             // Anchor the warranty clock the moment a repair completes; keep
             // the original completion stamp even if the ticket is edited later.
             ...((newStatus === 'Finished' || newStatus === 'Taken Out') && !w.completedAt
@@ -1487,9 +1491,20 @@ export default function App() {
       const next = prev.map((part) => {
         const consumed = aggregate.get(part.id);
         if (!consumed) return part;
+        // Audit A-P2-14: never silently floor negative stock — surface the
+        // shortfall so the shop knows the count drifted (stock may have been
+        // reduced after the part was added to the ticket).
+        const available = Number(part.quantityInStock || 0);
+        if (consumed.quantity > available) {
+          addToast(
+            `${part.name} stock is ${available} but this ticket needs ${consumed.quantity} — stock floored at 0, please reconcile.`,
+            'error',
+            'Stock Shortfall'
+          );
+        }
         const updated = {
           ...part,
-          quantityInStock: Math.max(0, Number(part.quantityInStock || 0) - consumed.quantity),
+          quantityInStock: Math.max(0, available - consumed.quantity),
         };
         saveDocument('parts', updated).catch(reportSaveError);
         return updated;
@@ -1678,6 +1693,7 @@ export default function App() {
             isPaid: true,
             paymentMethod: paymentMethod as any,
             status: 'Taken Out' as WorkOrderStatus,
+            statusChangedAt: w.status !== 'Taken Out' ? new Date().toISOString() : w.statusChangedAt,
             completedAt: w.completedAt || completedAtIso || new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           };
@@ -1689,12 +1705,13 @@ export default function App() {
     );
     // Keep the stored customer record's totals in sync (CRM list + Telegram bot
     // read the stored totalSpent — it was frozen at 0 for every customer).
+    // Match on customerId or digit-normalized phone — NEVER name alone (audit
+    // C-P2): same-name customers would accrue the payment on the wrong person.
     const norm = (p: string) => (p || '').replace(/\D/g, '');
     const cust = customers.find(
       (c) =>
         c.id === current.customerId ||
-        (current.customerPhone && c.phone && norm(c.phone) === norm(current.customerPhone)) ||
-        (current.customerName && c.name?.toLowerCase() === (current.customerName || '').toLowerCase())
+        (current.customerPhone && c.phone && norm(c.phone) === norm(current.customerPhone))
     );
     if (cust) {
       const updatedCust: Customer = {

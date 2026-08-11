@@ -167,12 +167,13 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
     }
     const matchesFilter = filterStatus === 'ALL' || wo.status === filterStatus;
     const query = searchQuery.toLowerCase();
+    // Guard against legacy/partial records missing optional fields (audit B-P2).
     const matchesSearch =
       !query ||
-      wo.orderNumber.toLowerCase().includes(query) ||
-      wo.customerName.toLowerCase().includes(query) ||
-      wo.deviceModel.toLowerCase().includes(query) ||
-      wo.serialNumber.toLowerCase().includes(query) ||
+      (wo.orderNumber || '').toLowerCase().includes(query) ||
+      (wo.customerName || '').toLowerCase().includes(query) ||
+      (wo.deviceModel || '').toLowerCase().includes(query) ||
+      (wo.serialNumber || '').toLowerCase().includes(query) ||
       (wo.imei && wo.imei.toLowerCase().includes(query));
     return matchesFilter && matchesSearch;
   }).sort((a, b) => {

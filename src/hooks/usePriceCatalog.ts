@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ModelRepairPrice, PriceCatalogImportRow, REPAIR_CATEGORIES, RepairCategoryDef, FolderConfig, DEFAULT_DEVICE_FOLDERS, getModelFolderId } from '../types/priceCatalog';
 import { INITIAL_REPAIR_PRICE_DATA } from '../data/repairPriceData';
-import { subscribeToCollection, saveBatchDocuments, saveDocument, clearCollection } from '../lib/supabase';
+import { subscribeToCollection, saveBatchDocuments, saveDocument, clearCollection, fetchCloudCollection } from '../lib/supabase';
 
 export function usePriceCatalog(globalCurrencySymbol?: string, onUpdateGlobalCurrency?: (symbol: string) => void) {
   // Price List is live Supabase data only. Do not merge bundled sample models
@@ -56,7 +56,16 @@ export function usePriceCatalog(globalCurrencySymbol?: string, onUpdateGlobalCur
     if (onUpdateGlobalCurrency) {
       onUpdateGlobalCurrency(symbol);
     } else {
-      saveDocument('systemSettings', { id: 'global', currencySymbol: symbol }).catch(console.error);
+      // audit A-P2-11: NEVER write a partial systemSettings doc — the Supabase
+      // upsert replaces the whole data column and would wipe every other
+      // setting (tax, shop profile, receipt footer, payment methods). Read the
+      // full settings doc, update just currencySymbol, write it all back.
+      fetchCloudCollection<{ id: string }>('systemSettings')
+        .then((docs) => {
+          const current = docs.find((d) => d.id === 'global') || {};
+          return saveDocument('systemSettings', { ...current, id: 'global', currencySymbol: symbol });
+        })
+        .catch(console.error);
     }
   };
 
@@ -164,6 +173,23 @@ export function usePriceCatalog(globalCurrencySymbol?: string, onUpdateGlobalCur
       saveDocument('priceCategories', { id: key, _deleted: true }).catch(console.error);
       return updated;
     });
+    // audit A-P2-12: strip the deleted key from every model doc so orphan
+    // price/warranty keys don't accumulate in the catalog.
+    setCatalog((prev) =>
+      prev.map((item) => {
+        if (!(key in (item.prices || {})) && !(key in (item.warranties || {}))) return item;
+        const { [key]: _removedPrice, ...restPrices } = item.prices;
+        const { [key]: _removedWarranty, ...restWarranties } = item.warranties;
+        const updated = {
+          ...item,
+          id: (item as any).id || item.model.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase(),
+          prices: restPrices,
+          warranties: restWarranties,
+        };
+        saveDocument('priceCatalog', updated).catch(console.error);
+        return updated;
+      })
+    );
   };
 
   // Model operations
@@ -206,18 +232,30 @@ export function usePriceCatalog(globalCurrencySymbol?: string, onUpdateGlobalCur
     const trimmedNew = newName.trim();
     if (!trimmedNew || oldName === trimmedNew) return;
 
+    const oldDocId = oldName.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+    const newDocId = trimmedNew.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+
+    // audit A-P3-13: reject when the slugified id already belongs to a
+    // DIFFERENT model (e.g. "iPhone 15 ProMax" vs existing "iPhone 15 Pro Max"
+    // both slugify to iphone_15_pro_max) — otherwise the upsert would
+    // overwrite the other model's document.
+    const collision = catalog.find((m) => ((m as ModelRepairPrice & { id?: string }).id || m.model.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase()) === newDocId && m.model !== oldName);
+    if (collision) {
+      console.warn(`Cannot rename "${oldName}" → "${trimmedNew}": catalog id "${newDocId}" already belongs to "${collision.model}".`);
+      return;
+    }
+
     setCatalog((prev) =>
       prev.map((m) => {
         if (m.model === oldName) {
-          const docId = trimmedNew.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
           const updated = {
             ...m,
-            id: docId,
+            id: newDocId,
             model: trimmedNew,
           };
-          const oldDocId = oldName.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
-          saveDocument('priceCatalog', { id: oldDocId, _deleted: true }).catch(console.error);
-          saveDocument('priceCatalog', updated).catch(console.error);
+          // audit A-P3-13: soft-delete + upsert in ONE batch request (no
+          // window where only one of the two documents exists).
+          saveBatchDocuments('priceCatalog', [{ id: oldDocId, _deleted: true }, updated]).catch(console.error);
           return updated;
         }
         return m;

@@ -54,6 +54,9 @@ export const generate10TestTickets = (): WorkOrder[] => {
         { id: 'li-1-2', description: 'iPhone 16 Pro Max Back Glass (Desert Titanium)', unitCost: 35000, unitPrice: 75000, quantity: 1, isLabor: false },
         { id: 'li-1-3', description: 'Labor: Modular Installation', unitCost: 0, unitPrice: 40000, quantity: 1, isLabor: true }
       ],
+      // subtotal = sum of unitPrice x qty across ALL line items (audit G-P2
+      // arithmetic mistakenly used unitCost for parts — verified: 200,000 is
+      // correct and matches totalAmount).
       subtotal: 200000,
       depositAmount: 50000,
       discountAmount: 0,
@@ -118,6 +121,9 @@ export const generate10TestTickets = (): WorkOrder[] => {
         { id: 'li-2-1', description: 'iPad Air 5 Front Glass Touch Digitizer', unitCost: 65000, unitPrice: 120000, quantity: 1, isLabor: false },
         { id: 'li-2-2', description: 'Labor: iPad Glass Separation & Lamination', unitCost: 0, unitPrice: 50000, quantity: 1, isLabor: true }
       ],
+      // subtotal = sum of unitPrice x qty across ALL line items (audit G-P2
+      // arithmetic mistakenly used unitCost for parts — verified: 170,000 is
+      // correct and matches totalAmount).
       subtotal: 170000,
       depositAmount: 30000,
       discountAmount: 0,
@@ -243,7 +249,10 @@ export const generate10TestTickets = (): WorkOrder[] => {
       ),
       afterDiagnostics: [],
       lineItems: [
-        { id: 'li-4-1', description: 'Samsung Galaxy S24 Ultra Original Dynamic AMOLED Screen', unitCost: 180000, unitPrice: 280000, quantity: 1, isLabor: false },
+        // audit G-P3: correct part for an iPhone 13 Pro Max (was a Samsung
+        // Galaxy S24 Ultra screen). Price/units unchanged so the line-item sum
+        // still equals subtotal below.
+        { id: 'li-4-1', description: 'iPhone 13 Pro Max OLED Screen Assembly (Genuine)', unitCost: 180000, unitPrice: 280000, quantity: 1, isLabor: false },
         { id: 'li-4-2', description: 'Labor: Frame Seal & Heat Transfer', unitCost: 0, unitPrice: 40000, quantity: 1, isLabor: true }
       ],
       subtotal: 320000,
@@ -308,6 +317,9 @@ export const generate10TestTickets = (): WorkOrder[] => {
         { id: 'li-5-1', description: 'Apple Watch Ultra 2 OEM Battery Unit', unitCost: 35000, unitPrice: 75000, quantity: 1, isLabor: false },
         { id: 'li-5-2', description: 'Labor: Waterproof Gasket Renewal & Sealing', unitCost: 0, unitPrice: 35000, quantity: 1, isLabor: true }
       ],
+      // subtotal = sum of unitPrice x qty across ALL line items (audit G-P2
+      // arithmetic mistakenly used unitCost for parts — verified: 110,000 is
+      // correct and matches totalAmount).
       subtotal: 110000,
       depositAmount: 30000,
       discountAmount: 0,
@@ -374,6 +386,9 @@ export const generate10TestTickets = (): WorkOrder[] => {
         { id: 'li-6-1', description: 'iPhone 15 Pro OEM Display Assembly', unitCost: 110000, unitPrice: 190000, quantity: 1, isLabor: false },
         { id: 'li-6-2', description: 'Labor: TrueTone Programming & Screen Mount', unitCost: 0, unitPrice: 40000, quantity: 1, isLabor: true }
       ],
+      // subtotal = sum of unitPrice x qty across ALL line items (audit G-P2
+      // arithmetic mistakenly used unitCost for parts — verified: 230,000 is
+      // correct); total = subtotal - discountAmount = 220,000.
       subtotal: 230000,
       depositAmount: 50000,
       discountAmount: 10000,
@@ -439,6 +454,9 @@ export const generate10TestTickets = (): WorkOrder[] => {
         { id: 'li-7-1', description: 'MacBook Air 15 M2 Original Keyboard Topcase Unit', unitCost: 120000, unitPrice: 220000, quantity: 1, isLabor: false },
         { id: 'li-7-2', description: 'Labor: Rivet Removal & Re-riveting Assembly', unitCost: 0, unitPrice: 80000, quantity: 1, isLabor: true }
       ],
+      // subtotal = sum of unitPrice x qty across ALL line items (audit G-P2
+      // arithmetic mistakenly used unitCost for parts — verified: 300,000 is
+      // correct and matches totalAmount).
       subtotal: 300000,
       depositAmount: 50000,
       discountAmount: 0,
@@ -505,6 +523,9 @@ export const generate10TestTickets = (): WorkOrder[] => {
         { id: 'li-8-1', description: 'iPhone 14 Pro OEM USB-C/Dock Flex Cable', unitCost: 20000, unitPrice: 55000, quantity: 1, isLabor: false },
         { id: 'li-8-2', description: 'Labor: Modular Installation', unitCost: 0, unitPrice: 35000, quantity: 1, isLabor: true }
       ],
+      // subtotal = sum of unitPrice x qty across ALL line items (audit G-P2
+      // arithmetic mistakenly used unitCost for parts — verified: 90,000 is
+      // correct and matches totalAmount).
       subtotal: 90000,
       depositAmount: 90000,
       discountAmount: 0,
@@ -617,11 +638,11 @@ export const generate10TestTickets = (): WorkOrder[] => {
         cellularSignal: false,
         wirelessCharging: false,
         liquidIndicatorTriggered: false,
-        physicalDamageNotes: "Board cracked across Tensor G3 SoC silicon layers"
+        physicalDamageNotes: "Board cracked across A14 Bionic SoC silicon layers"
       },
       symptomsReported: "Heavy impact runover. Infinite bootloop and heat spike.",
       beforeDiagnostics: get21Diagnostics(
-        [{ id: 'd1', name: '1. Power On & Boot State Logic', status: 'Fail', note: 'Tensor G3 SoC cracked internally' }],
+        [{ id: 'd1', name: '1. Power On & Boot State Logic', status: 'Fail', note: 'A14 Bionic SoC cracked internally' }],
         "Infinite bootloop and heat spike"
       ),
       afterDiagnostics: [],

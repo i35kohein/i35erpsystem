@@ -8,6 +8,7 @@ import { WorkOrder, Technician, SystemSettings, WorkOrderStatus } from '../../ty
 import { PriorityBadge } from '../common/PriorityBadge';
 import { TicketDetailInspectorModal } from '../common/TicketDetailInspectorModal';
 import { confirmDialog } from '../common/ConfirmDialog';
+import { isDateMatchingFilter } from '../common/DateFilterSelector';
 import { Button } from '../ui';
 
 interface TrelloBoardProps {
@@ -35,6 +36,10 @@ const STAGE_COLUMNS: { id: WorkOrderStatus; title: string; dot: string; border: 
   { id: 'Pending', title: 'Pending', dot: 'bg-warning', border: 'border-warning/40', headerBg: 'bg-warning/5' },
   { id: 'Finished', title: 'Finished', dot: 'bg-success-deep', border: 'border-success/40', headerBg: 'bg-success/5' },
   { id: 'Taken Out', title: 'Taken Out', dot: 'bg-line', border: 'border-line', headerBg: 'bg-surface' },
+  // Exception stages (audit D-P3): declined tickets used to be invisible on the
+  // board entirely — no column existed for them.
+  { id: 'Cant Repair', title: 'Cant Repair', dot: 'bg-danger', border: 'border-danger/40', headerBg: 'bg-danger/5' },
+  { id: 'Customer Not Repair', title: 'Customer Not Repair', dot: 'bg-warning', border: 'border-warning/40', headerBg: 'bg-warning/5' },
 ];
 
 /** Trello-style board for the Repair Ticket Roster.
@@ -83,17 +88,11 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
             return false;
           }
         }
-        // Date filter
-        if (dateFilter && dateFilter.preset !== 'all') {
-          const created = new Date(wo.createdAt).getTime();
-          const now = Date.now();
-          const DAY = 1000 * 60 * 60 * 24;
-          let windowMs = now;
-          if (dateFilter.preset === 'today') windowMs = now - DAY;
-          else if (dateFilter.preset === '7days') windowMs = now - 6 * DAY;
-          else if (dateFilter.preset === '30days') windowMs = now - 29 * DAY;
-          else if (dateFilter.preset === '60days') windowMs = now - 59 * DAY;
-          if (!isNaN(created) && created < windowMs) return false;
+        // Date filter (audit D-P2): reuse the shared calendar-day filter so
+        // Trello agrees with Pipeline/Dashboard — the old rolling 24h/6-day
+        // windows drifted by time-of-day and silently ignored custom ranges.
+        if (dateFilter && dateFilter.preset !== 'all' && !isDateMatchingFilter(wo.createdAt, dateFilter)) {
+          return false;
         }
         return true;
       })
@@ -108,7 +107,12 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
   }, [visibleWorkOrders]);
 
   const isStagnant = (wo: WorkOrder) => {
-    const created = new Date(wo.createdAt).getTime();
+    // Bottleneck anchors to statusChangedAt when present (audit D-P2): updatedAt
+    // is bumped by every save (logs, assign, QA), so a ticket stuck 5 days in
+    // Receive stopped being flagged the moment someone added a note. Falls back
+    // to createdAt for legacy tickets that predate the field.
+    const anchor = wo.statusChangedAt || wo.createdAt;
+    const created = new Date(anchor).getTime();
     if (isNaN(created)) return false;
     // Bottleneck applies only to OPEN stages — Finished / Taken Out are terminal,
     // they'd always look 'stale' by age and shouldn't get the red border.
@@ -158,6 +162,13 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
     setDragOverStage(null);
   };
 
+  // Dropping outside any column (audit D-P3): clear the stale drag state so
+  // the next drag doesn't re-fire the previous drop target.
+  const handleDragEnd = () => {
+    setDraggedWoId(null);
+    setDragOverStage(null);
+  };
+
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       {/* Board columns — horizontal scroll (kanban style, no grid) */}
@@ -198,6 +209,7 @@ export const TrelloBoardModule: React.FC<TrelloBoardProps> = ({
                       key={wo.id}
                       draggable
                       onDragStart={() => setDraggedWoId(wo.id)}
+                      onDragEnd={handleDragEnd}
                       onClick={() => setDetailWo(wo)}
                       role="button"
                       tabIndex={0}

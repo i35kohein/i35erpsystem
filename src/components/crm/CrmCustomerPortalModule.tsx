@@ -13,11 +13,12 @@ import {Users,
   Edit2} from 'lucide-react';
 import { Customer, CustomerType, WorkOrder, SystemSettings } from '../../types';
 import { Button , Input } from '../ui';
-import { CustomerFacingWebPortal } from '../portal/CustomerFacingWebPortal';
+import { CustomerFacingWebPortal, normalizePhone } from '../portal/CustomerFacingWebPortal';
 import { PrintableInvoiceModal } from '../common/PrintableInvoiceModal';
 import { CustomerRepairHistoryModal } from './CustomerRepairHistoryModal';
 import { DEFAULT_SYSTEM_SETTINGS } from '../../data/seedData';
 import { confirmDialog } from '../common/ConfirmDialog';
+import { toast } from '../../lib/toast';
 
 interface CrmCustomerPortalModuleProps {
   customers: Customer[];
@@ -97,9 +98,13 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
   // Filter customers by searchQuery and type filter
   const filteredCustomers = customers.filter((cust) => {
     const q = searchQuery.toLowerCase();
+    // audit C-P3: phone search runs on digit-normalized values so formatted
+    // variants ("09 123 456 789" vs "09123456789") still match.
+    const qDigits = q.replace(/[^0-9]/g, '');
+    const custPhoneDigits = normalizePhone(cust.phone);
     const matchesSearch = !q ||
       cust.name.toLowerCase().includes(q) ||
-      cust.phone.toLowerCase().includes(q) ||
+      (qDigits && custPhoneDigits.includes(qDigits)) ||
       (cust.email && cust.email.toLowerCase().includes(q)) ||
       (cust.company && cust.company.toLowerCase().includes(q));
 
@@ -170,6 +175,15 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
         notes: newCustomerForm.notes.trim() || undefined,
       });
     } else {
+      // audit C-P3: block duplicate accounts for the same phone (digit-
+      // normalized) — unlimited duplicates made the roster unusable and
+      // compounded the P2 matching inconsistency.
+      const newPhoneDigits = normalizePhone(newCustomerForm.phone);
+      const existingMatch = customers.find((c) => newPhoneDigits && normalizePhone(c.phone) === newPhoneDigits);
+      if (existingMatch) {
+        toast.error(`A customer account already exists for phone ${existingMatch.phone} (${existingMatch.name}). Use the existing account instead of creating a duplicate.`, 'Duplicate Phone');
+        return;
+      }
       const cust: Customer = {
         id: `cust-${Date.now()}`,
         name: newCustomerForm.name.trim(),
@@ -198,11 +212,15 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
   };
 
   const getCustomerWorkOrders = (cust: Customer) => {
+    // audit C-P2: match by customerId or digit-normalized phone ONLY — never
+    // by name alone (common Myanmar names like "U Aung" merged unrelated
+    // customers' tickets, serials, IMEIs and spend totals). Phone is compared
+    // with the same normalizer the portal uses, so formatting variants match.
+    const custPhoneDigits = normalizePhone(cust.phone);
     return workOrders.filter(
       (wo) =>
         wo.customerId === cust.id ||
-        (cust.phone && wo.customerPhone === cust.phone) ||
-        (cust.name && wo.customerName?.toLowerCase() === cust.name.toLowerCase())
+        (custPhoneDigits && normalizePhone(wo.customerPhone) === custPhoneDigits)
     );
   };
 

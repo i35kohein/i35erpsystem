@@ -86,9 +86,13 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
     openAddExpense: () => setShowAddExpenseModal(true),
   }));
 
-  // New Expense State
+  // New Expense State — default date from LOCAL components, not toISOString()
+  // (UTC would backdate entries made before 06:30 in UTC+6:30) (audit A-P2-15).
   const [newExpense, setNewExpense] = useState({
-    date: new Date().toISOString().split('T')[0],
+    date: (() => {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    })(),
     category: 'Rent' as ExpenseItem['category'],
     amount: 0,
     paymentMethod: 'Bank Transfer' as ExpenseItem['paymentMethod'],
@@ -102,10 +106,38 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
   const [paymentMethodInput, setPaymentMethodInput] = useState<string>('Bank Transfer');
   const [paymentNoteInput, setPaymentNoteInput] = useState<string>('Supplier Invoice Payment');
 
-  // Filtered Work Orders by Date
+  // Filtered Work Orders by Date — the P&L window is when money actually
+  // moved (audit A-P2-9): paid tickets bucket by their checkout/payment date
+  // (completedAt anchors POS checkout incl. backdating), unpaid by createdAt.
   const filteredWorkOrders = useMemo(() => {
-    return filterByDateRange(workOrders, dateFilter);
+    return filterByDateRange(
+      workOrders.map((wo) => ({
+        ...wo,
+        createdAt: wo.completedAt || wo.createdAt,
+      })),
+      dateFilter
+    );
   }, [workOrders, dateFilter]);
+
+  // Paid tickets inside the P&L window (audit A-P2-10): the revenue tab must
+  // list PAID tickets only — unpaid/in-progress tickets are not income yet.
+  const paidWorkOrders = useMemo(
+    () => filteredWorkOrders.filter((wo) => Boolean(wo.isPaid) || (Number(wo.paidAmount) > 0)),
+    [filteredWorkOrders]
+  );
+
+  // Technician payouts inside the same window (audit A-P2-15): "Period
+  // Commissions" must not add up ALL-time payouts. Anchor by paidAt, fall
+  // back to the period month (e.g. "2026-07" -> 2026-07-01).
+  const dateFilteredPayouts = useMemo(() => {
+    return filterByDateRange(
+      technicianPayouts.map((p) => ({
+        ...p,
+        createdAt: p.paidAt || (p.period ? `${p.period}-01` : undefined),
+      })),
+      dateFilter
+    );
+  }, [technicianPayouts, dateFilter]);
 
   // Expenses must respect the same date window as revenue/COGS — otherwise
   // Net Profit for TODAY/THIS_WEEK/THIS_MONTH subtracts all-time expenses
@@ -191,7 +223,25 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
         paymentMethodsBreakdown.cashDrawer += amount;
       } else if (method === 'Credit Card' || method === 'Apple Pay') {
         paymentMethodsBreakdown.cardPos += amount;
-      } else if (method.startsWith('Split Payment') || method === 'Net 30') {
+      } else if (method.startsWith('Split Payment')) {
+        // audit A-P3-6: allocate each split portion to its REAL bucket so the
+        // drawer reconciliation matches — e.g. "Split Payment (Cash: 100,000 + KBZPay: 50,000)".
+        const inner = method.replace(/^Split Payment\s*\(/, '').replace(/\)\s*$/, '');
+        let allocated = 0;
+        let hasPortions = false;
+        for (const raw of inner.split('+')) {
+          const m = raw.match(/([A-Za-z0-9][A-Za-z0-9 &]*?):\s*([\d,]+)/);
+          if (!m) continue;
+          hasPortions = true;
+          const portionName = m[1].trim();
+          const portionAmount = Number(m[2].replace(/,/g, '')) || 0;
+          allocated += portionAmount;
+          if (portionName === 'Cash') paymentMethodsBreakdown.cashDrawer += portionAmount;
+          else if (portionName === 'Credit Card' || portionName === 'Apple Pay') paymentMethodsBreakdown.cardPos += portionAmount;
+          else paymentMethodsBreakdown.mobileBanking += portionAmount;
+        }
+        if (!hasPortions || allocated < amount) paymentMethodsBreakdown.other += amount - allocated; // unparsed remainder
+      } else if (method === 'Net 30') {
         paymentMethodsBreakdown.other += amount;
       } else {
         paymentMethodsBreakdown.mobileBanking += amount;
@@ -227,11 +277,12 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
     const totalSupplierDebt = supplierDebts.reduce((acc, curr) => acc + (curr.totalAmount - curr.paidAmount), 0);
     const overdueDebtsCount = supplierDebts.filter((d) => d.status !== 'Paid' && new Date(d.dueDate) < new Date()).length;
 
-    // Technician Commissions
-    const totalCommissionsEarned = technicianPayouts.reduce((acc, curr) => acc + curr.netPayout, 0);
-    const pendingCommissionsAmount = technicianPayouts
+    // Technician Commissions — within the P&L date window (audit A-P2-15):
+    // "Total Period Commissions" must not silently add up ALL-time payouts.
+    const totalCommissionsEarned = dateFilteredPayouts.reduce((acc, curr) => acc + (curr.netPayout || 0), 0);
+    const pendingCommissionsAmount = dateFilteredPayouts
       .filter((p) => p.status === 'Pending')
-      .reduce((acc, curr) => acc + curr.netPayout, 0);
+      .reduce((acc, curr) => acc + (curr.netPayout || 0), 0);
 
     return {
       laborIncome,
@@ -254,7 +305,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
       totalCommissionsEarned,
       pendingCommissionsAmount,
     };
-  }, [filteredWorkOrders, dateFilteredExpenses, parts, supplierDebts, technicianPayouts]);
+  }, [filteredWorkOrders, dateFilteredExpenses, parts, supplierDebts, dateFilteredPayouts]);
 
   // Parts profit by category: which parts make the money this period.
   const partsCategoryProfit = useMemo(() => {
@@ -701,7 +752,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
 
           {/* Work Orders Paid List */}
           <div className="space-y-3">
-            <h4 className="font-extrabold text-xs text-ink uppercase tracking-wider">Completed Repair Income Records ({filteredWorkOrders.length})</h4>
+            <h4 className="font-extrabold text-xs text-ink uppercase tracking-wider">Completed Repair Income Records ({paidWorkOrders.length})</h4>
             <div className="overflow-x-auto border border-line rounded-xl">
               <table className="w-full text-left text-xs">
                 <thead className="bg-surface text-muted uppercase font-mono text-xs">
@@ -715,7 +766,9 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">
-                  {filteredWorkOrders.map((wo) => (
+                  {/* audit A-P2-10: paid tickets only — unpaid/in-progress are
+                      not income records; guard legacy rows missing subtotal. */}
+                  {paidWorkOrders.map((wo) => (
                     <tr key={wo.id} className="hover:bg-surface">
                       <td className="p-3 font-mono font-bold text-brand">{wo.orderNumber}</td>
                       <td className="p-3">
@@ -727,8 +780,8 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                           {wo.paymentMethod || 'Cash'}
                         </span>
                       </td>
-                      <td className="p-3 font-mono">{wo.subtotal.toLocaleString()} {currency}</td>
-                      <td className="p-3 font-mono font-bold text-success-deep">{wo.totalAmount.toLocaleString()} {currency}</td>
+                      <td className="p-3 font-mono">{(wo.subtotal ?? 0).toLocaleString()} {currency}</td>
+                      <td className="p-3 font-mono font-bold text-success-deep">{(wo.totalAmount ?? 0).toLocaleString()} {currency}</td>
                       <td className="p-3 text-right">
                         <span className={`text-xs font-black px-2 py-0.5 rounded-md ${
                           wo.isPaid ? 'bg-success/15 text-success-deep' : 'bg-warning/15 text-warning'
@@ -740,7 +793,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                   ))}
                 </tbody>
               </table>
-            {filteredWorkOrders.length === 0 && (
+            {paidWorkOrders.length === 0 && (
               <div className="p-8 text-center text-xs text-muted space-y-1">
                 <DollarSign className="w-6 h-6 mx-auto opacity-50" />
                 <p className="font-extrabold text-sm text-ink">No completed repair income in this period</p>
@@ -942,7 +995,9 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
-                {technicianPayouts.map((payout) => (
+                {/* audit A-P2-15: same date window as the "Total Period
+                    Commissions" figure */}
+                {dateFilteredPayouts.map((payout) => (
                   <tr key={payout.id} className="hover:bg-surface">
                     <td className="p-3 font-extrabold text-ink">{payout.technicianName}</td>
                     <td className="p-3 font-mono text-muted">{payout.period}</td>
@@ -982,7 +1037,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                 ))}
               </tbody>
             </table>
-            {technicianPayouts.length === 0 && (
+            {dateFilteredPayouts.length === 0 && (
               <div className="p-8 text-center text-xs text-muted space-y-1">
                 <Users className="w-6 h-6 mx-auto opacity-50" />
                 <p className="font-extrabold text-sm text-ink">No technician payouts for this period</p>

@@ -36,6 +36,8 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
   
   const [tempStartDate, setTempStartDate] = useState<string | undefined>(currentFilter.startDate);
   const [tempEndDate, setTempEndDate] = useState<string | undefined>(currentFilter.endDate);
+  // audit F-P2: reversed range (end < start) must not be applied silently
+  const [rangeError, setRangeError] = useState<string>('');
 
   const popoverRef = useRef<HTMLDivElement>(null);
 
@@ -71,7 +73,17 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
+  // audit F-P2: a reversed custom range (endDate < startDate) would silently
+  // yield an empty list — validate and surface an inline error instead.
+  const isRangeInvalid =
+    !!tempStartDate && !!tempEndDate && tempEndDate < tempStartDate;
+
   const handleApplyCustomRange = () => {
+    if (isRangeInvalid) {
+      setRangeError('End date must be on or after the start date.');
+      return;
+    }
+    setRangeError('');
     if (tempStartDate) {
       onChange({
         preset: 'custom',
@@ -245,6 +257,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
                 onClick={() => {
                   setTempStartDate(undefined);
                   setTempEndDate(undefined);
+                  setRangeError('');
                 }}
                 className="!h-6 !min-h-6 px-1.5 text-[11px] text-brand font-bold hover:underline cursor-pointer ml-2"
               >
@@ -252,6 +265,13 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
               </Button>
             )}
           </div>
+
+          {/* audit F-P2: inline error for a reversed custom range */}
+          {rangeError && (
+            <div className="mb-1.5 px-2 py-1.5 rounded-lg bg-danger/10 border border-danger/30 text-danger text-[11px] font-bold">
+              {rangeError}
+            </div>
+          )}
 
           {/* Direct Input Fallback & Action buttons */}
           <div className="space-y-1.5">
@@ -288,7 +308,7 @@ export const DateFilterSelector: React.FC<DateFilterSelectorProps> = ({
               <Button
                 type="button"
                 onClick={handleApplyCustomRange}
-                disabled={!tempStartDate}
+                disabled={!tempStartDate || isRangeInvalid}
                 className="!h-7 !min-h-7 px-3 bg-brand hover:bg-brand-deep disabled:opacity-50 text-white font-bold text-[11px] rounded-lg shadow-xs transition-all cursor-pointer flex items-center space-x-1"
               >
                 <Check className="w-3.5 h-3.5" />

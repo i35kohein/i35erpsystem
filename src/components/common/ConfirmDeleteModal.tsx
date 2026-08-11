@@ -60,6 +60,8 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
             onClick={onClose}
             variant="iconGhost"
             size="iconSm"
+            aria-label="Close"
+            title="Close"
             className="text-muted hover:text-muted hover:bg-surface"
           >
             <X className="w-5 h-5" />

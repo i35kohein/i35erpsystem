@@ -74,7 +74,10 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
               </Button>
             )}
             <Button variant="ghost"
+              type="button"
               onClick={onClose}
+              aria-label="Close model chooser"
+              title="Close model chooser"
               className="w-8 h-8 rounded-full text-muted hover:text-ink hover:bg-surface transition-colors cursor-pointer flex items-center justify-center"
             >
               <X className="w-4 h-4" />

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { ChevronDown, Search, BadgePercent, ShieldCheck } from 'lucide-react';
 import { WorkOrder, DiagnosticItemResult, AppleDeviceCategory, SelectedRepairItem, SystemSettings } from '../../types';
 import { toast } from '../../lib/toast';
@@ -195,15 +195,29 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
       checks: f.checks.map((c) => ({ ...c, status, note: status === 'N/A' ? '' : c.note })),
     }));
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submittingRef = useRef(false);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Double-submit guard (audit B-P2): a same-tick second submit would create
+    // a duplicate ticket (the order-number Set only helps after the first save
+    // commits). The ref is checked synchronously and stays locked for a second
+    // so a rapid double-click / Enter+click can't fire twice.
+    if (submittingRef.current || isSubmitting) {
+      toast('Save in progress — please wait.', 'info', 'Submitting');
+      return;
+    }
     // Color is required (Ko Hein 2026-08-10): block save + open the color picker.
     if (!form.color.trim()) {
       toast('Select a device color to save the ticket.', 'error', 'Color Required');
       setIsColorOpen(true);
       return;
     }
-    const now = new Date().toISOString();
+    submittingRef.current = true;
+    setIsSubmitting(true);
+    try {
+      const now = new Date().toISOString();
     const diagnostics: DiagnosticItemResult[] = DIAGNOSTIC_NAMES.map((name, i) => ({
       id: `simple-diag-${uniqueId('diag')}-${i}`,
       name,
@@ -332,6 +346,14 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
     // Same as New Intake Ticket Registration: print goes through the Sticker Tag
     // Voucher modal (onSelectPrintTag) — no raw window.print (Ko Hein 2026-08-10).
     if (!editingId) resetForm();
+    } finally {
+      // Release the submit guard after a short window — long enough to swallow
+      // rapid double-clicks/Enter+click, short enough not to block the next save.
+      window.setTimeout(() => {
+        submittingRef.current = false;
+        setIsSubmitting(false);
+      }, 1000);
+    }
   };
 
   const checkedCount = form.checks.filter((c) => c.status === 'Pass').length;

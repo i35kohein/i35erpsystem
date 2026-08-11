@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '../ui';
 import {X, 
   Printer, 
@@ -26,6 +26,14 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
   workOrder,
   systemSettings
 }) => {
+  // ESC closes the invoice modal, matching every sibling dialog (audit F-P3).
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, onClose]);
+
   if (!isOpen || !workOrder) return null;
 
   const shopName = systemSettings?.shopName || 'AppleRepair Pro Service Center';
@@ -35,19 +43,36 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
   const currency = systemSettings?.currencySymbol || 'MMK';
   const taxRate = systemSettings?.taxPercentage ?? systemSettings?.taxRatePercent ?? 6;
 
-  // Calculate Parts vs Labor breakdowns
-  const laborItems = workOrder.lineItems?.filter((item) => item.isLabor) || [];
+  // Calculate Parts vs Labor breakdowns. Parts are internal tracking only
+  // (never charged) per POS semantics — they are LISTED on the invoice so a
+  // missing part row can never be mistaken for an omission, but kept out of
+  // the customer balance (audit F-P2).
+  const lineItems = workOrder.lineItems || [];
+  const laborItems = lineItems.filter((item) => item.isLabor);
+  const partItems = lineItems.filter((item) => !item.isLabor);
 
   const laborSubtotal = laborItems.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+  const partsSubtotal = partItems.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
   const laborDiscount = laborItems.reduce((sum, item) => {
     const lineTotal = item.unitPrice * item.quantity;
     const disc = item.lineItemDiscountPercent ? Math.round(lineTotal * (item.lineItemDiscountPercent / 100)) : 0;
     return sum + disc;
   }, 0);
-  const customerTotal = Math.max(0, laborSubtotal - laborDiscount + workOrder.taxAmount - workOrder.discountAmount - (workOrder.depositAmount || 0));
+  // Mirror the POS reconciliation rules (audit F-P2): 'legacy' tickets store
+  // unitPrice as the FINAL price with discountAmount duplicating the embedded
+  // discount — subtracting it again would double-discount. New-format tickets
+  // (or missing flag = migrated) always apply discountAmount as an EXTRA
+  // invoice-level discount.
+  const effectiveDiscount = workOrder.discountFormat === 'legacy' ? 0 : (workOrder.discountAmount || 0);
+  const customerTotal = Math.max(0, laborSubtotal - laborDiscount + workOrder.taxAmount - effectiveDiscount - (workOrder.depositAmount || 0));
 
-  // Precompute line item discounts for display
-  const laborItemsWithTotals = laborItems.map((item) => ({
+  // Mismatch guard: if the itemized balance doesn't reconcile with the stored
+  // total, surface it on the invoice instead of silently understating the
+  // amount (legacy WOs created before parts-not-charged accounting) (audit F-P2).
+  const totalMismatch = Math.abs(customerTotal - (workOrder.totalAmount || 0)) > 1;
+
+  // Precompute line item discounts for display (labor AND parts rows)
+  const itemsWithTotals = lineItems.map((item) => ({
     item,
     lineTotal: item.unitPrice * item.quantity,
     disc: item.lineItemDiscountPercent ? Math.round(item.unitPrice * item.quantity * (item.lineItemDiscountPercent / 100)) : 0,
@@ -93,6 +118,24 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
         </html>
       `);
       printWindow.document.close();
+      // Close the popout after printing so it doesn't linger as a stray window
+      // (audit F-P3).
+      printWindow.onafterprint = () => printWindow.close();
+      try {
+        const mql = printWindow.matchMedia('print');
+        if (mql && typeof mql.addEventListener === 'function') {
+          // Fallback for browsers that don't fire onafterprint.
+          const onPrintChange = (ev: MediaQueryListEvent) => {
+            if (!ev.matches) {
+              mql.removeEventListener('change', onPrintChange);
+              printWindow.close();
+            }
+          };
+          mql.addEventListener('change', onPrintChange);
+        }
+      } catch (e) {
+        // ignore — popout close is best-effort
+      }
     } else {
       window.print();
     }
@@ -205,6 +248,8 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
             <Button variant="ghost"
               type="button"
               onClick={onClose}
+              aria-label="Close invoice"
+              title="Close invoice"
               className="p-1.5 text-muted hover:text-ink hover:bg-line rounded-xl transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
@@ -343,8 +388,8 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">
-                  {laborItemsWithTotals.length > 0 ? (
-                    laborItemsWithTotals.map(({ item, disc, effTotal }, idx) => (
+                  {itemsWithTotals.length > 0 ? (
+                    itemsWithTotals.map(({ item, disc, effTotal }, idx) => (
                       <tr key={item.id || idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-surface/50'}>
                         <td className="p-3">
                           <p className="font-bold text-ink">{item.description}</p>
@@ -353,6 +398,12 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
                           )}
                           {disc > 0 && (
                             <span className="text-xs font-semibold text-success-deep">• {item.lineItemDiscountPercent}% discount applied</span>
+                          )}
+                          {/* Parts are internal tracking only — state it on the
+                              document so a part row can never read as a missing
+                              charge (audit F-P2). */}
+                          {!item.isLabor && (
+                            <span className="block text-[10px] font-semibold text-muted italic">Internal part — tracked for inventory, not charged to customer</span>
                           )}
                         </td>
                         <td className="p-3">
@@ -411,6 +462,12 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
             {/* Calculations Breakdown */}
             <div className="sm:w-1/2 w-full space-y-2 text-right">
               <div className="bg-white p-4 rounded-xl border border-line space-y-2 shadow-2xs font-mono">
+                {partsSubtotal > 0 && (
+                  <div className="flex justify-between text-muted">
+                    <span>Parts (Internal, Not Charged):</span>
+                    <span>{partsSubtotal.toLocaleString()} {currency}</span>
+                  </div>
+                )}
                 {laborDiscount > 0 && (
                   <div className="flex justify-between text-success-deep font-semibold">
                     <span>Per-item Discounts:</span>
@@ -419,15 +476,15 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
                 )}
                 {laborSubtotal > 0 && (
                   <div className="flex justify-between text-muted">
-                    <span>Repair Subtotal:</span>
+                    <span>Labor & Services Subtotal:</span>
                     <span>{laborSubtotal.toLocaleString()} {currency}</span>
                   </div>
                 )}
 
-                {workOrder.discountAmount > 0 && (
+                {effectiveDiscount > 0 && (
                   <div className="flex justify-between text-success-deep font-semibold">
                     <span>Account / B2B Discount:</span>
-                    <span>-{workOrder.discountAmount.toLocaleString()} {currency}</span>
+                    <span>-{effectiveDiscount.toLocaleString()} {currency}</span>
                   </div>
                 )}
 
@@ -453,6 +510,16 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
                     {customerTotal.toLocaleString()} {currency}
                   </span>
                 </div>
+
+                {/* Legacy reconciliation note — never silently understate the
+                    stored total (audit F-P2). */}
+                {totalMismatch && (
+                  <p className="pt-1.5 border-t border-line text-[10px] leading-snug text-warning font-sans font-semibold text-left">
+                    Note: stored ticket total ({workOrder.totalAmount.toLocaleString()} {currency}) differs from the
+                    itemized balance — typical for tickets created before parts were tracked as
+                    internal (not charged). The itemized balance above is the reconciled amount.
+                  </p>
+                )}
               </div>
             </div>
           </div>

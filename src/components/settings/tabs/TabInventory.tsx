@@ -273,7 +273,17 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
               <Input
                 type="number"
                 value={formData.lowStockThreshold}
-                onChange={(e) => setFormData({ ...formData, lowStockThreshold: Number(e.target.value) })}
+                onChange={(e) => {
+                  // audit E-P3: Number('') === 0 would persist a cleared
+                  // threshold as 0 (inverting the low-stock warning) — keep the
+                  // previous value on empty/NaN and clamp to the 1–20 range.
+                  const raw = e.target.value;
+                  const parsed = Number(raw);
+                  const next = raw === '' || Number.isNaN(parsed)
+                    ? formData.lowStockThreshold
+                    : Math.min(20, Math.max(1, parsed));
+                  setFormData({ ...formData, lowStockThreshold: next });
+                }}
                 min="1"
                 max="20"
                 className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none "
@@ -289,7 +299,16 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
               <Input
                 type="number"
                 value={formData.defaultSupplierSlaDays}
-                onChange={(e) => setFormData({ ...formData, defaultSupplierSlaDays: Number(e.target.value) })}
+                onChange={(e) => {
+                  // audit E-P3: same clamp as the low-stock threshold — keep the
+                  // previous value on empty/NaN and clamp to the 1–30 range.
+                  const raw = e.target.value;
+                  const parsed = Number(raw);
+                  const next = raw === '' || Number.isNaN(parsed)
+                    ? formData.defaultSupplierSlaDays
+                    : Math.min(30, Math.max(1, parsed));
+                  setFormData({ ...formData, defaultSupplierSlaDays: next });
+                }}
                 min="1"
                 max="30"
                 className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none "

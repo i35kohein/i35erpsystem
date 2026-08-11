@@ -474,15 +474,44 @@ const SORTED: [string, string][] = [...DICT].sort((a, b) => b[0].length - a[0].l
 const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'CODE', 'PRE', 'TEXTAREA', 'INPUT', 'SELECT', 'OPTION', 'NOSCRIPT']);
 const TRANS_ATTRS = ['placeholder', 'title', 'aria-label'];
 
+// Elements marked with these attributes are user/data content — never
+// translated (audit G-P2). Components rendering dynamic values can opt out of
+// DOM translation per-node with data-no-translate (or data-raw).
+const NO_TRANSLATE_ATTRS = ['data-no-translate', 'data-raw', 'data-translate'];
+
 let observer: MutationObserver | null = null;
 const textOriginals = new WeakMap<Text, string>();
 const trackedElements = new Set<Element>();
 const attrOriginals = new WeakMap<Element, Map<string, string>>();
 
+/** True when the node sits in a data-bearing context that must not be
+ *  translated: an explicit data-no-translate/data-raw marker, or a table
+ *  DATA cell (tbody). thead headers stay translated — they are static UI
+ *  (audit G-P2: user-entered names/notes/parts were being rewritten). */
+function isProtectedDataNode(node: Node): boolean {
+  let el = node.parentElement;
+  let depth = 0;
+  while (el && depth < 8) {
+    if (NO_TRANSLATE_ATTRS.some((a) => el.hasAttribute(a))) return true;
+    if (el.tagName === 'TD' || el.tagName === 'TH') {
+      const section = el.closest('tbody, thead');
+      if (section && section.tagName === 'TBODY') return true;
+    }
+    el = el.parentElement;
+    depth++;
+  }
+  return false;
+}
+
 export function translateText(text: string): string {
   let out = text;
   for (const [en, mm] of SORTED) {
-    if (out.includes(en)) out = out.split(en).join(mm);
+    // Word-boundary matching: only whole phrases are replaced, never
+    // substrings inside longer words (audit G-P2). E.g. 'All' no longer
+    // corrupts "Small", 'No' no longer corrupts "Note".
+    const escaped = en.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp(`(^|[^\\p{L}\\p{N}])(${escaped})(?![\\p{L}\\p{N}])`, 'gu');
+    out = out.replace(re, (_m, pre: string) => pre + mm);
   }
   return out;
 }
@@ -492,6 +521,8 @@ function handleTextNode(node: Text): void {
   if (!parent || SKIP_TAGS.has(parent.tagName)) return;
   const current = node.nodeValue ?? '';
   if (current.trim().length < 2) return;
+  // audit G-P2: never rewrite user-entered / data content.
+  if (isProtectedDataNode(node)) return;
 
   const base = textOriginals.get(node);
   if (base === undefined) {
@@ -514,6 +545,12 @@ function handleTextNode(node: Text): void {
 
 function handleAttrs(el: Element): void {
   if (SKIP_TAGS.has(el.tagName)) return;
+  // audit G-P2: leave attributes on data-bearing elements alone.
+  if (NO_TRANSLATE_ATTRS.some((a) => el.hasAttribute(a))) return;
+  if (el.tagName === 'TD' || el.tagName === 'TH') {
+    const section = el.closest('tbody, thead');
+    if (section && section.tagName === 'TBODY') return;
+  }
   let map = attrOriginals.get(el);
   if (!map) {
     map = new Map();
@@ -553,22 +590,56 @@ function applyTo(root: Node): void {
   }
 }
 
+// audit G-P3: drop tracked elements that are no longer in the document so the
+// WeakMap/Set don't grow unboundedly on long sessions.
+let mutationsSincePrune = 0;
+function pruneTrackedElements(): void {
+  if (trackedElements.size === 0) return;
+  for (const el of trackedElements) {
+    if (!el.isConnected) {
+      trackedElements.delete(el);
+      attrOriginals.delete(el);
+    }
+  }
+}
+
 export function startDomTranslation(): void {
   if (observer) return;
   applyTo(document.body);
+  // Debounce the observer (audit G-P3): coalesce burst mutations (typing,
+  // re-renders) into one pass instead of re-scanning O(phrases x text) on
+  // every single mutation.
+  let pendingMutations: MutationRecord[] = [];
+  let flushTimer: ReturnType<typeof setTimeout> | null = null;
   observer = new MutationObserver((mutations) => {
-    for (const m of mutations) {
-      if (m.type === 'characterData' && m.target.nodeType === Node.TEXT_NODE) {
-        handleTextNode(m.target as Text);
-      } else if (m.type === 'childList') {
-        m.addedNodes.forEach((n) => {
-          if (n.nodeType === Node.TEXT_NODE) handleTextNode(n as Text);
-          else if (n.nodeType === Node.ELEMENT_NODE) applyTo(n);
-        });
-      } else if (m.type === 'attributes' && m.target.nodeType === Node.ELEMENT_NODE) {
-        handleAttrs(m.target as Element);
+    pendingMutations.push(...mutations);
+    mutationsSincePrune += mutations.length;
+    if (flushTimer) return;
+    flushTimer = setTimeout(() => {
+      flushTimer = null;
+      // Bail if translation was stopped while we were debouncing — otherwise
+      // the late batch would re-translate text that stopDomTranslation() just
+      // restored (audit G-P3).
+      if (!observer) return;
+      const batch = pendingMutations;
+      pendingMutations = [];
+      for (const m of batch) {
+        if (m.type === 'characterData' && m.target.nodeType === Node.TEXT_NODE) {
+          handleTextNode(m.target as Text);
+        } else if (m.type === 'childList') {
+          m.addedNodes.forEach((n) => {
+            if (n.nodeType === Node.TEXT_NODE) handleTextNode(n as Text);
+            else if (n.nodeType === Node.ELEMENT_NODE) applyTo(n);
+          });
+        } else if (m.type === 'attributes' && m.target.nodeType === Node.ELEMENT_NODE) {
+          handleAttrs(m.target as Element);
+        }
       }
-    }
+      if (mutationsSincePrune >= 100) {
+        mutationsSincePrune = 0;
+        pruneTrackedElements();
+      }
+    }, 80);
   });
   observer.observe(document.body, {
     subtree: true,

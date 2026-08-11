@@ -34,13 +34,15 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
   const filteredWorkOrders = archivedWorkOrders.filter((wo) => {
     const query = searchQuery.toLowerCase().trim();
     if (!query) return true;
+    // audit E-P3: legacy JSONB rows can be missing optional-ish fields —
+    // coalesce before .toLowerCase() so searching never throws a TypeError.
     return (
-      wo.orderNumber.toLowerCase().includes(query) ||
-      wo.id.toLowerCase().includes(query) ||
-      wo.customerName.toLowerCase().includes(query) ||
-      wo.customerPhone.toLowerCase().includes(query) ||
-      wo.deviceModel.toLowerCase().includes(query) ||
-      (wo.serialNumber && wo.serialNumber.toLowerCase().includes(query))
+      String(wo.orderNumber || '').toLowerCase().includes(query) ||
+      String(wo.id || '').toLowerCase().includes(query) ||
+      String(wo.customerName || '').toLowerCase().includes(query) ||
+      String(wo.customerPhone || '').toLowerCase().includes(query) ||
+      String(wo.deviceModel || '').toLowerCase().includes(query) ||
+      (wo.serialNumber && String(wo.serialNumber).toLowerCase().includes(query))
     );
   });
 

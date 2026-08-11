@@ -11,6 +11,7 @@ interface DrawerSelectProps {
 
 const MENU_WIDTH = 200;
 const MENU_MIN_HEIGHT = 120;
+const MENU_MAX_HEIGHT = 240; // max-h-56 (224px) + p-1.5 + border/shadow estimate
 const VIEWPORT_MARGIN = 8;
 
 /**
@@ -35,9 +36,30 @@ export const DrawerSelect: React.FC<DrawerSelectProps> = ({ label, value, onChan
     if (!rect) { setOpen(true); return; }
     const spaceBelow = window.innerHeight - rect.bottom;
     const spaceAbove = rect.top;
-    const placeTop = spaceBelow < MENU_MIN_HEIGHT && spaceAbove > spaceBelow;
+    let placeTop = spaceBelow < MENU_MIN_HEIGHT && spaceAbove > spaceBelow;
+    let top = placeTop ? rect.top - 8 : rect.bottom + 8;
+    // Vertical viewport clamp: keep the whole menu on screen. The menu extends
+    // UP from `top` when placeTop (-translate-y-full), DOWN otherwise (audit F-P2).
+    if (placeTop) {
+      top = Math.min(window.innerHeight - VIEWPORT_MARGIN, Math.max(VIEWPORT_MARGIN + MENU_MAX_HEIGHT, top));
+    } else {
+      top = Math.max(VIEWPORT_MARGIN, Math.min(window.innerHeight - MENU_MAX_HEIGHT - VIEWPORT_MARGIN, top));
+    }
+    // If the clamp pushed the menu over the trigger, flip to the other side
+    // when that side has room (audit F-P2).
+    const coversTrigger = placeTop ? top > rect.top : top < rect.bottom;
+    if (coversTrigger) {
+      const altTop = placeTop ? rect.bottom + 8 : rect.top - 8;
+      const altFits = placeTop
+        ? altTop + MENU_MAX_HEIGHT <= window.innerHeight - VIEWPORT_MARGIN
+        : altTop - MENU_MAX_HEIGHT >= VIEWPORT_MARGIN;
+      if (altFits) {
+        placeTop = !placeTop;
+        top = altTop;
+      }
+    }
     let left = Math.max(VIEWPORT_MARGIN, Math.min(rect.left, window.innerWidth - MENU_WIDTH - VIEWPORT_MARGIN));
-    setMenuPos({ top: placeTop ? rect.top - 8 : rect.bottom + 8, left, placeTop });
+    setMenuPos({ top, left, placeTop });
     setOpen(true);
   }, [open, close]);
 
@@ -48,12 +70,16 @@ export const DrawerSelect: React.FC<DrawerSelectProps> = ({ label, value, onChan
       if (target && menuRef.current?.contains(target)) return;
       close();
     };
+    // Named handler so the ESC listener is actually removed on cleanup — the
+    // old anonymous listener accumulated on every open/close cycle (audit F-P2).
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close(); };
     window.addEventListener('scroll', closeOnOutside, true);
     window.addEventListener('resize', closeOnOutside);
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+    document.addEventListener('keydown', onKey);
     return () => {
       window.removeEventListener('scroll', closeOnOutside, true);
       window.removeEventListener('resize', closeOnOutside);
+      document.removeEventListener('keydown', onKey);
     };
   }, [open, close]);
 

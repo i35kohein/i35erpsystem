@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '../ui';
 import { AlertTriangle, X } from 'lucide-react';
 
@@ -32,6 +32,9 @@ export function confirmDialog(opts: ConfirmOptions): Promise<boolean> {
 
 export const ConfirmDialogHost: React.FC = () => {
   const [active, setActiveState] = useState<ActiveState>(null);
+  // audit F-P2: ref to the confirm button so the Enter shortcut only fires
+  // when the confirm button itself has focus.
+  const confirmBtnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     setActive = setActiveState;
@@ -45,12 +48,14 @@ export const ConfirmDialogHost: React.FC = () => {
     setActiveState(null);
   };
 
-  // ESC cancels, Enter confirms.
+  // ESC cancels. Enter confirms ONLY when the confirm button is focused —
+  // otherwise Enter on "Cancel"/X (or any other focused element) would trigger
+  // the destructive action instead of cancelling (audit F-P2).
   useEffect(() => {
     if (!active) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') close(false);
-      else if (e.key === 'Enter') close(true);
+      else if (e.key === 'Enter' && document.activeElement === confirmBtnRef.current) close(true);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -105,6 +110,7 @@ export const ConfirmDialogHost: React.FC = () => {
           </Button>
           <Button
             type="button"
+            ref={confirmBtnRef}
             onClick={() => close(true)}
             className={
               active.danger ? 'bg-danger text-white hover:bg-danger/90' : 'bg-brand text-white hover:bg-brand-deep'

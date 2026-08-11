@@ -1,6 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import mermaid from 'mermaid';
 
+// Initialize ONCE outside the component (audit D-P3): the old code re-ran
+// mermaid.initialize inside the effect on every keystroke and used
+// securityLevel 'loose' (clickable links / raw HTML labels).
+mermaid.initialize({
+  startOnLoad: false,
+  securityLevel: 'strict',
+  theme: 'base',
+  fontFamily: 'Inter, system-ui, sans-serif',
+});
+
 export function MermaidModule() {
   const [diagramText, setDiagramText] = useState(`graph TD
   A[Start] --> B{Decision}
@@ -9,33 +19,36 @@ export function MermaidModule() {
   const [renderError, setRenderError] = useState<string | null>(null);
   const previewRef = useRef<HTMLDivElement | null>(null);
   const renderIdRef = useRef(`mermaid-${Math.random().toString(36).slice(2)}`);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!previewRef.current) return;
 
-    mermaid.initialize({
-      startOnLoad: false,
-      securityLevel: 'loose',
-      theme: 'base',
-      fontFamily: 'Inter, system-ui, sans-serif',
-    });
+    // Debounce (audit D-P3): fast typing used to interleave two async
+    // mermaid.render calls sharing the same id — the second removed the
+    // first's temp element → transient "element not found" flashes.
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      const render = async () => {
+        try {
+          const output = await mermaid.render(renderIdRef.current, diagramText);
+          if (previewRef.current) {
+            previewRef.current.innerHTML = output.svg;
+          }
+          setRenderError(null);
+        } catch (error) {
+          if (previewRef.current) {
+            previewRef.current.innerHTML = '';
+          }
+          setRenderError(error instanceof Error ? error.message : String(error));
+        }
+      };
+      void render();
+    }, 300);
 
-    const render = async () => {
-      try {
-        const output = await mermaid.render(renderIdRef.current, diagramText);
-        if (previewRef.current) {
-          previewRef.current.innerHTML = output.svg;
-        }
-        setRenderError(null);
-      } catch (error) {
-        if (previewRef.current) {
-          previewRef.current.innerHTML = '';
-        }
-        setRenderError(error instanceof Error ? error.message : String(error));
-      }
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-
-    void render();
   }, [diagramText]);
 
   return (

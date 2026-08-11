@@ -44,13 +44,20 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
   const [soundEnabled, setSoundEnabled] = useState(true);
 
   const scannerRef = useRef<Html5Qrcode | null>(null);
+  const beepCtxRef = useRef<AudioContext | null>(null);
   const scannerContainerId = 'reader-qr-viewfinder';
 
-  // Play audio beep synthesized with Web Audio API
+  // Play audio beep synthesized with Web Audio API. One shared AudioContext is
+  // reused across scans and closed on unmount — Chrome caps concurrent
+  // AudioContexts (~6), so creating a new one per scan silently kills the beep
+  // after a few scans (audit F-P3).
   const playBeep = () => {
     if (!soundEnabled) return;
     try {
-      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      if (!beepCtxRef.current) {
+        beepCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+      const audioCtx = beepCtxRef.current;
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.type = 'sine';
@@ -65,6 +72,18 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
       console.warn('Audio beep error:', e);
     }
   };
+
+  // Close the shared AudioContext when the modal unmounts (audit F-P3).
+  useEffect(() => {
+    return () => {
+      try {
+        beepCtxRef.current?.close();
+      } catch (e) {
+        console.warn('Audio beep context close error:', e);
+      }
+      beepCtxRef.current = null;
+    };
+  }, []);
 
   // Fetch available cameras
   useEffect(() => {
@@ -178,6 +197,9 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
+    // Reset the input value so re-selecting the SAME file re-fires onChange
+    // (audit F-P2).
+    event.target.value = '';
 
     setErrorMsg('');
     const imageFile = files[0];
@@ -239,10 +261,13 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
             </Button>
 
             <Button variant="ghost"
+              type="button"
               onClick={() => {
                 stopScanner();
                 onClose();
               }}
+              aria-label="Close scanner"
+              title="Close scanner"
               className="p-2 text-muted hover:text-ink hover:bg-line rounded-xl transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
@@ -345,9 +370,6 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
 
                 {/* Html5Qrcode Mount Point */}
                 <div id={scannerContainerId} className="w-full h-full text-white" />
-
-                {/* Hidden temp mount for file upload */}
-                <div id="reader-file-temp" className="hidden" />
               </div>
 
               {/* Status Message / Error */}
@@ -359,6 +381,12 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
               )}
             </div>
           )}
+
+          {/* Hidden temp mount for file upload — kept OUTSIDE the camera-tab
+              conditional so it exists while the Upload tab is active.
+              html5-qrcode's constructor throws synchronously when the element
+              is missing, which silently broke every upload scan (audit F-P2). */}
+          <div id="reader-file-temp" className="hidden" />
 
           {/* TAB 2: Upload Photo */}
           {activeTab === 'upload' && (

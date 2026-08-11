@@ -51,10 +51,14 @@ export function isHardwareRepair(wo: WorkOrder): boolean {
   return HARDWARE_KEYWORDS.some((re) => re.test(text));
 }
 
-/** Final repair type for a ticket: AI verdict wins, rule-based is the fallback. */
+/** Final repair type for a ticket: AI verdict wins; otherwise ONLY
+ *  Micro-Soldering serviceType counts as hardware — matching the POS checkout
+ *  and Finance payout engine exactly (audit D-P2). Keyword sniffing made the
+ *  dashboard rate a "No Power" ticket at the hardware rate while POS paid the
+ *  parts rate — three different numbers for the same ticket. */
 export function getRepairType(wo: WorkOrder): 'hardware' | 'spareparts' {
   if (wo.repairTypeAI) return wo.repairTypeAI;
-  return isHardwareRepair(wo) ? 'hardware' : 'spareparts';
+  return wo.serviceType === 'Micro-Soldering' ? 'hardware' : 'spareparts';
 }
 
 export function getLoadBadge(activeCount: number) {
@@ -91,11 +95,19 @@ export function getDurationHours(wo: WorkOrder) {
   return Math.max(0.5, (end - created) / (1000 * 60 * 60));
 }
 
-/** Labor-only revenue for a work order (isLabor line items). */
+/** Labor-only revenue for a work order (isLabor line items), AFTER per-item
+ *  discounts — exactly the commission base used by POS and the payout engine
+ *  (audit D-P2): Math.round(lineTotal * (disc/100)) subtracted per line. */
 export function getLaborRevenue(wo: WorkOrder) {
   return (wo.lineItems || [])
     .filter((i) => i.isLabor)
-    .reduce((sum, i) => sum + (i.unitPrice || 0) * (i.quantity || 1), 0);
+    .reduce((sum, i) => {
+      const lineTotal = (i.unitPrice || 0) * (i.quantity || 1);
+      const disc = i.lineItemDiscountPercent
+        ? Math.round(lineTotal * (i.lineItemDiscountPercent / 100))
+        : 0;
+      return sum + lineTotal - disc;
+    }, 0);
 }
 
 export interface TechStats {
@@ -120,7 +132,11 @@ export interface TechStats {
 
 export function computeTechStats(workOrders: WorkOrder[], tech: Technician): TechStats {
   const activeOrders = getTechActiveOrders(workOrders, tech.id);
-  const activeCount = activeOrders.length > 0 ? activeOrders.length : tech.activeJobsCount;
+  // Audit D-P2: never fall back to the static tech.activeJobsCount — it's a
+  // seeded snapshot that isn't recomputed when tickets move, so under a date
+  // filter a tech with 0 real active jobs could show "Heavy" from a stale
+  // record. Load must mirror the visible board.
+  const activeCount = activeOrders.length;
   const finishedOrders = getTechFinishedOrders(workOrders, tech.id);
   const liveCompleted = finishedOrders.length;
   const baselineMonthly = tech.completedThisMonth || 0;
@@ -147,7 +163,15 @@ export function computeTechStats(workOrders: WorkOrder[], tech: Technician): Tec
       )
     : null;
 
-  const warrantyReturnCount = tech.warrantyReturnCount || 0;
+  // Audit D-P3: successRate must be windowed — the static tech.warrantyReturnCount
+  // is all-time, so a tech with 1 historical return and 2 perfect completions in
+  // a 7-day window showed 67% instead of 100%. Count warranty returns within the
+  // SAME finished window (tickets that were taken out then re-entered In Progress
+  // / error-returned) instead of the stale counter.
+  const windowedWarrantyReturns = finishedOrders.filter(
+    (wo) => (wo as any).warrantyReturnAt || (wo.followUpRecords || []).some((r) => r.status === 'Issue Reported')
+  ).length;
+  const warrantyReturnCount = windowedWarrantyReturns;
   const qualityTotal = liveCompleted + warrantyReturnCount;
   const successRate = qualityTotal > 0 ? Math.min(100, Math.round((liveCompleted / qualityTotal) * 100)) : null;
   const hardwareJobCount = finishedOrders.filter((wo) => getRepairType(wo) === 'hardware').length;

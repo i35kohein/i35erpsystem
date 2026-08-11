@@ -28,7 +28,7 @@ import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, CartesianG
 import { TechnicianPerformanceTab } from './TechnicianPerformanceTab';
 import { TechnicianLeaderboardView } from './TechnicianLeaderboardView';
 import { TechnicianDetailModal } from './TechnicianDetailModal';
-import { computeTechStats } from '../../utils/techAnalytics';
+import { computeTechStats, getDurationHours } from '../../utils/techAnalytics';
 
 interface DashboardOverviewProps {
   workOrders: WorkOrder[];
@@ -227,7 +227,10 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
       if (isNaN(startDateMs)) return null;
 
       const expiryDateMs = startDateMs + (warrantyDays * ONE_DAY_MS);
-      const remainingDays = Math.ceil((expiryDateMs - now) / ONE_DAY_MS);
+      // Audit D-P3: use floor — ceil(-0.5) === 0, so a warranty that expired 12h
+      // ago showed "0d left / expiring soon" instead of "Expired" for the first
+      // 24h. floor makes any past expiry negative → correctly classified.
+      const remainingDays = Math.floor((expiryDateMs - now) / ONE_DAY_MS);
       const daysElapsed = Math.floor((now - startDateMs) / ONE_DAY_MS);
       const percentElapsed = Math.min(100, Math.max(0, Math.round((daysElapsed / warrantyDays) * 100)));
 
@@ -291,8 +294,10 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
   }, [workOrders, dateFilter]);
 
   // Inventory Fund reminder: parts taken from stock that haven't been settled
-  // (money set aside / restocked). Stays visible until settled.
-  const pendingFundTickets = filteredWorkOrders.filter(
+  // (money set aside / restocked). Stays visible until settled — computed from
+  // the UNFILTERED workOrders so a "Today"/"7 Days" header filter can't hide
+  // unsettled funds from earlier days (audit D-P3).
+  const pendingFundTickets = workOrders.filter(
     (wo) => wo.inventoryConsumptionAmount && wo.inventorySettlementStatus !== 'settled'
   );
   const pendingFundTotal = pendingFundTickets.reduce((sum, wo) => sum + (wo.inventoryConsumptionAmount || 0), 0);
@@ -333,11 +338,12 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
   const completedWorkOrders = filteredWorkOrders.filter((w) => w.status === 'Finished' || w.status === 'Taken Out');
   let avgTurnaroundHours = 0;
   if (completedWorkOrders.length > 0) {
+    // Audit D-P3: use the shared getDurationHours (clamped 0.5h minimum) so the
+    // Avg Turnaround card matches the tech KPIs/leaderboard — previously two
+    // different clamps produced different averages for the same tickets.
     const totalHours = completedWorkOrders.reduce((acc, wo) => {
-      const created = new Date(wo.createdAt).getTime();
-      const endTime = new Date(wo.completedAt || wo.updatedAt || wo.createdAt).getTime();
-      const diffHours = Math.max(0, (endTime - created) / (1000 * 60 * 60));
-      return acc + diffHours;
+      const h = getDurationHours(wo);
+      return acc + (h ?? 0);
     }, 0);
     avgTurnaroundHours = Number((totalHours / completedWorkOrders.length).toFixed(1));
   }
@@ -377,14 +383,17 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
   const maxLoadTechs = techLoadData.filter((t) => t.activeCount === maxTechLoad);
   const minLoadTechs = techLoadData.filter((t) => t.activeCount === minTechLoad && t.activeCount < maxTechLoad);
 
-  // Top Repair Devices — most-repaired models by ticket count + revenue
+  // Top Repair Devices — most-repaired models by ticket count + revenue.
+  // Revenue counts ONLY revenue-eligible tickets (Finished/Taken Out) — a
+  // Cant-Repair quote or an open estimate is not income (audit D-P2).
   const topRepairDevices = useMemo(() => {
     const byModel = new Map<string, { count: number; revenue: number }>();
     filteredWorkOrders.forEach((wo) => {
+      const isRevenue = REVENUE_STATUSES.includes(wo.status);
       const model = (wo.deviceModel || 'Unknown Device').trim() || 'Unknown Device';
       const entry = byModel.get(model) || { count: 0, revenue: 0 };
       entry.count += 1;
-      entry.revenue += wo.subtotal || wo.totalAmount || 0;
+      if (isRevenue) entry.revenue += wo.subtotal || wo.totalAmount || 0;
       byModel.set(model, entry);
     });
     return Array.from(byModel.entries())
@@ -393,9 +402,12 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
       .slice(0, 8);
   }, [filteredWorkOrders]);
 
-  // Top Repair Categories with income — ticket + revenue per repair category
+  // Top Repair Categories with income — ticket + revenue per repair category.
+  // Revenue counts only Finished/Taken Out tickets (audit D-P2); declined
+  // quotes and open estimates are not revenue.
   const topRepairCategories = useMemo(() => {
-    const totalRevenue = filteredWorkOrders.reduce((sum, wo) => sum + (wo.subtotal || wo.totalAmount || 0), 0);
+    const revenueOrders = filteredWorkOrders.filter((wo) => REVENUE_STATUSES.includes(wo.status));
+    const totalRevenue = revenueOrders.reduce((sum, wo) => sum + (wo.subtotal || wo.totalAmount || 0), 0);
     const stats = [
       { id: 'screen', label: 'Screen & Display OLED', icon: Smartphone, color: 'bg-brand', textCol: 'text-brand', bgLight: 'bg-brand-soft', count: 0, revenue: 0 },
       { id: 'battery', label: 'Battery & Charging System', icon: Zap, color: 'bg-success', textCol: 'text-success', bgLight: 'bg-success/10', count: 0, revenue: 0 },
@@ -408,7 +420,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
       const desc = (wo.symptomsReported || '').toLowerCase();
       const repairs = (wo.selectedRepairs || []).map((r) => r.name).join(' ').toLowerCase();
       const hay = `${s} ${desc} ${repairs}`;
-      const rev = wo.subtotal || wo.totalAmount || 0;
+      const rev = REVENUE_STATUSES.includes(wo.status) ? (wo.subtotal || wo.totalAmount || 0) : 0;
 
       // Classify by the actual repair names first (selectedRepairs), then
       // symptoms, then serviceType — serviceType alone is usually just
@@ -446,6 +458,9 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
 
     filteredWorkOrders.forEach((wo) => {
       const total = wo.subtotal || wo.totalAmount || 0;
+      // Audit D-P3: a zero-total ticket (empty quote, still in Receive, never
+      // priced) is NOT "Fully Settled" — skip it so paidCount isn't inflated.
+      if (total <= 0) return;
       // Single source of truth with the Paid/Unpaid badge: a fully-paid
       // ticket (isPaid) counts the whole amount; otherwise what was actually
       // collected (paidAmount at checkout, else the intake deposit).
@@ -503,10 +518,19 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
     const todayStartMs = todayStart.getTime();
     const endOfTodayMs = todayStartMs + DAY_MS - 1;
 
-    // Window mirrors the header date filter (all = trailing 30 days).
+    // Window mirrors the header date filter. For 'all' the KPI spans all time,
+    // so the chart must span the FULL data range too (audit D-P3) — the old
+    // hard-coded trailing-30-days window disagreed with the Total Revenue card
+    // whenever data was older than a month. The 7-day bucket rule below keeps
+    // long spans readable.
     let windowStartMs: number;
-    if (!dateFilter || dateFilter.preset === 'all') windowStartMs = todayStartMs - 29 * DAY_MS;
-    else if (dateFilter.preset === 'today') windowStartMs = todayStartMs;
+    if (!dateFilter || dateFilter.preset === 'all') {
+      const oldest = workOrders.reduce((min, wo) => {
+        const t = new Date(wo.createdAt || Date.now()).getTime();
+        return isNaN(t) ? min : Math.min(min, t);
+      }, todayStartMs);
+      windowStartMs = oldest;
+    } else if (dateFilter.preset === 'today') windowStartMs = todayStartMs;
     else if (dateFilter.preset === '7days') windowStartMs = todayStartMs - 6 * DAY_MS;
     else if (dateFilter.preset === '30days') windowStartMs = todayStartMs - 29 * DAY_MS;
     else if (dateFilter.preset === '60days') windowStartMs = todayStartMs - 59 * DAY_MS;
@@ -795,7 +819,13 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
                   { label: 'Finished', count: filteredWorkOrders.filter((w) => w.status === 'Finished').length, color: 'bg-success' },
                   { label: 'Taken Out', count: filteredWorkOrders.filter((w) => w.status === 'Taken Out').length, color: 'bg-line' },
                 ].map((stage) => {
-                  const pct = filteredWorkOrders.length > 0 ? Math.round((stage.count / filteredWorkOrders.length) * 100) : 0;
+                  // Audit D-P3: percentages must sum to 100 — the denominator is
+                  // the 5 tracked statuses only, so Cant Repair / Customer Not
+                  // Repair tickets don't make the bars under-fill.
+                  const tracked = filteredWorkOrders.filter((w) =>
+                    ['Receive', 'In Progress', 'Pending', 'Finished', 'Taken Out'].includes(w.status)
+                  ).length;
+                  const pct = tracked > 0 ? Math.round((stage.count / tracked) * 100) : 0;
                   return (
                     <div key={stage.label} className="space-y-1">
                       <div className="flex items-center justify-between text-xs">
@@ -1189,27 +1219,27 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <KpiCard
               label="Total Revenue"
-              value={`${totalRevenue.toLocaleString()} {currency}`}
+              value={`${totalRevenue.toLocaleString()} ${currency}`}
               footer={`${marginPercent}% Gross Profit Margin`}
               footerClass={marginPercent < 0 ? 'font-semibold text-danger' : 'font-semibold text-success-deep'}
               footerIcon={marginPercent < 0 ? <AlertTriangle className="w-3 h-3 shrink-0" /> : undefined}
             />
             <KpiCard
               label="Gross Profit (Margin)"
-              value={`${totalMargin.toLocaleString()} {currency}`}
+              value={`${totalMargin.toLocaleString()} ${currency}`}
               valueClass="text-success"
               footer="Revenue minus parts cost"
             />
             <KpiCard
               label="Total Collected (Paid)"
-              value={`${financialAnalytics.totalCollected.toLocaleString()} {currency}`}
+              value={`${financialAnalytics.totalCollected.toLocaleString()} ${currency}`}
               valueClass="text-brand"
               footer={`${financialAnalytics.paidCount} Tickets Fully Settled`}
               footerClass="font-semibold text-brand"
             />
             <KpiCard
               label="Unpaid Pending Balance"
-              value={`${financialAnalytics.totalUnpaidBalance.toLocaleString()} {currency}`}
+              value={`${financialAnalytics.totalUnpaidBalance.toLocaleString()} ${currency}`}
               valueClass="text-danger"
               footer={`${financialAnalytics.unpaidCount} Tickets Outstanding`}
               footerClass="font-semibold text-danger"

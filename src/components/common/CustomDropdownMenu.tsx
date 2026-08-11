@@ -28,6 +28,7 @@ interface CustomDropdownMenuProps {
 
 const MENU_WIDTH = 224; // w-56
 const MENU_MIN_HEIGHT = 232; // ~9 options before the internal list scrolls (max-h-64)
+const MENU_MAX_HEIGHT = 296; // max-h-64 (256px) + p-1.5 + border/shadow estimate
 const VIEWPORT_MARGIN = 8;
 
 /**
@@ -74,7 +75,7 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
     // Respect an explicit `top` placement, but auto-flip when the preferred
     // side has no room (portaled menus can't rely on CSS flipping).
     const preferTop = menuPlacement === 'top';
-    const placeTop = preferTop
+    let placeTop = preferTop
       ? spaceAbove > MENU_MIN_HEIGHT || spaceAbove >= spaceBelow
       : spaceBelow < MENU_MIN_HEIGHT && spaceAbove > spaceBelow;
 
@@ -86,8 +87,31 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
     // Clamp inside the viewport so phones never get an off-screen menu.
     left = Math.max(VIEWPORT_MARGIN, Math.min(left, window.innerWidth - MENU_WIDTH - VIEWPORT_MARGIN));
 
+    // Vertical viewport clamp: keep the whole menu on screen. The menu extends
+    // UP from `top` when placeTop (-translate-y-full), DOWN otherwise — without
+    // this the top/bottom options were unreachable on short viewports (audit F-P2).
+    let top = placeTop ? rect.top - 8 : rect.bottom + 8;
+    if (placeTop) {
+      top = Math.min(window.innerHeight - VIEWPORT_MARGIN, Math.max(VIEWPORT_MARGIN + MENU_MAX_HEIGHT, top));
+    } else {
+      top = Math.max(VIEWPORT_MARGIN, Math.min(window.innerHeight - MENU_MAX_HEIGHT - VIEWPORT_MARGIN, top));
+    }
+    // If the clamp pushed the menu over the trigger, flip to the other side
+    // when that side has room (audit F-P2).
+    const coversTrigger = placeTop ? top > rect.top : top < rect.bottom;
+    if (coversTrigger) {
+      const altTop = placeTop ? rect.bottom + 8 : rect.top - 8;
+      const altFits = placeTop
+        ? altTop + MENU_MAX_HEIGHT <= window.innerHeight - VIEWPORT_MARGIN
+        : altTop - MENU_MAX_HEIGHT >= VIEWPORT_MARGIN;
+      if (altFits) {
+        placeTop = !placeTop;
+        top = altTop;
+      }
+    }
+
     setMenuPos((prev) => {
-      const next = { top: placeTop ? rect.top - 8 : rect.bottom + 8, left, placeTop };
+      const next = { top, left, placeTop };
       // Skip identical positions to avoid re-render loops on every scroll tick.
       return prev && prev.top === next.top && prev.left === next.left && prev.placeTop === next.placeTop ? prev : next;
     });

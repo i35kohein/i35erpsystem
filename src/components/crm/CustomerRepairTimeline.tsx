@@ -151,9 +151,13 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
 
   // Sort chronologically
   const sortedOrders = [...filteredOrders].sort((a, b) => {
-    const dateA = new Date(a.createdAt).getTime();
-    const dateB = new Date(b.createdAt).getTime();
-    return sortOrder === 'NEWEST' ? dateB - dateA : dateA - dateB;
+    // audit C-P3: legacy rows without createdAt produced NaN comparisons and
+    // unstable ordering — fall back to 0 so missing dates sort to the bottom.
+    const tA = new Date(a.createdAt || '').getTime();
+    const tB = new Date(b.createdAt || '').getTime();
+    const vA = Number.isFinite(tA) ? tA : 0;
+    const vB = Number.isFinite(tB) ? tB : 0;
+    return sortOrder === 'NEWEST' ? vB - vA : vA - vB;
   });
 
   if (workOrders.length === 0) {
@@ -198,6 +202,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                   <option value="In Progress">In Progress</option>
                   <option value="Pending">Pending</option>
                   <option value="Receive">Receive</option>
+                  <option value="Taken Out">Taken Out</option>
                   <option value="Cant Repair">Can't Repair</option>
                   <option value="Customer Not Repair">Declined</option>
                 </select>
@@ -242,17 +247,19 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
             const NodeIcon = outcomeMeta.icon;
             const isLogsExpanded = expandedLogWoIds.includes(wo.id);
 
-            // Format date neatly
-            const orderDate = new Date(wo.createdAt);
-            const formattedDate = orderDate.toLocaleDateString(undefined, {
+            // Format date neatly (audit C-P3: legacy rows without createdAt
+            // used to render "Invalid Date")
+            const orderDate = new Date(wo.createdAt || '');
+            const hasValidDate = !Number.isNaN(orderDate.getTime());
+            const formattedDate = hasValidDate ? orderDate.toLocaleDateString(undefined, {
               year: 'numeric',
               month: 'short',
               day: 'numeric'
-            });
-            const formattedTime = orderDate.toLocaleTimeString([], {
+            }) : '—';
+            const formattedTime = hasValidDate ? orderDate.toLocaleTimeString([], {
               hour: '2-digit',
               minute: '2-digit'
-            });
+            }) : '';
 
             // Calculate parts used list
 
@@ -298,7 +305,7 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                     <div className="flex items-center space-x-2 text-xs text-muted">
                       <Calendar className="w-3.5 h-3.5 text-brand" />
                       <span className="font-semibold text-ink">{formattedDate}</span>
-                      <span className="text-muted">at {formattedTime}</span>
+                      {formattedTime && <span className="text-muted">at {formattedTime}</span>}
                     </div>
                   </div>
 

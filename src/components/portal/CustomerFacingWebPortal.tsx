@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {CircleDot, 
   Search, 
   CheckCircle2, 
@@ -22,13 +22,23 @@ import {CircleDot,
 import { WorkOrder, SystemSettings, Customer } from '../../types';
 import { Button , Input } from '../ui';
 import { applyEstimateApproval, applyEstimateRejection } from '../../utils/portalWorkflow';
+import { toast } from '../../lib/toast';
 
-/** Shared phone matcher — strict: query digits must EQUAL the ticket digits or be the
-    trailing 6+ digits of it. (Was duplicated verbatim ×2, P2 audit 2026-08-08.) */
+/** audit C-P2/C-P3: single shared phone normalizer (digits only). The CRM
+    roster, repair-history lookup, markPaid path and this portal must all
+    compare phones the same way — formatting variants used to split one
+    physical customer into duplicate accounts. */
+export const normalizePhone = (value?: string | null): string => (value || '').replace(/[^0-9]/g, '');
+
+/** audit C-P2: strict voucher auth — the query must be the FULL normalized
+    ticket phone (≥9 digits). The old matcher accepted any trailing 6+ digits,
+    so tickets sharing a suffix (e.g. …3456789) cross-authenticated and 1e6
+    combinations were brute-forceable. Order-number/email/serial lookups are
+    still exact matches elsewhere in the login flow. */
 const makePhoneMatcher = (queryDigits: string) => (wo: WorkOrder): boolean => {
-  const digits = (wo.customerPhone || '').replace(/[^0-9]/g, '');
-  if (!digits || queryDigits.length < 6) return false;
-  return digits === queryDigits || digits.endsWith(queryDigits);
+  const digits = normalizePhone(wo.customerPhone);
+  if (!digits || queryDigits.length < 9) return false;
+  return digits === queryDigits;
 };
 
 interface CustomerFacingWebPortalProps {
@@ -52,6 +62,9 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
   const [authenticatedCustomerPhoneOrEmail, setAuthenticatedCustomerPhoneOrEmail] = useState<string | null>(null);
   const [selectedWorkOrderId, setSelectedWorkOrderId] = useState<string | null>(null);
   const [loginError, setLoginError] = useState<string | null>(null);
+
+  // audit C-P2: brute-force throttle — 5 failed lookups lock the login for 30s.
+  const loginAttemptsRef = useRef<{ count: number; lockedUntil: number }>({ count: 0, lockedUntil: 0 });
 
   // Modals & Customer Interactions State
   const [approvalModalOpen, setApprovalModalOpen] = useState(false);
@@ -97,13 +110,22 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
       return;
     }
 
+    // audit C-P2: rate limit login attempts (no lockout existed before — 1e6
+    // trailing-digit combinations were brute-forceable).
+    const nowMs = Date.now();
+    if (nowMs < loginAttemptsRef.current.lockedUntil) {
+      const waitSec = Math.ceil((loginAttemptsRef.current.lockedUntil - nowMs) / 1000);
+      setLoginError(`Too many attempts. Please try again in ${waitSec} seconds.`);
+      return;
+    }
+
     const cleanQuery = query.toLowerCase().replace(/[^0-9a-z]/gi, '');
     const cleanQueryDigits = cleanQuery.replace(/[^0-9]/g, '');
 
     const phoneMatch = makePhoneMatcher(cleanQueryDigits);
 
-    // Check if any work order matches (strict: exact order#/email/serial/IMEI, or
-    // phone digits equal / trailing-6+ digits — never a raw substring).
+    // Check if any work order matches (strict: exact order#/email/serial/IMEI,
+    // or FULL normalized phone digits — never a raw substring or trailing-6).
     const found = workOrders.filter((wo) => {
       return (
         wo.orderNumber.toLowerCase() === query.toLowerCase() ||
@@ -116,23 +138,48 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
     });
 
     if (found.length > 0) {
+      loginAttemptsRef.current.count = 0;
       setAuthenticatedCustomerPhoneOrEmail(query);
       setSelectedWorkOrderId(found[0].id);
       setCustomerNameSig(found[0].customerName);
       setLoginError(null);
     } else {
-      setLoginError(`No active repair ticket found for "${query}". Please check your voucher receipt or contact ${systemSettings.shopPhone}.`);
+      // audit C-P3: generic message — the old text revealed whether a
+      // phone/order number exists (enumeration).
+      loginAttemptsRef.current.count += 1;
+      if (loginAttemptsRef.current.count >= 5) {
+        loginAttemptsRef.current.lockedUntil = Date.now() + 30_000;
+        loginAttemptsRef.current.count = 0;
+      }
+      setLoginError('No repair ticket matched that identifier. Please check the identifier printed on your voucher receipt.');
     }
+  };
+
+  // audit C-P2: re-read the freshest copy of the work order at write time.
+  // The portal previously saved the rendered snapshot, which clobbered
+  // concurrent technician edits (status changes, repair logs) via full-object
+  // upsert once realtime had updated the props underneath it.
+  const getFreshWorkOrder = (): WorkOrder | null => {
+    if (!currentWorkOrder) return null;
+    return workOrders.find((w) => w.id === currentWorkOrder.id) || currentWorkOrder;
   };
 
   // Handle Estimate Approval — delegates to pure applyEstimateApproval() (see portalWorkflow.test.ts)
   const handleApproveEstimate = () => {
-    if (!currentWorkOrder) return;
+    const fresh = getFreshWorkOrder();
+    if (!fresh) return;
+
+    // audit C-P2: never allow the approval flow to regress a completed ticket.
+    if (fresh.status === 'Finished' || fresh.status === 'Taken Out') {
+      toast.error('This repair is already complete — approval is no longer available.', 'Ticket Completed');
+      setApprovalModalOpen(false);
+      return;
+    }
 
     const updatedWo = applyEstimateApproval(
       {
-        workOrder: currentWorkOrder,
-        customerName: customerNameSig || currentWorkOrder.customerName,
+        workOrder: { ...fresh, totalAmount: Number(fresh.totalAmount) || 0 },
+        customerName: customerNameSig || fresh.customerName,
         currencySymbol: systemSettings.currencySymbol,
       },
       new Date().toISOString()
@@ -144,12 +191,22 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
 
   // Handle Estimate Rejection / Request Call — delegates to pure applyEstimateRejection()
   const handleRejectEstimate = () => {
-    if (!currentWorkOrder) return;
+    const fresh = getFreshWorkOrder();
+    if (!fresh) return;
+
+    // audit C-P2: the banner Decline flow could regress a finished (possibly
+    // paid) ticket back to Pending — refuse to downgrade terminal statuses.
+    if (fresh.status === 'Finished' || fresh.status === 'Taken Out' || fresh.isPaid) {
+      toast.error('This repair is already complete — decline is no longer available.', 'Ticket Completed');
+      setRejectionModalOpen(false);
+      setRejectionNotes('');
+      return;
+    }
 
     const updatedWo = applyEstimateRejection(
       {
-        workOrder: currentWorkOrder,
-        customerName: currentWorkOrder.customerName,
+        workOrder: { ...fresh, totalAmount: Number(fresh.totalAmount) || 0 },
+        customerName: fresh.customerName,
         rejectionReason,
         rejectionNotes,
       },
@@ -164,9 +221,13 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
   // Handle Customer Direct Messaging
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!messageInput.trim() || !currentWorkOrder) return;
+    if (!messageInput.trim()) return;
+    const fresh = getFreshWorkOrder();
+    if (!fresh) return;
 
-    const now = new Date().toLocaleString();
+    // audit C-P3: ISO timestamps (the rest of the app uses ISO; the old
+    // locale string made ordering/display inconsistent).
+    const now = new Date().toISOString();
     const newInquiry = {
       id: `inq-${Date.now()}`,
       timestamp: now,
@@ -174,19 +235,22 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
       text: messageInput.trim(),
     };
 
-    const updatedInquiries = [...(currentWorkOrder.customerInquiries || []), newInquiry];
+    // audit C-P2: merge onto the freshest copy and only touch the fields the
+    // portal owns (inquiries + appended log) — never blind-replace the whole
+    // work order from a stale snapshot.
+    const updatedInquiries = [...(fresh.customerInquiries || []), newInquiry];
     const updatedLogs = [
-      ...(currentWorkOrder.repairLogs || []),
+      ...(fresh.repairLogs || []),
       {
         id: `log-msg-${Date.now()}`,
         timestamp: now,
-        author: `Customer (${currentWorkOrder.customerName})`,
+        author: `Customer (${fresh.customerName})`,
         note: `Message received from customer: "${messageInput.trim()}"`,
       },
     ];
 
     const updatedWo: WorkOrder = {
-      ...currentWorkOrder,
+      ...fresh,
       customerInquiries: updatedInquiries,
       repairLogs: updatedLogs,
       updatedAt: new Date().toISOString(),
@@ -371,8 +435,12 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
       {/* Main Portal Canvas */}
       <main className="max-w-6xl mx-auto w-full px-4 pt-6 space-y-6 flex-1">
         
-        {/* Urgent Action Banner if Estimate is Pending Approval */}
-        {(currentWorkOrder.estimateStatus === 'Pending Approval' || (currentWorkOrder.status === 'Receive' && !currentWorkOrder.estimateStatus)) && (
+        {/* Urgent Action Banner if Estimate is Pending Approval — gated to
+            non-terminal statuses (audit C-P2): legacy tickets already Finished /
+            Taken Out (possibly paid) used to show Approve/Decline, and Decline
+            reset them back to Pending. */}
+        {((currentWorkOrder.status === 'Receive' || currentWorkOrder.status === 'Pending') &&
+          (currentWorkOrder.estimateStatus === 'Pending Approval' || (currentWorkOrder.status === 'Receive' && !currentWorkOrder.estimateStatus))) && (
           <div className="p-4 bg-warning/10 border border-warning/30 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-start space-x-3">
               <div className="w-10 h-10 rounded-xl bg-warning text-white flex items-center justify-center shrink-0">
@@ -386,7 +454,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   </span>
                 </div>
                 <p className="text-xs text-muted">
-                  Our technicians have completed the initial diagnostic inspection for your <strong>{currentWorkOrder.deviceModel}</strong>. Total estimated cost: <strong className="text-ink font-mono text-sm">{currentWorkOrder.totalAmount.toLocaleString()} {systemSettings.currencySymbol}</strong>.
+                  Our technicians have completed the initial diagnostic inspection for your <strong>{currentWorkOrder.deviceModel}</strong>. Total estimated cost: <strong className="text-ink font-mono text-sm">{(currentWorkOrder.totalAmount || 0).toLocaleString()} {systemSettings.currencySymbol}</strong>.
                 </p>
               </div>
             </div>
@@ -678,24 +746,25 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 <div className="space-y-2 bg-surface p-4 rounded-2xl border border-line text-xs">
                   <div className="flex justify-between">
                     <span className="text-muted">Subtotal:</span>
-                    <span className="font-mono text-ink">{currentWorkOrder.subtotal.toLocaleString()} {systemSettings.currencySymbol}</span>
+                    {/* audit C-P2: legacy/malformed rows can lack numeric fields */}
+                    <span className="font-mono text-ink">{(currentWorkOrder.subtotal || 0).toLocaleString()} {systemSettings.currencySymbol}</span>
                   </div>
                   {currentWorkOrder.discountAmount > 0 && (
                     <div className="flex justify-between text-success">
                       <span>Discount Applied:</span>
-                      <span className="font-mono">-{currentWorkOrder.discountAmount.toLocaleString()} {systemSettings.currencySymbol}</span>
+                      <span className="font-mono">-{(currentWorkOrder.discountAmount || 0).toLocaleString()} {systemSettings.currencySymbol}</span>
                     </div>
                   )}
                   {currentWorkOrder.depositAmount > 0 && (
                     <div className="flex justify-between text-brand">
                       <span>Deposit Paid:</span>
-                      <span className="font-mono">-{currentWorkOrder.depositAmount.toLocaleString()} {systemSettings.currencySymbol}</span>
+                      <span className="font-mono">-{(currentWorkOrder.depositAmount || 0).toLocaleString()} {systemSettings.currencySymbol}</span>
                     </div>
                   )}
                   <div className="pt-2 border-t border-line flex justify-between font-extrabold text-sm">
                     <span className="text-ink">Total Amount:</span>
                     <span className="font-mono text-brand">
-                      {currentWorkOrder.totalAmount.toLocaleString()} {systemSettings.currencySymbol}
+                      {(currentWorkOrder.totalAmount || 0).toLocaleString()} {systemSettings.currencySymbol}
                     </span>
                   </div>
                 </div>
@@ -765,50 +834,57 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 <div className="col-span-2 text-right">Price</div>
               </div>
 
-              {currentWorkOrder.lineItems.map((li) => (
-                <div key={li.id} className="px-4 py-3 grid grid-cols-12 items-center text-xs">
-                  <div className="col-span-6 font-semibold text-ink">
-                    {li.description}
-                    {li.partQuality && (
-                      <span className="block text-xs text-brand font-normal">{li.partQuality}</span>
-                    )}
+              {currentWorkOrder.lineItems && currentWorkOrder.lineItems.length > 0 ? (
+                currentWorkOrder.lineItems.map((li) => (
+                  <div key={li.id} className="px-4 py-3 grid grid-cols-12 items-center text-xs">
+                    <div className="col-span-6 font-semibold text-ink">
+                      {li.description}
+                      {li.partQuality && (
+                        <span className="block text-xs text-brand font-normal">{li.partQuality}</span>
+                      )}
+                    </div>
+                    <div className="col-span-2 text-center">
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                        li.isLabor ? 'bg-purple/10 text-purple' : 'bg-brand-soft text-brand'
+                      }`}>
+                        {li.isLabor ? 'Labor' : 'Part'}
+                      </span>
+                    </div>
+                    <div className="col-span-2 text-center font-mono font-medium">{li.quantity}</div>
+                    <div className="col-span-2 text-right font-mono font-bold text-ink">
+                      {((li.unitPrice || 0) * (li.quantity || 0)).toLocaleString()} {systemSettings.currencySymbol}
+                    </div>
                   </div>
-                  <div className="col-span-2 text-center">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                      li.isLabor ? 'bg-purple/10 text-purple' : 'bg-brand-soft text-brand'
-                    }`}>
-                      {li.isLabor ? 'Labor' : 'Part'}
-                    </span>
-                  </div>
-                  <div className="col-span-2 text-center font-mono font-medium">{li.quantity}</div>
-                  <div className="col-span-2 text-right font-mono font-bold text-ink">
-                    {(li.unitPrice * li.quantity).toLocaleString()} {systemSettings.currencySymbol}
-                  </div>
+                ))
+              ) : (
+                <div className="px-4 py-6 text-center text-xs text-muted italic">
+                  No itemized line items recorded for this work order.
                 </div>
-              ))}
+              )}
             </div>
 
             {/* Totals Box */}
             <div className="max-w-xs ml-auto space-y-2 bg-surface p-4 rounded-2xl border border-line">
               <div className="flex justify-between text-xs text-muted">
                 <span>Subtotal:</span>
-                <span className="font-mono text-ink">{currentWorkOrder.subtotal.toLocaleString()} {systemSettings.currencySymbol}</span>
+                {/* audit C-P2: guard legacy rows missing numeric fields */}
+                <span className="font-mono text-ink">{(currentWorkOrder.subtotal || 0).toLocaleString()} {systemSettings.currencySymbol}</span>
               </div>
               {currentWorkOrder.taxAmount > 0 && (
                 <div className="flex justify-between text-xs text-muted">
                   <span>Tax:</span>
-                  <span className="font-mono text-ink">{currentWorkOrder.taxAmount.toLocaleString()} {systemSettings.currencySymbol}</span>
+                  <span className="font-mono text-ink">{(currentWorkOrder.taxAmount || 0).toLocaleString()} {systemSettings.currencySymbol}</span>
                 </div>
               )}
               {currentWorkOrder.depositAmount > 0 && (
                 <div className="flex justify-between text-xs text-brand">
                   <span>Deposit Paid:</span>
-                  <span className="font-mono">-{currentWorkOrder.depositAmount.toLocaleString()} {systemSettings.currencySymbol}</span>
+                  <span className="font-mono">-{(currentWorkOrder.depositAmount || 0).toLocaleString()} {systemSettings.currencySymbol}</span>
                 </div>
               )}
               <div className="pt-2 border-t border-line flex justify-between font-extrabold text-sm text-ink">
                 <span>Total Authorized Estimate:</span>
-                <span className="font-mono text-brand">{currentWorkOrder.totalAmount.toLocaleString()} {systemSettings.currencySymbol}</span>
+                <span className="font-mono text-brand">{(currentWorkOrder.totalAmount || 0).toLocaleString()} {systemSettings.currencySymbol}</span>
               </div>
             </div>
 
@@ -842,7 +918,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                     <p className="text-xs opacity-90">Approved online on {currentWorkOrder.estimateApprovedAt ? new Date(currentWorkOrder.estimateApprovedAt).toLocaleString() : 'Record'}</p>
                   </div>
                 </div>
-                <span className="font-mono font-bold text-xs">{currentWorkOrder.totalAmount.toLocaleString()} {systemSettings.currencySymbol}</span>
+                <span className="font-mono font-bold text-xs">{(currentWorkOrder.totalAmount || 0).toLocaleString()} {systemSettings.currencySymbol}</span>
               </div>
             )}
           </div>
@@ -971,7 +1047,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted">Authorized Total:</span>
-                  <span className="font-extrabold text-success">{currentWorkOrder.totalAmount.toLocaleString()} {systemSettings.currencySymbol}</span>
+                  <span className="font-extrabold text-success">{(currentWorkOrder.totalAmount || 0).toLocaleString()} {systemSettings.currencySymbol}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted">Warranty Coverage:</span>
@@ -1194,17 +1270,22 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   <span>Item Description</span>
                   <span>Amount</span>
                 </div>
-                {currentWorkOrder.lineItems.map((li) => (
-                  <div key={li.id} className="px-3 py-2 flex justify-between text-xs">
-                    <span>{li.description} (x{li.quantity})</span>
-                    <span className="font-mono font-bold">{(li.unitPrice * li.quantity).toLocaleString()} {systemSettings.currencySymbol}</span>
-                  </div>
-                ))}
+                {currentWorkOrder.lineItems && currentWorkOrder.lineItems.length > 0 ? (
+                  currentWorkOrder.lineItems.map((li) => (
+                    <div key={li.id} className="px-3 py-2 flex justify-between text-xs">
+                      <span>{li.description} (x{li.quantity})</span>
+                      <span className="font-mono font-bold">{((li.unitPrice || 0) * (li.quantity || 0)).toLocaleString()} {systemSettings.currencySymbol}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-3 py-2 text-center text-xs text-muted italic">No line items on record.</div>
+                )}
               </div>
 
               <div className="text-right space-y-1 font-mono pt-2 border-t border-line">
-                <p className="text-xs text-muted">Subtotal: {currentWorkOrder.subtotal.toLocaleString()} {systemSettings.currencySymbol}</p>
-                <p className="text-sm font-black text-brand">Total: {currentWorkOrder.totalAmount.toLocaleString()} {systemSettings.currencySymbol}</p>
+                {/* audit C-P2: guard legacy rows missing numeric fields */}
+                <p className="text-xs text-muted">Subtotal: {(currentWorkOrder.subtotal || 0).toLocaleString()} {systemSettings.currencySymbol}</p>
+                <p className="text-sm font-black text-brand">Total: {(currentWorkOrder.totalAmount || 0).toLocaleString()} {systemSettings.currencySymbol}</p>
               </div>
 
               <p className="text-xs text-center text-muted pt-3 border-t border-line">

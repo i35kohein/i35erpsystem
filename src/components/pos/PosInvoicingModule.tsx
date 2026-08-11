@@ -49,11 +49,16 @@ import { getActivePaymentMethods } from '../../data/seedData';
 import { PrintableInvoiceModal } from '../common/PrintableInvoiceModal';
 import { CustomerNotificationModal } from '../common/CustomerNotificationModal';
 import { toast } from '../../lib/toast';
+import { confirmDialog } from '../common/ConfirmDialog';
 
 const DISCOUNT_OPTIONS = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
 
 const normalizeText = (value: string) =>
   value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim();
+
+// Signed MMK formatting for profit rows — a negative result must display as a
+// real loss, never a clamped 0 (audit A-P3-3).
+const signedMoney = (n: number) => `${n < 0 ? '−' : '+'}${Math.abs(Math.round(n)).toLocaleString()}`;
 
 const getLineItemIcon = (description: string) => {
   const text = normalizeText(description);
@@ -313,11 +318,55 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
       { method: activePaymentMethods[0]?.name || 'Cash', amount: 0 },
       { method: activePaymentMethods[1]?.name || 'Cash', amount: 0 },
     ]);
+    // audit A-P2-5: never let the previous ticket's Price List selection leak
+    // into the next checkout — clear selection/discounts/discount-menu state
+    // on every ticket switch (not only on the "Done" button path).
+    setPosCatalogSelection([]);
+    setPosCatalogDiscounts({});
+    setPosDiscountMenuFor(null);
+    setPosDiscountAnchor(null);
+    setPosCustomDiscountInput('');
   };
 
+  // audit A-P2-3: sheet-editor line-item draft — keystrokes update this local
+  // draft instantly; the full-document save is flushed once typing pauses, so
+  // rapid edits can't race each other's full-document PATCHes (out-of-order
+  // completions used to revert earlier edits).
+  const [lineItemDraft, setLineItemDraft] = useState<WorkOrder['lineItems'] | null>(null);
+  const pendingWoRef = useRef<WorkOrder | null>(null); // full doc incl. recomputed totals
+  const lineItemSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onSaveWorkOrderRef = useRef(onSaveWorkOrder);
+  useEffect(() => {
+    onSaveWorkOrderRef.current = onSaveWorkOrder;
+  }, [onSaveWorkOrder]);
+
+  // Flush any pending line-item edit when the ticket changes (it belongs to
+  // the OLD ticket) or when the module unmounts (audit A-P2-3).
+  useEffect(() => {
+    if (lineItemSaveTimerRef.current) {
+      clearTimeout(lineItemSaveTimerRef.current);
+      lineItemSaveTimerRef.current = null;
+    }
+    const toSave = pendingWoRef.current;
+    pendingWoRef.current = null;
+    setLineItemDraft(null);
+    if (toSave && onSaveWorkOrderRef.current) onSaveWorkOrderRef.current(toSave);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedWoId]);
+  useEffect(() => {
+    return () => {
+      if (lineItemSaveTimerRef.current) clearTimeout(lineItemSaveTimerRef.current);
+      const toSave = pendingWoRef.current;
+      pendingWoRef.current = null;
+      if (toSave && onSaveWorkOrderRef.current) onSaveWorkOrderRef.current(toSave);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Computed: labor vs parts breakdown for customer / system views (Ko Hein 2026-08-10)
-  const laborItems = useMemo(() => (selectedWo?.lineItems || []).filter((li) => li.isLabor), [selectedWo]);
-  const partsItems = useMemo(() => (selectedWo?.lineItems || []).filter((li) => !li.isLabor && li.partId), [selectedWo]);
+  const displayLineItems = lineItemDraft ?? selectedWo?.lineItems ?? [];
+  const laborItems = useMemo(() => displayLineItems.filter((li) => li.isLabor), [displayLineItems]);
+  const partsItems = useMemo(() => displayLineItems.filter((li) => !li.isLabor && li.partId), [displayLineItems]);
   const partsCostTotal = useMemo(() => partsItems.reduce((s, li) => s + (li.unitCost || 0) * li.quantity, 0), [partsItems]);
   // Estimated technician commission for this ticket — mirrors App.tsx handleMarkPaid
   // (Ko Hein 2026-08-11): commission base = labor revenue after per-item discounts.
@@ -405,20 +454,28 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
   const recalculateTotals = (lineItems: WorkOrder['lineItems'], discountAmount: number, depositAmount: number, discountFormat?: WorkOrder['discountFormat']) => {
     const laborItems = lineItems.filter((li) => li.isLabor);
-    let computedSubtotal = 0;
+    // audit A-P2-1/P3-1: subtotal is ALWAYS the pre-discount original sum
+    // (matches intake + self-heal). Per-line discounts are rounded exactly
+    // like perItemDiscountTotal so the summary chain ties:
+    // Subtotal − Per-item Discounts + Tax − Invoice Discount − Deposit = Due.
+    let originalSubtotal = 0;
+    let perItemDiscount = 0;
     for (const item of laborItems) {
       const lineTotal = (Number(item.unitPrice) || 0) * (Number(item.quantity) || 0);
-      const itemDiscount = item.lineItemDiscountPercent ? lineTotal * (item.lineItemDiscountPercent / 100) : 0;
-      computedSubtotal += lineTotal - itemDiscount;
+      originalSubtotal += lineTotal;
+      if (item.lineItemDiscountPercent) {
+        perItemDiscount += Math.round(lineTotal * (item.lineItemDiscountPercent / 100));
+      }
     }
     // Invoice-level discount (Ko Hein 2026-08-11, audit A-1): always subtract
     // discountAmount for new-format tickets. Legacy tickets (unitPrice = FINAL
     // price, discountAmount = duplicate of embedded discount) carry the explicit
     // 'legacy' flag (self-heal stamps it); they must NOT get a second deduction.
     const effectiveDiscount = discountFormat === 'legacy' ? 0 : discountAmount;
-    const taxAmount = Math.round(computedSubtotal * taxRate);
-    const totalAmount = Math.max(0, Math.round(computedSubtotal) + taxAmount - effectiveDiscount - depositAmount);
-    return { subtotal: Math.round(computedSubtotal), taxAmount, totalAmount };
+    const taxBase = Math.max(0, originalSubtotal - perItemDiscount);
+    const taxAmount = Math.round(taxBase * taxRate);
+    const totalAmount = Math.max(0, Math.round(taxBase) + taxAmount - effectiveDiscount - depositAmount);
+    return { subtotal: Math.round(originalSubtotal), taxAmount, totalAmount };
   };
 
   // Self-heal legacy tickets (Ko Hein 2026-08-11): old-format work orders
@@ -500,11 +557,14 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
         const unit = Number(li.unitPrice) || 0;
         origSum += unit * qty;
         finalSum += unit * qty;
-        return li;
+        // audit A-P2-2: always copy — never hand the original prop-owned
+        // object down for later in-place mutation (Format-A fallback below).
+        return { ...li };
       }
       // Parts are INTERNAL tracking only — never charged to the customer, so
       // they contribute nothing to the customer total (audit A-2).
-      return li;
+      // audit A-P2-2: copy, see above.
+      return { ...li };
     });
     // Format A fallback: recover from duplicate discountAmount
     if (dis > 0 && origSum === finalSum) {
@@ -561,7 +621,9 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     }
 
     const partLineId = `${selectedInventoryPart.id}-${Date.now()}`;
-    const existingLines = [...(selectedWo.lineItems || [])];
+    // audit A-P2-3: build on the pending draft (if any) so a debounced sheet
+    // edit is not lost when a part is added before the save flushed.
+    const existingLines = [...(pendingWoRef.current?.lineItems ?? selectedWo.lineItems ?? [])];
     const samePartIndex = existingLines.findIndex(
       (item) =>
         !item.isLabor &&
@@ -597,54 +659,89 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
       ];
     }
 
-    const totals = recalculateTotals(nextLineItems, selectedWo.discountAmount, selectedWo.depositAmount, selectedWo.discountFormat);
-    const updatedWo: WorkOrder = {
-      ...selectedWo,
-      lineItems: nextLineItems,
-      subtotal: totals.subtotal,
-      taxAmount: totals.taxAmount,
-      totalAmount: totals.totalAmount,
-      updatedAt: new Date().toISOString(),
-    };
-    onSaveWorkOrder?.(updatedWo);
+    // audit A-P2-3: commit once (immediate) — totals recomputed inside.
+    commitLineItems(nextLineItems, { immediate: true });
     setInventoryPartQty(1);
   };
 
   const handleRemoveInventoryPartFromWorkOrder = (lineItemId: string) => {
     if (!selectedWo || !onSaveWorkOrder) return;
 
-    const nextLineItems = (selectedWo.lineItems || []).filter((item) => item.id !== lineItemId);
-    const totals = recalculateTotals(nextLineItems, selectedWo.discountAmount, selectedWo.depositAmount, selectedWo.discountFormat);
+    // audit A-P2-3: remove from the pending draft when present.
+    const nextLineItems = (pendingWoRef.current?.lineItems ?? selectedWo.lineItems ?? []).filter((item) => item.id !== lineItemId);
+    commitLineItems(nextLineItems, { immediate: true });
+  };
+
+  // Commit (or schedule) a full work-order save for the given line items.
+  // immediate = discrete user action (add/remove part, discount change) —
+  // saves right away. default = sheet-editor keystrokes, debounced so rapid
+  // edits can't race each other's full-document PATCHes (audit A-P2-3).
+  const commitLineItems = (
+    nextLineItems: WorkOrder['lineItems'],
+    opts: { immediate?: boolean; discountAmount?: number; depositAmount?: number } = {}
+  ) => {
+    if (!selectedWo || !onSaveWorkOrderRef.current) return;
+    const discount = opts.discountAmount !== undefined ? opts.discountAmount : selectedWo.discountAmount || 0;
+    const deposit = opts.depositAmount !== undefined ? opts.depositAmount : selectedWo.depositAmount || 0;
+    const totals = recalculateTotals(nextLineItems, discount, deposit, selectedWo.discountFormat);
     const updatedWo: WorkOrder = {
       ...selectedWo,
       lineItems: nextLineItems,
+      discountAmount: discount,
+      depositAmount: deposit,
       subtotal: totals.subtotal,
       taxAmount: totals.taxAmount,
       totalAmount: totals.totalAmount,
       updatedAt: new Date().toISOString(),
     };
-    onSaveWorkOrder(updatedWo);
+    if (opts.immediate) {
+      if (lineItemSaveTimerRef.current) {
+        clearTimeout(lineItemSaveTimerRef.current);
+        lineItemSaveTimerRef.current = null;
+      }
+      pendingWoRef.current = null;
+      setLineItemDraft(null);
+      onSaveWorkOrderRef.current(updatedWo);
+      return;
+    }
+    pendingWoRef.current = updatedWo;
+    setLineItemDraft(nextLineItems);
+    if (lineItemSaveTimerRef.current) clearTimeout(lineItemSaveTimerRef.current);
+    lineItemSaveTimerRef.current = setTimeout(() => {
+      lineItemSaveTimerRef.current = null;
+      const toSave = pendingWoRef.current;
+      pendingWoRef.current = null;
+      setLineItemDraft(null);
+      if (toSave && onSaveWorkOrderRef.current) onSaveWorkOrderRef.current(toSave);
+    }, 500);
+  };
+
+  // Flush a pending debounced edit immediately (used before checkout so the
+  // amount charged always matches the amounts shown) (audit A-P2-3).
+  const flushLineItemDraft = () => {
+    if (lineItemSaveTimerRef.current) {
+      clearTimeout(lineItemSaveTimerRef.current);
+      lineItemSaveTimerRef.current = null;
+    }
+    const toSave = pendingWoRef.current;
+    pendingWoRef.current = null;
+    setLineItemDraft(null);
+    if (toSave && onSaveWorkOrderRef.current) onSaveWorkOrderRef.current(toSave);
   };
 
   // Update a single line item field (price, qty, or per-item discount) (Ko Hein 2026-08-10)
   const handleUpdateLineItem = (lineItemId: string, field: 'unitPrice' | 'quantity' | 'lineItemDiscountPercent', value: number) => {
     if (!selectedWo || !onSaveWorkOrder) return;
-    const nextLineItems = (selectedWo.lineItems || []).map((item) => {
+    const baseLines = pendingWoRef.current?.lineItems ?? selectedWo.lineItems ?? [];
+    const nextLineItems = baseLines.map((item) => {
       if (item.id !== lineItemId) return item;
       if (field === 'unitPrice') return { ...item, unitPrice: Math.max(0, value) };
       if (field === 'quantity') return { ...item, quantity: Math.max(1, Math.floor(value)) };
       if (field === 'lineItemDiscountPercent') return { ...item, lineItemDiscountPercent: Math.min(100, Math.max(0, value)) };
       return item;
     });
-    const totals = recalculateTotals(nextLineItems, selectedWo.discountAmount, selectedWo.depositAmount, selectedWo.discountFormat);
-    onSaveWorkOrder({
-      ...selectedWo,
-      lineItems: nextLineItems,
-      subtotal: totals.subtotal,
-      taxAmount: totals.taxAmount,
-      totalAmount: totals.totalAmount,
-      updatedAt: new Date().toISOString(),
-    });
+    // audit A-P2-3: debounced save — never a full-document PATCH per keystroke.
+    commitLineItems(nextLineItems);
   };
 
   // Add custom repair / service line item (Ko Hein 2026-08-10)
@@ -665,16 +762,9 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
       quantity: qty,
       isLabor: true,
     };
-    const nextLineItems = [...(selectedWo.lineItems || []), newLine];
-    const totals = recalculateTotals(nextLineItems, selectedWo.discountAmount, selectedWo.depositAmount, selectedWo.discountFormat);
-    onSaveWorkOrder({
-      ...selectedWo,
-      lineItems: nextLineItems,
-      subtotal: totals.subtotal,
-      taxAmount: totals.taxAmount,
-      totalAmount: totals.totalAmount,
-      updatedAt: new Date().toISOString(),
-    });
+    // audit A-P2-3: append to the pending draft (if any) and save once.
+    const nextLineItems = [...(pendingWoRef.current?.lineItems ?? selectedWo.lineItems ?? []), newLine];
+    commitLineItems(nextLineItems, { immediate: true });
     setCustomRepairName('');
     setCustomRepairPrice(0);
     setCustomRepairQty(1);
@@ -701,32 +791,39 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
       isLabor: true,
       lineItemDiscountPercent: item.discountPercent || undefined,
     }));
-    const nextLineItems = [...(selectedWo.lineItems || []), ...newLines];
-    const totals = recalculateTotals(nextLineItems, selectedWo.discountAmount, selectedWo.depositAmount, selectedWo.discountFormat);
-    onSaveWorkOrder({
-      ...selectedWo,
-      lineItems: nextLineItems,
-      subtotal: totals.subtotal,
-      taxAmount: totals.taxAmount,
-      totalAmount: totals.totalAmount,
-      updatedAt: new Date().toISOString(),
-    });
+    // audit A-P2-3: append to the pending draft (if any) and save once.
+    const nextLineItems = [...(pendingWoRef.current?.lineItems ?? selectedWo.lineItems ?? []), ...newLines];
+    commitLineItems(nextLineItems, { immediate: true });
     setIsAddRepairFromPriceListOpen(false);
+    // audit A-P2-5: clear picker selection on every exit path (Done / X / backdrop).
+    setPosCatalogSelection([]);
+    setPosCatalogDiscounts({});
+    setPosDiscountMenuFor(null);
+    setPosDiscountAnchor(null);
+    setPosCustomDiscountInput('');
+    setPriceSearchQuery('');
+    setSelectedGroupFilter('ALL');
+  };
+
+  // Close the Price List picker and drop its selection state (audit A-P2-5).
+  const closePriceListPicker = () => {
+    setIsAddRepairFromPriceListOpen(false);
+    setPosCatalogSelection([]);
+    setPosCatalogDiscounts({});
+    setPosDiscountMenuFor(null);
+    setPosDiscountAnchor(null);
+    setPosCustomDiscountInput('');
+    setPriceSearchQuery('');
+    setSelectedGroupFilter('ALL');
   };
 
   // Update whole-invoice discount (Ko Hein 2026-08-10)
   const handleUpdateInvoiceDiscount = (newDiscount: number) => {
     if (!selectedWo || !onSaveWorkOrder) return;
     const discount = Math.max(0, Number(newDiscount) || 0);
-    const totals = recalculateTotals(selectedWo.lineItems, discount, selectedWo.depositAmount, selectedWo.discountFormat);
-    onSaveWorkOrder({
-      ...selectedWo,
-      discountAmount: discount,
-      subtotal: totals.subtotal,
-      taxAmount: totals.taxAmount,
-      totalAmount: totals.totalAmount,
-      updatedAt: new Date().toISOString(),
-    });
+    // audit A-P2-3: apply on the pending draft (if any) and save once.
+    const baseLines = pendingWoRef.current?.lineItems ?? selectedWo.lineItems;
+    commitLineItems(baseLines, { immediate: true, discountAmount: discount });
   };
 
   // Tendered amount depends on the active method: split = sum of splits,
@@ -743,6 +840,14 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
   const handleProcessPayment = () => {
     if (!selectedWo || isProcessingPayment) return;
+    // audit A-P2-3: if a sheet edit is still in the debounce window, flush it
+    // and ask staff to re-confirm — charging from a stale total would record
+    // the wrong amount.
+    if (pendingWoRef.current) {
+      flushLineItemDraft();
+      toast.info('Line item amounts were just updated — please review the new total and charge again.', 'Amount Updated');
+      return;
+    }
     if (selectedWo.isPaid) {
       toast.error('This order is already paid — no double charging. Pick a different ticket.', 'Already Paid');
       return;
@@ -787,27 +892,35 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   };
 
   // Quick Action to charge Diagnostic Fee Only (စက်စစ်ခ) for Cant Repair / Customer Cancelled
-  const handleApplyDiagnosticFeeOnly = () => {
+  const handleApplyDiagnosticFeeOnly = async () => {
     if (!selectedWo || !onSaveWorkOrder) return;
+    // audit A-P2-4: replacing all line items destroys repair/part history with
+    // no undo — confirm first.
+    if ((selectedWo.lineItems || []).length > 0) {
+      const ok = await confirmDialog({
+        title: 'Apply Diagnostic Fee Only',
+        message: 'This replaces ALL current line items (repairs + parts) on this ticket with the single Diagnostic & Inspection Fee. Continue?',
+        confirmLabel: 'Apply Fee',
+        danger: true,
+      });
+      if (!ok) return;
+    }
     const diagFee = 5000; // 5000 MMK standard diagnostic inspection fee
-    const updatedWo: WorkOrder = {
-      ...selectedWo,
-      lineItems: [
-        {
-          id: 'diag-fee-item',
-          description: 'Diagnostic & Inspection Fee',
-          quantity: 1,
-          unitCost: 0,
-          unitPrice: diagFee,
-          isLabor: true,
-        },
-      ],
-      subtotal: diagFee,
-      taxAmount: Math.round(diagFee * taxRate),
-      totalAmount: Math.max(0, Math.round(diagFee * (1 + taxRate)) - (selectedWo.discountAmount || 0) - (selectedWo.depositAmount || 0)),
-      updatedAt: new Date().toISOString(),
-    };
-    onSaveWorkOrder(updatedWo);
+    const diagLines: WorkOrder['lineItems'] = [
+      {
+        id: 'diag-fee-item',
+        description: 'Diagnostic & Inspection Fee',
+        quantity: 1,
+        unitCost: 0,
+        unitPrice: diagFee,
+        isLabor: true,
+      },
+    ];
+    // audit A-P2-4: reset discountAmount to 0 — on legacy tickets it is a
+    // duplicate of the discount already embedded in prices and would zero out
+    // the fee (recalculateTotals honors 'legacy' via the flag, but a fresh
+    // fee line must never inherit an old invoice discount).
+    commitLineItems(diagLines, { immediate: true, discountAmount: 0 });
   };
 
   const renderCheckoutPanel = () =>
@@ -1237,7 +1350,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       </tr>
                       <tr>
                         <td className="border-b border-line px-3 py-2 text-muted">Repair Subtotal <span className="text-[10px]">({laborItems.length} item{laborItems.length !== 1 ? 's' : ''})</span></td>
-                        <td className="border-b border-line px-3 py-2 text-right font-mono font-bold text-ink tabular-nums">{selectedWo.subtotal.toLocaleString()} {currency}</td>
+                        <td className="border-b border-line px-3 py-2 text-right font-mono font-bold text-ink tabular-nums">{(selectedWo.subtotal ?? 0).toLocaleString()} {currency}</td>
                       </tr>
                       {perItemDiscountTotal > 0 && (
                         <tr>
@@ -1247,7 +1360,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       )}
                       <tr>
                         <td className="border-b border-line px-3 py-2 text-muted">Sales Tax ({Math.round(taxRate * 100)}%)</td>
-                        <td className="border-b border-line px-3 py-2 text-right font-mono font-bold text-ink tabular-nums">{selectedWo.taxAmount.toLocaleString()} {currency}</td>
+                        <td className="border-b border-line px-3 py-2 text-right font-mono font-bold text-ink tabular-nums">{(selectedWo.taxAmount ?? 0).toLocaleString()} {currency}</td>
                       </tr>
                       {/* Invoice Discount — editable (Ko Hein 2026-08-10) */}
                       <tr>
@@ -1299,19 +1412,24 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
                       {/* System section — profit breakdown (Ko Hein 2026-08-11)
                           Gross Profit = Amount Due (Customer) − Parts Cost
-                          Net Profit   = Gross Profit − Tech Commission */}
-                      {partsItems.length > 0 && (
+                          Net Profit   = Gross Profit − Tech Commission
+                          audit A-P3-3: show SIGNED values (clamping hid real
+                          losses) and render the block whenever there are parts
+                          OR a commission estimate — not only when parts exist. */}
+                      {(partsItems.length > 0 || estCommission > 0) && (
                         <>
                           <tr className="bg-surface/30">
                             <td className="border border-line px-2 py-1 text-[10px] font-extrabold text-muted uppercase tracking-wider" colSpan={2}>System (incl. Parts)</td>
                           </tr>
-                          <tr>
-                            <td className="border border-line px-2 py-1.5 text-muted">Parts Cost (deducted)</td>
-                            <td className="border border-line px-2 py-1.5 text-right font-mono text-warning tabular-nums">-{partsCostTotal.toLocaleString()} {currency}</td>
-                          </tr>
+                          {partsItems.length > 0 && (
+                            <tr>
+                              <td className="border border-line px-2 py-1.5 text-muted">Parts Cost (deducted)</td>
+                              <td className="border border-line px-2 py-1.5 text-right font-mono text-warning tabular-nums">-{partsCostTotal.toLocaleString()} {currency}</td>
+                            </tr>
+                          )}
                           <tr>
                             <td className="border border-line px-2 py-1.5 text-success-deep font-bold">Gross Profit</td>
-                            <td className="border border-line px-2 py-1.5 text-right font-mono font-black text-success-deep tabular-nums">+{(Math.max(0, (selectedWo.totalAmount || 0) - partsCostTotal)).toLocaleString()} {currency}</td>
+                            <td className="border border-line px-2 py-1.5 text-right font-mono font-black text-success-deep tabular-nums">{signedMoney((selectedWo.totalAmount || 0) - partsCostTotal)} {currency}</td>
                           </tr>
                           {estCommission > 0 && (
                             <tr>
@@ -1322,7 +1440,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           {estCommission > 0 && (
                             <tr className="bg-surface/20">
                               <td className="border border-line px-2 py-1.5 text-ink font-bold">Net Profit</td>
-                              <td className="border border-line px-2 py-1.5 text-right font-mono font-black text-ink tabular-nums">+{Math.max(0, (selectedWo.totalAmount || 0) - partsCostTotal - estCommission).toLocaleString()} {currency}</td>
+                              <td className="border border-line px-2 py-1.5 text-right font-mono font-black text-ink tabular-nums">{signedMoney((selectedWo.totalAmount || 0) - partsCostTotal - estCommission)} {currency}</td>
                             </tr>
                           )}
                         </>
@@ -1625,6 +1743,14 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           onClick={() => {
                             if (key === '⌫') {
                               setCashTendered(Math.floor(cashTendered / 10));
+                            } else if (key === '0') {
+                              // audit A-P3-5: append a literal zero — Number('0')||0
+                              // made the key a no-op when tendered was 0, and
+                              // Number('50'+'0') via string concat also worked
+                              // but 0/00 needed an explicit path.
+                              setCashTendered(cashTendered * 10);
+                            } else if (key === '00') {
+                              setCashTendered(cashTendered * 100);
                             } else {
                               setCashTendered(Number(String(cashTendered || '') + key) || 0);
                             }
@@ -2302,8 +2428,11 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
       {isAddRepairFromPriceListOpen && selectedWo && (() => {
         const catalogItems = getModelPriceCatalogItems(selectedWo.deviceModel || '', priceCatalog);
         const matchedModelName = catalogItems.length > 0 ? catalogItems[0].modelMatchedName : selectedWo.deviceModel;
+        // audit A-P2-6: fabricated fallback prices (isCatalogMatch === false)
+        // must never be addable to a live invoice — staff would charge a
+        // made-up amount for an unlisted model.
         const selectedCatalogItems = catalogItems.filter(
-          (item) => posCatalogSelection.includes(item.categoryKey) && item.price > 0
+          (item) => posCatalogSelection.includes(item.categoryKey) && item.isCatalogMatch && item.price > 0
         ).map((item) => ({ ...item, discountPercent: posCatalogDiscounts[item.categoryKey] || 0 }));
         const selectedCatalogTotal = selectedCatalogItems.reduce((sum, item) => sum + item.price, 0);
         const selectedCatalogFinalTotal = selectedCatalogItems.reduce(
@@ -2322,7 +2451,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
         return (
           <div
             className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 p-0 sm:items-center sm:p-4"
-            onClick={() => setIsAddRepairFromPriceListOpen(false)}
+            onClick={closePriceListPicker}
             role="presentation"
           >
             <div
@@ -2337,7 +2466,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 <Button
                   type="button"
                   variant="iconGhost"
-                  onClick={() => setIsAddRepairFromPriceListOpen(false)}
+                  onClick={closePriceListPicker}
                   className="rounded-lg p-1 text-muted hover:bg-surface hover:text-ink"
                   aria-label="Close"
                 >
@@ -2393,14 +2522,18 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       const alreadyInWo = (selectedWo.lineItems || []).some(
                         (li) => li.description?.toLowerCase() === item.name.toLowerCase()
                       );
+                      // audit A-P2-6: fallback "estimate" items (not in the real
+                      // catalog) are visible but never selectable — no made-up
+                      // prices on a live invoice.
+                      const notSelectable = alreadyInWo || !item.isCatalogMatch;
                       return (
                         <div
                           key={item.categoryKey}
                           role="button"
-                          tabIndex={alreadyInWo ? -1 : 0}
+                          tabIndex={notSelectable ? -1 : 0}
                           aria-pressed={isSelected}
                           onClick={() => {
-                            if (alreadyInWo) return;
+                            if (notSelectable) return;
                             setPosCatalogSelection((prev) => {
                               if (prev.includes(item.categoryKey)) {
                                 setPosCatalogDiscounts((discounts) => {
@@ -2418,7 +2551,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                             });
                           }}
                           onKeyDown={(e) => {
-                            if (alreadyInWo) return;
+                            if (notSelectable) return;
                             if (e.key === 'Enter' || e.key === ' ') {
                               e.preventDefault();
                               setPosCatalogSelection((prev) => {
@@ -2435,7 +2568,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                             }
                           }}
                           className={`group relative flex min-h-[92px] cursor-pointer select-none flex-col gap-1.5 rounded-2xl border-2 bg-white p-2.5 shadow-2xs transition-colors focus:outline-none ${
-                            alreadyInWo
+                            notSelectable
                               ? 'border-line bg-surface/50 opacity-60 cursor-not-allowed'
                               : isSelected
                                 ? 'border-brand bg-brand/5'
@@ -2463,7 +2596,13 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                                   <span className="text-[9px] font-extrabold text-success">−{(item.price - finalPrice).toLocaleString()} · {discountPct}%</span>
                                 ) : (
                                   <span className="text-[9px] font-extrabold text-muted">
-                                    {alreadyInWo ? 'Already in invoice' : isSelected ? 'Selected' : 'Tap to add'}
+                                    {alreadyInWo
+                                      ? 'Already in invoice'
+                                      : !item.isCatalogMatch
+                                        ? 'Estimate only — not in catalog'
+                                        : isSelected
+                                          ? 'Selected'
+                                          : 'Tap to add'}
                                   </span>
                                 )}
                               </div>
@@ -2515,7 +2654,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                 </div>
                 <div className="rounded-lg bg-brand p-2 text-white">
                   <span className="block text-[10px] font-bold uppercase opacity-90">Final</span>
-                  <span className="font-black">{selectedCatalogFinalTotal.toLocaleString()} MMK</span>
+                  <span className="font-black">{selectedCatalogFinalTotal.toLocaleString()} {currency}</span>
                 </div>
               </div>
 
@@ -2525,14 +2664,11 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   onClick={() => {
                     if (selectedCatalogItems.length > 0) {
                       handleAddRepairsFromPriceList(selectedCatalogItems);
+                    } else {
+                      // audit A-P2-5: closing via Done with nothing selected
+                      // must also clear picker state (no stale selection).
+                      closePriceListPicker();
                     }
-                    setPosCatalogSelection([]);
-                    setPosCatalogDiscounts({});
-                    setPosDiscountMenuFor(null);
-                    setPosDiscountAnchor(null);
-                    setPosCustomDiscountInput('');
-                    setPriceSearchQuery('');
-                    setSelectedGroupFilter('ALL');
                   }}
                   disabled={posCatalogSelection.length === 0}
                   className="rounded-xl bg-brand px-5 py-2 text-xs font-black text-white transition hover:bg-brand-deep disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"

@@ -139,6 +139,9 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
 }) => {
   const [createdTicket, setCreatedTicket] = useState<WorkOrder | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
+  // Synchronous double-submit guard (audit B-P2): the state flag is stale
+  // within the same tick — two rapid submits both see isRegistering === false.
+  const registeringRef = useRef(false);
   const isIpad = useIsIpad();
   const editWorkOrder = prefill?.editWorkOrder ?? null;
   const isEditMode = !!editWorkOrder;
@@ -376,7 +379,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
 
   // Submit / Register Device — validates, then shows inline errors + scrolls to the first one
   const handleRegisterDevice = () => {
-    if (isRegistering) return;
+    if (registeringRef.current || isRegistering) return;
     const errs: Record<string, string> = {};
     if (!customerName.trim()) errs['field-customer-name'] = 'Customer name is required.';
     if (!deviceModel.trim()) errs['intake-device'] = 'Select a device model to continue.';
@@ -416,12 +419,14 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         label: `${dupKey} already has an open ticket: ${dupTicket.orderNumber} — ${dupTicket.deviceModel} (${dupTicket.customerName})`,
         proceed: () => {
           setDupConfirm(null);
+          registeringRef.current = true; // synchronous guard (audit B-P2)
           setIsRegistering(true);
           handleRegisterDeviceInner();
         },
       });
       return;
     }
+    registeringRef.current = true; // synchronous guard (audit B-P2)
     setIsRegistering(true);
     handleRegisterDeviceInner();
   };
@@ -534,6 +539,8 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
     onSaveWorkOrder(newWorkOrder);
     setCreatedTicket(newWorkOrder);
     setIsRegistering(false);
+    // Release the synchronous double-submit guard (audit B-P2).
+    registeringRef.current = false;
   };
 
   const handleResetForm = () => {

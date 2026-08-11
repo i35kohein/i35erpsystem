@@ -210,6 +210,10 @@ export interface WorkOrder {
   /** ISO — stamped once when the repair reaches Finished / Taken Out.
    *  Serves as the warranty clock anchor (never moves on later edits). */
   completedAt?: string;
+  /** ISO — stamped ONLY when the status actually changes (handleUpdateWorkOrderStatus
+   *  / checkout), NOT on every save. Bottleneck/age metrics anchor to this so a
+   *  log note or reassignment doesn't reset the clock (audit D-P2). */
+  statusChangedAt?: string;
 
   // AI repair-type classification (Spareparts Change vs Hardware Repair)
   repairTypeAI?: 'spareparts' | 'hardware'; // AI verdict, overrides rule-based

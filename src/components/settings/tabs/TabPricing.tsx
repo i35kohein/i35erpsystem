@@ -48,7 +48,12 @@ const PricingTab: React.FC<PricingTabProps> = ({ formData, setFormData, setActiv
               <Input
                 type="number"
                 value={formData.taxPercentage}
-                onChange={(e) => setFormData({ ...formData, taxPercentage: Number(e.target.value) })}
+                onChange={(e) => {
+                  // Audit A-P3-12: clamp on change — min/max are HTML hints only
+                  // and typing 500 would make taxRate 5×.
+                  const v = Number(e.target.value);
+                  setFormData({ ...formData, taxPercentage: Number.isFinite(v) ? Math.min(30, Math.max(0, v)) : 0 });
+                }}
                 min="0"
                 max="30"
                 step="0.5"
@@ -65,7 +70,11 @@ const PricingTab: React.FC<PricingTabProps> = ({ formData, setFormData, setActiv
               <Input
                 type="number"
                 value={formData.defaultLaborDiscountPercent}
-                onChange={(e) => setFormData({ ...formData, defaultLaborDiscountPercent: Number(e.target.value) })}
+                onChange={(e) => {
+                  // Audit A-P3-12: clamp on change.
+                  const v = Number(e.target.value);
+                  setFormData({ ...formData, defaultLaborDiscountPercent: Number.isFinite(v) ? Math.min(50, Math.max(0, v)) : 0 });
+                }}
                 min="0"
                 max="50"
                 className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none "
