@@ -2647,6 +2647,7 @@ export default function App() {
                   onSaveWorkOrder={handleSaveWorkOrder}
                   onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
                   onNavigateToTab={(tab) => setActiveTab(tab as any)}
+                  onOpenAiAssistant={() => setIsAiAssistantOpen(true)}
                 />
               )}
 

@@ -1,12 +1,15 @@
-import React, { useState, useMemo, useRef } from 'react';
-import { ChevronDown, Search, BadgePercent, ShieldCheck } from 'lucide-react';
-import { WorkOrder, DiagnosticItemResult, AppleDeviceCategory, SelectedRepairItem, SystemSettings } from '../../types';
+import React, { useState, useMemo, useRef, lazy, Suspense } from 'react';
+import { ChevronDown, Search, BadgePercent, ShieldCheck, Camera, X, Sparkles } from 'lucide-react';
+import { WorkOrder, DiagnosticItemResult, AppleDeviceCategory, SelectedRepairItem, SystemSettings, CustomerType, RepairPriority } from '../../types';
 import { toast } from '../../lib/toast';
 import { ModelRepairPrice } from '../../types/priceCatalog';
 import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
-import { DIAGNOSTIC_NAMES, getAvailableColorsForModel, getRealisticColorStyle } from './deviceData';
+import { DIAGNOSTIC_NAMES, WARRANTY_OPTIONS, getAvailableColorsForModel, getRealisticColorStyle } from './deviceData';
 import { nextOrderNumber as nextOrderNumberFrom, uniqueId } from '../../utils/orderNumbers';
 import { DeviceModelChooserModal } from '../devices/DeviceModelChooserModal';
+import { compressImageFile } from '../../lib/utils';
+
+const CameraQrScannerModal = lazy(() => import('../common/CameraQrScannerModal').then((m) => ({ default: m.CameraQrScannerModal })));
 
 interface SimpleTicketCreatorProps {
   workOrders: WorkOrder[];
@@ -18,6 +21,8 @@ interface SimpleTicketCreatorProps {
   onSelectPrintTag?: (wo: WorkOrder) => void;
   /** Jump to another tab (e.g. Work Intake) after saving (Ko Hein 2026-08-10) */
   onNavigateToTab?: (tab: string) => void;
+  /** Open the AI diagnostic assistant (same as full Create Ticket) */
+  onOpenAiAssistant?: () => void;
 }
 
 interface FormState {
@@ -33,6 +38,17 @@ interface FormState {
   passcode: string;
   reply: string;
   checks: { status: 'N/A' | 'Pass' | 'Fail'; note: string }[];
+  // Full-form parity (Ko Hein 2026-08-11): the simple form now captures the
+  // same fields as Create Ticket — customer type, town, find-my, priority,
+  // service type, warranty, photos, scanner.
+  customerType: CustomerType;
+  town: string;
+  findMy: 'ON' | 'OFF' | 'UNKNOWN';
+  priority: RepairPriority;
+  serviceType: 'Standard Modular' | 'Micro-Soldering' | 'B2B Mail-In';
+  warrantyDays: number;
+  warrantyLabel: string;
+  photos: string[];
 }
 
 const EMPTY_FORM: FormState = {
@@ -40,6 +56,14 @@ const EMPTY_FORM: FormState = {
   date: new Date().toISOString().slice(0, 10),
   error: '', repairs: [], passcode: '', reply: '',
   checks: DIAGNOSTIC_NAMES.map(() => ({ status: 'N/A' as const, note: '' })),
+  customerType: 'Retail',
+  town: '',
+  findMy: 'UNKNOWN',
+  priority: 'Normal',
+  serviceType: 'Standard Modular',
+  warrantyDays: 90,
+  warrantyLabel: '90 Days Standard Warranty',
+  photos: [],
 };
 
 /** Popup-trigger rows styled exactly like the text inputs so all rows align. */
@@ -61,6 +85,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   onSaveWorkOrder,
   onSelectPrintTag,
   onNavigateToTab,
+  onOpenAiAssistant,
 }) => {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -83,6 +108,9 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   const [discountMenuFor, setDiscountMenuFor] = useState<string | null>(null);
   const [discountAnchor, setDiscountAnchor] = useState<{ top: number; left: number } | null>(null);
   const [customDiscountInput, setCustomDiscountInput] = useState('');
+  // Full-form parity (Ko Hein 2026-08-11): camera scanner + intake photos.
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   const catalogItemsForModel = getModelPriceCatalogItems(form.model, priceCatalog);
 
@@ -164,7 +192,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   };
 
   const resetForm = () => {
-    setForm(EMPTY_FORM);
+    setForm({ ...EMPTY_FORM, date: new Date().toISOString().slice(0, 10) });
     setEditingId(null);
     setMatchedCustomer(null);
   };
@@ -194,6 +222,15 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
           note: d?.note || '',
         };
       }),
+      // Full-form parity fields (Ko Hein 2026-08-11): preserved on edit.
+      customerType: wo.customerType || 'Retail',
+      town: wo.customerAddress || '',
+      findMy: wo.findMyStatus || 'UNKNOWN',
+      priority: wo.priority || 'Normal',
+      serviceType: wo.serviceType || 'Standard Modular',
+      warrantyDays: wo.warrantyDays ?? systemSettings?.defaultWarrantyDays ?? 90,
+      warrantyLabel: wo.warrantyLabel || `${wo.warrantyDays ?? systemSettings?.defaultWarrantyDays ?? 90} Days Standard Warranty`,
+      photos: wo.intakePhotos || [],
     });
     setEditingId(wo.id);
   };
@@ -299,19 +336,20 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
       customerName: form.name.trim() || 'Walk-in Customer',
       customerPhone: form.phone.trim(),
       customerEmail: existing?.customerEmail || '',
-      customerType: existing?.customerType || 'Retail',
+      customerAddress: form.town.trim() || existing?.customerAddress,
+      customerType: form.customerType,
       deviceCategory,
       deviceModel: form.model.trim() || 'Unknown Model',
       serialNumber: form.serial.trim() || existing?.serialNumber || '',
       imei: form.imei.trim() || existing?.imei || undefined,
       deviceColor: form.color.trim(),
       passcode: form.passcode.trim(),
-      findMyStatus: existing?.findMyStatus || 'UNKNOWN',
+      findMyStatus: form.findMy,
       status: existing?.status || 'Receive',
-      priority: existing?.priority || 'Normal',
+      priority: form.priority,
       assignedTechId: existing?.assignedTechId || '',
       assignedTechName: existing?.assignedTechName,
-      serviceType: existing?.serviceType || 'Standard Modular',
+      serviceType: form.serviceType,
       beforeDiagnostics: diagnostics,
       symptomsReported: [form.error.trim(), form.reply.trim()].filter(Boolean).join(' — '),
       selectedRepairs: form.repairs,
@@ -341,9 +379,9 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
         liquidIndicatorTriggered: false,
         physicalDamageNotes: '',
       },
-      warrantyDays: existing?.warrantyDays ?? systemSettings?.defaultWarrantyDays ?? 90,
-      warrantyLabel: existing?.warrantyLabel,
-      intakePhotos: existing?.intakePhotos || [],
+      warrantyDays: form.warrantyDays,
+      warrantyLabel: form.warrantyLabel,
+      intakePhotos: form.photos,
       estimatedCompletion: existing?.estimatedCompletion,
       isPaid: existing?.isPaid || false,
       paidAmount: existing?.paidAmount,
@@ -459,6 +497,29 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-muted"
               />
             </label>
+            {/* Customer Type — full-form parity (Ko Hein 2026-08-11) */}
+            <label className="flex items-center gap-3 py-2">
+              <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Type</span>
+              <select
+                value={form.customerType}
+                onChange={(e) => setForm((f) => ({ ...f, customerType: e.target.value as CustomerType }))}
+                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors"
+              >
+                <option value="Retail">Retail</option>
+                <option value="B2B Corporate">B2B Corporate</option>
+                <option value="Wholesale Mail-In">Wholesale Mail-In</option>
+              </select>
+            </label>
+            {/* Town / Address — full-form parity (Ko Hein 2026-08-11) */}
+            <label className="flex items-center gap-3 py-2">
+              <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Town</span>
+              <input
+                value={form.town}
+                onChange={(e) => set('town', e.target.value)}
+                placeholder="Customer town / address"
+                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-muted"
+              />
+            </label>
             {/* Model → popup */}
             <label className="flex items-center gap-3 py-2">
               <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Model</span>
@@ -510,10 +571,20 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Serial</span>
               <input
                 value={form.serial}
-                onChange={(e) => set('serial', e.target.value)}
+                onChange={(e) => set('serial', e.target.value.toUpperCase())}
                 placeholder="Device serial number"
                 className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-muted"
               />
+              {/* Camera scanner — full-form parity (Ko Hein 2026-08-11) */}
+              <button
+                type="button"
+                onClick={() => setIsScannerOpen(true)}
+                title="Scan barcode / QR"
+                aria-label="Scan barcode or QR code"
+                className="shrink-0 rounded-lg border border-line bg-surface px-2.5 py-2 text-muted transition-colors hover:border-brand hover:text-brand cursor-pointer"
+              >
+                <Camera className="w-4 h-4" />
+              </button>
             </label>
             {/* Received date */}
             <label className="flex items-center gap-3 py-2">
@@ -556,6 +627,79 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 placeholder="Device passcode"
                 className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-muted"
               />
+            </label>
+            {/* Find My — full-form parity (Ko Hein 2026-08-11) */}
+            <label className="flex items-center gap-3 py-2">
+              <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Find My</span>
+              <div className="flex w-full items-center gap-1 rounded-lg border border-line bg-white p-1">
+                {(['ON', 'OFF', 'UNKNOWN'] as const).map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, findMy: v }))}
+                    className={`flex-1 rounded-md px-2 py-1.5 text-xs font-black transition-colors cursor-pointer ${
+                      form.findMy === v
+                        ? v === 'ON'
+                          ? 'bg-danger text-white'
+                          : v === 'OFF'
+                          ? 'bg-success text-white'
+                          : 'bg-muted text-white'
+                        : 'text-muted hover:bg-surface'
+                    }`}
+                  >
+                    {v}
+                  </button>
+                ))}
+              </div>
+            </label>
+            {/* Priority — full-form parity (Ko Hein 2026-08-11) */}
+            <label className="flex items-center gap-3 py-2">
+              <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Priority</span>
+              <select
+                value={form.priority}
+                onChange={(e) => setForm((f) => ({ ...f, priority: e.target.value as RepairPriority }))}
+                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors"
+              >
+                <option value="Normal">Normal</option>
+                <option value="Urgent">Urgent</option>
+                <option value="Rush">Rush</option>
+                <option value="B2B Priority">B2B Priority</option>
+                <option value="Warranty Redo">Warranty Redo</option>
+              </select>
+            </label>
+            {/* Service Type — full-form parity (Ko Hein 2026-08-11) */}
+            <label className="flex items-center gap-3 py-2">
+              <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Service</span>
+              <select
+                value={form.serviceType}
+                onChange={(e) => setForm((f) => ({ ...f, serviceType: e.target.value as FormState['serviceType'] }))}
+                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors"
+              >
+                <option value="Standard Modular">Standard Modular</option>
+                <option value="Micro-Soldering">Micro-Soldering</option>
+                <option value="B2B Mail-In">B2B Mail-In</option>
+              </select>
+            </label>
+            {/* Warranty — full-form parity (Ko Hein 2026-08-11) */}
+            <label className="flex items-center gap-3 py-2">
+              <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Warranty</span>
+              <select
+                value={form.warrantyDays}
+                onChange={(e) => {
+                  const days = Number(e.target.value);
+                  const opt = WARRANTY_OPTIONS.find((o) => o.days === days);
+                  setForm((f) => ({
+                    ...f,
+                    warrantyDays: days,
+                    warrantyLabel: opt ? opt.label : `${days} Days Standard Warranty`,
+                  }));
+                }}
+                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors"
+              >
+                {WARRANTY_OPTIONS.map((opt) => (
+                  <option key={opt.days} value={opt.days}>{opt.label}</option>
+                ))}
+              </select>
             </label>
             {/* Intake note — flex-1 absorbs the remaining height so both columns balance */}
             <label className="flex flex-1 items-stretch gap-3 py-2">
@@ -637,6 +781,17 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               {editingId && <span className="ml-2 text-brand">· {editTarget?.orderNumber}</span>}
             </p>
             <div className="flex justify-end gap-2">
+              {onOpenAiAssistant && (
+                <button
+                  type="button"
+                  onClick={onOpenAiAssistant}
+                  className="flex items-center gap-1.5 rounded-xl border border-purple/30 bg-purple/10 px-4 py-2 text-xs font-black text-purple transition hover:bg-purple/20"
+                  title="Open AI diagnostic assistant"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  AI
+                </button>
+              )}
               <button type="reset" className="rounded-xl border border-line bg-white px-4 py-2 text-xs font-bold text-ink hover:bg-surface">
                 Clear
               </button>
@@ -647,6 +802,67 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 {editingId ? 'Update & Print' : 'Save & Print'}
               </button>
             </div>
+          </div>
+
+          {/* Intake photos — full-form parity (Ko Hein 2026-08-11) */}
+          <div className="no-print mt-3 rounded-xl border border-line bg-surface/50 p-3">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-wider text-muted">Device Photos ({form.photos.length}/6)</span>
+              <button
+                type="button"
+                onClick={() => photoInputRef.current?.click()}
+                className="rounded-lg border border-line bg-white px-2.5 py-1 text-[10px] font-black text-brand transition hover:border-brand cursor-pointer"
+              >
+                + Add Photo
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {form.photos.map((photo, idx) => (
+                <div key={idx} className="relative h-16 w-16 overflow-hidden rounded-lg border border-line group">
+                  <img src={photo} alt={`Device condition photo ${idx + 1}`} className="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, photos: f.photos.filter((_, i) => i !== idx) }))}
+                    aria-label={`Remove photo ${idx + 1}`}
+                    className="absolute right-0.5 top-0.5 rounded-full bg-black/70 p-0.5 text-white opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+              {form.photos.length === 0 && (
+                <p className="text-[11px] font-medium text-muted">No photos yet — tap Add Photo to capture the device condition.</p>
+              )}
+            </div>
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              multiple
+              aria-label="Upload device condition photos"
+              className="hidden"
+              onChange={(e) => {
+                const files = Array.from(e.target.files || []);
+                const MAX_INTAKE_PHOTOS = 6;
+                const room = MAX_INTAKE_PHOTOS - form.photos.length;
+                if (room <= 0) {
+                  toast('Max 6 photos — remove one to add another.', 'error', 'Photo Limit');
+                  e.target.value = '';
+                  return;
+                }
+                files.slice(0, room).forEach((file) => {
+                  if (file.size > 8_000_000) {
+                    toast(`${file.name} is over 8MB — skipping.`, 'error', 'Photo Too Large');
+                    return;
+                  }
+                  void compressImageFile(file).then((dataUrl) => {
+                    if (dataUrl) setForm((f) => ({ ...f, photos: [...f.photos, dataUrl] }));
+                  });
+                });
+                e.target.value = '';
+              }}
+            />
           </div>
 
           {savedFlash && (
@@ -953,6 +1169,21 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
           setIsModelModalOpen(false);
         }}
       />
+
+      {/* Camera/QR scanner — full-form parity (Ko Hein 2026-08-11) */}
+      {isScannerOpen && (
+        <Suspense fallback={null}>
+          <CameraQrScannerModal
+            isOpen={isScannerOpen}
+            onClose={() => setIsScannerOpen(false)}
+            onScanSuccess={(scannedText) => {
+              const clean = (scannedText || '').trim().replace(/\s+/g, ' ');
+              set('serial', clean.toUpperCase());
+              setIsScannerOpen(false);
+            }}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };
