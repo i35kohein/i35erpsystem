@@ -1433,7 +1433,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             <div className="workspace-panel__scroll rounded-xl">
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-3 p-2.5 sm:p-3 content-start">
               {paginatedParts.map((part) => {
-                const isLow = part.quantityInStock <= part.reorderPoint;
+                const threshold = part.reorderPoint > 0 ? part.reorderPoint : (systemSettings?.lowStockThreshold ?? 5);
+                const isLow = part.quantityInStock <= threshold;
                 const isOut = part.quantityInStock === 0;
                 const qualityBadge =
                   part.qualityTier === 'Original' || part.qualityTier?.includes('Original') ? (
@@ -1706,7 +1707,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 </thead>
                 <tbody className="divide-y divide-line">
                   {paginatedParts.map((part) => {
-                    const isLow = part.quantityInStock <= part.reorderPoint;
+                    const threshold = part.reorderPoint > 0 ? part.reorderPoint : (systemSettings?.lowStockThreshold ?? 5);
+                    const isLow = part.quantityInStock <= threshold;
                     const isOut = part.quantityInStock === 0;
                     const draft = inlineDrafts[part.id] || {};
                     const editValue = (key: keyof PartItem, fallback: string | number) => draft[key] ?? fallback;

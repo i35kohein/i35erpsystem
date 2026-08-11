@@ -91,7 +91,8 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
       window.print();
       return;
     }
-    const printWindow = window.open('', '_blank', 'width=850,height=1000');
+    const isThermal58 = systemSettings?.thermalPaperSize === '58mm';
+    const printWindow = window.open('', '_blank', isThermal58 ? 'width=420,height=1000' : 'width=850,height=1000');
     if (printWindow) {
       printWindow.document.write(`
         <!DOCTYPE html>
@@ -103,8 +104,8 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
               .no-print { display: none !important; }
               table { width: 100%; border-collapse: collapse; }
               th, td { padding: 3px; border-bottom: 1px solid #e5e5ea; }
-              .printable-invoice-modal { zoom: 0.84 !important; line-height: 1.15 !important; }
-              @page { size: A4 portrait; margin: 4mm; }
+              .printable-invoice-modal { zoom: ${isThermal58 ? 0.62 : 0.84} !important; line-height: 1.15 !important; }
+              @page { size: ${isThermal58 ? '58mm 297mm' : 'A4 portrait'}; margin: ${isThermal58 ? '2mm' : '4mm'}; }
             </style>
           </head>
           <body>

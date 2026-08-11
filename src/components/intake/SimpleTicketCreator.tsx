@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, lazy, Suspense } from 'react';
 import { ChevronDown, Search, BadgePercent, ShieldCheck, Camera, X, Sparkles } from 'lucide-react';
-import { WorkOrder, DiagnosticItemResult, AppleDeviceCategory, SelectedRepairItem, SystemSettings, CustomerType, RepairPriority } from '../../types';
+import { WorkOrder, DiagnosticItemResult, AppleDeviceCategory, SelectedRepairItem, SystemSettings, CustomerType, RepairPriority, Technician } from '../../types';
 import { toast } from '../../lib/toast';
 import { ModelRepairPrice } from '../../types/priceCatalog';
 import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
@@ -14,6 +14,7 @@ const CameraQrScannerModal = lazy(() => import('../common/CameraQrScannerModal')
 interface SimpleTicketCreatorProps {
   workOrders: WorkOrder[];
   customers?: Array<{ id: string; name: string; phone: string; type?: string }>;
+  technicians?: Technician[];
   priceCatalog?: ModelRepairPrice[];
   systemSettings?: SystemSettings;
   onSaveWorkOrder: (wo: WorkOrder) => void;
@@ -80,6 +81,7 @@ function shortWarranty(warranty: string): string {
 const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   workOrders,
   customers = [],
+  technicians = [],
   priceCatalog = [],
   systemSettings,
   onSaveWorkOrder,
@@ -141,16 +143,40 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   const toggleRepair = (item: ModelRepairCatalogItem) => {
     setForm((f) => {
       const exists = f.repairs.some((r) => r.id === item.id || r.name.toLowerCase() === item.name.toLowerCase());
+      if (exists) {
+        return {
+          ...f,
+          repairs: f.repairs.filter((r) => r.id !== item.id && r.name.toLowerCase() !== item.name.toLowerCase()),
+        };
+      }
+      // Settings-driven default discount (Ko Hein 2026-08-11):
+      // defaultLaborDiscountPercent now pre-fills the per-repair discount.
+      const dflt = Math.min(50, Math.max(0, Number(systemSettings?.defaultLaborDiscountPercent) || 0));
+      const basePrice = item.price;
       return {
         ...f,
-        repairs: exists
-          ? f.repairs.filter((r) => r.id !== item.id && r.name.toLowerCase() !== item.name.toLowerCase())
-          : [...f.repairs, { id: item.id, name: item.name, basePrice: item.price, discountPercent: 0, finalPrice: item.price }],
+        repairs: [
+          ...f.repairs,
+          {
+            id: item.id,
+            name: item.name,
+            basePrice,
+            discountPercent: dflt,
+            finalPrice: dflt > 0 ? Math.round(basePrice * (1 - dflt / 100)) : basePrice,
+          },
+        ],
       };
     });
   };
 
   const [matchedCustomer, setMatchedCustomer] = useState<string | null>(null);
+  // Settings-driven defaults (Ko Hein 2026-08-11): defaultTechnicianId
+  // auto-assigns on NEW tickets (edit keeps its own tech).
+  const defaultTech = systemSettings?.defaultTechnicianId
+    ? technicians.find((t) => t.id === systemSettings.defaultTechnicianId)
+    : undefined;
+  const defaultTechId = defaultTech?.id || '';
+  const defaultTechName = defaultTech?.name || '';
 
   const handlePhoneChange = (phone: string) => {
     setForm((f) => ({ ...f, phone }));
@@ -261,6 +287,16 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
       setIsColorOpen(true);
       return;
     }
+    // Settings-driven gates (Ko Hein 2026-08-11): requirePasscodeIntake /
+    // requireFindMyCheck now actually enforce the simple intake form.
+    if (systemSettings?.requirePasscodeIntake && !form.passcode.trim()) {
+      toast('Device passcode is required (Settings > Intake).', 'error', 'Passcode Required');
+      return;
+    }
+    if (systemSettings?.requireFindMyCheck && form.findMy === 'UNKNOWN') {
+      toast('Find My must be checked ON or OFF (Settings > Intake).', 'error', 'Find My Required');
+      return;
+    }
     submittingRef.current = true;
     setIsSubmitting(true);
     try {
@@ -347,8 +383,8 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
       findMyStatus: form.findMy,
       status: existing?.status || 'Receive',
       priority: form.priority,
-      assignedTechId: existing?.assignedTechId || '',
-      assignedTechName: existing?.assignedTechName,
+      assignedTechId: existing?.assignedTechId || (existing ? '' : defaultTechId),
+      assignedTechName: existing?.assignedTechName || (existing ? '' : defaultTechName),
       serviceType: form.serviceType,
       beforeDiagnostics: diagnostics,
       symptomsReported: [form.error.trim(), form.reply.trim()].filter(Boolean).join(' — '),

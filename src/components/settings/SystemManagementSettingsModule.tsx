@@ -198,9 +198,8 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   const [categoryDraft, setCategoryDraft] = useState('');
   const [editingCategoryKey, setEditingCategoryKey] = useState<string | null>(null);
   const [editingCategoryLabel, setEditingCategoryLabel] = useState('');
-  const [supplierDraft, setSupplierDraft] = useState({ name: '', code: '', phone: '', contactEmail: '', avgRmaTurnaroundDays: 3 });
-  const [editingInventorySupplier, setEditingInventorySupplier] = useState<Supplier | null>(null);
-  const [qualityTierDraft, setQualityTierDraft] = useState('');
+  const [supplierDraft, setSupplierDraft] = useState({ name: '', code: '', phone: '', contactEmail: '', avgRmaTurnaroundDays: Number(formData.defaultSupplierSlaDays) || 3 });
+  const [editingInventorySupplier, setEditingInventorySupplier] = useState<Supplier | null>(null);  const [qualityTierDraft, setQualityTierDraft] = useState('');
   const [editingQualityTier, setEditingQualityTier] = useState<string | null>(null);
   const [editingQualityTierLabel, setEditingQualityTierLabel] = useState('');
   const [binDraft, setBinDraft] = useState('');
@@ -882,7 +881,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
       phone: supplierDraft.phone.trim() || 'N/A',
       contactEmail: supplierDraft.contactEmail.trim() || 'vendor@example.com',
       website: 'https://supplier.com',
-      avgRmaTurnaroundDays: Number(supplierDraft.avgRmaTurnaroundDays) || 3,
+      avgRmaTurnaroundDays: Number(supplierDraft.avgRmaTurnaroundDays) || Number(formData.defaultSupplierSlaDays) || 3,
       rating: 5,
     });
     setSupplierDraft({ name: '', code: '', phone: '', contactEmail: '', avgRmaTurnaroundDays: 3 });

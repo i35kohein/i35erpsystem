@@ -207,6 +207,28 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                 Used by POS receipts and every A4 Device Intake Print Voucher after you save all settings.
               </p>
 
+              {/* Thermal paper size (Ko Hein 2026-08-11) — now actually drives
+                  the POS receipt printout width/@page. */}
+              <div className="space-y-1">
+                <label className="font-extrabold text-ink">Receipt Paper Size</label>
+                <div className="flex gap-2">
+                  {(['80mm', '58mm'] as const).map((size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, thermalPaperSize: size })}
+                      className={`flex-1 rounded-xl border px-3 py-2.5 text-xs font-black transition-all cursor-pointer ${
+                        (formData.thermalPaperSize || '80mm') === size
+                          ? 'border-brand bg-brand/10 text-brand'
+                          : 'border-line-strong bg-white text-muted hover:border-brand/40'
+                      }`}
+                    >
+                      {size === '80mm' ? 'Thermal 80mm (A4-style receipt)' : 'Thermal 58mm (narrow printer)'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 gap-4 text-xs">
                 <div className="space-y-1">
                   <label className="font-extrabold text-ink">Receipt & Voucher Header Subtitle</label>

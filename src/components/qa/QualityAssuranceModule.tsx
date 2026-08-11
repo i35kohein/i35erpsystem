@@ -282,7 +282,17 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
   // Optional gate: require a before/after photo before confirming (per Settings)
   const hasAnyPhoto = qaBeforePhotos.length > 0 || qaAfterPhotos.length > 0;
   const photoGateBlocked = !!systemSettings?.requireQaPhotoBeforeConfirm && !hasAnyPhoto;
-  const canConfirm = hasExplicitVerdict && !photoGateBlocked;
+  // Settings-driven gates (Ko Hein 2026-08-11): mandatoryQaChecklist requires
+  // an explicit Pass/Fail verdict; requireMicroSolderingLog requires the
+  // micro-soldering log for board-level repairs.
+  const checklistGateBlocked =
+    !!systemSettings?.mandatoryQaChecklist && qaDiagnostics.every((d) => d.status !== 'Pass' && d.status !== 'Fail');
+  const microSolderingGateBlocked =
+    !!systemSettings?.requireMicroSolderingLog &&
+    (selectedWo?.serviceType === 'Micro-Soldering' ||
+      selectedWo?.repairTypeAI === 'hardware') &&
+    !selectedWo?.microSolderingLog?.icReplaced?.length;
+  const canConfirm = hasExplicitVerdict && !photoGateBlocked && !checklistGateBlocked && !microSolderingGateBlocked;
 
   const handleSaveQaPass = () => {
     if (!selectedWo) return;

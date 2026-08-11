@@ -228,6 +228,10 @@ export default function App() {
   // Warm lazy-loaded module chunks once the user is signed in, so the first
   // tab visit doesn't flash the loading skeleton ("lazy" feel).
   const warmedRef = useRef(false);
+  // Settings-driven stock reservation guard (Ko Hein 2026-08-11): tickets whose
+  // part lines already bumped reservedQuantity — prevents double-reserve on
+  // repeated In Progress saves.
+  const reservedTicketsRef = useRef<Set<string>>(new Set());
   useEffect(() => {
     if (authUser && !warmedRef.current) {
       warmedRef.current = true;
@@ -1343,6 +1347,23 @@ export default function App() {
 
   const handleSaveWorkOrder = (wo: WorkOrder) => {
     const isUpdate = workOrders.some((x) => x.id === wo.id);
+    // Settings-driven stock reservation (Ko Hein 2026-08-11): autoReserveOnAssignment
+    // reserves the ticket's inventory part lines once when the work moves into
+    // In Progress (reservedQuantity is a soft hold; POS checkout still consumes
+    // from quantityInStock and clears the reservation).
+    if (systemSettings?.autoReserveOnAssignment && wo.status === 'In Progress') {
+      const partLines = (wo.lineItems || []).filter((li) => li.partId && !li.isLabor && li.quantity > 0);
+      if (partLines.length > 0 && !reservedTicketsRef.current.has(wo.id)) {
+        reservedTicketsRef.current.add(wo.id);
+        setParts((prev) =>
+          prev.map((p) => {
+            const line = partLines.find((li) => li.partId === p.id);
+            if (!line) return p;
+            return { ...p, reservedQuantity: (Number(p.reservedQuantity) || 0) + (Number(line.quantity) || 0) };
+          })
+        );
+      }
+    }
     // Anchor the warranty clock the moment a repair completes, mirroring
     // handleUpdateWorkOrderStatus — so single-save flows (POS checkout, soft
     // overrides) stamp completedAt without a second race-prone write (audit D-1).
@@ -2642,6 +2663,7 @@ export default function App() {
                 <SimpleTicketCreator
                   workOrders={workOrders}
                   customers={rosterCustomers}
+                  technicians={technicians}
                   priceCatalog={priceCatalog.catalog}
                   systemSettings={systemSettings}
                   onSaveWorkOrder={handleSaveWorkOrder}

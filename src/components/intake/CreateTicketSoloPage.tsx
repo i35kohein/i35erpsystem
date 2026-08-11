@@ -126,6 +126,7 @@ const getDiagnosticIcon = (name: string) => {
 export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
   workOrders,
   customers,
+  technicians,
   systemSettings,
   priceCatalog,
   prefill,
@@ -290,6 +291,13 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
   };
 
   const [extraReportedNotes, setExtraReportedNotes] = useState('');
+  // Settings-driven defaults (Ko Hein 2026-08-11): defaultTechnicianId now
+  // auto-assigns the configured tech on NEW tickets (edit keeps its own tech).
+  const defaultTech = systemSettings?.defaultTechnicianId
+    ? technicians.find((t) => t.id === systemSettings.defaultTechnicianId)
+    : undefined;
+  const defaultTechId = defaultTech?.id || '';
+  const defaultTechName = defaultTech?.name || '';
 
   // 21 Diagnostics with comment notes
   const [beforeDiagnostics, setBeforeDiagnostics] = useState<DiagnosticItemResult[]>(
@@ -390,6 +398,14 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
     if (!deviceModel.trim()) errs['intake-device'] = 'Select a device model to continue.';
     if (!deviceColor.trim()) errs['field-color'] = 'Select a device color to continue.';
     if (imei.trim() && imei.trim().length !== 15) errs['field-imei'] = 'IMEI must be exactly 15 digits.';
+    // Settings-driven gates (Ko Hein 2026-08-11): requirePasscodeIntake /
+    // requireFindMyCheck now actually enforce the intake form.
+    if (systemSettings?.requirePasscodeIntake && !passcode.trim()) {
+      errs['field-passcode'] = 'Device passcode is required (Settings > Intake).';
+    }
+    if (systemSettings?.requireFindMyCheck && findMyStatus === 'UNKNOWN') {
+      errs['field-findmy'] = 'Find My must be checked ON or OFF (Settings > Intake).';
+    }
     setFieldErrors(errs);
     if (Object.keys(errs).length > 0) {
       const firstKey = Object.keys(errs)[0];
@@ -399,6 +415,8 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         'intake-device': 'intake-device',
         'field-color': 'intake-device',
         'field-imei': 'intake-device',
+        'field-passcode': 'intake-device',
+        'field-findmy': 'intake-device',
       };
       scrollToSection(sectionMap[firstKey] || 'intake-customer');
       toast.error(Object.values(errs)[0], 'Please Complete the Form');
@@ -470,9 +488,8 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       status: baseWorkOrder?.status || 'Receive',
       priority: baseWorkOrder?.priority || 'Normal',
       // New intake tickets stay unassigned until the repair coordinator assigns a technician.
-      assignedTechId: baseWorkOrder?.assignedTechId || '',
-      assignedTechName: baseWorkOrder?.assignedTechName || '',
-      serviceType: baseWorkOrder?.serviceType || 'Standard Modular',
+      assignedTechId: baseWorkOrder?.assignedTechId || (baseWorkOrder ? '' : defaultTechId),
+      assignedTechName: baseWorkOrder?.assignedTechName || (baseWorkOrder ? '' : defaultTechName),      serviceType: baseWorkOrder?.serviceType || 'Standard Modular',
       selectedRepairs,
       // Edit mode must respect the live form: resetting a diagnostic to N/A,
       // clearing notes or deleting photos would otherwise be silently
