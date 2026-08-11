@@ -671,12 +671,13 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   });
   // Refs mirroring the tech modal state so the (earlier-registered) Save All
   // Settings action can flush pending technician edits (Ko Hein 2026-08-11).
+  // saveTechFormRef is refreshed every render so it always points at the
+  // CURRENT form/save closure — not only after a submit.
   const techModalOpenRef = React.useRef(false);
   const techFormNameRef = React.useRef('');
   const saveTechFormRef = React.useRef<(() => void) | null>(null);
   techModalOpenRef.current = techModalOpen;
   techFormNameRef.current = techFormData.name;
-
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   // AI repair-type re-scan state (Settings → AI Assistant & API)
@@ -761,8 +762,6 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   // Settings must save EVERYTHING, including commission rates).
   const saveTechForm = () => {
     if (!techFormData.name.trim()) return;
-    // Keep the latest save function reachable from the global Save All action.
-    saveTechFormRef.current = saveTechForm;
     if (editingTech) {
       const updated: Technician = {
         ...editingTech,
@@ -826,6 +825,13 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
 
     setTechModalOpen(false);
   };
+
+  // Keep the latest saveTechForm closure reachable from the global Save All
+  // Settings action (Ko Hein 2026-08-11) — refreshed every render so an open
+  // modal's edits are never stale.
+  React.useEffect(() => {
+    saveTechFormRef.current = saveTechForm;
+  });
 
   // Form submit wrapper (keeps the modal's native submit behavior).
   const handleTechSubmit = (e: React.FormEvent) => {
