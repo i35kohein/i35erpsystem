@@ -207,6 +207,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
     inProgress: techScopedOrders.filter(w => w.status === 'In Progress').length,
     pending: techScopedOrders.filter(w => w.status === 'Pending').length,
     finished: techScopedOrders.filter(w => w.status === 'Finished').length,
+    takenOut: techScopedOrders.filter(w => w.status === 'Taken Out').length,
     rush: techScopedOrders.filter(w => w.priority === 'Urgent' || w.priority === 'Rush' || w.priority === 'Warranty Redo').length,
   };
 
@@ -344,6 +345,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
             { id: 'In Progress', label: 'In Progress', count: counts.inProgress, icon: Wrench },
             { id: 'Pending', label: 'Pending', count: counts.pending, icon: Clock },
             { id: 'Finished', label: 'Ready', count: counts.finished, icon: CheckCircle2 },
+            { id: 'Taken Out', label: 'Takeout', count: counts.takenOut, icon: PackageCheck },
             { id: 'RUSH', label: 'Urgent', count: counts.rush, icon: Flame },
           ].map((st) => {
             const Icon = st.icon;
