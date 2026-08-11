@@ -175,6 +175,9 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   const activePaymentMethods = getActivePaymentMethods(systemSettings).filter((m) => m.enabled);
   // Parts owner filter — APP (shop) vs KZH (Ko Hein) (Ko Hein 2026-08-10)
   const [posOwner, setPosOwner] = useState<'ALL' | 'APP' | 'KZH'>('ALL');
+  // Add Inventory Part modal mode (Ko Hein 2026-08-11): Auto = exact device
+  // + repair-category filtered suggestions; Manual = every part for the device.
+  const [posPartMode, setPosPartMode] = useState<'auto' | 'manual'>('auto');
   const [selectedWoId, setSelectedWoId] = useState<string>(workOrders[0]?.id || '');
   const isIpad = useIsIpad();
   const [paymentMethod, setPaymentMethod] = useState<string>(activePaymentMethods[0]?.name || 'Cash');
@@ -396,7 +399,17 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     [laborItems]
   );
 
-  const filteredInventoryParts = useMemo(() => {
+  // Exact device-model match helper (Ko Hein 2026-08-11): a ticket for
+  // "iPhone 13 Pro Max" must ONLY match parts whose deviceCompatibility names
+  // the exact model — "iPhone 13" / "iPhone 13 Pro" must not leak in.
+  const matchesDeviceExactly = (device: string, model: string) => {
+    const d = device.trim().toLowerCase().replace(/\s+/g, ' ');
+    const m = model.trim().toLowerCase().replace(/\s+/g, ' ');
+    return d === m;
+  };
+
+  // Auto mode: exact device match AND repair-category match.
+  const autoInventoryParts = useMemo(() => {
     const ownerFiltered = posOwner === 'ALL' ? parts : parts.filter((part) => (part.owner || 'APP') === posOwner);
     if (!selectedWo) return ownerFiltered;
 
@@ -422,13 +435,11 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     );
 
     return ownerFiltered.filter((part) => {
+      // EXACT device match only (Ko Hein 2026-08-11) — no substring matching,
+      // so "iPhone 13 Pro Max" never matches parts listed for "iPhone 13".
       const matchesModel =
         !model ||
-        part.deviceCompatibility.some((device) => {
-          const d = device.trim().toLowerCase();
-          const m = model.trim().toLowerCase();
-          return d === m || d.includes(m) || m.includes(d);
-        });
+        (part.deviceCompatibility || []).some((device) => matchesDeviceExactly(device, model));
 
       const matchesCategory =
         matchedCategories.length === 0 ||
@@ -437,6 +448,20 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
       return matchesModel && matchesCategory;
     });
   }, [parts, selectedWo, posOwner]);
+
+  // Manual mode: every part that fits the ticket's exact device model,
+  // regardless of repair category.
+  const manualInventoryParts = useMemo(() => {
+    const ownerFiltered = posOwner === 'ALL' ? parts : parts.filter((part) => (part.owner || 'APP') === posOwner);
+    const model = selectedWo?.deviceModel || '';
+    if (!model) return ownerFiltered;
+    return ownerFiltered.filter((part) =>
+      (part.deviceCompatibility || []).some((device) => matchesDeviceExactly(device, model))
+    );
+  }, [parts, selectedWo, posOwner]);
+
+  // The list shown in the modal depends on the active sub-tab.
+  const filteredInventoryParts = posPartMode === 'manual' ? manualInventoryParts : autoInventoryParts;
 
   const selectedInventoryPart = filteredInventoryParts.find((part) => part.id === inventoryPartId) || filteredInventoryParts[0] || null;
   const taxRate = ((systemSettings?.taxPercentage ?? 6) || 0) / 100;
@@ -2179,20 +2204,40 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               ))}
             </div>
 
-            {/* Automatic — visual part list (Ko Hein) */}
+            {/* Sub-tabs: Auto (exact device + repair category) / Manual (all for device) — Ko Hein 2026-08-11 */}
+            <div className="flex items-center gap-1 bg-surface rounded-xl p-1">
+              {([['auto', 'Auto'], ['manual', 'Manual']] as const).map(([mode, label]) => (
+                <Button
+                  key={mode}
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setPosPartMode(mode)}
+                  className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-extrabold transition-colors cursor-pointer ${
+                    posPartMode === mode ? 'bg-white text-ink shadow-2xs' : 'text-muted hover:text-ink'
+                  }`}
+                >
+                  {label}
+                </Button>
+              ))}
+            </div>
+
+            {/* Part list — Auto mode (exact device + repair category) */}
+            {posPartMode === 'auto' && (
             <div>
-              <p className="text-[11px] font-bold text-muted mb-1.5">Automatic — tap a part</p>
+              <p className="text-[11px] font-bold text-muted mb-1.5">
+                {selectedWo?.deviceModel || 'Device'} · matched repair category — tap a part
+              </p>
               <div className="space-y-1.5">
               {filteredInventoryParts.filter((part) => part.quantityInStock > 0).length === 0 ? (
                 <div className="p-8 text-center text-muted text-xs space-y-1">
                   <PackageCheck className="w-8 h-8 mx-auto opacity-40 text-ink" />
                   <p className="font-extrabold text-ink">
-                    {parts.length === 0 ? 'No parts in database' : 'No compatible parts in stock'}
+                    {parts.length === 0 ? 'No parts in database' : 'No exact-match parts in stock'}
                   </p>
                   <p>
                     {parts.length === 0
                       ? 'Add parts in Inventory module first.'
-                      : `Try a different device model or change the owner filter.`}
+                      : 'Switch to Manual to see every part for this device, or change the owner filter.'}
                   </p>
                 </div>
               ) : (
@@ -2221,7 +2266,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                           >
                             {part.owner || 'APP'}
                           </span>
-                          Stock: {part.quantityInStock}{low ? ' — Low' : ''}
+                          {part.category} · Stock: {part.quantityInStock}{low ? ' — Low' : ''}
                         </p>
                       </div>
                       <span className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${isSelected ? 'border-success' : 'border-line-strong'}`}>
@@ -2233,25 +2278,60 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               )}
               </div>
             </div>
+            )}
 
-            {/* Manual — choose from inventory (Ko Hein) */}
+            {/* Manual mode — every part for the exact device model, any category */}
+            {posPartMode === 'manual' && (
             <div>
-              <p className="text-[11px] font-bold text-muted mb-1.5">Manual — choose from inventory</p>
-              <select
-                value={inventoryPartId || ''}
-                onChange={(e) => setInventoryPartId(e.target.value)}
-                className="w-full rounded-lg border border-line bg-white px-2.5 py-2 text-xs font-semibold text-ink outline-none "
-              >
-                <option value="">— Choose a part —</option>
-                {filteredInventoryParts
-                  .filter((part) => part.quantityInStock > 0)
-                  .map((part) => (
-                    <option key={part.id} value={part.id}>
-                      {part.name} • Stock: {part.quantityInStock}
-                    </option>
-                  ))}
-              </select>
+              <p className="text-[11px] font-bold text-muted mb-1.5">
+                {selectedWo?.deviceModel || 'Device'} · all inventory parts — tap a part
+              </p>
+              <div className="space-y-1.5">
+              {filteredInventoryParts.filter((part) => part.quantityInStock > 0).length === 0 ? (
+                <div className="p-8 text-center text-muted text-xs space-y-1">
+                  <PackageCheck className="w-8 h-8 mx-auto opacity-40 text-ink" />
+                  <p className="font-extrabold text-ink">No parts for this device</p>
+                  <p>Add parts in Inventory module first, or change the owner filter.</p>
+                </div>
+              ) : (
+                filteredInventoryParts.filter((part) => part.quantityInStock > 0).map((part) => {
+                  const isSelected = inventoryPartId === part.id;
+                  const low = part.quantityInStock <= part.reorderPoint;
+                  return (
+                    <Button
+                      key={part.id}
+                      type="button"
+                      variant="outline"
+                      onClick={() => setInventoryPartId(part.id)}
+                      className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border text-left text-ink transition-all cursor-pointer focus:outline-none active:scale-[0.99] ${
+                        isSelected ? 'border-ink bg-surface ring-1 ring-ink/10' : 'border-line bg-white hover:bg-surface'
+                      }`}
+                    >
+                      <div className="min-w-0">
+                        <p className="text-xs font-extrabold text-ink truncate">{part.name}</p>
+                        <p className={`text-[11px] font-semibold ${low ? 'text-warning' : 'text-muted'}`}>
+                          <span
+                            className={`mr-1.5 rounded px-1 py-px text-[9px] font-black uppercase ${
+                              (part.owner || 'APP') === 'KZH'
+                                ? 'bg-success/10 text-success-deep border border-success/30'
+                                : 'bg-surface text-ink border border-line'
+                            }`}
+                          >
+                            {part.owner || 'APP'}
+                          </span>
+                          {part.category} · Stock: {part.quantityInStock}{low ? ' — Low' : ''}
+                        </p>
+                      </div>
+                      <span className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${isSelected ? 'border-success' : 'border-line-strong'}`}>
+                        {isSelected && <span className="w-2 h-2 rounded-full bg-success" />}
+                      </span>
+                    </Button>
+                  );
+                })
+              )}
+              </div>
             </div>
+            )}
 
             {/* Qty + Add */}
             {selectedInventoryPart && (
