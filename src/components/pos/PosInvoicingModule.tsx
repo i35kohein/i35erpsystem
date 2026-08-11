@@ -32,6 +32,7 @@ import { ModelRepairPrice } from '../../types/priceCatalog';
 import { PriorityBadge } from '../common/PriorityBadge';
 import { Button , Input } from '../ui';
 import { StatusChip } from '../common/StatusChip';
+import { getRealisticColorStyle } from '../intake/deviceData';
 import { getActivePaymentMethods } from '../../data/seedData';
 import { PrintableInvoiceModal } from '../common/PrintableInvoiceModal';
 import { CustomerNotificationModal } from '../common/CustomerNotificationModal';
@@ -940,6 +941,17 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     <h2 className="flex items-center gap-1.5 text-base font-black text-ink leading-tight truncate">
                       <Smartphone className="w-4 h-4 text-muted shrink-0" />
                       <span className="truncate">{selectedWo.deviceModel}</span>
+                      {/* Device color circle (Ko Hein 2026-08-11) */}
+                      {selectedWo.deviceColor && (() => {
+                        const st = getRealisticColorStyle(selectedWo.deviceColor);
+                        return (
+                          <span
+                            className={`inline-block h-4 w-4 shrink-0 rounded-full border-2 border-white shadow-sm ${st.border}`}
+                            style={{ background: st.gradient, boxShadow: st.shadow }}
+                            title={`Color: ${selectedWo.deviceColor}`}
+                          />
+                        );
+                      })()}
                     </h2>
                   </div>
                   <div className="shrink-0 text-right space-y-0.5">

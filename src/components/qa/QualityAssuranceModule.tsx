@@ -748,21 +748,21 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                         >
                           {isPass ? '\u2713' : isFail ? '\u2715' : isCantTest ? '?' : ''}
                         </Button>
-                        <Button
+                        <button
                           type="button"
                           onClick={() => handleDiagnosticStatusChange(item.id, 'Pass')}
-                          className={`min-w-0 truncate text-left text-xs font-semibold transition-colors ${isPass ? 'text-success-deep' : isFail ? 'text-danger' : isCantTest ? 'text-warning' : 'text-muted hover:text-success-deep'}`}
+                          className={`min-w-0 truncate text-left text-xs font-semibold transition-colors cursor-pointer hover:underline ${isPass ? 'text-success-deep' : isFail ? 'text-danger' : isCantTest ? 'text-warning' : 'text-muted hover:text-success-deep'}`}
                           title={`Mark ${item.name} as Pass`}
                           aria-label={`Mark ${item.name} as Pass`}
                         >
                           {idx + 1}. {item.name}
-                        </Button>
-                        <Input
+                        </button>
+                        <input
                           aria-label={`${item.name} note`}
                           value={item.note || ''}
                           onChange={(e) => handleDiagnosticNoteChange(item.id, e.target.value)}
                           placeholder={isPass ? 'ok' : isFail ? 'issue…' : isCantTest ? 'note' : 'n/a'}
-                          className="ml-auto min-w-0 flex-1 bg-transparent px-1 text-xs outline-none focus:bg-[#d9f99d]/40"
+                          className="ml-auto h-6 min-w-0 flex-1 rounded-md bg-transparent px-1.5 text-xs outline-none transition-colors placeholder:text-muted/60 focus:bg-[#d9f99d]/40"
                         />
                       </div>
                     );
