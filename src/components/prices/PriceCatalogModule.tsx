@@ -1087,7 +1087,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
           {/* Service Grid — ONLY this scrolls (device card + chips stay fixed) (Ko Hein) */}
           <div className="min-h-0 flex-1 overflow-y-auto md:overflow-y-auto scrollbar-thin [scrollbar-gutter:stable]">
-          <div className={`grid gap-3.5 pb-8 pt-0.5 px-0.5 ${isIpad ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5'}`}>
+          <div className={`grid gap-2.5 pb-8 pt-0.5 px-0.5 ${isIpad ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5'}`}>
             {filteredItems.length === 0 ? (
               <div className="col-span-full bg-white border border-line rounded-2xl p-10 text-center text-muted">
                 <ListChecks className="w-8 h-8 mx-auto mb-2 opacity-40 text-ink" />
@@ -1119,7 +1119,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                     initial={false}
                     whileTap={{ scale: 0.98 }}
                     transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                    className={`group relative bg-white border-2 rounded-2xl p-2.5 sm:p-4 cursor-pointer transition-colors duration-200 flex flex-col gap-2 sm:gap-2.5 sm:items-stretch sm:justify-between select-none shadow-2xs min-h-[100px] sm:min-h-0 sm:h-[180px] focus:outline-none ${
+                    className={`group relative bg-white border-2 rounded-2xl p-2 sm:p-2.5 cursor-pointer transition-colors duration-200 flex flex-col gap-1.5 sm:items-stretch sm:justify-between select-none shadow-2xs min-h-[92px] sm:min-h-0 sm:h-[124px] focus:outline-none ${
                       isSelected
                         ? 'border-ink bg-surface shadow-md'
                         : 'border-line hover:border-ink/30'
@@ -1127,11 +1127,11 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                   >
                     {/* Row 1: icon + service name (left) + warranty (far right) */}
                     <div className="flex items-center justify-between gap-2 min-w-0">
-                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                        <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shrink-0 ${config.bg}`}>
-                          <IconComp className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${config.color}`} />
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center shrink-0 ${config.bg}`}>
+                          <IconComp className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${config.color}`} />
                         </div>
-                        <h3 className="font-extrabold text-xs sm:text-sm text-ink min-w-0 leading-snug" title={item.label}>
+                        <h3 className="font-extrabold text-[11px] sm:text-xs text-ink min-w-0 leading-snug" title={item.label}>
                           {item.label}
                         </h3>
                       </div>
@@ -1140,25 +1140,25 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
                     {/* Row 2: Repair Category */}
                     <div className="flex items-center justify-between gap-2 min-w-0">
-                      <span className="text-[10px] sm:text-xs font-extrabold text-muted uppercase tracking-wider truncate">
+                      <span className="text-[9px] sm:text-[10px] font-extrabold text-muted uppercase tracking-wider truncate">
                         {item.group}
                       </span>
                     </div>
 
                     {/* Price (right on mobile / bottom on desktop) + selection checkmark */}
-                    <div className="flex items-center gap-2 shrink-0 w-full mt-1 pt-2 border-t border-line justify-between sm:mt-2 sm:pt-2 sm:border-t sm:border-line sm:flex-col sm:items-start sm:gap-0.5">
+                    <div className="flex items-center gap-2 shrink-0 w-full mt-1 pt-1.5 border-t border-line justify-between sm:mt-1.5 sm:pt-1.5 sm:border-t sm:border-line sm:flex-col sm:items-start sm:gap-0.5">
                       <div className="text-right sm:text-left min-w-0">
-                        <div className="flex items-baseline space-x-1.5 sm:mt-0.5 flex-wrap">
-                          <span className="font-mono text-sm sm:text-sm font-black text-ink">
+                        <div className="flex items-baseline space-x-1.5 sm:mt-0 flex-wrap">
+                          <span className="font-mono text-xs sm:text-sm font-black text-ink">
                             {formatPrice(finalPrice)}
                           </span>
                           {discountPct > 0 && (
-                            <span className="text-sm sm:text-sm font-bold text-muted line-through font-mono">
+                            <span className="text-xs sm:text-sm font-bold text-muted line-through font-mono">
                               {formatPrice(item.price)}
                             </span>
                           )}
                           {discountPct > 0 && (
-                            <span className="text-[10px] sm:text-[11px] font-extrabold text-success whitespace-nowrap">
+                            <span className="text-[9px] sm:text-[10px] font-extrabold text-success whitespace-nowrap">
                               −{formatPrice(Math.round(item.price! - finalPrice))} · {discountPct}%
                             </span>
                           )}
