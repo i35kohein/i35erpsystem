@@ -26,7 +26,6 @@ interface NavigationProps {
   systemSettings?: SystemSettings;
   currentUser?: AppUser;
   users?: AppUser[];
-  onSwitchUser?: (user: AppUser) => void;
   onLogout?: () => void;
   onOpenUserManagement?: () => void;
   onOpenNewWorkOrder: () => void;
@@ -61,7 +60,10 @@ export const Navigation: React.FC<NavigationProps> = ({
   const isMobileMenuOpen = externalMobileMenuOpen !== undefined ? externalMobileMenuOpen : internalMobileMenuOpen;
   const setIsMobileMenuOpen = externalSetIsMobileMenuOpen || setInternalMobileMenuOpen;
 
-  const role = currentUser?.role || 'Admin';
+  // Audit E-P3: default to the LEAST privileged role when currentUser is
+  // missing — never fall back to Admin (latent privilege escalation if the
+  // shell ever renders before auth resolves).
+  const role = currentUser?.role || 'Reception';
   const isTech = role === 'Technician';
   const techName = currentUser?.technicianName || currentUser?.name || '';
   const myWorkOrders = isTech

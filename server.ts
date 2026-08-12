@@ -821,10 +821,17 @@ ${JSON.stringify(context)}`;
   const ERROR_LOG_FILE = path.join(process.cwd(), "error-log.jsonl");
   app.post("/api/error-log", (req, res) => {
     try {
+      // Audit G-P3: bound the payload — an unbounded body could be poisoned by
+      // any client. Cap the JSON-serialized entry at ~2 KB.
+      const rawBody = req.body && typeof req.body === "object" ? req.body : { raw: String(req.body || "").slice(0, 500) };
       const entry = {
         t: new Date().toISOString(),
-        ...(req.body && typeof req.body === "object" ? req.body : { raw: String(req.body || "").slice(0, 500) }),
+        ...rawBody,
       };
+      if (JSON.stringify(entry).length > 2048) {
+        res.status(413).json({ success: false, error: "Entry too large." });
+        return;
+      }
       fs.appendFileSync(ERROR_LOG_FILE, JSON.stringify(entry) + "\n");
       const lines = fs.readFileSync(ERROR_LOG_FILE, "utf8").split("\n").filter(Boolean);
       if (lines.length > 1000) {
@@ -906,7 +913,14 @@ ${JSON.stringify(context)}`;
       next();
     });
 
-    app.get("*", (_req, res) => {
+    app.get("*", (req, res) => {
+      // Audit G-P3: missing /assets/* files return 404 instead of the SPA
+      // fallback — a broken deploy (hashed filename mismatch) must surface as
+      // a hard error, not silently serve index.html for a .js/.css request.
+      if (/^\/assets\//.test(req.path) || /\.[a-z0-9]{2,5}$/i.test(req.path)) {
+        res.status(404).json({ success: false, error: "Not found." });
+        return;
+      }
       res.setHeader("Cache-Control", "no-cache");
       res.sendFile(path.join(distPath, "index.html"));
     });

@@ -779,7 +779,7 @@ selectedWo ? (
                                   updated[idx].amount = Math.max(0, Number(e.target.value) || 0);
                                   setSplitPayments(updated);
                                 }}
-                                placeholder="Amount MMK"
+                                placeholder={`Amount ${currency}`}
                                 className="w-full bg-surface border border-line rounded-lg p-1.5 text-xs font-mono font-bold text-ink outline-none"
                               />
                               <Button variant="ghost"
@@ -922,7 +922,7 @@ selectedWo ? (
                 {paymentMethod === 'Cash' && (
                   <div className="px-0 py-1.5 bg-transparent border-0 rounded-none space-y-2">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <label className="block text-xs font-extrabold text-ink">Cash Amount Tendered (MMK):</label>
+                      <label className="block text-xs font-extrabold text-ink">Cash Amount Tendered ({currency}):</label>
                       <div className="flex flex-wrap items-center gap-1">
                         {[selectedWo.totalAmount, 50000, 100000, 200000, 500000]
                           .filter((v, i, arr) => arr.indexOf(v) === i)

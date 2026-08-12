@@ -8,6 +8,15 @@ HOST="root@178.128.62.242"
 REMOTE_DIR="/opt/i35erp"
 PUBLIC_URL="http://178.128.62.242:3100"
 
+# Audit G-P3: refuse to deploy a dirty tree — deploy.sh ships the working tree
+# as-is (builds include uncommitted changes), so a reproducible deploy needs a
+# clean checkout. Override with ALLOW_DIRTY=1 for hotfixes.
+if [ "${ALLOW_DIRTY:-0}" != "1" ] && ! git diff --quiet; then
+  echo "❌ Working tree has uncommitted changes — commit first for a reproducible deploy."
+  echo "   (or run: ALLOW_DIRTY=1 ./deploy.sh)"
+  exit 1
+fi
+
 # 1) Make sure the SSH key is loaded (macOS Keychain keeps the passphrase
 #    after the first time, so later runs are silent).
 if ! ssh-add -L 2>/dev/null | grep -q "n8ndigitalocean"; then
@@ -29,7 +38,12 @@ echo "==> [2/4] Uploading to VPS ($HOST:$REMOTE_DIR)..."
 ssh -i "$KEY" "$HOST" "cd $REMOTE_DIR && rm -rf dist.prev && cp -r dist dist.prev"
 
 # NOTE: `dist` without trailing slash => lands in $REMOTE_DIR/dist (server expects that layout)
-rsync -az -e "ssh -i $KEY" dist package.json package-lock.json "$HOST:$REMOTE_DIR/"
+# Audit G-P3: dist is synced SEPARATELY with --delete (prunes stale hashed
+# assets from old builds), then package files are copied WITHOUT --delete so
+# dist.prev / credentials.json / .env.production / error-log.jsonl are never
+# touched.
+rsync -az --delete -e "ssh -i $KEY" dist/ "$HOST:$REMOTE_DIR/dist/"
+rsync -az -e "ssh -i $KEY" package.json package-lock.json "$HOST:$REMOTE_DIR/"
 
 echo "==> [3/4] Installing deps + restarting service..."
 # dist.prev already holds the previous release (backed up before upload), so

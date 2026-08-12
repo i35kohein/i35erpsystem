@@ -709,6 +709,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               <input
                 type="date"
                 value={form.date}
+                max={new Date().toISOString().slice(0, 10)}
                 onChange={(e) => set('date', e.target.value)}
                 className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors [color-scheme:light]"
               />

@@ -900,6 +900,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 id="field-received-date"
                 type="date"
                 value={receivedDate}
+                max={new Date().toISOString().slice(0, 10)}
                 onChange={(e) => setReceivedDate(e.target.value)}
                 className="w-full bg-white border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none font-semibold transition-all [color-scheme:light]"
               />
@@ -1591,7 +1592,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               <span>Take / Add Photo</span>
             </Button>
           </div>
-          <p className="text-xs text-muted font-medium pt-1">Up to 4MB per photo — tap × on a thumbnail to delete.</p>
+          <p className="text-xs text-muted font-medium pt-1">Up to 8MB per photo — tap × on a thumbnail to delete.</p>
         </div>
 
         </>

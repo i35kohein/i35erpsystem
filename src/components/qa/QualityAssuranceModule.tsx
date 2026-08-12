@@ -83,11 +83,15 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
       if (!isAssignedToMe) return false;
     }
     const q = searchQuery.toLowerCase();
-    const matchesSearch = !q ||
-      w.orderNumber.toLowerCase().includes(q) ||
-      w.customerName.toLowerCase().includes(q) ||
-      w.deviceModel.toLowerCase().includes(q) ||
-      w.serialNumber.toLowerCase().includes(q);
+    // Audit B-P2: guard legacy/partial records missing optional fields — an
+    // unguarded .toLowerCase() on undefined crashed the whole QA roster render.
+    const matchesSearch =
+      !q ||
+      (w.orderNumber || '').toLowerCase().includes(q) ||
+      (w.customerName || '').toLowerCase().includes(q) ||
+      (w.deviceModel || '').toLowerCase().includes(q) ||
+      (w.serialNumber || '').toLowerCase().includes(q) ||
+      (w.imei && w.imei.toLowerCase().includes(q));
 
     // Dashboard-shared statusFilter must never empty the QA roster: apply it
     // only when it names a roster status (Finished / Taken Out); 'Pending QA'

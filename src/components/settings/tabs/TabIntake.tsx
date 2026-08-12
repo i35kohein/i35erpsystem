@@ -41,11 +41,12 @@ const IntakeTab: React.FC<IntakeTabProps> = ({ formData, setFormData }) => {
                 <ShieldCheck className="w-3.5 h-3.5 text-success" />
                 <span>Default Service Warranty Coverage (Days)</span>
               </label>
-              <select aria-label="30 Days (Standard Modular)"
+              <select aria-label="Default Service Warranty Coverage (Days)"
                 value={formData.defaultWarrantyDays}
                 onChange={(e) => setFormData({ ...formData, defaultWarrantyDays: Number(e.target.value) })}
                 className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none "
               >
+                <option value={0}>No Warranty</option>
                 <option value={30}>30 Days (Standard Modular)</option>
                 <option value={60}>60 Days (Extended)</option>
                 <option value={90}>90 Days (Recommended Apple Lab Standard)</option>

@@ -369,21 +369,6 @@ export default function App() {
     addToast('User account deleted.', 'info');
   };
 
-  const handleSwitchUser = (user: AppUser) => {
-    setCurrentUser(user);
-    addToast(`Switched active profile to ${user.name} (${user.role})`, 'info', 'Role Switch');
-    if (user.role === 'Technician') {
-      const allowedTechTabs = ['trello', 'qa', 'crm', 'price-catalog'];
-      if (!allowedTechTabs.includes(activeTab)) {
-        setActiveTab('trello');
-      }
-    } else if (user.role === 'Reception') {
-      if (activeTab === 'settings') {
-        setActiveTab('intake');
-      }
-    }
-  };
-
   // Settings access (audit E-1): Admin or an explicit canAccessSettings grant.
   // The settings tab used to be reachable by ANY role via #/settings deep link.
   const canAccessSettings =
@@ -1165,7 +1150,13 @@ export default function App() {
     const cloudIds = new Set(customers.map((c) => c.id));
     const byKey = new Map<string, { base: Customer; orders: WorkOrder[] }>();
     activeWorkOrders.forEach((wo) => {
-      const key = wo.customerId || `${(wo.customerName || '').trim().toLowerCase()}|${(wo.customerPhone || '').trim()}`;
+      // Audit C-P2 (roster key): digit-normalize the phone so formatting
+      // variants (09xxx vs +959xxx vs spaces/dashes) of the same person merge
+      // into ONE roster row instead of splitting into duplicates.
+      const normPhone = String(wo.customerPhone || '').replace(/\D/g, '');
+      const key =
+        wo.customerId ||
+        `${(wo.customerName || '').trim().toLowerCase()}|${normPhone}`;
       if (!key || cloudIds.has(key)) return;
       const entry = byKey.get(key);
       if (entry) {
@@ -1539,16 +1530,21 @@ export default function App() {
 
     saveDocument('workOrders', updatedWorkOrder).catch(reportSaveError);
 
-    const inventoryExpense: Omit<ExpenseItem, 'id'> = {
-      category: 'Inventory Consumption',
-      description: `${workOrder.orderNumber} • ${workOrder.deviceModel} • ${usageItems.length} part(s) used from stock`,
-      amount: totalInventoryCost,
-      date: nowIso.split('T')[0],
-      paymentMethod: 'Inventory Settlement',
-      payee: workOrder.customerName,
-      createdByName: currentUser.name,
-    };
-    handleAddExpense(inventoryExpense);
+    // audit C-P3: skip the expense row entirely when nothing was actually
+    // consumed (zero-cost / free parts) — a 0 MMK "Inventory Consumption"
+    // row only pollutes the finance P&L.
+    if (totalInventoryCost > 0) {
+      const inventoryExpense: Omit<ExpenseItem, 'id'> = {
+        category: 'Inventory Consumption',
+        description: `${workOrder.orderNumber} • ${workOrder.deviceModel} • ${usageItems.length} part(s) used from stock`,
+        amount: totalInventoryCost,
+        date: nowIso.split('T')[0],
+        paymentMethod: 'Inventory Settlement',
+        payee: workOrder.customerName,
+        createdByName: currentUser.name,
+      };
+      handleAddExpense(inventoryExpense);
+    }
     addToast(
       `Inventory stock deducted for ${workOrder.orderNumber}: ${usageItems.length} part(s), ${totalInventoryCost.toLocaleString()} MMK recorded.`,
       'success',
@@ -2017,7 +2013,6 @@ export default function App() {
         systemSettings={systemSettings}
         currentUser={currentUser}
         users={users}
-        onSwitchUser={handleSwitchUser}
         onLogout={handleLogout}
         onOpenUserManagement={() => setActiveTab('settings')}
         onOpenNewWorkOrder={() => handleOpenNewWorkOrder()}
@@ -2742,6 +2737,7 @@ export default function App() {
                   parts={parts}
                   systemSettings={systemSettings}
                   onAddRma={handleAddRma}
+                  onUpdatePart={handleUpdatePart}
                   onAddSupplier={handleAddSupplier}
                   onUpdateSupplier={handleUpdateSupplier}
                   onDeleteSupplier={handleDeleteSupplier}

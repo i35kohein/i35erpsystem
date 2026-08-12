@@ -31,6 +31,7 @@ interface SupplierRmaModuleProps {
   parts: PartItem[];
   systemSettings?: SystemSettings;
   onAddRma: (rma: RmaItem) => void;
+  onUpdatePart?: (part: PartItem) => void;
   onAddSupplier?: (supplier: Supplier) => void;
   onUpdateSupplier?: (supplier: Supplier) => void;
   onDeleteSupplier?: (supplierId: string) => void;
@@ -52,6 +53,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
   parts,
   systemSettings,
   onAddRma,
+  onUpdatePart,
   onAddSupplier,
   onUpdateSupplier,
   onDeleteSupplier,
@@ -227,6 +229,18 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
     };
 
     onAddRma(rma);
+
+    // audit C-P2 (supplier path): defective units leave the shelf at claim
+    // time — the inventory warranty modal already does this, the Suppliers tab
+    // entry point was missing it, so stock inflated when Replacement Received
+    // later added the quantity back. Balanced by that same increment.
+    if (onUpdatePart) {
+      onUpdatePart({
+        ...part,
+        quantityInStock: Math.max(0, (Number(part.quantityInStock) || 0) - qty),
+      });
+    }
+
     setShowNewRmaModal(false);
   };
 

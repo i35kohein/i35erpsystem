@@ -176,6 +176,14 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
       return;
     }
 
+    // Audit G-P3: duplicate-approve guard — the modal can be double-clicked or
+    // re-opened; a second approve must not stack a duplicate log entry.
+    if (fresh.estimateStatus === 'Approved' || fresh.estimateApprovedAt) {
+      toast.info('This estimate was already approved.', 'Already Approved');
+      setApprovalModalOpen(false);
+      return;
+    }
+
     const updatedWo = applyEstimateApproval(
       {
         workOrder: { ...fresh, totalAmount: Number(fresh.totalAmount) || 0 },
@@ -198,6 +206,15 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
     // paid) ticket back to Pending — refuse to downgrade terminal statuses.
     if (fresh.status === 'Finished' || fresh.status === 'Taken Out' || fresh.isPaid) {
       toast.error('This repair is already complete — decline is no longer available.', 'Ticket Completed');
+      setRejectionModalOpen(false);
+      setRejectionNotes('');
+      return;
+    }
+
+    // Audit G-P3: duplicate-reject guard — a second decline must not stack a
+    // duplicate log entry.
+    if (fresh.estimateStatus === 'Rejected' || fresh.estimateRejectionReason) {
+      toast.info('This estimate was already declined.', 'Already Declined');
       setRejectionModalOpen(false);
       setRejectionNotes('');
       return;
