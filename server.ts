@@ -447,9 +447,9 @@ async function startServer() {
         data: serverSafeData(collection, item || {}),
         updated_at: item?.updatedAt || new Date().toISOString(),
       }));
-      const r = await fetch(`${SUPABASE_URL}/rest/v1/erp_records`, {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/erp_records?on_conflict=collection_name,id`, {
         method: "POST",
-        headers: supabaseHeaders(),
+        headers: { ...supabaseHeaders(), Prefer: "resolution=merge-duplicates,return=minimal" },
         body: JSON.stringify(payload),
       });
       if (!r.ok) throw new Error(`Supabase ${r.status}`);
