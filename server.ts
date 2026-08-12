@@ -32,9 +32,11 @@ async function startServer() {
     // renders plain text only — no unsafe-eval.
     res.setHeader(
       "Content-Security-Policy",
-      "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; " +
-        "img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' " +
-        "https://*.supabase.co wss://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+      "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' " +
+        "https://fonts.googleapis.com; " +
+        "img-src 'self' data: blob:; font-src 'self' data: " +
+        "https://fonts.gstatic.com https://cdn.jsdelivr.net; " +
+        "connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
     );
     if (process.env.NODE_ENV === "production") {
       res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
