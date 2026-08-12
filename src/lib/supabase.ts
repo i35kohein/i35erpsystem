@@ -1,30 +1,17 @@
-import { createClient, type SupabaseClient, type RealtimeChannel } from '@supabase/supabase-js';
+/**
+ * Data layer — P0 security fix (Ko Hein 2026-08-13).
+ *
+ * The old implementation talked to Supabase DIRECTLY with a publishable key
+ * shipped in the JS bundle. Anyone who opened the site could read, write and
+ * delete every business table (customers, work orders, payouts, users).
+ *
+ * Now ALL reads/writes go through the authenticated server proxy
+ * (/api/data/*), which holds the service-role key server-side only and
+ * requires a valid session token on every request. The client bundle no
+ * longer contains ANY database credential. Realtime is replaced by light
+ * polling (every POLL_MS) so the UI still stays in sync across devices.
+ */
 import { addToQueue, getQueue, getQueueCount, removeFromQueue, type OfflineQueueItem } from './offlineQueue';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
-
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY to .env.local.');
-}
-
-type SupabaseGlobal = typeof globalThis & { __i35SupabaseClient?: SupabaseClient };
-const supabaseGlobal = globalThis as SupabaseGlobal;
-
-// Reuse one client through Vite hot reloads.
-export const supabase = supabaseGlobal.__i35SupabaseClient ?? createClient(
-  supabaseUrl.replace(/\/rest\/v1\/?$/, ''),
-  supabaseKey,
-  { auth: { persistSession: true, autoRefreshToken: true } },
-);
-supabaseGlobal.__i35SupabaseClient = supabase;
-
-type ErpRecord = {
-  collection_name: string;
-  id: string;
-  data: Record<string, unknown>;
-  updated_at?: string;
-};
 
 export interface SyncStatusDetail {
   isOnline: boolean;
@@ -40,24 +27,34 @@ export function notifySyncStatus(status: SyncStatusDetail) {
   }
 }
 
-// Secrets remain local. Only non-sensitive settings are synchronized to the browser-readable table.
-function cloudSafeData<T extends { id: string }>(collectionName: string, data: T): T {
-  if (collectionName !== 'systemSettings') return data;
-  const {
-    aiApiKey: _aiApiKey,
-    telegramBotToken: _telegramBotToken,
-    ...safe
-  } = data as T & { aiApiKey?: string; telegramBotToken?: string };
-  return safe as T;
+/** Session token for the server proxy (same token used for login). */
+function sessionToken(): string {
+  if (typeof window === 'undefined') return '';
+  return window.localStorage.getItem('i35_session_token') || '';
 }
 
-function toRows<T extends { id: string }>(collectionName: string, items: T[]): ErpRecord[] {
-  return items.map((item) => ({
-    collection_name: collectionName,
-    id: item.id,
-    data: cloudSafeData(collectionName, item) as Record<string, unknown>,
-    updated_at: new Date().toISOString(),
-  }));
+async function proxyFetch<T = unknown>(path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(path, {
+    ...init,
+    headers: {
+      'Content-Type': 'application/json',
+      'x-session-token': sessionToken(),
+      ...(init?.headers || {}),
+    },
+  });
+  if (res.status === 401) {
+    // Session expired/invalid — clear local auth so the login screen shows.
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem('i35_session_token');
+      window.localStorage.removeItem('i35_session_user');
+    }
+    throw new Error('AUTH_EXPIRED');
+  }
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error((body as any)?.error || `Request failed (${res.status})`);
+  }
+  return (await res.json()) as T;
 }
 
 /**
@@ -70,42 +67,25 @@ function toRows<T extends { id: string }>(collectionName: string, items: T[]): E
 async function isStaleQueuedWrite(collectionName: string, queued: { id: string }): Promise<boolean> {
   const queuedUpdatedAt = (queued as any)?.updatedAt || (queued as any)?.updated_at;
   if (!queuedUpdatedAt) return false;
-  const { data } = await supabase
-    .from('erp_records')
-    .select('data')
-    .eq('collection_name', collectionName)
-    .eq('id', queued.id)
-    .maybeSingle();
-  const live = (data as { data?: any } | null)?.data;
-  const liveUpdatedAt = live?.updatedAt || live?.updated_at;
-  if (!liveUpdatedAt) return false; // no live row → nothing to regress
-  const qTime = new Date(queuedUpdatedAt).getTime();
-  const lTime = new Date(liveUpdatedAt).getTime();
-  if (Number.isNaN(qTime) || Number.isNaN(lTime)) return false;
-  return lTime > qTime;
+  try {
+    const rows = await fetchCloudCollection<any>(collectionName);
+    const live = rows.find((r) => r.id === queued.id);
+    const liveUpdatedAt = live?.updatedAt || live?.updated_at;
+    if (!liveUpdatedAt) return false; // no live row → nothing to regress
+    const qTime = new Date(queuedUpdatedAt).getTime();
+    const lTime = new Date(liveUpdatedAt).getTime();
+    if (Number.isNaN(qTime) || Number.isNaN(lTime)) return false;
+    return lTime > qTime;
+  } catch {
+    return false;
+  }
 }
 
 export async function fetchCloudCollection<T>(collectionName: string): Promise<T[]> {
-  // Audit G P2: without a limit, Supabase truncates silently at 1000 rows per
-  // request — a shop with more parts/tickets/customers would silently lose
-  // the tail of every collection. Order by updated_at so a bounded fetch still
-  // returns the most-recently-changed rows, and page through with an offset.
-  const pageSize = 1000;
-  const rows: any[] = [];
-  let offset = 0;
-  for (;;) {
-    const { data, error } = await supabase
-      .from('erp_records')
-      .select('data')
-      .eq('collection_name', collectionName)
-      .order('updated_at', { ascending: true })
-      .range(offset, offset + pageSize - 1);
-    if (error) throw error;
-    rows.push(...(data || []));
-    if (!data || data.length < pageSize) break;
-    offset += pageSize;
-  }
-  return rows.map((row) => row.data as T);
+  const { rows } = await proxyFetch<{ success: boolean; rows: unknown[] }>(
+    `/api/data/${encodeURIComponent(collectionName)}`
+  );
+  return (rows || []) as T[];
 }
 
 function browserOnline() {
@@ -113,13 +93,13 @@ function browserOnline() {
 }
 
 // ---------------------------------------------------------------------------
-// Shared per-collection state (fix #2: incremental realtime, no empty flash)
+// Shared per-collection state (incremental updates, no empty flash)
 // ---------------------------------------------------------------------------
 
 interface CollectionState<T> {
   items: T[];
   listeners: Set<() => void>;
-  channel: RealtimeChannel | null;
+  pollTimer: ReturnType<typeof setInterval> | null;
   loaded: boolean;
 }
 
@@ -128,7 +108,7 @@ const collectionStates = new Map<string, CollectionState<never>>();
 function getState<T>(collectionName: string): CollectionState<T> {
   let state = collectionStates.get(collectionName) as CollectionState<T> | undefined;
   if (!state) {
-    state = { items: [], listeners: new Set(), channel: null, loaded: false };
+    state = { items: [], listeners: new Set(), pollTimer: null, loaded: false };
     collectionStates.set(collectionName, state as CollectionState<never>);
   }
   return state;
@@ -147,7 +127,7 @@ async function pendingQueueCount(): Promise<number> {
 }
 
 /** Full re-fetch of one collection into the shared cache. Keeps last-known
- *  items on failure (fix #2: no `onData([])` flash). */
+ *  items on failure (no `onData([])` flash). */
 export async function refreshCollection<T>(collectionName: string): Promise<void> {
   const state = getState<T>(collectionName);
   try {
@@ -162,8 +142,17 @@ export async function refreshCollection<T>(collectionName: string): Promise<void
       isSyncing: false,
       lastSyncedAt: Date.now(),
     });
-  } catch (error) {
-    console.warn(`Supabase load failed for ${collectionName}:`, error);
+  } catch (error: any) {
+    if (error?.message === 'AUTH_EXPIRED') {
+      notifySyncStatus({
+        isOnline: browserOnline(),
+        isConnected: false,
+        pendingCount: await pendingQueueCount(),
+        isSyncing: false,
+      });
+      return;
+    }
+    console.warn(`Data load failed for ${collectionName}:`, error);
     // Keep whatever we already have — do not clear the UI.
     notifySyncStatus({
       isOnline: browserOnline(),
@@ -182,12 +171,16 @@ export function refreshAllCollections() {
   });
 }
 
+/** Poll interval for live updates (replaces Supabase Realtime — the client
+ *  no longer holds a database key, so realtime is not available). 15s is a
+ *  good balance of freshness vs load for a single-shop ERP. */
+const POLL_MS = 15_000;
+
 /**
- * Live subscription with incremental realtime updates.
+ * Live subscription with incremental polling.
  * - Renders cached items immediately (no empty flash).
- * - INSERT / UPDATE / DELETE events patch the local array instead of
- *   refetching the whole collection (fix #2).
- * - One realtime channel per collection, shared by all subscribers.
+ * - Refetches the collection every POLL_MS while at least one subscriber
+ *   is active, patching the shared array in place.
  */
 export function subscribeToCollection<T extends { id: string }>(
   collectionName: string,
@@ -200,52 +193,21 @@ export function subscribeToCollection<T extends { id: string }>(
   state.listeners.add(listener);
   listener(); // instant render from cache
 
-  if (!state.channel) {
-    const filter = `collection_name=eq.${collectionName}`;
-    const onInsert = (payload: any) => {
-      const row = payload?.new as ErpRecord | undefined;
-      if (!row?.id || !row.data) return;
-      const item = { ...(row.data as T), id: row.id } as T;
-      if (!state.items.some((existing) => existing.id === item.id)) {
-        state.items = [item, ...state.items];
-        notifyState(state);
-      }
-    };
-    const onUpdate = (payload: any) => {
-      const row = payload?.new as ErpRecord | undefined;
-      if (!row?.id || !row.data) return;
-      const item = { ...(row.data as T), id: row.id } as T;
-      if (state.items.some((existing) => existing.id === item.id)) {
-        state.items = state.items.map((existing) => (existing.id === item.id ? item : existing));
-      } else {
-        state.items = [item, ...state.items];
-      }
-      notifyState(state);
-    };
-    const onDelete = (payload: any) => {
-      const row = payload?.old as { id?: string } | undefined;
-      if (!row?.id) return;
-      const before = state.items.length;
-      state.items = state.items.filter((existing) => existing.id !== row.id);
-      if (state.items.length !== before) notifyState(state);
-    };
-
-    state.channel = supabase
-      .channel(`erp-${collectionName}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'erp_records', filter }, onInsert)
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'erp_records', filter }, onUpdate)
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'erp_records', filter }, onDelete)
-      .subscribe();
-
+  if (!state.pollTimer) {
+    // Initial load + periodic refresh (also heals after reconnects).
     if (!state.loaded) void refreshCollection(collectionName);
+    state.pollTimer = setInterval(() => {
+      if (!browserOnline()) return;
+      void refreshCollection(collectionName);
+    }, POLL_MS);
   }
 
   return () => {
     state.listeners.delete(listener);
     if (state.listeners.size === 0) {
-      if (state.channel) {
-        void supabase.removeChannel(state.channel);
-        state.channel = null;
+      if (state.pollTimer) {
+        clearInterval(state.pollTimer);
+        state.pollTimer = null;
       }
       state.loaded = false;
       collectionStates.delete(collectionName);
@@ -254,7 +216,7 @@ export function subscribeToCollection<T extends { id: string }>(
 }
 
 // ---------------------------------------------------------------------------
-// Optimistic local patches (fix #1: offline writes appear in the UI instantly)
+// Optimistic local patches (offline writes appear in the UI instantly)
 // ---------------------------------------------------------------------------
 
 export function applyLocalChange<T extends { id: string }>(collectionName: string, data: T) {
@@ -286,7 +248,7 @@ export function clearLocalCollection(collectionName: string) {
 }
 
 // ---------------------------------------------------------------------------
-// Writes with offline queueing (fix #1)
+// Writes with offline queueing
 // ---------------------------------------------------------------------------
 
 async function queueWrite(item: Omit<OfflineQueueItem, 'queueId' | 'queuedAt'>) {
@@ -307,11 +269,14 @@ export async function saveDocument<T extends { id: string }>(collectionName: str
     return;
   }
 
-  const { error } = await supabase.from('erp_records').upsert(toRows(collectionName, [data]), {
-    onConflict: 'collection_name,id',
-  });
-  if (error) {
-    console.warn(`Supabase write failed for ${collectionName}/${data.id} — queued for retry:`, error);
+  try {
+    await proxyFetch('/api/data/save', {
+      method: 'POST',
+      body: JSON.stringify({ collection: collectionName, rows: [data] }),
+    });
+  } catch (error: any) {
+    if (error?.message === 'AUTH_EXPIRED') throw error;
+    console.warn(`Data write failed for ${collectionName}/${data.id} — queued for retry:`, error);
     await queueWrite({ collectionName, action: 'save', data });
     return; // not thrown — data is queued, badge shows pending count
   }
@@ -335,11 +300,14 @@ export async function saveBatchDocuments<T extends { id: string }>(collectionNam
     return;
   }
 
-  const { error } = await supabase.from('erp_records').upsert(toRows(collectionName, items), {
-    onConflict: 'collection_name,id',
-  });
-  if (error) {
-    console.warn(`Supabase batch write failed for ${collectionName} — queued for retry:`, error);
+  try {
+    await proxyFetch('/api/data/save', {
+      method: 'POST',
+      body: JSON.stringify({ collection: collectionName, rows: items }),
+    });
+  } catch (error: any) {
+    if (error?.message === 'AUTH_EXPIRED') throw error;
+    console.warn(`Data batch write failed for ${collectionName} — queued for retry:`, error);
     await queueWrite({ collectionName, action: 'batch', data: items });
     return;
   }
@@ -362,13 +330,14 @@ export async function deleteDocument(collectionName: string, id: string) {
     return;
   }
 
-  const { error } = await supabase
-    .from('erp_records')
-    .delete()
-    .eq('collection_name', collectionName)
-    .eq('id', id);
-  if (error) {
-    console.warn(`Supabase delete failed for ${collectionName}/${id} — queued for retry:`, error);
+  try {
+    await proxyFetch('/api/data/delete', {
+      method: 'POST',
+      body: JSON.stringify({ collection: collectionName, ids: [id] }),
+    });
+  } catch (error: any) {
+    if (error?.message === 'AUTH_EXPIRED') throw error;
+    console.warn(`Data delete failed for ${collectionName}/${id} — queued for retry:`, error);
     await queueWrite({ collectionName, action: 'delete', data: { id } });
     return;
   }
@@ -391,9 +360,14 @@ export async function clearCollection(collectionName: string) {
     return;
   }
 
-  const { error } = await supabase.from('erp_records').delete().eq('collection_name', collectionName);
-  if (error) {
-    console.warn(`Supabase clear failed for ${collectionName} — queued for retry:`, error);
+  try {
+    await proxyFetch('/api/data/clear', {
+      method: 'POST',
+      body: JSON.stringify({ collection: collectionName }),
+    });
+  } catch (error: any) {
+    if (error?.message === 'AUTH_EXPIRED') throw error;
+    console.warn(`Data clear failed for ${collectionName} — queued for retry:`, error);
     await queueWrite({ collectionName, action: 'clear', data: null });
     return;
   }
@@ -414,7 +388,7 @@ export async function clearCollection(collectionName: string) {
 
 let flushInProgress = false;
 
-/** Replay the offline queue against Supabase. Safe to call any time. */
+/** Replay the offline queue against the server proxy. Safe to call any time. */
 export async function flushOfflineQueue(): Promise<{ syncedCount: number; remainingCount: number }> {
   if (typeof window === 'undefined') return { syncedCount: 0, remainingCount: 0 };
 
@@ -448,19 +422,16 @@ export async function flushOfflineQueue(): Promise<{ syncedCount: number; remain
       try {
         if (item.action === 'save') {
           const data = item.data as { id: string };
-          // Stale-write guard (audit B-2): if a NEWER version of this document
-          // already landed live (e.g. the user retried successfully while this
-          // copy was still queued), replaying this older snapshot would regress
-          // the record. Compare updatedAt before upserting.
+          // Stale-write guard (audit B-2): skip replaying older snapshots.
           if (isStaleQueuedWrite(item.collectionName, data)) {
             await removeFromQueue(item.queueId);
             syncedCount++;
             continue;
           }
-          const { error } = await supabase.from('erp_records').upsert(toRows(item.collectionName, [data]), {
-            onConflict: 'collection_name,id',
+          await proxyFetch('/api/data/save', {
+            method: 'POST',
+            body: JSON.stringify({ collection: item.collectionName, rows: [data] }),
           });
-          if (error) throw error;
         } else if (item.action === 'batch') {
           const items = (item.data as { id: string }[]) || [];
           // Drop any batch items superseded by newer live writes.
@@ -469,31 +440,33 @@ export async function flushOfflineQueue(): Promise<{ syncedCount: number; remain
             if (!isStaleQueuedWrite(item.collectionName, it)) fresh.push(it);
           }
           if (fresh.length > 0) {
-            const { error } = await supabase.from('erp_records').upsert(toRows(item.collectionName, fresh), {
-              onConflict: 'collection_name,id',
+            await proxyFetch('/api/data/save', {
+              method: 'POST',
+              body: JSON.stringify({ collection: item.collectionName, rows: fresh }),
             });
-            if (error) throw error;
           }
         } else if (item.action === 'delete') {
           const { id } = (item.data as { id?: string }) || {};
           if (id) {
-            const { error } = await supabase
-              .from('erp_records')
-              .delete()
-              .eq('collection_name', item.collectionName)
-              .eq('id', id);
-            if (error) throw error;
+            await proxyFetch('/api/data/delete', {
+              method: 'POST',
+              body: JSON.stringify({ collection: item.collectionName, ids: [id] }),
+            });
           }
         } else if (item.action === 'clear') {
-          const { error } = await supabase
-            .from('erp_records')
-            .delete()
-            .eq('collection_name', item.collectionName);
-          if (error) throw error;
+          await proxyFetch('/api/data/clear', {
+            method: 'POST',
+            body: JSON.stringify({ collection: item.collectionName }),
+          });
         }
         await removeFromQueue(item.queueId);
         syncedCount++;
-      } catch (err) {
+      } catch (err: any) {
+        if (err?.message === 'AUTH_EXPIRED') {
+          // Session is gone — stop replaying; user must log in again.
+          flushInProgress = false;
+          return { syncedCount, remainingCount: await pendingQueueCount() };
+        }
         console.warn(`Offline queue item ${item.queueId} failed (${item.collectionName}/${item.action}):`, err);
         // Stop replaying if the network dropped mid-flush; keep the rest queued.
         if (!navigator.onLine) break;
@@ -522,11 +495,4 @@ export async function flushOfflineQueue(): Promise<{ syncedCount: number; remain
   } finally {
     flushInProgress = false;
   }
-}
-
-// Auto-flush + refetch when connectivity returns (covers missed realtime events).
-if (typeof window !== 'undefined') {
-  window.addEventListener('online', () => {
-    void flushOfflineQueue().then(() => refreshAllCollections());
-  });
 }

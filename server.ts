@@ -4,13 +4,102 @@ import path from "path";
 import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
-import { randomBytes, createHash, timingSafeEqual } from "crypto";
+import { randomBytes, createHash, timingSafeEqual, scryptSync } from "crypto";
+
+// --- Military-grade security middleware (Ko Hein 2026-08-13) ---
+// Layered defenses: helmet-style headers, strict CORS, CSRF via custom-header
+// requirement + Origin check, per-route rate limits, server-side audit log,
+// and a data-proxy that keeps the Supabase service-role key server-side ONLY
+// (the client never holds a database key — P0 fix: the publishable key in the
+// JS bundle previously allowed ANYONE to read/write/delete every table).
 
 async function startServer() {
   const app = express();
   const PORT = Number(process.env.PORT) || 3000;
 
   app.use(express.json({ limit: "10mb" }));
+
+  // ---- Security headers (helmet-style, no extra dep) ----
+  app.use((_req, res, next) => {
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader("Referrer-Policy", "no-referrer");
+    res.setHeader("X-XSS-Protection", "1; mode=block");
+    res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+    res.setHeader("Permissions-Policy", "camera=(self), microphone=(), geolocation=()");
+    // Strict CSP: no inline scripts (Vite emits external files), self-only
+    // sources, blob: for QR camera frames, data: for images. The AI chat
+    // renders plain text only — no unsafe-eval.
+    res.setHeader(
+      "Content-Security-Policy",
+      "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; " +
+        "img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' " +
+        "https://*.supabase.co wss://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+    );
+    if (process.env.NODE_ENV === "production") {
+      res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+    }
+    next();
+  });
+
+  // ---- Strict CORS: same-origin only (the SPA and API share one origin via
+  // Caddy). No cross-origin requests are legitimate. ----
+  app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin && origin !== `https://${req.headers.host}` && origin !== `http://${req.headers.host}` && origin !== `https://erp.i35appleservice.com`) {
+      res.status(403).json({ success: false, error: "Cross-origin request blocked." });
+      return;
+    }
+    next();
+  });
+
+  // ---- Audit log (server-side, append-only JSONL, capped) ----
+  const AUDIT_LOG_FILE = path.join(process.cwd(), "audit-log.jsonl");
+  const AUDIT_MAX_LINES = 5000;
+  function auditLog(event: string, detail: Record<string, unknown>) {
+    try {
+      const line = JSON.stringify({ t: new Date().toISOString(), event, ...detail }) + "\n";
+      fs.appendFileSync(AUDIT_LOG_FILE, line);
+      const lines = fs.readFileSync(AUDIT_LOG_FILE, "utf8").split("\n").filter(Boolean);
+      if (lines.length > AUDIT_MAX_LINES) {
+        fs.writeFileSync(AUDIT_LOG_FILE, lines.slice(-AUDIT_MAX_LINES).join("\n") + "\n");
+      }
+    } catch (err) {
+      console.error("Audit log write failed:", err);
+    }
+  }
+
+  // ---- IP helpers (function declarations so they hoist above the middleware) ----
+  function getClientIpSafe(req: express.Request): string {
+    const peer = req.socket?.remoteAddress || "unknown";
+    const peerClean = peer.replace(/^::ffff:/, "");
+    const isTrustedProxy = peerClean === "127.0.0.1" || peerClean === "::1" || peerClean.startsWith("172.") || peerClean.startsWith("10.");
+    if (isTrustedProxy) {
+      const fwd = (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim();
+      if (fwd) return fwd;
+    }
+    return peerClean || "unknown";
+  }
+
+  // ---- Global API rate limit (per-IP token bucket) ----
+  const apiHits = new Map<string, { count: number; resetAt: number }>();
+  const API_RATE_MAX = 300; // per window
+  const API_RATE_WINDOW_MS = 60_000;
+  app.use("/api", (req, res, next) => {
+    const ip = getClientIpSafe(req);
+    const now = Date.now();
+    let rec = apiHits.get(ip);
+    if (!rec || now > rec.resetAt) {
+      rec = { count: 0, resetAt: now + API_RATE_WINDOW_MS };
+      apiHits.set(ip, rec);
+    }
+    rec.count += 1;
+    if (rec.count > API_RATE_MAX) {
+      res.status(429).json({ success: false, error: "Rate limit exceeded — slow down." });
+      return;
+    }
+    next();
+  });
 
   async function readProviderJson(response: Response, providerName: string) {
     const body = await response.text();
@@ -115,27 +204,38 @@ async function startServer() {
   const LOGIN_LOCKOUT_MS = Number(process.env.LOGIN_LOCKOUT_MS) || 15 * 60_000;
   const LOGIN_LOCKOUT_THRESHOLD = Number(process.env.LOGIN_LOCKOUT_THRESHOLD) || 10; // failures before lockout
   const loginAttempts = new Map<string, { count: number; firstAt: number; lockedUntil: number }>();
-  const getClientIp = (req: express.Request) =>
-    // Audit G P2: X-Forwarded-For is client-spoofable — anyone can rotate the
-    // header and bypass the per-IP login rate limit/lockout. Only honor it
-    // when the request actually came through a trusted proxy (behind Caddy on
-    // the VPS the socket peer is 127.0.0.1/172.18.x.x), otherwise use the
-    // socket address directly.
-    (() => {
-      const peer = req.socket?.remoteAddress || "unknown";
-      const peerClean = peer.replace(/^::ffff:/, "");
-      const isTrustedProxy = peerClean === "127.0.0.1" || peerClean === "::1" || peerClean.startsWith("172.") || peerClean.startsWith("10.");
-      if (isTrustedProxy) {
-        const fwd = (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim();
-        if (fwd) return fwd;
-      }
-      return peerClean || "unknown";
-    })();
+  const getClientIp = (req: express.Request) => getClientIpSafe(req);
   const safeEqual = (a: string, b: string) => {
     const ba = Buffer.from(a);
     const bb = Buffer.from(b);
     return ba.length === bb.length && timingSafeEqual(ba, bb);
   };
+
+  // ---- Military-grade password verification (Ko Hein 2026-08-13) ----
+  // Admin password supports two formats:
+  //   1. AUTH_PASSWORD_HASH=<scrypt:$saltHex:$hashHex> — preferred, derived
+  //      with scrypt (N=2^15, r=8, p=1) so a leaked .env can't be
+  //      brute-forced at GPU speed.
+  //   2. Legacy AUTH_PASSWORD=<plaintext> — compared with timingSafeEqual
+  //      (still better than ===), kept for backward compat. Convert to a
+  //      hash with scripts/hash-password.mjs.
+  const SCRYPT_N = 1 << 15;
+  function verifyPassword(input: string, storedHash: string | undefined, legacyPlain: string | undefined): boolean {
+    if (storedHash && storedHash.startsWith("scrypt:")) {
+      const parts = storedHash.split(":");
+      if (parts.length !== 3) return false;
+      const [, saltHex, hashHex] = parts;
+      try {
+        const derived = scryptSync(input, Buffer.from(saltHex, "hex"), 32, { N: SCRYPT_N, r: 8, p: 1, maxmem: 128 * 1024 * 1024 });
+        const expected = Buffer.from(hashHex, "hex");
+        return derived.length === expected.length && timingSafeEqual(derived, expected);
+      } catch {
+        return false;
+      }
+    }
+    // Legacy plaintext path
+    return Boolean(legacyPlain) && safeEqual(input, legacyPlain);
+  }
   // Extra staff logins (server-only credentials file — never synced to clients).
   // Format: { "<email>": { "passwordHash": "<sha256 hex>", "name": "...", "role": "..." } }
   const CREDENTIALS_FILE = path.join(process.cwd(), "credentials.json");
@@ -149,8 +249,9 @@ async function startServer() {
   app.post("/api/auth/login", async (req, res) => {
     const { email, password } = req.body || {};
     const authEmail = (process.env.AUTH_EMAIL || "").trim().toLowerCase();
+    const authPassHash = process.env.AUTH_PASSWORD_HASH || "";
     const authPass = process.env.AUTH_PASSWORD || "";
-    if (!authEmail || !authPass) {
+    if (!authEmail || (!authPassHash && !authPass)) {
       res.status(503).json({ success: false, error: "Auth not configured on server" });
       return;
     }
@@ -171,12 +272,13 @@ async function startServer() {
       return;
     }
     const emailOk = safeEqual(String(email || "").trim().toLowerCase(), authEmail);
-    const passOk = safeEqual(String(password || ""), authPass);
+    const passOk = verifyPassword(String(password || ""), authPassHash, authPass);
     if (emailOk && passOk) {
       loginAttempts.delete(ip);
       const token = randomBytes(24).toString("hex");
       authTokens[hashToken(token)] = { email: authEmail, expiresAt: Date.now() + TOKEN_TTL_MS };
       saveAuthTokens();
+      auditLog("auth.login", { email: authEmail, ip, result: "success" });
       res.json({ success: true, token, user: { email: authEmail, name: "Ko Hein" } });
       return;
     }
@@ -192,6 +294,7 @@ async function startServer() {
     }
     {
       rec.count += 1;
+      auditLog("auth.login", { email: String(email || "").trim().toLowerCase(), ip, result: "failed" });
       if (rec.count >= LOGIN_LOCKOUT_THRESHOLD) {
         rec.lockedUntil = now + LOGIN_LOCKOUT_MS;
         rec.count = 0;
@@ -247,6 +350,185 @@ async function startServer() {
       res.json({ success: true, user: { email: entry?.email || "", name: entry?.email || "" } });
     } else {
       res.status(401).json({ success: false });
+    }
+  });
+
+  // ---------------------------------------------------------------------
+  // DATA PROXY (P0 security fix, Ko Hein 2026-08-13)
+  // ---------------------------------------------------------------------
+  // Previously the client talked to Supabase DIRECTLY with a publishable key
+  // shipped in the JS bundle — anyone could read/write/delete every business
+  // table (customers, work orders, payouts, users). Now ALL data access goes
+  // through this authenticated proxy; the service-role key stays server-side
+  // only. Client endpoints: GET (list), POST (save/delete/clear). Every
+  // request requires a valid session token.
+  const SUPABASE_SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE || "";
+  const SUPABASE_URL = process.env.SUPABASE_URL || "";
+  const isServiceConfigured = () => Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE);
+  const supabaseHeaders = () => ({
+    apikey: SUPABASE_SERVICE_ROLE,
+    Authorization: `Bearer ${SUPABASE_SERVICE_ROLE}`,
+    "Content-Type": "application/json",
+  });
+
+  // Whitelist — the client may only touch known collections.
+  const ALLOWED_COLLECTIONS = new Set([
+    "workOrders", "parts", "customers", "technicians", "technicianPayouts",
+    "systemSettings", "priceCatalog", "priceCategories", "priceFolders",
+    "suppliers", "rmas", "purchaseOrders", "users", "expenses",
+    "monthlyReports", "notifications", "supplierDebts",
+  ]);
+
+  // Secrets are stripped server-side too — the browser must never receive or
+  // persist AI keys / Telegram tokens (defense in depth; client also strips).
+  function serverSafeData(collectionName: string, data: Record<string, unknown>) {
+    if (collectionName !== "systemSettings") return data;
+    const safe = { ...data };
+    delete safe.aiApiKey;
+    delete safe.telegramBotToken;
+    return safe;
+  }
+
+  // GET /api/data/:collection — list rows (auth required)
+  app.get("/api/data/:collection", async (req, res) => {
+    if (!requireAuth(req, res)) return;
+    if (!isServiceConfigured()) {
+      res.status(503).json({ success: false, error: "Data service not configured." });
+      return;
+    }
+    const collection = String(req.params.collection || "");
+    if (!ALLOWED_COLLECTIONS.has(collection)) {
+      res.status(403).json({ success: false, error: "Unknown collection." });
+      return;
+    }
+    try {
+      const pageSize = 1000;
+      const rows: any[] = [];
+      let offset = 0;
+      for (;;) {
+        const r = await fetch(
+          `${SUPABASE_URL}/rest/v1/erp_records?select=data&collection_name=eq.${encodeURIComponent(collection)}&order=updated_at.asc&offset=${offset}&limit=${pageSize}`,
+          { headers: supabaseHeaders() }
+        );
+        if (!r.ok) throw new Error(`Supabase ${r.status}`);
+        const page: any[] = await r.json();
+        rows.push(...page);
+        if (!page || page.length < pageSize) break;
+        offset += pageSize;
+      }
+      res.json({ success: true, rows: rows.map((row) => row?.data).filter(Boolean) });
+    } catch (err) {
+      console.error(`Data proxy read failed (${collection}):`, err);
+      res.status(502).json({ success: false, error: "Data service error." });
+    }
+  });
+
+  // POST /api/data/save — upsert one or many rows (auth required)
+  app.post("/api/data/save", async (req, res) => {
+    if (!requireAuth(req, res)) return;
+    if (!isServiceConfigured()) {
+      res.status(503).json({ success: false, error: "Data service not configured." });
+      return;
+    }
+    const { collection, rows } = req.body || {};
+    if (!ALLOWED_COLLECTIONS.has(String(collection || ""))) {
+      res.status(403).json({ success: false, error: "Unknown collection." });
+      return;
+    }
+    const list = Array.isArray(rows) ? rows : rows ? [rows] : [];
+    if (!list.length) {
+      res.status(400).json({ success: false, error: "No rows provided." });
+      return;
+    }
+    try {
+      const payload = list.map((item: any) => ({
+        collection_name: collection,
+        id: item?.id,
+        data: serverSafeData(collection, item || {}),
+        updated_at: item?.updatedAt || new Date().toISOString(),
+      }));
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/erp_records`, {
+        method: "POST",
+        headers: supabaseHeaders(),
+        body: JSON.stringify(payload),
+      });
+      if (!r.ok) throw new Error(`Supabase ${r.status}`);
+      const sessionEmail = authTokens[hashToken(String(req.headers["x-session-token"] || ""))]?.email || "?";
+      auditLog("data.save", { collection, count: payload.length, by: sessionEmail });
+      res.json({ success: true });
+    } catch (err) {
+      console.error(`Data proxy save failed (${collection}):`, err);
+      res.status(502).json({ success: false, error: "Data service error." });
+    }
+  });
+
+  // POST /api/data/delete — delete rows by id (auth required)
+  app.post("/api/data/delete", async (req, res) => {
+    if (!requireAuth(req, res)) return;
+    if (!isServiceConfigured()) {
+      res.status(503).json({ success: false, error: "Data service not configured." });
+      return;
+    }
+    const { collection, ids } = req.body || {};
+    if (!ALLOWED_COLLECTIONS.has(String(collection || ""))) {
+      res.status(403).json({ success: false, error: "Unknown collection." });
+      return;
+    }
+    const idList = Array.isArray(ids) ? ids.filter(Boolean) : [];
+    if (!idList.length) {
+      res.status(400).json({ success: false, error: "No ids provided." });
+      return;
+    }
+    try {
+      for (const id of idList) {
+        const r = await fetch(
+          `${SUPABASE_URL}/rest/v1/erp_records?collection_name=eq.${encodeURIComponent(collection)}&id=eq.${encodeURIComponent(id)}`,
+          { method: "DELETE", headers: supabaseHeaders() }
+        );
+        if (!r.ok) throw new Error(`Supabase ${r.status}`);
+      }
+      const sessionEmail = authTokens[hashToken(String(req.headers["x-session-token"] || ""))]?.email || "?";
+      auditLog("data.delete", { collection, count: idList.length, by: sessionEmail });
+      res.json({ success: true });
+    } catch (err) {
+      console.error(`Data proxy delete failed (${collection}):`, err);
+      res.status(502).json({ success: false, error: "Data service error." });
+    }
+  });
+
+  // POST /api/data/clear — delete ALL rows of a collection (ADMIN ONLY)
+  app.post("/api/data/clear", async (req, res) => {
+    const token = String(req.headers["x-session-token"] || "");
+    if (!isTokenValid(token)) {
+      res.status(401).json({ success: false, error: "Authentication required." });
+      return;
+    }
+    const sessionEmail = (authTokens[hashToken(token)]?.email || "").toLowerCase().trim();
+    const adminEmail = (process.env.AUTH_EMAIL || "").toLowerCase().trim();
+    if (!adminEmail || sessionEmail !== adminEmail) {
+      res.status(403).json({ success: false, error: "Admin only." });
+      return;
+    }
+    if (!isServiceConfigured()) {
+      res.status(503).json({ success: false, error: "Data service not configured." });
+      return;
+    }
+    const { collection } = req.body || {};
+    if (!ALLOWED_COLLECTIONS.has(String(collection || ""))) {
+      res.status(403).json({ success: false, error: "Unknown collection." });
+      return;
+    }
+    try {
+      const r = await fetch(
+        `${SUPABASE_URL}/rest/v1/erp_records?collection_name=eq.${encodeURIComponent(collection)}`,
+        { method: "DELETE", headers: supabaseHeaders() }
+      );
+      if (!r.ok) throw new Error(`Supabase ${r.status}`);
+      auditLog("data.clear", { collection, by: sessionEmail });
+      res.json({ success: true });
+    } catch (err) {
+      console.error(`Data proxy clear failed (${collection}):`, err);
+      res.status(502).json({ success: false, error: "Data service error." });
     }
   });
 
@@ -820,6 +1102,12 @@ ${JSON.stringify(context)}`;
   // Lightweight client error logging (bug #9) — append JSONL, capped at 1000 lines.
   const ERROR_LOG_FILE = path.join(process.cwd(), "error-log.jsonl");
   app.post("/api/error-log", (req, res) => {
+    // Security (Ko Hein 2026-08-13): require a valid session — anonymous log
+    // poisoning / disk-fill via spoofed error entries is not acceptable.
+    if (!isTokenValid(String(req.headers["x-session-token"] || ""))) {
+      res.status(401).json({ success: false, error: "Authentication required." });
+      return;
+    }
     try {
       // Audit G-P3: bound the payload — an unbounded body could be poisoned by
       // any client. Cap the JSON-serialized entry at ~2 KB.

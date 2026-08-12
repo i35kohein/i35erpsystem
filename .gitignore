@@ -14,3 +14,6 @@ backups/
 # Runtime auth tokens (local dev only)
 auth-tokens.json
 error-log.jsonl
+# Server-side audit trail (military-grade security, never commit)
+audit-log.jsonl
+ai-chat-history.json

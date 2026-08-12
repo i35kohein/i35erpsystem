@@ -18,11 +18,23 @@ if (typeof window !== 'undefined') {
   );
   const cachesApi = window.caches;
   void cachesApi?.keys?.().then((keys) => Promise.all(keys.map((key) => cachesApi.delete(key))));
-  try {
-    indexedDB.deleteDatabase('AppleRepairERP_DB');
-  } catch {
-    // Browsers without IndexedDB simply have no legacy cache to remove.
-  }
+  // Audit G-P3: await the delete and handle onblocked — the old fire-and-
+  // forget call could leave the DB half-open and block re-creation.
+  void (async () => {
+    try {
+      const req = indexedDB.deleteDatabase('AppleRepairERP_DB');
+      req.onblocked = () => {
+        // Another tab still holds a connection; it will close on its own.
+        // Nothing else to do — the app works without the legacy cache.
+      };
+      await new Promise<void>((resolve) => {
+        req.onsuccess = () => resolve();
+        req.onerror = () => resolve(); // best-effort cleanup only
+      });
+    } catch {
+      // Browsers without IndexedDB simply have no legacy cache to remove.
+    }
+  })();
 }
 
 // Lightweight client error reporting (bug #9): capture uncaught errors and
