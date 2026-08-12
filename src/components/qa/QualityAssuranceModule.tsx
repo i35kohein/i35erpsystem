@@ -762,7 +762,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           value={item.note || ''}
                           onChange={(e) => handleDiagnosticNoteChange(item.id, e.target.value)}
                           placeholder={isPass ? 'ok' : isFail ? 'issue…' : isCantTest ? 'note' : 'n/a'}
-                          className="ml-auto !h-5 !min-h-5 min-w-0 flex-1 rounded bg-transparent px-1 text-[11px] outline-none transition-colors placeholder:text-muted/60 focus:bg-[#d9f99d]/40"
+                          className="ml-auto !h-5 !min-h-5 min-w-0 flex-1 rounded bg-transparent px-1 text-[11px] outline-none transition-colors placeholder:text-muted/60 focus:bg-lime-200/40"
                         />
                       </div>
                     );

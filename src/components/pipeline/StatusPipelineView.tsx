@@ -1291,7 +1291,7 @@ export const StatusPipelineView: React.FC<StatusPipelineViewProps> = ({
                           setAfterDiagnostics((prev) => prev.map((d) => (d.id === item.id ? { ...d, note: e.target.value } : d)))
                         }
                         placeholder={isPass ? 'ok' : isFail ? 'issue…' : isCantTest ? 'note' : 'n/a'}
-                        className="ml-auto min-w-0 flex-1 bg-transparent px-1 text-xs outline-none focus:bg-[#d9f99d]/40"
+                        className="ml-auto min-w-0 flex-1 bg-transparent px-1 text-xs outline-none focus:bg-lime-200/40"
                       />
                     </div>
                   );
