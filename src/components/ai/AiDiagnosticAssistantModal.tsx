@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { Button } from '../ui';
-import { Bot, Send, Sparkles, X, AlertTriangle, PackageSearch, PhoneCall, Activity, Settings2, Copy, Database, RotateCcw } from 'lucide-react';
+import { Bot, Send, Sparkles, X, AlertTriangle, PackageSearch, PhoneCall, Activity, Settings2, Copy, Database, RotateCcw, Loader2 } from 'lucide-react';
+import { confirmDialog } from '../common/ConfirmDialog';
 import { Customer, PartItem, Supplier, SystemSettings, Technician, TechnicianPayoutRecord, WorkOrder } from '../../types';
 import { ModelRepairPrice as PriceCatalogItem } from '../../types/priceCatalog';
 
@@ -58,7 +59,12 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE]);
+  // Tracks whether the last assistant reply came from the external provider or
+  // the local fallback — the header status dot flips to warning on fallback
+  // (audit F-P3).
+  const [lastUsedSource, setLastUsedSource] = useState<'ai' | 'local'>('local');
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // Per-account chat history: each logged-in user keeps their own conversation
   // (localStorage keyed by user id). Loaded when the assistant opens.
@@ -251,6 +257,15 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
     if (isOpen) requestAnimationFrame(() => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight }));
   }, [messages, isOpen]);
 
+  // ESC closes the assistant; move focus into the composer on open (audit F-P2).
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    requestAnimationFrame(() => inputRef.current?.focus());
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, onClose]);
+
   const localAnswer = (question: string) => {
     const normalized = question.toLowerCase();
     const asksToday = normalized.includes('today') || question.includes('ဒီနေ့');
@@ -417,12 +432,14 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
         ...current,
         { id: `assistant-${Date.now()}`, role: 'assistant', source: isExternalAi ? 'ai' : 'local', content: answer },
       ]);
+      setLastUsedSource(isExternalAi ? 'ai' : 'local');
     } catch (error) {
       setMessages((current) => [
         ...current,
         { id: `notice-${Date.now()}`, role: 'system', content: 'AI provider is unavailable right now. Showing local live-data analysis instead.' },
         { id: `assistant-${Date.now()}`, role: 'assistant', source: 'local', content: localAnswer(trimmed) },
       ]);
+      setLastUsedSource('local');
     } finally {
       setIsLoading(false);
     }
@@ -456,20 +473,23 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
       role="dialog"
       aria-modal="true"
       aria-label="Operations Copilot chat"
-      className="fixed inset-0 pt-[env(safe-area-inset-top)] sm:pt-0 sm:inset-auto sm:right-4 sm:bottom-4 sm:w-[400px] sm:max-w-[calc(100vw-2rem)] sm:h-[min(70vh,560px)] z-50 bg-white border-t sm:border border-line rounded-none sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-i35-slide-up"
+      className="fixed inset-0 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] sm:pt-0 sm:pb-0 sm:inset-auto sm:right-4 sm:bottom-4 sm:w-[400px] sm:max-w-[calc(100vw-2rem)] sm:h-[min(70vh,560px)] z-50 bg-white border-t sm:border border-line rounded-none sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-i35-slide-up"
     >
         <div className="px-4 py-3 border-b border-line flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 bg-brand text-white flex items-center justify-center rounded-lg"><Bot className="w-4 h-4" /></div>
             <div className="min-w-0">
               <h2 className="text-sm font-extrabold text-ink">Operations Copilot</h2>
-              <p className="text-xs text-muted truncate flex items-center gap-1"><span className={`w-1.5 h-1.5 rounded-full ${isExternalAi ? 'bg-success' : 'bg-brand'}`} />{providerLabel}</p>
+              <p className="text-xs text-muted truncate flex items-center gap-1"><span className={`w-1.5 h-1.5 rounded-full ${!isExternalAi ? 'bg-brand' : lastUsedSource === 'ai' ? 'bg-success' : 'bg-warning'}`} />{providerLabel}</p>
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <Button variant="ghost" type="button" onClick={clearConversation} disabled={isLoading} title="New conversation" aria-label="New conversation" className="p-2 text-muted hover:text-brand hover:bg-brand-soft rounded-lg disabled:opacity-40"><RotateCcw className="w-4 h-4" /></Button>
-            <Button variant="ghost" type="button" onClick={onOpenAiSettings} title="AI provider settings" aria-label="AI provider settings" className="p-2 text-muted hover:text-brand hover:bg-brand-soft rounded-lg"><Settings2 className="w-4 h-4" /></Button>
-            <Button variant="ghost" type="button" onClick={onClose} title="Close assistant" aria-label="Close assistant" className="p-2 text-muted hover:text-ink hover:bg-brand-soft rounded-lg"><X className="w-4 h-4" /></Button>
+            <Button variant="ghost" type="button" onClick={async () => {
+              const ok = await confirmDialog({ title: 'New conversation', message: 'Clear this conversation and its saved history?', confirmLabel: 'Clear' });
+              if (ok) clearConversation();
+            }} disabled={isLoading} title="New conversation" aria-label="New conversation" className="p-2 text-muted hover:text-brand hover:bg-brand-soft rounded-lg disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-brand/30"><RotateCcw className="w-4 h-4" /></Button>
+            <Button variant="ghost" type="button" onClick={onOpenAiSettings} title="AI provider settings" aria-label="AI provider settings" className="p-2 text-muted hover:text-brand hover:bg-brand-soft rounded-lg focus-visible:ring-2 focus-visible:ring-brand/30"><Settings2 className="w-4 h-4" /></Button>
+            <Button variant="ghost" type="button" onClick={onClose} title="Close assistant" aria-label="Close assistant" className="p-2 text-muted hover:text-ink hover:bg-brand-soft rounded-lg focus-visible:ring-2 focus-visible:ring-brand/30"><X className="w-4 h-4" /></Button>
           </div>
         </div>
 
@@ -480,7 +500,7 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
           </div>
           <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
           {QUICK_PROMPTS.map(({ label, prompt, icon: Icon }) => (
-            <Button variant="ghost" key={label} type="button" disabled={isLoading} onClick={() => sendMessage(prompt)} className="px-2.5 py-1.5 bg-surface border border-line text-ink rounded-lg text-xs font-bold flex items-center gap-1.5 shrink-0 hover:border-brand hover:bg-brand-soft disabled:opacity-50">
+            <Button variant="ghost" key={label} type="button" disabled={isLoading} onClick={() => sendMessage(prompt)} className="px-2.5 py-2 bg-surface border border-line text-ink rounded-lg text-xs font-bold flex items-center gap-1.5 shrink-0 hover:border-brand hover:bg-brand-soft disabled:opacity-50 disabled:cursor-not-allowed">
               <Icon className="w-3.5 h-3.5 text-brand" /> {label}
             </Button>
           ))}
@@ -501,7 +521,7 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
                 {message.role === 'assistant' && <span className="block mb-1 text-xs font-bold uppercase tracking-wide text-muted">{message.source === 'ai' ? 'AI analysis' : 'Live ERP analysis'}</span>}
                 {message.content}
                 {message.role === 'assistant' && (
-                  <Button variant="ghost" type="button" onClick={() => void copyMessage(message.content)} aria-label="Copy response" title="Copy response" className="absolute -right-8 top-1.5 p-1 text-muted opacity-0 group-hover:opacity-100 hover:text-brand">
+                  <Button variant="ghost" type="button" onClick={() => void copyMessage(message.content)} aria-label="Copy response" title="Copy response" className="absolute right-2 top-1.5 p-1 text-muted opacity-100 sm:opacity-0 sm:group-hover:opacity-100 hover:text-brand">
                     <Copy className="w-3.5 h-3.5" />
                   </Button>
                 )}
@@ -511,7 +531,7 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
           ))}
           {isLoading && (
             <div className="flex justify-start">
-              <div className="px-3 py-2.5 bg-white border border-line rounded-2xl rounded-bl-md text-xs text-muted flex items-center gap-2">
+              <div className="px-3 py-2.5 bg-white text-ink border border-line rounded-2xl rounded-bl-md shadow-sm text-xs flex items-center gap-2">
                 <Sparkles className="w-3.5 h-3.5 text-brand animate-pulse" /> Reviewing live ERP data…
               </div>
             </div>
@@ -521,6 +541,7 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
         <form onSubmit={(event) => { event.preventDefault(); sendMessage(); }} className="p-3 border-t border-line bg-white shrink-0">
           <div className="flex items-end gap-2">
             <textarea
+              ref={inputRef}
               value={input}
               onChange={(event) => setInput(event.target.value)}
               onKeyDown={(event) => {
@@ -531,10 +552,10 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
               }}
               rows={1}
               placeholder="Ask a business question…"
-              className="flex-1 min-h-[42px] max-h-28 resize-none border border-line bg-white rounded-xl px-3 py-2 text-xs focus:outline-none "
+              className="flex-1 min-h-[42px] max-h-28 resize-none border border-line bg-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
             />
-            <Button type="submit" disabled={!input.trim() || isLoading} title="Send message" aria-label="Send message" className="w-10 h-10 bg-brand text-white rounded-xl flex items-center justify-center disabled:opacity-40">
-              <Send className="w-4 h-4" />
+            <Button type="submit" disabled={!input.trim() || isLoading} title={isLoading ? 'Sending…' : 'Send message'} aria-label={isLoading ? 'Sending…' : 'Send message'} className="w-10 h-10 bg-brand text-white rounded-xl flex items-center justify-center disabled:opacity-40">
+              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             </Button>
           </div>
           <p className="mt-1.5 text-xs text-muted text-center">Enter sends · Shift+Enter new line.</p>

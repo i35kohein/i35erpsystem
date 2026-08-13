@@ -51,7 +51,21 @@ export const RightFilterDrawer: React.FC<RightFilterDrawerProps> = ({
       panelRef.current?.focus();
     });
 
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+      // audit A-P3: lightweight Tab loop so focus can't walk behind the
+      // backdrop (aria-modal="true" without a trap is an a11y contradiction).
+      if (e.key === 'Tab' && panelRef.current) {
+        const focusables = panelRef.current.querySelectorAll<HTMLElement>(
+          'button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (!focusables.length) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    };
     window.addEventListener('keydown', handler);
 
     return () => {
@@ -82,9 +96,9 @@ export const RightFilterDrawer: React.FC<RightFilterDrawerProps> = ({
       className={`fixed inset-0 z-[80] ${alwaysVisible ? '' : 'lg:hidden'} ${open ? '' : 'pointer-events-none invisible'}`}
       aria-hidden={!open}
     >
-      {/* Backdrop */}
+      {/* Backdrop — audit A-P3: respect motion-reduce like the panel does. */}
       <div
-        className={`absolute inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0'}`}
+        className={`absolute inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity duration-300 motion-reduce:transition-none ${open ? 'opacity-100' : 'opacity-0'}`}
         onClick={onClose}
         role="presentation"
         aria-hidden="true"
@@ -121,19 +135,23 @@ export const RightFilterDrawer: React.FC<RightFilterDrawerProps> = ({
         {/* Sticky footer (P1) */}
         {onReset && (
           <div className="flex items-center gap-2 border-t border-line bg-white px-4 pt-2.5 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-            <Button variant="ghost"
+            {/* audit A-P2: use the kit variants instead of hand-rolled
+                destructive styles. */}
+            <Button
+              variant="destructive"
               type="button"
               onClick={onReset}
               disabled={resetDisabled}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-danger/30 bg-danger/10 px-3 py-2.5 text-xs font-extrabold text-danger transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+              className="flex-1"
             >
               <RotateCcw className="w-4 h-4" />
               Reset All
             </Button>
             <Button
+              variant="default"
               type="button"
               onClick={onClose}
-              className="flex flex-1 items-center justify-center rounded-xl bg-brand px-3 py-2.5 text-xs font-extrabold text-white shadow-xs transition-colors cursor-pointer hover:bg-brand-deep active:scale-95"
+              className="flex-1"
             >
               Done
             </Button>

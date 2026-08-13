@@ -114,8 +114,19 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search archived tickets by WO#, name, model..."
-                className="w-full bg-surface text-xs text-ink placeholder-muted pl-9 pr-4 py-2 rounded-xl border border-line focus:bg-white focus:outline-none transition-all"
+                className="w-full bg-surface text-xs text-ink placeholder-muted pl-9 pr-8 py-2 rounded-xl border border-line focus:bg-white focus:outline-none transition-all"
               />
+              {searchQuery && (
+                <Button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  aria-label="Clear search"
+                  title="Clear search"
+                  className="absolute right-1.5 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full text-muted hover:bg-line hover:text-ink"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </Button>
+              )}
             </div>
 
             {/* Mobile Restore All & Empty buttons */}
@@ -160,7 +171,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
             filteredWorkOrders.map((wo) => (
               <div
                 key={wo.id}
-                className="bg-white rounded-2xl border border-line p-4 shadow-2xs hover:border-brand/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                className="bg-white rounded-2xl border border-line p-4 shadow-2xs hover:border-brand/40 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4"
               >
                 <div className="space-y-1.5 flex-1 min-w-0">
                   <div className="flex items-center space-x-1.5 flex-wrap gap-y-1">
@@ -180,7 +191,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
                   </div>
 
                   {wo.archivedAt && (
-                    <div className="text-xs text-danger font-medium">
+                    <div className="text-xs text-muted font-medium">
                       Archived on {new Date(wo.archivedAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
                     </div>
                   )}
@@ -192,6 +203,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
                     type="button"
                     onClick={() => onRestoreWorkOrder(wo.id)}
                     className="flex-1 sm:flex-initial bg-success hover:bg-success-deep text-white"
+                    title="Restore this ticket"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     <span>Restore Ticket</span>
@@ -203,6 +215,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
                     variant="outline"
                     className="flex-1 sm:flex-initial bg-danger/10 hover:bg-danger/15 text-danger border-danger/30"
                     title="Permanently Delete"
+                    aria-label="Delete permanently"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     <span className="hidden md:inline">Delete Permanently</span>
@@ -230,7 +243,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
 
         {/* Confirm Empty Recycle Bin Modal Popup */}
         {confirmEmptyOpen && (
-          <div className="fixed inset-0 bg-slate-900/50 z-60 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-[60] flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl border border-line shadow-2xl p-6 max-w-md w-full space-y-4">
               <div className="flex items-center space-x-3 text-danger">
                 <ShieldAlert className="w-7 h-7" />

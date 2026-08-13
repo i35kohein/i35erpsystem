@@ -52,15 +52,19 @@ export const OfflineSyncStatusBadge: React.FC = () => {
   };
 
   return (
-    <div className="relative hidden lg:block shrink-0" ref={rootRef}>
+    // audit A-P2: show the live-DB indicator on phones/tablets too (compact
+    // button); the detail panel stays desktop-only (hidden lg:block).
+    <div className="relative block lg:inline-flex shrink-0" ref={rootRef}>
       <Button
         type="button"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
-        className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-all cursor-pointer active:scale-95 hover:brightness-95 ${
+        className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border transition-all cursor-pointer active:scale-95 hover:brightness-95 ${
           unavailable
             ? 'border-danger/30 bg-danger/10 text-danger'
-            : 'border-success/30/80 bg-success/10 text-success-deep'
+            : // audit A-P2: border-success/30/80 was invalid (double opacity) —
+              // the online-state border was silently dropped.
+              'border-success/30 bg-success/10 text-success-deep'
         }`}
         title={`${label} — click for details`}
         aria-label={`${label} — click for details`}
@@ -69,7 +73,7 @@ export const OfflineSyncStatusBadge: React.FC = () => {
       </Button>
 
       {open && (
-        <div className="absolute right-0 top-9 z-[70] w-64 rounded-xl border border-line bg-white p-3 shadow-xl text-xs">
+        <div className="absolute right-0 top-9 z-[70] hidden lg:block w-64 rounded-xl border border-line bg-white p-3 shadow-xl text-xs animate-in fade-in zoom-in-95 duration-150 origin-top-right">
           <div className="flex items-center justify-between border-b border-line pb-2 mb-2">
             <span className="font-extrabold text-ink">Live Database Status</span>
             <Button variant="ghost"
@@ -91,7 +95,10 @@ export const OfflineSyncStatusBadge: React.FC = () => {
             />
             <StatusRow ok={status.pendingCount === 0} label="Pending writes" value={String(status.pendingCount ?? 0)} />
             {status.lastSyncedAt ? (
-              <StatusRow ok label="Last synced" value={new Date(status.lastSyncedAt).toLocaleTimeString()} />
+              // audit A-P3: fixed 2-digit time format instead of the
+              // device-locale toLocaleTimeString() (rest of the app formats
+              // consistently).
+              <StatusRow ok label="Last synced" value={new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' }).format(new Date(status.lastSyncedAt))} />
             ) : (
               <StatusRow ok label="Last synced" value="—" />
             )}

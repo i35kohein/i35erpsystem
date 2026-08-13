@@ -313,14 +313,18 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
     return null;
   };
 
-  // Force the RMA card grid below md (phones); user toggle wins on desktop.
+  // Force the RMA card grid below md (phones); restore the table when the
+  // viewport grows back past md (mirrors the inventory matchMedia pattern).
   useEffect(() => {
-    const apply = () => {
-      if (window.innerWidth < 768) setRmaView('cards');
-    };
+    const mql = window.matchMedia('(max-width: 767px)');
+    const apply = () => setRmaView(mql.matches ? 'cards' : 'table');
     apply();
+    mql.addEventListener('change', apply);
     window.addEventListener('resize', apply);
-    return () => window.removeEventListener('resize', apply);
+    return () => {
+      mql.removeEventListener('change', apply);
+      window.removeEventListener('resize', apply);
+    };
   }, []);
 
   return (
@@ -375,6 +379,13 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
             }`}
           >
             <span>Vendor Catalog</span>
+            <span
+              className={`px-2 py-0.5 rounded-full text-xs font-mono font-bold ${
+                activeSubTab === 'SUPPLIERS' ? 'bg-white/20 text-white' : 'bg-line text-ink'
+              }`}
+            >
+              {suppliers.length}
+            </span>
           </Button>
         </div>
       </div>
@@ -415,7 +426,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
               <Button
                 type="button"
                 onClick={() => setShowNewRmaModal(true)}
-                className="bg-purple hover:bg-purple text-white flex items-center space-x-1.5"
+                className="bg-purple hover:bg-purple-600 text-white flex items-center space-x-1.5"
               >
                 <Plus className="w-4 h-4" />
                 <span>Flag Defective RMA</span>
@@ -441,7 +452,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                       <p className="font-mono font-bold text-brand">{rma.rmaNumber}</p>
                       <p className="text-xs text-muted">{new Date(rma.createdAt).toLocaleDateString()}</p>
                     </div>
-                    <span className={`inline-flex items-center gap-1.5 text-xs font-extrabold px-2.5 py-1 rounded-lg border shadow-2xs ${rma.status === 'Credit Approved' ? 'bg-success/10 text-success-deep border-success/30' : rma.status === 'Shipped to Vendor' ? 'bg-brand-soft text-brand border-brand/25' : 'bg-surface text-muted border-line'}`}>
+                    <span className={`inline-flex items-center gap-1.5 text-xs font-extrabold px-2.5 py-1 rounded-lg border shadow-2xs ${rma.status === 'Credit Approved' ? 'bg-success/10 text-success-deep border-success/30' : rma.status === 'Shipped to Vendor' ? 'bg-brand-soft text-brand border-brand/25' : rma.status === 'Replacement Received' ? 'bg-brand/10 text-brand border-brand/30' : 'bg-surface text-muted border-line'}`}>
                       <span>{rma.status}</span>
                     </span>
                   </div>
@@ -467,11 +478,14 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                       <span className="text-xs text-brand font-extrabold">↻ Replacement back in stock</span>
                     ) : null}
                   </div>
-                  {renderRmaActions(rma) && (
-                    <div className="flex flex-wrap items-center justify-end gap-1.5">
-                      {renderRmaActions(rma)}
-                    </div>
-                  )}
+                  {(() => {
+                    const rmaActions = renderRmaActions(rma);
+                    return rmaActions && (
+                      <div className="flex flex-wrap items-center justify-end gap-1.5">
+                        {rmaActions}
+                      </div>
+                    );
+                  })()}
                 </div>
               ))}
             </div>
@@ -517,6 +531,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                       <span className={`inline-flex items-center gap-1.5 text-xs font-extrabold px-2.5 py-1 rounded-lg border shadow-2xs ${
                         rma.status === 'Credit Approved' ? 'bg-success/10 text-success-deep border-success/30' :
                         rma.status === 'Shipped to Vendor' ? 'bg-brand-soft text-brand border-brand/25' :
+                        rma.status === 'Replacement Received' ? 'bg-brand/10 text-brand border-brand/30' :
                         'bg-surface text-muted border-line'
                       }`}>
                         <span>{rma.status}</span>
@@ -560,7 +575,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
               <div key={po.id} className="p-4 bg-white border border-line rounded-2xl space-y-3 text-xs shadow-xs">
                 <div className="flex items-center justify-between border-b border-line pb-2">
                   <div>
-                    <span className="font-mono font-bold text-brand">{po.poNumber}</span>
+                    <span className="font-mono font-bold text-purple">{po.poNumber}</span>
                     <p className="text-ink font-semibold">{po.supplierName}</p>
                   </div>
                   <span className={`px-2 py-0.5 rounded font-bold border ${
@@ -573,15 +588,15 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                 <div className="space-y-1">
                   {po.items.map((it, idx) => (
                     <div key={idx} className="flex justify-between text-ink">
-                      <span>{it.quantity}x {it.partName}</span>
-                      <span className="font-mono">{(it.unitCost * it.quantity).toLocaleString()} {currency}</span>
+                      <span className="min-w-0 truncate" title={it.partName}>{it.quantity}x {it.partName}</span>
+                      <span className="shrink-0 font-mono">{(it.unitCost * it.quantity).toLocaleString()} {currency}</span>
                     </div>
                   ))}
                 </div>
 
                 <div className="flex justify-between items-center pt-2 border-t border-line font-bold">
                   <span className="text-muted">Total PO Value:</span>
-                  <span className="text-success-deep font-mono text-sm">{po.totalCost.toLocaleString()} {currency}</span>
+                  <span className="text-success-deep font-mono text-sm tabular-nums">{po.totalCost.toLocaleString()} {currency}</span>
                 </div>
 
                 {po.status !== 'Received' && onReceivePurchaseOrder && (
@@ -693,15 +708,27 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
 
       {/* New RMA Modal */}
       {showNewRmaModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-line rounded-2xl max-w-lg w-full p-6 space-y-4 text-xs shadow-xl">
-            <h3 className="text-sm font-bold text-ink border-b border-line pb-2">
-              Flag Defective Component for Vendor RMA
-            </h3>
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white border border-line rounded-2xl max-w-lg w-full p-5 space-y-4 text-xs shadow-2xl">
+            <div className="flex justify-between items-center border-b border-line pb-2">
+              <h4 className="font-extrabold text-ink text-sm flex items-center space-x-1.5">
+                <RotateCcw className="w-4 h-4 text-purple" />
+                <span>Flag Defective Component for Vendor RMA</span>
+              </h4>
+              <Button variant="ghost"
+                type="button"
+                onClick={() => setShowNewRmaModal(false)}
+                aria-label="Close"
+                title="Close"
+                className="text-muted hover:text-ink cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
 
             <div className="space-y-3">
               <div>
-                <label className="block text-muted mb-1">Select Component from Inventory</label>
+                <label className="block font-bold text-ink mb-1">Select Component from Inventory</label>
                 <select
                   value={newRmaData.partId}
                   onChange={(e) => {
@@ -713,7 +740,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                       unitCost: (selPart?.costPrice ?? Number(newRmaData.unitCost)) || 0,
                     });
                   }}
-                  className="w-full bg-surface border border-line rounded-lg p-2 text-ink "
+                  className="w-full bg-surface border border-line rounded-lg p-2 text-ink focus:border-brand focus:ring-2 focus:ring-brand/20"
                 >
                   {parts.map((p) => (
                     <option key={p.id} value={p.id}>{p.name} ({p.qualityTier}) - {p.costPrice.toLocaleString()} {currency}</option>
@@ -722,11 +749,11 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
               </div>
 
               <div>
-                <label className="block text-muted mb-1">Vendor / Supplier</label>
+                <label className="block font-bold text-ink mb-1">Vendor / Supplier</label>
                 <select
                   value={newRmaData.supplierId}
                   onChange={(e) => setNewRmaData({ ...newRmaData, supplierId: e.target.value })}
-                  className="w-full bg-surface border border-line rounded-lg p-2 text-ink "
+                  className="w-full bg-surface border border-line rounded-lg p-2 text-ink focus:border-brand focus:ring-2 focus:ring-brand/20"
                 >
                   {suppliers.map((s) => (
                     <option key={s.id} value={s.id}>{s.name}</option>
@@ -736,46 +763,46 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-muted mb-1">Quantity</label>
+                  <label className="block font-bold text-ink mb-1">Quantity</label>
                   <Input
                     type="number"
                     min={1}
                     value={newRmaData.quantity ?? 1}
                     onChange={(e) => setNewRmaData({ ...newRmaData, quantity: Number(e.target.value) || 1 })}
-                    className="w-full bg-surface border border-line rounded-lg p-2 text-ink font-mono "
+                    className="w-full bg-surface border border-line rounded-lg p-2 text-ink font-mono focus:border-brand focus:ring-2 focus:ring-brand/20"
                   />
                 </div>
                 <div>
-                  <label className="block text-muted mb-1">Unit Cost ({currency})</label>
+                  <label className="block font-bold text-ink mb-1">Unit Cost ({currency})</label>
                   <Input
                     type="number"
                     min={0}
                     value={newRmaData.unitCost ?? 0}
                     onChange={(e) => setNewRmaData({ ...newRmaData, unitCost: Number(e.target.value) || 0 })}
-                    className="w-full bg-surface border border-line rounded-lg p-2 text-ink font-mono "
+                    className="w-full bg-surface border border-line rounded-lg p-2 text-ink font-mono focus:border-brand focus:ring-2 focus:ring-brand/20"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-muted mb-1">Defect Description / Testing Notes</label>
+                <label className="block font-bold text-ink mb-1">Defect Description / Testing Notes</label>
                 <textarea
                   rows={3}
                   value={newRmaData.reason || ''}
                   onChange={(e) => setNewRmaData({ ...newRmaData, reason: e.target.value })}
                   placeholder="e.g. Screen lines, battery non-genuine warning loop..."
-                  className="w-full bg-surface border border-line rounded-lg p-2 text-ink "
+                  className="w-full bg-surface border border-line rounded-lg p-2 text-ink focus:border-brand focus:ring-2 focus:ring-brand/20"
                 />
               </div>
 
               <div>
-                <label className="block text-muted mb-1">Return Shipment Tracking #</label>
+                <label className="block font-bold text-ink mb-1">Return Shipment Tracking #</label>
                 <Input
                   type="text"
                   value={newRmaData.trackingNumber || ''}
                   onChange={(e) => setNewRmaData({ ...newRmaData, trackingNumber: e.target.value })}
                   placeholder="e.g. 1Z9999990199887766"
-                  className="w-full bg-surface border border-line rounded-lg p-2 text-ink font-mono "
+                  className="w-full bg-surface border border-line rounded-lg p-2 text-ink font-mono focus:border-brand focus:ring-2 focus:ring-brand/20"
                 />
               </div>
             </div>
@@ -791,7 +818,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
               <Button
                 type="button"
                 onClick={handleCreateRma}
-                className="bg-purple hover:bg-purple text-white"
+                className="bg-purple hover:bg-purple-600 text-white"
               >
                 Submit Defective RMA
               </Button>
@@ -802,7 +829,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
 
       {/* Register Supplier Modal */}
       {showAddSupplierModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
           <form onSubmit={handleCreateSupplierSubmit} className="bg-white border border-line rounded-2xl max-w-md w-full p-5 space-y-4 text-xs shadow-2xl">
             <div className="flex justify-between items-center border-b border-line pb-2">
               <h4 className="font-extrabold text-ink text-sm flex items-center space-x-1.5">
@@ -898,7 +925,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
 
       {/* Edit Supplier Modal */}
       {editingSupplier && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
           <form onSubmit={handleSaveEditSupplierSubmit} className="bg-white border border-line rounded-2xl max-w-md w-full p-5 space-y-4 text-xs shadow-2xl">
             <div className="flex justify-between items-center border-b border-line pb-2">
               <h4 className="font-extrabold text-ink text-sm flex items-center space-x-1.5">
@@ -990,7 +1017,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
 
       {/* Create Purchase Order modal */}
       {showPoModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-3 sm:p-5" onClick={() => { setShowPoModal(false); resetPoForm(); }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-3 sm:p-5 animate-in fade-in duration-200" role="presentation" aria-hidden="true" onClick={() => { setShowPoModal(false); resetPoForm(); }}>
           <form
             onSubmit={handleCreatePoSubmit}
             onClick={(e) => e.stopPropagation()}
@@ -1010,7 +1037,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                 <select
                   value={poSupplierId}
                   onChange={(e) => setPoSupplierId(e.target.value)}
-                  className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm text-ink outline-none "
+                  className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
                 >
                   <option value="">Choose supplier…</option>
                   {suppliers.map((s) => (
@@ -1045,7 +1072,7 @@ export const SupplierRmaModule: React.FC<SupplierRmaModuleProps> = ({
                             )
                           );
                         }}
-                        className="min-w-0 flex-1 rounded-lg border border-line bg-white px-2 py-1.5 text-xs text-ink outline-none "
+                        className="min-w-0 flex-1 rounded-lg border border-line bg-white px-2 py-1.5 text-xs text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
                       >
                         <option value="">Part…</option>
                         {parts.map((p) => (

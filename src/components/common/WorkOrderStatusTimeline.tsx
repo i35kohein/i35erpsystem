@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Button , Input } from '../ui';
+import { toast } from '../../lib/toast';
 import {Clock, 
   CheckCircle2, 
   Cog, 
@@ -32,7 +33,7 @@ export const MAIN_STATUS_PIPELINE: { status: WorkOrderStatus; label: string; des
   { status: 'In Progress', label: 'In Progress', desc: 'Active Hardware Repair', icon: Cog, color: 'text-brand border-brand/60 bg-brand/25', badge: 'bg-brand/15 text-brand-deep border-brand/30' },
   { status: 'Pending', label: 'Pending', desc: 'Awaiting Parts or Client Approval', icon: Clock, color: 'text-warning border-warning/50 bg-warning/20', badge: 'bg-warning/15 text-warning border-warning/30' },
   { status: 'Finished', label: 'Finished', desc: 'QA Passed & Ready for Pickup', icon: CheckCircle2, color: 'text-success border-success/50 bg-success/20', badge: 'bg-success/15 text-success-deep border-success/30' },
-  { status: 'Taken Out', label: 'Taken Out', desc: 'Paid & Returned to Customer', icon: ShieldCheck, color: 'text-muted border-slate-700 bg-ink/80', badge: 'bg-line text-ink border-line' },
+  { status: 'Taken Out', label: 'Taken Out', desc: 'Paid & Returned to Customer', icon: ShieldCheck, color: 'text-slate-300 border-slate-600 bg-slate-800/60', badge: 'bg-line text-ink border-line' },
 ];
 
 export interface FormattedAuditItem {
@@ -215,7 +216,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
     if (!onSaveWorkOrder && !onUpdateStatus) {
       setNewLogNote('');
       setIsAddingLog(false);
-      if (typeof window !== 'undefined') window.alert?.('Save is unavailable here — open the ticket from Intake/Pipeline to publish transition logs.');
+      toast.error('Save is unavailable here — open the ticket from Intake/Pipeline to publish transition logs.', 'Read-only mode');
       return;
     }
 
@@ -274,9 +275,12 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
       summaryText += `${item.note}\n`;
     });
 
-    navigator.clipboard.writeText(summaryText);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2500);
+    navigator.clipboard.writeText(summaryText)
+      .then(() => {
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2500);
+      })
+      .catch(() => toast.error('Copy failed — please copy manually'));
   };
 
   return (
@@ -340,7 +344,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedStageFilter(selectedStageFilter === stage.status ? 'ALL' : stage.status); }
                   }}
-                  className={`p-2.5 rounded-xl border transition-all cursor-pointer relative overflow-hidden ${
+                  className={`p-2.5 rounded-xl border transition-all cursor-pointer relative overflow-hidden focus-visible:ring-2 focus-visible:ring-brand/60 ${
                     selectedStageFilter === stage.status
                       ? 'ring-2 ring-white border-white bg-white/20'
                       : isCurrent
@@ -366,7 +370,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
 
                   <p className="text-xs text-slate-300 line-clamp-1 leading-tight">{stage.desc}</p>
 
-                  <div className="flex justify-between items-center mt-2 pt-1 border-t border-white/10 text-xs text-muted">
+                  <div className="flex justify-between items-center mt-2 pt-1 border-t border-white/10 text-xs text-slate-400">
                     <span>{isCurrent ? 'Current Stage' : isPassed ? 'Completed' : 'Upcoming'}</span>
                     {logCount > 0 && (
                       <span className="font-mono font-bold bg-white/20 text-white px-1.5 rounded">
@@ -413,8 +417,9 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div>
-              <label className="block font-bold text-ink mb-1">Target Status Transition</label>
+              <label className="block font-bold text-ink mb-1" htmlFor="timeline-target-status">Target Status Transition</label>
               <select
+                id="timeline-target-status"
                 value={targetStatus}
                 onChange={(e) => setTargetStatus(e.target.value as WorkOrderStatus)}
                 className="w-full bg-white border border-line rounded-xl px-3 py-1.5 text-xs font-bold text-ink focus:outline-none"
@@ -462,8 +467,9 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
             </div>
 
             <div>
-              <label className="block font-bold text-ink mb-1">Technician / Author Name</label>
+              <label className="block font-bold text-ink mb-1" htmlFor="timeline-log-author">Technician / Author Name</label>
               <Input
+                id="timeline-log-author"
                 type="text"
                 value={newLogAuthor}
                 onChange={(e) => setNewLogAuthor(e.target.value)}
@@ -474,8 +480,9 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
           </div>
 
           <div>
-            <label className="block font-bold text-ink mb-1">Audit Log Note & Repair Evidence *</label>
+            <label className="block font-bold text-ink mb-1" htmlFor="timeline-log-note">Audit Log Note & Repair Evidence *</label>
             <textarea
+              id="timeline-log-note"
               rows={3}
               value={newLogNote}
               onChange={(e) => setNewLogNote(e.target.value)}
@@ -495,6 +502,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
             <Button
               type="button"
               onClick={handleAddNewTransitionLog}
+              disabled={!newLogNote.trim()}
               className="px-4 py-1.5 bg-brand hover:bg-brand-deep text-white font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center space-x-1 cursor-pointer"
             >
               <Send className="w-3.5 h-3.5" />
@@ -509,7 +517,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 bg-surface p-2.5 rounded-2xl border border-line">
           {/* Search Bar */}
           <div className="relative w-full sm:w-72">
-            <Search className="w-3.5 h-3.5 text-muted absolute left-3 top-2.5" />
+            <Search className="w-3.5 h-3.5 text-muted absolute left-3 top-1/2 -translate-y-1/2" />
             <Input
               type="text"
               value={searchQuery}
@@ -532,7 +540,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
                 key={pill.id}
                 type="button"
                 onClick={() => setFilterType(pill.id)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`px-2.5 py-1 min-h-9 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   filterType === pill.id ? 'bg-brand text-white' : 'bg-white text-ink hover:bg-line'
                 }`}
               >
@@ -545,7 +553,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
 
       {/* SECTION 4: Interactive Chronological Audit Timeline */}
       {filteredAuditItems.length > 0 ? (
-        <div className="relative pl-6 sm:pl-8 space-y-5 before:absolute before:left-3 sm:before:left-4 before:top-3 before:bottom-3 before:w-0.5 before:bg-gradient-to-b before:from-brand before:via-purple before:to-success">
+        <div className="relative pl-(--timeline-rail) space-y-5 before:absolute before:left-[calc(var(--timeline-rail)/2)] before:top-3 before:bottom-3 before:w-0.5 before:bg-gradient-to-b before:from-brand before:via-purple before:to-success [--timeline-rail:1.5rem] sm:[--timeline-rail:2rem]">
           {filteredAuditItems.map((item) => {
 
             // Determine Icon & Styling by Event Type
@@ -584,7 +592,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
             return (
               <div key={item.id} className="relative group">
                 {/* Node Point on Left Line */}
-                <div className={`absolute -left-6 sm:-left-8 top-3 w-6 h-6 rounded-full flex items-center justify-center ${iconBg} shadow-sm z-10 transition-transform group-hover:scale-110`}>
+                <div className={`absolute -left-[calc((var(--timeline-rail)+1.5rem)/2)] top-3 w-6 h-6 rounded-full flex items-center justify-center ${iconBg} shadow-sm z-10 transition-transform group-hover:scale-110`}>
                   <IconComponent className="w-3.5 h-3.5" />
                 </div>
 
@@ -643,7 +651,7 @@ export const WorkOrderStatusTimeline: React.FC<WorkOrderStatusTimelineProps> = (
           })}
         </div>
       ) : (
-        <div className="p-8 text-center text-muted bg-surface rounded-2xl border border-dashed border-line">
+        <div className="p-8 text-center text-muted bg-surface rounded-2xl border border-dashed border-line-strong">
           <Search className="w-8 h-8 text-muted/40 mx-auto mb-2" />
           <p className="font-extrabold text-xs text-ink">No Status Transition Events Found</p>
           <p className="text-xs text-muted mt-0.5">Adjust keywords or filters.</p>

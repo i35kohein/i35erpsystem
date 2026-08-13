@@ -175,6 +175,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   };
   const handleToggleLowStockOnly = () => setShowLowStockOnly(!showLowStockOnly);
   const [skuFilterOpen, setSkuFilterOpen] = useState(false);
+  // Bulk "Set Reorder Point" uses a styled modal, not a native window.prompt (audit P2).
+  const [bulkReorderOpen, setBulkReorderOpen] = useState(false);
+  const [bulkReorderValue, setBulkReorderValue] = useState('');
 
   // Supplier & Quality Tier Edit States
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
@@ -325,14 +328,21 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     toast.success(`${selectedParts.length} part(s) exported`, 'CSV Exported');
   };
   const bulkSetReorder = () => {
-    const input = window.prompt(`Set reorder point for ${selectedParts.length} selected part(s) to:`);
-    const value = Number(input);
-    if (input === null || Number.isNaN(value) || value < 0) return;
+    setBulkReorderValue('');
+    setBulkReorderOpen(true);
+  };
+  const confirmBulkSetReorder = () => {
+    const value = Number(bulkReorderValue);
+    if (Number.isNaN(value) || value < 0) {
+      toast.error('Reorder point must be a non-negative number.', 'Bulk Update');
+      return;
+    }
     selectedParts.forEach((p) => {
       onUpdatePart?.({ ...p, reorderPoint: value });
     });
     toast.success(`Reorder point set to ${value} for ${selectedParts.length} part(s)`, 'Bulk Update');
     clearSelection();
+    setBulkReorderOpen(false);
   };
   const bulkDelete = async () => {
     const ok = await confirmDialog({ title: 'Delete Parts', message: `Delete ${selectedParts.length} selected part(s)? This cannot be undone.`, confirmLabel: `Delete ${selectedParts.length} Parts`, danger: true });
@@ -1102,7 +1112,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           }
           setShowInlineSaveConfirm(true);
           }}
-          className="flex-1 sm:flex-none inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-brand bg-brand px-4 text-xs font-extrabold text-white shadow-xs transition-all hover:bg-brand-deep active:scale-95"
+          disabled={!inlineSaveReview.length}
+          className="flex-1 sm:flex-none inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-brand bg-brand px-4 text-xs font-extrabold text-white shadow-xs transition-all hover:bg-brand-deep active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
           title="Save all inline edits"
           >
           <Check className="h-4 w-4" />
@@ -1129,8 +1140,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               </span>
             </div>
             <div className="flex items-center gap-1.5 mt-1.5">
-              <span className="rounded bg-brand/10 px-1.5 py-0.5 text-[10px] font-black text-brand">APP {metrics.ownerCounts.APP || 0}</span>
-              <span className="rounded bg-success/10 px-1.5 py-0.5 text-[10px] font-black text-success-deep">KZH {metrics.ownerCounts.KZH || 0}</span>
+              <span className="rounded bg-brand/10 px-2 py-1 text-[11px] font-black text-brand">APP {metrics.ownerCounts.APP || 0}</span>
+              <span className="rounded bg-success/10 px-2 py-1 text-[11px] font-black text-success-deep">KZH {metrics.ownerCounts.KZH || 0}</span>
             </div>
           </div>
         </div>
@@ -1277,7 +1288,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           <Button
             type="button"
             onClick={() => handleToggleLowStockOnly()}
-            className={`w-full flex items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-xs transition-all cursor-pointer active:scale-[0.99] ${
+            className={`w-full flex items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-xs transition-all cursor-pointer active:scale-95 ${
               showLowStockOnly
                 ? 'bg-warning border-amber-600 text-white'
                 : 'bg-warning/10 hover:bg-warning/15 border-warning/30 text-warning'
@@ -1367,7 +1378,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         onClick={() => setSelectedPartForDetails(part)}
                         aria-label={`View ${part.name} details`}
                         title="View part details"
-                        className="inline-flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors hover:border-brand hover:bg-brand-soft hover:text-brand"
+                        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors hover:border-brand hover:bg-brand-soft hover:text-brand"
                       >
                         <FileText className="h-3.5 w-3.5" />
                       </Button>
@@ -1400,7 +1411,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         <div className="flex items-center gap-1.5">
                           <Button variant="ghost"
                             type="button"
-                            onClick={() => { onUpdatePartStock(part.id, Math.max(0, part.quantityInStock - 1)); toast.info(`${part.name}: ${Math.max(0, part.quantityInStock - 1)} units`, 'Stock −1'); }}
+                            onClick={() => { onUpdatePartStock(part.id, Math.max(0, part.quantityInStock - 1)); }}
                             aria-label={`Decrease stock for ${part.name}`}
                             title="Decrease stock"
                             className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg border border-warning/30 bg-white font-black text-danger active:scale-95"
@@ -1408,7 +1419,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                           <span className="min-w-10 text-center font-mono text-base font-black text-ink">{part.quantityInStock}</span>
                           <Button variant="ghost"
                             type="button"
-                            onClick={() => { onUpdatePartStock(part.id, part.quantityInStock + 1); toast.success(`${part.name}: ${part.quantityInStock + 1} units`, 'Stock +1'); }}
+                            onClick={() => { onUpdatePartStock(part.id, part.quantityInStock + 1); }}
                             aria-label={`Increase stock for ${part.name}`}
                             title="Increase stock"
                             className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg border border-warning/30 bg-white font-black text-brand active:scale-95"
@@ -1468,7 +1479,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         <span className="font-mono text-sm font-black text-success-deep">{part.sellingPrice.toLocaleString()} {currency}</span>
                       </div>
                       {part.supplierName && (
-                        <span className="max-w-[45%] truncate text-xs font-semibold text-muted">{part.supplierName}</span>
+                        <span className="max-w-[45%] truncate text-xs font-semibold text-muted" title={part.supplierName}>{part.supplierName}</span>
                       )}
                     </div>
                   </div>
@@ -1482,7 +1493,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 <thead className="sticky top-0 z-20 bg-surface text-muted text-xs uppercase font-mono border-b border-line shadow-2xs">
                   <tr>
                     {!inlineEditMode && (
-                      <th className="w-[40px] px-2 py-2 bg-surface">
+                      <th className="w-[40px] px-2.5 py-2 bg-surface">
                         <Input
                           type="checkbox"
                           checked={paginatedParts.length > 0 && paginatedParts.every((p) => selectedPartIds.has(p.id))}
@@ -1492,7 +1503,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         />
                       </th>
                     )}
-                    <th className="w-[28%] min-w-[220px] px-2 py-2 bg-surface">
+                    <th className="w-[28%] min-w-[220px] px-2.5 py-2 bg-surface">
                       <div className="flex items-center gap-1">
                         <Button type="button" onClick={() => toggleSort('name')} className="inline-flex items-center gap-1 hover:text-brand transition-colors cursor-pointer uppercase font-mono text-xs focus:outline-none" title="Sort by part name">
                           Part Name & SKU
@@ -1518,6 +1529,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                                 <div>
                                   <p className="text-[10px] font-extrabold uppercase tracking-wide text-muted mb-1">Model</p>
                                   <select
+                                    aria-label="Filter by model"
                                     value={selectedModelFilter}
                                     onChange={(e) => setSelectedModelFilter(e.target.value)}
                                     className="w-full rounded-lg border border-line bg-white px-2 py-1.5 text-xs font-semibold text-ink outline-none "
@@ -1530,6 +1542,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                                 <div>
                                   <p className="text-[10px] font-extrabold uppercase tracking-wide text-muted mb-1">Category</p>
                                   <select
+                                    aria-label="Filter by category"
                                     value={selectedCategory}
                                     onChange={(e) => setSelectedCategory(e.target.value)}
                                     className="w-full rounded-lg border border-line bg-white px-2 py-1.5 text-xs font-semibold text-ink outline-none "
@@ -1542,6 +1555,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                                 <div>
                                   <p className="text-[10px] font-extrabold uppercase tracking-wide text-muted mb-1">Owner</p>
                                   <select
+                                    aria-label="Filter by owner"
                                     value={ownerFilter}
                                     onChange={(e) => setOwnerFilter(e.target.value as 'ALL' | PartOwner)}
                                     className="w-full rounded-lg border border-line bg-white px-2 py-1.5 text-xs font-semibold text-ink outline-none "
@@ -1560,13 +1574,22 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                                   />
                                   Low stock only
                                 </label>
+                                <div className="pt-1.5 mt-1 border-t border-line">
+                                  <Button
+                                    type="button"
+                                    onClick={() => setSkuFilterOpen(false)}
+                                    className="w-full rounded-lg bg-brand px-2 py-1.5 text-xs font-extrabold text-white shadow-xs transition-all hover:bg-brand-deep active:scale-95"
+                                  >
+                                    Done
+                                  </Button>
+                                </div>
                               </div>
                             </>
                           )}
                         </div>
                       </div>
                     </th>
-                    <th className="w-[12%] min-w-[110px] px-2 py-2 bg-surface hidden md:table-cell">
+                    <th className="w-[12%] min-w-[110px] px-2.5 py-2 bg-surface hidden md:table-cell">
                       <CustomDropdownMenu
                         value={selectedQuality}
                         onChange={setSelectedQuality}
@@ -1592,8 +1615,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       </Button>
                     </th>
                     {inlineEditMode && <th className="w-[13%] min-w-[110px] px-1.5 py-2 bg-surface">Supplier</th>}
-                    <th className="w-[10%] min-w-[96px] px-2 py-2 bg-surface hidden md:table-cell">Bin</th>
-                    {!inlineEditMode && <th className="w-[12%] min-w-[80px] px-2 py-2 text-right bg-surface">Detail</th>}
+                    <th className="w-[10%] min-w-[96px] px-2.5 py-2 bg-surface hidden md:table-cell">Bin</th>
+                    {!inlineEditMode && <th className="w-[12%] min-w-[80px] px-2.5 py-2 text-right bg-surface">Detail</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">
@@ -1608,7 +1631,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       <tr key={part.id} className={`transition-colors ${selectedPartIds.has(part.id) ? 'bg-brand-soft' : ''}`}>
                         {/* Selection checkbox */}
                         {!inlineEditMode && (
-                          <td className="px-2 py-2">
+                          <td className="px-2.5 py-2">
                             <Input
                               type="checkbox"
                               checked={selectedPartIds.has(part.id)}
@@ -1619,7 +1642,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                           </td>
                         )}
                         {/* Part Name & SKU */}
-                        <td className="w-[28%] min-w-[220px] px-2 py-2 space-y-1">
+                        <td className="w-[28%] min-w-[220px] px-2.5 py-2 space-y-1">
                           <div className="flex items-start space-x-2">
                             <div className="p-1 rounded-md bg-brand/10 text-brand-deep shrink-0 mt-0.5">
                               <Cpu className="w-3 h-3" />
@@ -1643,7 +1666,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         </td>
 
                         {/* Quality Tier */}
-                        <td className="w-[12%] min-w-[110px] px-2 py-2 hidden md:table-cell">
+                        <td className="w-[12%] min-w-[110px] px-2.5 py-2 hidden md:table-cell">
                           {part.qualityTier === 'Original' || part.qualityTier?.includes('Original') ? (
                             <span className="inline-flex max-w-[112px] items-center gap-1 truncate rounded-md border border-brand/30 bg-brand-soft px-1.5 py-0.5 text-xs font-extrabold text-brand-deep">
                               <ShieldCheck className="h-3 w-3 shrink-0 text-brand" />
@@ -1717,7 +1740,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         </td>
 
                         {/* Selling price only — profit belongs in the Profit tab. */}
-                        <td className={`w-[13%] min-w-[110px] pl-3 pr-1.5 py-2 font-sans text-sm font-semibold text-success-deep whitespace-nowrap ${inlineEditMode ? '!w-[176px]' : ''}`}>
+                        <td className={`w-[13%] min-w-[110px] pl-3 pr-1.5 py-2 font-sans text-sm font-semibold tabular-nums text-success-deep whitespace-nowrap ${inlineEditMode ? '!w-[176px]' : ''}`}>
                           {inlineEditMode ? (
                             <div className="grid grid-cols-2 gap-2">
                               <label className="flex min-w-0 flex-col gap-0.5 text-xs font-bold uppercase tracking-wide text-muted">
@@ -1817,7 +1840,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <span className="font-bold">
                 Showing all <strong className="text-ink">{filteredParts.length}</strong> parts
               </span>
-              <span className="font-bold text-ink">{filteredParts.length} items</span>
+              {selectedPartIds.size > 0 && (
+                <span className="font-bold text-ink">{selectedPartIds.size} selected</span>
+              )}
             </div>
           )}
         </div>
@@ -1912,7 +1937,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         onClick={() => setSelectedPartForDetails(part)}
                         aria-label={`View ${part.name} details`}
                         title="View part details"
-                        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors hover:border-brand hover:bg-brand-soft hover:text-brand"
+                        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors hover:border-brand hover:bg-brand-soft hover:text-brand"
                       >
                         <Eye className="h-3.5 w-3.5" />
                       </Button>
@@ -1920,15 +1945,15 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     <div className="grid grid-cols-3 gap-1.5 sm:gap-2 rounded-lg sm:rounded-xl border border-line bg-surface p-2 sm:p-3">
                       <div>
                         <p className="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-muted">Cost</p>
-                        <p className="mt-0.5 font-mono text-xs font-bold text-faint break-words">{part.costPrice.toLocaleString()}</p>
+                        <p className="mt-0.5 font-mono text-xs font-bold text-faint break-words">{part.costPrice.toLocaleString()} {currency}</p>
                       </div>
                       <div>
                         <p className="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-muted">Selling</p>
-                        <p className="mt-0.5 font-mono text-xs font-bold text-success-deep break-words">{part.sellingPrice.toLocaleString()}</p>
+                        <p className="mt-0.5 font-mono text-xs font-bold text-success-deep break-words">{part.sellingPrice.toLocaleString()} {currency}</p>
                       </div>
                       <div>
                         <p className="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-muted">Profit</p>
-                        <p className={`mt-0.5 font-mono text-xs font-black break-words ${profit >= 0 ? 'text-brand' : 'text-danger'}`}>{profit >= 0 ? '+' : ''}{profit.toLocaleString()}</p>
+                        <p className={`mt-0.5 font-mono text-xs font-black break-words ${profit >= 0 ? 'text-brand' : 'text-danger'}`}>{profit >= 0 ? '+' : ''}{profit.toLocaleString()} {currency}</p>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
@@ -1943,12 +1968,12 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
             <table className="w-full text-left hidden sm:table">
               <thead className="sticky top-0 z-20 border-b border-line bg-surface font-mono text-xs uppercase text-muted">
                 <tr>
-                  <th className="p-2.5">Part</th>
-                  <th className="p-2.5 hidden md:table-cell">Cost</th>
-                  <th className="p-2.5">Selling</th>
-                  <th className="p-2.5">Profit / Unit</th>
-                  <th className="p-2.5 hidden sm:table-cell">Margin</th>
-                  <th className="p-2.5 text-right">Detail</th>
+                  <th className="px-2.5 py-2">Part</th>
+                  <th className="px-2.5 py-2 hidden md:table-cell">Cost</th>
+                  <th className="px-2.5 py-2">Selling</th>
+                  <th className="px-2.5 py-2">Profit / Unit</th>
+                  <th className="px-2.5 py-2 hidden sm:table-cell">Margin</th>
+                  <th className="px-2.5 py-2 text-right">Detail</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
@@ -1963,12 +1988,12 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     'bg-danger/15 text-danger';
                   return (
                     <tr key={part.id} className="">
-                      <td className="p-2.5"><p className="max-w-[260px] truncate font-bold text-ink">{part.name}</p><p className="mt-0.5 font-mono text-xs text-muted">{part.sku}</p></td>
-                      <td className="p-2.5 font-mono text-faint whitespace-nowrap hidden md:table-cell">{part.costPrice.toLocaleString()} {currency}</td>
-                      <td className="p-2.5 font-mono font-bold text-success-deep whitespace-nowrap">{part.sellingPrice.toLocaleString()} {currency}</td>
-                      <td className={`p-2.5 font-mono font-black whitespace-nowrap ${profit >= 0 ? 'text-brand' : 'text-danger'}`}>{profit >= 0 ? '+' : ''}{profit.toLocaleString()} {currency}<span className={`mt-0.5 block w-max rounded-md px-1.5 py-0.5 font-mono text-xs font-black sm:hidden ${heat}`}>{margin}%</span></td>
-                      <td className="p-2.5 hidden sm:table-cell"><span className={`rounded-md px-1.5 py-0.5 font-mono text-xs font-black ${heat}`} title={margin >= 40 ? 'High margin' : margin >= 20 ? 'Good margin' : margin >= 0 ? 'Low margin' : 'Loss'}>{margin}%</span></td>
-                      <td className="p-2.5 text-right"><Button variant="ghost" type="button" aria-label={`View ${part.name} details`} title="View part details" onClick={() => setSelectedPartForDetails(part)} className="inline-flex h-10 w-10 lg:h-7 lg:w-7 items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand"><Eye className="h-3 w-3" /></Button></td>
+                      <td className="px-2.5 py-2"><p className="max-w-[260px] truncate font-bold text-ink">{part.name}</p><p className="mt-0.5 font-mono text-xs text-muted">{part.sku}</p></td>
+                      <td className="px-2.5 py-2 font-mono text-faint whitespace-nowrap hidden md:table-cell">{part.costPrice.toLocaleString()} {currency}</td>
+                      <td className="px-2.5 py-2 font-mono font-bold text-success-deep whitespace-nowrap">{part.sellingPrice.toLocaleString()} {currency}</td>
+                      <td className={`px-2.5 py-2 font-mono font-black whitespace-nowrap ${profit >= 0 ? 'text-brand' : 'text-danger'}`}>{profit >= 0 ? '+' : ''}{profit.toLocaleString()} {currency}<span className={`mt-0.5 block w-max rounded-md px-1.5 py-0.5 font-mono text-xs font-black sm:hidden ${heat}`}>{margin}%</span></td>
+                      <td className="px-2.5 py-2 hidden sm:table-cell"><span className={`rounded-md px-1.5 py-0.5 font-mono text-xs font-black ${heat}`} title={margin >= 40 ? 'High margin' : margin >= 20 ? 'Good margin' : margin >= 0 ? 'Low margin' : 'Loss'}>{margin}%</span></td>
+                      <td className="px-2.5 py-2 text-right"><Button variant="ghost" type="button" aria-label={`View ${part.name} details`} title="View part details" onClick={() => setSelectedPartForDetails(part)} className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand"><Eye className="h-3 w-3" /></Button></td>
                     </tr>
                   );
                 })}
@@ -1987,7 +2012,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <span className="font-bold">
                 Showing all <strong className="text-ink">{filteredParts.length}</strong> parts
               </span>
-              <span className="font-bold text-ink">{filteredParts.length} items</span>
+              {selectedPartIds.size > 0 && (
+                <span className="font-bold text-ink">{selectedPartIds.size} selected</span>
+              )}
             </div>
           )}
         </div>
@@ -2060,7 +2087,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                                 className={`min-w-12 min-h-8 sm:min-w-14 md:min-h-8 rounded-lg border px-2 py-1 font-mono text-xs font-black ${
                                   quantity === 0 ? 'border-danger/30 bg-danger/10 text-danger' : isLow ? 'border-warning/30 bg-warning/10 text-warning' : 'border-success/30 bg-success/10 text-success-deep'
                                 }`}
-                                title={`${matchingParts.length} SKU${matchingParts.length === 1 ? '' : 's'} · ${quantity} units · Cost ${costValue.toLocaleString()} {currency} · Retail ${retailValue.toLocaleString()} {currency}${sharedLabel}`}
+                                title={`${matchingParts.length} SKU${matchingParts.length === 1 ? '' : 's'} · ${quantity} units · Cost ${costValue.toLocaleString()} ${currency} · Retail ${retailValue.toLocaleString()} ${currency}${sharedLabel}`}
                               >
                                 {quantity}
                                 {/* Touch fallback for the title= tooltip (invisible on
@@ -2100,9 +2127,45 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         </div>
       )}
 
+      {/* MODAL: BULK SET REORDER POINT — styled replacement for the old native prompt (audit P2) */}
+      {bulkReorderOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-sm space-y-4 rounded-2xl border border-line-strong bg-white p-5 text-xs shadow-2xl">
+            <div className="flex items-start justify-between gap-2 border-b border-line pb-2">
+              <div>
+                <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-brand">Bulk update</p>
+                <h3 className="mt-0.5 text-sm font-black text-ink">Set reorder point</h3>
+                <p className="mt-0.5 text-xs font-semibold text-ink">{selectedParts.length} selected part(s)</p>
+              </div>
+              <Button variant="ghost" type="button" onClick={() => setBulkReorderOpen(false)} aria-label="Close" title="Close" className="rounded-lg p-1 text-ink hover:bg-surface hover:text-brand">
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+            <Input
+              type="number"
+              min={0}
+              autoFocus
+              value={bulkReorderValue}
+              onChange={(e) => setBulkReorderValue(e.target.value)}
+              placeholder="e.g. 5"
+              aria-label="Reorder point value"
+              className="w-full rounded-lg border border-line bg-surface px-2.5 py-1.5 text-xs font-mono font-bold text-ink focus:bg-white focus:outline-none"
+            />
+            <div className="flex justify-end gap-2 border-t border-line pt-3">
+              <Button variant="ghost" type="button" onClick={() => setBulkReorderOpen(false)} className="rounded-lg border border-line bg-white px-4 py-2 text-xs font-bold text-ink hover:bg-surface">
+                Cancel
+              </Button>
+              <Button type="button" onClick={confirmBulkSetReorder} className="rounded-lg bg-brand px-4 py-2 text-xs font-extrabold text-white shadow-xs transition-all hover:bg-brand-deep active:scale-95">
+                Apply to {selectedParts.length} Part(s)
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* MODAL: ADD NEW PART */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="flex max-h-[85vh] min-h-0 w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-line bg-white text-xs shadow-2xl">
             <div className={isDeviceModelChooserOpen ? 'hidden' : 'contents'}>
             <div className="flex shrink-0 items-center justify-between border-b border-line px-4 py-2.5">
@@ -2114,6 +2177,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 onClick={() => setShowAddModal(false)}
                 variant="iconGhost"
                 className="p-1"
+                aria-label="Close"
+                title="Close"
               >
                 <X className="w-5 h-5" />
               </Button>
@@ -2137,6 +2202,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         onClick={() => applyPartSpecification({ deviceCompatibility: newPartData.deviceCompatibility.filter((_, i) => i !== idx) })}
                         className="ml-0.5 rounded-full p-0.5 hover:bg-brand/20 transition-colors"
                         title={`Remove ${device}`}
+                        aria-label={`Remove ${device}`}
                       >
                         <X className="h-3 w-3" />
                       </Button>
@@ -2340,7 +2406,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               </div>
 
               <div>
-                <label className="block font-bold text-ink mb-1">Cost Price ' {currency}')</label>
+                <label className="block font-bold text-ink mb-1">Cost Price ({currency})</label>
                 <Input
                   type="number"
                   value={newPartData.costPrice || ''}
@@ -2350,7 +2416,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               </div>
 
               <div>
-                <label className="block font-bold text-ink mb-1">Selling Price ' {currency}')</label>
+                <label className="block font-bold text-ink mb-1">Selling Price ({currency})</label>
                 <Input
                   type="number"
                   value={newPartData.sellingPrice || ''}
@@ -2455,7 +2521,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <Button variant="ghost"
                 type="button"
                 onClick={() => setShowAddModal(false)}
-                className="rounded-lg border border-line bg-white px-3 py-2 text-xs font-bold text-ink hover:bg-surface"
+                className="rounded-lg border border-line bg-white px-4 py-2 text-xs font-bold text-ink hover:bg-surface"
               >
                 Cancel
               </Button>
@@ -2506,7 +2572,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
       {/* MODAL: EDIT PART DETAILS */}
       {editingPart && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="bg-white border border-line rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-5 space-y-3 text-xs shadow-2xl">
             <div className="flex justify-between items-center border-b border-line pb-3">
               <h3 className="text-sm font-extrabold text-ink flex items-center space-x-2">
@@ -2516,6 +2582,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <Button variant="ghost"
                 onClick={() => setEditingPart(null)}
                 className="text-muted hover:text-ink"
+                aria-label="Close"
+                title="Close"
               >
                 <X className="w-4 h-4" />
               </Button>
@@ -2528,7 +2596,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                   type="text"
                   value={editingPart.name}
                   onChange={(e) => setEditingPart({ ...editingPart, name: e.target.value })}
-                  className="w-full bg-surface border border-line rounded-xl p-2.5 text-xs font-bold text-ink"
+                  className="w-full bg-surface border border-line rounded-xl p-2.5 text-xs font-bold text-ink focus:bg-white focus:outline-none"
                 />
               </div>
 
@@ -2545,6 +2613,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                           onClick={() => setEditingPart({ ...editingPart, deviceCompatibility: editingPart.deviceCompatibility.filter((_, i) => i !== idx) })}
                           className="ml-0.5 rounded-full p-0.5 hover:bg-brand/20 transition-colors"
                           title={`Remove ${device}`}
+                          aria-label={`Remove ${device}`}
                         >
                           <X className="h-3 w-3" />
                         </Button>
@@ -2599,7 +2668,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     type="number"
                     value={editingPart.quantityInStock}
                     onChange={(e) => setEditingPart({ ...editingPart, quantityInStock: Number(e.target.value) })}
-                    className="w-full bg-surface border border-line rounded-xl p-2.5 text-xs font-mono font-bold text-ink"
+                    className="w-full bg-surface border border-line rounded-xl p-2.5 text-xs font-mono font-bold text-ink focus:bg-white focus:outline-none"
                   />
                 </div>
 
@@ -2609,27 +2678,27 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     type="number"
                     value={editingPart.reorderPoint}
                     onChange={(e) => setEditingPart({ ...editingPart, reorderPoint: Number(e.target.value) })}
-                    className="w-full bg-surface border border-line rounded-xl p-2.5 text-xs font-mono text-ink"
+                    className="w-full bg-surface border border-line rounded-xl p-2.5 text-xs font-mono text-ink focus:bg-white focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-bold text-ink mb-1">Cost Price ' {currency}')</label>
+                  <label className="block font-bold text-ink mb-1">Cost Price ({currency})</label>
                   <Input
                     type="number"
                     value={editingPart.costPrice}
                     onChange={(e) => setEditingPart({ ...editingPart, costPrice: Number(e.target.value) })}
-                    className="w-full bg-surface border border-line rounded-xl p-2.5 text-xs font-mono text-ink"
+                    className="w-full bg-surface border border-line rounded-xl p-2.5 text-xs font-mono text-ink focus:bg-white focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-bold text-ink mb-1">Selling Price ' {currency}')</label>
+                  <label className="block font-bold text-ink mb-1">Selling Price ({currency})</label>
                   <Input
                     type="number"
                     value={editingPart.sellingPrice}
                     onChange={(e) => setEditingPart({ ...editingPart, sellingPrice: Number(e.target.value) })}
-                    className="w-full bg-surface border border-line rounded-xl p-2.5 text-xs font-mono text-success-deep font-bold"
+                    className="w-full bg-surface border border-line rounded-xl p-2.5 text-xs font-mono text-success-deep font-bold focus:bg-white focus:outline-none"
                   />
                 </div>
               </div>
@@ -2709,7 +2778,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 <select
                   value={editingPart.qualityTier}
                   onChange={(e) => setEditingPart({ ...editingPart, qualityTier: e.target.value as any })}
-                  className="w-full bg-surface border border-line rounded-xl p-2.5 text-xs font-bold text-ink"
+                  className="w-full bg-surface border border-line rounded-xl p-2.5 text-xs font-bold text-ink focus:bg-white focus:outline-none"
                 >
                   {customQualityTiers.map((tier) => (
                     <option key={tier} value={tier}>
@@ -2766,7 +2835,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <Button
                 type="button"
                 onClick={handleSaveEditPart}
-                className="px-5 py-2 bg-brand hover:bg-brand-deep text-white font-extrabold rounded-xl shadow-xs"
+                className="px-4 py-2 bg-brand hover:bg-brand-deep text-white font-extrabold rounded-xl shadow-xs"
               >
                 Save Changes
               </Button>
@@ -2777,7 +2846,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
       {/* Device Model Chooser for Edit Part modal */}
       {isEditDeviceChooserOpen && editingPart && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
           <DeviceModelChooserModal
             isOpen
             onClose={() => setIsEditDeviceChooserOpen(false)}
@@ -2797,8 +2866,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
       {/* MODAL: FILE PARTS WARRANTY CLAIM */}
       {claimingWarrantyPart && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-line rounded-2xl max-w-lg w-full p-6 space-y-4 text-xs shadow-2xl">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white border border-line rounded-2xl max-w-lg w-full p-5 space-y-4 text-xs shadow-2xl">
             <div className="flex justify-between items-center border-b border-line pb-3">
               <h3 className="text-base font-extrabold text-ink flex items-center space-x-2">
                 <ShieldAlert className="w-5 h-5 text-warning" />
@@ -2807,6 +2876,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <Button variant="ghost"
                 onClick={() => setClaimingWarrantyPart(null)}
                 className="text-muted hover:text-ink p-1 rounded-lg"
+                aria-label="Close"
+                title="Close"
               >
                 <X className="w-5 h-5" />
               </Button>
@@ -2865,7 +2936,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 </div>
 
                 <div>
-                  <label className="block font-bold text-ink mb-1">Unit Cost ' {currency}')</label>
+                  <label className="block font-bold text-ink mb-1">Unit Cost ({currency})</label>
                   <Input
                     type="number"
                     value={warrantyForm.unitCost}
@@ -2924,7 +2995,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <Button
                 type="button"
                 onClick={handleSubmitWarrantyClaim}
-                className="px-5 py-2 bg-warning hover:bg-warning text-white font-extrabold rounded-xl shadow-xs flex items-center space-x-1.5 cursor-pointer"
+                className="px-4 py-2 bg-warning hover:brightness-95 text-white font-extrabold rounded-xl shadow-xs flex items-center space-x-1.5 cursor-pointer"
               >
                 <ShieldAlert className="w-4 h-4" />
                 <span>File Warranty Claim</span>
@@ -2937,7 +3008,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
       {/* MINI MODAL: QUICK ADD SUPPLIER */}
       {showAddSupplierMiniModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
           <form onSubmit={handleCreateSupplier} className="bg-white border border-line rounded-2xl max-w-md w-full p-5 space-y-4 text-xs shadow-2xl">
             <div className="flex justify-between items-center border-b border-line pb-2">
               <h4 className="font-extrabold text-ink text-sm flex items-center space-x-1.5">
@@ -2948,6 +3019,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 type="button"
                 onClick={() => setShowAddSupplierMiniModal(false)}
                 className="text-muted hover:text-ink"
+                aria-label="Close"
+                title="Close"
               >
                 <X className="w-4 h-4" />
               </Button>
@@ -3009,7 +3082,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
       {/* EDIT SUPPLIER MODAL */}
       {editingSupplier && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
           <form onSubmit={handleSaveEditSupplier} className="bg-white border border-line rounded-2xl max-w-md w-full p-5 space-y-4 text-xs shadow-2xl">
             <div className="flex justify-between items-center border-b border-line pb-2">
               <h4 className="font-extrabold text-ink text-sm flex items-center space-x-1.5">
@@ -3020,6 +3093,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 type="button"
                 onClick={() => setEditingSupplier(null)}
                 className="text-muted hover:text-ink"
+                aria-label="Close"
+                title="Close"
               >
                 <X className="w-4 h-4" />
               </Button>
@@ -3103,14 +3178,10 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
 
       {showInlineSaveConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="w-full max-w-3xl space-y-4 rounded-2xl border border-line-strong bg-white p-5 text-xs shadow-2xl">
             {(() => {
               const totalChangeCount = inlineSaveReview.reduce((count, item) => count + item.changes.length, 0);
-              const categoryChangeCount = inlineSaveReview.reduce(
-                (count, item) => count + item.changes.filter((change) => /category/i.test(change.label)).length,
-                0,
-              );
               return (
                 <>
             <div className="flex items-start justify-between gap-2 border-b border-line pb-2">
@@ -3124,14 +3195,10 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               </Button>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+            <div className="grid grid-cols-2 gap-2">
               <div className="rounded-xl border border-line bg-surface px-3 py-2">
                 <p className="text-xs font-bold uppercase tracking-wide text-muted">Total changes</p>
                 <p className="mt-0.5 text-sm font-black text-ink">{totalChangeCount}</p>
-              </div>
-              <div className="rounded-xl border border-line bg-surface px-3 py-2">
-                <p className="text-xs font-bold uppercase tracking-wide text-muted">Category changes</p>
-                <p className="mt-0.5 text-sm font-black text-ink">{categoryChangeCount}</p>
               </div>
               <div className="rounded-xl border border-line bg-surface px-3 py-2">
                 <p className="text-xs font-bold uppercase tracking-wide text-muted">Rows affected</p>

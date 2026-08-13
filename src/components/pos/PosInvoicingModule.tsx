@@ -21,7 +21,7 @@ import { PrintableInvoiceModal } from '../common/PrintableInvoiceModal';
 import { CustomerNotificationModal } from '../common/CustomerNotificationModal';
 import { toast } from '../../lib/toast';
 import { confirmDialog } from '../common/ConfirmDialog';
-import { normalizeText, INVENTORY_CATEGORY_GROUPS, repairSummaryOf } from './posUtils';
+import { normalizeText, INVENTORY_CATEGORY_GROUPS, repairSummaryOf, DIAGNOSTIC_FEE } from './posUtils';
 import { PosConfirmPaymentModal, PosAddPartModal, PosDigitalReceiptModal, PosPriceListPickerModal } from './PosModals';
 import { PosCheckoutPanel } from './PosCheckoutPanel';
 
@@ -889,7 +889,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
       });
       if (!ok) return;
     }
-    const diagFee = 5000; // 5000 MMK standard diagnostic inspection fee
+    const diagFee = DIAGNOSTIC_FEE; // standard diagnostic inspection fee (shared with checkout panel)
     const diagLines: WorkOrder['lineItems'] = [
       {
         id: 'diag-fee-item',
@@ -912,6 +912,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
       <PosCheckoutPanel
         selectedWo={selectedWo}
         currency={currency}
+        posOwner={posOwner}
         taxRate={taxRate}
         laborItems={laborItems}
         partsItems={partsItems}
@@ -942,7 +943,6 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
         setIsSheetEditMode={setIsSheetEditMode}
         isPaymentShort={isPaymentShort}
         isProcessingPayment={isProcessingPayment}
-        isMobileCheckoutFullOpen={isMobileCheckoutFullOpen}
         cashInputRef={cashInputRef}
         technicians={technicians}
         handleUpdateLineItem={handleUpdateLineItem}
@@ -968,7 +968,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     <div className={`space-y-2 md:h-[calc(100dvh-58px)] md:min-h-0 md:overflow-hidden ${isIpad ? 'flex min-h-0 flex-1 flex-col' : ''}`}>
       <div className={`flex flex-col md:h-full md:min-h-0 md:overflow-hidden md:flex-row gap-2 text-xs pb-16 md:pb-0 ${isIpad ? 'md:flex-1' : ''}`}>
         {/* Left Column: Select Work Order to Checkout (collapsible, hugs sidebar) */}
-        <div className={`bg-white border border-line rounded-xl p-2.5 space-y-2 shadow-xs shrink-0 ${
+        <div className={`bg-white border border-line rounded-xl p-2.5 space-y-2 shadow-xs shrink-0 transition-[width] duration-200 ${
           isQueueCollapsed ? 'md:w-32' : 'md:w-[340px]'
         } ${isIpad ? 'md:flex md:h-full md:flex-col md:min-h-0' : 'md:h-full md:self-stretch md:flex md:flex-col md:min-h-0 md:overflow-hidden'}`}>
           <div className="flex justify-between items-center border-b border-line pb-2">
@@ -993,9 +993,6 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       </button>
                     ))}
                   </div>
-                  <span className="text-xs font-mono font-bold bg-success/10 text-success-deep px-2 py-0.5 rounded-full border border-success/20">
-                    Checkout
-                  </span>
                   <Button
                     type="button"
                     onClick={() => setIsQueueCollapsed(true)}
@@ -1022,7 +1019,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
           </div>
 
           {!isQueueCollapsed && (
-          <div className={`space-y-2 overflow-y-auto pr-1 ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:flex-1 md:max-h-none' : 'min-h-[360px] max-h-[calc(100dvh-280px)] md:max-h-none md:flex-1 md:min-h-0'}`}>
+          <div className="space-y-2 overflow-y-auto pr-1 min-h-[360px] md:min-h-0 md:flex-1">
             {filteredWorkOrders.length === 0 ? (
               <div className="flex min-h-0 flex-1 flex-col items-center justify-center p-8 text-center text-muted space-y-2 bg-surface rounded-xl border border-dashed border-line-strong my-4">
                 <CheckCircle2 className="w-8 h-8 mx-auto text-success opacity-70" />
@@ -1051,7 +1048,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                         handleSelectWo();
                       }
                     }}
-                    className={`group cursor-pointer rounded-lg border bg-white p-2.5 shadow-2xs transition-all hover:shadow-md hover:border-ink/30 select-none ${
+                    className={`group cursor-pointer rounded-lg border bg-white p-2.5 shadow-2xs transition-all hover:shadow-md hover:border-ink/30 select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 ${
                       isSelected ? 'border-ink ring-2 ring-ink/10 bg-surface' : 'border-line'
                     }`}
                   >
@@ -1060,7 +1057,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       <span className="font-mono text-[11px] font-black text-ink truncate">{wo.orderNumber}</span>
                       <div className="flex items-center gap-1 shrink-0">
                         <PriorityBadge priority={wo.priority} size="xs" />
-                        <span className={`text-[9px] font-black px-1.5 py-px rounded uppercase ${
+                        <span aria-live="polite" className={`text-[10px] font-black px-1.5 py-px rounded uppercase ${
                           wo.isPaid ? 'bg-success text-white' : 'bg-warning text-white'
                         }`}>
                           {wo.isPaid ? 'PAID' : 'DUE'}
@@ -1101,7 +1098,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
           )}
 
           {isQueueCollapsed && filteredWorkOrders.length > 0 && (
-            <div className={`space-y-1.5 overflow-y-auto pr-1 ${isIpad ? 'md:flex md:flex-col md:min-h-0 md:flex-1 md:max-h-none' : 'min-h-[360px] max-h-[calc(100dvh-280px)] md:max-h-none md:flex-1 md:min-h-0'}`}>
+            <div className="space-y-1.5 overflow-y-auto pr-1 min-h-[360px] md:min-h-0 md:flex-1">
               {sortedQueue.map((wo) => {
                 const isSel = wo.id === selectedWoId;
                 return (
@@ -1122,11 +1119,11 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                     <span className={`font-mono text-[10px] font-black leading-tight ${isSel ? 'text-white' : 'text-ink'}`}>
                       {wo.orderNumber}
                     </span>
-                    <span className={`text-[9px] font-bold leading-tight truncate w-full ${isSel ? 'text-white/90' : 'text-ink'}`}>
+                    <span className={`text-[10px] font-bold leading-tight truncate w-full ${isSel ? 'text-white/90' : 'text-ink'}`}>
                       {wo.deviceModel}
                     </span>
-                    <span className={`text-[8px] font-black leading-tight ${isSel ? 'text-white/80' : 'text-muted'}`}>
-                      {wo.isPaid ? '✓ PAID' : '$ DUE'} · {wo.totalAmount.toLocaleString()}
+                    <span className={`text-[10px] font-black leading-tight ${isSel ? 'text-white/80' : 'text-muted'}`}>
+                      {wo.isPaid ? '✓ PAID' : '· DUE'} · {wo.totalAmount.toLocaleString()}
                     </span>
                   </Button>
                 );
@@ -1144,12 +1141,19 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
       {/* Mobile: full POS checkout popup — Pay tap opens the whole checkout (Ko Hein) */}
       {isMobileCheckoutFullOpen && selectedWo && (
         <div className="fixed inset-0 z-50 md:hidden bg-white flex flex-col pt-[calc(env(safe-area-inset-top)+8px)]">
-          <div className="sticky top-0 z-10 flex justify-end px-3 pt-1.5 shrink-0">
+          <div className="sticky top-0 z-10 flex items-center justify-between px-3 pt-1.5 shrink-0">
+            <Button
+              type="button"
+              onClick={() => setIsMobileCheckoutFullOpen(false)}
+              className="text-xs font-extrabold text-muted hover:text-ink px-2 py-1.5 rounded-lg hover:bg-surface transition-colors cursor-pointer"
+            >
+              Back
+            </Button>
             <Button
               type="button"
               onClick={() => setIsMobileCheckoutFullOpen(false)}
               aria-label="Close checkout"
-              className="text-muted hover:text-ink p-1.5 rounded transition-colors cursor-pointer focus:outline-none"
+              className="text-muted hover:text-ink p-3 rounded transition-colors cursor-pointer focus:outline-none"
             >
               <X className="w-4 h-4" />
             </Button>
@@ -1172,6 +1176,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                   disabled={isProcessingPayment || isPaymentShort || selectedWo.isPaid}
                   variant="success"
                   className="flex-1 max-w-[240px] py-3 hover:bg-success/90"
+                  title="You can backdate the checkout date in the confirm step."
                 >
                   <CreditCard className="w-4 h-4 shrink-0" />
                   <span className="truncate">Pay & Print Receipt</span>
@@ -1203,6 +1208,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
               disabled={isProcessingPayment}
               variant="success"
               className="flex-1 max-w-[220px] py-3 hover:bg-success/90"
+              title="You can backdate the checkout date in the confirm step."
             >
               <CreditCard className="w-4 h-4 shrink-0" />
               <span className="truncate hidden sm:inline">Pay & Print Receipt</span>
@@ -1265,6 +1271,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
         isOpen={isReceiptModalOpen}
         workOrder={selectedWo}
         paymentMethod={paymentMethod}
+        cashTendered={cashTendered}
         systemSettings={systemSettings}
         onClose={() => setIsReceiptModalOpen(false)}
         onFullInvoice={() => {

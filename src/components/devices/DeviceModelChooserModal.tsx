@@ -31,14 +31,42 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
   const [deviceSearchQuery, setDeviceSearchQuery] = useState('');
   const [activeFamilyTab, setActiveFamilyTab] = useState<'All' | 'iPhone' | 'iPad' | 'Apple Watch' | 'Mac' | 'Other'>('All');
 
-  // ESC closes the device chooser (embedded mode stays inert).
+  // ESC closes the device chooser (embedded mode stays inert). While open,
+  // lock body scroll and trap Tab focus inside the panel (audit F-P2).
   useEffect(() => {
     if (!isOpen || embedded) return;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    const panel = document.getElementById('device-model-chooser-panel');
+    panel?.focus();
+    document.body.style.overflow = 'hidden';
+
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (e.key === 'Tab' && panel) {
+        const focusables = panel.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusables.length === 0) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
     document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+      previousFocus?.focus();
+    };
   }, [isOpen, embedded, onClose]);
 
   if (!isOpen) return null;
@@ -47,11 +75,11 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
   const enabledFolders = folders.filter((f) => f.enabled);
 
   const chooserContent = (
-      <div className={`bg-white ${embedded ? 'h-full w-full' : 'w-full max-w-3xl max-h-[82vh] rounded-2xl border border-line shadow-2xl'} flex flex-col overflow-hidden`}>
+      <div id="device-model-chooser-panel" tabIndex={-1} className={`outline-none bg-white ${embedded ? 'h-full w-full' : 'w-full max-w-3xl max-h-[82vh] rounded-2xl border border-line shadow-2xl'} flex flex-col overflow-hidden`}>
         {/* Modal Header */}
         <div className="px-3.5 py-3 border-b border-line flex items-center justify-between bg-surface/80">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-ink text-white flex items-center justify-center font-bold shadow-2xs shrink-0">
+            <div className="w-10 h-10 rounded-lg bg-ink text-white flex items-center justify-center font-bold shadow-2xs shrink-0">
               <Folder className="w-4 h-4" />
             </div>
             <div className="min-w-0">
@@ -67,6 +95,8 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                   onClose();
                   onOpenSettings();
                 }}
+                aria-label="Folder Settings"
+                title="Folder Settings"
                 className="px-2.5 py-1.5 rounded-lg bg-white hover:bg-line text-ink font-extrabold text-xs border border-line transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
               >
                 <Settings className="w-3.5 h-3.5" />
@@ -78,7 +108,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
               onClick={onClose}
               aria-label="Close model chooser"
               title="Close model chooser"
-              className="w-8 h-8 rounded-full text-muted hover:text-ink hover:bg-surface transition-colors cursor-pointer flex items-center justify-center"
+              className="w-10 h-10 rounded-full text-muted hover:text-ink hover:bg-surface transition-colors cursor-pointer flex items-center justify-center"
             >
               <X className="w-4 h-4" />
             </Button>
@@ -113,7 +143,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                   disabled={count === 0 && fam.key !== 'All'}
                   title={count === 0 && fam.key !== 'All' ? 'No models available yet' : undefined}
                   variant="ghost"
-                  className={`shrink-0 rounded-full border px-2.5 !h-7 !min-h-0 text-xs font-extrabold transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:bg-ink focus-visible:text-white ${
+                  className={`shrink-0 rounded-full border px-2.5 h-9 text-xs font-extrabold transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:bg-ink focus-visible:text-white ${
                     isActive
                       ? 'bg-ink text-white border-transparent shadow-2xs'
                       : count === 0 && fam.key !== 'All'
@@ -135,7 +165,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
               placeholder="Type model name (e.g. 15 Pro, M2, Series 9)..."
               value={deviceSearchQuery}
               onChange={(e) => setDeviceSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-surface border border-line rounded-lg text-xs font-bold text-ink focus:outline-none "
+              className={`w-full pl-9 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-brand/20 ${deviceSearchQuery ? 'pr-14' : 'pr-10'}`}
             />
             {deviceSearchQuery && (
               <Button variant="ghost"
@@ -150,8 +180,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
         </div>
 
         {/* Folder / Model Grid Container — each series is a column (Ko Hein) */}
-        <div className={`min-h-0 overflow-y-auto p-3.5 ${embedded ? 'flex-1' : 'max-h-[58vh]'}`}>
-          <div className="grid grid-cols-1 items-stretch gap-x-6 gap-y-4 sm:grid-cols-3">
+        <div className="min-h-0 flex-1 overflow-y-auto p-3.5">
           {(() => {
             const visibleFolders = enabledFolders.filter((f) => {
               if (activeFamilyTab !== 'All' && f.family !== activeFamilyTab) return false;
@@ -172,7 +201,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
               return (
                 <div key={folder.id} className="flex min-w-0 flex-col">
                   {/* Series text header (plain) */}
-                  <p className="border-b border-line pb-1.5 text-[10px] font-black uppercase tracking-wider text-muted">
+                  <p className="border-b border-line pb-1.5 text-[11px] font-black uppercase tracking-wider text-muted">
                     {folder.name}
                   </p>
 
@@ -189,14 +218,15 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                             onSelectDevice(item.model);
                             onClose();
                           }}
-                          className={`flex w-full items-center justify-between gap-2 border-b border-line/60 bg-transparent py-2 pl-1 text-left text-sm transition-colors cursor-pointer focus:outline-none hover:bg-surface ${
+                          className={`flex w-full items-center justify-between gap-2 border-b border-line/60 bg-transparent py-2 pl-1 text-left text-sm transition-colors cursor-pointer focus-visible:bg-surface focus-visible:ring-2 focus-visible:ring-brand/30 hover:bg-surface ${
                             isSelected ? 'font-extrabold text-ink' : 'font-semibold text-ink'
                           }`}
+                          aria-pressed={isSelected}
                         >
                           <span className="min-w-0 flex-1">
                             <span className="block truncate">{item.model}</span>
                             {item.modelCodes && item.modelCodes.length > 0 && (
-                              <span className="mt-0.5 block whitespace-normal font-mono text-[10px] font-black leading-tight text-brand/60">
+                              <span className="mt-0.5 block whitespace-normal font-mono text-[11px] font-black leading-tight text-brand">
                                 {item.modelCodes.join(', ')}
                               </span>
                             )}
@@ -222,9 +252,12 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
               );
             }
 
-            return folderBlocks;
+            return (
+              <div className="grid grid-cols-1 items-stretch gap-x-6 gap-y-4 sm:grid-cols-3">
+                {folderBlocks}
+              </div>
+            );
           })()}
-          </div>
         </div>
 
         {/* Modal Footer */}

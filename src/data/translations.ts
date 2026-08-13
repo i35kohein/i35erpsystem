@@ -19,6 +19,10 @@ export const translations: TranslationDictionary = {
   navDashboardFull: { en: 'Dashboard & Hardware Analytics', mm: 'ဒက်ရှ်ဘုတ်နှင့် စက်ပစ္စည်း စာရင်းအင်းများ' },
   navIntake: { en: 'Work Intake', mm: 'လက်ခံလက်မှတ်နှင့် ပြုပြင်ရေး' },
   navIntakeFull: { en: 'Work Intake', mm: 'လက်ခံလက်မှတ်နှင့် ပြုပြင်ဆဲ လက်မှတ်များ' },
+  // audit A-P2: keys for the previously hardcoded nav labels.
+  navSimpleTicket: { en: 'Simple Ticket', mm: 'ရိုးရှင်းလက်မှတ်' },
+  navTicketBoard: { en: 'Ticket Board', mm: 'လက်မှတ်ဘုတ်' },
+  navMermaid: { en: 'Mermaid', mm: 'Mermaid' },
   navCreateTicket: { en: 'New Ticket', mm: 'ပြုပြင်ရေး လက်မှတ်အသစ် စာရင်းသွင်းခြင်း' },
   navPipeline: { en: 'Pipeline', mm: 'လုပ်ငန်းစဉ် လိုင်း' },
   navPriceList: { en: 'Price List', mm: 'ဈေးနှုန်းစာရင်း' },

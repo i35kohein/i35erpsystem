@@ -79,7 +79,7 @@ import {
   SupplierDebtRecord,
   TechnicianPayoutRecord,
   AppUser} from './types';
-import { DateFilterSelector, DateFilterState } from './components/common/DateFilterSelector';
+import { DateFilterSelector, DateFilterState, formatDateLabel } from './components/common/DateFilterSelector';
 import { RightFilterDrawer } from './components/common/RightFilterDrawer';
 import { ActiveFilterChips } from './components/common/ActiveFilterChips';
 import { DrawerSelect } from './components/common/DrawerSelect';
@@ -136,37 +136,59 @@ function FixedMoreMenu({ anchorRef, isOpen, editMode, onClose, onPrintTags, onTo
   onView: (v: 'stock' | 'profit' | 'matrix') => void;
   onAddPart: () => void;
 }) {
+  // audit A-P2: Escape closes the menu (matches CustomDropdownMenu / Radix).
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
   const rect = anchorRef.current?.getBoundingClientRect();
   if (!rect) return null;
   const menuW = 192;
+  const menuH = 296; // conservative max height for the flip/clamp math
   let left = rect.right - menuW;
   left = Math.max(8, Math.min(left, window.innerWidth - menuW - 8));
-  const top = rect.bottom + 6;
+  // audit A-P2: mirror CustomDropdownMenu — flip above when there isn't
+  // ~296px below the trigger, and clamp so the menu stays on-screen.
+  const spaceBelow = window.innerHeight - rect.bottom;
+  const spaceAbove = rect.top;
+  let top = rect.bottom + 6;
+  if (spaceBelow < menuH && spaceAbove > menuH) {
+    top = rect.top - menuH - 6;
+  }
+  top = Math.max(8, Math.min(top, window.innerHeight - menuH - 8));
   return createPortal(
     <>
       <div className="fixed inset-0 z-40" onClick={onClose} role="presentation" aria-hidden="true" />
-      <div className="fixed z-50 w-48 rounded-xl border border-line bg-white p-1.5 shadow-xl" style={{ top, left }}>
-        {(['stock', 'profit', 'matrix'] as const).map((v) => (
+      <div className="fixed z-50 w-48 rounded-xl border border-line bg-white p-1.5 shadow-xl animate-in fade-in zoom-in-95 duration-150" style={{ top, left }}>
+        {/* audit A-P2: the view-switcher + Add Part group (and its separator)
+            hide together on desktop — no more dangling divider between the
+            two groups at lg. */}
+        <div className="lg:hidden">
+          {(['stock', 'profit', 'matrix'] as const).map((v) => (
+            <Button
+              key={v}
+              type="button"
+              onClick={() => { onView(v); onClose(); }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-extrabold rounded-lg hover:bg-surface transition-colors cursor-pointer text-left focus:outline-none"
+            >
+              {v === 'stock' ? <List className="w-4 h-4 text-brand shrink-0" /> : v === 'profit' ? <TrendingUp className="w-4 h-4 text-brand shrink-0" /> : <Grid className="w-4 h-4 text-brand shrink-0" />}
+              {v === 'stock' ? 'Stock View' : v === 'profit' ? 'Profit View' : 'Matrix View'}
+            </Button>
+          ))}
           <Button
-            key={v}
             type="button"
-            onClick={() => { onView(v); onClose(); }}
-            className="lg:hidden w-full flex items-center gap-2 px-3 py-2 text-xs font-extrabold rounded-lg hover:bg-surface transition-colors cursor-pointer text-left focus:outline-none"
+            onClick={() => { onAddPart(); onClose(); }}
+            className="w-full flex items-center gap-2 px-3 py-2 text-xs font-extrabold rounded-lg hover:bg-surface transition-colors cursor-pointer text-left focus:outline-none"
           >
-            {v === 'stock' ? <List className="w-4 h-4 text-brand shrink-0" /> : v === 'profit' ? <TrendingUp className="w-4 h-4 text-brand shrink-0" /> : <Grid className="w-4 h-4 text-brand shrink-0" />}
-            {v === 'stock' ? 'Stock View' : v === 'profit' ? 'Profit View' : 'Matrix View'}
+            <Plus className="w-4 h-4 text-brand shrink-0" />
+            Add Part
           </Button>
-        ))}
-        <Button
-          type="button"
-          onClick={() => { onAddPart(); onClose(); }}
-          className="lg:hidden w-full flex items-center gap-2 px-3 py-2 text-xs font-extrabold rounded-lg hover:bg-surface transition-colors cursor-pointer text-left focus:outline-none"
-        >
-          <Plus className="w-4 h-4 text-brand shrink-0" />
-          Add Part
-        </Button>
-        <div className="lg:hidden my-1 border-t border-line" />
+          <div className="my-1 border-t border-line" />
+        </div>
         <Button
           type="button"
           onClick={onPrintTags}
@@ -190,6 +212,14 @@ function FixedMoreMenu({ anchorRef, isOpen, editMode, onClose, onPrintTags, onTo
     document.body,
   );
 }
+
+// audit A-P3: tiny centered spinner for code-split modal chunks — fallback={null}
+// left a blank screen (header still showed the old tab) on slow connections.
+const modalLoadingFallback = (
+  <div className="fixed inset-0 z-[100] grid place-items-center">
+    <div className="h-8 w-8 animate-spin rounded-full border-2 border-line border-t-brand" />
+  </div>
+);
 
 export default function App() {
   const { t } = useLanguage();
@@ -569,7 +599,9 @@ export default function App() {
   const reportSaveError = (err: unknown) => {
     console.error(err);
     const detail = err instanceof Error ? err.message : String(err);
-    addToast(`Database save failed: ${detail}`, 'error', 'Save Error — Check Connection');
+    // audit A-P2: save errors stay visible (persistent, dismissible) — a
+    // 4s auto-dismiss could be missed during a busy moment.
+    addToast(`Database save failed: ${detail}`, 'error', 'Save Error — Check Connection', { persistent: true });
   };
 
   const addToast = (
@@ -930,7 +962,7 @@ export default function App() {
                     className={`flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 text-xs font-extrabold transition-colors cursor-pointer ${
                       intakeViewMode === v
                         ? 'bg-ink text-white border-ink shadow-2xs'
-                        : 'bg-white text-ink border-line hover:bg-slate-100'
+                        : 'bg-white text-ink border-line hover:bg-surface'
                     }`}
                   >
                     {v === 'table' ? <TableIcon className="w-4 h-4" /> : <LayoutGrid className="w-4 h-4" />}
@@ -944,7 +976,7 @@ export default function App() {
               <Button
                 type="button"
                 onClick={() => setIntakeSortByPriority((v) => !v)}
-                className={`${rowCls} ${intakeSortByPriority ? 'bg-brand text-white border-brand shadow-2xs' : 'bg-white text-ink border-line hover:bg-slate-100'}`}
+                className={`${rowCls} ${intakeSortByPriority ? 'bg-brand text-white border-brand shadow-2xs' : 'bg-white text-ink border-line hover:bg-surface'}`}
               >
                 <span className="flex items-center gap-2">
                   <Flame className={`w-4 h-4 ${intakeSortByPriority ? 'text-white' : 'text-danger'}`} />
@@ -958,7 +990,7 @@ export default function App() {
               <Button
                 type="button"
                 onClick={() => setIntakeScanRequest((n) => n + 1)}
-                className={`${rowCls} bg-white text-ink border-line hover:bg-slate-100`}
+                className={`${rowCls} bg-white text-ink border-line hover:bg-surface`}
               >
                 <span className="flex items-center gap-2">
                   <Camera className="w-4 h-4 text-brand" />
@@ -1009,7 +1041,7 @@ export default function App() {
               <Button
                 type="button"
                 onClick={() => setInventoryLowStockOnly((v) => !v)}
-                className={`${rowCls} ${inventoryLowStockOnly ? 'bg-warning text-white border-amber-600 shadow-2xs' : 'bg-white text-ink border-line hover:bg-slate-100'}`}
+                className={`${rowCls} ${inventoryLowStockOnly ? 'bg-warning text-white border-warning shadow-2xs' : 'bg-white text-ink border-line hover:bg-surface'}`}
               >
                 <span className="flex items-center gap-2">
                   <AlertTriangle className={`w-4 h-4 ${inventoryLowStockOnly ? 'text-white' : 'text-warning'}`} />
@@ -1029,7 +1061,7 @@ export default function App() {
                     className={`flex items-center justify-center rounded-xl border px-2 py-2.5 text-xs font-extrabold transition-colors cursor-pointer active:scale-95 ${
                       inventoryViewMode === v
                         ? 'bg-ink text-white border-ink shadow-2xs'
-                        : 'bg-white text-ink border-line hover:bg-slate-100'
+                        : 'bg-white text-ink border-line hover:bg-surface'
                     }`}
                   >
                     {v === 'stock' ? 'Stock' : v === 'profit' ? 'Profit' : 'Matrix'}
@@ -1044,12 +1076,12 @@ export default function App() {
                 onClick={() => setInventoryEditMode((m) => !m)}
                 className={`${rowCls} ${
                   inventoryEditMode
-                    ? 'bg-amber-500 text-white border-amber-600 shadow-2xs'
-                    : 'bg-white text-ink border-line hover:bg-slate-100'
+                    ? 'bg-warning text-white border-warning shadow-2xs'
+                    : 'bg-white text-ink border-line hover:bg-surface'
                 }`}
               >
                 <span className="flex items-center gap-2">
-                  <Edit2 className={`w-4 h-4 ${inventoryEditMode ? 'text-white' : 'text-amber-600'}`} />
+                  <Edit2 className={`w-4 h-4 ${inventoryEditMode ? 'text-white' : 'text-warning'}`} />
                   Edit Rows
                 </span>
                 <span className={`text-xs ${inventoryEditMode ? 'text-white/80' : 'text-muted'}`}>{inventoryEditMode ? 'On' : 'Off'}</span>
@@ -1060,7 +1092,7 @@ export default function App() {
               <Button
                 type="button"
                 onClick={() => setInventoryTagsPrintOpen(true)}
-                className={`${rowCls} bg-white text-ink border-line hover:bg-slate-100`}
+                className={`${rowCls} bg-white text-ink border-line hover:bg-surface`}
               >
                 <span className="flex items-center gap-2">
                   <Printer className="w-4 h-4 text-brand" />
@@ -1101,9 +1133,11 @@ export default function App() {
                 { value: '60days', label: 'Last 60 Days' },
                 {
                   value: 'custom',
+                  // audit A-P2: same "Jan 3 - Jan 8" formatting as the header
+                  // control (was raw ISO with a literal "(custom)" suffix).
                   label:
                     dateFilter.preset === 'custom' && dateFilter.startDate
-                      ? `${dateFilter.startDate} → ${dateFilter.endDate || ''} (custom)`
+                      ? `${formatDateLabel(dateFilter.startDate)} → ${formatDateLabel(dateFilter.endDate)}`
                       : 'Custom Range…',
                 },
               ]}
@@ -1982,7 +2016,7 @@ export default function App() {
   // rendered inside the layout (see OfflineBanner), so mid-form state survives.
   const offlineBanner = !isOnline ? (
     <div className="pointer-events-none fixed inset-x-0 top-0 z-[95] flex justify-center pt-3">
-      <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-4 py-2 text-xs font-bold text-amber-700 shadow-md">
+      <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-warning/30 bg-warning/10 px-4 py-2 text-xs font-bold text-warning shadow-md">
         <AlertTriangle className="h-3.5 w-3.5" />
         <span>Offline — changes are queued locally and will sync when reconnected</span>
       </div>
@@ -2022,6 +2056,7 @@ export default function App() {
         setIsCollapsed={setIsCollapsed}
         isMobileMenuOpen={isMobileMenuOpen}
         isIpad={isIpad}
+        isOnline={isOnline}
         setIsMobileMenuOpen={setIsMobileMenuOpen}
       />
 
@@ -2066,12 +2101,13 @@ export default function App() {
               <Button
                 type="button"
                 onClick={handleResetAllFilters}
-                className="h-10 px-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold rounded-xl transition-all flex items-center space-x-1 cursor-pointer shrink-0 active:scale-95 shadow-2xs"
+                // audit A-P3: token colors (danger) + one label (was raw rose
+                // and an sm: label swap that made the button jump width).
+                className="h-10 px-2.5 bg-danger/10 hover:bg-danger/15 text-danger border border-danger/30 text-xs font-bold rounded-xl transition-all flex items-center space-x-1 cursor-pointer shrink-0 active:scale-95 shadow-2xs"
                 title="Reset active search & filters"
               >
-                <X className="w-3.5 h-3.5 text-rose-600" />
-                <span className="hidden sm:inline">Reset Filters</span>
-                <span className="sm:hidden">Reset</span>
+                <X className="w-3.5 h-3.5 text-danger" />
+                <span>Reset Filters</span>
               </Button>
             )}
             {/* System Settings Header Actions */}
@@ -2110,6 +2146,17 @@ export default function App() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  // audit A-P3: tab-specific name so the field stays labelled
+                  // once the placeholder disappears while typing.
+                  aria-label={
+                    activeTab === 'intake' ? 'Search tickets'
+                    : activeTab === 'inventory' ? 'Search parts'
+                    : activeTab === 'crm' ? 'Search customers'
+                    : activeTab === 'suppliers' ? 'Search suppliers'
+                    : activeTab === 'qa' ? 'Search QA tickets'
+                    : activeTab === 'pos' ? 'Search POS tickets'
+                    : `Search ${currentTab.title}`
+                  }
                   placeholder={
                     activeTab === 'intake'
                       ? "Search Ticket #, Customer, Phone..."
@@ -2125,14 +2172,17 @@ export default function App() {
                       ? "Search Ticket #, Customer, Model, IMEI..."
                       : `Search ${currentTab.title}...`
                   }
-                  className="w-full h-10 bg-surface text-xs text-ink placeholder-muted pl-7 pr-5 rounded-xl border border-line focus:bg-white focus:outline-none transition-all shadow-2xs"
+                  className="w-full h-10 bg-surface text-xs text-ink placeholder-muted pl-7 pr-8 rounded-xl border border-line focus:bg-white focus:outline-none transition-all shadow-2xs"
                 />
                 {searchQuery && (
                   <Button variant="ghost"
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-muted hover:text-ink"
+                    // audit A-P2/A-P3: lucide X (was a raw × glyph) + a
+                    // padded hit target + aria-label.
+                    aria-label="Clear search"
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 text-muted hover:text-ink"
                   >
-                    ×
+                    <X className="h-3.5 w-3.5" />
                   </Button>
                 )}
               </div>
@@ -2328,7 +2378,7 @@ export default function App() {
               {/* Phone side menu (drawer) */}
               {inventorySideMenuOpen && (
                 <div className="fixed inset-0 z-[70] sm:hidden" role="dialog" aria-modal="true" aria-label="Inventory menu">
-                  <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => setInventorySideMenuOpen(false)} />
+                <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" role="presentation" aria-hidden="true" onClick={() => setInventorySideMenuOpen(false)} />
                   <div className="absolute right-0 top-0 flex h-full w-72 max-w-[85vw] flex-col bg-white shadow-2xl">
                     <div className="flex items-center justify-between border-b border-line px-4 py-3.5">
                       <div className="flex items-center gap-2">
@@ -2458,7 +2508,10 @@ export default function App() {
                       variant="ghost"
                       type="button"
                       onClick={() => setQaViewMode('table')}
-                      className={`!h-8 !min-h-8 w-8 px-0 rounded-md flex items-center justify-center cursor-pointer hover:bg-transparent! ${qaViewMode === 'table' ? 'bg-brand text-white shadow-2xs' : 'text-muted hover:text-ink'}`}
+                      // audit A-P1: hover:bg-transparent! erased the ACTIVE
+                      // fill exactly while the pointer was on it — use the
+                      // dashboard subtab-pill pattern instead.
+                      className={`!h-8 !min-h-8 w-8 px-0 rounded-md flex items-center justify-center cursor-pointer ${qaViewMode === 'table' ? 'bg-brand text-white shadow-2xs hover:bg-brand-deep' : 'text-muted hover:text-ink hover:bg-surface'}`}
                       title="Table View"
                       aria-label="Table View"
                     >
@@ -2468,7 +2521,7 @@ export default function App() {
                       variant="ghost"
                       type="button"
                       onClick={() => setQaViewMode('cards')}
-                      className={`!h-8 !min-h-8 w-8 px-0 rounded-md flex items-center justify-center cursor-pointer hover:bg-transparent! ${qaViewMode === 'cards' ? 'bg-brand text-white shadow-2xs' : 'text-muted hover:text-ink'}`}
+                      className={`!h-8 !min-h-8 w-8 px-0 rounded-md flex items-center justify-center cursor-pointer ${qaViewMode === 'cards' ? 'bg-brand text-white shadow-2xs hover:bg-brand-deep' : 'text-muted hover:text-ink hover:bg-surface'}`}
                       title="Cards Grid View"
                       aria-label="Cards Grid View"
                     >
@@ -2485,7 +2538,8 @@ export default function App() {
                   filter={dateFilter}
                   onChange={setDateFilter}
                   compact
-                  buttonClassName="!h-10 !min-h-10 !min-w-[150px] !rounded-xl !border-line-strong !bg-white !px-3 !text-xs !font-extrabold !shadow-2xs hover:!border-brand/40 hover:!bg-brand-soft"
+                  // audit A-P2: real `labeled` prop — the 8 `!` overrides are gone.
+                  labeled
                 />
                 <Button
                   type="button"
@@ -2551,24 +2605,27 @@ export default function App() {
             ) : activeTab === 'suppliers' ? (
               <Button
                 onClick={() => setRmaModalOpen(true)}
-                className="h-10 flex items-center space-x-1.5 px-3.5 bg-purple hover:bg-purple-600 text-white text-xs font-bold rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+                // audit A-P3: token hover pair (was raw purple-600).
+                className="h-10 flex items-center space-x-1.5 px-3.5 bg-purple hover:bg-purple/90 text-white text-xs font-bold rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>{t('flagRma')}</span>
               </Button>
             ) : null}
 
-            {/* Mobile filter drawer trigger — rightmost on phones (all tabs) */}
+            {/* Mobile filter drawer trigger — rightmost on phones (all tabs);
+                audit A-P2: on iPad the always-visible drawer had no trigger
+                ≥640px — show it at all widths when isIpad. */}
             <Button
               type="button"
               onClick={() => setIsFilterDrawerOpen(true)}
-              className={`sm:hidden relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand transition-all cursor-pointer`}
+              className={`${isIpad ? '' : 'sm:hidden'} relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-white text-ink hover:border-brand hover:text-brand transition-all cursor-pointer`}
               title="Open filters"
               aria-label="Open filters"
             >
               <SlidersHorizontal className="h-4 w-4" />
               {getActiveFilterCount(activeTab) > 0 && (
-                <span className="absolute -right-1 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-xs font-black text-white">
+                <span className="absolute -right-1 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1.5 text-[10px] font-black leading-none text-white">
                   {getActiveFilterCount(activeTab)}
                 </span>
               )}
@@ -2578,7 +2635,7 @@ export default function App() {
           </div>
         </header>
 
-        <main className="min-h-0 flex-1 w-full max-w-[3840px] mx-auto px-3 sm:px-4 lg:px-5 pt-3 pb-6 lg:pb-5 flex flex-col">
+        <main className="min-h-0 flex-1 w-full max-w-[1920px] mx-auto px-3 sm:px-4 lg:px-5 pt-3 pb-6 lg:pb-5 flex flex-col">
           <Suspense fallback={<ModuleLoadingSkeleton />}>
           <div key={activeTab} className="app-module-content flex-1 w-full min-w-0 flex flex-col">
               {activeTab === 'dashboard' && (
@@ -2948,7 +3005,7 @@ export default function App() {
 
       {/* Global Search Modal (Cmd/Ctrl+K) — mounted only when open so the chunk loads on demand */}
       {isGlobalSearchOpen && (
-        <Suspense fallback={null}>
+        <Suspense fallback={modalLoadingFallback}>
           <GlobalSearchModal
             open={isGlobalSearchOpen}
             onClose={() => setIsGlobalSearchOpen(false)}
@@ -2965,7 +3022,9 @@ export default function App() {
         <Button
           type="button"
           onClick={() => setIsAiAssistantOpen(true)}
-          className="lg:hidden fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-4 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-brand text-white shadow-lg cursor-pointer active:scale-95 transition-transform hover:scale-105"
+          // audit A-P3: bottom-4 matches the toast stack; z-40 (was z-30,
+          // under drawers/toasts); safe-area kept in the calc.
+          className="lg:hidden fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-brand text-white shadow-lg cursor-pointer active:scale-95 transition-transform hover:scale-105"
           aria-label="Open AI Assistant"
           title="Open AI Assistant"
         >
@@ -2975,7 +3034,7 @@ export default function App() {
 
       {/* AI Diagnostic Assistant Modal — mounted only when open */}
       {isAiAssistantOpen && (
-        <Suspense fallback={null}>
+        <Suspense fallback={modalLoadingFallback}>
           <AiDiagnosticAssistantModal
             isOpen={isAiAssistantOpen}
             onClose={() => setIsAiAssistantOpen(false)}
@@ -3002,7 +3061,7 @@ export default function App() {
 
       {/* Printable Device Tag Sticker Modal — mounted only when printing */}
       {printableTagWo && (
-        <Suspense fallback={null}>
+        <Suspense fallback={modalLoadingFallback}>
           <DeviceTagPrinterModal
             workOrder={printableTagWo}
             systemSettings={systemSettings}
@@ -3013,7 +3072,7 @@ export default function App() {
 
       {/* Recycle Bin & Archive Modal — mounted only when open */}
       {isRecycleBinOpen && (
-        <Suspense fallback={null}>
+        <Suspense fallback={modalLoadingFallback}>
           <RecycleBinModal
             isOpen={isRecycleBinOpen}
             onClose={() => setIsRecycleBinOpen(false)}
@@ -3077,10 +3136,17 @@ export default function App() {
                 {toast.type === 'info' && <Info className="w-3 h-3" />}
               </span>
               <div className="min-w-0 flex-1 pr-1">
-                {toast.title && <div className="text-[11px] font-black leading-tight mb-0.5">{toast.title}</div>}
-                <div className="text-[11px] leading-snug text-[var(--text-secondary)]">{toast.message}</div>
+                {/* audit A-P2: readable toast text (11px → xs / 10px tag). */}
+                {toast.title && <div className="text-xs font-black leading-tight mb-0.5">{toast.title}</div>}
+                <div className="text-xs leading-snug text-[var(--text-secondary)]">{toast.message}</div>
                 {toast.persistent && (
-                  <div className="mt-1.5 inline-flex items-center gap-1 rounded-md bg-rose-500/10 px-1.5 py-0.5 text-[9px] font-extrabold text-rose-500 border border-rose-500/30">
+                  <div className={`mt-1.5 inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-extrabold border ${
+                    toast.type === 'success'
+                      ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30'
+                      : toast.type === 'error'
+                      ? 'bg-rose-500/10 text-rose-500 border-rose-500/30'
+                      : 'bg-sky-500/10 text-sky-500 border-sky-500/30'
+                  }`}>
                     <AlertTriangle className="w-2.5 h-2.5 shrink-0" />
                     <span>Persistent</span>
                   </div>

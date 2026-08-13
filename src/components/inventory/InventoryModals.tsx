@@ -40,19 +40,19 @@ export const PartDetailsModal: React.FC<PartDetailsModalProps> = ({
 }) => {
   if (!part) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="w-full max-w-lg space-y-4 rounded-2xl border border-line bg-white p-5 text-xs shadow-2xl">
         <div className="flex items-start justify-between gap-3 border-b border-line pb-3">
           <div className="min-w-0">
             <p className="font-mono text-xs font-extrabold text-brand">{part.sku}</p>
             <h3 className="mt-1 truncate text-sm font-extrabold text-ink">{part.name}</h3>
-            <p className="mt-1 text-xs text-muted">{part.category} · {part.qualityTier}</p>
+            <p className="mt-1 text-xs text-muted">{[part.category, part.qualityTier].filter(Boolean).join(' · ') || '—'}</p>
             {part.deviceCompatibility && part.deviceCompatibility.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-1">
                 {part.deviceCompatibility.map((device) => (
-                  <span key={device} className="inline-flex items-center gap-0.5 rounded-full border border-brand/30 bg-brand-soft px-1.5 py-0.5 text-[10px] font-bold text-brand-deep">
-                    <Smartphone className="h-2.5 w-2.5" />
-                    {device}
+                  <span key={device} className="inline-flex items-center gap-0.5 rounded-full border border-brand/30 bg-brand-soft px-2 py-1 text-[11px] font-bold text-brand-deep">
+                    <Smartphone className="h-2.5 w-2.5 shrink-0" />
+                    <span className="max-w-[140px] truncate">{device}</span>
                   </span>
                 ))}
               </div>
@@ -68,8 +68,8 @@ export const PartDetailsModal: React.FC<PartDetailsModalProps> = ({
             <p className="text-xs font-bold uppercase tracking-wide text-muted">In Stock</p>
             <p className="mt-1 font-mono text-xl font-black text-ink">{part.quantityInStock}</p>
             <div className="mt-2 flex gap-1.5">
-              <Button variant="ghost" type="button" onClick={() => { onUpdatePartStock(part.id, Math.max(0, part.quantityInStock - 1)); }} aria-label="Subtract one from stock" title="Subtract one" className="flex h-10 w-10 lg:h-7 lg:w-7 items-center justify-center rounded-lg border border-line bg-white font-black hover:bg-danger/10 hover:text-danger">−</Button>
-              <Button variant="ghost" type="button" onClick={() => { onUpdatePartStock(part.id, part.quantityInStock + 1); }} aria-label="Add one to stock" title="Add one" className="flex h-10 w-10 lg:h-7 lg:w-7 items-center justify-center rounded-lg border border-line bg-white font-black text-brand hover:bg-success/10 hover:text-success">+</Button>
+              <Button variant="ghost" type="button" onClick={() => { onUpdatePartStock(part.id, Math.max(0, part.quantityInStock - 1)); }} aria-label="Subtract one from stock" title="Subtract one" className="flex h-10 w-10 items-center justify-center rounded-lg border border-line bg-white font-black hover:bg-danger/10 hover:text-danger">−</Button>
+              <Button variant="ghost" type="button" onClick={() => { onUpdatePartStock(part.id, part.quantityInStock + 1); }} aria-label="Add one to stock" title="Add one" className="flex h-10 w-10 items-center justify-center rounded-lg border border-line bg-white font-black text-brand hover:bg-success/10 hover:text-success">+</Button>
               <span className="self-center text-xs font-bold text-muted">Min: {part.reorderPoint}</span>
             </div>
           </div>
@@ -87,7 +87,7 @@ export const PartDetailsModal: React.FC<PartDetailsModalProps> = ({
         </div>
 
         <div className="flex items-center justify-end gap-2 border-t border-line pt-3">
-          <Button variant="ghost" type="button" onClick={() => { onWarranty(part); onClose(); }} className="inline-flex h-10 lg:h-8 items-center gap-1.5 rounded-lg border border-warning/30 bg-warning/10 px-2.5 font-extrabold text-warning hover:bg-warning/15"><ShieldAlert className="h-3.5 w-3.5" /> Warranty</Button>
+          <Button variant="ghost" type="button" onClick={() => { onWarranty(part); }} className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-warning/30 bg-warning/10 px-2.5 font-extrabold text-warning hover:bg-warning/15"><ShieldAlert className="h-3.5 w-3.5" /> Warranty</Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button type="button" variant="iconGhost" size="icon" aria-label="Part actions" className="border border-line">
@@ -436,13 +436,16 @@ export const TagsPrintSheet: React.FC<TagsPrintSheetProps> = ({
                 onClick={() => {
                   const sheet = document.getElementById('spare-tags-sheet');
                   if (sheet) sheet.classList.add('print-selected-only');
-                  window.print();
-                  if (sheet) sheet.classList.remove('print-selected-only');
+                  try {
+                    window.print();
+                  } finally {
+                    if (sheet) sheet.classList.remove('print-selected-only');
+                  }
                 }}
                 disabled={selectedTagIds.size === 0}
                 className="flex items-center gap-1.5 rounded-lg bg-brand px-3 py-2 text-xs font-extrabold text-white transition hover:bg-brand-deep disabled:cursor-not-allowed disabled:bg-faint"
               >
-                <Check className="h-3.5 w-3.5" /> Print Selected ({selectedTagIds.size})
+                <Check className="h-3.5 w-3.5" /> <span aria-live="polite">Print Selected ({selectedTagIds.size})</span>
               </Button>
               <Button variant="ghost"
                 type="button"
@@ -480,7 +483,13 @@ export const TagsPrintSheet: React.FC<TagsPrintSheetProps> = ({
             <span className="text-xs font-bold text-muted">{parts.length} parts</span>
           </div>
 
-          {paginateTags(parts, 18).map((pageParts, pageIdx) => (
+          {parts.length === 0 ? (
+            <div className="rounded-lg border border-dashed border-line bg-surface/50 p-8 text-center">
+              <p className="text-xs font-bold text-ink">No parts to print</p>
+              <p className="mt-1 text-xs text-muted">Add inventory components first, then reopen this sheet.</p>
+            </div>
+          ) : (
+            paginateTags(parts, 18).map((pageParts, pageIdx) => (
             <div key={pageIdx} className="tags-page mb-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
               {pageParts.map((part) => {
                 const isSelected = selectedTagIds.has(part.id);
@@ -505,13 +514,13 @@ export const TagsPrintSheet: React.FC<TagsPrintSheetProps> = ({
                       isSelected ? 'tag-selected border-brand ring-2 ring-brand/30' : 'border-ink hover:border-brand'
                     }`}
                   >
-                    <div className="tag-selector absolute right-1 top-1 z-10 flex h-5 w-5 items-center justify-center rounded-full border bg-white shadow-xs">
+                    <div className="tag-selector absolute right-1 top-1 z-10 flex h-6 w-6 items-center justify-center rounded-full border bg-white shadow-xs">
                       <Input
                         type="checkbox"
                         checked={isSelected}
                         onChange={toggleSelect}
                         onClick={(e) => e.stopPropagation()}
-                        className="h-3.5 w-3.5 accent-brand"
+                        className="h-4 w-4 accent-brand"
                       />
                     </div>
                     <div className="flex items-center justify-between border-b border-dashed border-line pb-1.5">
@@ -536,7 +545,8 @@ export const TagsPrintSheet: React.FC<TagsPrintSheetProps> = ({
                 );
               })}
             </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </div>

@@ -40,7 +40,11 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
       <div
         id="confirm-delete-panel"
         tabIndex={-1}
-        className="bg-white border border-line rounded-3xl shadow-2xl max-w-md w-full p-6 space-y-5 animate-in zoom-in-95 duration-150 outline-none"
+        // audit A-P2: announce as a dialog (was an unnamed plain div).
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        className="bg-white border border-line rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-5 animate-in zoom-in-95 duration-150 outline-none"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between border-b border-line pb-4">
@@ -52,7 +56,6 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
             </div>
             <div>
               <h3 className="font-extrabold text-base text-ink">{title}</h3>
-              <p className="text-xs text-muted font-medium">Action Requires Confirmation</p>
             </div>
           </div>
           <Button
@@ -89,13 +92,16 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
           </Button>
           <Button
             type="button"
+            // audit A-P2/A-P3: use the kit's variants — destructive for danger
+            // (solid red + hover:bg-danger-deep), default (brand) for the
+            // positive path; drop the hand-rolled px/py/color classes and the
+            // raw shadow-rose-200.
+            variant={isDanger ? 'destructive' : 'default'}
             onClick={() => {
               onConfirm();
               onClose();
             }}
-            className={`px-5 py-2.5 text-white text-xs font-black rounded-xl shadow-md transition-all flex items-center space-x-2 cursor-pointer active:scale-95 ${
-              isDanger ? 'bg-danger hover:bg-danger-deep shadow-rose-200' : 'bg-warning hover:bg-warning'
-            }`}
+            className="flex-1 sm:flex-none"
           >
             <Trash2 className="w-4 h-4" />
             <span>{confirmLabel}</span>

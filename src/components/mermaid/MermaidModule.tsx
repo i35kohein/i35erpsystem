@@ -1,5 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import mermaid from 'mermaid';
+import { Button } from '../ui';
+import { Loader2 } from 'lucide-react';
+
+// Example templates (audit F-P3): one-click presets so syntax is discoverable.
+const DIAGRAM_EXAMPLES = [
+  { label: 'Flowchart', source: `graph TD\n  A[Start] --> B{Decision}\n  B -->|Yes| C[Done]\n  B -->|No| D[Review]` },
+  { label: 'Sequence', source: `sequenceDiagram\n  Customer->>Technician: Bring device\n  Technician-->>Customer: Diagnosis\n  Customer-->>Technician: Approve repair` },
+  { label: 'State', source: `stateDiagram-v2\n  [*] --> Receive\n  Receive --> InProgress\n  InProgress --> Finished\n  Finished --> [*]` },
+];
 
 // Initialize ONCE outside the component (audit D-P3): the old code re-ran
 // mermaid.initialize inside the effect on every keystroke and used
@@ -17,6 +26,7 @@ export function MermaidModule() {
   B -->|Yes| C[Done]
   B -->|No| D[Review]`);
   const [renderError, setRenderError] = useState<string | null>(null);
+  const [isRendering, setIsRendering] = useState(false);
   const previewRef = useRef<HTMLDivElement | null>(null);
   const renderIdRef = useRef(`mermaid-${Math.random().toString(36).slice(2)}`);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -29,6 +39,7 @@ export function MermaidModule() {
     // first's temp element → transient "element not found" flashes.
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
+      setIsRendering(true);
       const render = async () => {
         try {
           const output = await mermaid.render(renderIdRef.current, diagramText);
@@ -41,6 +52,8 @@ export function MermaidModule() {
             previewRef.current.innerHTML = '';
           }
           setRenderError(error instanceof Error ? error.message : String(error));
+        } finally {
+          setIsRendering(false);
         }
       };
       void render();
@@ -62,15 +75,29 @@ export function MermaidModule() {
           <label htmlFor="mermaid-editor" className="sr-only">
             Mermaid source
           </label>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-xs font-bold text-muted">Examples:</span>
+            {DIAGRAM_EXAMPLES.map((example) => (
+              <Button
+                key={example.label}
+                type="button"
+                variant="ghost"
+                onClick={() => setDiagramText(example.source)}
+                className="h-8 rounded-full border border-line bg-surface px-3 text-xs font-bold text-ink hover:border-brand hover:text-brand"
+              >
+                {example.label}
+              </Button>
+            ))}
+          </div>
           <textarea
             id="mermaid-editor"
             value={diagramText}
             onChange={(event) => setDiagramText(event.target.value)}
             spellCheck={false}
-            className="min-h-[250px] w-full rounded-3xl border border-line bg-surface p-4 text-xs font-mono text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/15"
+            className="min-h-[250px] w-full resize-y rounded-xl border border-line bg-white p-4 text-xs font-mono text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/30"
           />
           {renderError ? (
-            <div className="rounded-2xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
+            <div role="alert" className="max-h-40 overflow-auto rounded-2xl border border-danger/30 bg-danger/10 p-3 text-sm text-danger">
               <span className="font-bold">Render error:</span> {renderError}
             </div>
           ) : null}
@@ -79,7 +106,20 @@ export function MermaidModule() {
 
       <section className="rounded-3xl border border-line bg-white p-5 shadow-sm">
         <h3 className="text-sm font-bold">Preview</h3>
-        <div className="mt-4 overflow-auto rounded-3xl border border-line/70 bg-surface p-4 min-h-[280px]" ref={previewRef} />
+        <div className="relative mt-4">
+          <div
+            role="img"
+            aria-label="Rendered Mermaid diagram"
+            className="overflow-auto rounded-3xl border border-line/70 bg-surface p-4 min-h-[280px]"
+            ref={previewRef}
+          />
+          {isRendering && (
+            <div className="absolute inset-0 flex items-center justify-center gap-2 rounded-3xl bg-surface/70 text-sm font-semibold text-muted">
+              <Loader2 className="h-4 w-4 animate-spin text-brand" />
+              Rendering…
+            </div>
+          )}
+        </div>
       </section>
     </div>
   );

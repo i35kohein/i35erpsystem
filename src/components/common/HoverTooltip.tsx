@@ -7,7 +7,9 @@ type TooltipState = {
   placement: 'top' | 'bottom';
 };
 
-const TOOLTIP_SELECTOR = 'button[title], button[aria-label], button[data-tooltip], [role="button"][title], [role="button"][aria-label], [role="button"][data-tooltip]';
+// audit A-P3: widen the selector to links + anything carrying data-tooltip;
+// bare title matching stays limited to interactive elements.
+const TOOLTIP_SELECTOR = 'button[title], button[aria-label], button[data-tooltip], [role="button"][title], [role="button"][aria-label], [role="button"][data-tooltip], a[title], a[aria-label], [data-tooltip]';
 
 export const HoverTooltip: React.FC = () => {
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
@@ -48,7 +50,12 @@ export const HoverTooltip: React.FC = () => {
 
     const restoreTitle = () => {
       if (activeElementRef.current && originalTitleRef.current !== null) {
-        activeElementRef.current.setAttribute('title', originalTitleRef.current);
+        // audit A-P3: only touch the DOM while the target is still attached —
+        // restoring a title on a detached node (list re-render mid-hover) was
+        // a no-op anyway and left the refs stale.
+        if (activeElementRef.current.isConnected) {
+          activeElementRef.current.setAttribute('title', originalTitleRef.current);
+        }
       }
       activeElementRef.current = null;
       originalTitleRef.current = null;
@@ -139,13 +146,22 @@ export const HoverTooltip: React.FC = () => {
   return (
     <div
       ref={tipRef}
-      role="tooltip" className="fixed z-[1000] pointer-events-none max-w-64 px-2.5 py-1.5 bg-ink text-white text-xs font-semibold leading-tight text-center rounded-lg shadow-lg"
+      // audit A-P3: fade/zoom entrance matching the app's dialog/menu pattern,
+      // plus a 6px caret pointing at the trigger.
+      role="tooltip"
+      className="fixed z-[1000] pointer-events-none max-w-64 px-2.5 py-1.5 bg-ink text-white text-xs font-semibold leading-tight text-center rounded-lg shadow-lg animate-in fade-in zoom-in-95 duration-150"
       style={{
         left: tooltip.left,
         top: tooltip.top,
         transform: tooltip.placement === 'top' ? 'translate(-50%, -100%)' : 'translate(-50%, 0)',
       }}
     >
+      <span
+        aria-hidden="true"
+        className={`absolute left-1/2 -translate-x-1/2 h-2 w-2 rotate-45 bg-ink ${
+          tooltip.placement === 'top' ? '-bottom-1' : '-top-1'
+        }`}
+      />
       {tooltip.label}
     </div>
   );

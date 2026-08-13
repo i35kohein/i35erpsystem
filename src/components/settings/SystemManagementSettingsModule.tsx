@@ -21,7 +21,10 @@ import {
   Sparkles,
   Search,
   Tag,
-  ArrowLeft} from 'lucide-react';
+  ArrowLeft,
+  Crown,
+  Wrench,
+  ClipboardList} from 'lucide-react';
 import { Technician, SystemSettings, TechnicianLevel, PaymentMethodConfig, NotificationTemplate, AppUser, UserRole, UserPermissions, PartItem, PartQualityTier, Supplier } from '../../types';
 import {DEFAULT_PAYMENT_METHODS, DEFAULT_NOTIFICATION_TEMPLATES} from '../../data/seedData';
 import { Button , Input } from '../ui';
@@ -52,6 +55,24 @@ const TabPosLazy = lazyWithRetry(() => import('./tabs/TabPos').then((m) => ({ de
 const TabInventoryLazy = lazyWithRetry(() => import('./tabs/TabInventory').then((m) => ({ default: m.default })), 'TabInventory');
 const TabTechniciansLazy = lazyWithRetry(() => import('./tabs/TabTechnicians').then((m) => ({ default: m.default })), 'TabTechnicians');
 const TabUsersLazy = lazyWithRetry(() => import('./tabs/TabUsers').then((m) => ({ default: m.default })), 'TabUsers');
+
+/** Launcher label lookup for the drilled-in back bar (audit E-P3). */
+const SUBTAB_LABELS: Record<string, string> = {
+  users: 'User Roles & Permissions',
+  shop: 'Shop Settings & Logo',
+  theme: 'Theme & Color Palette',
+  technicians: 'Technicians & Staff',
+  intake: 'Work Orders & Intake',
+  pricing: 'Pricing & Currency',
+  payment: 'Payment Methods & MM QR',
+  inventory: 'Inventory Data & Quality',
+  pos: 'POS & Receipt Layout',
+  notifications: 'SMS & Telegram Alerts',
+  ai: 'AI Assistant & API',
+  qa: 'QA & Diagnostic Rules',
+  'price-catalog': 'Price Catalog & Models',
+  recycle: 'Recycle Bin & Trash',
+};
 
 interface SystemManagementSettingsModuleProps {
   settings: SystemSettings;
@@ -142,6 +163,9 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   // Local settings draft state
   const [formData, setFormData] = useState<SystemSettings>(settings);
   const [isSavedBanner, setIsSavedBanner] = useState(false);
+  // Styled inline add-dialog state replacing native prompt() (audit E-P2).
+  const [customAddKind, setCustomAddKind] = useState<'payment' | 'notification' | null>(null);
+  const [customAddName, setCustomAddName] = useState('');
   // Settings tab navigation: search + dirty tracking
   const [settingsTabQuery, setSettingsTabQuery] = useState('');
   const isDirty = useMemo(
@@ -200,14 +224,22 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
       onRegisterActions({
         reset: () => setFormData(settings),
         save: () => {
-          onUpdateSettings(formData);
+          // audit E-P2: surface a failure toast if the save promise rejects.
+          try {
+            Promise.resolve(onUpdateSettings(formData))
+              .then(() => {
+                setIsSavedBanner(true);
+                setTimeout(() => setIsSavedBanner(false), 3000);
+              })
+              .catch(() => toast.error('Settings save failed — please retry.', 'Save Error'));
+          } catch {
+            toast.error('Settings save failed — please retry.', 'Save Error');
+          }
           // Save All Settings must save EVERYTHING (Ko Hein 2026-08-11):
           // flush an open technician modal's edits (commission rates, etc.).
           if (techModalOpenRef.current && techFormNameRef.current.trim() && saveTechFormRef.current) {
             saveTechFormRef.current();
           }
-          setIsSavedBanner(true);
-          setTimeout(() => setIsSavedBanner(false), 3000);
         },
       });
     }
@@ -302,24 +334,47 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   };
 
   const handleAddCustomPaymentMethod = () => {
-    const customName = prompt('Enter New Payment Method Name (e.g., "Aplus Pay" or "KBZ Special Account"):');
-    if (!customName || !customName.trim()) return;
+    // audit E-P2: native prompt() replaced by a styled inline add-dialog.
+    setCustomAddKind('payment');
+    setCustomAddName('');
+  };
 
-    const id = `custom_${Date.now()}`;
-    const newMethod: PaymentMethodConfig = {
-      id,
-      name: customName.trim(),
-      category: 'Myanmar Mobile Pay',
-      enabled: true,
-      accountName: formData.shopName,
-      accountNumber: '',
-      notes: 'Custom payment gateway',
-    };
-
-    setFormData({
-      ...formData,
-      paymentMethods: [...currentPaymentMethods, newMethod],
-    });
+  const confirmCustomAdd = () => {
+    const name = customAddName.trim();
+    if (!name) return;
+    if (customAddKind === 'payment') {
+      const id = `custom_${Date.now()}`;
+      const newMethod: PaymentMethodConfig = {
+        id,
+        name,
+        category: 'Myanmar Mobile Pay',
+        enabled: true,
+        accountName: formData.shopName,
+        accountNumber: '',
+        notes: 'Custom payment gateway',
+      };
+      setFormData({
+        ...formData,
+        paymentMethods: [...currentPaymentMethods, newMethod],
+      });
+    } else {
+      const newId = `tmpl-${Date.now()}`;
+      const newTmpl: NotificationTemplate = {
+        id: newId,
+        key: name.replace(/\s+/g, ''),
+        title: name,
+        channel: 'All',
+        enabled: true,
+        description: 'Custom user notification template',
+        templateText: `မင်္ဂလာပါ {customerName} ခင်ဗျာ၊ {shopName} မှ လူကြီးမင်း၏ {deviceModel} (Ticket: #{ticketNumber}) နှင့် ပတ်သက်၍ အကြောင်းကြားအပ်ပါသည်။`,
+      };
+      setFormData({
+        ...formData,
+        notificationTemplates: [...currentNotificationTemplates, newTmpl],
+      });
+    }
+    setCustomAddKind(null);
+    setCustomAddName('');
   };
 
   const handleResetPaymentMethods = async () => {
@@ -356,24 +411,9 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   };
 
   const handleAddCustomNotificationTemplate = () => {
-    const title = prompt('Enter Notification Template Title (e.g. "Ready for Pickup", "Needs Attention", "Deposit Received"):');
-    if (!title || !title.trim()) return;
-
-    const newId = `tmpl-${Date.now()}`;
-    const newTmpl: NotificationTemplate = {
-      id: newId,
-      key: title.trim().replace(/\s+/g, ''),
-      title: title.trim(),
-      channel: 'All',
-      enabled: true,
-      description: 'Custom user notification template',
-      templateText: `မင်္ဂလာပါ {customerName} ခင်ဗျာ၊ {shopName} မှ လူကြီးမင်း၏ {deviceModel} (Ticket: #{ticketNumber}) နှင့် ပတ်သက်၍ အကြောင်းကြားအပ်ပါသည်။`,
-    };
-
-    setFormData({
-      ...formData,
-      notificationTemplates: [...currentNotificationTemplates, newTmpl],
-    });
+    // audit E-P2: native prompt() replaced by a styled inline add-dialog.
+    setCustomAddKind('notification');
+    setCustomAddName('');
   };
 
   const handleDeleteNotificationTemplate = async (id: string) => {
@@ -609,9 +649,17 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   // Handle Save Settings
   const handleSaveSettings = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    onUpdateSettings(formData);
-    setIsSavedBanner(true);
-    setTimeout(() => setIsSavedBanner(false), 3000);
+    // audit E-P2: surface a failure toast instead of silently succeeding.
+    try {
+      Promise.resolve(onUpdateSettings(formData))
+        .then(() => {
+          setIsSavedBanner(true);
+          setTimeout(() => setIsSavedBanner(false), 3000);
+        })
+        .catch(() => toast.error('Settings save failed — please retry.', 'Save Error'));
+    } catch {
+      toast.error('Settings save failed — please retry.', 'Save Error');
+    }
   };
 
   // Open Add Technician Modal
@@ -858,7 +906,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
         <div className="p-3 bg-success/10 border border-success/30 rounded-xl text-success-deep text-xs font-bold flex items-center justify-between animate-fadeIn">
           <div className="flex items-center space-x-2">
             <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
-            <span>Settings saved to Supabase. The header database icon shows the live connection status.</span>
+            <span>Settings saved.</span>
           </div>
         </div>
       )}
@@ -967,7 +1015,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                         <span className="leading-tight line-clamp-2">{tab.label}</span>
                         <span className="absolute top-1.5 right-1.5 flex items-center gap-1 shrink-0">
                           {isDirty && isActive && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-warning shrink-0" title="Unsaved changes" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-warning shrink-0" title="Unsaved changes" aria-label="Unsaved changes" />
                           )}
                           {tab.id === 'recycle' && tab.badge !== undefined && tab.badge > 0 && (
                             <span
@@ -1009,6 +1057,10 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Back to Settings Menu</span>
           </Button>
+          {/* audit E-P3: show the active section name so users keep orientation */}
+          <span className="flex-1 text-center text-sm font-extrabold text-ink truncate px-2">
+            {SUBTAB_LABELS[activeSubTab] || activeSubTab}
+          </span>
           {isDirty && (
             <span className="flex items-center gap-1.5 text-xs font-extrabold text-warning">
               <span className="w-1.5 h-1.5 rounded-full bg-warning" />
@@ -1224,7 +1276,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                       onChange={(e) => setTechFormData({ ...techFormData, commissionRateParts: clampCommissionRate(e.target.value, techFormData.commissionRateParts) })}
                       min="0"
                       max="50"
-                      className="w-full h-9 bg-white text-ink font-bold px-3 rounded-lg border border-line-strong focus:outline-none "
+                      className="w-full h-10 bg-white text-ink font-bold px-3 rounded-xl border border-line-strong focus:outline-none "
                     />
                     <p className="text-xs text-muted mt-1.5">Standard Modular (parts-swap) jobs</p>
                   </div>
@@ -1237,7 +1289,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                       onChange={(e) => setTechFormData({ ...techFormData, commissionRateHardware: clampCommissionRate(e.target.value, techFormData.commissionRateHardware) })}
                       min="0"
                       max="50"
-                      className="w-full h-9 bg-white text-ink font-bold px-3 rounded-lg border border-line-strong focus:outline-none "
+                      className="w-full h-10 bg-white text-ink font-bold px-3 rounded-xl border border-line-strong focus:outline-none "
                     />
                     <p className="text-xs text-muted mt-1.5">Micro-Soldering (board-level) jobs</p>
                   </div>
@@ -1268,7 +1320,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
       {/* Delete Technician Confirmation Modal */}
       {deleteConfirmId && (
         <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-sm w-full p-5 space-y-4 border border-line-strong shadow-xl animate-scale-in">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-5 border border-line-strong shadow-2xl animate-scale-in">
             <div className="flex items-center space-x-3 text-danger">
               <AlertCircle className="w-6 h-6 shrink-0" />
               <h3 className="font-extrabold text-sm text-ink">Delete Technician?</h3>
@@ -1328,7 +1380,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                     value={userFormData.name}
                     onChange={(e) => setUserFormData({ ...userFormData, name: e.target.value })}
                     placeholder="e.g. Mg Mg or Daw Thin"
-                    className="w-full px-3 py-2 rounded-xl border border-line-strong focus:outline-none font-medium"
+                    className="w-full h-10 bg-surface px-3 rounded-xl border border-line-strong focus:bg-white focus:outline-none font-medium"
                   />
                 </div>
 
@@ -1339,7 +1391,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                     value={userFormData.email}
                     onChange={(e) => setUserFormData({ ...userFormData, email: e.target.value })}
                     placeholder="user@applerepairpro.com"
-                    className="w-full px-3 py-2 rounded-xl border border-line-strong focus:outline-none font-medium"
+                    className="w-full h-10 bg-surface px-3 rounded-xl border border-line-strong focus:bg-white focus:outline-none font-medium"
                   />
                 </div>
               </div>
@@ -1353,7 +1405,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                     value={userFormData.phone}
                     onChange={(e) => setUserFormData({ ...userFormData, phone: e.target.value })}
                     placeholder="+95 9 123 456 789"
-                    className="w-full px-3 py-2 rounded-xl border border-line-strong focus:outline-none font-medium"
+                    className="w-full h-10 bg-surface px-3 rounded-xl border border-line-strong focus:bg-white focus:outline-none font-medium"
                   />
                 </div>
 
@@ -1362,7 +1414,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                   <select aria-label="Account Status"
                     value={userFormData.status}
                     onChange={(e) => setUserFormData({ ...userFormData, status: e.target.value as any })}
-                    className="w-full px-3 py-2 rounded-xl border border-line-strong focus:outline-none font-bold bg-white"
+                    className="w-full h-10 bg-surface px-3 rounded-xl border border-line-strong focus:bg-white focus:outline-none font-bold"
                   >
                     <option value="Active">Active User</option>
                     <option value="Inactive">Inactive / Suspended</option>
@@ -1378,6 +1430,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                 <div className="grid grid-cols-3 gap-2">
                   <Button
                     type="button"
+                    aria-pressed={userFormData.role === 'Admin'}
                     onClick={() => {
                       setUserFormData({
                         ...userFormData,
@@ -1399,12 +1452,13 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                         : 'bg-white border-line-strong text-ink hover:bg-purple/50'
                     }`}
                   >
-                    <div className="text-base mb-0.5">👑</div>
+                    <Crown className="w-5 h-5 mx-auto mb-0.5" />
                     <div>Admin</div>
                   </Button>
 
                   <Button
                     type="button"
+                    aria-pressed={userFormData.role === 'Technician'}
                     onClick={() => {
                       setUserFormData({
                         ...userFormData,
@@ -1426,12 +1480,13 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                         : 'bg-white border-line-strong text-ink hover:bg-brand-soft/50'
                     }`}
                   >
-                    <div className="text-base mb-0.5">🔧</div>
+                    <Wrench className="w-5 h-5 mx-auto mb-0.5" />
                     <div>Technician</div>
                   </Button>
 
                   <Button
                     type="button"
+                    aria-pressed={userFormData.role === 'Reception'}
                     onClick={() => {
                       setUserFormData({
                         ...userFormData,
@@ -1453,7 +1508,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                         : 'bg-white border-line-strong text-ink hover:bg-warning/50'
                     }`}
                   >
-                    <div className="text-base mb-0.5">📋</div>
+                    <ClipboardList className="w-5 h-5 mx-auto mb-0.5" />
                     <div>Reception</div>
                   </Button>
                 </div>
@@ -1619,6 +1674,58 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
         </div>
       )}
         </>
+      )}
+
+      {/* Styled inline add-dialog — replaces native prompt() (audit E-P2) */}
+      {customAddKind && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 border border-line-strong shadow-2xl animate-scale-in">
+            <div className="flex items-center justify-between border-b border-line pb-3">
+              <h3 className="font-extrabold text-base text-ink">
+                {customAddKind === 'payment' ? 'Add Custom Payment Method' : 'Add Notification Template'}
+              </h3>
+              <Button variant="ghost"
+                type="button"
+                onClick={() => setCustomAddKind(null)}
+                className="p-1.5 text-muted hover:text-ink hover:bg-surface rounded-lg cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            <div>
+              <label className="font-bold text-ink block mb-1.5">
+                {customAddKind === 'payment' ? 'Payment Method Name' : 'Template Title'}
+              </label>
+              <Input
+                type="text"
+                autoFocus
+                value={customAddName}
+                onChange={(e) => setCustomAddName(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); confirmCustomAdd(); } }}
+                placeholder={customAddKind === 'payment' ? 'e.g. Aplus Pay or KBZ Special Account' : 'e.g. Ready for Pickup, Needs Attention'}
+                className="w-full h-10 bg-surface text-ink font-medium px-3 rounded-xl border border-line-strong focus:bg-white focus:outline-none"
+              />
+            </div>
+            <div className="flex items-center justify-end space-x-2 pt-2 border-t border-line">
+              <Button
+                type="button"
+                onClick={() => setCustomAddKind(null)}
+                variant="outline"
+                className="font-bold"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={confirmCustomAdd}
+                disabled={!customAddName.trim()}
+                className="font-extrabold disabled:opacity-50"
+              >
+                Add
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Interactive Device Intake Print Voucher & Tag Printer Modal */}

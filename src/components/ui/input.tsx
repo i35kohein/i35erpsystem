@@ -19,11 +19,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       <input
         type={type}
         className={cn(
-          "flex h-10 w-full rounded-xl border border-line bg-white px-3.5 text-sm text-ink transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
-          invalid && "border-rose-500 ",
+          "flex h-10 w-full rounded-xl border border-line bg-white px-3.5 text-sm text-ink transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted focus:border-brand focus:ring-2 focus:ring-brand/25 focus:ring-offset-0 focus-visible:outline-none disabled:cursor-not-allowed disabled:bg-surface disabled:opacity-50",
+          invalid && "border-danger ring-2 ring-danger/20",
           className
         )}
         ref={ref}
+        aria-invalid={invalid || undefined}
         {...props}
       />
     )

@@ -41,6 +41,35 @@ const makePhoneMatcher = (queryDigits: string) => (wo: WorkOrder): boolean => {
   return digits === queryDigits;
 };
 
+/** Shared customer-facing timestamp formatter — short month/day + time. */
+const formatCustomerTimestamp = (iso?: string): string =>
+  iso
+    ? new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+    : '';
+
+/** Friendly status labels for customer-facing copy (internal jargon stays internal). */
+const STATUS_LABELS: Record<string, string> = {
+  Receive: 'Received',
+  Pending: 'Pending',
+  'In Progress': 'In Progress',
+  Finished: 'Finished',
+  'Taken Out': 'Collected',
+  'Cant Repair': 'Cannot Repair',
+  'Customer Not Repair': 'Customer Declined',
+};
+
+/** Esc-to-close for portal modals (matches PriceSettingsModal behavior). */
+const useModalEscape = (open: boolean, onClose: () => void) => {
+  React.useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+};
+
 interface CustomerFacingWebPortalProps {
   workOrders: WorkOrder[];
   customers?: Customer[];
@@ -77,6 +106,11 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
   const [printModalOpen, setPrintModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'ESTIMATE' | 'DIAGNOSTICS' | 'MESSAGES'>('OVERVIEW');
 
+  // Esc-to-close for Approval / Rejection / Print modals (audit E-P2).
+  useModalEscape(approvalModalOpen, () => setApprovalModalOpen(false));
+  useModalEscape(rejectionModalOpen, () => setRejectionModalOpen(false));
+  useModalEscape(printModalOpen, () => setPrintModalOpen(false));
+
   // Find matching work orders based on phone, email, order number, serial number, or IMEI
   // Phone matching is strict: the query digits must EQUAL the ticket digits or be the
   // trailing 6+ digits of it. Raw substring matching was leaking tickets (typing "0"
@@ -99,6 +133,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
 
   // Active Selected Work Order
   const currentWorkOrder = matchingWorkOrders.find((w) => w.id === selectedWorkOrderId) || matchingWorkOrders[0] || null;
+  const friendlyStatus = currentWorkOrder ? STATUS_LABELS[currentWorkOrder.status] || currentWorkOrder.status : '';
 
   // Handle Login Lookup
   const handleLogin = (e?: React.FormEvent, directInput?: string) => {
@@ -301,7 +336,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
   // Render Login View if not authenticated
   if (!authenticatedCustomerPhoneOrEmail || !currentWorkOrder) {
     return (
-      <div className="min-h-screen bg-surface flex flex-col justify-between p-4 sm:p-6 text-xs antialiased">
+      <div className="min-h-screen bg-surface flex flex-col justify-between p-4 sm:p-6 text-sm antialiased">
         {/* Top Header */}
         <header className="max-w-4xl mx-auto w-full flex items-center justify-between py-3 px-4 bg-white/80 backdrop-blur-md rounded-2xl border border-line shadow-2xs">
           <div className="flex items-center space-x-2.5">
@@ -337,7 +372,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             </div>
 
             {loginError && (
-              <div className="p-3 bg-danger/10 border border-danger/30 rounded-xl text-danger text-xs font-medium flex items-start space-x-2">
+              <div role="alert" className="p-3 bg-danger/10 border border-danger/30 rounded-xl text-danger text-xs font-medium flex items-start space-x-2">
                 <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{loginError}</span>
               </div>
@@ -385,7 +420,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
   const currentStage = getProgressStage(currentWorkOrder.status);
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col text-xs antialiased pb-12">
+    <div className="min-h-screen bg-surface flex flex-col text-sm antialiased pb-12">
       {/* Top Header Navigation */}
       <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-line px-4 py-3 shadow-2xs">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
@@ -471,7 +506,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   </span>
                 </div>
                 <p className="text-xs text-muted">
-                  Our technicians have completed the initial diagnostic inspection for your <strong>{currentWorkOrder.deviceModel}</strong>. Total estimated cost: <strong className="text-ink font-mono text-sm">{(currentWorkOrder.totalAmount || 0).toLocaleString()} {systemSettings.currencySymbol}</strong>.
+                  Our technicians have completed the initial diagnostic inspection for your <strong>{currentWorkOrder.deviceModel}</strong>. Total estimated cost: <strong className="text-ink font-mono tabular-nums text-sm">{(currentWorkOrder.totalAmount || 0).toLocaleString()} {systemSettings.currencySymbol}</strong>.
                 </p>
               </div>
             </div>
@@ -510,7 +545,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   currentWorkOrder.status === 'In Progress' ? 'bg-brand/10 text-brand-deep border-brand/30' :
                   'bg-warning/10 text-warning border-warning/30'
                 }`}>
-                  Status: {currentWorkOrder.status}
+                  Status: {friendlyStatus}
                 </span>
                 {currentWorkOrder.priority === 'Rush' && (
                   <span className="bg-danger/10 text-danger text-xs font-extrabold px-2 py-0.5 rounded-full border border-danger/30">
@@ -531,7 +566,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
               <div className="text-right">
                 <p className="text-xs text-muted font-bold uppercase tracking-wider">Estimated Completion</p>
                 <p className="text-sm font-extrabold text-brand font-mono">
-                  {currentWorkOrder.estimatedCompletion ? new Date(currentWorkOrder.estimatedCompletion).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Pending Bench Test'}
+                  {currentWorkOrder.estimatedCompletion ? new Date(currentWorkOrder.estimatedCompletion).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Pending Bench Test'}
                 </p>
               </div>
               <Button
@@ -550,7 +585,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
           <div className="space-y-3 pt-2">
             <p className="text-xs font-bold text-muted uppercase tracking-wider">Live Repair Progress Timeline</p>
 
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 relative">
+            <div className="grid grid-cols-1 sm:grid-cols-5 gap-2 relative">
               {/* Stage 1: Intake Received */}
               <div className={`p-3 rounded-2xl border transition-all ${
                 currentStage >= 1
@@ -653,7 +688,10 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
             <FileText className="w-4 h-4" />
             <span>Itemized Quote Estimate</span>
             {currentWorkOrder.estimateStatus === 'Pending Approval' && (
-              <span aria-hidden="true" className="w-2 h-2 rounded-full bg-warning animate-ping" />
+              <span className="relative inline-flex h-2 w-2">
+                <span aria-hidden="true" className="absolute inline-flex h-full w-full rounded-full bg-warning opacity-75 animate-ping" style={{ animationIterationCount: 3 }} />
+                <span aria-hidden="true" className="relative inline-flex h-2 w-2 rounded-full bg-warning" />
+              </span>
             )}
           </Button>
 
@@ -739,7 +777,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                       <div key={log.id} className="p-3 bg-surface rounded-xl border border-line space-y-1">
                         <div className="flex justify-between items-center text-xs text-muted">
                           <span className="font-bold text-ink">{log.author || 'Shop Tech'}</span>
-                          <span>{log.timestamp}</span>
+                          <span>{formatCustomerTimestamp(log.timestamp)}</span>
                         </div>
                         <p className="text-xs text-ink">{log.note}</p>
                       </div>
@@ -764,7 +802,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   <div className="flex justify-between">
                     <span className="text-muted">Subtotal:</span>
                     {/* audit C-P2: legacy/malformed rows can lack numeric fields */}
-                    <span className="font-mono text-ink">{(currentWorkOrder.subtotal || 0).toLocaleString()} {systemSettings.currencySymbol}</span>
+                    <span className="font-mono tabular-nums text-ink">{(currentWorkOrder.subtotal || 0).toLocaleString()} {systemSettings.currencySymbol}</span>
                   </div>
                   {/* audit (Ko Hein 2026-08-11): per-item discounts (new format)
                       must show too, otherwise Subtotal − Total looks like a math
@@ -778,25 +816,25 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                     return (
                       <div className="flex justify-between text-success">
                         <span>Discount on Repairs:</span>
-                        <span className="font-mono">-{perItem.toLocaleString()} {systemSettings.currencySymbol}</span>
+                        <span className="font-mono tabular-nums">-{perItem.toLocaleString()} {systemSettings.currencySymbol}</span>
                       </div>
                     );
                   })()}
                   {currentWorkOrder.discountAmount > 0 && (
                     <div className="flex justify-between text-success">
                       <span>Discount Applied:</span>
-                      <span className="font-mono">-{(currentWorkOrder.discountAmount || 0).toLocaleString()} {systemSettings.currencySymbol}</span>
+                      <span className="font-mono tabular-nums">-{(currentWorkOrder.discountAmount || 0).toLocaleString()} {systemSettings.currencySymbol}</span>
                     </div>
                   )}
                   {currentWorkOrder.depositAmount > 0 && (
                     <div className="flex justify-between text-brand">
                       <span>Deposit Paid:</span>
-                      <span className="font-mono">-{(currentWorkOrder.depositAmount || 0).toLocaleString()} {systemSettings.currencySymbol}</span>
+                      <span className="font-mono tabular-nums">-{(currentWorkOrder.depositAmount || 0).toLocaleString()} {systemSettings.currencySymbol}</span>
                     </div>
                   )}
                   <div className="pt-2 border-t border-line flex justify-between font-extrabold text-sm">
                     <span className="text-ink">Total Amount:</span>
-                    <span className="font-mono text-brand">
+                    <span className="font-mono tabular-nums text-brand">
                       {(currentWorkOrder.totalAmount || 0).toLocaleString()} {systemSettings.currencySymbol}
                     </span>
                   </div>
@@ -884,7 +922,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                       </span>
                     </div>
                     <div className="col-span-2 text-center font-mono font-medium">{li.quantity}</div>
-                    <div className="col-span-2 text-right font-mono font-bold text-ink">
+                    <div className="col-span-2 text-right font-mono tabular-nums font-bold text-ink">
                       {((li.unitPrice || 0) * (li.quantity || 0)).toLocaleString()} {systemSettings.currencySymbol}
                     </div>
                   </div>
@@ -901,7 +939,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
               <div className="flex justify-between text-xs text-muted">
                 <span>Subtotal:</span>
                 {/* audit C-P2: guard legacy rows missing numeric fields */}
-                <span className="font-mono text-ink">{(currentWorkOrder.subtotal || 0).toLocaleString()} {systemSettings.currencySymbol}</span>
+                <span className="font-mono tabular-nums text-ink">{(currentWorkOrder.subtotal || 0).toLocaleString()} {systemSettings.currencySymbol}</span>
               </div>
               {/* audit (Ko Hein 2026-08-11): per-item discounts so the totals
                   chain ties (Subtotal − Repair Discounts + Tax … = Total). */}
@@ -914,25 +952,25 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 return (
                   <div className="flex justify-between text-xs text-success">
                     <span>Discount on Repairs:</span>
-                    <span className="font-mono">-{perItem.toLocaleString()} {systemSettings.currencySymbol}</span>
+                    <span className="font-mono tabular-nums">-{perItem.toLocaleString()} {systemSettings.currencySymbol}</span>
                   </div>
                 );
               })()}
               {currentWorkOrder.taxAmount > 0 && (
                 <div className="flex justify-between text-xs text-muted">
                   <span>Tax:</span>
-                  <span className="font-mono text-ink">{(currentWorkOrder.taxAmount || 0).toLocaleString()} {systemSettings.currencySymbol}</span>
+                  <span className="font-mono tabular-nums text-ink">{(currentWorkOrder.taxAmount || 0).toLocaleString()} {systemSettings.currencySymbol}</span>
                 </div>
               )}
               {currentWorkOrder.depositAmount > 0 && (
                 <div className="flex justify-between text-xs text-brand">
                   <span>Deposit Paid:</span>
-                  <span className="font-mono">-{(currentWorkOrder.depositAmount || 0).toLocaleString()} {systemSettings.currencySymbol}</span>
+                  <span className="font-mono tabular-nums">-{(currentWorkOrder.depositAmount || 0).toLocaleString()} {systemSettings.currencySymbol}</span>
                 </div>
               )}
               <div className="pt-2 border-t border-line flex justify-between font-extrabold text-sm text-ink">
                 <span>Total Authorized Estimate:</span>
-                <span className="font-mono text-brand">{(currentWorkOrder.totalAmount || 0).toLocaleString()} {systemSettings.currencySymbol}</span>
+                <span className="font-mono tabular-nums text-brand">{(currentWorkOrder.totalAmount || 0).toLocaleString()} {systemSettings.currencySymbol}</span>
               </div>
             </div>
 
@@ -966,7 +1004,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                     <p className="text-xs opacity-90">Approved online on {currentWorkOrder.estimateApprovedAt ? new Date(currentWorkOrder.estimateApprovedAt).toLocaleString() : 'Record'}</p>
                   </div>
                 </div>
-                <span className="font-mono font-bold text-xs">{(currentWorkOrder.totalAmount || 0).toLocaleString()} {systemSettings.currencySymbol}</span>
+                <span className="font-mono tabular-nums font-bold text-xs">{(currentWorkOrder.totalAmount || 0).toLocaleString()} {systemSettings.currencySymbol}</span>
               </div>
             )}
           </div>
@@ -1035,7 +1073,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                     }`}>
                       <p className="font-medium">{msg.text}</p>
                     </div>
-                    <span className="text-xs text-muted mt-1 font-mono">{msg.timestamp}</span>
+                    <span className="text-xs text-muted mt-1 font-mono tabular-nums">{formatCustomerTimestamp(msg.timestamp)}</span>
                   </div>
                 ))
               ) : (
@@ -1088,7 +1126,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 You are authorizing <strong>{systemSettings.shopName}</strong> to proceed with the repair for <strong>{currentWorkOrder.deviceModel}</strong> (WO #{currentWorkOrder.orderNumber}).
               </p>
 
-              <div className="bg-surface p-3.5 rounded-2xl border border-line space-y-1.5 font-mono">
+              <div className="bg-surface p-3.5 rounded-2xl border border-line space-y-1.5 font-mono tabular-nums">
                 <div className="flex justify-between">
                   <span className="text-muted">Device:</span>
                   <span className="font-bold">{currentWorkOrder.deviceModel}</span>
@@ -1121,7 +1159,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   onChange={(e) => setAgreedToTerms(e.target.checked)}
                   className="mt-0.5 h-4 w-4 shrink-0 rounded border-line text-brand accent-brand"
                 />
-                <span className="text-xs text-muted">I authorize the shop to install components and accept the estimates.</span>
+                <span className="text-xs text-ink font-semibold">I authorize the shop to install components and accept the estimates.</span>
               </label>
             </div>
 
@@ -1203,7 +1241,8 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
               <Button
                 type="button"
                 onClick={handleRejectEstimate}
-                className="flex-1 bg-danger hover:bg-danger text-white"
+                disabled={rejectionReason === 'Other reason' && !rejectionNotes.trim()}
+                className="flex-1 bg-danger hover:bg-danger-deep disabled:opacity-50 text-white"
               >
                 Submit Request
               </Button>
@@ -1322,7 +1361,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                   currentWorkOrder.lineItems.map((li) => (
                     <div key={li.id} className="px-3 py-2 flex justify-between text-xs">
                       <span>{li.description} (x{li.quantity})</span>
-                      <span className="font-mono font-bold">{((li.unitPrice || 0) * (li.quantity || 0)).toLocaleString()} {systemSettings.currencySymbol}</span>
+                      <span className="font-mono tabular-nums font-bold">{((li.unitPrice || 0) * (li.quantity || 0)).toLocaleString()} {systemSettings.currencySymbol}</span>
                     </div>
                   ))
                 ) : (
@@ -1330,7 +1369,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 )}
               </div>
 
-              <div className="text-right space-y-1 font-mono pt-2 border-t border-line">
+              <div className="text-right space-y-1 font-mono tabular-nums pt-2 border-t border-line">
                 {/* audit C-P2: guard legacy rows missing numeric fields */}
                 <p className="text-xs text-muted">Subtotal: {(currentWorkOrder.subtotal || 0).toLocaleString()} {systemSettings.currencySymbol}</p>
                 <p className="text-sm font-black text-brand">Total: {(currentWorkOrder.totalAmount || 0).toLocaleString()} {systemSettings.currencySymbol}</p>

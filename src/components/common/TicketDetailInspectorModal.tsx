@@ -26,6 +26,8 @@ interface TicketDetailInspectorModalProps {
   onDelete?: (id: string) => void;
   /** Add a manual log entry to the ticket (Ko Hein 2026-08-11). */
   onAddLog?: (workOrder: WorkOrder, note: string) => void;
+  /** Currency symbol for money cells — defaults to MMK when not supplied. */
+  currency?: string;
 }
 
 export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProps> = ({
@@ -36,6 +38,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
   onEdit,
   onDelete,
   onAddLog,
+  currency = 'MMK',
 }) => {
   const [activeTab, setActiveTab] = React.useState<'details' | 'log'>('details');
   const [logDraft, setLogDraft] = React.useState('');
@@ -99,13 +102,9 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
   const savedRepairLogs = workOrder.repairLogs || [];
   const intakeLog = {
     id: `intake-${workOrder.id}`,
-    timestamp: new Date(workOrder.createdAt).toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
+    timestamp: new Date(workOrder.createdAt).toLocaleString([], {
+      dateStyle: 'medium',
+      timeStyle: 'short',
     }),
     author: 'Intake Desk',
     note: `Ticket created for ${workOrder.deviceModel}.`,
@@ -121,8 +120,8 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-3 sm:p-5">
-      <div className="flex h-[92vh] max-h-[760px] min-h-0 w-full max-w-5xl flex-col overflow-hidden rounded-xl border border-line bg-white shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-3 sm:p-5 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="flex h-[92vh] max-h-[760px] min-h-0 w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-2xl">
         <header className="flex items-center justify-between gap-3 border-b border-line px-4 py-3 sm:px-5">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2.5">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-brand">
@@ -280,7 +279,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                 ).map(([label, value]) => (
                   <div key={label} className="flex items-center gap-3 py-2">
                     <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">{label}</span>
-                    <span className="min-w-0 flex-1 truncate text-sm font-semibold text-ink" title={value}>
+                    <span className="min-w-0 flex-1 text-sm font-semibold text-ink line-clamp-2" title={value}>
                       {value}
                     </span>
                   </div>
@@ -291,7 +290,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                   <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Color</span>
                   <span className="flex min-w-0 items-center gap-2 text-sm font-semibold text-ink">
                     <span
-                      className={`h-5 w-5 shrink-0 rounded-full border-2 border-white shadow ${deviceColor.border}`}
+                      className={`h-5 w-5 shrink-0 rounded-full border-2 border-line shadow ${deviceColor.border}`}
                       style={{ background: deviceColor.gradient }}
                     />
                     <span className="truncate">{workOrder.deviceColor || 'Standard'}</span>
@@ -310,7 +309,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                 <div className="flex items-center gap-3 py-2.5">
                   <span className="w-32 shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted">Total Estimate</span>
                   <span className="font-mono text-base font-black text-brand">
-                    {(workOrder.totalAmount || workOrder.subtotal || 0).toLocaleString()} MMK
+                    {(workOrder.totalAmount || workOrder.subtotal || 0).toLocaleString()} {currency}
                   </span>
                 </div>
               </div>
@@ -320,7 +319,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                 <div className="flex items-center justify-between border-b border-line pb-2">
                   <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted">Phone Testing &amp; Checking</span>
                   <span className="flex shrink-0 items-center gap-1.5">
-                    <span className="rounded-md border border-line bg-surface px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-muted">Before · After</span>
+                    <span className="rounded-md border border-line bg-surface px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-muted">Before · After</span>
                     <span className="font-mono text-[11px] font-black text-brand">{diagnosticRows.length} checks</span>
                   </span>
                 </div>
@@ -332,7 +331,7 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                     return (
                       <div
                         key={beforeItem.id || `${beforeItem.name}-${index}`}
-                        className={`flex min-h-7 items-center gap-1.5 border-b border-line/60 py-1.5 ${hasFail ? 'bg-danger/10' : ''}`}
+                        className={`flex min-h-8 items-center gap-2 border-b border-line/60 py-1.5 ${hasFail ? 'bg-danger/10' : ''}`}
                       >
                         <StatusDot status={beforeItem.status} label={`Before: ${beforeItem.status}`} />
                         <StatusDot status={afterItem.status} label={`After: ${afterItem.status}`} />
@@ -407,7 +406,8 @@ export const TicketDetailInspectorModal: React.FC<TicketDetailInspectorModalProp
                       }}
                       className="shrink-0 rounded-lg bg-brand px-4 py-2 text-xs font-extrabold text-white transition-colors hover:bg-brand-deep disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      Add Log
+                      {isSavingLog && <span className="h-3 w-3 rounded-full border-2 border-white/40 border-t-white animate-spin" />}
+                      {isSavingLog ? 'Saving…' : 'Add Log'}
                     </Button>
                   </div>
                 </div>

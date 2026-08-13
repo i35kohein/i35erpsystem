@@ -1312,8 +1312,13 @@ html[data-theme="dark-slate"] .shadow-raised-top {
 }
 
 /* Ko Hein 2026-08-10: clean look — no focus ring/outline decorations on
-   interactive elements (replaces the accessibility focus rings). */
-:where(button, input, select, textarea, [role="button"], a, [tabindex]):focus,
-:where(button, input, select, textarea, [role="button"], a, [tabindex]):focus-visible {
+   interactive elements (replaces the accessibility focus rings).
+   2026-08-13 (audit A-P1): keep mouse clicks outline-free, but restore a
+   visible keyboard-focus indicator via :focus-visible (brand outline). */
+:where(button, input, select, textarea, [role="button"], a, [tabindex]):focus {
   outline: none;
+}
+:where(button, a, [role="button"], input, select, textarea):focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
 }

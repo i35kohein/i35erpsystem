@@ -29,16 +29,15 @@ import {ClipboardList, Stethoscope,
   RotateCcw,
   Ban,
   UserX,
-  PackageCheck,
-  ArrowUp,
-  ArrowDown } from 'lucide-react';
+  PackageCheck } from 'lucide-react';
 import {WorkOrder, 
   PartItem, 
   Customer, 
   Technician,
   AppUser,
   RepairLogEntry,
-  WorkOrderStatus} from '../../types';
+  WorkOrderStatus,
+  SystemSettings} from '../../types';
 import { getRealisticColorStyle } from './deviceData';
 
 export { APPLE_MODEL_SERIES, WARRANTY_OPTIONS, AVAILABLE_REPAIRS, DIAGNOSTIC_NAMES, getAvailableColorsForModel } from './deviceData';
@@ -73,10 +72,13 @@ interface IntakeWorkOrderModuleProps {
   onReopenQa?: (id: string) => void;
   /** Direct status change from the roster (Ko Hein 2026-08-10) */
   onUpdateWorkOrderStatus?: (id: string, status: WorkOrderStatus) => void;
+  /** Currency symbol from Settings (audit area-B) — falls back to MMK. */
+  systemSettings?: SystemSettings;
 }
 
 export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   workOrders,
+  systemSettings,
   technicians,
   currentUser,
   onSelectPrintTag,
@@ -106,6 +108,8 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   const [localViewMode, setLocalViewMode] = useState<'table' | 'cards'>('cards');
   const viewMode = propViewMode !== undefined ? propViewMode : localViewMode;
   const setViewMode = (v: 'table' | 'cards') => (propSetViewMode ? propSetViewMode(v) : setLocalViewMode(v));
+  // Currency token (audit area-B): matches POS/intake; MMK when Settings unavailable.
+  const currency = systemSettings?.currencySymbol || 'MMK';
 
   // Phones default to the card grid — the 9-column table is unusable below md.
   // (User can still switch back to Table; manual choice is preserved.)
@@ -131,6 +135,18 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   useEffect(() => {
     if (scanRequested > 0) setIsCameraScannerOpen(true);
   }, [scanRequested]);
+
+  // Esc closes the roster popovers (status picker / tech assign) — file-local
+  // keydown handler (audit area-B).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      setStatusPicker(null);
+      setTechAssignOpenId(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   // Tech assignment from the roster (Ko Hein 2026-08-10)
   const handleAssignTech = (wo: WorkOrder, techId: string) => {
@@ -269,7 +285,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           aria-expanded={isOpen}
           aria-label={`Current status ${currentStatus.label}. Change status.`}
           title={`Current: ${currentStatus.label}`}
-          className={`!h-7 !min-h-7 w-7 shrink-0 px-0 flex items-center justify-center rounded-full border shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-brand/30 ${currentStatus.color}`}
+          className={`!h-8 !min-h-8 w-8 shrink-0 px-0 flex items-center justify-center rounded-full border shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-brand/30 ${currentStatus.color}`}
         >
           <CurrentIcon className="h-3.5 w-3.5" />
         </Button>
@@ -321,7 +337,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
         variant="ghost"
         type="button"
         onClick={(e) => { e.stopPropagation(); onNavigateToTab?.('pos'); }}
-        className="!h-7 !min-h-7 w-7 shrink-0 px-0 rounded-full bg-success text-white hover:bg-success/90 border border-success shadow-2xs"
+        className="!h-8 !min-h-8 w-8 shrink-0 px-0 rounded-full bg-success text-white hover:bg-success/90 border border-success shadow-2xs focus-visible:ring-2 focus-visible:ring-success/40"
         title="Go to POS checkout"
         aria-label={`Checkout ${wo.orderNumber || wo.id}`}
       >
@@ -369,7 +385,8 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                   }
                 }}
                 aria-pressed={isSelected}
-                className={`inline-flex h-8 items-center gap-1.5 rounded-full border px-2.5 text-[11px] font-bold transition-colors cursor-pointer focus:outline-none ${
+                title={st.id === 'RUSH' ? 'Sort urgent/rush tickets to top' : `Filter: ${st.label}`}
+                className={`inline-flex h-9 items-center gap-1.5 rounded-full border px-2.5 text-xs font-bold transition-colors cursor-pointer focus:outline-none ${
                   isSelected
                     ? 'bg-ink text-white border-ink'
                     : 'bg-white text-ink border-line hover:border-brand/40 hover:text-brand'
@@ -390,7 +407,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                 variant="ghost"
                 type="button"
                 onClick={() => setViewMode('table')}
-                className={`!h-7 !min-h-7 w-7 px-0 rounded-md flex items-center justify-center cursor-pointer hover:bg-transparent! ${viewMode === 'table' ? 'bg-brand text-white shadow-2xs' : 'text-muted hover:text-ink'}`}
+                className={`!h-7 !min-h-7 w-7 px-0 rounded-md flex items-center justify-center cursor-pointer ${viewMode === 'table' ? 'bg-brand text-white shadow-2xs' : 'text-muted hover:text-ink'}`}
                 title="Table View"
                 aria-label="Table View"
               >
@@ -400,7 +417,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                 variant="ghost"
                 type="button"
                 onClick={() => setViewMode('cards')}
-                className={`!h-7 !min-h-7 w-7 px-0 rounded-md flex items-center justify-center cursor-pointer hover:bg-transparent! ${viewMode === 'cards' ? 'bg-brand text-white shadow-2xs' : 'text-muted hover:text-ink'}`}
+                className={`!h-7 !min-h-7 w-7 px-0 rounded-md flex items-center justify-center cursor-pointer ${viewMode === 'cards' ? 'bg-brand text-white shadow-2xs' : 'text-muted hover:text-ink'}`}
                 title="Cards Grid View"
                 aria-label="Cards Grid View"
               >
@@ -456,7 +473,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
 
         {/* View Content: Table or Grid Cards */}
         {filteredOrders.length === 0 ? (
-          <div className="flex flex-1 min-h-[320px] flex-col items-center justify-center p-10 m-5 text-center text-xs space-y-4 bg-surface/60 rounded-2xl border border-dashed border-line">
+          <div className="flex flex-1 min-h-[320px] flex-col items-center justify-center p-10 text-center text-xs space-y-4 bg-surface/60 rounded-2xl border border-dashed border-line">
             <div className="w-16 h-16 bg-brand/10 text-brand rounded-2xl flex items-center justify-center mx-auto shadow-2xs">
               <Inbox className="w-8 h-8" />
             </div>
@@ -473,28 +490,11 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           /* TABLE VIEW */
           <div className="workspace-panel__scroll scroll-shadow-right scroll-shadow-bottom rounded-xl pb-3">
             <table className="w-full text-left text-xs">
-              <thead className="sticky top-0 z-10">
+              <thead className="sticky top-0 z-10 shadow-[0_1px_0_0_var(--line)]">
                 <tr className="border-b border-line text-muted font-bold text-xs uppercase tracking-wider bg-surface">
                   <th className="py-2.5 px-3">
                     <span className="inline-flex items-center gap-1">
                       Ticket # & Date
-                      {/* Date sort mini icon (Ko Hein 2026-08-11): Latest / Oldest */}
-                      <button
-                        type="button"
-                        onClick={() => setDateSort(dateSort === 'latest' ? 'oldest' : 'latest')}
-                        title={`Sort by date — ${dateSort === 'latest' ? 'Oldest first' : 'Latest first'}`}
-                        aria-label={`Sort by date — currently ${dateSort === 'latest' ? 'Latest first' : 'Oldest first'}`}
-                        className="inline-flex items-center gap-0.5 rounded px-1 py-0.5 transition-colors cursor-pointer hover:bg-brand/10 hover:text-brand"
-                      >
-                        {dateSort === 'latest' ? (
-                          <ArrowDown className="w-3 h-3" />
-                        ) : (
-                          <ArrowUp className="w-3 h-3" />
-                        )}
-                        <span className="text-[9px] font-black normal-case">
-                          {dateSort === 'latest' ? 'Latest' : 'Oldest'}
-                        </span>
-                      </button>
                     </span>
                   </th>
                   <th className="py-2.5 px-3">Customer & Contact</th>
@@ -534,14 +534,14 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                       {/* Customer */}
                       <td className="py-3 px-3">
                         <p className="font-bold text-ink truncate max-w-[140px]">{wo.customerName}</p>
-                        <p className="text-xs text-muted font-mono">{wo.customerPhone}</p>
+                        <p className="text-xs text-muted font-mono truncate max-w-[140px]">{wo.customerPhone}</p>
                       </td>
 
                       {/* Device & Serial */}
                       <td className="py-3 px-3">
                         <p className="font-semibold text-ink truncate max-w-[150px]">{wo.deviceModel}</p>
                         <p className="text-xs font-mono text-muted truncate max-w-[150px]">
-                          {wo.serialNumber || wo.imei ? `SN: ${wo.serialNumber || wo.imei}` : 'No Serial'}
+                          {wo.serialNumber ? `SN: ${wo.serialNumber}` : wo.imei ? `IMEI: ${wo.imei}` : 'No Serial'}
                         </p>
                       </td>
 
@@ -616,11 +616,11 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                       <td className="py-3 px-3">
                         <div className="flex items-center gap-1.5">
                           <p className="font-mono font-extrabold text-xs text-ink">
-                            {totalAmount.toLocaleString()} MMK
+                            {totalAmount.toLocaleString()} {currency}
                           </p>
                         </div>
-                        <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
-                          wo.isPaid ? 'bg-success/15 text-success-deep' : 'bg-danger/15 text-danger'
+                        <span className={`text-xs font-bold px-2 py-1 rounded ${
+                          wo.isPaid ? 'bg-success/15 text-success-deep' : 'bg-warning/15 text-warning'
                         }`}>
                           {wo.isPaid ? 'Paid' : 'Unpaid'}
                         </span>
@@ -628,7 +628,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
 
                       {/* Ticket status inspector and label export — icon-only actions */}
                       <td className="py-3 px-3 text-right">
-                        <div className="inline-flex items-center justify-end gap-1">
+                        <div className="inline-flex items-center justify-end gap-1.5">
                           {renderCheckoutButton(wo)}
                           {(wo.status === 'Finished' || wo.status === 'Taken Out') &&
                             (!wo.postRepairChecklist && wo.status === 'Finished' ? (
@@ -637,7 +637,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                               variant="ghost"
                               type="button"
                               onClick={(e) => { e.stopPropagation(); onNavigateToTab?.('qa'); }}
-                              className="!h-7 !min-h-7 w-7 px-0 rounded-full bg-brand text-white hover:bg-brand-deep border border-brand"
+                              className="!h-8 !min-h-8 w-8 px-0 rounded-full bg-brand text-white hover:bg-brand-deep border border-brand focus-visible:ring-2 focus-visible:ring-brand/40"
                               title="Run 21-point diagnosis first"
                               aria-label={`Diagnose ${wo.orderNumber || wo.id}`}
                             >
@@ -653,7 +653,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                                 const ok = await confirmDialog({ title: 'Reopen QA', message: `Reopen QA for ${wo.orderNumber || wo.id}? It goes back to the QA queue for re-inspection.`, confirmLabel: 'Reopen QA' });
                                 if (ok) onReopenQa(wo.id);
                               }}
-                              className="!h-7 !min-h-7 w-7 px-0 rounded-full border border-warning/40 bg-warning/10 text-warning hover:bg-warning/20"
+                              className="!h-8 !min-h-8 w-8 px-0 rounded-full border border-warning/40 bg-warning/10 text-warning hover:bg-warning/20 focus-visible:ring-2 focus-visible:ring-warning/40"
                               title="Reopen QA — re-run the 21-point check"
                               aria-label={`Reopen QA for ${wo.orderNumber || wo.id}`}
                             >
@@ -664,7 +664,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                             variant="ghost"
                             type="button"
                             onClick={() => handleOpenTicketDetail(wo)}
-                            className="!h-7 !min-h-7 w-7 px-0 border border-line bg-brand-soft text-brand hover:bg-white rounded-lg"
+                            className="!h-8 !min-h-8 w-8 px-0 border border-line bg-brand-soft text-brand hover:bg-white rounded-lg focus-visible:ring-2 focus-visible:ring-brand/40"
                             title="View Ticket Status"
                             aria-label={`View status for ${wo.orderNumber || wo.id}`}
                           >
@@ -675,7 +675,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                             variant="ghost"
                             type="button"
                             onClick={() => onSelectPrintTag(wo)}
-                            className="!h-7 !min-h-7 w-7 px-0 hover:bg-line border border-line rounded-lg"
+                            className="!h-8 !min-h-8 w-8 px-0 hover:bg-line border border-line rounded-lg focus-visible:ring-2 focus-visible:ring-brand/40"
                             title="Print Device Label Tag"
                             aria-label={`Print label for ${wo.orderNumber || wo.id}`}
                           >
@@ -692,7 +692,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           </div>
         ) : (
           /* GRID CARDS VIEW — POS Ready-to-Checkout style */
-          <div className="workspace-panel__scroll grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 content-start rounded-xl p-1">
+          <div className="workspace-panel__scroll grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 content-start rounded-xl p-2 sm:p-3">
             {filteredOrders.map((wo) => {
               const woColorStyle = getRealisticColorStyle(wo.deviceColor);
               const summary = (wo.selectedRepairs || []).map((r) => r.name).join(', ') || wo.serviceType || 'General Repair';
@@ -715,7 +715,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                     <div className="flex items-center gap-1 min-w-0">
                       <span className="font-mono text-[11px] font-extrabold text-brand truncate">{wo.orderNumber}</span>
                       <span
-                        className="text-[9px] font-mono text-muted shrink-0"
+                        className="text-[10px] font-mono text-muted shrink-0"
                         title={`Voucher opened: ${new Date(wo.createdAt || Date.now()).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}`}
                       >
                         {new Date(wo.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
@@ -725,7 +725,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                       {wo.priority && wo.priority !== 'Normal' ? (
                         <PriorityBadge priority={wo.priority} size="xs" />
                       ) : (
-                        <span className="text-[9px] font-black px-1.5 py-px rounded uppercase bg-surface text-muted">NORM</span>
+                        <span className="text-[10px] font-black px-1.5 py-px rounded uppercase bg-surface text-muted">Normal</span>
                       )}
                       {onUpdateWorkOrderStatus ? (
                         renderStatusCirclePicker(wo)
@@ -795,7 +795,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                     <div className="flex items-center gap-1.5">
                       {renderCheckoutButton(wo)}
                       <span className="font-mono text-[11px] font-black text-success-deep">
-                        {(wo.totalAmount || wo.subtotal || 0).toLocaleString()} MMK
+                        {(wo.totalAmount || wo.subtotal || 0).toLocaleString()} {currency}
                       </span>
                     </div>
                   </div>

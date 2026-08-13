@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {PhoneCall, 
   Star, 
   CheckCircle2, 
@@ -164,6 +164,18 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
       }, 0) / ratedOrders.length).toFixed(1)
     : '—';
 
+  // Close modals with Escape (audit D-P2 a11y — mirrors PrintableInvoiceModal)
+  useEffect(() => {
+    if (!isLogModalOpen && !historyModalWo) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      setIsLogModalOpen(false);
+      setHistoryModalWo(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isLogModalOpen, historyModalWo]);
+
   const handleOpenLogModal = (wo: WorkOrder) => {
     setSelectedWo(wo);
     setFormStatus(wo.followUpStatus || 'Satisfied');
@@ -291,7 +303,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
               <UserCheck className="w-4 h-4" />
             </div>
             <div className="pr-10">
-              <span className="text-xs font-semibold text-muted">Total Completed</span>
+              <span className="text-xs font-bold text-muted">Total Completed</span>
               <div className="text-xl font-extrabold text-ink">{totalCompleted}</div>
             </div>
           </div>
@@ -321,27 +333,27 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
               <CalendarDays className="w-4 h-4" />
             </div>
             <div className="pr-10">
-              <span className="text-xs font-bold text-violet-900">2-Month Check</span>
-              <div className="text-xl font-extrabold text-violet-800">{count60Days}</div>
+              <span className="text-xs font-bold text-purple">2-Month Check</span>
+              <div className="text-xl font-extrabold text-purple">{count60Days}</div>
             </div>
           </div>
 
-          <div className="relative bg-success/50 border border-success/30 rounded-xl p-3 space-y-1">
+          <div className="relative bg-success/15 border border-success/30 rounded-xl p-3 space-y-1">
             <div className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-white text-success-deep flex items-center justify-center">
               <CheckCircle2 className="w-4 h-4" />
             </div>
             <div className="pr-10">
-              <span className="text-xs font-semibold text-success-deep">Satisfied</span>
+              <span className="text-xs font-bold text-success-deep">Satisfied</span>
               <div className="text-xl font-extrabold text-success-deep">{satisfiedCount}</div>
             </div>
           </div>
 
-          <div className="relative bg-warning/50 border border-warning/30 rounded-xl p-3 space-y-1 col-span-2 sm:col-span-1">
+          <div className="relative bg-warning/15 border border-warning/30 rounded-xl p-3 space-y-1 col-span-2 sm:col-span-1">
             <div className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-white text-warning flex items-center justify-center">
               <Star className="w-4 h-4 fill-warning text-warning" />
             </div>
             <div className="pr-10">
-              <span className="text-xs font-semibold text-warning">Avg Rating</span>
+              <span className="text-xs font-bold text-warning">Avg Rating</span>
               <div className="text-xl font-extrabold text-warning">{avgRating}</div>
             </div>
           </div>
@@ -437,14 +449,14 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
 
                       {/* Customer & Contact */}
                       <td className="py-3 px-3">
-                        <p className="font-bold text-ink truncate max-w-[140px]">{wo.customerName}</p>
-                        <p className="text-xs text-muted font-mono">{wo.customerPhone}</p>
+                        <p className="font-bold text-ink truncate min-w-0 max-w-full">{wo.customerName}</p>
+                        <p className="text-xs text-muted font-mono truncate min-w-0 max-w-full">{wo.customerPhone}</p>
                       </td>
 
                       {/* Device & Serial */}
                       <td className="py-3 px-3">
-                        <p className="font-semibold text-ink truncate max-w-[150px]">{wo.deviceModel}</p>
-                        <p className="text-xs font-mono text-muted truncate max-w-[150px]">
+                        <p className="font-semibold text-ink truncate min-w-0 max-w-full">{wo.deviceModel}</p>
+                        <p className="text-xs font-mono text-muted truncate min-w-0 max-w-full">
                           {wo.serialNumber ? `SN: ${wo.serialNumber}` : wo.imei ? `IMEI: ${wo.imei}` : 'No Serial'}
                           {wo.assignedTechName ? ` · ${wo.assignedTechName}` : ''}
                         </p>
@@ -474,8 +486,8 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
 
                       {/* Amount */}
                       <td className="py-3 px-3">
-                        <p className="font-mono font-extrabold text-xs text-ink">{systemSettings.currencySymbol}{wo.totalAmount || 0}</p>
-                        <span className="text-[11px] text-muted">Warranty {wo.warrantyDays} Days</span>
+                        <p className="font-mono font-extrabold text-xs text-ink tabular-nums">{Number(wo.totalAmount || 0).toLocaleString()} {systemSettings.currencySymbol}</p>
+                        <span className="text-[11px] text-muted">Warranty {wo.warrantyDays || 90} Days</span>
                       </td>
 
                       {/* Actions — Call / Logs / Log Follow-Up */}
@@ -484,7 +496,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                           <a
                             href={`tel:${wo.customerPhone}`}
                             aria-label={`Call ${wo.customerName || 'customer'}`}
-                            className="!h-7 !min-h-7 w-7 rounded-lg bg-surface hover:bg-line text-ink border border-line transition-colors cursor-pointer inline-flex items-center justify-center"
+                            className="h-9 min-h-9 w-9 rounded-lg bg-surface hover:bg-line text-ink border border-line transition-colors cursor-pointer inline-flex items-center justify-center"
                             title="Call Phone"
                           >
                             <Phone className="w-3.5 h-3.5 text-brand" />
@@ -494,7 +506,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                               type="button"
                               onClick={() => setHistoryModalWo(wo)}
                               variant="ghost"
-                              className="!h-7 !min-h-7 w-7 px-0 border border-line text-muted hover:bg-surface rounded-lg"
+                              className="h-9 min-h-9 w-9 px-0 border border-line text-muted hover:bg-surface rounded-lg"
                               title={`View logs (${records.length})`}
                               aria-label={`View follow-up logs for ${wo.orderNumber}`}
                             >
@@ -504,7 +516,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                           <Button
                             type="button"
                             onClick={() => handleOpenLogModal(wo)}
-                            className="!h-7 !min-h-7 px-2 bg-brand hover:bg-brand-deep text-white flex items-center space-x-1 rounded-lg"
+                            className="h-9 min-h-9 px-2.5 bg-brand hover:bg-brand-deep text-white flex items-center space-x-1 rounded-lg"
                             title="Log Follow-Up"
                           >
                             <PhoneCall className="w-3.5 h-3.5" />
@@ -523,8 +535,8 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
 
       {/* LOG FOLLOW-UP MODAL */}
       {isLogModalOpen && selectedWo && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-line rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-xl animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Record follow-up call">
+          <div className="bg-white border border-line rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-xl animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto" tabIndex={-1}>
             <div className="flex items-center justify-between border-b border-line pb-3">
               <div className="flex items-center space-x-2">
                 <div className="p-2 bg-brand-soft text-brand rounded-xl">
@@ -541,6 +553,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
               </div>
               <Button variant="ghost"
                 onClick={() => setIsLogModalOpen(false)}
+                aria-label="Close follow-up log"
                 className="p-1 rounded-lg text-muted hover:bg-surface hover:text-ink transition-colors"
               >
                 <X className="w-4 h-4" />
@@ -648,7 +661,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                       >
                         <Star
                           className={`w-6 h-6 ${
-                            star <= formRating ? 'fill-warning text-warning' : 'text-line'
+                            star <= formRating ? 'fill-warning text-warning' : 'text-warning/30'
                           }`}
                         />
                       </Button>
@@ -682,7 +695,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
                     <Button variant="ghost"
                       key={idx}
                       type="button"
-                      onClick={() => setFormNotes(tmpl)}
+                      onClick={() => setFormNotes((prev) => (prev ? prev + ' ' + tmpl : tmpl))}
                       className="px-2 min-h-10 bg-surface hover:bg-line text-ink border border-line rounded-lg text-xs font-semibold transition-all text-left cursor-pointer"
                     >
                       + {tmpl.slice(0, 32)}...
@@ -735,8 +748,8 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
 
       {/* HISTORY LOGS MODAL */}
       {historyModalWo && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-line rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Follow-up history">
+          <div className="bg-white border border-line rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl animate-in fade-in zoom-in-95 duration-150" tabIndex={-1}>
             <div className="flex items-center justify-between border-b border-line pb-3">
               <div className="flex items-center space-x-2">
                 <History className="w-5 h-5 text-brand" />
@@ -751,6 +764,7 @@ export const CompletedDeviceFollowUpModule: React.FC<CompletedDeviceFollowUpModu
               </div>
               <Button variant="ghost"
                 onClick={() => setHistoryModalWo(null)}
+                aria-label="Close history"
                 className="p-1 rounded-lg text-muted hover:bg-surface hover:text-ink transition-colors"
               >
                 <X className="w-4 h-4" />

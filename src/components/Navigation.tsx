@@ -19,6 +19,10 @@ import { WorkOrder, SystemSettings, AppUser } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { Button, Badge } from './ui';
 
+// audit A-P2: version derives from the build env (VITE_APP_VERSION) with a
+// hardcoded fallback — was a literal that drifted from the real build.
+const APP_VERSION = (import.meta.env as Record<string, string | undefined>).VITE_APP_VERSION || 'v2.4.0';
+
 interface NavigationProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
@@ -38,6 +42,8 @@ interface NavigationProps {
   setIsMobileMenuOpen?: (open: boolean | ((prev: boolean) => boolean)) => void;
   /** iPad: sidebar behaves like the mobile drawer (hidden by default, hamburger opens it). */
   isIpad?: boolean;
+  /** audit A-P2: real connectivity so the footer pill isn't always green. */
+  isOnline?: boolean;
 }
 
 export const Navigation: React.FC<NavigationProps> = ({
@@ -54,6 +60,7 @@ export const Navigation: React.FC<NavigationProps> = ({
   isMobileMenuOpen: externalMobileMenuOpen,
   setIsMobileMenuOpen: externalSetIsMobileMenuOpen,
   isIpad = false,
+  isOnline = true,
 }) => {
   const { t } = useLanguage();
   const [internalMobileMenuOpen, setInternalMobileMenuOpen] = useState(false);
@@ -114,12 +121,12 @@ export const Navigation: React.FC<NavigationProps> = ({
         },
         {
           id: 'simple-ticket',
-          label: 'Simple Ticket',
+          label: t('navSimpleTicket'),
           icon: ClipboardCheck,
         },
         {
           id: 'trello',
-          label: 'Ticket Board',
+          label: t('navTicketBoard'),
           icon: Trello,
         },
         {
@@ -155,7 +162,7 @@ export const Navigation: React.FC<NavigationProps> = ({
         },
         {
           id: 'finance',
-          label: 'Finance',
+          label: t('navFinance'),
           icon: DollarSign,
           badge: financePendingCount > 0 ? financePendingCount : undefined,
           badgeColor: 'bg-warning text-white',
@@ -189,7 +196,7 @@ export const Navigation: React.FC<NavigationProps> = ({
         },
         {
           id: 'mermaid',
-          label: 'Mermaid',
+          label: t('navMermaid'),
           icon: Tag,
         },
         {
@@ -240,9 +247,13 @@ export const Navigation: React.FC<NavigationProps> = ({
     setIsMobileMenuOpen(false);
   };
 
+  // audit A-P3: one shared collapsed-mode sizing string for the Intake
+  // button and the nav items (was three hand-tuned centering variants).
+  const collapsedNavBtn = 'h-10 w-10 mx-auto justify-center p-0 rounded-xl';
+
   const navButtonBase = (isActive: boolean) => `
     group w-full border transition-all duration-200
-    ${effectiveCollapsed ? 'h-10 w-10 mx-auto justify-center p-0 relative rounded-xl' : 'h-10 justify-between px-2.5 rounded-xl'}
+    ${effectiveCollapsed ? `${collapsedNavBtn} relative` : 'h-10 justify-between px-2.5 rounded-xl'}
     ${
       isActive
         ? 'bg-brand-soft text-brand-deep font-bold border-transparent'
@@ -372,7 +383,7 @@ export const Navigation: React.FC<NavigationProps> = ({
         </div>
 
         {/* Navigation List */}
-        <nav aria-label="Sidebar Navigation" className="flex-1 overflow-y-auto p-2 space-y-3 text-xs touch-pan-y overscroll-y-contain scrollbar-thin scrollbar-thumb-gray-200">
+        <nav aria-label="Sidebar Navigation" className="flex-1 overflow-y-auto p-2 space-y-3 text-xs touch-pan-y overscroll-y-contain scrollbar-thin scrollbar-thumb-line">
           {/* Dashboard is the landing view — the sidebar logo already navigates
               there, so a separate "Dashboard Overview" entry is redundant. */}
           <div className="pb-2 border-b border-line/80">
@@ -388,12 +399,12 @@ export const Navigation: React.FC<NavigationProps> = ({
               size="sm"
               title="New Intake Ticket"
               className={`w-full mt-1.5 h-10 rounded-xl font-bold shadow-sm ${
-                effectiveCollapsed ? 'w-10 mx-auto justify-center p-0' : 'justify-center px-3.5'
+                effectiveCollapsed ? collapsedNavBtn : 'justify-center px-3.5'
               } ${activeTab === 'create-ticket' ? 'bg-brand-deep' : 'hover:bg-brand-deep'}`}
             >
-              <div className="flex items-center justify-center min-w-0">
-                <Plus className={`${effectiveCollapsed ? '!w-5 !h-5' : 'w-4 h-4'} shrink-0 ${effectiveCollapsed ? '' : 'mr-2'}`} />
-                {!effectiveCollapsed && <span className="truncate text-xs">+ Intake Ticket</span>}
+              <div className="flex items-center justify-center min-w-0 gap-2">
+                <Plus className={`${effectiveCollapsed ? '!w-5 !h-5' : 'w-4 h-4'} shrink-0`} />
+                {!effectiveCollapsed && <span className="truncate text-xs">Intake Ticket</span>}
               </div>
             </Button>
 
@@ -409,16 +420,18 @@ export const Navigation: React.FC<NavigationProps> = ({
             >
               <div className="flex items-center justify-center min-w-0">
                 <span className={navIconClass(activeTab === 'dashboard')}>
-                  <LayoutDashboard className="!h-4.5 !w-4.5" />
+                  <LayoutDashboard className="h-4 w-4" />
                 </span>
-                {!effectiveCollapsed && <span className="truncate text-xs ml-2.5">Dashboard</span>}
+                {!effectiveCollapsed && <span className="truncate text-xs ml-2.5">{t('navDashboard')}</span>}
               </div>
             </Button>
           </div>
 
-          {/* Grouped Sub-Menus with detail lines */}
+          {/* Grouped Sub-Menus with detail lines — audit A-P3: in collapsed
+              mode hide the group border too (it floated label-less under every
+              icon group). */}
           {navGroups.map((group) => (
-            <div key={group.title} className="space-y-1 pb-2 border-b border-line/60 last:border-b-0">
+            <div key={group.title} className={`space-y-1 ${effectiveCollapsed ? '' : 'pb-2 border-b border-line/60 last:border-b-0'}`}>
               {!effectiveCollapsed && (
                 <div className="px-3 py-1 text-xs font-extrabold text-muted tracking-wider uppercase flex items-center justify-between">
                   <span>{group.title}</span>
@@ -444,7 +457,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                     >
                       <div className={`flex items-center min-w-0 ${effectiveCollapsed ? 'justify-center' : 'flex-1'}`}>
                         <span className={navIconClass(isActive)}>
-                          <ItemIcon className="!h-4.5 !w-4.5" />
+                          <ItemIcon className="h-4 w-4" />
                         </span>
                         {!effectiveCollapsed && <span className="truncate text-xs ml-2.5">{item.label}</span>}
                       </div>
@@ -464,14 +477,15 @@ export const Navigation: React.FC<NavigationProps> = ({
 
         {/* Sidebar Footer */}
         <div className="p-2.5 border-t border-line bg-surface pb-[calc(0.625rem+env(safe-area-inset-bottom))]">
-          {/* System Online Status Pill */}
+          {/* System Online Status Pill — audit A-P2: reflects real connectivity
+              (was always green) and version from the build env. */}
           {!effectiveCollapsed && (
             <div className="pt-1 px-1 flex items-center justify-between text-xs text-muted">
               <span className="flex items-center space-x-1.5">
-                <span className="w-2 h-2 rounded-full bg-success-deep" />
-                <span className="font-medium">System online</span>
+                <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-success-deep' : 'bg-danger'}`} />
+                <span className="font-medium">{isOnline ? 'System online' : 'Offline'}</span>
               </span>
-              <span className="font-mono text-xs bg-line px-1.5 py-0.5 rounded-md text-ink">v2.4.0</span>
+              <span className="font-mono text-xs bg-line px-1.5 py-0.5 rounded-md text-ink">{APP_VERSION}</span>
             </div>
           )}
         </div>

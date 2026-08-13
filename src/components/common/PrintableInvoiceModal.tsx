@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Button } from '../ui';
 import {X, 
   Printer, 
@@ -34,6 +34,16 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
     return () => window.removeEventListener('keydown', onKey);
   }, [isOpen, onClose]);
 
+  // Move focus into the modal on open and restore it to the trigger on close
+  // (audit D-P2 a11y).
+  const modalRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!isOpen || !workOrder) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    modalRef.current?.focus();
+    return () => { previouslyFocused?.focus?.(); };
+  }, [isOpen, workOrder]);
+
   if (!isOpen || !workOrder) return null;
 
   const shopName = systemSettings?.shopName || 'AppleRepair Pro Service Center';
@@ -42,6 +52,9 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
   const shopAddress = systemSettings?.shopAddress || '1 Infinite Loop, Suite 100, Cupertino, CA 95014';
   const currency = systemSettings?.currencySymbol || 'MMK';
   const taxRate = systemSettings?.taxPercentage ?? systemSettings?.taxRatePercent ?? 6;
+  // 58mm thermal prints get extra zoom compression; A4 prints at natural size
+  // (audit D-P2: 0.84 zoom made the 12px body print smaller than 12px).
+  const isThermal58 = systemSettings?.thermalPaperSize === '58mm';
 
   // Calculate Parts vs Labor breakdowns. Parts are internal tracking only
   // (never charged) per POS semantics — they are LISTED on the invoice so a
@@ -91,7 +104,6 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
       window.print();
       return;
     }
-    const isThermal58 = systemSettings?.thermalPaperSize === '58mm';
     const printWindow = window.open('', '_blank', isThermal58 ? 'width=420,height=1000' : 'width=850,height=1000');
     if (printWindow) {
       printWindow.document.write(`
@@ -104,7 +116,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
               .no-print { display: none !important; }
               table { width: 100%; border-collapse: collapse; }
               th, td { padding: 3px; border-bottom: 1px solid #e5e5ea; }
-              .printable-invoice-modal { zoom: ${isThermal58 ? 0.62 : 0.84} !important; line-height: 1.15 !important; }
+              .printable-invoice-modal { zoom: ${isThermal58 ? 0.62 : 1} !important; line-height: 1.15 !important; }
               @page { size: ${isThermal58 ? '58mm 297mm' : 'A4 portrait'}; margin: ${isThermal58 ? '2mm' : '4mm'}; }
             </style>
           </head>
@@ -152,7 +164,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
   };
 
   return (
-    <div className="printable-invoice-root fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[70] flex items-center justify-center p-3 sm:p-6 overflow-y-auto no-print-bg">
+    <div className="printable-invoice-root fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[70] flex items-center justify-center p-3 sm:p-6 overflow-y-auto no-print-bg" role="dialog" aria-modal="true" aria-label="Service invoice">
       {/* Print CSS rules */}
       <style>{`
         @media print {
@@ -202,7 +214,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
             overflow: visible !important;
             max-height: none !important;
             height: auto !important;
-            zoom: 0.84 !important;
+            zoom: ${isThermal58 ? 0.62 : 1} !important;
             line-height: 1.15 !important;
           }
           .printable-invoice-modal > div {
@@ -217,9 +229,9 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
         }
       `}</style>
 
-      <div className="printable-invoice-modal bg-white border border-line-strong rounded-2xl max-w-3xl w-full my-auto shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      <div ref={modalRef} tabIndex={-1} className="printable-invoice-modal bg-white border border-line-strong rounded-2xl max-w-3xl w-full my-auto shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Modal Action Header (Hidden in Print) */}
-        <div className="no-print bg-surface px-5 py-3.5 border-b border-line flex items-center justify-between shrink-0">
+        <div className="no-print bg-surface px-5 py-3 border-b border-line flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-2">
             <Receipt className="w-5 h-5 text-brand" />
             <span className="font-extrabold text-ink text-sm">Official Service Invoice & Voucher</span>
@@ -233,18 +245,11 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
               type="button"
               onClick={handlePopoutPrint}
               title="Open print in new window if direct print is blocked"
+              aria-label="Open print in new window"
               className="px-3 py-1.5 bg-white border border-line-strong hover:bg-surface text-ink font-bold text-xs rounded-xl shadow-2xs transition-all flex items-center space-x-1 cursor-pointer active:scale-95"
             >
               <ExternalLink className="w-3.5 h-3.5 text-brand" />
               <span className="hidden sm:inline">Popout Print</span>
-            </Button>
-            <Button
-              type="button"
-              onClick={handlePrint}
-              className="px-3.5 py-1.5 bg-brand hover:bg-brand-deep text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center space-x-1.5 cursor-pointer active:scale-95"
-            >
-              <Printer className="w-4 h-4" />
-              <span>Print Invoice</span>
             </Button>
             <Button variant="ghost"
               type="button"
@@ -259,7 +264,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
         </div>
 
         {/* Scrollable Printable Invoice Content */}
-        <div id="printable-invoice-content" className="p-6 sm:p-8 overflow-y-auto space-y-6 text-xs text-ink bg-white">
+        <div id="printable-invoice-content" className="p-6 sm:p-8 overflow-y-auto space-y-6 text-sm text-ink bg-white">
           {/* Top Invoice Header & Branding */}
           <div className="flex flex-col sm:flex-row justify-between items-start border-b border-line pb-6 gap-4">
             <div>
@@ -333,7 +338,9 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
               </div>
 
               <p className="font-extrabold text-sm text-ink">{workOrder.customerName}</p>
-              <p className="text-muted">Town / City: <strong className="text-ink">{workOrder.customerAddress || ''}</strong></p>
+              {workOrder.customerAddress && (
+                <p className="text-muted">Town / City: <strong className="text-ink">{workOrder.customerAddress}</strong></p>
+              )}
               <p className="text-muted">Phone: <strong className="text-ink">{workOrder.customerPhone}</strong></p>
               {workOrder.customerEmail && <p className="text-muted">Email: <strong className="text-ink">{workOrder.customerEmail}</strong></p>}
               <div className="pt-1">
@@ -404,7 +411,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
                               document so a part row can never read as a missing
                               charge (audit F-P2). */}
                           {!item.isLabor && (
-                            <span className="block text-[10px] font-semibold text-muted italic">Internal part — tracked for inventory, not charged to customer</span>
+                            <span className="block text-[11px] font-semibold text-muted italic">Internal part — tracked for inventory, not charged to customer</span>
                           )}
                         </td>
                         <td className="p-3">
@@ -414,9 +421,9 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
                             {item.isLabor ? 'LABOR' : 'PART'}
                           </span>
                         </td>
-                        <td className="p-3 text-center font-mono text-muted">{item.quantity}</td>
-                        <td className="p-3 text-right font-mono text-muted">{item.unitPrice.toLocaleString()} {currency}</td>
-                        <td className="p-3 text-right font-mono font-bold text-ink">
+                        <td className="p-3 text-center font-mono text-muted tabular-nums">{item.quantity}</td>
+                        <td className="p-3 text-right font-mono text-muted tabular-nums">{item.unitPrice.toLocaleString()} {currency}</td>
+                        <td className="p-3 text-right font-mono font-bold text-ink tabular-nums">
                           {effTotal.toLocaleString()} {currency}
                         </td>
                       </tr>
@@ -432,9 +439,9 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
                           SERVICE
                         </span>
                       </td>
-                      <td className="p-3 text-center font-mono text-muted">1</td>
-                      <td className="p-3 text-right font-mono text-muted">{workOrder.subtotal.toLocaleString()} {currency}</td>
-                      <td className="p-3 text-right font-mono font-bold text-ink">{workOrder.subtotal.toLocaleString()} {currency}</td>
+                      <td className="p-3 text-center font-mono text-muted tabular-nums">1</td>
+                      <td className="p-3 text-right font-mono text-muted tabular-nums">{workOrder.subtotal.toLocaleString()} {currency}</td>
+                      <td className="p-3 text-right font-mono font-bold text-ink tabular-nums">{workOrder.subtotal.toLocaleString()} {currency}</td>
                     </tr>
                   )}
                 </tbody>
@@ -462,52 +469,52 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
 
             {/* Calculations Breakdown */}
             <div className="sm:w-1/2 w-full space-y-2 text-right">
-              <div className="bg-white p-4 rounded-xl border border-line space-y-2 shadow-2xs font-mono">
+              <div className="bg-white p-4 rounded-xl border border-line space-y-2 shadow-2xs">
                 {partsSubtotal > 0 && (
                   <div className="flex justify-between text-muted">
                     <span>Parts (Internal, Not Charged):</span>
-                    <span>{partsSubtotal.toLocaleString()} {currency}</span>
+                    <span className="font-mono tabular-nums">{partsSubtotal.toLocaleString()} {currency}</span>
                   </div>
                 )}
                 {laborDiscount > 0 && (
                   <div className="flex justify-between text-success-deep font-semibold">
                     <span>Per-item Discounts:</span>
-                    <span>-{laborDiscount.toLocaleString()} {currency}</span>
+                    <span className="font-mono tabular-nums">-{laborDiscount.toLocaleString()} {currency}</span>
                   </div>
                 )}
                 {laborSubtotal > 0 && (
                   <div className="flex justify-between text-muted">
                     <span>Labor & Services Subtotal:</span>
-                    <span>{laborSubtotal.toLocaleString()} {currency}</span>
+                    <span className="font-mono tabular-nums">{laborSubtotal.toLocaleString()} {currency}</span>
                   </div>
                 )}
 
                 {effectiveDiscount > 0 && (
                   <div className="flex justify-between text-success-deep font-semibold">
                     <span>Account / B2B Discount:</span>
-                    <span>-{effectiveDiscount.toLocaleString()} {currency}</span>
+                    <span className="font-mono tabular-nums">-{effectiveDiscount.toLocaleString()} {currency}</span>
                   </div>
                 )}
 
                 {workOrder.taxAmount > 0 && (
                   <div className="flex justify-between text-muted">
                     <span>Sales Tax ({taxRate}%):</span>
-                    <span>+{workOrder.taxAmount.toLocaleString()} {currency}</span>
+                    <span className="font-mono tabular-nums">+{workOrder.taxAmount.toLocaleString()} {currency}</span>
                   </div>
                 )}
 
                 {workOrder.depositAmount > 0 && (
                   <div className="flex justify-between text-success-deep font-semibold">
                     <span>Upfront Deposit Paid:</span>
-                    <span>-{workOrder.depositAmount.toLocaleString()} {currency}</span>
+                    <span className="font-mono tabular-nums">-{workOrder.depositAmount.toLocaleString()} {currency}</span>
                   </div>
                 )}
 
                 <div className="flex justify-between items-center pt-2.5 border-t border-line text-sm">
-                  <span className="font-extrabold text-ink font-sans">
+                  <span className="font-extrabold text-ink">
                     {workOrder.isPaid ? 'Total Amount Paid:' : 'Final Balance Due:'}
                   </span>
-                  <span className="font-black text-lg text-brand">
+                  <span className="font-black text-lg text-brand font-mono tabular-nums">
                     {customerTotal.toLocaleString()} {currency}
                   </span>
                 </div>
@@ -515,7 +522,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
                 {/* Legacy reconciliation note — never silently understate the
                     stored total (audit F-P2). */}
                 {totalMismatch && (
-                  <p className="pt-1.5 border-t border-line text-[10px] leading-snug text-warning font-sans font-semibold text-left">
+                  <p className="pt-1.5 border-t border-line text-[11px] leading-snug text-warning font-sans font-semibold text-left">
                     Note: stored ticket total ({workOrder.totalAmount.toLocaleString()} {currency}) differs from the
                     itemized balance — typical for tickets created before parts were tracked as
                     internal (not charged). The itemized balance above is the reconciled amount.
@@ -551,7 +558,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
         </div>
 
         {/* Modal Action Footer (Hidden in Print) */}
-        <div className="no-print bg-surface px-6 py-3 border-t border-line flex justify-between items-center shrink-0">
+        <div className="no-print bg-surface px-5 py-3 border-t border-line flex justify-between items-center shrink-0">
           <span className="text-xs text-muted">
             Invoice ready for printing or digital distribution.
           </span>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   ShieldCheck,
   XCircle,
@@ -13,7 +13,7 @@ import { WorkOrder, PartItem, SystemSettings } from '../../types';
 import { ModelRepairPrice } from '../../types/priceCatalog';
 import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
 import { Button, Input } from '../ui';
-import { DISCOUNT_OPTIONS } from './posUtils';
+import { DISCOUNT_OPTIONS, shortWarranty } from './posUtils';
 
 /** Modals extracted from PosInvoicingModule (Ko Hein 2026-08-11). */
 
@@ -47,10 +47,26 @@ export const PosConfirmPaymentModal: React.FC<PosConfirmModalProps> = ({
   onCancel,
   onConfirm,
 }) => {
+  // Esc closes the confirm modal; file-local handler (audit area-B).
+  useEffect(() => {
+    if (!isOpen || !selectedWo) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, selectedWo, onCancel]);
+
   if (!isOpen || !selectedWo) return null;
   return (
-    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center pt-[env(safe-area-inset-top)]">
-      <div className="bg-white border border-line rounded-t-3xl sm:rounded-2xl w-full sm:max-w-sm h-[92dvh] sm:h-auto p-5 space-y-4 shadow-xl overflow-y-auto">
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 bg-ink/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center pt-[env(safe-area-inset-top)]"
+      onClick={onCancel}
+    >
+      <div
+        className="bg-white border border-line rounded-t-3xl sm:rounded-2xl w-full sm:max-w-sm h-[92dvh] sm:h-auto p-5 space-y-4 shadow-xl overflow-y-auto animate-i35-slide-up"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-2">
             <ShieldCheck className="w-5 h-5 text-success" />
@@ -134,7 +150,7 @@ export const PosConfirmPaymentModal: React.FC<PosConfirmModalProps> = ({
             type="button"
             onClick={onConfirm}
             disabled={isProcessingPayment || isPaymentShort || selectedWo.isPaid}
-            className="flex-1 bg-success hover:bg-success/90 text-white"
+            className={`flex-1 ${isProcessingPayment || isPaymentShort ? 'bg-muted text-white opacity-60' : 'bg-success hover:bg-success/90 text-white'}`}
           >
             <ShieldCheck className="w-4 h-4 shrink-0" />
             <span>Confirm & Print</span>
@@ -200,16 +216,27 @@ export const PosAddPartModal: React.FC<PosAddPartModalProps> = ({
   onExternalSellChange,
   onAddExternal,
 }) => {
+  // Esc closes the add-part picker; file-local handler (audit area-B).
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
   const inStock = filteredParts.filter((part) => part.quantityInStock > 0);
   const selectedPart = filteredParts.find((part) => part.id === selectedPartId) || filteredParts[0] || null;
   return (
     <div
       className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center pt-[env(safe-area-inset-top)]"
-      onClick={onClose}
       role="presentation"
+      aria-hidden="true"
+      onClick={onClose}
     >
       <div
+        role="dialog"
+        aria-modal="true"
         className="bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md h-[80dvh] sm:h-[520px] flex flex-col p-4 space-y-3 shadow-xl animate-i35-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
@@ -281,7 +308,7 @@ export const PosAddPartModal: React.FC<PosAddPartModalProps> = ({
             </div>
             <div className="grid grid-cols-3 gap-2">
               <div className="space-y-1">
-                <label className="block text-[11px] font-bold text-muted">Cost (ဝယ်ရင်)</label>
+                <label className="block text-[11px] font-bold text-muted">Cost (buy-in)</label>
                 <input
                   type="number"
                   min={0}
@@ -367,7 +394,7 @@ export const PosAddPartModal: React.FC<PosAddPartModalProps> = ({
                     key={part.id}
                     type="button"
                     onClick={() => onSelectPartId(part.id)}
-                    className={`w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg border text-left text-ink transition-all cursor-pointer focus:outline-none ${
+                    className={`w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg border text-left text-ink transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-brand/40 ${
                       isSelected ? 'border-ink bg-surface ring-1 ring-ink/10' : 'border-line bg-white hover:bg-surface'
                     }`}
                   >
@@ -390,9 +417,10 @@ export const PosAddPartModal: React.FC<PosAddPartModalProps> = ({
         {/* Qty + Add */}
         {selectedPart && (
           <div className="flex items-end gap-2 pt-1">
-            <label className="block shrink-0">
+            <label htmlFor="pos-part-qty" className="block shrink-0">
               <span className="block text-[11px] font-bold text-muted mb-1">Qty</span>
               <Input
+                id="pos-part-qty"
                 type="number"
                 min={1}
                 max={selectedPart.quantityInStock || 99}
@@ -423,6 +451,8 @@ export interface PosReceiptModalProps {
   isOpen: boolean;
   workOrder: WorkOrder | null;
   paymentMethod: string;
+  /** Tendered cash amount (audit area-B): shown on the receipt when Cash over-paid. */
+  cashTendered?: number;
   systemSettings?: SystemSettings;
   onClose: () => void;
   onFullInvoice: () => void;
@@ -432,6 +462,7 @@ export const PosDigitalReceiptModal: React.FC<PosReceiptModalProps> = ({
   isOpen,
   workOrder: selectedWo,
   paymentMethod,
+  cashTendered = 0,
   systemSettings,
   onClose,
   onFullInvoice,
@@ -527,6 +558,19 @@ export const PosDigitalReceiptModal: React.FC<PosReceiptModalProps> = ({
             </span>
           </div>
         </div>
+
+        {paymentMethod === 'Cash' && cashTendered > (selectedWo.totalAmount || 0) && (
+          <div className="p-4 bg-surface rounded-xl border border-line space-y-1 font-mono">
+            <div className="flex justify-between">
+              <span className="text-muted">Tendered</span>
+              <span>{cashTendered.toLocaleString()} {systemSettings?.currencySymbol || 'MMK'}</span>
+            </div>
+            <div className="flex justify-between text-success-deep font-bold">
+              <span>Change</span>
+              <span>{(cashTendered - (selectedWo.totalAmount || 0)).toLocaleString()} {systemSettings?.currencySymbol || 'MMK'}</span>
+            </div>
+          </div>
+        )}
 
         <div className="p-2 bg-surface rounded-xl border border-line text-xs text-muted text-center italic">
           {systemSettings?.receiptFooterNote || 'Thank you for choosing AppleRepair! All repairs covered by warranty.'}
@@ -702,7 +746,7 @@ export const PosPriceListPickerModal: React.FC<PosPriceListPickerProps> = ({
         </div>
 
         {/* Repair list — Simple Ticket card grid */}
-        <div className="h-[248px] overflow-y-auto px-4 py-3">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
           {filteredItems.length === 0 ? (
             <div className="p-8 text-center text-muted text-xs space-y-1">
               <FileText className="w-8 h-8 mx-auto opacity-40 text-brand" />
@@ -727,7 +771,8 @@ export const PosPriceListPickerModal: React.FC<PosPriceListPickerProps> = ({
                     key={item.categoryKey}
                     role="button"
                     tabIndex={notSelectable ? -1 : 0}
-                    aria-pressed={isSelected}
+                    aria-pressed={notSelectable ? undefined : isSelected}
+                    aria-disabled={notSelectable || undefined}
                     onClick={() => {
                       if (notSelectable) return;
                       const isIn = selection.includes(item.categoryKey);
@@ -771,7 +816,7 @@ export const PosPriceListPickerModal: React.FC<PosPriceListPickerProps> = ({
                       <span className="truncate text-[10px] font-extrabold uppercase tracking-wider text-muted">{item.group}</span>
                       <span className="inline-flex shrink-0 items-center space-x-0.5 rounded-full border border-success/30 bg-success/10 px-1 py-px text-[10px] font-extrabold text-success-deep">
                         <ShieldCheck className="h-1.5 w-1.5 shrink-0 text-success" />
-                        <span>{item.warranty}</span>
+                        <span>{shortWarranty(item.warranty)}</span>
                       </span>
                     </div>
                     <div className="mt-auto flex items-center justify-between gap-2 border-t border-line pt-1.5">
@@ -809,6 +854,7 @@ export const PosPriceListPickerModal: React.FC<PosPriceListPickerProps> = ({
                           setDiscountMenuFor(item.categoryKey);
                         }}
                         title={discountPct > 0 ? `${discountPct}% discount applied` : 'Add discount'}
+                        aria-label={`Set discount for ${item.name}`}
                         className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition-all cursor-pointer active:scale-95 ${
                           isSelected
                             ? discountPct > 0
@@ -835,11 +881,11 @@ export const PosPriceListPickerModal: React.FC<PosPriceListPickerProps> = ({
           </div>
           <div className="rounded-lg bg-surface p-2">
             <span className="block font-semibold text-muted">Base</span>
-            <span className="font-extrabold text-ink">{selectedCatalogTotal.toLocaleString()}</span>
+            <span className="font-extrabold text-ink">{selectedCatalogTotal.toLocaleString()} {currency}</span>
           </div>
           <div className="rounded-lg bg-surface p-2">
             <span className="block font-semibold text-muted">Discount</span>
-            <span className="font-extrabold text-danger">{selectedCatalogSaved > 0 ? `-${selectedCatalogSaved.toLocaleString()}` : '0'}</span>
+            <span className="font-extrabold text-danger">{selectedCatalogSaved > 0 ? `-${selectedCatalogSaved.toLocaleString()} ${currency}` : `0 ${currency}`}</span>
           </div>
           <div className="rounded-lg bg-brand p-2 text-white">
             <span className="block text-[10px] font-bold uppercase opacity-90">Final</span>
@@ -862,7 +908,7 @@ export const PosPriceListPickerModal: React.FC<PosPriceListPickerProps> = ({
             disabled={selection.length === 0}
             className="rounded-xl bg-brand px-5 py-2 text-xs font-black text-white transition hover:bg-brand-deep disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
           >
-            Done ({selection.length})
+            Done ({selectedCatalogItems.length})
           </Button>
         </div>
 

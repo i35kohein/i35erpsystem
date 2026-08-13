@@ -19,11 +19,14 @@ export const ActiveFilterChips: React.FC<{ chips: ActiveFilterChip[] }> = ({ chi
           type="button"
           onClick={chip.onClear}
           variant="chip"
-          className="border-brand/25 bg-brand-soft px-2.5 py-1 text-brand hover:bg-brand hover:text-white"
+          // audit A-P2: bigger chip + aria-label; audit A-P3: hover signals
+          // dismissal (danger tint) instead of flipping to solid brand.
+          aria-label={`Clear filter ${chip.label}`}
+          className="h-9 border-brand/25 bg-brand-soft px-2.5 py-1 text-brand hover:border-danger/40 hover:bg-danger/10 hover:text-danger"
           title={`Clear ${chip.label}`}
         >
           {chip.label}
-          <X className="w-3 h-3" />
+          <X className="w-3.5 h-3.5" />
         </Button>
       ))}
     </div>

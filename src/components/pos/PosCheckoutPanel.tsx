@@ -25,7 +25,8 @@ import { WorkOrder, WorkOrderLineItem, Technician, PaymentMethodConfig } from '.
 import { Button, Input } from '../ui';
 import { StatusChip } from '../common/StatusChip';
 import { getRealisticColorStyle } from '../intake/deviceData';
-import { getLineItemIcon, signedMoney } from './posUtils';
+import { getLineItemIcon, signedMoney, DIAGNOSTIC_FEE } from './posUtils';
+import { confirmDialog } from '../common/ConfirmDialog';
 
 export interface PosCheckoutPanelProps {
   selectedWo: WorkOrder | null;
@@ -38,6 +39,8 @@ export interface PosCheckoutPanelProps {
   estCommission: number;
   activePaymentMethods: PaymentMethodConfig[];
   selectedMethodConfig?: PaymentMethodConfig;
+  /** Active parts-owner filter (audit area-B): shown as a badge when != 'ALL'. */
+  posOwner: string;
   paymentMethod: string;
   setPaymentMethod: (m: string) => void;
   cashTendered: number;
@@ -60,7 +63,6 @@ export interface PosCheckoutPanelProps {
   setIsSheetEditMode: (v: boolean) => void;
   isPaymentShort: boolean;
   isProcessingPayment: boolean;
-  isMobileCheckoutFullOpen: boolean;
   cashInputRef: React.RefObject<HTMLInputElement | null>;
   technicians?: Technician[];
   handleUpdateLineItem: (lineItemId: string, field: 'unitPrice' | 'quantity' | 'lineItemDiscountPercent', value: number) => void;
@@ -86,6 +88,7 @@ export const PosCheckoutPanel: React.FC<PosCheckoutPanelProps> = ({
   estCommission,
   activePaymentMethods,
   selectedMethodConfig,
+  posOwner,
   paymentMethod,
   setPaymentMethod,
   cashTendered,
@@ -108,7 +111,6 @@ export const PosCheckoutPanel: React.FC<PosCheckoutPanelProps> = ({
   setIsSheetEditMode,
   isPaymentShort,
   isProcessingPayment,
-  isMobileCheckoutFullOpen,
   cashInputRef,
   technicians,
   handleUpdateLineItem,
@@ -131,11 +133,16 @@ selectedWo ? (
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0 space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center gap-1.5 font-mono font-black text-ink text-xs tracking-tight">
+                      <span className="inline-flex min-w-0 items-center gap-1.5 font-mono font-black text-ink text-xs tracking-tight">
                         <Ticket className="w-3.5 h-3.5 text-muted shrink-0" />
-                        {selectedWo.orderNumber}
+                        <span className="truncate min-w-0">{selectedWo.orderNumber}</span>
                       </span>
                       <StatusChip status={selectedWo.status} />
+                      {posOwner !== 'ALL' && (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-brand/25 bg-brand-soft px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-brand">
+                          Owner: {posOwner}
+                        </span>
+                      )}
                     </div>
                     <h2 className="flex items-center gap-1.5 text-base font-black text-ink leading-tight truncate">
                       <Smartphone className="w-4 h-4 text-muted shrink-0" />
@@ -193,7 +200,7 @@ selectedWo ? (
                       <tr>
                         <td className="border border-line px-2 py-1.5 text-muted">Standard Diagnostic Fee</td>
                         <td className="border border-line px-2 py-1.5 text-right font-mono font-black text-ink tabular-nums">
-                          5,000 {currency}
+                          {DIAGNOSTIC_FEE.toLocaleString()} {currency}
                         </td>
                       </tr>
                       <tr className="bg-surface/50">
@@ -225,12 +232,12 @@ selectedWo ? (
                       {laborItems.length} repair{laborItems.length !== 1 ? 's' : ''}{partsItems.length > 0 ? ` · ${partsItems.length} part${partsItems.length !== 1 ? 's' : ''}` : ''}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-1.5 shrink-0">
                     <Button
                       type="button"
                       variant="ghost"
                       onClick={() => setIsAddPartOpen(true)}
-                      className="h-auto min-h-0 bg-transparent p-0 text-[11px] font-extrabold text-ink hover:bg-transparent hover:text-ink hover:underline"
+                      className="h-auto min-h-0 bg-transparent px-2 py-1 rounded-md text-[11px] font-extrabold text-ink hover:bg-surface hover:text-ink"
                     >
                       <PackageCheck className="w-3.5 h-3.5" />
                       <span>Add Part</span>
@@ -239,7 +246,7 @@ selectedWo ? (
                       type="button"
                       variant="ghost"
                       onClick={() => setIsAddCustomRepairOpen(!isAddCustomRepairOpen)}
-                      className={`h-auto min-h-0 bg-transparent p-0 text-[11px] font-extrabold hover:bg-transparent hover:underline ${
+                      className={`h-auto min-h-0 bg-transparent px-2 py-1 rounded-md text-[11px] font-extrabold hover:bg-surface ${
                         isAddCustomRepairOpen ? 'text-success-deep' : 'text-ink hover:text-ink'
                       }`}
                     >
@@ -250,7 +257,7 @@ selectedWo ? (
                       type="button"
                       variant="ghost"
                       onClick={() => setIsAddRepairFromPriceListOpen(true)}
-                      className="h-auto min-h-0 bg-transparent p-0 text-[11px] font-extrabold text-ink hover:bg-transparent hover:text-ink hover:underline"
+                      className="h-auto min-h-0 bg-transparent px-2 py-1 rounded-md text-[11px] font-extrabold text-ink hover:bg-surface hover:text-ink"
                     >
                       <FileText className="w-3.5 h-3.5" />
                       <span>Price List</span>
@@ -260,7 +267,7 @@ selectedWo ? (
                         type="button"
                         variant="ghost"
                         onClick={() => setIsSheetEditMode(!isSheetEditMode)}
-                        className={`h-auto min-h-0 bg-transparent p-0 text-[11px] font-extrabold hover:bg-transparent hover:underline ${
+                        className={`h-auto min-h-0 bg-transparent px-2 py-1 rounded-md text-[11px] font-extrabold hover:bg-surface ${
                           isSheetEditMode ? 'text-success-deep' : 'text-ink hover:text-ink'
                         }`}
                       >
@@ -327,7 +334,7 @@ selectedWo ? (
                                         min={1}
                                         value={li.quantity}
                                         onChange={(e) => handleUpdateLineItem(li.id, 'quantity', Number(e.target.value))}
-                                        className="!h-5 !min-h-0 w-full text-center text-xs font-mono font-bold text-ink bg-transparent border-0 rounded px-1 py-0 outline-none focus:ring-0 focus:border-0"
+                                        className="!h-7 !min-h-0 w-full text-center text-xs font-mono font-bold text-ink bg-white border border-line rounded px-1 py-0 outline-none focus:ring-0 focus:border-brand/40"
                                       />
                                     ) : (
                                       <span className="text-muted tabular-nums">{li.quantity}</span>
@@ -343,7 +350,7 @@ selectedWo ? (
                                         step={500}
                                         value={li.unitPrice}
                                         onChange={(e) => handleUpdateLineItem(li.id, 'unitPrice', Number(e.target.value))}
-                                        className="!h-5 !min-h-0 w-full text-center text-xs font-mono font-bold text-ink bg-transparent border-0 rounded px-1 py-0 outline-none focus:ring-0 focus:border-0"
+                                        className="!h-7 !min-h-0 w-full text-center text-xs font-mono font-bold text-ink bg-white border border-line rounded px-1 py-0 outline-none focus:ring-0 focus:border-brand/40"
                                       />
                                     ) : (
                                       <span className="font-mono text-muted tabular-nums">{li.unitPrice.toLocaleString()}</span>
@@ -361,7 +368,7 @@ selectedWo ? (
                                           value={li.lineItemDiscountPercent ?? ''}
                                           onChange={(e) => handleUpdateLineItem(li.id, 'lineItemDiscountPercent', Number(e.target.value))}
                                           placeholder="0"
-                                          className="!h-5 !min-h-0 w-full text-center text-xs font-mono font-bold text-ink bg-transparent border-0 rounded px-1 py-0 outline-none focus:ring-0 focus:border-0"
+                                          className="!h-7 !min-h-0 w-full text-center text-xs font-mono font-bold text-ink bg-white border border-line rounded px-1 py-0 outline-none focus:ring-0 focus:border-brand/40"
                                         />
                                         <Percent className="w-3 h-3 text-muted shrink-0" />
                                       </div>
@@ -376,23 +383,26 @@ selectedWo ? (
                                   <td className="border border-line px-2 py-1.5 text-right font-mono font-black text-ink tabular-nums whitespace-nowrap">
                                     <div className="flex items-center justify-end gap-1">
                                       <div className="flex min-w-0 flex-col items-end gap-0">
-                                        {hasDiscount ? (
-                                          <React.Fragment>
-                                            <span className="font-black text-ink text-xs">{effectiveTotal.toLocaleString()}</span>
-                                          </React.Fragment>
-                                        ) : (
-                                          <React.Fragment>
-                                            <span>{effectiveTotal.toLocaleString()}</span>
-                                          </React.Fragment>
+                                        {hasDiscount && (
+                                          <span className="font-mono text-[10px] text-muted line-through">{lineTotal.toLocaleString()}</span>
                                         )}
+                                        <span className="font-black text-ink text-xs">{effectiveTotal.toLocaleString()}</span>
                                       </div>
                                       <Button
                                         type="button"
                                         variant="iconGhost"
-                                        onClick={() => handleRemoveInventoryPartFromWorkOrder(li.id)}
+                                        onClick={async () => {
+                                          const ok = await confirmDialog({
+                                            title: 'Remove line item?',
+                                            message: `Remove "${li.description}" from this invoice?`,
+                                            confirmLabel: 'Remove',
+                                            danger: true,
+                                          });
+                                          if (ok) handleRemoveInventoryPartFromWorkOrder(li.id);
+                                        }}
                                         aria-label={`Remove ${li.description}`}
                                         title="Remove line item"
-                                        className={`!h-5 !min-h-5 w-5 text-muted hover:text-danger p-0 rounded transition-colors cursor-pointer focus:outline-none ${isEditing ? '' : 'invisible pointer-events-none'}`}
+                                        className="!h-6 !min-h-6 w-6 text-muted hover:text-danger p-0 rounded transition-colors cursor-pointer opacity-40 hover:opacity-100 focus-visible:ring-2 focus-visible:ring-danger/30"
                                       >
                                         <X className="w-3 h-3" />
                                       </Button>
@@ -424,7 +434,7 @@ selectedWo ? (
                                         min={1}
                                         value={li.quantity}
                                         onChange={(e) => handleUpdateLineItem(li.id, 'quantity', Number(e.target.value))}
-                                        className="!h-5 !min-h-0 w-full text-center text-xs font-mono font-bold text-ink bg-transparent border-0 rounded px-1 py-0 outline-none focus:ring-0 focus:border-0"
+                                        className="!h-7 !min-h-0 w-full text-center text-xs font-mono font-bold text-ink bg-white border border-line rounded px-1 py-0 outline-none focus:ring-0 focus:border-brand/40"
                                       />
                                     ) : (
                                       <span className="text-muted tabular-nums">{li.quantity}</span>
@@ -438,7 +448,7 @@ selectedWo ? (
                                         step={500}
                                         value={li.unitPrice}
                                         onChange={(e) => handleUpdateLineItem(li.id, 'unitPrice', Number(e.target.value))}
-                                        className="!h-5 !min-h-0 w-full text-center text-xs font-mono font-bold text-ink bg-transparent border-0 rounded px-1 py-0 outline-none focus:ring-0 focus:border-0"
+                                        className="!h-7 !min-h-0 w-full text-center text-xs font-mono font-bold text-ink bg-white border border-line rounded px-1 py-0 outline-none focus:ring-0 focus:border-brand/40"
                                       />
                                     ) : (
                                       <span className="font-mono text-muted tabular-nums">{li.unitPrice.toLocaleString()}</span>
@@ -454,7 +464,7 @@ selectedWo ? (
                                           value={li.lineItemDiscountPercent ?? ''}
                                           onChange={(e) => handleUpdateLineItem(li.id, 'lineItemDiscountPercent', Number(e.target.value))}
                                           placeholder="0"
-                                          className="!h-5 !min-h-0 w-full text-center text-xs font-mono font-bold text-ink bg-transparent border-0 rounded px-1 py-0 outline-none focus:ring-0 focus:border-0"
+                                          className="!h-7 !min-h-0 w-full text-center text-xs font-mono font-bold text-ink bg-white border border-line rounded px-1 py-0 outline-none focus:ring-0 focus:border-brand/40"
                                         />
                                         <Percent className="w-3 h-3 text-muted shrink-0" />
                                       </div>
@@ -467,23 +477,26 @@ selectedWo ? (
                                   <td className="border border-line px-2 py-1.5 text-right font-mono font-black text-ink tabular-nums whitespace-nowrap">
                                     <div className="flex items-center justify-end gap-1">
                                       <div className="flex min-w-0 flex-col items-end gap-0">
-                                        {hasDiscount ? (
-                                          <React.Fragment>
-                                            <span className="font-black text-ink text-xs">{effectiveTotal.toLocaleString()}</span>
-                                          </React.Fragment>
-                                        ) : (
-                                          <React.Fragment>
-                                            <span>{effectiveTotal.toLocaleString()}</span>
-                                          </React.Fragment>
+                                        {hasDiscount && (
+                                          <span className="font-mono text-[10px] text-muted line-through">{lineTotal.toLocaleString()}</span>
                                         )}
+                                        <span className="font-black text-ink text-xs">{effectiveTotal.toLocaleString()}</span>
                                       </div>
                                       <Button
                                         type="button"
                                         variant="iconGhost"
-                                        onClick={() => handleRemoveInventoryPartFromWorkOrder(li.id)}
+                                        onClick={async () => {
+                                          const ok = await confirmDialog({
+                                            title: 'Remove line item?',
+                                            message: `Remove "${itemName}" from this invoice?`,
+                                            confirmLabel: 'Remove',
+                                            danger: true,
+                                          });
+                                          if (ok) handleRemoveInventoryPartFromWorkOrder(li.id);
+                                        }}
                                         aria-label={`Remove ${itemName}`}
                                         title="Remove system part"
-                                        className={`!h-5 !min-h-5 w-5 text-muted hover:text-danger p-0 rounded transition-colors cursor-pointer focus:outline-none ${isEditing ? '' : 'invisible pointer-events-none'}`}
+                                        className="!h-6 !min-h-6 w-6 text-muted hover:text-danger p-0 rounded transition-colors cursor-pointer opacity-40 hover:opacity-100 focus-visible:ring-2 focus-visible:ring-danger/30"
                                       >
                                         <X className="w-3 h-3" />
                                       </Button>
@@ -506,7 +519,7 @@ selectedWo ? (
                       <Wrench className="w-4 h-4 text-ink shrink-0" />
                       <span className="text-xs font-extrabold text-ink">Add Custom Repair / Service</span>
                     </div>
-                    <div className="grid grid-cols-[1fr_80px_80px] gap-2">
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_90px_70px]">
                       <Input
                         value={customRepairName}
                         onChange={(e) => setCustomRepairName(e.target.value)}
@@ -588,6 +601,7 @@ selectedWo ? (
                               step={1000}
                               value={invoiceDiscountInput || selectedWo.discountAmount || ''}
                               onChange={(e) => setInvoiceDiscountInput(e.target.value)}
+                              aria-label="Invoice discount amount"
                               onBlur={() => {
                                 const val = Number(invoiceDiscountInput) || 0;
                                 handleUpdateInvoiceDiscount(val);
@@ -601,7 +615,7 @@ selectedWo ? (
                                 }
                               }}
                               placeholder={selectedWo.discountAmount ? selectedWo.discountAmount.toLocaleString() : '0'}
-                              className="h-auto min-h-0 w-20 text-right text-xs font-mono font-bold text-success-deep bg-transparent border-0 rounded-none px-1 py-0 outline-none focus:ring-0 focus:border-0"
+                              className="h-auto min-h-0 w-20 text-right text-xs font-mono font-bold text-success-deep bg-transparent border-0 border-b border-success/40 rounded-none px-1 py-0 outline-none focus:ring-0 focus:border-b-2 focus:border-success"
                             />
                             <span className="text-success-deep font-mono tabular-nums text-xs shrink-0">{currency}</span>
                           </div>
@@ -614,7 +628,7 @@ selectedWo ? (
                         </tr>
                       )}
                       <tr className="bg-ink text-white hover:bg-ink hover:text-white">
-                        <td className="px-3 py-2.5 text-xs font-black uppercase tracking-wide">Amount Due (Customer)</td>
+                        <td className="px-3 py-2.5 text-xs font-black uppercase tracking-wide whitespace-nowrap min-w-0">Amount Due (Customer)</td>
                         <td className="px-3 py-2.5 text-right font-mono text-lg font-black tabular-nums">
                           {selectedWo.totalAmount.toLocaleString()} {currency}
                         </td>
@@ -634,7 +648,7 @@ selectedWo ? (
                           {partsItems.length > 0 && (
                             <tr>
                               <td className="border border-line px-2 py-1.5 text-muted">Parts Cost (deducted)</td>
-                              <td className="border border-line px-2 py-1.5 text-right font-mono text-warning tabular-nums">-{partsCostTotal.toLocaleString()} {currency}</td>
+                              <td className="border border-line px-2 py-1.5 text-right font-mono text-muted tabular-nums">-{partsCostTotal.toLocaleString()} {currency}</td>
                             </tr>
                           )}
                           <tr>
@@ -694,9 +708,10 @@ selectedWo ? (
                         type="button"
                         onClick={() => setPaymentMethod(m.name)}
                         variant="ghost"
-                        className={`!h-7 !min-h-0 px-2.5 py-1 rounded-lg text-[11px] font-extrabold border-0 shadow-none transition-all cursor-pointer focus:outline-none active:scale-95 ${
+                        className={`!h-9 !min-h-0 px-2.5 py-1 rounded-lg text-[11px] font-extrabold border-0 shadow-none transition-all cursor-pointer focus:outline-none active:scale-95 ${
                           isSelected ? 'bg-ink text-white' : 'bg-transparent text-ink hover:bg-surface'
                         }`}
+                        title={m.notes || m.accountNumber || undefined}
                       >
                         {isSelected && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
                         {m.name}
@@ -718,7 +733,7 @@ selectedWo ? (
                       }
                     }}
                     variant="ghost"
-                    className={`!h-7 !min-h-0 px-2.5 py-1 rounded-lg text-[11px] font-extrabold border-0 shadow-none transition-all cursor-pointer focus:outline-none active:scale-95 ${
+                    className={`!h-9 !min-h-0 px-2.5 py-1 rounded-lg text-[11px] font-extrabold border-0 shadow-none transition-all cursor-pointer focus:outline-none active:scale-95 ${
                       paymentMethod === 'Split Payment' ? 'bg-ink text-white' : 'bg-transparent text-ink hover:bg-surface'
                     }`}
                   >
@@ -760,6 +775,7 @@ selectedWo ? (
                                 updated[idx].method = e.target.value;
                                 setSplitPayments(updated);
                               }}
+                              aria-label={`Split ${idx + 1} payment method`}
                               className="bg-surface border border-line rounded-lg p-1.5 text-xs font-extrabold text-ink outline-none"
                             >
                               {activePaymentMethods.map((m) => (
@@ -779,6 +795,7 @@ selectedWo ? (
                                   updated[idx].amount = Math.max(0, Number(e.target.value) || 0);
                                   setSplitPayments(updated);
                                 }}
+                                aria-label={`Split ${idx + 1} amount`}
                                 placeholder={`Amount ${currency}`}
                                 className="w-full bg-surface border border-line rounded-lg p-1.5 text-xs font-mono font-bold text-ink outline-none"
                               />
@@ -932,7 +949,7 @@ selectedWo ? (
                               type="button"
                               onClick={() => setCashTendered(amt)}
                               variant="ghost"
-                              className={`h-8 px-2.5 rounded-lg border-0 shadow-none text-[11px] font-bold ${
+                              className={`h-9 px-2.5 rounded-lg border-0 shadow-none text-[11px] font-bold ${
                                 cashTendered === amt
                                   ? 'bg-ink text-white'
                                   : 'bg-transparent text-ink hover:bg-surface'
@@ -976,7 +993,7 @@ selectedWo ? (
                           }}
                           variant="outline"
                           className="h-11 font-mono text-sm font-black hover:bg-surface hover:border-line-strong"
-                          aria-label={`Numpad ${key}`}
+                          aria-label={key === '⌫' ? 'Backspace' : `Numpad ${key}`}
                         >
                           {key}
                         </Button>
@@ -1019,10 +1036,12 @@ selectedWo ? (
                   type="button"
                   onClick={() => setIsConfirmOpen(true)}
                   disabled={isProcessingPayment || isPaymentShort || selectedWo.isPaid}
-                  className={`${isMobileCheckoutFullOpen ? 'flex' : 'hidden md:flex'} w-full sm:w-1/2 ${
+                  className={`hidden md:flex w-full sm:w-1/2 ${
                     isProcessingPayment
                       ? 'bg-muted text-white opacity-80'
-                      : 'bg-success hover:bg-success/90 text-white'
+                      : isPaymentShort
+                        ? 'bg-warning hover:bg-warning/90 text-white'
+                        : 'bg-success hover:bg-success/90 text-white'
                   }`}
                 >
                   {isProcessingPayment ? (

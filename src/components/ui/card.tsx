@@ -8,7 +8,9 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-2xl border border-line bg-white text-ink shadow-xs",
+      // audit A-P3: overflow-hidden so rounded corners clip edge-to-edge
+      // header images/color blocks (module cards use colored headers).
+      "rounded-2xl overflow-hidden border border-line bg-white text-ink shadow-xs",
       className
     )}
     {...props}

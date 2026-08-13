@@ -11,7 +11,8 @@ const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      "inline-flex items-center justify-center rounded-xl bg-surface p-1 text-muted",
+      // audit A-P3: gap-1 separates triggers (was flush — mis-taps on touch).
+      "inline-flex items-center justify-center gap-1 rounded-xl bg-surface p-1 text-muted",
       className
     )}
     {...props}
@@ -26,7 +27,7 @@ const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "inline-flex items-center justify-center whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-bold ring-offset-white transition-all focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-ink data-[state=active]:shadow-xs cursor-pointer",
+      "inline-flex items-center justify-center whitespace-nowrap rounded-lg px-3 py-2 text-xs font-bold ring-offset-white transition-all focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-ink data-[state=active]:shadow-xs cursor-pointer",
       className
     )}
     {...props}

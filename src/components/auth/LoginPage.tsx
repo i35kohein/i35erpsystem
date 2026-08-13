@@ -6,6 +6,9 @@ interface LoginPageProps {
   onLoginSuccess: (user: { email: string; name: string }) => void;
 }
 
+// Single source for the footer version string (audit F-P3): bump here, not in JSX.
+const APP_VERSION = 'v2.4.0';
+
 export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -41,7 +44,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-surface px-4">
       <div className="w-full max-w-sm">
-        <div className="rounded-2xl border border-line bg-white p-8 shadow-sm">
+        <div className="animate-fadeIn rounded-2xl border border-line bg-white p-8 shadow-sm">
           <div className="mb-6 flex flex-col items-center">
             <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand">
               <ShieldCheck className="h-7 w-7 text-white" />
@@ -58,10 +61,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 <Input
                   type="email"
                   required
+                  autoComplete="email"
+                  disabled={loading}
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value.trim())}
                   placeholder="you@example.com"
-                  className="w-full rounded-xl border border-line-strong bg-white py-2.5 pl-10 pr-3 text-sm font-semibold text-ink outline-none transition "
+                  className="pl-10 pr-10 font-semibold"
                 />
               </div>
             </div>
@@ -73,10 +78,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 <Input
                   type={showPassword ? 'text' : 'password'}
                   required
+                  autoComplete="current-password"
+                  disabled={loading}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full rounded-xl border border-line-strong bg-white py-2.5 pl-10 pr-10 text-sm font-semibold text-ink outline-none transition "
+                  className="pl-10 pr-10 font-semibold"
                 />
                 <Button variant="ghost"
                   type="button"
@@ -90,7 +97,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             </div>
 
             {error && (
-              <div className="rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-xs font-bold text-danger">
+              <div role="alert" aria-live="polite" className="rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-xs font-bold text-danger">
                 {error}
               </div>
             )}
@@ -98,7 +105,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             <Button
               type="submit"
               disabled={loading}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-3 text-sm font-black text-white transition hover:bg-brand-deep active:scale-95 disabled:opacity-60 focus-visible:outline-none "
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-3 text-sm font-black text-white transition hover:bg-brand-deep active:scale-95 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/50 focus-visible:ring-offset-2"
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
               {loading ? 'Signing in…' : 'Sign In'}
@@ -106,7 +113,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           </form>
 
           <p className="mt-6 text-center text-xs font-semibold text-muted">
-            i35 Apple Service · v2.4.0 · Authorized staff only
+            i35 Apple Service · {APP_VERSION} · Authorized staff only
           </p>
         </div>
       </div>

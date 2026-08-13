@@ -48,7 +48,9 @@ export const StatusChip: React.FC<{ status: WorkOrderStatus; size?: 'xs' | 'sm' 
   })();
   return (
     <span
-      className={`inline-flex shrink-0 items-center gap-1 border font-extrabold uppercase tracking-wide leading-none ${base} ${tone}`}
+      // audit A-P2/A-P3: nowrap keeps long statuses on one line; mixed case
+      // with font-bold (dropped uppercase) so multi-word labels don't inflate.
+      className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap border font-bold leading-none ${base} ${tone}`}
     >
       {s}
     </span>

@@ -166,7 +166,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
 
   // Global Warranty Presets State
   const [globalWarrantyFolder, setGlobalWarrantyFolder] = useState<string>('ALL');
-  const [globalWarrantyCategory] = useState<string>('ALL');
+  const [globalWarrantyCategory, setGlobalWarrantyCategory] = useState<string>('ALL');
   const [globalWarrantyTerm, setGlobalWarrantyTerm] = useState<string>('3 Month');
   const importInputRef = useRef<HTMLInputElement>(null);
 
@@ -195,6 +195,9 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
     setSaveMsg(msg);
     setSaveSuccess(true);
     setTimeout(() => setSaveSuccess(false), 2500);
+    // audit E-P3: also surface a toast so the feedback is visible even when
+    // the inline banner is scrolled out of view.
+    toast.success(msg);
   };
 
   // Calculate model counts per folder
@@ -462,6 +465,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
             </div>
           </div>
           <Button
+            type="button"
             onClick={onClose}
             aria-label="Close price settings"
             className={`w-8 h-8 rounded-full text-muted hover:text-ink hover:bg-surface transition-colors flex items-center justify-center cursor-pointer ${embedded ? 'hidden' : ''}`}
@@ -539,18 +543,22 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
               onClick={() => importInputRef.current?.click()}
               className="px-3 py-1.5 rounded-lg bg-brand-soft hover:bg-brand/15 text-brand font-bold text-xs transition-all flex items-center space-x-1.5 border border-brand/30 cursor-pointer"
               title="Import a Price List CSV exported from this ERP"
+              aria-label="Import CSV"
             >
               <FileUp className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Import CSV</span>
             </Button>
             <Button variant="ghost"
+              type="button"
               onClick={handleExportJson}
               className="px-3 py-1.5 rounded-lg bg-surface hover:bg-line text-ink font-bold text-xs transition-all flex items-center space-x-1.5 border border-line cursor-pointer"
+              aria-label="Export JSON"
             >
               <Download className="w-3.5 h-3.5 text-brand" />
               <span className="hidden sm:inline">Export JSON</span>
             </Button>
             <Button variant="ghost"
+              type="button"
               onClick={async () => {
                 if (!demoSeedEnabled) return;
                 const ok = await confirmDialog({ title: 'Reset Price Catalog', message: 'Reset all price tables, folder settings, and categories back to factory defaults?', confirmLabel: 'Reset Catalog', danger: true });
@@ -561,7 +569,8 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
               }}
               disabled={!demoSeedEnabled}
               title={demoSeedEnabled ? 'Reset all price tables, folder settings, and categories back to factory defaults.' : 'Disabled for live data — factory reset only runs in demo-seed mode (audit A-P3-9).'}
-              className="px-3 py-1.5 rounded-lg bg-danger/10 hover:bg-danger/15 text-danger font-bold text-xs transition-all flex items-center space-x-1.5 border border-red-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              aria-label="Reset Defaults"
+              className="px-3 py-1.5 rounded-lg bg-danger/10 hover:bg-danger/15 text-danger font-bold text-xs transition-all flex items-center space-x-1.5 border border-danger/30 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Reset Defaults</span>
@@ -572,8 +581,8 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
         {/* Modal Body */}
         <div className="flex-1 overflow-y-auto p-5 space-y-6">
           {saveSuccess && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-xs font-bold flex items-center space-x-2 animate-fadeIn">
-              <Check className="w-4 h-4 text-green-600 shrink-0" />
+            <div className="p-3 bg-success/10 border border-success/30 rounded-xl text-success-deep text-xs font-bold flex items-center space-x-2 animate-fadeIn">
+              <Check className="w-4 h-4 text-success shrink-0" />
               <span>{saveMsg}</span>
             </div>
           )}
@@ -723,13 +732,13 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
               </div>
 
               {/* Price & Warranty Table */}
-              <div className="border border-line rounded-xl overflow-hidden bg-white shadow-2xs">
+              <div className="border border-line rounded-xl overflow-x-auto bg-white shadow-2xs">
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-surface border-b border-line text-xs font-extrabold text-muted uppercase tracking-wider">
-                      <th className="py-3 px-4 w-1/3">Repair Category / Component</th>
-                      <th className="py-3 px-4 w-1/3">Price ({currencySymbol})</th>
-                      <th className="py-3 px-4 w-1/3">Warranty Term</th>
+                      <th className="py-3 px-4 w-1/3 min-w-[140px]">Repair Category / Component</th>
+                      <th className="py-3 px-4 w-1/3 min-w-[140px]">Price ({currencySymbol})</th>
+                      <th className="py-3 px-4 w-1/3 min-w-[140px]">Warranty Term</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-line text-xs">
@@ -739,7 +748,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
 
                       return (
                         <tr key={cat.key} className="hover:bg-surface/50 transition-colors">
-                          <td className="py-2.5 px-4 font-extrabold text-ink">
+                          <td className="py-2.5 px-4 min-w-[140px] font-extrabold text-ink">
                             <div className="flex items-center space-x-2">
                               <span className="w-2 h-2 rounded-full bg-brand" />
                               <span>{cat.label}</span>
@@ -748,13 +757,15 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                               {cat.group} • Key: {cat.key}
                             </span>
                           </td>
-                          <td className="py-2.5 px-4">
+                          <td className="py-2.5 px-4 min-w-[140px]">
                             <div className="flex items-center rounded-lg border border-line bg-surface focus-within:bg-white focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/20 overflow-hidden transition-all">
                               <span className="px-2.5 py-1.5 bg-line/60 border-r border-line text-xs font-bold text-muted select-none shrink-0 font-mono">
                                 {currencySymbol}
                               </span>
                               <Input
                                 type="text"
+                                inputMode="decimal"
+                                autoComplete="off"
                                 placeholder="e.g. 120000 or empty if N/A"
                                 value={priceCellDrafts[cat.key] !== undefined ? priceCellDrafts[cat.key] : (currentPrice === null || currentPrice === undefined ? '' : currentPrice)}
                                 onChange={(e) => setPriceCellDrafts((prev) => ({ ...prev, [cat.key]: e.target.value }))}
@@ -772,7 +783,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                               />
                             </div>
                           </td>
-                          <td className="py-2.5 px-4">
+                          <td className="py-2.5 px-4 min-w-[140px]">
                             <Input
                               type="text"
                               placeholder="e.g. 3 Month, 12 Month"
@@ -977,7 +988,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                       onClick={() => setAllFoldersEnabled(false)}
                       variant="outline"
                       size="sm"
-                      className="text-muted hover:bg-danger/100 hover:text-white hover:border-red-500"
+                      className="text-muted hover:bg-danger hover:text-white hover:border-danger"
                     >
                       Hide All
                     </Button>
@@ -1075,7 +1086,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                                 <Button variant="ghost"
                                   type="button"
                                   onClick={() => handleStartEditingFolder(folder)}
-                                  className="text-brand hover:text-brand/80 p-0.5 cursor-pointer"
+                                  className="text-brand hover:text-brand/80 p-1.5 rounded-md hover:bg-brand/10 cursor-pointer"
                                   title="Rename folder"
                                 >
                                   <Edit3 className="w-3 h-3" />
@@ -1217,7 +1228,7 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                   </h3>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 items-end">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 items-end">
                   <div>
                     <label className="text-xs font-extrabold text-ink block mb-1">Target Folder</label>
                     <select
@@ -1228,6 +1239,20 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                       <option value="ALL">All Device Folders</option>
                       {folders.map((f) => (
                         <option key={f.id} value={f.id}>{f.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-extrabold text-ink block mb-1">Target Service Category</label>
+                    <select
+                      value={globalWarrantyCategory}
+                      onChange={(e) => setGlobalWarrantyCategory(e.target.value)}
+                      className="w-full px-3 py-2 bg-surface border border-line rounded-xl text-xs font-bold text-ink focus:outline-none"
+                    >
+                      <option value="ALL">All Service Categories ({categories.length} categories)</option>
+                      {categories.map((c) => (
+                        <option key={c.key} value={c.key}>{c.label}</option>
                       ))}
                     </select>
                   </div>
@@ -1275,9 +1300,10 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
                       key={curr.sym}
                       type="button"
                       onClick={() => setCurrencySymbol(curr.sym)}
+                      aria-pressed={currencySymbol === curr.sym}
                       className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
                         currencySymbol === curr.sym
-                          ? 'border-brand bg-brand-soft/60 text-brand font-extrabold shadow-2xs'
+                          ? 'border-brand bg-brand-soft text-brand font-extrabold shadow-2xs'
                           : 'border-line hover:border-muted text-ink font-semibold'
                       }`}
                     >

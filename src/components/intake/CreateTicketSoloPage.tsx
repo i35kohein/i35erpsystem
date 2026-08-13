@@ -54,7 +54,7 @@ import {
   SystemSettings
 } from '../../types';
 import { ModelRepairPrice } from '../../types/priceCatalog';
-import { Button , Input } from '../ui';
+import { Button, Input } from '../ui';
 import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
 import {
   getAvailableColorsForModel, 
@@ -212,6 +212,22 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
   };
   const goNext = () => { if (canNextStep()) setWizardStep((s) => Math.min(4, s + 1)); };
   const goBack = () => setWizardStep((s) => Math.max(1, s - 1));
+
+  // Esc closes any open intake modal (audit area-B): one file-local handler
+  // for all six overlays — no shared modal shell needed.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      if (showMarkAllPassConfirm) { setShowMarkAllPassConfirm(false); return; }
+      if (dupConfirm) { setDupConfirm(null); return; }
+      if (diagCommentId) { setDiagCommentId(null); return; }
+      if (isColorModalOpen) { setIsColorModalOpen(false); return; }
+      if (isWarrantyModalOpen) { setIsWarrantyModalOpen(false); return; }
+      if (isRepairsModalOpen) { setIsRepairsModalOpen(false); return; }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [showMarkAllPassConfirm, dupConfirm, diagCommentId, isColorModalOpen, isWarrantyModalOpen, isRepairsModalOpen]);
 
   // Effect to process prefill from Price Catalog
   useEffect(() => {
@@ -376,6 +392,8 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
   const taxRate = ((systemSettings?.taxPercentage ?? 6) || 0) / 100;
   const taxAmountFor = (net: number) => Math.round(net * taxRate);
   const totalWithTax = finalEstimate + taxAmountFor(finalEstimate);
+  // Currency token (audit area-B): single source for every money label in this form.
+  const currency = systemSettings?.currencySymbol || 'MMK';
 
   const updateRepairDiscount = (repairId: string, newDiscountPercent: number) => {
     setSelectedRepairs(prev => prev.map(item => {
@@ -489,7 +507,8 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       priority: baseWorkOrder?.priority || 'Normal',
       // New intake tickets stay unassigned until the repair coordinator assigns a technician.
       assignedTechId: baseWorkOrder?.assignedTechId || (baseWorkOrder ? '' : defaultTechId),
-      assignedTechName: baseWorkOrder?.assignedTechName || (baseWorkOrder ? '' : defaultTechName),      serviceType: baseWorkOrder?.serviceType || 'Standard Modular',
+      assignedTechName: baseWorkOrder?.assignedTechName || (baseWorkOrder ? '' : defaultTechName),
+      serviceType: baseWorkOrder?.serviceType || 'Standard Modular',
       selectedRepairs,
       // Edit mode must respect the live form: resetting a diagnostic to N/A,
       // clearing notes or deleting photos would otherwise be silently
@@ -622,9 +641,9 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           </div>
 
           <div className="bg-surface p-5 rounded-2xl border border-line-strong text-left text-xs space-y-3 max-w-md mx-auto">
-            <div className="flex justify-between items-center">
-              <span className="text-muted">Customer Phone:</span>
-              <span className="font-semibold text-ink">{createdTicket.customerPhone}</span>
+            <div className="flex justify-between items-center min-w-0">
+              <span className="text-muted shrink-0">Customer Phone:</span>
+              <span className="font-semibold text-ink truncate ml-2 text-right">{createdTicket.customerPhone || '—'}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-muted">Town / City:</span>
@@ -648,8 +667,8 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               <span className="font-semibold text-ink">{createdTicket.warrantyLabel}</span>
             </div>
             <div className="flex justify-between items-center border-t border-line-strong pt-2.5">
-              <span className="text-muted font-bold">Total Estimate:</span>
-              <span className="font-black text-brand text-base">{createdTicket.totalAmount.toLocaleString()} MMK</span>
+              <span className="text-muted font-bold">Total (Amount Due):</span>
+              <span className="font-black text-brand text-base">{createdTicket.totalAmount.toLocaleString()} {currency}</span>
             </div>
           </div>
 
@@ -755,14 +774,17 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               <Button
                 type="button"
                 onClick={() => { if (s.n < wizardStep || canNextStep()) setWizardStep(s.n); }}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-extrabold transition-all cursor-pointer border ${
+                disabled={s.n > wizardStep && !canNextStep()}
+                title={s.n > wizardStep && !canNextStep() ? `Complete step ${wizardStep} first` : `Step ${s.n}: ${s.label}`}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-extrabold transition-all border ${
+                  s.n > wizardStep && !canNextStep() ? 'bg-surface text-muted/50 border-line cursor-not-allowed' : 'cursor-pointer'
+                } ${
                   wizardStep === s.n
                     ? 'bg-brand text-white border-brand shadow-2xs'
                     : wizardStep > s.n
                     ? 'bg-success/10 text-success-deep border-success/25'
                     : 'bg-surface text-muted border-line'
                 }`}
-                title={`Step ${s.n}: ${s.label}`}
               >
                 <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black ${
                   wizardStep === s.n ? 'bg-white/20' : wizardStep > s.n ? 'bg-success text-white' : 'bg-line text-muted'
@@ -783,7 +805,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           <div className="flex items-center justify-between gap-2 border-b border-line pb-2.5">
             <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2 min-w-0">
               <span className="w-6 h-6 rounded-full bg-brand text-white flex items-center justify-center text-xs font-black shrink-0">1</span>
-              <span className="text-sm truncate">Customer Information</span>
+              <span className="text-xs truncate">Customer Information</span>
             </h3>
             {/* Always rendered (visibility toggles) so the header never changes
                 height when a phone number matches — no layout shift below. */}
@@ -796,7 +818,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div className="relative">
               <label htmlFor="field-customer-phone" className="flex items-center justify-between gap-2 text-muted mb-1 font-medium min-h-5">
-                <span className="truncate">Phone Number *</span>
+                <span className="truncate">Phone Number</span>
                 {customerPhone.replace(/\D/g, '').length > 0 && (
                   <span className="text-xs font-mono font-bold text-muted shrink-0 whitespace-nowrap">
                     {customerPhone.replace(/\D/g, '').length} digit(s)
@@ -829,10 +851,6 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                       type="button"
                       onMouseDown={(e) => {
                         e.preventDefault();
-                        handlePhoneChange(c.phone);
-                        setPhoneSuggestOpen(false);
-                      }}
-                      onClick={() => {
                         handlePhoneChange(c.phone);
                         setPhoneSuggestOpen(false);
                       }}
@@ -918,7 +936,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 ]}
                 menuAlign="left"
                 className="w-full"
-                buttonClassName="w-full bg-white border-line rounded-xl h-10 px-3 text-xs"
+                buttonClassName="w-full bg-white border-line rounded-xl h-[42px] px-3 text-xs"
               />
             </div>
           </div>
@@ -941,7 +959,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
             }
           }}
           aria-label={deviceModel ? `Selected model: ${deviceModel}. Change device model` : 'Choose Apple hardware device model'}
-          className={`w-full text-left p-3 bg-surface/80 rounded-xl border border-line space-y-2.5 cursor-pointer hover:border-brand/50 hover:bg-surface transition-all group scroll-mt-40 flex flex-col h-auto items-stretch justify-start `}
+          className={`w-full text-left p-3 bg-surface rounded-xl border border-line space-y-2.5 cursor-pointer hover:border-brand/50 hover:bg-surface transition-all group scroll-mt-40 flex flex-col h-auto items-stretch justify-start `}
         >
           <div className="flex items-center justify-between border-b border-line pb-2">
             <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
@@ -956,7 +974,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           {!deviceModel ? (
             <div className="grow flex items-center justify-between bg-warning/10 p-2.5 rounded-lg border border-dashed border-warning/30 text-xs shadow-2xs group-hover:border-amber-400">
               <div className="flex items-center space-x-2.5">
-                <AlertCircle className="w-5 h-5 text-warning shrink-0 animate-pulse" />
+                <AlertCircle className="w-5 h-5 text-warning shrink-0 animate-[pulse_1s_ease-in-out_3]" />
                 <div>
                   <span className="font-extrabold text-warning text-sm block">Choose Device Model First</span>
                   <span className="text-xs text-warning">Click to select Apple iPhone, iPad, MacBook, Watch, or Mac</span>
@@ -983,14 +1001,21 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 `}>
           {/* STEP 2b: Real Official Color Selection — only after a model is chosen */}
           {deviceModel ? (
-            <Button
-              type="button"
+            <div
+              role="button"
+              tabIndex={0}
               onClick={() => setIsColorModalOpen(true)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setIsColorModalOpen(true);
+                }
+              }}
+              aria-label="Open realistic color picker"
               className="w-full min-w-0 text-left p-3 bg-surface rounded-xl border border-line space-y-2.5 cursor-pointer hover:border-brand/50 transition-all group flex flex-col h-auto items-stretch justify-start"
             >
               <div className="flex items-center justify-between border-b border-line pb-2.5">
                 <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
-                  <span className={`w-6 h-6 rounded-full bg-brand/15 text-brand-deep flex items-center justify-center text-xs font-black group-hover:scale-105 transition-transform border border-brand/30 hidden`}>2a</span>
                   <span className="text-xs">Realistic Color ({availableRealColors.length} Palette)</span>
                 </h3>
                 <span className="text-xs font-bold text-brand group-hover:underline">Change</span>
@@ -1011,12 +1036,11 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               {fieldErrors['field-color'] && (
                 <p role="alert" className="mt-1 text-xs font-semibold text-danger">{fieldErrors['field-color']}</p>
               )}
-            </Button>
+            </div>
           ) : (
             <div className="w-full p-3 bg-surface rounded-xl border border-line space-y-2.5 flex flex-col">
               <div className="flex items-center justify-between border-b border-line pb-2.5">
                 <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
-                  <span className={`w-6 h-6 rounded-full bg-brand/15 text-brand-deep flex items-center justify-center text-xs font-black border border-brand/30 hidden`}>2a</span>
                   <span className="text-xs">Realistic Color (0 Palette)</span>
                 </h3>
               </div>
@@ -1030,14 +1054,21 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           )}
 
           {/* STEP 2c: Warranty Selection */}
-          <Button
-            type="button"
+          <div
+            role="button"
+            tabIndex={0}
             onClick={() => setIsWarrantyModalOpen(true)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setIsWarrantyModalOpen(true);
+              }
+            }}
+            aria-label="Open warranty selection"
             className="w-full min-w-0 text-left p-3 bg-surface rounded-xl border border-line space-y-2.5 cursor-pointer hover:border-brand/50 transition-all group flex flex-col h-auto items-stretch justify-start"
           >
             <div className="flex items-center justify-between border-b border-line pb-2.5">
               <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
-                <span className={`w-6 h-6 rounded-full bg-brand/15 text-brand-deep flex items-center justify-center text-xs font-black group-hover:scale-105 transition-transform border border-brand/30 hidden`}>2b</span>
                 <span className="text-xs">Warranty Policy</span>
               </h3>
               <span className="text-xs font-bold text-brand group-hover:underline">Change</span>
@@ -1052,11 +1083,11 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 <ShieldCheck className="w-5 h-5" />
               </div>
             </div>
-          </Button>
+          </div>
         </div>
 
         {/* Serial / IMEI Input */}
-        <div className={`p-3 bg-surface/80 rounded-xl border border-line space-y-2.5 `}>
+        <div className={`p-3 bg-surface rounded-xl border border-line space-y-2.5 `}>
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-2">
             <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2 min-w-0">
               <Smartphone className="w-4 h-4 text-brand shrink-0" />
@@ -1135,11 +1166,11 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         {/* STEP 3 (Phase 3): Choose Available Repairs (MMK CURRENCY) */}
         {wizardStep === 3 && (
         <>
-        <div id="intake-repairs" className={`p-3 bg-surface/80 rounded-xl border border-line space-y-2.5 scroll-mt-40 `}>
+        <div id="intake-repairs" className={`p-3 bg-surface rounded-xl border border-line space-y-2.5 scroll-mt-40 `}>
           <div className="flex items-center justify-between border-b border-line pb-2">
             <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
               <span className="w-5 h-5 rounded-full bg-brand text-white flex items-center justify-center text-xs">3</span>
-              <span>Available Repairs Selection (MMK Pricing)</span>
+              <span>Available Repairs Selection ({currency} Pricing)</span>
             </h3>
             {deviceModel && (
               <Button
@@ -1178,11 +1209,11 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                     <Sparkles className="w-4 h-4 text-success animate-pulse shrink-0" />
                     <span>Catalog Discount Auto-Applied:</span>
                     <span className="bg-success text-white px-2 py-0.5 rounded-md text-xs font-black font-mono">
-                      {overallDiscountPercent}% OFF ({savedAmount.toLocaleString()} MMK Discount)
+                      {overallDiscountPercent}% OFF ({savedAmount.toLocaleString()} {currency} Discount)
                     </span>
                   </div>
                   <span className="text-xs text-success-deep font-mono hidden sm:inline">
-                    Base: <span className="line-through">{baseTotal.toLocaleString()} MMK</span> → <span className="font-extrabold text-success-deep">{finalEstimate.toLocaleString()} MMK</span>
+                    Base: <span className="line-through">{baseTotal.toLocaleString()} {currency}</span> → <span className="font-extrabold text-success-deep">{finalEstimate.toLocaleString()} {currency}</span>
                   </span>
                 </div>
               )}
@@ -1200,7 +1231,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                       </div>
                       <div>
                         <span className="block font-extrabold text-ink text-sm">{repair.name}</span>
-                        <span className="block text-muted text-xs font-medium">Base Price: {repair.basePrice.toLocaleString()} MMK</span>
+                        <span className="block text-muted text-xs font-medium">Base Price: {repair.basePrice.toLocaleString()} {currency}</span>
                       </div>
                     </div>
 
@@ -1214,6 +1245,8 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                             max="100"
                             value={repair.discountPercent}
                             onChange={(e) => updateRepairDiscount(repair.id, Number(e.target.value))}
+                            aria-label={`Discount percent for ${repair.name}`}
+                            title={`Discount percent for ${repair.name}`}
                             className="w-16 bg-surface border border-line-strong rounded-lg px-2 py-1.5 font-bold text-center text-ink focus:outline-none transition-all"
                           />
                           <span className="absolute inset-y-0 right-2 flex items-center text-muted text-xs font-bold pointer-events-none">%</span>
@@ -1221,12 +1254,13 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                       </div>
 
                       <div className="font-black text-brand text-sm min-w-[100px] text-right">
-                        {repair.finalPrice.toLocaleString()} MMK
+                        {repair.finalPrice.toLocaleString()} {currency}
                       </div>
 
                       <Button variant="ghost"
+                        type="button"
                         onClick={() => setSelectedRepairs(prev => prev.filter(r => r.id !== repair.id))}
-                        className="bg-white md:bg-transparent border border-line md:border-none text-muted hover:text-danger hover:bg-danger/10 p-1.5 rounded-lg transition-colors"
+                        className="bg-white md:bg-transparent border border-line md:border-none text-muted hover:text-danger hover:bg-danger/10 p-1.5 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-danger/30"
                       >
                         <X className="w-4 h-4" />
                       </Button>
@@ -1248,19 +1282,19 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 </div>
                 <div className="bg-white/70 p-2 rounded-lg">
                   <span className="block text-xs text-muted font-semibold">Base Total</span>
-                  <span className="font-extrabold text-ink text-sm">{baseTotal.toLocaleString()} MMK</span>
+                  <span className="font-extrabold text-ink text-sm">{baseTotal.toLocaleString()} {currency}</span>
                 </div>
                 <div className="bg-white/70 p-2 rounded-lg">
                   <span className="block text-xs text-muted font-semibold">Saved Amount</span>
-                  <span className="font-extrabold text-success text-sm">{savedAmount.toLocaleString()} MMK</span>
+                  <span className="font-extrabold text-success text-sm">{savedAmount.toLocaleString()} {currency}</span>
                 </div>
                 <div className="bg-white/70 p-2 rounded-lg">
                   <span className="block text-xs text-muted font-semibold">Overall Discount</span>
                   <span className="font-extrabold text-purple text-sm">{overallDiscountPercent}%</span>
                 </div>
-                <div className="col-span-2 md:col-span-2 bg-brand text-white rounded-xl p-2.5 flex flex-col justify-center">
-                  <span className="block text-xs opacity-90 uppercase font-bold tracking-wider">Final Estimate</span>
-                  <span className="font-black text-base">{finalEstimate.toLocaleString()} MMK</span>
+                <div className="col-span-2 md:col-span-3 bg-brand text-white rounded-xl p-2.5 flex flex-col justify-center">
+                  <span className="block text-xs opacity-90 uppercase font-bold tracking-wider">Subtotal (before tax)</span>
+                  <span className="font-black text-base">{finalEstimate.toLocaleString()} {currency}</span>
                 </div>
               </div>
             </>
@@ -1270,7 +1304,6 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         {/* STEP 4A (Phase 4): Intake Notes */}
         <div className={`p-3 bg-surface rounded-xl border border-line-strong space-y-2.5 `}>
           <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2 border-b border-line-strong pb-2">
-            <span className={`px-1.5 h-5 rounded-full bg-brand text-white flex items-center justify-center text-xs font-black hidden`}>4A</span>
             <span>Intake Notes & Customer Symptoms</span>
           </h3>
 
@@ -1293,7 +1326,6 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         <div id="intake-diagnostics" className={`p-3 bg-surface rounded-xl border border-line space-y-2.5 scroll-mt-40 `}>
           <div className="flex items-center justify-between border-b border-line pb-2">
             <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2">
-              <span className={`px-1.5 h-5 rounded-full bg-brand text-white flex items-center justify-center text-xs font-black hidden`}>4B</span>
               <span>21-Point Post-Repair Hardware Inspection</span>
             </h3>
             <div className="flex items-center gap-1.5 flex-wrap">
@@ -1310,14 +1342,14 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                   }
                   setBeforeDiagnostics(prev => prev.map(d => ({ ...d, status: 'Pass' })));
                 }}
-                className="!h-7 !min-h-7 text-[11px] text-white font-bold bg-success hover:bg-success/90 px-2.5 rounded-full shadow-2xs transition-colors"
+                className="!h-9 !min-h-9 text-[11px] text-white font-bold bg-success hover:bg-success/90 px-2.5 rounded-full shadow-2xs transition-colors"
               >
                 Mark All Pass
               </Button>
               <Button variant="ghost"
                 type="button"
                 onClick={() => setBeforeDiagnostics(prev => prev.map(d => ({ ...d, status: 'N/A' })))}
-                className="!h-7 !min-h-7 text-[11px] text-ink font-bold bg-surface hover:bg-line px-2.5 rounded-full transition-colors border border-line-strong"
+                className="!h-9 !min-h-9 text-[11px] text-ink font-bold bg-surface hover:bg-line px-2.5 rounded-full transition-colors border border-line-strong"
               >
                 Mark All N/A
               </Button>
@@ -1325,7 +1357,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 type="button"
                 onClick={() => setBeforeDiagnostics(prev => prev.map(d => ({ ...d, status: 'N/A' as const, note: '' })))}
                 title="Reset all statuses and comments"
-                className="!h-7 !min-h-7 text-[11px] text-muted font-bold bg-white hover:bg-line px-2.5 rounded-full transition-colors border border-line-strong"
+                className="!h-9 !min-h-9 text-[11px] text-muted font-bold bg-white hover:bg-line px-2.5 rounded-full transition-colors border border-line-strong"
               >
                 Reset
               </Button>
@@ -1381,7 +1413,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                     <Button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); setDiagCommentId(diagCommentId === item.id ? null : item.id); }}
-                      className={`!h-5 !min-h-5 w-5 px-0 rounded shrink-0 flex items-center justify-center transition-colors ${
+                      className={`!h-8 !min-h-8 w-8 px-0 rounded shrink-0 flex items-center justify-center transition-colors ${
                         diagCommentId === item.id ? 'bg-line text-ink' : 'text-muted hover:bg-line/60 hover:text-ink'
                       }`}
                       title="More options"
@@ -1393,7 +1425,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
 
                   {/* Reason chip when Fail + note */}
                   {isFail && (item.note || '').trim() && (
-                    <p className="text-[9px] font-semibold text-danger truncate mt-0.5" title={item.note}>
+                    <p className="text-[11px] font-semibold text-danger mt-0.5 line-clamp-2" title={item.note}>
                       ⚠ {item.note}
                     </p>
                   )}
@@ -1407,11 +1439,13 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           {/* Mark All Pass custom confirm */}
           {showMarkAllPassConfirm && (
             <div
-              className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/40 p-4"
+              role="dialog"
+              aria-modal="true"
+              className="fixed inset-0 z-[70] flex items-center justify-center bg-ink/40 p-4"
               onClick={() => setShowMarkAllPassConfirm(false)}
             >
               <div
-                className="w-full max-w-xs bg-white border border-line rounded-2xl shadow-2xl p-4 space-y-3"
+                className="w-full max-w-xs bg-white border border-line rounded-2xl shadow-2xl p-4 space-y-3 animate-fadeIn"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex items-start gap-2.5">
@@ -1449,11 +1483,13 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           {/* Duplicate device custom confirm */}
           {dupConfirm && (
             <div
-              className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/40 p-4"
+              role="dialog"
+              aria-modal="true"
+              className="fixed inset-0 z-[70] flex items-center justify-center bg-ink/40 p-4"
               onClick={() => setDupConfirm(null)}
             >
               <div
-                className="w-full max-w-sm bg-white border border-line rounded-2xl shadow-2xl p-4 space-y-3"
+                className="w-full max-w-sm bg-white border border-line rounded-2xl shadow-2xl p-4 space-y-3 animate-fadeIn"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex items-start gap-2.5">
@@ -1488,11 +1524,13 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
           {/* Intake comment modal */}
           {diagCommentItem && (
               <div
-                className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/40 p-4"
+                role="dialog"
+                aria-modal="true"
+                className="fixed inset-0 z-[70] flex items-center justify-center bg-ink/40 p-4"
                 onClick={() => setDiagCommentId(null)}
               >
                 <div
-                  className="w-full max-w-xs bg-white border border-line rounded-2xl shadow-2xl p-3 space-y-2"
+                  className="w-full max-w-xs bg-white border border-line rounded-2xl shadow-2xl p-3 space-y-2 animate-fadeIn"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="flex items-center justify-between">
@@ -1534,7 +1572,6 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         {/* STEP 4C (Phase 4): Before-Repair Condition Photos */}
         <div className={`p-3 bg-surface rounded-xl border border-line space-y-2.5 `}>
           <h3 className="text-xs font-extrabold text-ink flex items-center space-x-2 border-b border-line pb-2">
-            <span className={`px-1.5 h-5 rounded-full bg-brand text-white flex items-center justify-center text-xs font-black hidden`}>4C</span>
             <span>Before-Repair Condition Photos</span>
           </h3>
 
@@ -1592,7 +1629,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               <span>Take / Add Photo</span>
             </Button>
           </div>
-          <p className="text-xs text-muted font-medium pt-1">Up to 8MB per photo — tap × on a thumbnail to delete.</p>
+          <p className="text-xs text-muted font-medium pt-1">Up to 6 photos, 8MB each — tap × on a thumbnail to delete.</p>
         </div>
 
         </>
@@ -1611,12 +1648,12 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 <span className="font-black text-ink text-sm">{repairCount} item{repairCount === 1 ? '' : 's'}</span>
               </div>
               <div className="text-center sm:text-left">
-                <span className="block text-xs uppercase tracking-wider text-muted font-bold">Estimate</span>
-                <span className="font-black text-brand text-sm">{finalEstimate.toLocaleString()} MMK</span>
+                <span className="block text-xs uppercase tracking-wider text-muted font-bold">Subtotal (before tax)</span>
+                <span className="font-black text-brand text-sm">{finalEstimate.toLocaleString()} {currency}</span>
               </div>
               <div className="text-center sm:text-left">
                 <span className="block text-xs uppercase tracking-wider text-muted font-bold">{overallDiscountPercent > 0 ? `${overallDiscountPercent}% Off` : 'Saved'}</span>
-                <span className={`font-bold text-sm ${savedAmount > 0 ? 'text-success' : 'text-muted'}`}>{savedAmount.toLocaleString()} MMK</span>
+                <span className={`font-bold text-sm ${savedAmount > 0 ? 'text-success' : 'text-muted'}`}>{savedAmount.toLocaleString()} {currency}</span>
               </div>
             </div>
 
@@ -1664,7 +1701,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                   ) : (
                     <>
                       <CheckCircle2 className="w-5 h-5" />
-                      <span className="hidden sm:inline">{isEditMode ? 'Save Ticket Changes' : 'Create Ticket & Print'}</span>
+                      <span className="hidden sm:inline">{isEditMode ? 'Save Ticket Changes' : 'Create Ticket'}</span>
                       <span className="sm:hidden">{isEditMode ? 'Save' : 'Create'}</span>
                     </>
                   )}
@@ -1686,8 +1723,9 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
 
       {/* MODAL 2: Realistic Device Color Picker (REAL COLORS IN BIG CIRCLE WITH SHADOW) */}
       {isColorModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-line rounded-2xl max-w-lg w-full p-6 space-y-4 text-xs shadow-2xl relative">
+        <div role="dialog" aria-modal="true" className="fixed inset-0 bg-ink/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={(e) => { if (e.target === e.currentTarget) setIsColorModalOpen(false); }}>
+          <div className="bg-white border border-line rounded-2xl max-w-lg w-full p-6 space-y-4 text-xs shadow-2xl relative animate-fadeIn">
             <Button variant="ghost" onClick={() => setIsColorModalOpen(false)} aria-label="Close color picker" className="absolute right-4 top-4 text-muted hover:text-ink">
               <X className="w-5 h-5" />
             </Button>
@@ -1735,8 +1773,9 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
 
       {/* MODAL 3: Warranty Selection */}
       {isWarrantyModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-line rounded-2xl max-w-md w-full p-6 space-y-4 text-xs shadow-2xl relative">
+        <div role="dialog" aria-modal="true" className="fixed inset-0 bg-ink/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={(e) => { if (e.target === e.currentTarget) setIsWarrantyModalOpen(false); }}>
+          <div className="bg-white border border-line rounded-2xl max-w-md w-full p-6 space-y-4 text-xs shadow-2xl relative animate-fadeIn">
             <Button variant="ghost" onClick={() => setIsWarrantyModalOpen(false)} aria-label="Close warranty info" className="absolute right-4 top-4 text-muted hover:text-ink">
               <X className="w-5 h-5" />
             </Button>
@@ -1797,10 +1836,13 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
 
       {/* MODAL 4: Available Repairs Chooser (Catalog Price List) */}
       {isRepairsModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-line rounded-2xl max-w-2xl w-full p-6 space-y-4 text-xs shadow-2xl relative max-h-[85vh] flex flex-col">
+        <div role="dialog" aria-modal="true" className="fixed inset-0 bg-ink/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={(e) => { if (e.target === e.currentTarget) setIsRepairsModalOpen(false); }}>
+          <div className="bg-white border border-line rounded-2xl max-w-2xl w-full p-6 space-y-4 text-xs shadow-2xl relative max-h-[85vh] flex flex-col animate-fadeIn">
             <Button variant="ghost"
+              type="button"
               onClick={() => setIsRepairsModalOpen(false)}
+              aria-label="Close repairs picker"
               className="absolute right-4 top-4 text-muted hover:text-ink p-1 rounded-lg hover:bg-surface"
             >
               <X className="w-5 h-5" />
@@ -1812,7 +1854,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                 <span>Price Catalog Repair Selector ({matchedModelName})</span>
               </h3>
               <p className="text-xs text-muted">
-                Select repair services with verified catalog pricing in MMK for {matchedModelName}
+                Select repair services with verified catalog pricing in {currency} for {matchedModelName}
               </p>
             </div>
 
@@ -1892,7 +1934,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
 
                       <div className="text-right">
                         <span className="font-mono font-black text-sm text-brand">
-                          {item.price.toLocaleString()} MMK
+                          {item.price.toLocaleString()} {currency}
                         </span>
                         {item.isCatalogMatch && (
                           <span className="block text-xs text-success-deep font-bold">Catalog Verified</span>
@@ -1901,6 +1943,25 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
                     </Button>
                   );
                 })}
+                {catalogItemsForModel.filter((item) => {
+                  const matchesSearch =
+                    !priceSearchQuery ||
+                    item.name.toLowerCase().includes(priceSearchQuery.toLowerCase()) ||
+                    item.group.toLowerCase().includes(priceSearchQuery.toLowerCase());
+                  const matchesGroup = selectedGroupFilter === 'ALL' || item.group === selectedGroupFilter;
+                  return matchesSearch && matchesGroup;
+                }).length === 0 && (
+                  <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
+                    <p className="text-xs font-bold text-muted">No repairs match your search.</p>
+                    <Button
+                      type="button"
+                      onClick={() => { setPriceSearchQuery(''); setSelectedGroupFilter('ALL'); }}
+                      className="px-3 py-1.5 bg-surface text-ink border border-line rounded-lg text-[11px] font-bold hover:bg-line"
+                    >
+                      Clear filters
+                    </Button>
+                  </div>
+                )}
             </div>
 
             <div className="pt-2 border-t border-line flex items-center justify-between">
@@ -1919,7 +1980,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       )}
       {/* MODAL 5: Camera QR / Barcode Scanner — mounted only while scanning */}
       {isCameraScannerOpen && (
-        <Suspense fallback={null}>
+        <Suspense fallback={<div className="p-10 flex items-center justify-center"><span className="w-8 h-8 border-2 border-line border-t-brand rounded-full animate-spin" /></div>}>
           <CameraQrScannerModal
             isOpen={isCameraScannerOpen}
             onClose={() => setIsCameraScannerOpen(false)}

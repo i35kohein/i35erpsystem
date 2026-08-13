@@ -59,6 +59,9 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [menuPos, setMenuPos] = useState<{ top: number; left: number; placeTop: boolean } | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  // audit A-P3: backdrop touch-start Y so a scroll beginning on the backdrop
+  // doesn't dismiss the menu — only a tap (no movement) closes it.
+  const touchStartYRef = useRef<number | null>(null);
 
   const selectedOption = options.find((o) => o.value === value);
 
@@ -168,14 +171,24 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
       <div
         className="fixed inset-0 z-[95]"
         onMouseDown={close}
-        onTouchStart={close}
+        onTouchStart={(e) => { touchStartYRef.current = e.touches[0]?.clientY ?? null; }}
+        onTouchEnd={(e) => {
+          const startY = touchStartYRef.current;
+          touchStartYRef.current = null;
+          if (startY === null) return;
+          const endY = e.changedTouches[0]?.clientY ?? startY;
+          if (Math.abs(endY - startY) < 10) close();
+        }}
         role="presentation"
         aria-hidden="true"
       />
       <div
         ref={menuRef}
         role="listbox"
-        className={`fixed z-[96] w-56 max-w-[calc(100vw-1rem)] rounded-xl border border-line bg-surface p-1.5 shadow-lg ${menuPos.placeTop ? '-translate-y-full' : ''} ${menuClassName}`}
+        // audit A-P2: unify menu surface with the Radix menu / DrawerSelect
+        // (bg-white) — bg-surface turned gray in dark theme while the others
+        // stayed white.
+        className={`fixed z-[96] w-56 max-w-[calc(100vw-1rem)] rounded-xl border border-line bg-white p-1.5 shadow-lg ${menuPos.placeTop ? '-translate-y-full' : ''} ${menuClassName}`}
         style={{ top: menuPos.top, left: menuPos.left }}
         onMouseDown={(e) => e.stopPropagation()}
       >
@@ -193,7 +206,7 @@ export const CustomDropdownMenu: React.FC<CustomDropdownMenuProps> = ({
                   onChange(option.value);
                   close();
                 }}
-                className={`min-h-9 w-full flex items-center justify-between gap-3 px-3 py-2 text-xs rounded-lg transition-colors cursor-pointer text-left ${
+                className={`${size === 'md' ? 'min-h-10' : 'min-h-9'} w-full flex items-center justify-between gap-3 px-3 py-2 text-xs rounded-lg transition-colors cursor-pointer text-left ${
                   isSelected
                     ? 'bg-brand text-white font-extrabold'
                     : 'text-ink hover:bg-brand-soft font-semibold'

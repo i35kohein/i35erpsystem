@@ -56,9 +56,9 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
     }
   }, [open]);
 
-  const results = useMemo<ResultItem[]>(() => {
+  const searchResults = useMemo(() => {
     const q = debouncedQuery.trim().toLowerCase();
-    if (q.length < 2) return [];
+    if (q.length < 2) return { items: [] as ResultItem[], total: 0 };
     const inText = (...vals: (string | undefined)[]) => vals.some((v) => v && v.toLowerCase().includes(q));
     const items: ResultItem[] = [];
     workOrders.slice(0, 2000).forEach((wo) => {
@@ -81,8 +81,12 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
         items.push({ kind: 'customer', id: c.id, label: c.name || '?', sub: `${c.phone || ''}${c.email ? ' · ' + c.email : ''}`, tab: 'crm' });
       }
     });
-    return items.slice(0, 30);
+    // audit A-P3: keep the full match count so the footer can say
+    // "Showing 30 of N matches" instead of silently capping.
+    return { items: items.slice(0, 30), total: items.length };
   }, [debouncedQuery, workOrders, parts, customers]);
+  const results = searchResults.items;
+  const totalMatches = searchResults.total;
 
   useEffect(() => setCursor(0), [query]);
 
@@ -118,9 +122,11 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   })).filter((g) => g.items.length > 0);
 
   return (
-    <div role="dialog" aria-modal="true" aria-label="Global search" className="fixed inset-0 z-[100] flex items-start justify-center bg-slate-900/50 pt-[12vh] px-4" onMouseDown={onClose}>
+    // audit A-P2: outer backdrop is not a dialog — inner card carries the
+    // role; two stacked role=dialog announcements confused screen readers.
+    <div role="presentation" className="fixed inset-0 z-[100] flex items-start justify-center bg-slate-900/50 pt-[10vh] px-4" onMouseDown={onClose}>
       <div
-        className="w-full max-w-xl rounded-2xl border border-line bg-white shadow-2xl overflow-hidden"
+        className="w-full max-w-xl rounded-2xl border border-line bg-white shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
         onMouseDown={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -132,16 +138,19 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search tickets, parts, customers…  (Esc to close)"
+            placeholder="Search tickets, parts, customers…"
             className="h-12 w-full bg-transparent text-sm text-ink placeholder-muted focus:outline-none"
             aria-label="Search tickets, parts, customers"
+            // audit A-P3: announce the highlighted result as the input's
+            // active descendant (arrow keys move a visual highlight only).
+            aria-activedescendant={results[cursor] ? `gs-result-${cursor}` : undefined}
           />
           <Button variant="ghost" type="button" onClick={onClose} aria-label="Close search" className="shrink-0 text-muted hover:text-ink cursor-pointer">
             <X className="h-4 w-4" />
           </Button>
         </div>
 
-        <div ref={listRef} className="max-h-[52vh] overflow-y-auto p-2">
+        <div ref={listRef} role="listbox" aria-label="Search results" className="max-h-[52vh] flex-1 min-h-0 overflow-y-auto p-2">
           {query.trim().length < 2 && (
             <p className="px-3 py-8 text-center text-xs text-muted">Type 2+ characters — searches tickets, parts, customers.</p>
           )}
@@ -159,7 +168,10 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                 return (
                   <Button
                     key={item.kind + item.id}
+                    id={`gs-result-${idx}`}
                     type="button"
+                    role="option"
+                    aria-selected={active}
                     data-active={active}
                     onClick={() => { onNavigate(item.tab); onClose(); }}
                     onMouseEnter={() => setCursor(idx)}
@@ -178,6 +190,15 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
               })}
             </div>
           ))}
+        </div>
+
+        {/* audit A-P3: persistent key hints (placeholder hint disappeared
+            while typing) + match-count note when results were capped at 30. */}
+        <div className="flex items-center justify-between gap-2 border-t border-line px-4 py-2 text-[10px] font-semibold text-muted">
+          <span>↑↓ navigate · Enter open · Esc close</span>
+          {totalMatches > results.length && (
+            <span className="shrink-0">Showing {results.length} of {totalMatches} matches</span>
+          )}
         </div>
       </div>
     </div>

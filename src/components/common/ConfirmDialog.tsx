@@ -35,6 +35,8 @@ export const ConfirmDialogHost: React.FC = () => {
   // audit F-P2: ref to the confirm button so the Enter shortcut only fires
   // when the confirm button itself has focus.
   const confirmBtnRef = useRef<HTMLButtonElement>(null);
+  // audit A-P2: panel ref for the lightweight Tab trap.
+  const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setActive = setActiveState;
@@ -51,11 +53,22 @@ export const ConfirmDialogHost: React.FC = () => {
   // ESC cancels. Enter confirms ONLY when the confirm button is focused —
   // otherwise Enter on "Cancel"/X (or any other focused element) would trigger
   // the destructive action instead of cancelling (audit F-P2).
+  // audit A-P2: move keyboard focus into the dialog on open, and trap Tab
+  // inside the panel so it can't walk behind the modal.
   useEffect(() => {
     if (!active) return;
+    requestAnimationFrame(() => confirmBtnRef.current?.focus());
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') close(false);
       else if (e.key === 'Enter' && document.activeElement === confirmBtnRef.current) close(true);
+      else if (e.key === 'Tab' && panelRef.current) {
+        const focusables = panelRef.current.querySelectorAll<HTMLElement>('button:not([disabled])');
+        if (!focusables.length) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -67,13 +80,16 @@ export const ConfirmDialogHost: React.FC = () => {
   return (
     <div
       className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-xs animate-in fade-in duration-150"
-      onClick={() => close(false)}
+      // audit A-P3: outside-click cancels only for non-destructive confirms;
+      // a stray click must not silently dismiss a destructive action.
+      onClick={() => { if (!active.danger) close(false); }}
       role="dialog"
       aria-modal="true"
       aria-label={active.title}
     >
       <div
-        className="w-full max-w-md space-y-5 rounded-3xl border border-line bg-white p-6 shadow-2xl outline-none animate-in zoom-in-95 duration-150"
+        ref={panelRef}
+        className="w-full max-w-md space-y-5 rounded-2xl border border-line bg-white p-6 shadow-2xl outline-none animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between border-b border-line pb-4">
@@ -87,7 +103,6 @@ export const ConfirmDialogHost: React.FC = () => {
             </div>
             <div>
               <h3 className="text-base font-extrabold text-ink">{active.title}</h3>
-              <p className="text-xs font-medium text-muted">Action Requires Confirmation</p>
             </div>
           </div>
           <Button

@@ -21,6 +21,20 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    // audit A-P3: auto-reload ONCE per session on chunk errors (stale build)
+    // before showing the manual screen — sessionStorage prevents a reload
+    // loop if the chunk is genuinely broken.
+    const isChunkError = error.message?.includes('dynamically imported module') ||
+                         error.message?.includes('ChunkLoadError');
+    if (isChunkError && typeof sessionStorage !== 'undefined' && !sessionStorage.getItem('i35-erp-auto-reloaded')) {
+      try {
+        sessionStorage.setItem('i35-erp-auto-reloaded', '1');
+        window.setTimeout(() => window.location.reload(), 400);
+      } catch {
+        // ignore — fall through to the manual error screen
+      }
+    }
+
     // Log to server error endpoint (fire-and-forget)
     try {
       void fetch('/api/error-log', {
@@ -90,17 +104,21 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             )}
 
             <div className="flex gap-2">
+              {/* audit A-P2: use the kit variants instead of hand-rolled
+                  button classes (drift risk vs the ui kit). */}
               <Button
                 type="button"
                 onClick={this.handleRetry}
-                className="flex-1 inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-line bg-surface px-4 text-xs font-extrabold text-ink shadow-xs transition-all hover:bg-line active:scale-95"
+                variant="outline"
+                className="flex-1"
               >
                 Try Again
               </Button>
               <Button
                 type="button"
                 onClick={this.handleReload}
-                className="flex-1 inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-brand bg-brand px-4 text-xs font-extrabold text-white shadow-xs transition-all hover:bg-brand-deep active:scale-95"
+                variant="default"
+                className="flex-1"
               >
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />

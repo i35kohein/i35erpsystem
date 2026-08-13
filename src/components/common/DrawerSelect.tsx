@@ -9,7 +9,7 @@ interface DrawerSelectProps {
   options: Array<{ value: string; label: string }>;
 }
 
-const MENU_WIDTH = 200;
+const MENU_WIDTH = 192; // w-48 (audit A-P3: was 200 — off by 8px from the real 192px menu)
 const MENU_MIN_HEIGHT = 120;
 const MENU_MAX_HEIGHT = 240; // max-h-56 (224px) + p-1.5 + border/shadow estimate
 const VIEWPORT_MARGIN = 8;
@@ -24,6 +24,10 @@ export const DrawerSelect: React.FC<DrawerSelectProps> = ({ label, value, onChan
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const selected = options.find((o) => o.value === value);
+  // audit A-P3: stable ids so the label can be associated with the trigger
+  // and the listbox can be named (aria-labelledby).
+  const selectId = useRef(`drawer-select-${Math.random().toString(36).slice(2, 8)}`);
+  const labelId = useRef(`${selectId.current}-label`);
 
   const close = useCallback(() => {
     setOpen(false);
@@ -89,6 +93,7 @@ export const DrawerSelect: React.FC<DrawerSelectProps> = ({ label, value, onChan
       <div
         ref={menuRef}
         role="listbox"
+        aria-labelledby={labelId.current}
         className={`fixed z-[96] w-48 max-w-[calc(100vw-1rem)] rounded-xl border border-line bg-white p-1.5 shadow-xl ${menuPos.placeTop ? '-translate-y-full' : ''}`}
         style={{ top: menuPos.top, left: menuPos.left }}
         onMouseDown={(e) => e.stopPropagation()}
@@ -101,7 +106,7 @@ export const DrawerSelect: React.FC<DrawerSelectProps> = ({ label, value, onChan
               role="option"
               aria-selected={opt.value === value}
               onClick={() => { onChange(opt.value); close(); }}
-              className={`w-full rounded-lg px-3 py-2.5 text-left text-xs font-bold transition-colors cursor-pointer ${
+              className={`min-h-9 w-full rounded-lg px-3 py-2.5 text-left text-xs font-bold transition-colors cursor-pointer focus-visible:bg-surface focus-visible:ring-2 focus-visible:ring-brand/40 ${
                 opt.value === value ? 'bg-brand text-white' : 'text-ink hover:bg-surface'
               }`}
             >
@@ -115,14 +120,17 @@ export const DrawerSelect: React.FC<DrawerSelectProps> = ({ label, value, onChan
 
   return (
     <div className="relative">
-      <label className="mb-1 block text-xs font-extrabold uppercase tracking-wider text-muted">{label}</label>
+      <label id={labelId.current} htmlFor={selectId.current} className="mb-1 block text-xs font-extrabold uppercase tracking-wider text-muted">{label}</label>
       <button
         ref={buttonRef}
+        id={selectId.current}
         type="button"
         onClick={toggle}
         aria-expanded={open}
         aria-haspopup="listbox"
-        className="flex w-full items-center justify-between gap-2 rounded-xl border border-line bg-white px-3 py-2.5 text-xs font-extrabold text-ink outline-none transition-colors cursor-pointer"
+        aria-labelledby={labelId.current}
+        // audit A-P1: restore a visible focus indicator on the trigger.
+        className="flex w-full items-center justify-between gap-2 rounded-xl border border-line bg-white px-3 py-2.5 text-xs font-extrabold text-ink outline-none transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-brand/60"
       >
         <span className="truncate">{selected ? selected.label : 'Select…'}</span>
         <ChevronDown className={`h-4 w-4 shrink-0 text-muted transition-transform ${open ? 'rotate-180' : ''}`} />

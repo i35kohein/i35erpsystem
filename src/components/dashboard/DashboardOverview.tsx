@@ -19,9 +19,11 @@ import {Coins,
   ListFilter,
   Copy,
   Search,
-  RefreshCw} from 'lucide-react';
+  RefreshCw,
+  X} from 'lucide-react';
 import { WorkOrder, PartItem, RmaItem, Technician, WorkOrderStatus } from '../../types';
 import { Button , Input } from '../ui';
+import { toast } from '../../lib/toast';
 
 import { DateFilterState, filterByDateRange} from '../common/DateFilterSelector';
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend } from 'recharts';
@@ -79,12 +81,12 @@ const TrendChart: React.FC<{
             <div className="flex items-center space-x-2">
               <div className="w-2 h-2 rounded-sm bg-brand" />
               <span className="text-muted">Revenue:</span>
-              <span className="font-bold text-brand-deep">{payload[0].value.toLocaleString()} {currencySymbol}</span>
+              <span className="font-bold text-brand-deep">{(payload[0]?.value ?? 0).toLocaleString()} {currencySymbol}</span>
             </div>
             <div className="flex items-center space-x-2">
               <div className="w-2 h-2 rounded-full bg-success" />
               <span className="text-muted">Repairs:</span>
-              <span className="font-bold text-success-deep">{payload[1].value}</span>
+              <span className="font-bold text-success-deep">{payload[1]?.value ?? 0}</span>
             </div>
           </div>
         </div>
@@ -94,9 +96,9 @@ const TrendChart: React.FC<{
   };
 
   return (
-    <div className="w-full h-64 mt-4 -ml-4">
+    <div className="w-full h-64 mt-4">
       <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 5 }}>
+        <ComposedChart data={data} margin={{ top: 10, right: 10, left: -12, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-line)" />
           <XAxis 
             dataKey="name" 
@@ -155,8 +157,8 @@ function KpiCard({
 }) {
   return (
     <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-1">
-      <span className="text-xs font-bold text-muted uppercase">{label}</span>
-      <p className={`text-2xl font-extrabold ${valueClass}`}>{value}</p>
+      <span className="text-xs font-extrabold uppercase tracking-wider text-muted">{label}</span>
+      <p className={`text-2xl font-black ${valueClass}`}>{value}</p>
       <p className={`text-xs flex items-center space-x-1 ${footerClass}`}>
         {footerIcon}
         <span>{footer}</span>
@@ -283,9 +285,12 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
 
   const handleCopyWarrantyCourtesyMessage = (item: typeof warrantyCheckData[0]) => {
     const msg = `Dear ${item.wo.customerName}, your ${item.warrantyDays}-day warranty for ${item.wo.deviceModel} (Ticket ${item.wo.orderNumber}) at AppleRepair Pro Lab expires on ${item.expiryDateFormatted} (${item.remainingDays} day${item.remainingDays === 1 ? '' : 's'} remaining). If you experience any issues, please visit us or contact ${item.wo.customerPhone}. Thank you!`;
-    navigator.clipboard.writeText(msg);
-    setCopiedNoticeId(item.wo.id);
-    setTimeout(() => setCopiedNoticeId(null), 3000);
+    navigator.clipboard.writeText(msg)
+      .then(() => {
+        setCopiedNoticeId(item.wo.id);
+        setTimeout(() => setCopiedNoticeId(null), 3000);
+      })
+      .catch(() => toast.error('Copy failed — please copy manually'));
   };
 
   // Filter work orders based on date filter selection
@@ -631,10 +636,10 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
               Inventory fund reminder — {pendingFundTickets.length} ticket{pendingFundTickets.length > 1 ? 's' : ''} used parts worth{' '}
               <span className="font-black">{pendingFundTotal.toLocaleString()} {currency}</span> from stock, not settled yet
               {(pendingOwnerTotals.kzh > 0 || pendingOwnerTotals.app > 0) && (
-                <span className="block text-[10px] font-black mt-0.5 text-ink/70">
-                  Pay back: <span className="text-violet-700">KZH {pendingOwnerTotals.kzh.toLocaleString()} {currency}</span>
+                <span className="block text-xs font-black mt-0.5 text-ink/70">
+                  Pay back: <span className="px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 border border-violet-200">KZH {pendingOwnerTotals.kzh.toLocaleString()} {currency}</span>
                   {' · '}
-                  <span className="text-sky-700">APP {pendingOwnerTotals.app.toLocaleString()} {currency}</span>
+                  <span className="px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-200">APP {pendingOwnerTotals.app.toLocaleString()} {currency}</span>
                 </span>
               )}
             </span>
@@ -711,10 +716,11 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
                 <span className="font-mono font-bold text-brand">{item.wo.orderNumber}</span>
                 <span className="font-bold text-ink">{item.wo.customerName}</span>
                 <span className="text-muted">({item.wo.deviceModel})</span>
-                <span className={`px-1.5 py-0.5 rounded font-extrabold text-xs ${
+                <span className={`px-1.5 py-0.5 rounded font-extrabold text-xs inline-flex items-center space-x-1 ${
                   item.remainingDays <= 3 ? 'bg-danger text-white' : 'bg-warning/15 text-warning'
                 }`}>
-                  ⏳ {item.remainingDays}d left
+                  <Clock className="w-3 h-3" />
+                  <span>{item.remainingDays}d left</span>
                 </span>
               </div>
             ))}
@@ -727,7 +733,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
         <div role="tabpanel" id="dash-panel-status-queue" aria-labelledby="dash-tab-status-queue" className="space-y-6">
 
       {/* 4 KPI cards stay 4-up on every large screen — simplified: label + number + one action hint */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Active In-Shop Repairs */}
         <div
           role="button"
@@ -793,7 +799,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
               Total Revenue
             </span>
             <div className="mt-2">
-              <span className="text-xl sm:text-2xl font-black text-ink tracking-tight truncate block">
+              <span className="text-2xl sm:text-3xl font-black text-ink tracking-tight truncate block">
                 {totalRevenue.toLocaleString()} <span className="text-xs font-bold text-muted">{currency}</span>
               </span>
             </div>
@@ -830,10 +836,10 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
       </div>
 
           {/* Compact Dashboard Summary */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-3.5">
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
 
             {/* Repair Health */}
-            <div className="flex flex-col min-h-[210px] bg-white border border-line rounded-2xl p-4 shadow-2xs">
+            <div className="flex flex-col bg-white border border-line rounded-2xl p-4 shadow-2xs">
               <div className="flex items-center space-x-2 mb-3">
                 <ListFilter className="w-4 h-4 text-brand" />
                 <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Repair Health</h3>
@@ -868,21 +874,21 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
               </div>
 
               <div className="pt-4 border-t border-line space-y-3 text-xs">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-ink">Top device</span>
-                  <span className="font-mono font-black text-muted">{topRepairDevices[0]?.count ?? 0} tickets</span>
-                </div>
-                {topRepairDevices.slice(0, 3).map((dev, idx) => (
-                  <div key={dev.name} className="flex items-center justify-between gap-2">
-                    <span className="truncate text-sm font-semibold text-ink">{idx + 1}. {dev.name}</span>
-                    <span className="text-xs text-muted">{dev.count}</span>
-                  </div>
-                ))}
+                {topRepairDevices.length === 0 ? (
+                  <p className="text-muted">No data in period.</p>
+                ) : (
+                  topRepairDevices.slice(0, 3).map((dev, idx) => (
+                    <div key={dev.name} className="flex items-center justify-between gap-2">
+                      <span className="truncate text-sm font-semibold text-ink">{idx + 1}. {dev.name}</span>
+                      <span className="text-xs text-muted">{dev.count}</span>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
             {/* Financial Pulse */}
-            <div className="flex flex-col min-h-[210px] bg-white border border-line rounded-2xl p-4 shadow-2xs">
+            <div className="flex flex-col bg-white border border-line rounded-2xl p-4 shadow-2xs">
               <div className="flex items-center space-x-2 mb-3">
                 <Coins className="w-4 h-4 text-success" />
                 <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Financial Pulse</h3>
@@ -919,7 +925,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
             </div>
 
             {/* Inventory & Warranty */}
-            <div className="flex flex-col min-h-[210px] bg-white border border-line rounded-2xl p-4 shadow-2xs">
+            <div className="flex flex-col bg-white border border-line rounded-2xl p-4 shadow-2xs">
               <div className="flex items-center gap-2 mb-3">
                 <Boxes className="w-4 h-4 text-warning shrink-0" />
                 <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Inventory & Warranty</h3>
@@ -962,7 +968,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
                         <p className="font-semibold text-ink truncate">{item.wo.orderNumber}</p>
                         <p className="text-muted truncate">{item.wo.customerName}</p>
                       </div>
-                      <span className={`px-2 py-0.5 rounded-full text-[11px] ${item.isCritical ? 'bg-danger text-white' : 'bg-warning/15 text-warning'}`}>
+                      <span className={`px-2 py-0.5 rounded-full text-xs ${item.isCritical ? 'bg-danger text-white' : 'bg-warning/15 text-warning'}`}>
                         {item.remainingDays}d
                       </span>
                     </div>
@@ -981,7 +987,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
 
       {/* SUBTAB 2: REPAIR DATA */}
       {activeDashboardSubTab === 'repair-data' && (
-        <div role="tabpanel" id="dash-panel-repair-data" aria-labelledby="dash-tab-repair-data" className="grid grid-cols-1 xl:grid-cols-2 gap-3.5">
+        <div role="tabpanel" id="dash-panel-repair-data" aria-labelledby="dash-tab-repair-data" className="grid grid-cols-1 xl:grid-cols-2 gap-4">
           {/* Top Repair Devices */}
           <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-3">
             <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-line">
@@ -1118,19 +1124,25 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-1">
               <span className="text-xs font-bold text-muted uppercase">Total Parts Valuation</span>
-              <p className="text-xl font-extrabold text-ink">{inventoryAnalytics.totalValuation.toLocaleString()} {currency}</p>
+              <div className="p-3 bg-surface rounded-2xl">
+                <p className="text-xl font-extrabold text-ink">{inventoryAnalytics.totalValuation.toLocaleString()} {currency}</p>
+              </div>
               <p className="text-xs text-success font-semibold">{inventoryAnalytics.totalItems} Total Replacement Items</p>
             </div>
 
             <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-1">
               <span className="text-xs font-bold text-muted uppercase">Low Stock Repair Items</span>
-              <p className="text-xl font-extrabold text-warning">{repairLowStockParts.length} Repair Parts</p>
+              <div className="p-3 bg-surface rounded-2xl">
+                <p className="text-xl font-extrabold text-warning">{repairLowStockParts.length} Repair Parts</p>
+              </div>
               <p className="text-xs text-warning font-semibold">Below reorder threshold</p>
             </div>
 
             <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-1">
               <span className="text-xs font-bold text-muted uppercase">Pending Vendor RMAs</span>
-              <p className="text-xl font-extrabold text-purple">{pendingRmas.length} Defective Returns</p>
+              <div className="p-3 bg-surface rounded-2xl">
+                <p className="text-xl font-extrabold text-purple">{pendingRmas.length} Defective Returns</p>
+              </div>
               <p className="text-xs text-purple font-semibold">Awaiting supplier credits</p>
             </div>
           </div>
@@ -1171,7 +1183,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
                         <div className="w-full h-1.5 bg-line rounded-full overflow-hidden">
                           <div className="h-full bg-brand rounded-full" style={{ width: `${barPct}%` }} />
                         </div>
-                        <span className="text-[11px] font-bold text-muted shrink-0 w-20 text-right">
+                        <span className="text-xs font-bold text-muted shrink-0 text-right whitespace-nowrap tabular-nums">
                           {part.revenue.toLocaleString()} {currency}
                         </span>
                       </div>
@@ -1281,7 +1293,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
                   <div className="p-2 bg-brand/10 text-brand-deep rounded-xl border border-brand/20">
                     <TrendingUp className="w-4 h-4" />
                   </div>
-                  <h3 className="text-base font-extrabold text-ink">Revenue & Repairs Trend</h3>
+                  <h3 className="text-sm font-extrabold text-ink">Revenue & Repairs Trend</h3>
                 </div>
                 <p className="text-xs text-muted">{trendSeries.windowLabel} · {trendSeries.bucketDays === 7 ? 'weekly' : 'daily'} buckets · completed tickets only</p>
               </div>
@@ -1391,7 +1403,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
                     <span>90-Day Warranty Background Telemetry</span>
                   </h2>
                   <span className="px-2.5 py-0.5 bg-success/20 text-emerald-300 border border-emerald-500/30 font-mono text-xs font-bold rounded-full flex items-center space-x-1">
-                    <span aria-hidden="true" className="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block mr-1" />
+                    <span aria-hidden="true" className="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block" />
                     <span>Background Scanner Active</span>
                   </span>
                 </div>
@@ -1414,7 +1426,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
               <div className="p-3 bg-white/10 rounded-xl border border-white/10 space-y-0.5">
                 <span className="text-xs text-slate-300 font-bold uppercase">Scanned Tickets</span>
                 <p className="text-xl font-black text-white">{warrantyCheckData.length}</p>
-                <p className="text-xs text-muted">Total with warranty</p>
+                <p className="text-xs text-slate-300">Total with warranty</p>
               </div>
 
               <div className="p-3 bg-danger/20 border border-rose-500/40 rounded-xl space-y-0.5">
@@ -1454,7 +1466,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
                   value={warrantySearchQuery}
                   onChange={(e) => setWarrantySearchQuery(e.target.value)}
                   placeholder="Search ticket #, customer, device, serial..."
-                  className="w-full bg-surface text-xs text-ink placeholder-muted pl-8 pr-8 py-1.5 rounded-xl border border-line focus:bg-white focus:outline-none transition-all"
+                  className="w-full bg-surface text-xs text-ink placeholder-muted pl-8 pr-8 py-1.5 rounded-xl border border-line focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand/50 transition-all"
                 />
                 {warrantySearchQuery && (
                   <Button
@@ -1462,9 +1474,10 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
   
                     type="button"
                     onClick={() => setWarrantySearchQuery('')}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-muted hover:text-ink"
+                    aria-label="Clear search"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-muted hover:text-ink p-2"
                   >
-                    ×
+                    <X className="w-3.5 h-3.5" />
                   </Button>
                 )}
               </div>
@@ -1476,7 +1489,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
   
                   type="button"
                   onClick={() => setWarrantyFilterTab('ALL_EXPIRING')}
-                  className="px-3 py-1 shrink-0"
+                  className="px-3 py-1 min-h-10 shrink-0 focus-visible:ring-2 focus-visible:ring-brand/50"
                 >
                   Flagged Expiration ({expiringSoonWorkOrders.length})
                 </Button>
@@ -1485,7 +1498,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
   
                   type="button"
                   onClick={() => setWarrantyFilterTab('CRITICAL')}
-                  className="px-3 py-1 shrink-0"
+                  className="px-3 py-1 min-h-10 shrink-0 focus-visible:ring-2 focus-visible:ring-brand/50"
                 >
                   Critical &le;7d ({criticalWarrantyCount})
                 </Button>
@@ -1494,7 +1507,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
   
                   type="button"
                   onClick={() => setWarrantyFilterTab('WARNING')}
-                  className="px-3 py-1 shrink-0"
+                  className="px-3 py-1 min-h-10 shrink-0 focus-visible:ring-2 focus-visible:ring-brand/50"
                 >
                   Warning 8-14d ({warningWarrantyCount})
                 </Button>
@@ -1503,7 +1516,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
   
                   type="button"
                   onClick={() => setWarrantyFilterTab('EXPIRED')}
-                  className="px-3 py-1 shrink-0"
+                  className="px-3 py-1 min-h-10 shrink-0 focus-visible:ring-2 focus-visible:ring-brand/50"
                 >
                   Expired ({expiredWarrantyCount})
                 </Button>
@@ -1512,7 +1525,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
   
                   type="button"
                   onClick={() => setWarrantyFilterTab('ALL')}
-                  className="px-3 py-1 shrink-0"
+                  className="px-3 py-1 min-h-10 shrink-0 focus-visible:ring-2 focus-visible:ring-brand/50"
                 >
                   All Tickets ({warrantyCheckData.length})
                 </Button>
@@ -1670,6 +1683,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
                                   onClick={() => onNavigateToTab('crm')}
                                   className="bg-surface hover:bg-line border border-line"
                                   title="Open Customer Dossier in CRM"
+                                  aria-label="Open customer dossier in CRM"
                                 >
                                   <Users className="w-3.5 h-3.5" />
                                 </Button>

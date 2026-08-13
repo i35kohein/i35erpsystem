@@ -5,6 +5,14 @@ import { WorkOrder } from '../../types';
 
 export const DISCOUNT_OPTIONS = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
 
+/** Standard diagnostic & inspection fee (audit area-B): single source shared
+ *  between the POS module (diag-fee line item) and the checkout panel table. */
+export const DIAGNOSTIC_FEE = 5000;
+
+/** '12 Month' → '12M', '6 Months' → '6M' (price-list style short warranty). */
+export const shortWarranty = (warranty: string): string =>
+  (warranty || '').replace(/(\d+)\s*(?:Months?|M)\b/gi, '$1M');
+
 export const normalizeText = (value: string) =>
   (value || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim();
 

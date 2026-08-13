@@ -10,7 +10,8 @@ import {X,
   ArrowRight,
   Volume2,
   VolumeX,
-  FileCode} from 'lucide-react';
+  FileCode,
+  Loader2} from 'lucide-react';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 
 interface CameraQrScannerModalProps {
@@ -89,6 +90,11 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
   useEffect(() => {
     if (!isOpen) return;
 
+    // Reset the previous scan session so a stale "Barcode Decoded" banner
+    // never greets the user on reopen (audit F-P2).
+    setScannedResult(null);
+    setErrorMsg('');
+
     // ESC closes the scanner modal
     const escHandler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', escHandler);
@@ -152,7 +158,7 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
         cameraId,
         {
           fps: 15,
-          qrbox: { width: 260, height: 180 },
+          qrbox: { width: 256, height: 176 },
           aspectRatio: 1.333,
         },
         (decodedText) => {
@@ -235,7 +241,7 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-fadeIn">
+    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-fadeIn">
       <div className="bg-white border border-line rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header */}
         <div className="px-6 py-4 border-b border-line bg-surface flex items-center justify-between">
@@ -252,10 +258,11 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
           <div className="flex items-center space-x-2">
             <Button
               onClick={() => setSoundEnabled(!soundEnabled)}
+              aria-pressed={soundEnabled}
               className={`p-2 rounded-xl transition-colors cursor-pointer ${
                 soundEnabled ? 'text-brand bg-brand-soft' : 'text-muted bg-surface'
               }`}
-              title={soundEnabled ? 'Beep Audio On' : 'Beep Audio Muted'}
+              title={soundEnabled ? 'Mute beep' : 'Enable beep'}
             >
               {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
             </Button>
@@ -277,12 +284,14 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
 
         {/* Tab Switcher */}
         <div className="px-6 pt-3 pb-1 border-b border-line bg-white flex items-center justify-between">
-          <div className="flex space-x-2 text-xs font-bold">
+        <div className="flex space-x-2 text-xs font-bold" role="tablist">
             <Button
               onClick={() => {
                 setActiveTab('camera');
                 setScannedResult(null);
               }}
+              role="tab"
+              aria-selected={activeTab === 'camera'}
               className={`px-4 py-2 rounded-xl flex items-center space-x-2 transition-all cursor-pointer ${
                 activeTab === 'camera'
                   ? 'bg-brand text-white shadow-xs'
@@ -299,6 +308,8 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
                 setActiveTab('upload');
                 setScannedResult(null);
               }}
+              role="tab"
+              aria-selected={activeTab === 'upload'}
               className={`px-4 py-2 rounded-xl flex items-center space-x-2 transition-all cursor-pointer ${
                 activeTab === 'upload'
                   ? 'bg-brand text-white shadow-xs'
@@ -315,6 +326,8 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
                 setActiveTab('samples');
                 setScannedResult(null);
               }}
+              role="tab"
+              aria-selected={activeTab === 'samples'}
               className={`px-4 py-2 rounded-xl flex items-center space-x-2 transition-all cursor-pointer ${
                 activeTab === 'samples'
                   ? 'bg-brand text-white shadow-xs'
@@ -331,7 +344,7 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
             <select
               value={selectedCameraId}
               onChange={(e) => setSelectedCameraId(e.target.value)}
-              className="bg-surface border border-line text-ink text-xs font-semibold px-2.5 py-1.5 rounded-xl focus:outline-none"
+              className="bg-surface border border-line text-ink text-xs font-semibold px-2.5 py-1.5 rounded-xl focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
             >
               {cameras.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -349,10 +362,18 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
             <div className="space-y-3">
               {/* Scanner Container Box */}
               <div className="relative bg-slate-900 rounded-3xl overflow-hidden min-h-[280px] flex items-center justify-center border-2 border-slate-800 shadow-inner">
+                {/* Camera starting state (audit F-P2): the stream can take 1-3s
+                    to enumerate and start — show feedback instead of a black void. */}
+                {!isScanning && !scannedResult && !errorMsg && (
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 text-white/80">
+                    <Loader2 className="w-6 h-6 animate-spin text-brand" />
+                    <span className="text-xs font-bold">Starting camera…</span>
+                  </div>
+                )}
                 {/* Viewfinder Target Reticle Laser line */}
                 {isScanning && !scannedResult && (
                   <div className="absolute inset-0 pointer-events-none z-10 flex flex-col items-center justify-center">
-                    <div className="w-64 h-44 border-2 border-brand rounded-2xl relative shadow-lg">
+                    <div className="w-56 sm:w-64 h-44 border-2 border-brand rounded-2xl relative shadow-lg">
                       {/* Corner brackets */}
                       <div className="absolute -top-1 -left-1 w-5 h-5 border-t-4 border-l-4 border-white rounded-tl-lg" />
                       <div className="absolute -top-1 -right-1 w-5 h-5 border-t-4 border-r-4 border-white rounded-tr-lg" />
@@ -360,7 +381,7 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
                       <div className="absolute -bottom-1 -right-1 w-5 h-5 border-b-4 border-r-4 border-white rounded-br-lg" />
 
                       {/* Laser beam */}
-                      <div className="w-full h-0.5 bg-danger/100 shadow-[0_0_8px_#f43f5e] animate-pulse absolute top-1/2" />
+                      <div className="w-full h-0.5 bg-danger/100 shadow-[0_0_8px] shadow-danger/70 animate-pulse absolute top-1/2" />
                     </div>
                     <span className="mt-3 text-xs font-bold text-white/90 bg-slate-900/50 px-3 py-1 rounded-full backdrop-blur-xs">
                       Align Barcode or QR Code within Frame
@@ -376,7 +397,16 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
               {errorMsg && (
                 <div className="p-3 bg-danger/10 border border-danger/30 text-danger rounded-2xl flex items-center space-x-2 text-xs font-semibold">
                   <AlertCircle className="w-4 h-4 shrink-0" />
-                  <span>{errorMsg}</span>
+                  <span className="flex-1">{errorMsg}</span>
+                  {activeTab === 'camera' && selectedCameraId && (
+                    <Button
+                      type="button"
+                      onClick={() => startCameraScanner(selectedCameraId)}
+                      className="px-2.5 py-1 bg-danger/10 hover:bg-danger/20 border border-danger/30 text-danger font-bold text-xs rounded-lg shrink-0"
+                    >
+                      Try again
+                    </Button>
+                  )}
                 </div>
               )}
             </div>
@@ -390,7 +420,17 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
 
           {/* TAB 2: Upload Photo */}
           {activeTab === 'upload' && (
-            <div className="p-8 border-2 border-dashed border-line hover:border-brand rounded-3xl text-center space-y-4 bg-surface transition-all">
+            <div
+              className="p-8 border-2 border-dashed border-line hover:border-brand rounded-3xl text-center space-y-4 bg-surface transition-all"
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                const files = e.dataTransfer.files;
+                if (files && files.length > 0) {
+                  handleFileUpload({ target: { files, value: '' } } as unknown as React.ChangeEvent<HTMLInputElement>);
+                }
+              }}
+            >
               <div className="w-16 h-16 bg-brand/10 text-brand-deep rounded-2xl flex items-center justify-center mx-auto shadow-inner">
                 <Upload className="w-8 h-8" />
               </div>
@@ -399,10 +439,20 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
                 <p className="text-xs text-muted mt-1">Select a PNG, JPG, or WebP photo containing a barcode or QR label</p>
               </div>
 
-              <label className="inline-flex items-center space-x-2 px-5 py-2.5 bg-brand hover:bg-brand-deep text-white font-extrabold text-xs rounded-2xl shadow-sm cursor-pointer transition-all">
+              <label
+                className="inline-flex items-center space-x-2 px-5 py-2.5 bg-brand hover:bg-brand-deep text-white font-extrabold text-xs rounded-2xl shadow-sm cursor-pointer transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    document.getElementById('qr-upload-input')?.click();
+                  }
+                }}
+              >
                 <FileCode className="w-4 h-4" />
                 <span>Choose Image File</span>
                 <Input
+                  id="qr-upload-input"
                   type="file"
                   accept="image/*"
                   onChange={handleFileUpload}
@@ -494,7 +544,7 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
               stopScanner();
               onClose();
             }}
-            className="px-4 py-2 bg-ink hover:bg-black text-white font-bold text-xs rounded-xl transition-all cursor-pointer"
+            className="px-4 py-2 bg-ink hover:bg-ink/90 text-white font-bold text-xs rounded-xl transition-all cursor-pointer"
           >
             Close Scanner
           </Button>

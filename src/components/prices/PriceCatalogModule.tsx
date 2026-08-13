@@ -98,7 +98,7 @@ function shortWarranty(warranty: string): string {
 }
 
 /** Mobile swipe-to-remove row — swipe LEFT reveals a theme Remove button; tap it to delete (Ko Hein). */
-function SwipeToRemoveRow({ onRemove, children }: { onRemove: () => void; children: React.ReactNode }) {
+function SwipeToRemoveRow({ onRemove, itemLabel, children }: { onRemove: () => void; itemLabel: string; children: React.ReactNode }) {
   const offsetRef = useRef(0);
   const startX = useRef<number | null>(null);
   const startY = useRef<number | null>(null);
@@ -152,16 +152,17 @@ function SwipeToRemoveRow({ onRemove, children }: { onRemove: () => void; childr
       <Button
         type="button"
         onClick={onRemove}
-        aria-label="Remove item"
+        aria-label={`Remove ${itemLabel}`}
         className="absolute inset-y-0 right-0 w-24 bg-danger hover:bg-danger/90 text-white text-xs font-extrabold flex items-center justify-center gap-1.5 rounded-l-xl focus:outline-none"
       >
         <Trash2 className="w-4 h-4" />
         <span>Remove</span>
       </Button>
-      {/* Foreground content — tapping it closes the reveal */}
+      {/* Foreground content — tapping it closes the reveal (keyboard: use the Remove button) */}
       <div
         ref={contentRef}
-        className="relative bg-white"
+        className="relative bg-white cursor-pointer"
+        tabIndex={-1}
         style={{ transition: 'transform 200ms' }}
         onClick={() => {
           if (offsetRef.current < 0) applyOffset(0);
@@ -181,6 +182,85 @@ function WarrantyPill({ warranty, size = 'sm' }: { warranty: string; size?: 'sm'
       <ShieldCheck className={`${icon} text-success shrink-0`} />
       <span>{shortWarranty(warranty)}</span>
     </span>
+  );
+}
+
+/** Single cart item card — shared by the 3-slot and scrollable cart lists (audit E-P3). */
+function CartItemCard({
+  item,
+  index,
+  formatPrice,
+  renderDiscountPopup,
+  onOpenDiscount,
+  onRemove,
+}: {
+  item: CartItem;
+  index: number;
+  formatPrice: (amount: number | null | undefined) => string;
+  renderDiscountPopup: (item: CartItem) => React.ReactNode;
+  onOpenDiscount: (categoryKey: string, e: React.MouseEvent<HTMLButtonElement>) => void;
+  onRemove: () => void;
+}) {
+  const discAmt = item.price * (item.discountPercent / 100);
+  const finalItemPrice = item.price - discAmt;
+  return (
+    <div className="min-h-[88px] p-2.5 bg-white border border-line rounded-xl flex flex-col justify-between shadow-2xs transition-all hover:border-ink/30">
+      <div className="flex items-start justify-between gap-1.5">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center space-x-1.5 min-w-0">
+            <span className="w-4 h-4 rounded-md bg-ink text-white flex items-center justify-center font-extrabold text-xs shrink-0">
+              {index + 1}
+            </span>
+            <h4 className="font-extrabold text-xs text-ink truncate leading-tight min-w-0">{item.label}</h4>
+          </div>
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          <WarrantyPill warranty={item.warranty} size="md" />
+          <Button variant="ghost"
+            type="button"
+            onClick={onRemove}
+            className="bg-transparent text-muted hover:text-danger hover:bg-transparent p-1 rounded transition-colors cursor-pointer shrink-0 focus-visible:outline-none "
+            title="Remove item"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between bg-surface px-2 py-1 rounded-lg">
+        <div className="flex items-center space-x-1.5">
+          <div className="relative">
+            <Button
+              type="button"
+              onClick={(e) => onOpenDiscount(item.categoryKey, e)}
+              title={item.discountPercent > 0 ? `${item.discountPercent}% discount applied` : 'Add discount'}
+              className={`discount-trigger !w-7 !h-7 !min-h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
+                item.discountPercent > 0
+                  ? 'bg-success text-white shadow-2xs'
+                  : 'bg-transparent text-muted hover:bg-surface hover:text-ink'
+              }`}
+            >
+              <BadgePercent className="w-4 h-4" />
+            </Button>
+            {renderDiscountPopup(item)}
+          </div>
+          {item.discountPercent > 0 && (
+            <span className="text-[11px] font-extrabold text-success">{item.discountPercent}% Off</span>
+          )}
+        </div>
+
+        <div className="flex items-baseline space-x-1.5 shrink-0">
+          {item.discountPercent > 0 && (
+            <span className="text-xs text-muted line-through font-mono tabular-nums">
+              {formatPrice(item.price)}
+            </span>
+          )}
+          <span className="font-black font-mono tabular-nums text-sm text-ink">
+            {formatPrice(finalItemPrice)}
+          </span>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -278,6 +358,15 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
   // Cart State: Map of categoryKey -> CartItem
   const [cart, setCart] = useState<Map<string, CartItem>>(() => new Map<string, CartItem>());
+
+  // audit E-P3: if the discount popup's item leaves the cart (double-tap,
+  // swipe-remove), close the popup so it never shows a stale item.
+  useEffect(() => {
+    if (discountMenuOpenFor && !cart.has(discountMenuOpenFor)) {
+      setDiscountMenuOpenFor(null);
+      setDiscountPopupAnchor(null);
+    }
+  }, [cart, discountMenuOpenFor]);
 
   // Filter folders enabled by user
   
@@ -502,20 +591,20 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
   
 
-  const handleCopyCustomerQuote = () => {
+  const handleCopyCustomerQuote = async () => {
     const dateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     const shopName = systemSettings?.shopName?.trim() || 'i35 Apple Service';
     const slogan = systemSettings?.shopInfo?.trim() || '';
+    let text: string;
     if (cart.size === 0) {
       // Copy single estimated service or active device total
-      const text = [
+      text = [
         `${shopName} — Repair Quote`,
         `Device: ${selectedDevice}`,
         `Date: ${dateStr}`,
         'Status: Available Today',
         ...(slogan ? [slogan] : []),
       ].join('\n');
-      navigator.clipboard.writeText(text);
     } else {
       const lines: string[] = [
         `${shopName} — Repair Quote`,
@@ -538,10 +627,27 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
       lines.push('');
       lines.push(`Total Estimated: ${formatPrice(cartSummary.totalDue)}`);
       if (slogan) lines.push(slogan);
-      navigator.clipboard.writeText(lines.join('\n'));
+      text = lines.join('\n');
     }
-    setQuoteCopied(true);
-    setTimeout(() => setQuoteCopied(false), 2200);
+    // audit E-P2: surface clipboard failures instead of silently succeeding.
+    try {
+      await navigator.clipboard.writeText(text);
+      setQuoteCopied(true);
+      setTimeout(() => setQuoteCopied(false), 2200);
+      toast.success('Quote copied', 'Quote');
+    } catch {
+      toast.error('Copy failed — clipboard permission denied', 'Quote');
+    }
+  };
+
+  /** Shared discount-popup anchor opener (desktop cart cards) — audit E-P3. */
+  const openDiscountPopup = (categoryKey: string, e: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pw = 176;
+    let l = rect.left;
+    l = Math.max(8, Math.min(l, window.innerWidth - pw - 8));
+    setDiscountPopupAnchor({ top: rect.bottom + 6, left: l });
+    setDiscountMenuOpenFor(categoryKey);
   };
 
   const handleCreateWorkOrderFromCart = () => {
@@ -647,7 +753,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                         const finalItemPrice = item.price - discAmt;
 
                         return (
-                          <SwipeToRemoveRow key={item.categoryKey} onRemove={() => handleToggleCartItem(item.categoryKey, item.label, item.price, item.warranty)}>
+                          <SwipeToRemoveRow key={item.categoryKey} onRemove={() => handleToggleCartItem(item.categoryKey, item.label, item.price, item.warranty)} itemLabel={item.label}>
                           <div className="py-2.5 border-b border-line last:border-0">
                             <div className="grid grid-cols-[14px_1fr_auto] items-center gap-x-2.5">
                               {/* # */}
@@ -701,78 +807,16 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                       const item = cartItems[i];
 
                       if (item) {
-                        const discAmt = item.price * (item.discountPercent / 100);
-                        const finalItemPrice = item.price - discAmt;
-
                         return (
-                          <div
+                          <CartItemCard
                             key={item.categoryKey}
-                            className="min-h-[88px] p-2.5 bg-white border border-line rounded-xl flex flex-col justify-between shadow-2xs transition-all hover:border-ink/30"
-                          >
-                            <div className="flex items-start justify-between gap-1.5">
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-center space-x-1.5 min-w-0">
-                                  <span className="w-4 h-4 rounded-md bg-ink text-white flex items-center justify-center font-extrabold text-xs shrink-0">
-                                    {i + 1}
-                                  </span>
-                                  <h4 className="font-extrabold text-xs text-ink truncate leading-tight min-w-0">{item.label}</h4>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-1 shrink-0">
-                                <WarrantyPill warranty={item.warranty} size="md" />
-                                <Button variant="ghost"
-                                  type="button"
-                                  onClick={() => handleToggleCartItem(item.categoryKey, item.label, item.price, item.warranty)}
-                                  className="bg-transparent text-muted hover:text-danger hover:bg-transparent p-1 rounded transition-colors cursor-pointer shrink-0 focus-visible:outline-none "
-                                  title="Remove item"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </Button>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center justify-between bg-surface px-2 py-1 rounded-lg">
-                              <div className="flex items-center space-x-1.5">
-                                <div className="relative">
-                                  <Button
-                                    type="button"
-                                    onClick={(e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const pw = 176;
-    let l = rect.left;
-    l = Math.max(8, Math.min(l, window.innerWidth - pw - 8));
-    setDiscountPopupAnchor({ top: rect.bottom + 6, left: l });
-    setDiscountMenuOpenFor(item.categoryKey);
-  }}
-                                    title={item.discountPercent > 0 ? `${item.discountPercent}% discount applied` : 'Add discount'}
-                                    className={`discount-trigger !w-7 !h-7 !min-h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
-                                      item.discountPercent > 0
-                                        ? 'bg-success text-white shadow-2xs'
-                                        : 'bg-transparent text-muted hover:bg-surface hover:text-ink'
-                                    }`}
-                                  >
-                                    <BadgePercent className="w-4 h-4" />
-                                  </Button>
-                                  {renderDiscountPopup(item)}
-                                </div>
-                                {item.discountPercent > 0 && (
-                                  <span className="text-[11px] font-extrabold text-success">{item.discountPercent}% Off</span>
-                                )}
-                              </div>
-
-                              <div className="flex items-baseline space-x-1.5 shrink-0">
-                                {item.discountPercent > 0 && (
-                                  <span className="text-xs text-muted line-through font-mono">
-                                    {formatPrice(item.price)}
-                                  </span>
-                                )}
-                                <span className="font-black font-mono text-sm text-ink">
-                                  {formatPrice(finalItemPrice)}
-                                </span>
-                              </div>
-                            </div>
-                            
-                          </div>
+                            item={item}
+                            index={i}
+                            formatPrice={formatPrice}
+                            renderDiscountPopup={renderDiscountPopup}
+                            onOpenDiscount={openDiscountPopup}
+                            onRemove={() => handleToggleCartItem(item.categoryKey, item.label, item.price, item.warranty)}
+                          />
                         );
                       }
 
@@ -799,78 +843,16 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
               return (
                 <div className="overflow-y-auto space-y-2.5 pr-1 no-scrollbar">
                   {cartItems.map((item, idx) => {
-                    const discAmt = item.price * (item.discountPercent / 100);
-                    const finalItemPrice = item.price - discAmt;
-
                     return (
-                      <div
+                      <CartItemCard
                         key={item.categoryKey}
-                        className="min-h-[88px] p-2.5 bg-white border border-line rounded-xl flex flex-col justify-between shadow-2xs transition-all hover:border-ink/30"
-                      >
-                        <div className="flex items-start justify-between gap-1.5">
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center space-x-1.5 min-w-0">
-                              <span className="w-4 h-4 rounded-md bg-ink text-white flex items-center justify-center font-extrabold text-xs shrink-0">
-                                {idx + 1}
-                              </span>
-                              <h4 className="font-extrabold text-xs text-ink truncate leading-tight min-w-0">{item.label}</h4>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1 shrink-0">
-                            <WarrantyPill warranty={item.warranty} size="md" />
-                            <Button variant="ghost"
-                              type="button"
-                              onClick={() => handleToggleCartItem(item.categoryKey, item.label, item.price, item.warranty)}
-                              className="bg-transparent text-muted hover:text-danger hover:bg-transparent p-1 rounded transition-colors cursor-pointer shrink-0 focus-visible:outline-none "
-                              title="Remove item"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between bg-surface px-2 py-1 rounded-lg">
-                          <div className="flex items-center space-x-1.5">
-                            <div className="relative">
-                              <Button
-                                type="button"
-                                onClick={(e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const pw = 176;
-    let l = rect.left;
-    l = Math.max(8, Math.min(l, window.innerWidth - pw - 8));
-    setDiscountPopupAnchor({ top: rect.bottom + 6, left: l });
-    setDiscountMenuOpenFor(item.categoryKey);
-  }}
-                                title={item.discountPercent > 0 ? `${item.discountPercent}% discount applied` : 'Add discount'}
-                                className={`discount-trigger !w-7 !h-7 !min-h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
-                                  item.discountPercent > 0
-                                    ? 'bg-success text-white shadow-2xs'
-                                    : 'bg-transparent text-muted hover:bg-surface hover:text-ink'
-                                }`}
-                              >
-                                <BadgePercent className="w-4 h-4" />
-                              </Button>
-                              {renderDiscountPopup(item)}
-                            </div>
-                            {item.discountPercent > 0 && (
-                              <span className="text-[11px] font-extrabold text-success">{item.discountPercent}% Off</span>
-                            )}
-                          </div>
-
-                          <div className="flex items-baseline space-x-1.5 shrink-0">
-                            {item.discountPercent > 0 && (
-                              <span className="text-xs text-muted line-through font-mono">
-                                {formatPrice(item.price)}
-                              </span>
-                            )}
-                            <span className="font-black font-mono text-sm text-ink">
-                              {formatPrice(finalItemPrice)}
-                            </span>
-                          </div>
-                        </div>
-                          
-                      </div>
+                        item={item}
+                        index={idx}
+                        formatPrice={formatPrice}
+                        renderDiscountPopup={renderDiscountPopup}
+                        onOpenDiscount={openDiscountPopup}
+                        onRemove={() => handleToggleCartItem(item.categoryKey, item.label, item.price, item.warranty)}
+                      />
                     );
                   })}
                 </div>
@@ -938,7 +920,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                 }
               }
             }}
-            className="w-full !h-9 !min-h-9 rounded-full bg-surface border border-line px-3.5 text-xs font-bold text-ink/60 placeholder:text-muted/50 outline-none transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            className="w-full !h-10 !min-h-10 rounded-full bg-surface border border-line px-3.5 text-xs font-bold text-ink placeholder:text-muted outline-none transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             title="Custom discount % — type and press Enter"
           />
         </div>
@@ -952,17 +934,17 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
       <div className="space-y-1.5 text-xs sm:text-sm">
         <div className="flex justify-between items-center">
           <span className="text-muted">Subtotal</span>
-          <span className="font-mono font-bold text-ink sm:text-base">{formatPrice(cartSummary.subtotal)}</span>
+          <span className="font-mono tabular-nums font-bold text-ink sm:text-base">{formatPrice(cartSummary.subtotal)}</span>
         </div>
 
         <div className="flex justify-between items-center">
           <span className="text-muted">Discount Applied</span>
           {cartSummary.totalDiscountAmount > 0 ? (
-            <span className="font-mono font-bold text-success sm:text-base">
+            <span className="font-mono tabular-nums font-bold text-success sm:text-base">
               -{formatPrice(cartSummary.totalDiscountAmount)}
             </span>
           ) : (
-            <span className="font-mono text-muted sm:text-base">{formatPrice(0)}</span>
+            <span className="font-mono tabular-nums text-muted sm:text-base">{formatPrice(0)}</span>
           )}
         </div>
 
@@ -973,7 +955,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
             </span>
             <span className="text-xs text-muted">{cartSummary.count} {cartSummary.count === 1 ? 'Service' : 'Services'} Selected</span>
           </div>
-          <span className="text-xl font-extrabold font-mono text-ink shrink-0">
+          <span className="text-xl font-extrabold font-mono tabular-nums text-ink shrink-0">
             {formatPrice(cartSummary.totalDue)}
           </span>
         </div>
@@ -1058,7 +1040,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
             <Button
               type="button"
               onClick={() => { setCategoryFilter('ALL'); setCategoryFilterTouched(true); }}
-              className={`shrink-0 px-2.5 !h-7 !min-h-0 sm:!h-10 sm:!min-h-10 sm:px-3 rounded-full text-xs font-extrabold border transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:bg-ink focus-visible:text-white ${
+              className={`shrink-0 px-2.5 !h-9 !min-h-0 sm:!h-10 sm:!min-h-10 sm:px-3 rounded-full text-xs font-extrabold border transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:bg-ink focus-visible:text-white min-w-0 truncate ${
                 effectiveCategoryFilter === 'ALL' && categoryFilterTouched
                   ? 'bg-ink text-white border-transparent shadow-2xs'
                   : 'bg-white text-ink border-line hover:bg-surface'
@@ -1071,7 +1053,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                 key={group}
                 type="button"
                 onClick={() => { setCategoryFilter(group); setCategoryFilterTouched(true); }}
-                className={`shrink-0 px-2.5 !h-7 !min-h-0 sm:!h-10 sm:!min-h-10 sm:px-3 rounded-full text-xs font-extrabold border transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:bg-ink focus-visible:text-white ${
+                className={`shrink-0 px-2.5 !h-9 !min-h-0 sm:!h-10 sm:!min-h-10 sm:px-3 rounded-full text-xs font-extrabold border transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:bg-ink focus-visible:text-white min-w-0 truncate ${
                   effectiveCategoryFilter === group
                     ? 'bg-ink text-white border-transparent shadow-2xs'
                     : 'bg-white text-ink border-line hover:bg-surface'
@@ -1119,7 +1101,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                     initial={false}
                     whileTap={{ scale: 0.98 }}
                     transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                    className={`group relative bg-white border-2 rounded-2xl p-2 sm:p-2.5 cursor-pointer transition-colors duration-200 flex flex-col gap-1.5 sm:items-stretch sm:justify-between select-none shadow-2xs min-h-[92px] sm:min-h-0 sm:h-[124px] focus:outline-none ${
+                    className={`group relative bg-white border-2 rounded-2xl p-2 sm:p-2.5 cursor-pointer transition-colors duration-200 flex flex-col gap-1.5 sm:items-stretch sm:justify-between select-none shadow-2xs min-h-[92px] sm:min-h-0 sm:h-[124px] focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/40 focus-visible:border-ink ${
                       isSelected
                         ? 'border-ink bg-surface shadow-md'
                         : 'border-line hover:border-ink/30'
@@ -1140,7 +1122,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
                     {/* Row 2: Repair Category */}
                     <div className="flex items-center justify-between gap-2 min-w-0">
-                      <span className="text-[9px] sm:text-[10px] font-extrabold text-muted uppercase tracking-wider truncate">
+                      <span className="text-[10px] sm:text-[11px] font-extrabold text-muted uppercase tracking-wider truncate">
                         {item.group}
                       </span>
                     </div>
@@ -1255,11 +1237,11 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 shrink-0">
               <p className="text-xs font-bold text-muted uppercase tracking-wide">Selected Services</p>
-              <p className="font-mono font-black text-ink text-base leading-tight">
+              <p className="font-mono tabular-nums font-black text-ink text-base leading-tight">
                 {cartSummary.count} <span className="text-xs font-normal text-muted">items · {formatPrice(cartSummary.totalDue)}</span>
               </p>
               {cartSummary.totalDiscountAmount > 0 && (
-                <p className="text-xs font-extrabold text-success leading-tight">
+                <p className="text-xs font-extrabold text-success leading-tight tabular-nums">
                   − {formatPrice(cartSummary.totalDiscountAmount)} saved
                 </p>
               )}
@@ -1281,6 +1263,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
         <div
           className="fixed inset-0 z-50 flex flex-col bg-white animate-i35-slide-up lg:hidden pt-[env(safe-area-inset-top)]"
           role="presentation"
+          onClick={() => setIsCartSheetOpen(false)}
         >
           <div
             className="flex flex-col min-h-0 flex-1 w-full"
@@ -1360,7 +1343,7 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
       {/* Bottom-center discount notification (Ko Hein) */}
       {discountNotice && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[90] px-4 py-2 rounded-full bg-ink text-white text-xs font-bold shadow-xl animate-i35-slide-up whitespace-nowrap">
+        <div className="fixed bottom-32 lg:bottom-24 left-1/2 -translate-x-1/2 z-[90] px-4 py-2 rounded-full bg-ink text-white text-xs font-bold shadow-xl animate-i35-slide-up whitespace-nowrap pointer-events-none">
           {discountNotice}
         </div>
       )}

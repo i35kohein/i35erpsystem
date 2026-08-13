@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useIsIpad } from '../../hooks/useIsIpad';
 import {CheckCircle2, 
   X,
+  Check,
+  Minus,
   Stethoscope,
   Camera,
   UserCheck,
@@ -61,6 +63,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
   );
 
   const isTechnicianUser = currentUser?.role === 'Technician';
+  const currencySymbol = systemSettings?.currencySymbol || 'MMK';
 
   // Inspector list comes from System Users & Role Access Control (users collection),
   // falling back to the technician roster when no system users exist (Ko Hein 2026-08-10).
@@ -112,6 +115,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
   const isIpad = useIsIpad();
   const selectedWo = filteredWorkOrders.find((w) => w.id === selectedWoId);
   const [qaSavedNotice, setQaSavedNotice] = useState<boolean>(false);
+  const [qaSaveError, setQaSaveError] = useState<string>('');
   const repairCategorySummary = selectedWo?.selectedRepairs?.length
     ? Array.from(new Set(selectedWo.selectedRepairs.map((repair) => repair.name.trim()).filter(Boolean))).join(' • ')
     : (selectedWo?.lineItems || [])
@@ -136,6 +140,20 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
       setSelectedWoId(filteredWorkOrders[0]?.id || '');
     }
   }, [filteredWorkOrders, selectedWoId, isQaModalOpen]);
+
+  // Escape-to-close for the QA modal (matches PriceSettingsModal behavior).
+  // Guarded while typing in an input/textarea so the notes field can't close it.
+  useEffect(() => {
+    if (!isQaModalOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      const el = e.target as HTMLElement | null;
+      if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable)) return;
+      setIsQaModalOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isQaModalOpen]);
 
   // Form State for Post Repair QA Checklist
   const [qaData, setQaData] = useState<PostRepairChecklist>(
@@ -176,7 +194,11 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
       return;
     }
     Array.from(files || []).slice(0, room).forEach((file) => {
-      if (file.size > 8_000_000) return;
+      if (file.size > 8_000_000) {
+        setPhotoLimitNotice('Photo over 8MB skipped.');
+        setTimeout(() => setPhotoLimitNotice(''), 4000);
+        return;
+      }
       void compressImageFile(file).then((dataUrl) => {
         if (dataUrl) setter((prev) => [...prev, dataUrl]);
       });
@@ -302,12 +324,25 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
     if (!selectedWo) return;
     if (!canConfirm) return; // guard: verdict + photo gate must pass (button can be bypassed programmatically)
     skipRetargetRef.current = true; // keep the detail pane on this ticket after it leaves the roster
-    onSavePostRepairChecklist(selectedWo.id, qaData, qaDiagnostics, {
-      before: qaBeforePhotos,
-      after: qaAfterPhotos,
-    });
-    setQaSavedNotice(true);
-    setTimeout(() => setQaSavedNotice(false), 4000);
+    try {
+      Promise.resolve(
+        onSavePostRepairChecklist(selectedWo.id, qaData, qaDiagnostics, {
+          before: qaBeforePhotos,
+          after: qaAfterPhotos,
+        })
+      )
+        .then(() => {
+          setQaSavedNotice(true);
+          setTimeout(() => setQaSavedNotice(false), 4000);
+        })
+        .catch(() => {
+          setQaSaveError('QA save failed — please retry.');
+          setTimeout(() => setQaSaveError(''), 4000);
+        });
+    } catch {
+      setQaSaveError('QA save failed — please retry.');
+      setTimeout(() => setQaSaveError(''), 4000);
+    }
   };
 
   return (
@@ -316,7 +351,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
           'QA Control' badge dropped */}
 
       {/* QA Roster — click a row/card to run the 21-Point Diagnostic */}
-      <div className="bg-white border border-line rounded-2xl shadow-2xs overflow-hidden">
+      <div className="bg-white border border-line rounded-2xl shadow-2xs overflow-hidden min-h-[240px]">
         {filteredWorkOrders.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-10 text-center text-muted space-y-2">
             <CheckCircle2 className="w-8 h-8 text-success mx-auto opacity-50" />
@@ -344,7 +379,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                   tabIndex={0}
                   onClick={openQaCard}
                   onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openQaCard(); } }}
-                  className="group flex cursor-pointer flex-col gap-2 rounded-2xl border border-line bg-white p-3 shadow-2xs transition-colors hover:border-brand/40 focus:outline-none"
+                  className={`group flex cursor-pointer flex-col gap-2 rounded-2xl border p-3 shadow-2xs transition-colors hover:border-brand/40 focus:outline-none ${selectedWoId === wo.id ? 'bg-brand/5 ring-1 ring-brand/30 border-brand/20' : 'border-line bg-white'}`}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-mono font-black text-brand text-xs">{wo.orderNumber || wo.id}</span>
@@ -358,7 +393,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                   <div className="mt-auto flex items-center justify-between gap-2 border-t border-line pt-2">
                     <span className="rounded-md border border-warning/20 bg-warning/10 px-1.5 py-0.5 text-xs font-bold uppercase text-warning">QA Pending</span>
                     <div className="flex items-center gap-1.5">
-                      <span className="font-mono font-extrabold text-xs text-ink">{wo.totalAmount.toLocaleString()} MMK</span>
+                      <span className="font-mono font-extrabold text-xs text-ink">{wo.totalAmount.toLocaleString()} {currencySymbol}</span>
                       {(wo as WorkOrder).status === 'Taken Out' && onErrorReturn ? (
                         <Button
                           variant="ghost"
@@ -434,7 +469,10 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     <tr
                       key={wo.id}
                       onClick={openQa}
-                      className="hover:bg-surface transition-colors cursor-pointer"
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openQa(); } }}
+                      className={`hover:bg-surface focus-visible:bg-surface transition-colors cursor-pointer ${selectedWoId === wo.id ? 'bg-brand/5 ring-1 ring-brand/30' : ''}`}
                     >
                       {/* Ticket # & Date */}
                       <td className="py-3 px-3">
@@ -494,7 +532,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
 
                       {/* Amount */}
                       <td className="py-3 px-3">
-                        <p className="font-mono font-extrabold text-xs text-ink">{wo.totalAmount.toLocaleString()} MMK</p>
+                        <p className="font-mono font-extrabold text-xs text-ink">{wo.totalAmount.toLocaleString()} {currencySymbol}</p>
                       </td>
 
                       {/* Actions — Diagnose before Checkout; Taken Out is final except Error Return (Ko Hein) */}
@@ -555,7 +593,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
 
       {/* 21-Point Diagnostic Modal */}
       {isQaModalOpen && selectedWo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-3 sm:p-5" onClick={() => setIsQaModalOpen(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-3 sm:p-5" role="presentation" aria-hidden="true" onClick={() => setIsQaModalOpen(false)}>
           <div
             className="flex h-[92vh] max-h-[760px] min-h-0 w-full max-w-5xl flex-col overflow-hidden rounded-xl border border-line bg-white shadow-xl"
             onClick={(e) => e.stopPropagation()}
@@ -599,6 +637,15 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                   <CheckCircle2 className="w-4 h-4" />
                   <span>Confirm QA Pass</span>
                 </Button>
+                {!canConfirm && (
+                  <span className="hidden sm:block max-w-[140px] text-[10px] font-semibold text-warning leading-tight text-right">
+                    {!hasExplicitVerdict
+                      ? 'Set at least one Pass/Fail verdict to confirm'
+                      : photoGateBlocked
+                      ? 'Attach a before/after photo to confirm (required by Settings)'
+                      : 'Micro-soldering log required to confirm'}
+                  </span>
+                )}
                 <Button
                   type="button"
                   onClick={() => setIsQaModalOpen(false)}
@@ -648,7 +695,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                       <Button
                         type="button"
                         onClick={() => beforePhotoInputRef.current?.click()}
-                        className="w-12 h-12 rounded-lg border-2 border-dashed border-line hover:border-brand flex flex-col items-center justify-center text-muted hover:text-brand text-[9px] gap-0.5 bg-white transition-all"
+                        className="w-12 h-12 rounded-lg border-2 border-dashed border-line hover:border-brand flex flex-col items-center justify-center text-muted hover:text-brand text-[10px] gap-1 bg-white transition-all"
                         title="Add before photo"
                       >
                         <Camera className="w-4 h-4" />
@@ -688,7 +735,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                       <Button
                         type="button"
                         onClick={() => afterPhotoInputRef.current?.click()}
-                        className="w-12 h-12 rounded-lg border-2 border-dashed border-line hover:border-success flex flex-col items-center justify-center text-muted hover:text-success-deep text-[9px] gap-0.5 bg-white transition-all"
+                        className="w-12 h-12 rounded-lg border-2 border-dashed border-line hover:border-success flex flex-col items-center justify-center text-muted hover:text-success-deep text-[10px] gap-1 bg-white transition-all"
                         title="Add after photo"
                       >
                         <Camera className="w-4 h-4" />
@@ -700,6 +747,11 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                 {photoLimitNotice && (
                   <p role="status" className="mt-2 rounded-lg bg-warning/10 px-3 py-1.5 text-[11px] font-bold text-warning">
                     {photoLimitNotice}
+                  </p>
+                )}
+                {qaSaveError && (
+                  <p role="alert" className="mt-2 rounded-lg bg-danger/10 px-3 py-1.5 text-[11px] font-bold text-danger">
+                    {qaSaveError}
                   </p>
                 )}
               </div>
@@ -740,7 +792,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           onClick={() => cycleStatus(item.id, item.status)}
                           title={isPass ? 'Pass — tap for Fail' : isFail ? 'Fail — tap for N/A' : isCantTest ? 'Cant Test — tap for N/A' : 'Not checked — tap for Pass'}
                           aria-label={`Change status for ${item.name}`}
-                          className={`flex !h-3.5 !w-3.5 !min-h-3.5 !min-w-3.5 shrink-0 items-center justify-center rounded-full border text-[9px] font-black leading-none transition-colors cursor-pointer ${
+                          className={`flex !h-6 !w-6 !min-h-6 !min-w-6 shrink-0 items-center justify-center rounded-full border transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-brand/40 ${
                             isPass
                               ? 'border-success bg-success text-white'
                               : isFail
@@ -750,7 +802,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                               : 'border-line bg-white text-muted hover:border-brand'
                           }`}
                         >
-                          {isPass ? '\u2713' : isFail ? '\u2715' : isCantTest ? '?' : ''}
+                          {isPass ? <Check className="w-2.5 h-2.5" /> : isFail ? <X className="w-2.5 h-2.5" /> : isCantTest ? <Minus className="w-2.5 h-2.5" /> : null}
                         </Button>
                         <button
                           type="button"
@@ -766,7 +818,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                           value={item.note || ''}
                           onChange={(e) => handleDiagnosticNoteChange(item.id, e.target.value)}
                           placeholder={isPass ? 'ok' : isFail ? 'issue…' : isCantTest ? 'note' : 'n/a'}
-                          className="ml-auto !h-5 !min-h-5 min-w-0 flex-1 rounded bg-transparent px-1 text-[11px] outline-none transition-colors placeholder:text-muted/60 focus:bg-lime-200/40"
+                          className="ml-auto !h-5 !min-h-5 min-w-0 flex-1 rounded bg-transparent px-1 text-[11px] outline-none transition-colors placeholder:text-muted/60 focus:bg-brand-soft/40"
                         />
                       </div>
                     );
@@ -788,7 +840,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     options={inspectorOptions}
                     placeholder="Select inspector"
                     className="w-full"
-                    buttonClassName="!h-6 !min-h-6 w-full text-[11px]"
+                    buttonClassName="!h-8 !min-h-8 w-full text-[11px]"
                     menuAlign="left"
                     menuPlacement="top"
                     size="sm"
@@ -806,7 +858,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     value={qaData.notes}
                     onChange={(e) => setQaData({ ...qaData, notes: e.target.value })}
                     placeholder="Final QA notes…"
-                    className="!h-6 !min-h-6 w-full rounded-md bg-white border border-line px-2 text-[11px] text-ink focus:outline-none "
+                    className="!h-8 !min-h-8 w-full rounded-md bg-white border border-line px-2 text-[11px] text-ink focus:outline-none "
                   />
                 </div>
               </div>

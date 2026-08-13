@@ -48,6 +48,9 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
 
   const initialChannel = settings?.defaultNotificationChannel || 'Viber';
   const [channel, setChannel] = useState<'SMS' | 'Viber' | 'Telegram'>(initialChannel);
+  // Set once the user picks a channel manually — stops the settings-sync effect
+  // from overriding their choice (audit F-P3).
+  const [channelTouched, setChannelTouched] = useState(false);
 
   const activeTemplates: NotificationTemplate[] = (settings?.notificationTemplates && settings.notificationTemplates.length > 0)
     ? settings.notificationTemplates
@@ -56,9 +59,12 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>(activeTemplates[0]?.id || 'tmpl-1');
   const [copied, setCopied] = useState(false);
   const [isLogged, setIsLogged] = useState(false);
+  // Transient "Opened X ✓" confirmation after Send (audit F-P3).
+  const [sentNotice, setSentNotice] = useState<string | null>(null);
 
   const shopName = settings?.shopName || 'AppleRepair Pro Lab';
   const shopPhone = settings?.shopPhone || '+95 9 790 000 000';
+  const currencySymbol = settings?.currencySymbol || 'MMK';
 
   const currentTmplObj = activeTemplates.find((t) => t.id === selectedTemplateId) || activeTemplates[0];
 
@@ -74,6 +80,22 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
     }
   }, [selectedTemplateId, workOrder, settings]);
 
+  // Sync the default channel if the shop setting changes mid-session — but only
+  // until the user has picked a channel themselves (audit F-P3).
+  useEffect(() => {
+    if (channelTouched) return;
+    const def = settings?.defaultNotificationChannel;
+    if (def === 'SMS' || def === 'Viber' || def === 'Telegram') setChannel(def);
+  }, [settings?.defaultNotificationChannel, channelTouched]);
+
+  // ESC closes the notification modal (parity with every other modal — audit F-P2).
+  useEffect(() => {
+    if (!mounted || !workOrder) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [mounted, workOrder, onClose]);
+
   // Keep the modal open (not unmounting) while the workOrder prop flips to a
   // different ticket; only close fully when isOpen goes false.
   if (!mounted || !workOrder) return null;
@@ -87,8 +109,26 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
     setMessageText(applyTemplateVariables(tmpl.templateText, workOrder, shopName, shopPhone));
   };
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(messageText);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(messageText);
+    } catch {
+      // Clipboard API unavailable (non-HTTPS / permission denied) — fall back to
+      // the legacy execCommand path (audit F-P3).
+      try {
+        const textarea = document.createElement('textarea');
+        textarea.value = messageText;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(textarea);
+        if (!ok) return;
+      } catch {
+        return;
+      }
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     if (onLogNotificationSent && !isLogged) {
@@ -117,6 +157,10 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
     if (url && url !== '#') {
       window.open(url, '_blank');
     }
+    // Transient confirmation — popup blockers can swallow window.open silently,
+    // so always give feedback (audit F-P3).
+    setSentNotice(`Opened ${channel} ✓`);
+    setTimeout(() => setSentNotice(null), 2500);
     if (onLogNotificationSent && !isLogged) {
       onLogNotificationSent(channel, messageText);
       setIsLogged(true);
@@ -128,20 +172,22 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
       <div className="bg-white rounded-2xl border border-line shadow-2xl max-w-lg w-full overflow-hidden">
         {/* Modal Header */}
         <div className="bg-ink text-white p-5 flex items-center justify-between">
-          <div className="flex items-center space-x-2.5" id="customer-notification-title">
+          <div className="flex items-center space-x-2.5 min-w-0" id="customer-notification-title">
             <div className="p-2 bg-brand rounded-2xl text-white">
               <BellRing className="w-5 h-5 animate-pulse" />
             </div>
-            <div>
+            <div className="min-w-0">
               <h2 className="text-base font-extrabold tracking-tight">Customer Notification Alert</h2>
-              <p className="text-xs text-slate-300">
-                Ticket <span className="font-mono text-blue-300 font-bold">{workOrder.orderNumber}</span> • {workOrder.customerName} ({workOrder.customerPhone})
+              <p className="truncate text-xs text-white/60">
+                Ticket <span className="font-mono text-brand-soft font-bold">{workOrder.orderNumber}</span> • {workOrder.customerName} ({workOrder.customerPhone})
               </p>
             </div>
           </div>
           <Button
             type="button"
             onClick={onClose}
+            aria-label="Close notification modal"
+            title="Close notification modal"
             className="p-1.5 rounded-full hover:bg-white/10 text-slate-300 hover:text-white transition-all cursor-pointer"
           >
             <X className="w-5 h-5" />
@@ -157,7 +203,8 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
             <div className="grid grid-cols-3 gap-2">
               <Button
                 type="button"
-                onClick={() => setChannel('Viber')}
+                onClick={() => { setChannelTouched(true); setChannel('Viber'); }}
+                aria-pressed={channel === 'Viber'}
                 className={`py-2.5 px-3 rounded-2xl border font-extrabold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer ${
                   channel === 'Viber'
                     ? 'bg-purple text-white border-purple shadow-sm'
@@ -170,7 +217,8 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
 
               <Button
                 type="button"
-                onClick={() => setChannel('SMS')}
+                onClick={() => { setChannelTouched(true); setChannel('SMS'); }}
+                aria-pressed={channel === 'SMS'}
                 className={`py-2.5 px-3 rounded-2xl border font-extrabold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer ${
                   channel === 'SMS'
                     ? 'bg-success text-white border-success shadow-sm'
@@ -183,7 +231,8 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
 
               <Button
                 type="button"
-                onClick={() => setChannel('Telegram')}
+                onClick={() => { setChannelTouched(true); setChannel('Telegram'); }}
+                aria-pressed={channel === 'Telegram'}
                 className={`py-2.5 px-3 rounded-2xl border font-extrabold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer ${
                   channel === 'Telegram'
                     ? 'bg-sky text-white border-sky shadow-sm'
@@ -209,7 +258,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
                     key={tmpl.id}
                     type="button"
                     onClick={() => handleSelectTemplate(tmpl)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-brand/30 ${
                       isSel
                         ? 'bg-brand text-white shadow-xs'
                         : 'bg-surface text-ink hover:bg-line border border-line'
@@ -234,7 +283,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
               rows={4}
               value={messageText}
               onChange={(e) => setMessageText(e.target.value)}
-              className="w-full bg-surface border border-line rounded-2xl p-3.5 text-xs text-ink font-sans leading-relaxed focus:bg-white resize-none"
+              className="w-full bg-surface border border-line rounded-2xl p-3.5 text-xs text-ink font-sans leading-relaxed focus:bg-white focus:border-brand focus:ring-2 focus:ring-brand/20 resize-none"
             />
           </div>
 
@@ -246,7 +295,7 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
             </div>
             <div className="text-right">
               <span className="text-xs text-muted block">Device / Total:</span>
-              <span className="font-bold">{workOrder.deviceModel} • {workOrder.totalAmount.toLocaleString()} MMK</span>
+              <span className="font-bold">{workOrder.deviceModel} • {(workOrder.totalAmount || 0).toLocaleString()} {currencySymbol}</span>
             </div>
           </div>
 
@@ -285,6 +334,12 @@ export const CustomerNotificationModal: React.FC<CustomerNotificationModalProps>
               <span>Send via {channel}</span>
             </Button>
           </div>
+
+          {sentNotice && (
+            <p role="status" className="text-center text-xs font-bold text-success-deep">
+              {sentNotice}
+            </p>
+          )}
         </div>
       </div>
     </div>

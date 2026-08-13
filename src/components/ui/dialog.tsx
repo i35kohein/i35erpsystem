@@ -40,8 +40,13 @@ const DialogContent = React.forwardRef<
       )}
       {...props}
     >
-      {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none disabled:pointer-events-none data-[state=open]:bg-surface data-[state=open]:text-muted">
+      {/* audit A-P2: long dialogs must not clip off-screen on short/phone
+          viewports — the scrollable wrapper keeps the gap-4 rhythm while the
+          absolute close button stays visible above the scroll area. */}
+      <div className="grid gap-4 max-h-[calc(85dvh-3rem)] overflow-y-auto">
+        {children}
+      </div>
+      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-lg p-1.5 opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none disabled:pointer-events-none data-[state=open]:bg-surface data-[state=open]:text-muted">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
@@ -85,7 +90,9 @@ const DialogTitle = React.forwardRef<
   <DialogPrimitive.Title
     ref={ref}
     className={cn(
-      "text-sm font-bold text-ink leading-none tracking-tight",
+      // audit A-P2: unify dialog-title typography with ConfirmDialog /
+      // ConfirmDeleteModal (text-base font-extrabold) + leading for wrap.
+      "text-base font-extrabold text-ink leading-relaxed tracking-tight",
       className
     )}
     {...props}

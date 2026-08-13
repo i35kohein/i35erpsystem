@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useImperativeHandle, forwardRef } from 'react';
+import React, { useState, useMemo, useImperativeHandle, forwardRef, useEffect } from 'react';
 import {DollarSign, 
   TrendingUp, 
   Receipt, 
@@ -67,6 +67,13 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
   dateFilter,
 }, ref) => {
   const currency = systemSettings?.currencySymbol || 'MMK';
+  // Shared short date formatter for tables — "Aug 10, 2026" (audit D-P2:
+  // expenses/debts used raw YYYY-MM-DD while the fund table used the long form).
+  const formatShortDate = (d: string) => {
+    const t = new Date(d.includes('T') ? d : `${d}T00:00:00`).getTime();
+    if (isNaN(t)) return '—';
+    return new Date(t).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
   const activePaymentMethods = getActivePaymentMethods(systemSettings).filter((m) => m.enabled);
   const [activeTab, setActiveTab] = useState<'overview' | 'revenue' | 'expenses' | 'inventory-asset' | 'commissions' | 'accounts-payable' | 'inventory-fund' | 'parts-revenue'>('overview');
   // Parts Value owner filter — APP (shop) vs KZH (Ko Hein) (Ko Hein 2026-08-10)
@@ -84,6 +91,8 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
   const [partsSubTab, setPartsSubTab] = useState<'overview' | 'day' | 'category' | 'ticket'>('overview');
   const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
   const [selectedDebtForPayment, setSelectedDebtForPayment] = useState<SupplierDebtRecord | null>(null);
+  // Double-click guard for "Mark All Settled" (audit D-P2)
+  const [isSettlingFund, setIsSettlingFund] = useState(false);
 
   // Expose openAddExpense to the app navbar (Record Expense button moved there 2026-08-08)
   useImperativeHandle(ref, () => ({
@@ -468,6 +477,18 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
     setSelectedDebtForPayment(null);
   };
 
+  // Close modals with Escape (audit D-P2 a11y — mirrors PrintableInvoiceModal)
+  useEffect(() => {
+    if (!showAddExpenseModal && !selectedDebtForPayment) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      if (showAddExpenseModal) setShowAddExpenseModal(false);
+      if (selectedDebtForPayment) setSelectedDebtForPayment(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [showAddExpenseModal, selectedDebtForPayment]);
+
   // Drawer & Stockroom derived figures (Ko Hein 2026-08-13 — polished cards)
   const pm = financialSummary.paymentMethodsBreakdown;
   const drawerTotal = pm.cashDrawer + pm.mobileBanking + pm.cardPos + pm.other;
@@ -490,9 +511,9 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
           { id: 'expenses', label: 'Expenses', icon: Receipt },
           { id: 'inventory-asset', label: 'Parts Value', icon: Boxes },
           { id: 'commissions', label: 'Commissions', icon: Users },
-          { id: 'accounts-payable', label: 'Debts', icon: Truck, badge: financialSummary.overdueDebtsCount > 0 ? `${financialSummary.overdueDebtsCount} Overdue` : undefined },
-          { id: 'inventory-fund', label: 'Inventory Fund', icon: Coins, badge: pendingFundCount > 0 ? `${pendingFundCount} To Settle` : undefined },
-          { id: 'parts-revenue', label: 'Parts Profit', icon: Boxes, badge: financialSummary.partsUnitsSold > 0 ? `${financialSummary.partsUnitsSold} Sold` : undefined },
+          { id: 'accounts-payable', label: 'Debts', icon: Truck, badge: financialSummary.overdueDebtsCount > 0 ? `${financialSummary.overdueDebtsCount} Overdue` : undefined, badgeClass: 'bg-danger text-white' },
+          { id: 'inventory-fund', label: 'Inventory Fund', icon: Coins, badge: pendingFundCount > 0 ? `${pendingFundCount} To Settle` : undefined, badgeClass: 'bg-warning text-white' },
+          { id: 'parts-revenue', label: 'Parts Profit', icon: Boxes, badge: financialSummary.partsUnitsSold > 0 ? `${financialSummary.partsUnitsSold} Sold` : undefined, badgeClass: 'bg-brand text-white' },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -501,7 +522,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id as any)}
-              className={`px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 ${
+              className={`px-3.5 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center space-x-2 shrink-0 cursor-pointer border select-none active:scale-95 focus-visible:ring-2 focus-visible:ring-brand/50 ${
                 isActive
                   ? 'bg-brand text-white border-brand shadow-xs'
                   : 'bg-white hover:bg-surface text-faint hover:text-ink border-line'
@@ -512,7 +533,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
               {tab.badge && (
                 <span
                   className={`px-2 py-0.5 rounded-full text-xs font-mono font-bold ${
-                    isActive ? 'bg-white/20 text-white' : 'bg-danger text-white'
+                    isActive ? 'bg-white/20 text-white' : (tab.badgeClass || 'bg-danger text-white')
                   }`}
                 >
                   {tab.badge}
@@ -553,7 +574,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
 
             {/* Parts Cost & Gross Profit Card */}
             <div className="relative flex min-h-[168px] flex-col bg-white p-5 rounded-2xl border border-line shadow-2xs space-y-2">
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-2xl bg-brand-soft text-brand flex items-center justify-center">
+              <div className="absolute right-4 top-4 w-12 h-12 rounded-2xl bg-brand-soft text-brand flex items-center justify-center">
                 <Coins className="w-6 h-6" />
               </div>
               <div className="pr-14">
@@ -602,13 +623,13 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
 
             {/* Net Profit Card */}
             <div className="relative flex min-h-[168px] flex-col bg-white p-5 rounded-2xl border border-line shadow-2xs space-y-2">
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-2xl bg-brand-soft text-brand flex items-center justify-center">
+              <div className="absolute right-4 top-4 w-12 h-12 rounded-2xl bg-brand-soft text-brand flex items-center justify-center">
                 <Sparkles className="w-6 h-6" />
               </div>
               <div className="pr-14">
                 <span className="text-xs font-bold uppercase tracking-wider text-muted leading-4">Net Profit</span>
                 <div className="flex items-baseline justify-between gap-2 mt-2">
-                  <span className="text-2xl font-black text-brand font-mono leading-none">
+                  <span className="text-2xl font-black font-mono leading-none ${financialSummary.netProfit < 0 ? 'text-danger' : 'text-brand'}">
                     {financialSummary.netProfit.toLocaleString()} {currency}
                   </span>
                   <span className="shrink-0 text-xs font-black bg-surface text-ink px-2 py-0.5 rounded-full border border-line">
@@ -1004,7 +1025,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
               <tbody className="divide-y divide-line">
                 {dateFilteredExpenses.map((exp) => (
                   <tr key={exp.id} className="hover:bg-surface">
-                    <td className="p-3 font-mono font-bold text-ink">{exp.date}</td>
+                    <td className="p-3 font-mono font-bold text-ink">{formatShortDate(exp.date)}</td>
                     <td className="p-3">
                       <span className="bg-purple/10 text-purple font-extrabold px-2.5 py-1 rounded-lg text-xs border border-purple/30">
                         {exp.category}
@@ -1016,8 +1037,8 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                     </td>
                     <td className="p-3 text-muted font-medium">{exp.paymentMethod}</td>
                     <td className="p-3 text-ink font-bold">{exp.createdByName}</td>
-                    <td className="p-3 text-right font-mono font-black text-danger">
-                      -{exp.amount.toLocaleString()} {currency}
+                    <td className="p-3 text-right font-mono font-black text-danger tabular-nums">
+                      <span className="text-danger">−</span>{exp.amount.toLocaleString()} {currency}
                     </td>
                   </tr>
                 ))}
@@ -1049,7 +1070,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                     key={owner}
                     type="button"
                     onClick={() => setPartsOwner(owner)}
-                    className={`rounded-lg px-2 py-1 text-xs font-bold transition-colors cursor-pointer ${
+                    className={`rounded-lg px-2 py-1 min-h-9 text-xs font-bold transition-colors cursor-pointer ${
                       partsOwner === owner ? 'bg-brand text-white shadow-2xs' : 'bg-surface text-muted hover:bg-line hover:text-ink'
                     }`}
                   >
@@ -1090,7 +1111,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                       <td className="p-3">
                         <div className="flex items-center gap-2">
                           <span
-                            className={`rounded px-1.5 py-0.5 text-[9px] font-black uppercase ${
+                            className={`rounded px-1.5 py-0.5 text-[10px] font-black uppercase ${
                               (part.owner || 'APP') === 'KZH'
                                 ? 'bg-success/10 text-success-deep border border-success/30'
                                 : 'bg-brand-soft text-brand border border-brand/30'
@@ -1179,7 +1200,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                         <Button
                           type="button"
                           onClick={() => onUpdatePayoutStatus(payout.id, 'Approved')}
-                          className="px-2.5 py-1 bg-brand hover:bg-brand-deep text-white font-bold rounded-lg text-xs cursor-pointer"
+                          className="px-2.5 py-1 min-h-9 bg-brand hover:bg-brand-deep text-white font-bold rounded-lg text-xs cursor-pointer"
                         >
                           Approve
                         </Button>
@@ -1188,7 +1209,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                         <Button
                           type="button"
                           onClick={() => onUpdatePayoutStatus(payout.id, 'Paid')}
-                          className="px-2.5 py-1 bg-success hover:bg-success-deep text-white font-bold rounded-lg text-xs cursor-pointer"
+                          className="px-2.5 py-1 min-h-9 bg-success hover:bg-success-deep text-white font-bold rounded-lg text-xs cursor-pointer"
                         >
                           Mark Paid
                         </Button>
@@ -1255,9 +1276,9 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                         <span className="font-mono text-xs text-brand">{debt.invoiceNumber}</span>
                       </td>
                       <td className="p-3 font-mono text-xs">
-                        <span className="block text-muted">Issued: {debt.issueDate}</span>
+                        <span className="block text-muted">Issued: {formatShortDate(debt.issueDate)}</span>
                         <span className={`font-bold ${isOverdue ? 'text-danger' : 'text-ink'}`}>
-                          Due: {debt.dueDate}
+                          Due: {formatShortDate(debt.dueDate)}
                         </span>
                       </td>
                       <td className="p-3 font-mono font-bold text-ink">{debt.totalAmount.toLocaleString()} {currency}</td>
@@ -1304,8 +1325,8 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
 
       {/* MODAL 1: ADD EXPENSE */}
       {showAddExpenseModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <form onSubmit={handleSaveExpenseSubmit} className="bg-white border border-line rounded-2xl max-w-lg w-full p-6 space-y-4 text-xs shadow-2xl">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Add expense">
+          <form onSubmit={handleSaveExpenseSubmit} className="bg-white border border-line rounded-2xl max-w-lg w-full p-6 space-y-4 text-xs shadow-2xl" tabIndex={-1}>
             <div className="flex justify-between items-center border-b border-line pb-3">
               <h3 className="text-base font-extrabold text-ink flex items-center space-x-2">
                 <Receipt className="w-5 h-5 text-danger" />
@@ -1314,6 +1335,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
               <Button variant="ghost"
                 type="button"
                 onClick={() => setShowAddExpenseModal(false)}
+                aria-label="Close add expense"
                 className="text-muted hover:text-ink"
               >
                 <X className="w-5 h-5" />
@@ -1417,8 +1439,8 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
 
       {/* MODAL 2: RECORD SUPPLIER DEBT PAYMENT */}
       {selectedDebtForPayment && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-line rounded-2xl max-w-md w-full p-6 space-y-4 text-xs shadow-2xl">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Record supplier debt payment">
+          <div className="bg-white border border-line rounded-2xl max-w-md w-full p-6 space-y-4 text-xs shadow-2xl" tabIndex={-1}>
             <div className="flex justify-between items-center border-b border-line pb-3">
               <h3 className="text-base font-extrabold text-ink">
                 Record Supplier Debt Payment
@@ -1511,7 +1533,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                 <span className="text-xs text-muted block">Parts Revenue</span>
                 <span className="text-lg font-black text-success-deep">{partsRevenueTotal.toLocaleString()} {currency}</span>
               </div>
-              <div className="h-8 w-px bg-line" />
+              <div className="hidden sm:block h-8 w-px bg-line" />
               <div>
                 <span className="text-xs text-muted block">Pending Settlement</span>
                 <span className="text-lg font-black text-warning">{pendingFundTotal.toLocaleString()} {currency}</span>
@@ -1521,7 +1543,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                   </span>
                 )}
               </div>
-              <div className="h-8 w-px bg-line" />
+              <div className="hidden sm:block h-8 w-px bg-line" />
               <div>
                 <span className="text-xs text-muted block">Settled This Period</span>
                 <span className="text-lg font-black text-success">{settledFundTotal.toLocaleString()} {currency}</span>
@@ -1532,7 +1554,8 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
           {pendingFundTickets.length > 0 && (
             <Button variant="ghost"
               type="button"
-              onClick={() => onSettleInventoryFund?.(pendingFundTickets.map((wo) => wo.id))}
+              onClick={() => { if (isSettlingFund) return; setIsSettlingFund(true); onSettleInventoryFund?.(pendingFundTickets.map((wo) => wo.id)); setTimeout(() => setIsSettlingFund(false), 1200); }}
+              disabled={isSettlingFund}
               className="w-full p-3 bg-warning/10 border border-warning/30 rounded-xl text-xs font-extrabold text-warning hover:bg-warning/15 transition-all cursor-pointer flex items-center justify-center gap-1.5"
             >
               <CheckCircle2 className="w-4 h-4" />
@@ -1675,39 +1698,39 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <div className="p-4 bg-white border border-line rounded-xl shadow-2xs">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-muted">Units Sold</span>
-                <span className="w-7 h-7 rounded-lg bg-brand-soft text-brand flex items-center justify-center"><Boxes className="w-3.5 h-3.5" /></span>
+                <span className="text-xs font-extrabold uppercase tracking-[0.14em] text-muted">Units Sold</span>
+                <span className="w-12 h-12 rounded-2xl bg-brand-soft text-brand flex items-center justify-center"><Boxes className="w-6 h-6" /></span>
               </div>
               <p className="text-2xl font-black text-ink mt-2 tabular-nums">{financialSummary.partsUnitsSold}</p>
-              <span className="text-[10px] font-bold text-muted">parts this period</span>
+              <span className="text-xs font-bold text-muted">parts this period</span>
             </div>
             <div className="p-4 bg-white border border-line rounded-xl shadow-2xs">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-muted">Parts Revenue</span>
-                <span className="w-7 h-7 rounded-lg bg-success/10 text-success-deep flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5" /></span>
+                <span className="text-xs font-extrabold uppercase tracking-[0.14em] text-muted">Parts Revenue</span>
+                <span className="w-12 h-12 rounded-2xl bg-success/10 text-success-deep flex items-center justify-center"><TrendingUp className="w-6 h-6" /></span>
               </div>
               <p className="text-2xl font-black text-success-deep mt-2 tabular-nums">{financialSummary.partsSalesIncome.toLocaleString()} {currency}</p>
-              <span className="text-[10px] font-bold text-muted">selling price</span>
+              <span className="text-xs font-bold text-muted">selling price</span>
             </div>
             <div className="p-4 bg-white border border-line rounded-xl shadow-2xs">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-muted">Parts Cost</span>
-                <span className="w-7 h-7 rounded-lg bg-danger/10 text-danger flex items-center justify-center"><Coins className="w-3.5 h-3.5" /></span>
+                <span className="text-xs font-extrabold uppercase tracking-[0.14em] text-muted">Parts Cost</span>
+                <span className="w-12 h-12 rounded-2xl bg-danger/10 text-danger flex items-center justify-center"><Coins className="w-6 h-6" /></span>
               </div>
               <p className="text-2xl font-black text-danger mt-2 tabular-nums">-{financialSummary.cogsTotal.toLocaleString()} {currency}</p>
-              <span className="text-[10px] font-bold text-muted">unit cost</span>
+              <span className="text-xs font-bold text-muted">unit cost</span>
             </div>
             <div className="p-4 bg-gradient-to-br from-success/10 to-surface border border-success/30 rounded-xl shadow-2xs">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-success-deep">Gross Profit</span>
-                <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                <span className="text-xs font-extrabold uppercase tracking-[0.14em] text-success-deep">Gross Profit</span>
+                <span className={`text-xs font-black px-2 py-0.5 rounded-full ${
                   financialSummary.partsMarginPercent >= 40 ? 'bg-success/15 text-success-deep' : 'bg-warning/15 text-warning'
                 }`}>
                   {financialSummary.partsMarginPercent}% margin
                 </span>
               </div>
               <p className="text-2xl font-black text-success-deep mt-2 tabular-nums">+{financialSummary.partsProfit.toLocaleString()} {currency}</p>
-              <span className="text-[10px] font-bold text-muted">revenue − cost</span>
+              <span className="text-xs font-bold text-muted">revenue − cost</span>
             </div>
           </div>
 
@@ -1718,17 +1741,17 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
             return (
               <div className="rounded-2xl bg-ink text-white p-5 shadow-lg">
                 <div className="flex items-center justify-between gap-2 mb-4">
-                  <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-white/60">Parts Profit Summary</span>
-                  <span className="text-[10px] font-bold text-white/40">Parts Revenue − Parts Cost</span>
+                  <span className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-white/60">Parts Profit Summary</span>
+                  <span className="text-[11px] font-bold text-white/60">Parts Revenue − Parts Cost</span>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0">
                   <div className="grid grid-cols-2 flex-1 gap-3 text-center">
                     <div className="rounded-xl bg-white/10 px-2 py-2.5">
-                      <span className="block text-[9px] font-extrabold uppercase tracking-wider text-white/50">Parts Revenue</span>
+                      <span className="block text-[10px] font-extrabold uppercase tracking-wider text-white/60">Parts Revenue</span>
                       <span className="block text-sm font-black tabular-nums mt-0.5">{financialSummary.partsSalesIncome.toLocaleString()} {currency}</span>
                     </div>
                     <div className="rounded-xl bg-white/10 px-2 py-2.5">
-                      <span className="block text-[9px] font-extrabold uppercase tracking-wider text-white/50">Parts Cost</span>
+                      <span className="block text-[10px] font-extrabold uppercase tracking-wider text-white/60">Parts Cost</span>
                       <span className="block text-sm font-black tabular-nums text-danger mt-0.5">-{financialSummary.cogsTotal.toLocaleString()} {currency}</span>
                     </div>
                   </div>
@@ -1736,12 +1759,12 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                     <span className="text-2xl font-black text-white/50">=</span>
                   </div>
                   <div className="rounded-xl bg-success text-white px-5 py-3 text-center shrink-0 shadow-md">
-                    <span className="block text-[9px] font-extrabold uppercase tracking-wider text-white/70">Parts Profit</span>
+                    <span className="block text-[10px] font-extrabold uppercase tracking-wider text-white/70">Parts Profit</span>
                     <span className="block text-xl font-black tabular-nums mt-0.5">+{profit.toLocaleString()} {currency}</span>
                     <span className="block text-[10px] font-black text-white/70 mt-0.5">{margin}% margin</span>
                   </div>
                 </div>
-                <div className="mt-3 flex items-center justify-between text-[10px] font-bold text-white/40">
+                <div className="mt-3 flex items-center justify-between text-[10px] font-bold text-white/60">
                   <span>{financialSummary.partsUnitsSold} units · this period</span>
                   <span>· {fundTickets.length} parts ticket{fundTickets.length !== 1 ? 's' : ''}</span>
                 </div>
@@ -1769,11 +1792,11 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                     <tr>
                       <th className="p-3"></th>
                       <th className="p-3">Day</th>
-                      <th className="p-3 text-center">Tickets</th>
-                      <th className="p-3 text-center">Units</th>
-                      <th className="p-3 text-center">Revenue</th>
-                      <th className="p-3 text-center">Parts Cost</th>
-                      <th className="p-3 text-center">Profit</th>
+                      <th className="p-3 text-right">Tickets</th>
+                      <th className="p-3 text-right">Units</th>
+                      <th className="p-3 text-right">Revenue</th>
+                      <th className="p-3 text-right">Parts Cost</th>
+                      <th className="p-3 text-right">Profit</th>
                       <th className="p-3 text-right">Margin</th>
                     </tr>
                   </thead>
@@ -1785,6 +1808,11 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                       return (
                         <React.Fragment key={day.date}>
                           <tr
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpandedDay(open ? null : day.date); }
+                            }}
+                            aria-expanded={open}
                             className={`cursor-pointer hover:bg-surface ${open ? 'bg-brand-soft/50' : ''}`}
                             onClick={() => setExpandedDay(open ? null : day.date)}
                           >
@@ -1792,14 +1820,14 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                               {open ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
                             </td>
                             <td className="p-3 font-extrabold text-ink">{day.label}</td>
-                            <td className="p-3 text-center font-mono font-bold">{day.tickets}</td>
-                            <td className="p-3 text-center font-mono font-bold">{day.units}</td>
-                            <td className="p-3 text-center font-mono text-success-deep">{day.revenue.toLocaleString()} {currency}</td>
-                            <td className="p-3 text-center font-mono text-danger">{day.cost.toLocaleString()} {currency}</td>
-                            <td className="p-3 text-center font-mono font-black text-success-deep">+{profit.toLocaleString()} {currency}</td>
+                            <td className="p-3 text-right font-mono font-bold">{day.tickets}</td>
+                            <td className="p-3 text-right font-mono font-bold">{day.units}</td>
+                            <td className="p-3 text-right font-mono text-success-deep">{day.revenue.toLocaleString()} {currency}</td>
+                            <td className="p-3 text-right font-mono text-danger">{day.cost.toLocaleString()} {currency}</td>
+                            <td className="p-3 text-right font-mono font-black text-success-deep">+{profit.toLocaleString()} {currency}</td>
                             <td className="p-3 text-right">
                               <span className={`rounded-md px-1.5 py-0.5 font-mono text-[10px] font-black ${
-                                margin >= 40 ? 'bg-success/15 text-success-deep' : margin >= 20 ? 'bg-success/15 text-success-deep' : margin >= 0 ? 'bg-warning/15 text-warning' : 'bg-danger/15 text-danger'
+                                margin >= 40 ? 'bg-success/15 text-success-deep' : margin >= 20 ? 'bg-brand/15 text-brand' : margin >= 0 ? 'bg-warning/15 text-warning' : 'bg-danger/15 text-danger'
                               }`}>{margin}%</span>
                             </td>
                           </tr>
@@ -1856,10 +1884,10 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                   <thead className="bg-surface text-muted uppercase font-mono text-xs">
                     <tr>
                       <th className="p-3">Parts Category</th>
-                      <th className="p-3 text-center">Units</th>
-                      <th className="p-3 text-center">Revenue</th>
-                      <th className="p-3 text-center">Parts Cost</th>
-                      <th className="p-3 text-center">Profit</th>
+                      <th className="p-3 text-right">Units</th>
+                      <th className="p-3 text-right">Revenue</th>
+                      <th className="p-3 text-right">Parts Cost</th>
+                      <th className="p-3 text-right">Profit</th>
                       <th className="p-3 text-right">Margin</th>
                     </tr>
                   </thead>
@@ -1867,10 +1895,10 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                     {partsCategoryProfit.slice(0, 10).map((row) => (
                       <tr key={row.category} className="hover:bg-surface">
                         <td className="p-3 font-extrabold text-ink">{row.category}</td>
-                        <td className="p-3 text-center font-mono font-bold">{row.units}</td>
-                        <td className="p-3 text-center font-mono text-success-deep">{row.revenue.toLocaleString()} {currency}</td>
-                        <td className="p-3 text-center font-mono text-danger">{row.cost.toLocaleString()} {currency}</td>
-                        <td className="p-3 text-center font-mono font-black text-success-deep">+{row.profit.toLocaleString()} {currency}</td>
+                        <td className="p-3 text-right font-mono font-bold">{row.units}</td>
+                        <td className="p-3 text-right font-mono text-success-deep">{row.revenue.toLocaleString()} {currency}</td>
+                        <td className="p-3 text-right font-mono text-danger">{row.cost.toLocaleString()} {currency}</td>
+                        <td className="p-3 text-right font-mono font-black text-success-deep">+{row.profit.toLocaleString()} {currency}</td>
                         <td className="p-3 text-right font-mono font-bold text-brand">
                           {row.revenue > 0 ? Math.round((row.profit / row.revenue) * 100) : 0}%
                         </td>
@@ -1899,9 +1927,9 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                     <tr>
                       <th className="p-3">Ticket</th>
                       <th className="p-3">Device / Customer</th>
-                      <th className="p-3 text-center">Parts Units</th>
-                      <th className="p-3 text-center">Parts Revenue</th>
-                      <th className="p-3 text-center">Parts Cost</th>
+                      <th className="p-3 text-right">Parts Units</th>
+                      <th className="p-3 text-right">Parts Revenue</th>
+                      <th className="p-3 text-right">Parts Cost</th>
                       <th className="p-3 text-right">Parts Profit</th>
                     </tr>
                   </thead>
@@ -1913,9 +1941,9 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                           <span className="font-bold text-ink block">{wo.deviceModel}</span>
                           <span className="text-xs text-muted">{wo.customerName}</span>
                         </td>
-                        <td className="p-3 text-center font-mono font-bold">{units}</td>
-                        <td className="p-3 text-center font-mono text-success-deep">{revenue.toLocaleString()} {currency}</td>
-                        <td className="p-3 text-center font-mono text-danger">{cost.toLocaleString()} {currency}</td>
+                        <td className="p-3 text-right font-mono font-bold">{units}</td>
+                        <td className="p-3 text-right font-mono text-success-deep">{revenue.toLocaleString()} {currency}</td>
+                        <td className="p-3 text-right font-mono text-danger">{cost.toLocaleString()} {currency}</td>
                         <td className="p-3 text-right font-mono font-black text-success-deep">+{(revenue - cost).toLocaleString()} {currency}</td>
                       </tr>
                     ))}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Languages} from 'lucide-react';
+import { Languages } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { Button } from '../ui';
 
@@ -34,7 +34,9 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         <Button
           type="button"
           onClick={() => setLanguage('mm')}
-          className={`px-2 py-1 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
+          variant="ghost"
+          size="sm"
+          className={`px-2 py-1 ${
             language === 'mm'
               ? 'bg-brand text-white shadow-xs'
               : 'text-ink hover:bg-line/60'
@@ -49,7 +51,9 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 
   return (
     <div className={`flex items-center space-x-1 bg-surface p-1 rounded-xl border border-line/80 ${className}`}>
-      <div className="flex items-center px-2 py-0.5 text-muted font-bold text-xs space-x-1">
+      {/* audit A-P3: decorative globe — hide from SRs and give it a label;
+          it carries no information on its own. */}
+      <div aria-hidden="true" title="Language" className="flex items-center px-2 py-0.5 text-muted font-bold text-xs space-x-1">
         <Languages className="w-3.5 h-3.5 text-brand" />
       </div>
       <Button
@@ -57,6 +61,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         onClick={() => setLanguage('en')}
         variant="ghost"
         size="sm"
+        title="English"
         className={`flex items-center space-x-1.5 px-2.5 py-1 ${
           language === 'en'
             ? 'bg-white text-brand shadow-xs border border-line'
@@ -68,6 +73,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
       <Button
         type="button"
         onClick={() => setLanguage('mm')}
+        title="မြန်မာဘာသာ"
         className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
           language === 'mm'
             ? 'bg-white text-brand shadow-xs border border-line'

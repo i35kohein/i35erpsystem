@@ -11,12 +11,52 @@ import {Printer,
   Scissors, 
   Phone,
   Globe,
-  MapPin} from 'lucide-react';
+  MapPin,
+  Loader2} from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Button } from '../ui';
 import { WorkOrder, SystemSettings } from '../../types';
 
 import { get21Diagnostics, get21AfterDiagnostics } from '../../utils/diagnosticUtils';
+
+type FooterSizeRange = { start: number; end: number; size?: 'small' | 'medium' | 'large' };
+
+/**
+ * Split footer lines into styled segments from absolute character ranges.
+ * Invalid ranges (start >= end / missing bounds) are ignored and ranges are
+ * clamped to each line, so a malformed saved range can never drop footer text
+ * (audit F-P3). Returns per-line segment lists; size '' means "inherit the
+ * container size" (the caller applies the default class on the wrapper).
+ */
+function applyFooterTextRanges(
+  lines: string[],
+  ranges: FooterSizeRange[]
+): Array<Array<{ text: string; size: 'small' | 'medium' | 'large' | '' }>> {
+  const validRanges = (ranges || []).filter(
+    (r) => typeof r.start === 'number' && typeof r.end === 'number' && r.start < r.end
+  );
+  return lines.map((line, lineIndex) => {
+    if (!line) return [{ text: '\u00A0', size: '' }];
+    const lineStart = lines.slice(0, lineIndex).reduce((offset, previousLine) => offset + previousLine.length + 1, 0);
+    const lineEnd = lineStart + line.length;
+    const boundaries = [
+      ...new Set([
+        lineStart,
+        lineEnd,
+        ...validRanges.flatMap((range) => {
+          const start = Math.max(lineStart, range.start);
+          const end = Math.min(lineEnd, range.end);
+          return start < end ? [start, end] : [];
+        }),
+      ]),
+    ].sort((a, b) => a - b);
+    return boundaries.slice(0, -1).map((point, index) => {
+      const next = boundaries[index + 1];
+      const range = validRanges.find((r) => r.start <= point && r.end >= next);
+      return { text: line.slice(point - lineStart, next - lineStart), size: range?.size ?? '' };
+    });
+  });
+}
 
 interface DeviceTagPrinterModalProps {
   workOrder: WorkOrder | null;
@@ -30,6 +70,8 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
   onClose,
 }) => {
   const [paperSize, setPaperSize] = useState<'3x2_tag' | 'a4_voucher'>('a4_voucher');
+  // Transient "Preparing…" state while the print dialog is open (audit F-P3).
+  const [printing, setPrinting] = useState(false);
 
   // ESC closes the print modal
   React.useEffect(() => {
@@ -37,6 +79,14 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [onClose]);
+
+  // Clear the preparing state when the print dialog closes (also on cancel).
+  React.useEffect(() => {
+    if (!printing) return;
+    const clear = () => setPrinting(false);
+    window.addEventListener('afterprint', clear);
+    return () => window.removeEventListener('afterprint', clear);
+  }, [printing]);
 
   // Print layout is centrally managed in System Management → POS & Receipt Layout.
   // The voucher only reads those saved defaults to keep every print consistent.
@@ -61,10 +111,19 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
   const voucherFooterLines = voucherFooterText.split(/\r?\n/);
   const voucherFooterFontSize = systemSettings?.receiptFooterFontSize ?? 'medium';
   const voucherFooterPreviewSizeClass = {
-    small: 'text-xs',
+    small: 'text-[10px]',
     medium: 'text-xs',
-    large: 'text-xs',
+    large: 'text-sm',
   }[voucherFooterFontSize];
+  // One date formatter for the whole header block — the old code mixed
+  // locale-default and explicit formats, printing two different date shapes
+  // on the same voucher (audit F-P2).
+  const formatPrintDate = (value?: string | number | Date) => {
+    if (!value) return '—';
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+  const voucherFooterSegments = applyFooterTextRanges(voucherFooterLines, voucherFooterTextSizeRanges);
   const authorizationText = `Customer authorizes ${systemSettings?.shopName || 'the repair shop'} to perform diagnostics and hardware repairs. Please backup data prior to service. Replaced parts warrantied for ${workOrder?.warrantyDays ?? 0} days under standard conditions.`;
 
   if (!workOrder) return null;
@@ -122,7 +181,9 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
       }));
 
   const handlePrint = () => {
-    window.print();
+    setPrinting(true);
+    // Let React flush the "Preparing…" label before the (blocking) dialog opens.
+    setTimeout(() => window.print(), 50);
   };
 
   // Helper renderer for diagnostic status with clean text and icons
@@ -174,7 +235,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                 ? 'border-black/20 text-black/25'
                 : 'border-success/20 text-success/25'
             }`}
-              style={{ fontSize: '64px', lineHeight: 1 }}
+              style={{ fontSize: 'min(64px, 14vw)', lineHeight: 1 }}
             >
               PAID
             </div>
@@ -185,7 +246,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
         <div className={`a4-voucher-header flex flex-col sm:flex-row justify-between items-start sm:items-center pb-3 border-b ${
           isMono ? 'border-black' : 'border-line'
         } gap-3`}>
-          <div>
+          <div className="min-w-0">
             <div className="flex items-stretch space-x-2.5">
               {shopLogoUrl ? (
                 <img 
@@ -203,8 +264,8 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                 </div>
               )}
               <div>
-                <div className="flex items-center space-x-2">
-                  <h1 className="font-black text-base text-black tracking-tight">{shopName}</h1>
+                <div className="flex items-center space-x-2 min-w-0">
+                  <h1 className="font-black text-base text-black tracking-tight leading-snug truncate" title={shopName}>{shopName}</h1>
                   {copyLabel && (
                     <span className="text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded bg-black text-white font-mono">
                       {copyLabel}
@@ -213,7 +274,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                 </div>
                 <p
                   data-print-voucher-header-text
-                  className={`text-xs font-semibold mb-0.5 ${isMono ? 'text-ink' : 'text-muted'}`}
+                  className={`text-xs font-semibold mb-0.5 leading-snug ${isMono ? 'text-ink' : 'text-muted'}`}
                 >
                   {voucherHeaderText}
                 </p>
@@ -243,19 +304,17 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
           </div>
 
           <div className="flex items-center space-x-3">
-            <div className="text-left sm:text-right font-mono space-y-0.5">
+            <div className="text-left sm:text-right font-mono space-y-0.5 tabular-nums">
               <p className={`text-xs font-black ${isMono ? 'text-black' : 'text-brand'}`}>
                 Voucher #: {workOrder.orderNumber}
               </p>
-              <p className="text-xs text-muted">Date: {new Date(workOrder.createdAt).toLocaleDateString()}</p>
+              <p className="text-xs text-muted">Date: {formatPrintDate(workOrder.createdAt)}</p>
               <p className="text-xs text-muted">
-                Est. Return: {workOrder.estimatedCompletion
-                  ? new Date(workOrder.estimatedCompletion).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
-                  : '—'}
+                Est. Return: {workOrder.estimatedCompletion ? formatPrintDate(workOrder.estimatedCompletion) : '—'}
               </p>
               {isPaidWo && (
                 <p className="text-xs font-bold text-muted">
-                  Taken Out: {new Date(workOrder.updatedAt || Date.now()).toLocaleDateString()}
+                  Taken Out: {formatPrintDate(workOrder.updatedAt || Date.now())}
                 </p>
               )}
             </div>
@@ -330,13 +389,13 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                     <th className="p-1.5 text-right font-bold">Subtotal</th>
                   </tr>
                 </thead>
-                <tbody className={`divide-y font-mono ${isMono ? 'divide-slate-200 text-black' : 'divide-slate-200'}`}>
+                <tbody className={`divide-y font-mono tabular-nums ${isMono ? 'divide-slate-200 text-black' : 'divide-slate-200'}`}>
                   {printableRepairItems.map((item) => (
                     <tr key={item.id}>
                       <td className="p-1.5 font-sans font-semibold">{item.name}</td>
                       <td className="p-1.5 text-right">{item.basePrice.toLocaleString()} MMK</td>
                       <td className="p-1.5 text-right">{item.discountPercent}%</td>
-                      <td className="p-1.5 text-right">{workOrder.warrantyDays} Days</td>
+                      <td className="p-1.5 text-right">{workOrder.warrantyDays ?? 0} Days</td>
                       <td className="p-1.5 text-right font-bold">{item.finalPrice.toLocaleString()} MMK</td>
                     </tr>
                   ))}
@@ -344,8 +403,8 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                 <tfoot>
                   <tr className={`border-t font-bold ${isMono ? 'border-black' : 'border-slate-800'}`}>
                     <td colSpan={4} className="p-1.5 text-right font-sans text-xs">Estimated Total Charge:</td>
-                    <td className={`p-1.5 text-right text-sm font-mono ${isMono ? 'text-black font-extrabold' : 'text-brand'}`}>
-                      {workOrder.subtotal.toLocaleString()} MMK
+                    <td className={`p-1.5 text-right text-sm font-mono tabular-nums ${isMono ? 'text-black font-extrabold' : 'text-brand'}`}>
+                      {(workOrder.subtotal || 0).toLocaleString()} MMK
                     </td>
                   </tr>
                 </tfoot>
@@ -497,19 +556,18 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
             data-print-voucher-footer-text
             className={`print-voucher-footer-text leading-tight font-medium whitespace-pre-wrap footer-text-${voucherFooterFontSize} ${voucherFooterPreviewSizeClass}`}
           >
-            {voucherFooterLines.map((line, lineIndex) => {
-              const lineStart = voucherFooterLines.slice(0, lineIndex).reduce((offset, previousLine) => offset + previousLine.length + 1, 0);
-              const boundaries = [...new Set([lineStart, lineStart + line.length, ...voucherFooterTextSizeRanges.flatMap((range) => range.start < lineStart + line.length && range.end > lineStart ? [Math.max(lineStart, range.start), Math.min(lineStart + line.length, range.end)] : [])])].sort((a, b) => a - b);
-              return <p
-                key={`${lineIndex}-${line}`}
+            {voucherFooterSegments.map((segments, lineIndex) => (
+              <p
+                key={lineIndex}
                 style={{ textAlign: voucherFooterLineAlignments[lineIndex] || voucherFooterTextAlign }}
               >
-                {line ? boundaries.slice(0, -1).map((point, index) => {
-                  const next = boundaries[index + 1]; const size = voucherFooterTextSizeRanges.find((range) => range.start <= point && range.end >= next)?.size || voucherFooterFontSize;
-                  return <span key={`${point}-${next}`} className={`footer-text-${size}`}>{line.slice(point - lineStart, next - lineStart)}</span>;
-                }) : '\u00A0'}
-              </p>;
-            })}
+                {segments.map((segment, index) => (
+                  <span key={index} className={segment.size ? `footer-text-${segment.size}` : undefined}>
+                    {segment.text}
+                  </span>
+                ))}
+              </p>
+            ))}
           </div>
         </div>
 
@@ -929,7 +987,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                 <div className="flex justify-between items-start border-b-2 border-black pb-1">
                   <div className="flex items-center space-x-1.5">
                     {shopLogoUrl && (
-                      <img src={shopLogoUrl} alt="Logo" className="w-6 h-6 object-contain border border-black p-0.5 rounded shrink-0" />
+                      <img src={shopLogoUrl} alt={shopName} className="w-6 h-6 object-contain border border-black p-0.5 rounded shrink-0" />
                     )}
                     <div>
                       <p className="font-black text-sm tracking-tight text-black">{shopName}</p>
@@ -958,10 +1016,17 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
 
                 <div className="pt-2 border-t border-dashed border-black flex items-center justify-between">
                   <div className="font-mono text-center">
-                    <div className="h-8 bg-black w-32 flex items-center justify-center text-white text-xs tracking-widest font-mono rounded-sm">
+                    {/* Decorative S/N barcode — NOT scannable (audit F-P2): styled as
+                        a dashed placeholder so customers don't try to scan it. The
+                        scannable code on the sticker is the QR on the right. */}
+                    <div
+                      aria-hidden="true"
+                      className="h-8 w-32 flex items-center justify-center rounded-sm border border-dashed border-black/50 bg-black/5 text-[9px] tracking-widest text-black/40 font-mono select-none"
+                    >
                       |||| | |||||| | ||| | |||
                     </div>
                     <span className="text-xs font-mono text-black">{workOrder.orderNumber}</span>
+                    <span className="block text-[7px] uppercase tracking-wide text-black/50">S/N lookup</span>
                   </div>
 
                   <div className="flex flex-col items-center bg-white p-1 border-2 border-black rounded-md shrink-0">
@@ -1026,12 +1091,13 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
             <Button
               type="button"
               onClick={handlePrint}
+              disabled={printing}
               className={`h-10 px-5 ${
                 a4ColorMode === 'monochrome' ? 'bg-black hover:bg-slate-800' : 'bg-brand hover:bg-brand-deep'
               }`}
             >
-              <Printer className="w-4 h-4" />
-              <span>{paperSize === 'a4_voucher' ? 'Print / Save PDF' : 'Print Tag Sticker'}</span>
+              {printing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Printer className="w-4 h-4" />}
+              <span>{printing ? 'Preparing…' : paperSize === 'a4_voucher' ? 'Print / Save PDF' : 'Print Tag Sticker'}</span>
             </Button>
           </div>
         </div>

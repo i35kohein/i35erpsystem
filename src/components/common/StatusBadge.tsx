@@ -15,14 +15,19 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
   className = '',
 }) => {
   const normStatus = (status || '').toString().trim();
+  // audit A-P3: multi-word statuses render mixed-case (uppercase would widen
+  // "Customer Not Repair" ~30% and overflow narrow cards).
+  const multiWord = normStatus.includes(' ');
 
-  // Size variations — compact
+  // Size variations — compact (audit A-P3: h-5/h-6/h-7 tokens + consistent
+  // text sizes, replacing the arbitrary 16–22px micro heights).
   const sizeClasses = {
-    xs: 'text-[11px] px-1.5 rounded-md font-extrabold uppercase tracking-wider h-[16px] inline-flex items-center leading-none',
-    sm: 'text-[11px] px-2 rounded-lg font-extrabold uppercase tracking-wider h-[18px] inline-flex items-center leading-none',
-    md: 'text-[11px] px-2 rounded-lg font-extrabold uppercase tracking-wider h-[20px] inline-flex items-center leading-none',
-    lg: 'text-xs px-2.5 rounded-xl font-extrabold uppercase tracking-wider h-[22px] inline-flex items-center leading-none',
+    xs: 'text-[10px] px-1.5 rounded-md font-extrabold h-5 inline-flex items-center leading-none',
+    sm: 'text-xs px-2 rounded-lg font-extrabold h-6 inline-flex items-center leading-none',
+    md: 'text-xs px-2 rounded-lg font-extrabold h-6 inline-flex items-center leading-none',
+    lg: 'text-xs px-2.5 rounded-xl font-extrabold h-7 inline-flex items-center leading-none',
   }[size];
+  const labelCase = multiWord ? 'tracking-tight' : 'uppercase tracking-wider';
 
   const dotSizes = {
     xs: 'h-1 w-1',
@@ -54,7 +59,9 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
       badgeStyle = 'bg-warning/10 text-warning border border-warning/30';
       dotColor = 'bg-warning';
       pingColor = 'bg-warning';
-      isPulsing = false;
+      // audit A-P3: pending states are attention-worthy — wire up the ping
+      // animation that previously could never render.
+      isPulsing = true;
       break;
 
     case 'Receive':
@@ -101,9 +108,11 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
       // Audit B-P3: distinct completed tone (ink/success border) — the old
       // bg-surface/muted style was identical to the unknown fallback, so a
       // finished+paid ticket looked greyed-out/missing.
-      badgeStyle = 'bg-ink text-white border border-ink';
-      dotColor = 'bg-white';
-      pingColor = 'bg-ink';
+      // audit A-P3: completed states use the soft success tone (solid ink was
+      // heavier than active states); solid ink stays for terminal rows only.
+      badgeStyle = 'bg-success/10 text-success-deep border border-success/30';
+      dotColor = 'bg-success';
+      pingColor = 'bg-success';
       isPulsing = false;
       break;
 
@@ -117,7 +126,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
 
   return (
     <span
-      className={`inline-flex items-center space-x-1 transition-all duration-200 whitespace-nowrap ${sizeClasses} ${badgeStyle} ${className}`}
+      className={`inline-flex items-center space-x-1 transition-all duration-200 whitespace-nowrap ${sizeClasses} ${labelCase} ${badgeStyle} ${className}`}
     >
       {showIndicator && (
         <span className={`relative flex ${dotSizes} shrink-0`}>

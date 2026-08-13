@@ -18,24 +18,25 @@ export const ModuleLoadingSkeleton: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="h-9 w-24 rounded-xl bg-line" />
-          <div className="h-9 w-24 rounded-xl bg-line" />
+          <div className="h-10 w-24 rounded-xl bg-line" />
+          <div className="h-10 w-24 rounded-xl bg-line" />
         </div>
       </div>
 
-      {/* Filter chips row */}
+      {/* Filter chips row — audit A-P3: Tailwind width classes instead of
+          magic-number inline pixels (same visual widths). */}
       <div className="flex items-center gap-2 mb-5">
-        {[72, 88, 64, 96, 80].map((w, i) => (
-          <div key={i} className="h-8 rounded-full bg-line" style={{ width: w }} />
+        {['w-16', 'w-20', 'w-14', 'w-24', 'w-18'].map((w, i) => (
+          <div key={i} className={`h-8 rounded-full bg-line ${w}`} />
         ))}
       </div>
 
       {/* Card grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3.5">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="rounded-2xl border border-line bg-white p-4 space-y-3">
+          <div key={i} className="rounded-2xl border border-line bg-white p-5 space-y-3">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-surface" />
+              <div className="w-9 h-9 rounded-xl bg-line" />
               <div className="space-y-1.5 flex-1">
                 <div className="h-3 w-3/4 rounded-md bg-line" />
                 <div className="h-2.5 w-1/2 rounded-md bg-surface" />
