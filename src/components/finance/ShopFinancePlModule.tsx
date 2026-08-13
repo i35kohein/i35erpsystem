@@ -12,6 +12,10 @@ import {DollarSign,
   Percent,
   Coins,
   Wallet,
+  Banknote,
+  Smartphone,
+  CreditCard,
+  Package,
   Sparkles, ChevronDown, ChevronRight, Calendar} from 'lucide-react';
 import { 
   WorkOrder, 
@@ -464,6 +468,17 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
     setSelectedDebtForPayment(null);
   };
 
+  // Drawer & Stockroom derived figures (Ko Hein 2026-08-13 — polished cards)
+  const pm = financialSummary.paymentMethodsBreakdown;
+  const drawerTotal = pm.cashDrawer + pm.mobileBanking + pm.cardPos + pm.other;
+  const shareOf = (v: number) => (drawerTotal > 0 ? Math.round((v / drawerTotal) * 100) : 0);
+  const netStockroomEquity =
+    financialSummary.totalInventoryAssetValue - financialSummary.totalSupplierDebt;
+  const stockroomFinancedPct =
+    financialSummary.totalInventoryAssetValue > 0
+      ? Math.min(100, Math.round((financialSummary.totalSupplierDebt / financialSummary.totalInventoryAssetValue) * 100))
+      : 0;
+
   return (
     <div className="finance-module space-y-3">
       {/* Title & Header Bar */}
@@ -636,50 +651,126 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
 
               <div className="space-y-3 text-xs">
                 {/* Cash Drawer */}
-                <div className="p-3 bg-warning/10 border border-warning/30 rounded-xl flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <span className="font-extrabold text-warning block">💵 Cash In Drawer (Physical Cash)</span>
-                    <span className="text-xs text-warning">Must reconcile cleanly with daily opening/closing register</span>
+                <div className="p-3 bg-warning/10 border border-warning/30 rounded-xl">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center space-x-2.5 min-w-0">
+                      <span className="w-8 h-8 rounded-lg bg-warning/20 text-warning flex items-center justify-center shrink-0">
+                        <Banknote className="w-4 h-4" />
+                      </span>
+                      <div className="min-w-0">
+                        <span className="font-extrabold text-warning block truncate">Cash In Drawer (Physical)</span>
+                        <span className="text-[10px] text-warning/80 font-medium">Daily opening / closing register</span>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="font-mono font-black text-warning text-sm block">
+                        {pm.cashDrawer.toLocaleString()} {currency}
+                      </span>
+                      <span className="text-[10px] font-bold text-warning/70">{shareOf(pm.cashDrawer)}% of intake</span>
+                    </div>
                   </div>
-                  <span className="font-mono font-black text-warning text-sm">
-                    {financialSummary.paymentMethodsBreakdown.cashDrawer.toLocaleString()} {currency}
-                  </span>
+                  <div className="mt-2 h-1.5 rounded-full bg-warning/15 overflow-hidden">
+                    <div className="h-full rounded-full bg-warning" style={{ width: `${shareOf(pm.cashDrawer)}%` }} />
+                  </div>
                 </div>
 
                 {/* KBZPay / WavePay / Banking */}
-                <div className="p-3 bg-brand-soft/80 border border-brand/30 rounded-xl flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <span className="font-extrabold text-brand-deep block">📱 KBZPay / WavePay / Mobile Banking</span>
-                    <span className="text-xs text-brand-deep">Direct wallet transfers & bank QR payments</span>
+                <div className="p-3 bg-brand-soft/80 border border-brand/30 rounded-xl">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center space-x-2.5 min-w-0">
+                      <span className="w-8 h-8 rounded-lg bg-brand/15 text-brand-deep flex items-center justify-center shrink-0">
+                        <Smartphone className="w-4 h-4" />
+                      </span>
+                      <div className="min-w-0">
+                        <span className="font-extrabold text-brand-deep block truncate">KBZPay / WavePay / Mobile Banking</span>
+                        <span className="text-[10px] text-brand-deep/80 font-medium">Direct wallet transfers & bank QR payments</span>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="font-mono font-black text-brand-deep text-sm block">
+                        {pm.mobileBanking.toLocaleString()} {currency}
+                      </span>
+                      <span className="text-[10px] font-bold text-brand-deep/70">{shareOf(pm.mobileBanking)}% of intake</span>
+                    </div>
                   </div>
-                  <span className="font-mono font-black text-brand-deep text-sm">
-                    {financialSummary.paymentMethodsBreakdown.mobileBanking.toLocaleString()} {currency}
-                  </span>
+                  <div className="mt-2 h-1.5 rounded-full bg-brand/15 overflow-hidden">
+                    <div className="h-full rounded-full bg-brand" style={{ width: `${shareOf(pm.mobileBanking)}%` }} />
+                  </div>
                 </div>
 
                 {/* Card / POS */}
-                <div className="p-3 bg-purple/10 border border-purple/30 rounded-xl flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <span className="font-extrabold text-purple block">💳 Credit Card / POS Terminal</span>
-                    <span className="text-xs text-purple">Bank merchant card settlement transfers</span>
+                <div className="p-3 bg-purple/10 border border-purple/30 rounded-xl">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center space-x-2.5 min-w-0">
+                      <span className="w-8 h-8 rounded-lg bg-purple/15 text-purple flex items-center justify-center shrink-0">
+                        <CreditCard className="w-4 h-4" />
+                      </span>
+                      <div className="min-w-0">
+                        <span className="font-extrabold text-purple block truncate">Credit Card / POS Terminal</span>
+                        <span className="text-[10px] text-purple/80 font-medium">Bank merchant card settlement transfers</span>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="font-mono font-black text-purple text-sm block">
+                        {pm.cardPos.toLocaleString()} {currency}
+                      </span>
+                      <span className="text-[10px] font-bold text-purple/70">{shareOf(pm.cardPos)}% of intake</span>
+                    </div>
                   </div>
-                  <span className="font-mono font-black text-purple text-sm">
-                    {financialSummary.paymentMethodsBreakdown.cardPos.toLocaleString()} {currency}
-                  </span>
+                  <div className="mt-2 h-1.5 rounded-full bg-purple/15 overflow-hidden">
+                    <div className="h-full rounded-full bg-purple" style={{ width: `${shareOf(pm.cardPos)}%` }} />
+                  </div>
                 </div>
 
                 {/* Split / Net-30 / Other — only shown when it actually has money (audit P2) */}
-                {financialSummary.paymentMethodsBreakdown.other > 0 && (
-                  <div className="p-3 bg-line/30 border border-line-strong rounded-xl flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <span className="font-extrabold text-muted block">🔀 Split / Net-30 & Other</span>
-                      <span className="text-xs text-muted">Mixed split payments & credit terms</span>
+                {pm.other > 0 && (
+                  <div className="p-3 bg-line/30 border border-line-strong rounded-xl">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center space-x-2.5 min-w-0">
+                        <span className="w-8 h-8 rounded-lg bg-muted/15 text-muted flex items-center justify-center shrink-0">
+                          <Coins className="w-4 h-4" />
+                        </span>
+                        <div className="min-w-0">
+                          <span className="font-extrabold text-muted block truncate">Split / Net-30 & Other</span>
+                          <span className="text-[10px] text-muted/80 font-medium">Mixed split payments & credit terms</span>
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className="font-mono font-black text-muted text-sm block">
+                          {pm.other.toLocaleString()} {currency}
+                        </span>
+                        <span className="text-[10px] font-bold text-muted/70">{shareOf(pm.other)}% of intake</span>
+                      </div>
                     </div>
-                    <span className="font-mono font-black text-muted text-sm">
-                      {financialSummary.paymentMethodsBreakdown.other.toLocaleString()} {currency}
-                    </span>
+                    <div className="mt-2 h-1.5 rounded-full bg-line-strong/40 overflow-hidden">
+                      <div className="h-full rounded-full bg-muted" style={{ width: `${shareOf(pm.other)}%` }} />
+                    </div>
                   </div>
                 )}
+              </div>
+
+              {/* Total Collected — stacked share bar + summary */}
+              <div className="rounded-xl bg-surface border border-line p-3 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <span className="block text-[10px] font-black uppercase tracking-wider text-muted">Total Collected</span>
+                  <span className="font-mono font-black text-ink text-base leading-tight block">
+                    {drawerTotal.toLocaleString()} {currency}
+                  </span>
+                </div>
+                <div className="w-full max-w-[45%] shrink-0">
+                  <div className="h-2.5 rounded-full bg-line overflow-hidden flex w-full">
+                    <div className="h-full bg-warning" style={{ width: `${shareOf(pm.cashDrawer)}%` }} />
+                    <div className="h-full bg-brand" style={{ width: `${shareOf(pm.mobileBanking)}%` }} />
+                    <div className="h-full bg-purple" style={{ width: `${shareOf(pm.cardPos)}%` }} />
+                    <div className="h-full bg-muted" style={{ width: `${shareOf(pm.other)}%` }} />
+                  </div>
+                  <div className="mt-1 flex justify-between text-[9px] font-bold text-muted">
+                    <span className="text-warning">Cash</span>
+                    <span className="text-brand-deep">Wallet</span>
+                    <span className="text-purple">Card</span>
+                    {pm.other > 0 && <span className="text-muted">Other</span>}
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -692,52 +783,97 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
 
               <div className="space-y-3 text-xs">
                 {/* Total Stock Asset Value */}
-                <div className="p-3.5 bg-surface border border-line rounded-xl flex items-center justify-between">
-                  <div>
-                    <span className="block text-xs font-extrabold text-muted uppercase">Tied-Up Capital Asset Value</span>
-                    <span className="font-extrabold text-ink text-xs">Unsold Displays, Batteries & Chips</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-mono font-black text-ink text-sm block">
-                      {financialSummary.totalInventoryAssetValue.toLocaleString()} {currency}
-                    </span>
-                    <span className="text-xs text-success-deep font-bold">
-                      Retail Potential: {financialSummary.totalRetailValuation.toLocaleString()} {currency}
-                    </span>
+                <div className="p-3.5 bg-surface border border-line rounded-xl">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center space-x-2.5 min-w-0">
+                      <span className="w-8 h-8 rounded-lg bg-success/15 text-success-deep flex items-center justify-center shrink-0">
+                        <Package className="w-4 h-4" />
+                      </span>
+                      <div className="min-w-0">
+                        <span className="block text-[10px] font-black uppercase tracking-wider text-muted">Tied-Up Capital Asset</span>
+                        <span className="font-extrabold text-ink text-xs truncate block">Displays, Batteries & Chips in Stock</span>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="font-mono font-black text-ink text-sm block">
+                        {financialSummary.totalInventoryAssetValue.toLocaleString()} {currency}
+                      </span>
+                      <span className="text-[10px] font-bold text-success-deep">
+                        Retail: {financialSummary.totalRetailValuation.toLocaleString()} {currency}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
                 {/* Total Supplier Debt */}
-                <div className="p-3.5 bg-danger/10 border border-danger/30 rounded-xl flex items-center justify-between">
-                  <div>
-                    <span className="block text-xs font-extrabold text-danger uppercase">Accounts Payable / Wholesaler Debts</span>
-                    <span className="font-extrabold text-danger text-xs">Unpaid balances to parts vendors</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-mono font-black text-danger text-sm block">
-                      {financialSummary.totalSupplierDebt.toLocaleString()} {currency}
-                    </span>
-                    {financialSummary.overdueDebtsCount > 0 && (
-                      <span className="text-xs font-black text-danger bg-danger/15 px-2 py-0.5 rounded-full">
-                        ⚠️ {financialSummary.overdueDebtsCount} Overdue Invoices
+                <div className="p-3.5 bg-danger/10 border border-danger/30 rounded-xl">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center space-x-2.5 min-w-0">
+                      <span className="w-8 h-8 rounded-lg bg-danger/15 text-danger flex items-center justify-center shrink-0">
+                        <Truck className="w-4 h-4" />
                       </span>
-                    )}
+                      <div className="min-w-0">
+                        <span className="block text-[10px] font-black uppercase tracking-wider text-danger">Accounts Payable</span>
+                        <span className="font-extrabold text-danger text-xs truncate block">Unpaid balances to parts vendors</span>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="font-mono font-black text-danger text-sm block">
+                        {financialSummary.totalSupplierDebt.toLocaleString()} {currency}
+                      </span>
+                      {financialSummary.overdueDebtsCount > 0 && (
+                        <span className="inline-block mt-0.5 text-[10px] font-black text-danger bg-danger/15 px-2 py-0.5 rounded-full">
+                          ⚠️ {financialSummary.overdueDebtsCount} Overdue
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
 
                 {/* Tech Commission Pool */}
-                <div className="p-3.5 bg-success/10 border border-success/30 rounded-xl flex items-center justify-between">
-                  <div>
-                    <span className="block text-xs font-extrabold text-success-deep uppercase">Technician Commission Payouts</span>
-                    <span className="font-extrabold text-success-deep text-xs">Verified QA Pass Bounties & Rates</span>
+                <div className="p-3.5 bg-success/10 border border-success/30 rounded-xl">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center space-x-2.5 min-w-0">
+                      <span className="w-8 h-8 rounded-lg bg-success/20 text-success-deep flex items-center justify-center shrink-0">
+                        <Users className="w-4 h-4" />
+                      </span>
+                      <div className="min-w-0">
+                        <span className="block text-[10px] font-black uppercase tracking-wider text-success-deep">Tech Commission Payouts</span>
+                        <span className="font-extrabold text-success-deep text-xs truncate block">Verified QA pass bounties & rates</span>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="font-mono font-black text-success-deep text-sm block">
+                        {financialSummary.totalCommissionsEarned.toLocaleString()} {currency}
+                      </span>
+                      <span className="text-[10px] font-bold text-success-deep">
+                        Pending: {financialSummary.pendingCommissionsAmount.toLocaleString()} {currency}
+                      </span>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <span className="font-mono font-black text-success-deep text-sm block">
-                      {financialSummary.totalCommissionsEarned.toLocaleString()} {currency}
-                    </span>
-                    <span className="text-xs text-success-deep font-bold">
-                      Pending Payout: {financialSummary.pendingCommissionsAmount.toLocaleString()} {currency}
-                    </span>
+                </div>
+
+                {/* Net Stockroom Position — owned capital vs supplier-financed */}
+                <div className="p-3.5 bg-surface border border-line rounded-xl">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <span className="block text-[10px] font-black uppercase tracking-wider text-muted">Net Stockroom Position</span>
+                      <span className={`font-mono font-black text-sm block ${netStockroomEquity >= 0 ? 'text-success-deep' : 'text-danger'}`}>
+                        {netStockroomEquity.toLocaleString()} {currency}
+                      </span>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="block text-[10px] font-bold text-muted">Supplier-financed</span>
+                      <span className="font-mono font-black text-xs text-danger">{stockroomFinancedPct}%</span>
+                    </div>
+                  </div>
+                  <div className="mt-2 h-2 rounded-full bg-line overflow-hidden flex">
+                    <div className="h-full bg-success-deep" style={{ width: `${100 - stockroomFinancedPct}%` }} />
+                    <div className="h-full bg-danger" style={{ width: `${stockroomFinancedPct}%` }} />
+                  </div>
+                  <div className="mt-1.5 flex justify-between text-[10px] font-bold">
+                    <span className="text-success-deep">Owned Capital</span>
+                    <span className="text-danger">Supplier Debt</span>
                   </div>
                 </div>
               </div>
