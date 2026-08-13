@@ -2060,7 +2060,7 @@ export default function App() {
           </div>
 
           {/* Dynamic Header Actions & Quick Filters per Tab */}
-          <div className="app-topbar-actions flex min-w-0 flex-1 items-center flex-nowrap gap-1.5 sm:gap-2 text-xs py-1 relative z-30 overflow-x-auto no-scrollbar max-w-full lg:justify-end">
+          <div className="app-topbar-actions flex min-w-0 flex-1 items-center flex-nowrap gap-1.5 sm:gap-2 text-xs py-1 relative z-30 overflow-x-auto no-scrollbar max-w-full justify-end">
             {/* Reset All Filters Pill Button when any filter is active */}
             {hasActiveFilters && (
               <Button
