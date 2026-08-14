@@ -42,11 +42,10 @@ interface FormState {
   reply: string;
   checks: { status: 'N/A' | 'Pass' | 'Fail'; note: string }[];
   // Full-form parity (Ko Hein 2026-08-11): the simple form now captures the
-  // same fields as Create Ticket — customer type, town, find-my, priority,
-  // service type, warranty, photos, scanner.
+  // same fields as Create Ticket — customer type, town, priority, service type,
+  // warranty, photos, scanner. (Find My removed from the simple form 2026-08-14.)
   customerType: CustomerType;
   town: string;
-  findMy: 'ON' | 'OFF' | 'UNKNOWN';
   priority: RepairPriority;
   serviceType: 'Standard Modular' | 'Micro-Soldering' | 'B2B Mail-In';
   warrantyDays: number;
@@ -61,7 +60,6 @@ const EMPTY_FORM: FormState = {
   checks: DIAGNOSTIC_NAMES.map(() => ({ status: 'N/A' as const, note: '' })),
   customerType: 'Retail',
   town: '',
-  findMy: 'UNKNOWN',
   priority: 'Normal',
   serviceType: 'Standard Modular',
   warrantyDays: 90,
@@ -280,7 +278,6 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
       // Full-form parity fields (Ko Hein 2026-08-11): preserved on edit.
       customerType: wo.customerType || 'Retail',
       town: wo.customerAddress || '',
-      findMy: wo.findMyStatus || 'UNKNOWN',
       priority: wo.priority || 'Normal',
       serviceType: wo.serviceType || 'Standard Modular',
       warrantyDays: wo.warrantyDays ?? systemSettings?.defaultWarrantyDays ?? 90,
@@ -320,10 +317,6 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
     // requireFindMyCheck now actually enforce the simple intake form.
     if (systemSettings?.requirePasscodeIntake && !form.passcode.trim()) {
       toast('Device passcode is required (Settings > Intake).', 'error', 'Passcode Required');
-      return;
-    }
-    if (systemSettings?.requireFindMyCheck && form.findMy === 'UNKNOWN') {
-      toast('Find My must be checked ON or OFF (Settings > Intake).', 'error', 'Find My Required');
       return;
     }
     submittingRef.current = true;
@@ -409,7 +402,9 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
       imei: form.imei.trim() || existing?.imei || undefined,
       deviceColor: form.color.trim(),
       passcode: form.passcode.trim(),
-      findMyStatus: form.findMy,
+      // Find My removed from the simple form (Ko Hein 2026-08-14) — keep the
+      // value from an existing ticket when editing, default UNKNOWN on new.
+      findMyStatus: existing?.findMyStatus || 'UNKNOWN',
       status: existing?.status || 'Receive',
       priority: form.priority,
       assignedTechId: existing?.assignedTechId || (existing ? '' : defaultTechId),
@@ -770,30 +765,6 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 placeholder="Device passcode"
                 className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-muted"
               />
-            </label>
-            {/* Find My — full-form parity (Ko Hein 2026-08-11) */}
-            <label className="flex flex-col items-stretch gap-1 py-1.5 sm:flex-row sm:items-center sm:gap-3">
-              <span className="w-full shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted sm:w-32">Find My</span>
-              <div className="flex w-full items-center gap-1 rounded-lg border border-line bg-white p-1">
-                {(['ON', 'OFF', 'UNKNOWN'] as const).map((v) => (
-                  <button
-                    key={v}
-                    type="button"
-                    onClick={() => setForm((f) => ({ ...f, findMy: v }))}
-                    className={`flex-1 rounded-md px-2 py-1.5 text-xs font-black transition-colors cursor-pointer ${
-                      form.findMy === v
-                        ? v === 'ON'
-                          ? 'bg-danger text-white'
-                          : v === 'OFF'
-                          ? 'bg-success text-white'
-                          : 'bg-muted text-white'
-                        : 'text-muted hover:bg-surface'
-                    }`}
-                  >
-                    {v}
-                  </button>
-                ))}
-              </div>
             </label>
             {/* Priority — full-form parity (Ko Hein 2026-08-11) */}
             <label className="flex flex-col items-stretch gap-1 py-1.5 sm:flex-row sm:items-center sm:gap-3">
