@@ -617,7 +617,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               <span className="shrink-0 font-mono text-[11px] font-black text-brand">{form.repairs.length > 0 ? `${form.repairs.length} repair${form.repairs.length > 1 ? 's' : ''}` : '—'}</span>
             </div>
             {/* Phone */}
-            <label className="flex flex-col items-stretch gap-1 py-2 sm:flex-row sm:items-center sm:gap-3">
+            <label className="flex flex-col items-stretch gap-1 py-1.5 sm:flex-row sm:items-center sm:gap-3">
               <span className="w-full shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted sm:w-32">Phone</span>
               <input
                 value={form.phone}
@@ -629,7 +629,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               {matchedCustomer && <span className="shrink-0 text-[10px] font-black text-success-deep">✓ {matchedCustomer}</span>}
             </label>
             {/* Name */}
-            <label className="flex flex-col items-stretch gap-1 py-2 sm:flex-row sm:items-center sm:gap-3">
+            <label className="flex flex-col items-stretch gap-1 py-1.5 sm:flex-row sm:items-center sm:gap-3">
               <span className="w-full shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted sm:w-32">Name</span>
               <input
                 value={form.name}
@@ -640,7 +640,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               />
             </label>
             {/* Customer Type — full-form parity (Ko Hein 2026-08-11) */}
-            <label className="flex flex-col items-stretch gap-1 py-2 sm:flex-row sm:items-center sm:gap-3">
+            <label className="flex flex-col items-stretch gap-1 py-1.5 sm:flex-row sm:items-center sm:gap-3">
               <span className="w-full shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted sm:w-32">Type</span>
               <select
                 value={form.customerType}
@@ -653,7 +653,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               </select>
             </label>
             {/* Town / Address — full-form parity (Ko Hein 2026-08-11) */}
-            <label className="flex flex-col items-stretch gap-1 py-2 sm:flex-row sm:items-center sm:gap-3">
+            <label className="flex flex-col items-stretch gap-1 py-1.5 sm:flex-row sm:items-center sm:gap-3">
               <span className="w-full shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted sm:w-32">Town</span>
               <input
                 value={form.town}
@@ -663,7 +663,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               />
             </label>
             {/* Model → popup */}
-            <label className="flex flex-col items-stretch gap-1 py-2 sm:flex-row sm:items-center sm:gap-3">
+            <label className="flex flex-col items-stretch gap-1 py-1.5 sm:flex-row sm:items-center sm:gap-3">
               <span className="w-full shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted sm:w-32">Model</span>
               <button
                 type="button"
@@ -675,7 +675,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               </button>
             </label>
             {/* Color → popup */}
-            <label className="flex flex-col items-stretch gap-1 py-2 sm:flex-row sm:items-center sm:gap-3">
+            <label className="flex flex-col items-stretch gap-1 py-1.5 sm:flex-row sm:items-center sm:gap-3">
               <span className="w-full shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted sm:w-32">Color</span>
               <button
                 type="button"
@@ -698,7 +698,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
             {/* IMEI — audit B-P2: separate field from Serial so editing one
                 never corrupts the other (the old single field wrote the same
                 value into both serialNumber and imei). */}
-            <label className="flex flex-col items-stretch gap-1 py-2 sm:flex-row sm:items-center sm:gap-3">
+            <label className="flex flex-col items-stretch gap-1 py-1.5 sm:flex-row sm:items-center sm:gap-3">
               <span className="w-full shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted sm:w-32">IMEI</span>
               <input
                 value={form.imei}
@@ -709,7 +709,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               />
             </label>
             {/* Serial Number */}
-            <label className="flex flex-col items-stretch gap-1 py-2 sm:flex-row sm:items-center sm:gap-3">
+            <label className="flex flex-col items-stretch gap-1 py-1.5 sm:flex-row sm:items-center sm:gap-3">
               <span className="w-full shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted sm:w-32">Serial</span>
               <input
                 value={form.serial}
@@ -729,7 +729,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               </button>
             </label>
             {/* Received date */}
-            <label className="flex flex-col items-stretch gap-1 py-2 sm:flex-row sm:items-center sm:gap-3">
+            <label className="flex flex-col items-stretch gap-1 py-1.5 sm:flex-row sm:items-center sm:gap-3">
               <span className="w-full shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted sm:w-32">Received</span>
               <input
                 type="date"
@@ -740,7 +740,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               />
             </label>
             {/* Error / Repairs → popup */}
-            <label className="flex flex-col items-stretch gap-1 py-2 sm:flex-row sm:items-center sm:gap-3">
+            <label className="flex flex-col items-stretch gap-1 py-1.5 sm:flex-row sm:items-center sm:gap-3">
               <span className="w-full shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted sm:w-32">Repairs</span>
               <button
                 type="button"
@@ -761,7 +761,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               </button>
             </label>
             {/* Passcode */}
-            <label className="flex flex-col items-stretch gap-1 py-2 sm:flex-row sm:items-center sm:gap-3">
+            <label className="flex flex-col items-stretch gap-1 py-1.5 sm:flex-row sm:items-center sm:gap-3">
               <span className="w-full shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted sm:w-32">Passcode</span>
               <input
                 value={form.passcode}
@@ -772,7 +772,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               />
             </label>
             {/* Find My — full-form parity (Ko Hein 2026-08-11) */}
-            <label className="flex flex-col items-stretch gap-1 py-2 sm:flex-row sm:items-center sm:gap-3">
+            <label className="flex flex-col items-stretch gap-1 py-1.5 sm:flex-row sm:items-center sm:gap-3">
               <span className="w-full shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted sm:w-32">Find My</span>
               <div className="flex w-full items-center gap-1 rounded-lg border border-line bg-white p-1">
                 {(['ON', 'OFF', 'UNKNOWN'] as const).map((v) => (
@@ -796,7 +796,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               </div>
             </label>
             {/* Priority — full-form parity (Ko Hein 2026-08-11) */}
-            <label className="flex flex-col items-stretch gap-1 py-2 sm:flex-row sm:items-center sm:gap-3">
+            <label className="flex flex-col items-stretch gap-1 py-1.5 sm:flex-row sm:items-center sm:gap-3">
               <span className="w-full shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted sm:w-32">Priority</span>
               <select
                 value={form.priority}
@@ -811,7 +811,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               </select>
             </label>
             {/* Service Type — full-form parity (Ko Hein 2026-08-11) */}
-            <label className="flex flex-col items-stretch gap-1 py-2 sm:flex-row sm:items-center sm:gap-3">
+            <label className="flex flex-col items-stretch gap-1 py-1.5 sm:flex-row sm:items-center sm:gap-3">
               <span className="w-full shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted sm:w-32">Service</span>
               <select
                 value={form.serviceType}
@@ -824,7 +824,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               </select>
             </label>
             {/* Warranty — full-form parity (Ko Hein 2026-08-11) */}
-            <label className="flex flex-col items-stretch gap-1 py-2 sm:flex-row sm:items-center sm:gap-3">
+            <label className="flex flex-col items-stretch gap-1 py-1.5 sm:flex-row sm:items-center sm:gap-3">
               <span className="w-full shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted sm:w-32">Warranty</span>
               <select
                 value={form.warrantyDays}
@@ -845,7 +845,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               </select>
             </label>
             {/* Intake note — flex-1 absorbs the remaining height so both columns balance */}
-            <label className="flex flex-1 flex-col items-stretch gap-1 py-2 sm:flex-row sm:items-stretch sm:gap-3">
+            <label className="flex flex-1 flex-col items-stretch gap-1 py-1.5 sm:flex-row sm:items-stretch sm:gap-3">
               <span className="w-full shrink-0 pt-2.5 text-[11px] font-extrabold uppercase tracking-wider text-muted sm:w-32">Intake Note</span>
               <textarea
                 value={form.reply}
@@ -879,7 +879,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 <span role="status" aria-label="Passed checks" className="font-mono text-[11px] font-black text-brand">{checkedCount}/{DIAGNOSTIC_NAMES.length}</span>
               </span>
             </div>
-            <div className="mt-0 grid grid-cols-1 gap-x-4 sm:grid-cols-2 sm:gap-x-8">
+            <div className="mt-0 grid grid-cols-2 gap-x-3 gap-y-0.5 sm:gap-x-8">
               {DIAGNOSTIC_NAMES.map((name, i) => (
                 <label key={name} className="group flex min-h-7 items-center gap-2 border-b border-line/60 py-1.5">
                   <button
@@ -896,7 +896,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                   >
                     {form.checks[i].status === 'Pass' ? '✓' : form.checks[i].status === 'Fail' ? '✕' : ''}
                   </button>
-                  <span className={`text-xs font-semibold sm:text-sm ${form.checks[i].status !== 'N/A' ? 'text-ink' : 'text-muted'}`}>
+                  <span className={`min-w-0 truncate text-xs font-semibold sm:text-sm ${form.checks[i].status !== 'N/A' ? 'text-ink' : 'text-muted'}`}>
                     {name}
                   </span>
                   <input
@@ -905,7 +905,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                     onChange={(e) => setCheck(i, { note: e.target.value })}
                     placeholder={form.checks[i].status === 'Pass' ? 'ok' : form.checks[i].status === 'Fail' ? 'issue…' : 'n/a'}
                     title="Add note"
-                    className="ml-auto min-w-0 flex-1 bg-transparent border-b border-line/50 px-1 text-xs outline-none transition-colors hover:bg-surface/60 focus:border-brand/40 focus:bg-brand-soft/50"
+                    className="ml-auto min-w-[40px] max-w-[76px] flex-1 bg-transparent border-b border-line/50 px-1 text-xs outline-none transition-colors hover:bg-surface/60 focus:border-brand/40 focus:bg-brand-soft/50 sm:max-w-none"
                   />
                 </label>
               ))}
@@ -913,17 +913,31 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
           </div>
           </div>
 
-          <div className="no-print mt-3 flex items-center justify-between gap-2">
-            <p className="min-w-0 truncate !text-[10px] font-bold text-muted">
-              <span className="font-mono">Items {form.repairs.length}</span>
-              <span className="mx-1 text-line">·</span>
-              <span className="font-mono">Base {baseTotal.toLocaleString()}</span>
-              <span className="mx-1 text-line">·</span>
-              <span className="font-mono">Disc {savedAmount > 0 ? `-${savedAmount.toLocaleString()}` : '0'}</span>
-              <span className="mx-1 text-line">·</span>
-              <span className="font-mono font-black text-brand">Final {finalEstimate.toLocaleString()} {currency}</span>
-              {editingId && <span className="ml-2 text-brand">· {editTarget?.orderNumber}</span>}
-            </p>
+          <div className="no-print mt-3 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+            {/* Summary stat tiles — 2×2 on mobile so the Final total never truncates (Ko Hein 2026-08-14) */}
+            <div className="grid grid-cols-2 gap-1.5 sm:flex sm:items-center sm:gap-2">
+              <div className="rounded-lg bg-surface px-2 py-1.5 text-center sm:px-3">
+                <span className="block text-[9px] font-black uppercase tracking-wider text-muted">Items</span>
+                <span className="block font-mono text-[11px] font-black text-ink">{form.repairs.length}</span>
+              </div>
+              <div className="rounded-lg bg-surface px-2 py-1.5 text-center sm:px-3">
+                <span className="block text-[9px] font-black uppercase tracking-wider text-muted">Base</span>
+                <span className="block font-mono text-[11px] font-black text-ink">{baseTotal.toLocaleString()}</span>
+              </div>
+              <div className="rounded-lg bg-surface px-2 py-1.5 text-center sm:px-3">
+                <span className="block text-[9px] font-black uppercase tracking-wider text-muted">Disc</span>
+                <span className="block font-mono text-[11px] font-black text-danger">{savedAmount > 0 ? `-${savedAmount.toLocaleString()}` : '0'}</span>
+              </div>
+              <div className="rounded-lg bg-brand px-2 py-1.5 text-center sm:px-3">
+                <span className="block text-[9px] font-black uppercase tracking-wider text-white/80">Final</span>
+                <span className="block font-mono text-[11px] font-black text-white">{finalEstimate.toLocaleString()} {currency}</span>
+              </div>
+              {editingId && (
+                <span className="col-span-2 text-center font-mono text-[10px] font-bold text-brand sm:col-auto sm:text-left">
+                  · {editTarget?.orderNumber}
+                </span>
+              )}
+            </div>
             <div className="flex justify-end gap-2">
               {onOpenAiAssistant && (
                 <button
