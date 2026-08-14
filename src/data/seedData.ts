@@ -263,6 +263,8 @@ export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
   aiModel: '',
   aiBaseUrl: '',
   aiSystemPrompt: 'You are a concise repair-shop operations assistant. Use only the supplied ERP data, clearly state uncertainty, and prioritize actionable next steps.',
+  // Module visibility (Ko Hein 2026-08-14): empty = all modules enabled.
+  disabledModules: [],
 };
 
 export const INITIAL_TECHNICIANS: Technician[] = [

@@ -414,6 +414,11 @@ export interface SystemSettings {
   aiModel?: string;
   aiBaseUrl?: string;
   aiSystemPrompt?: string;
+
+  // Module visibility (Ko Hein 2026-08-14): sidebar entries the shop doesn't
+  // use are hidden. Stored as module ids; empty array = everything enabled.
+  // 'dashboard', 'settings' and 'create-ticket' can never be disabled.
+  disabledModules?: string[];
 }
 
 export interface NotificationTemplate {

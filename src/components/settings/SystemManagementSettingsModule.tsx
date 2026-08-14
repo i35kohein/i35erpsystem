@@ -24,7 +24,8 @@ import {
   ArrowLeft,
   Crown,
   Wrench,
-  ClipboardList} from 'lucide-react';
+  ClipboardList,
+  Blocks} from 'lucide-react';
 import { Technician, SystemSettings, TechnicianLevel, PaymentMethodConfig, NotificationTemplate, AppUser, UserRole, UserPermissions, PartItem, PartQualityTier, Supplier } from '../../types';
 import {DEFAULT_PAYMENT_METHODS, DEFAULT_NOTIFICATION_TEMPLATES} from '../../data/seedData';
 import { Button , Input } from '../ui';
@@ -55,6 +56,7 @@ const TabPosLazy = lazyWithRetry(() => import('./tabs/TabPos').then((m) => ({ de
 const TabInventoryLazy = lazyWithRetry(() => import('./tabs/TabInventory').then((m) => ({ default: m.default })), 'TabInventory');
 const TabTechniciansLazy = lazyWithRetry(() => import('./tabs/TabTechnicians').then((m) => ({ default: m.default })), 'TabTechnicians');
 const TabUsersLazy = lazyWithRetry(() => import('./tabs/TabUsers').then((m) => ({ default: m.default })), 'TabUsers');
+const TabModulesLazy = lazyWithRetry(() => import('./tabs/TabModules').then((m) => ({ default: m.default })), 'TabModules');
 
 /** Launcher label lookup for the drilled-in back bar (audit E-P3). */
 const SUBTAB_LABELS: Record<string, string> = {
@@ -72,6 +74,7 @@ const SUBTAB_LABELS: Record<string, string> = {
   qa: 'QA & Diagnostic Rules',
   'price-catalog': 'Price Catalog & Models',
   recycle: 'Recycle Bin & Trash',
+  modules: 'Modules & Visibility',
 };
 
 interface SystemManagementSettingsModuleProps {
@@ -153,7 +156,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   onAiRescanTickets,
   priceCatalogManager,
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'shop' | 'theme' | 'users' | 'technicians' | 'intake' | 'pricing' | 'payment' | 'inventory' | 'pos' | 'notifications' | 'qa' | 'recycle' | 'ai' | 'price-catalog'>(initialSubTab || 'users');
+  const [activeSubTab, setActiveSubTab] = useState<'shop' | 'theme' | 'users' | 'technicians' | 'intake' | 'pricing' | 'payment' | 'inventory' | 'pos' | 'notifications' | 'qa' | 'recycle' | 'ai' | 'price-catalog' | 'modules'>(initialSubTab || 'users');
   // Two-level navigation: launcher menu → drilled-in tab view (Back returns).
   // App only sets initialSubTab='ai' when jumping from the dashboard AI shortcut — drill in then.
   const [settingsDrilledIn, setSettingsDrilledIn] = useState(initialSubTab === 'ai');
@@ -951,6 +954,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             { id: 'ai', label: 'AI Assistant & API', icon: Sparkles },
             { id: 'qa', label: 'QA & Diagnostic Rules', icon: ShieldCheck },
             { id: 'price-catalog', label: 'Price Catalog & Models', icon: Tag },
+            { id: 'modules', label: 'Modules & Visibility', icon: Blocks },
             { id: 'recycle', label: 'Recycle Bin & Trash', icon: Trash2, badge: archivedCount },
           ];
           const defById = new Map(tabDefs.map((t) => [t.id, t]));
@@ -958,7 +962,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             { label: 'Business', ids: ['shop', 'pricing', 'payment', 'pos'] },
             { label: 'Staff', ids: ['users', 'technicians'] },
             { label: 'Operations', ids: ['intake', 'qa', 'inventory', 'notifications'] },
-            { label: 'System', ids: ['theme', 'ai', 'price-catalog', 'recycle'] },
+            { label: 'System', ids: ['theme', 'ai', 'price-catalog', 'modules', 'recycle'] },
           ];
           // Work-desk accent tints per group (icon tile backgrounds)
           const accentByGroup: Record<string, string> = {
@@ -1151,6 +1155,10 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
       )}      {activeSubTab === 'recycle' && (
         <Suspense fallback={<ModuleLoadingSkeleton />}>
           <TabRecycleLazy formData={formData} setFormData={setFormData} onOpenRecycleBin={onOpenRecycleBin} archivedCount={archivedCount} />
+        </Suspense>
+      )}{activeSubTab === 'modules' && (
+        <Suspense fallback={<ModuleLoadingSkeleton />}>
+          <TabModulesLazy formData={formData} setFormData={setFormData} />
         </Suspense>
       )}{/* Add / Edit Technician Modal */}
       {techModalOpen && (

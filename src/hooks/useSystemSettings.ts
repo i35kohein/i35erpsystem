@@ -34,6 +34,9 @@ export interface SystemSettings {
   dbProjectId: string;
   isFirestoreEnabled: boolean;
   lastBackupDate?: string;
+
+  // Module visibility (Ko Hein 2026-08-14) — see types/index.ts
+  disabledModules?: string[];
 }
 
 export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
@@ -60,6 +63,7 @@ export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
   dbProjectId: 'nomadic-adapter-k9z5m',
   isFirestoreEnabled: true,
   lastBackupDate: new Date().toISOString().split('T')[0],
+  disabledModules: [],
 };
 
 const LOCAL_STORAGE_KEY = 'applerepair_system_settings_v1';

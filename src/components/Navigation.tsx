@@ -18,6 +18,7 @@ import {CircleDot,
 import { WorkOrder, SystemSettings, AppUser } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { Button, Badge } from './ui';
+import { isModuleEnabled } from '../lib/modules';
 
 // audit A-P2: version derives from the build env (VITE_APP_VERSION) with a
 // hardcoded fallback — was a literal that drifted from the real build.
@@ -44,6 +45,8 @@ interface NavigationProps {
   isIpad?: boolean;
   /** audit A-P2: real connectivity so the footer pill isn't always green. */
   isOnline?: boolean;
+  /** Module ids to hide from the sidebar (Settings > Modules & Visibility, Ko Hein 2026-08-14). */
+  disabledModules?: string[];
 }
 
 export const Navigation: React.FC<NavigationProps> = ({
@@ -61,6 +64,7 @@ export const Navigation: React.FC<NavigationProps> = ({
   setIsMobileMenuOpen: externalSetIsMobileMenuOpen,
   isIpad = false,
   isOnline = true,
+  disabledModules = [],
 }) => {
   const { t } = useLanguage();
   const [internalMobileMenuOpen, setInternalMobileMenuOpen] = useState(false);
@@ -208,10 +212,13 @@ export const Navigation: React.FC<NavigationProps> = ({
     },
   ];
 
-  // Role-based filtering of navigation items
+  // Module visibility (Ko Hein 2026-08-14): hide sidebar entries the shop
+  // disabled in Settings > Modules & Visibility. Dashboard/Settings/Intake
+  // button are always kept.
   const navGroups = allNavGroups
     .map((group) => {
       const filteredItems = group.items.filter((item) => {
+        if (!isModuleEnabled(disabledModules, item.id)) return false;
         if (role === 'Admin') return true;
         if (role === 'Reception') {
           // Reception can use everything EXCEPT system settings
@@ -387,7 +394,9 @@ export const Navigation: React.FC<NavigationProps> = ({
           {/* Dashboard is the landing view — the sidebar logo already navigates
               there, so a separate "Dashboard Overview" entry is redundant. */}
           <div className="pb-2 border-b border-line/80">
-            {/* New Intake Ticket — primary action */}
+            {/* New Intake Ticket — primary action (hidden when the Intake module
+                is disabled in Settings > Modules & Visibility, Ko Hein 2026-08-14) */}
+            {isModuleEnabled(disabledModules, 'intake') && (
             <Button
               type="button"
               onClick={() => {
@@ -407,6 +416,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                 {!effectiveCollapsed && <span className="truncate text-xs">Intake Ticket</span>}
               </div>
             </Button>
+            )}
 
             {/* Dashboard — landing view shortcut (logo also navigates here) */}
             <Button

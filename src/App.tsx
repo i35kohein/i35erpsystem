@@ -412,6 +412,16 @@ export default function App() {
     }
   }, [activeTab, canAccessSettings]);
 
+  // Module visibility guard (Ko Hein 2026-08-14): if the active tab belongs to
+  // a module disabled in Settings > Modules & Visibility (e.g. via deep link,
+  // hash restore, or a role switch after toggling), bounce back to Dashboard.
+  const disabledModules = systemSettings.disabledModules || [];
+  useEffect(() => {
+    if (disabledModules.includes(activeTab)) {
+      setActiveTab('dashboard');
+    }
+  }, [activeTab, disabledModules]);
+
   // Persistent Price Catalog Hook with global currency sync
   const priceCatalog = usePriceCatalog(systemSettings.currencySymbol, (newSymbol) => {
     handleUpdateSettings({ ...systemSettings, currencySymbol: newSymbol });
@@ -2057,6 +2067,7 @@ export default function App() {
         isMobileMenuOpen={isMobileMenuOpen}
         isIpad={isIpad}
         isOnline={isOnline}
+        disabledModules={systemSettings.disabledModules}
         setIsMobileMenuOpen={setIsMobileMenuOpen}
       />
 
