@@ -41,6 +41,7 @@ import { RECEIPT_FOOTER_ALIGNMENT_OPTIONS, RECEIPT_FOOTER_SIZE_OPTIONS, splitFoo
 import { Suspense } from 'react';
 import { ModuleLoadingSkeleton } from '../common/ModuleLoadingSkeleton';
 import { lazyWithRetry } from '../../lib/lazyWithRetry';
+import { LITE_MODE } from '../../lib/lite';
 
 const TabQaLazy = lazyWithRetry(() => import('./tabs/TabQa').then((m) => ({ default: m.default })), 'TabQa');
 const TabNotificationsLazy = lazyWithRetry(() => import('./tabs/TabNotifications').then((m) => ({ default: m.default })), 'TabNotifications');
@@ -948,7 +949,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             { id: 'intake', label: 'Work Orders & Intake', icon: FileText },
             { id: 'pricing', label: 'Pricing & Currency', icon: DollarSign },
             { id: 'payment', label: 'Payment Methods & MM QR', icon: CreditCard },
-            { id: 'inventory', label: 'Inventory Data & Quality', icon: Boxes, badge: inventoryCategories.length },
+            ...(LITE_MODE ? [] : [{ id: 'inventory', label: 'Inventory Data & Quality', icon: Boxes, badge: inventoryCategories.length }]),
             { id: 'pos', label: 'POS & Receipt Layout', icon: Printer },
             { id: 'notifications', label: 'SMS & Telegram Alerts', icon: BellRing },
             { id: 'ai', label: 'AI Assistant & API', icon: Sparkles },
@@ -961,7 +962,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
           const groups = [
             { label: 'Business', ids: ['shop', 'pricing', 'payment', 'pos'] },
             { label: 'Staff', ids: ['users', 'technicians'] },
-            { label: 'Operations', ids: ['intake', 'qa', 'inventory', 'notifications'] },
+            { label: 'Operations', ids: ['intake', 'qa', ...(LITE_MODE ? [] : ['inventory']), 'notifications'] },
             { label: 'System', ids: ['theme', 'ai', 'price-catalog', 'modules', 'recycle'] },
           ];
           // Work-desk accent tints per group (icon tile backgrounds)
@@ -1106,7 +1107,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
         <Suspense fallback={<ModuleLoadingSkeleton />}>
           <TabPaymentLazy formData={formData} setFormData={setFormData} currentPaymentMethods={currentPaymentMethods} handleTogglePaymentMethod={handleTogglePaymentMethod} handleUpdatePaymentMethodField={handleUpdatePaymentMethodField} handleAddCustomPaymentMethod={handleAddCustomPaymentMethod} handleResetPaymentMethods={handleResetPaymentMethods} handleSetAllPaymentMethodsState={handleSetAllPaymentMethodsState} />
         </Suspense>
-      )}      {activeSubTab === 'inventory' && (
+      )}      {!LITE_MODE && activeSubTab === 'inventory' && (
         <Suspense fallback={<ModuleLoadingSkeleton />}>
           <TabInventoryLazy formData={formData} setFormData={setFormData} parts={parts} suppliers={suppliers} inventoryCategories={inventoryCategories} settings={settings} isSavedBanner={isSavedBanner} onUpdateInventoryCategories={onUpdateInventoryCategories} onUpdateSupplier={onUpdateSupplier} onDeleteSupplier={onDeleteSupplier} onUpdatePart={onUpdatePart} onUpdateSettings={onUpdateSettings} setActiveSubTab={setActiveSubTab} isSectionOpen={isSectionOpen} toggleSection={toggleSection} inventoryDataTab={inventoryDataTab} setInventoryDataTab={setInventoryDataTab} categoryDraft={categoryDraft} setCategoryDraft={setCategoryDraft} editingCategoryKey={editingCategoryKey} setEditingCategoryKey={setEditingCategoryKey} editingCategoryLabel={editingCategoryLabel} setEditingCategoryLabel={setEditingCategoryLabel} supplierDraft={supplierDraft} setSupplierDraft={setSupplierDraft} editingInventorySupplier={editingInventorySupplier} setEditingInventorySupplier={setEditingInventorySupplier} qualityTierDraft={qualityTierDraft} setQualityTierDraft={setQualityTierDraft} editingQualityTier={editingQualityTier} setEditingQualityTier={setEditingQualityTier} editingQualityTierLabel={editingQualityTierLabel} setEditingQualityTierLabel={setEditingQualityTierLabel} binDraft={binDraft} setBinDraft={setBinDraft} expandedBinName={expandedBinName} setExpandedBinName={setExpandedBinName} inventoryQualityTiers={inventoryQualityTiers} inventoryBinNames={inventoryBinNames} partsByBin={partsByBin} handleAddInventoryCategory={handleAddInventoryCategory} handleSaveInventoryCategory={handleSaveInventoryCategory} handleAddInventorySupplier={handleAddInventorySupplier} handleAddInventoryQualityTier={handleAddInventoryQualityTier} handleSaveInventoryQualityTier={handleSaveInventoryQualityTier} handleDeleteInventoryQualityTier={handleDeleteInventoryQualityTier} handleAddInventoryBin={handleAddInventoryBin} handleDeleteInventoryBin={handleDeleteInventoryBin} />
         </Suspense>

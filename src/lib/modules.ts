@@ -9,6 +9,8 @@
 // hidden module, and the Intake Ticket button is the primary CTA. They can
 // never be disabled.
 
+import { isLiteHiddenModule } from './lite';
+
 export interface ModuleDef {
   /** Sidebar/tab id (must match Navigation.tsx item ids). */
   id: string;
@@ -40,12 +42,13 @@ export const MODULES: ModuleDef[] = [
   // Management
   { id: 'crm', label: 'CRM', description: 'Customer records & history', group: 'Management' },
   { id: 'mermaid', label: 'Workflow Diagram', description: 'Process/workflow diagram view', group: 'Management' },
-];
+].filter((m) => !isLiteHiddenModule(m.id));
 
 /** Module ids that are always on and can never be disabled. */
 export const ALWAYS_ON_MODULE_IDS = ['dashboard', 'settings', 'create-ticket'];
 
 export function isModuleEnabled(disabledModules: string[] | undefined, moduleId: string): boolean {
   if (ALWAYS_ON_MODULE_IDS.includes(moduleId)) return true;
+  if (isLiteHiddenModule(moduleId)) return false;
   return !(disabledModules || []).includes(moduleId);
 }

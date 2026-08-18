@@ -28,6 +28,7 @@ import {
   SystemSettings 
 } from '../../types';
 import { getActivePaymentMethods } from '../../data/seedData';
+import { LITE_MODE } from '../../lib/lite';
 import { Button , Input } from '../ui';
 import { toast } from '../../lib/toast';
 import { DateFilterState, filterByDateRange } from '../common/DateFilterSelector';
@@ -509,11 +510,11 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
           { id: 'overview', label: 'Financial Overview', icon: PieChart },
           { id: 'revenue', label: 'Revenue', icon: TrendingUp },
           { id: 'expenses', label: 'Expenses', icon: Receipt },
-          { id: 'inventory-asset', label: 'Parts Value', icon: Boxes },
+          ...(LITE_MODE ? [] : [{ id: 'inventory-asset', label: 'Parts Value', icon: Boxes }]),
           { id: 'commissions', label: 'Commissions', icon: Users },
           { id: 'accounts-payable', label: 'Debts', icon: Truck, badge: financialSummary.overdueDebtsCount > 0 ? `${financialSummary.overdueDebtsCount} Overdue` : undefined, badgeClass: 'bg-danger text-white' },
-          { id: 'inventory-fund', label: 'Inventory Fund', icon: Coins, badge: pendingFundCount > 0 ? `${pendingFundCount} To Settle` : undefined, badgeClass: 'bg-warning text-white' },
-          { id: 'parts-revenue', label: 'Parts Profit', icon: Boxes, badge: financialSummary.partsUnitsSold > 0 ? `${financialSummary.partsUnitsSold} Sold` : undefined, badgeClass: 'bg-brand text-white' },
+          ...(LITE_MODE ? [] : [{ id: 'inventory-fund', label: 'Inventory Fund', icon: Coins, badge: pendingFundCount > 0 ? `${pendingFundCount} To Settle` : undefined, badgeClass: 'bg-warning text-white' }]),
+          ...(LITE_MODE ? [] : [{ id: 'parts-revenue', label: 'Parts Profit', icon: Boxes, badge: financialSummary.partsUnitsSold > 0 ? `${financialSummary.partsUnitsSold} Sold` : undefined, badgeClass: 'bg-brand text-white' }]),
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -565,15 +566,17 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                   <span>Customer Paid (Labor):</span>
                   <span>{financialSummary.laborIncome.toLocaleString()} {currency}</span>
                 </div>
+                {!LITE_MODE && (
                 <div className="flex justify-between text-muted">
                   <span>Parts Revenue (internal):</span>
                   <span>{financialSummary.partsSalesIncome.toLocaleString()} {currency}</span>
                 </div>
+                )}
               </div>
             </div>
 
-            {/* Parts Cost & Gross Profit Card */}
-            <div className="relative flex min-h-[168px] flex-col bg-white p-5 rounded-2xl border border-line shadow-2xs space-y-2">
+            {/* Parts Cost & Gross Profit Card (hidden in lite — no inventory) */}
+            {!LITE_MODE && (<div className="relative flex min-h-[168px] flex-col bg-white p-5 rounded-2xl border border-line shadow-2xs space-y-2">
               <div className="absolute right-4 top-4 w-12 h-12 rounded-2xl bg-brand-soft text-brand flex items-center justify-center">
                 <Coins className="w-6 h-6" />
               </div>
@@ -602,7 +605,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                   <span className="font-mono">+{financialSummary.partsProfit.toLocaleString()} {currency}</span>
                 </div>
               </div>
-            </div>
+            </div>)}
 
             {/* Expenses Card */}
             <div className="relative flex min-h-[168px] flex-col bg-white p-5 rounded-2xl border border-line shadow-2xs space-y-2">
@@ -1056,7 +1059,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
       )}
 
       {/* SUB-VIEW 4: PARTS INVENTORY ASSET VALUATION */}
-      {activeTab === 'inventory-asset' && (
+      {!LITE_MODE && activeTab === 'inventory-asset' && (
         <div className="bg-white border border-line rounded-2xl p-5 space-y-5 shadow-xs">
           <div className="flex justify-between items-center gap-3 pb-3 border-b border-line">
             <div className="min-w-0">
@@ -1519,7 +1522,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
         </div>
       )}
       {/* SUB-VIEW 7: INVENTORY FUND */}
-      {activeTab === 'inventory-fund' && (
+      {!LITE_MODE && activeTab === 'inventory-fund' && (
         <div className="bg-white border border-line rounded-2xl p-5 space-y-5 shadow-xs">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-line">
             <div>
@@ -1654,7 +1657,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
         </div>
       )}
       {/* SUB-VIEW 8: PARTS REVENUE & PROFIT (standalone) */}
-      {activeTab === 'parts-revenue' && (
+      {!LITE_MODE && activeTab === 'parts-revenue' && (
         <div className="bg-white border border-line rounded-2xl p-5 space-y-5 shadow-xs">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-line">
             <div>

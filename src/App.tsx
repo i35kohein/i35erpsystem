@@ -8,6 +8,7 @@ import {Sparkles, Plus, Search, Filter, AlertTriangle, CheckCircle2, Info, Alert
   Grid, Smartphone, Layers, ScanLine, ListFilter, Activity, Users, Boxes, Coins, ShieldAlert,
   Table as TableIcon, LayoutGrid, Flame, Camera, ClipboardCheck} from 'lucide-react';
 import { subscribeToCollection, refreshCollection, refreshAllCollections, flushOfflineQueue, saveDocument, deleteDocument } from './lib/supabase';
+import { LITE_MODE, isLiteHiddenModule } from './lib/lite';
 import { setActiveUserId, notifyAccountChanged } from './utils/accountSettings';
 
 // ---- AI repair-type classification (Spareparts Change vs Hardware Repair) ----
@@ -417,7 +418,7 @@ export default function App() {
   // hash restore, or a role switch after toggling), bounce back to Dashboard.
   const disabledModules = systemSettings.disabledModules || [];
   useEffect(() => {
-    if (disabledModules.includes(activeTab)) {
+    if (disabledModules.includes(activeTab) || isLiteHiddenModule(activeTab)) {
       setActiveTab('dashboard');
     }
   }, [activeTab, disabledModules]);
@@ -454,7 +455,7 @@ export default function App() {
       setIsDbSynced(true);
     }, []);
 
-    const unsubParts = subscribeToCollection<PartItem>('parts', (data) => {
+    const unsubParts = LITE_MODE ? () => {} : subscribeToCollection<PartItem>('parts', (data) => {
       // Normalize older Supabase rows so inventory values remain editable after schema/UI changes.
       const normalized = data.map((raw: any) => ({
         ...raw,
@@ -473,15 +474,15 @@ export default function App() {
       setParts(normalized);
     }, []);
 
-    const unsubSuppliers = subscribeToCollection<Supplier>('suppliers', (data) => {
+    const unsubSuppliers = LITE_MODE ? () => {} : subscribeToCollection<Supplier>('suppliers', (data) => {
       setSuppliers(data);
     }, []);
 
-    const unsubRmas = subscribeToCollection<RmaItem>('rmas', (data) => {
+    const unsubRmas = LITE_MODE ? () => {} : subscribeToCollection<RmaItem>('rmas', (data) => {
       setRmas(data);
     }, []);
 
-    const unsubPos = subscribeToCollection<PurchaseOrder>('purchaseOrders', (data) => {
+    const unsubPos = LITE_MODE ? () => {} : subscribeToCollection<PurchaseOrder>('purchaseOrders', (data) => {
       setPurchaseOrders(data);
     }, []);
 
@@ -497,7 +498,7 @@ export default function App() {
       setExpenses(data);
     }, []);
 
-    const unsubDebts = subscribeToCollection<SupplierDebtRecord>('supplierDebts', (data) => {
+    const unsubDebts = LITE_MODE ? () => {} : subscribeToCollection<SupplierDebtRecord>('supplierDebts', (data) => {
       setSupplierDebts(data);
     }, []);
 
@@ -543,7 +544,7 @@ export default function App() {
       // events and offline-optimistic writes all stay consistent (bug #1/#2).
       await Promise.allSettled([
         refreshCollection<WorkOrder>('workOrders'),
-        refreshCollection<PartItem>('parts'),
+        ...(LITE_MODE ? [] : [refreshCollection<PartItem>('parts')]),
       ]);
     };
     // Push any queued offline writes first, then re-fetch.
@@ -2255,7 +2256,7 @@ export default function App() {
                     { id: 'status-queue', label: 'Status Queue', icon: ListFilter },
                     { id: 'repair-data', label: 'Analytics', icon: Activity },
                     { id: 'tech-kpi', label: 'Technicians', icon: Users },
-                    { id: 'inventory', label: 'Inventory', icon: Boxes },
+                    ...(LITE_MODE ? [] : [{ id: 'inventory', label: 'Inventory', icon: Boxes }]),
                     { id: 'finance', label: 'Finance', icon: Coins },
                     { id: 'warranty-watch', label: 'Warranty', icon: ShieldAlert },
                   ].map((tab) => {

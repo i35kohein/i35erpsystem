@@ -20,6 +20,7 @@ import { getActivePaymentMethods } from '../../data/seedData';
 import { PrintableInvoiceModal } from '../common/PrintableInvoiceModal';
 import { CustomerNotificationModal } from '../common/CustomerNotificationModal';
 import { toast } from '../../lib/toast';
+import { LITE_MODE } from '../../lib/lite';
 import { confirmDialog } from '../common/ConfirmDialog';
 import { normalizeText, INVENTORY_CATEGORY_GROUPS, repairSummaryOf, DIAGNOSTIC_FEE } from './posUtils';
 import { PosConfirmPaymentModal, PosAddPartModal, PosDigitalReceiptModal, PosPriceListPickerModal } from './PosModals';
@@ -271,7 +272,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   // Computed: labor vs parts breakdown for customer / system views (Ko Hein 2026-08-10)
   const displayLineItems = lineItemDraft ?? selectedWo?.lineItems ?? [];
   const laborItems = useMemo(() => displayLineItems.filter((li) => li.isLabor), [displayLineItems]);
-  const partsItems = useMemo(() => displayLineItems.filter((li) => !li.isLabor && (li.partId || li.partName)), [displayLineItems]);
+  const partsItems = useMemo(() => LITE_MODE ? [] as WorkOrderLineItem[] : displayLineItems.filter((li) => !li.isLabor && (li.partId || li.partName)), [displayLineItems]);
   // Parts value at SELLING price (Ko Hein 2026-08-11): repair price list
   // already includes parts, so the parts deduction uses the selling price.
   // Stock/expense bookkeeping (handleConsumeInventoryFromWorkOrder) still

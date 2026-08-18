@@ -26,6 +26,7 @@ import { Button , Input } from '../ui';
 import { toast } from '../../lib/toast';
 
 import { DateFilterState, filterByDateRange} from '../common/DateFilterSelector';
+import { LITE_MODE } from '../../lib/lite';
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend } from 'recharts';
 import { TechnicianPerformanceTab } from './TechnicianPerformanceTab';
 import { TechnicianLeaderboardView } from './TechnicianLeaderboardView';
@@ -302,7 +303,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
   // (money set aside / restocked). Stays visible until settled — computed from
   // the UNFILTERED workOrders so a "Today"/"7 Days" header filter can't hide
   // unsettled funds from earlier days (audit D-P3).
-  const pendingFundTickets = workOrders.filter(
+  const pendingFundTickets = LITE_MODE ? [] as WorkOrder[] : workOrders.filter(
     (wo) => wo.inventoryConsumptionAmount && wo.inventorySettlementStatus !== 'settled'
   );
   const pendingFundTotal = pendingFundTickets.reduce((sum, wo) => sum + (wo.inventoryConsumptionAmount || 0), 0);
@@ -928,8 +929,9 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
             <div className="flex flex-col bg-white border border-line rounded-2xl p-4 shadow-2xs">
               <div className="flex items-center gap-2 mb-3">
                 <Boxes className="w-4 h-4 text-warning shrink-0" />
-                <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Inventory & Warranty</h3>
+                <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">{LITE_MODE ? 'Warranty' : 'Inventory & Warranty'}</h3>
               </div>
+              {!LITE_MODE && (
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="p-3 bg-surface rounded-2xl space-y-1">
                   <span className="text-muted">Stock value</span>
@@ -948,12 +950,15 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
                   <p className={`font-black ${repairLowStockParts.length > 0 ? 'text-danger' : 'text-success-deep'}`}>{repairLowStockParts.length}</p>
                 </div>
               </div>
+              )}
 
               <div className="pt-4 border-t border-line space-y-2 text-xs">
+                {!LITE_MODE && (
                 <div className="flex items-center justify-between">
                   <span className="text-muted">Pending RMAs</span>
                   <span className="font-bold text-ink">{pendingRmas.length}</span>
                 </div>
+                )}
                 <div className="flex items-center justify-between">
                   <span className="text-muted">Expiring soon</span>
                   <span className="font-bold text-warning">{expiringSoonWorkOrders.length}</span>
@@ -1118,7 +1123,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
       )}
 
       {/* SUBTAB 4: INVENTORY */}
-      {activeDashboardSubTab === 'inventory' && (
+      {!LITE_MODE && activeDashboardSubTab === 'inventory' && (
         <div role="tabpanel" id="dash-panel-inventory" aria-labelledby="dash-tab-inventory" className="space-y-6">
           {/* Inventory Valuation & Parts Summary */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

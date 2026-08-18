@@ -27,6 +27,7 @@ import { StatusChip } from '../common/StatusChip';
 import { getRealisticColorStyle } from '../intake/deviceData';
 import { getLineItemIcon, signedMoney, DIAGNOSTIC_FEE } from './posUtils';
 import { confirmDialog } from '../common/ConfirmDialog';
+import { LITE_MODE } from '../../lib/lite';
 
 export interface PosCheckoutPanelProps {
   selectedWo: WorkOrder | null;
@@ -233,6 +234,7 @@ selectedWo ? (
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
+                    {!LITE_MODE && (
                     <Button
                       type="button"
                       variant="ghost"
@@ -242,6 +244,7 @@ selectedWo ? (
                       <PackageCheck className="w-3.5 h-3.5" />
                       <span>Add Part</span>
                     </Button>
+                    )}
                     <Button
                       type="button"
                       variant="ghost"
@@ -283,7 +286,7 @@ selectedWo ? (
                   <div className="p-6 text-center text-muted text-xs border border-dashed border-line-strong rounded-lg bg-surface/30">
                     <Wrench className="w-6 h-6 mx-auto mb-1.5 opacity-40 text-ink" />
                     <p className="font-extrabold text-ink">No items added yet</p>
-                    <p>Use Add Part, Custom, or Price List above to add line items.</p>
+                    <p>{LITE_MODE ? 'Use Custom or Price List above to add line items.' : 'Use Add Part, Custom, or Price List above to add line items.'}</p>
                   </div>
                 ) : (
                   <>
@@ -643,7 +646,7 @@ selectedWo ? (
                       {(partsItems.length > 0 || estCommission > 0) && (
                         <>
                           <tr className="bg-surface/30">
-                            <td className="border border-line px-2 py-1 text-[10px] font-extrabold text-muted uppercase tracking-wider" colSpan={2}>System (incl. Parts)</td>
+                            <td className="border border-line px-2 py-1 text-[10px] font-extrabold text-muted uppercase tracking-wider" colSpan={2}>{LITE_MODE ? 'Profit Breakdown' : 'System (incl. Parts)'}</td>
                           </tr>
                           {partsItems.length > 0 && (
                             <tr>
