@@ -339,11 +339,11 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
         variant="ghost"
         type="button"
         onClick={(e) => { e.stopPropagation(); onNavigateToTab?.('pos'); }}
-        className="!h-6 !min-h-6 w-6 shrink-0 px-0 rounded-full !bg-success !text-white hover:!bg-success/90 border border-success shadow-2xs focus-visible:ring-2 focus-visible:ring-success/40"
+        className="!h-6 !min-h-6 w-6 shrink-0 px-0 flex items-center justify-center rounded-full !text-success-deep hover:!text-success hover:!bg-success/10 transition-colors"
         title="Go to POS checkout"
         aria-label={`Checkout ${wo.orderNumber || wo.id}`}
       >
-        <DollarSign className="w-3 h-3" />
+        <DollarSign className="w-3.5 h-3.5" />
       </Button>
     );
   };
