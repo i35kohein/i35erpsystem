@@ -444,15 +444,15 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
             }`}>
               <h3 className="font-extrabold text-xs text-black flex items-center space-x-1.5">
                 <ShieldCheck className={`w-4 h-4 ${isMono ? 'text-black' : 'text-success'}`} />
-                <span>{hasAfterQa ? '21-Point Hardware Diagnostic Checklist — Before Intake vs After QA Pass' : '21-Point Hardware Diagnostic Checklist — Before Intake'}</span>
+                <span>Device Diagnostic Checklist</span>
               </h3>
               <div className="flex items-center space-x-2 text-xs font-bold font-mono">
                 <span className="bg-surface text-muted px-1.5 py-0.5 rounded border border-line">
-                  Before: {beforeDiagnosticList.filter(d => d.status === 'Pass').length}/21 Pass
+                  Before {beforeDiagnosticList.filter(d => d.status === 'Pass').length}/21
                 </span>
                 {hasAfterQa && (
                   <span className="bg-success/10 text-success-deep px-1.5 py-0.5 rounded border border-success/30">
-                    After QA: {afterDiagnosticList.filter(d => d.status === 'Pass').length}/21 Pass
+                    After {afterDiagnosticList.filter(d => d.status === 'Pass').length}/21
                   </span>
                 )}
               </div>
