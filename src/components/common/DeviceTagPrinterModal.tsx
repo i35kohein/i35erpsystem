@@ -161,7 +161,12 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
     (workOrder.status === 'Finished' || workOrder.status === 'Taken Out') &&
     Array.isArray(workOrder.afterDiagnostics) &&
     workOrder.afterDiagnostics.length > 0;
-  const effectiveDiagDisplayFormat = hasAfterQa ? diagDisplayFormat : 'before_only';
+  // Simple Checks is used regardless of after-QA state (it adapts: shows the
+  // After circle only when QA exists) so before-only tickets print in the same
+  // style (Ko Hein 2026-08-25). Other formats keep the hasAfterQa gating.
+  const effectiveDiagDisplayFormat = diagDisplayFormat === 'simple_checks'
+    ? 'simple_checks'
+    : (hasAfterQa ? diagDisplayFormat : 'before_only');
   const printableRepairItems = workOrder.selectedRepairs?.length
     ? workOrder.selectedRepairs.map((item) => ({
         id: item.id,
