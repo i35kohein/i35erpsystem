@@ -393,6 +393,8 @@ export interface SystemSettings {
   a4CustomHeaderNote?: string;
   a4PrintLayoutDensity?: 'standard' | 'compact' | 'dual_voucher';
   a4DiagnosticDisplayFormat?: 'simple_checks' | 'comparison_table' | 'dual_grid' | 'before_only' | 'after_only';
+  /** Editable Terms & Authorization text for the A4 voucher (Ko Hein 2026-08-25). */
+  a4TermsText?: string;
 
   // Quality Assurance
   mandatoryQaChecklist: boolean;

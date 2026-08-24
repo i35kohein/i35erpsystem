@@ -396,6 +396,18 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
               </div>
 
               <div className="space-y-1.5">
+                <label className="font-bold text-ink block">Voucher Terms &amp; Authorization</label>
+                <textarea
+                  value={formData.a4TermsText || ''}
+                  onChange={(e) => setFormData({ ...formData, a4TermsText: e.target.value })}
+                  rows={3}
+                  className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none "
+                  placeholder="Customer authorizes ... to perform diagnostics and hardware repairs. Replaced parts warrantied for 90 days under standard conditions."
+                />
+                <p className="text-[11px] text-muted">Shown as "Terms &amp; Authorization" at the bottom of every A4 voucher. Leave empty to use the default wording.</p>
+              </div>
+
+              <div className="space-y-1.5">
                 <label className="font-bold text-ink block">21-Point Diagnostic Layout</label>
                 <select aria-label="Before vs After Table"
                   value={formData.a4DiagnosticDisplayFormat || 'comparison_table'}

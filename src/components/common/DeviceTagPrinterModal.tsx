@@ -134,7 +134,9 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
     return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
   };
   const voucherFooterSegments = applyFooterTextRanges(voucherFooterLines, voucherFooterTextSizeRanges);
-  const authorizationText = `Customer authorizes ${systemSettings?.shopName || 'the repair shop'} to perform diagnostics and hardware repairs. Please backup data prior to service. Replaced parts warrantied for ${workOrder?.warrantyDays ?? 0} days under standard conditions.`;
+  const authorizationText = systemSettings?.a4TermsText?.trim()
+    ? systemSettings.a4TermsText.trim()
+    : `Customer authorizes ${systemSettings?.shopName || 'the repair shop'} to perform diagnostics and hardware repairs. Please backup data prior to service. Replaced parts warrantied for ${workOrder?.warrantyDays ?? 0} days under standard conditions.`;
 
   if (!workOrder) return null;
 
