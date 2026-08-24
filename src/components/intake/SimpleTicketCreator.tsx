@@ -772,6 +772,19 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 <option value="Warranty Redo">Warranty Redo</option>
               </select>
             </label>
+            {/* Service Type — full-form parity (Ko Hein 2026-08-11) */}
+            <label className="flex flex-col items-stretch gap-1 py-1.5 sm:flex-row sm:items-center sm:gap-3">
+              <span className="w-full shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted sm:w-32">Service</span>
+              <select
+                value={form.serviceType}
+                onChange={(e) => setForm((f) => ({ ...f, serviceType: e.target.value as FormState['serviceType'] }))}
+                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors"
+              >
+                <option value="Standard Modular">Standard Modular</option>
+                <option value="Micro-Soldering">Micro-Soldering</option>
+                <option value="B2B Mail-In">B2B Mail-In</option>
+              </select>
+            </label>
             {/* Warranty — full-form parity (Ko Hein 2026-08-11) */}
             <label className="flex flex-col items-stretch gap-1 py-1.5 sm:flex-row sm:items-center sm:gap-3">
               <span className="w-full shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted sm:w-32">Warranty</span>
