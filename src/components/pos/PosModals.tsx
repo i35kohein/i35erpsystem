@@ -168,8 +168,8 @@ export interface PosAddPartModalProps {
   isOpen: boolean;
   parts: PartItem[];
   deviceModel: string;
-  owner: 'ALL' | 'APP' | 'KZH';
-  onOwnerChange: (o: 'ALL' | 'APP' | 'KZH') => void;
+  owner: 'ALL' | 'APP';
+  onOwnerChange: (o: 'ALL' | 'APP') => void;
   mode: 'auto' | 'manual' | 'external';
   onModeChange: (m: 'auto' | 'manual' | 'external') => void;
   search: string;
@@ -259,7 +259,7 @@ export const PosAddPartModal: React.FC<PosAddPartModalProps> = ({
 
         {/* Owner filter — compact text-only pills (Ko Hein 2026-08-11) */}
         <div className="flex items-center gap-2">
-          {(['ALL', 'APP', 'KZH'] as const).map((o) => (
+          {(['ALL', 'APP'] as const).map((o) => (
             <button
               key={o}
               type="button"

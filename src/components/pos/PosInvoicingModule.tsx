@@ -59,8 +59,8 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 }) => {
   const currency = systemSettings?.currencySymbol || 'MMK';
   const activePaymentMethods = getActivePaymentMethods(systemSettings).filter((m) => m.enabled);
-  // Parts owner filter — APP (shop) vs KZH (Ko Hein) (Ko Hein 2026-08-10)
-  const [posOwner, setPosOwner] = useState<'ALL' | 'APP' | 'KZH'>('ALL');
+  // Parts owner filter — APP (shop) stock (Ko Hein 2026-08-24: KZH removed)
+  const [posOwner, setPosOwner] = useState<'ALL' | 'APP'>('ALL');
   // Add Inventory Part modal mode (Ko Hein 2026-08-11): Auto = exact device
   // + repair-category filtered suggestions; Manual = every part for the device.
   const [posPartMode, setPosPartMode] = useState<'auto' | 'manual' | 'external'>('auto');

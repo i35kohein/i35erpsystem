@@ -77,8 +77,8 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
   };
   const activePaymentMethods = getActivePaymentMethods(systemSettings).filter((m) => m.enabled);
   const [activeTab, setActiveTab] = useState<'overview' | 'revenue' | 'expenses' | 'inventory-asset' | 'commissions' | 'accounts-payable' | 'inventory-fund' | 'parts-revenue'>('overview');
-  // Parts Value owner filter — APP (shop) vs KZH (Ko Hein) (Ko Hein 2026-08-10)
-  const [partsOwner, setPartsOwner] = useState<'ALL' | 'APP' | 'KZH'>('ALL');
+  // Parts Value owner filter — APP (shop) stock (Ko Hein 2026-08-24: KZH removed)
+  const [partsOwner, setPartsOwner] = useState<'ALL' | 'APP'>('ALL');
   const ownerFilteredParts = useMemo(
     () => (partsOwner === 'ALL' ? parts : parts.filter((p) => (p.owner || 'APP') === partsOwner)),
     [parts, partsOwner]
@@ -181,34 +181,24 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
       .reduce((s, li) => s + li.unitPrice * li.quantity, 0);
   const partsRevenueTotal = fundTickets.reduce((s, wo) => s + partsRevenueOf(wo), 0);
 
-  // Owner split (Ko Hein 2026-08-11): stock is owned by APP (shop fund) or
-  // KZH (Ko Hein's own parts). Settlement must show WHO to pay — sum the
-  // consumed lines per owner using the parts owner map (legacy parts default
-  // to APP).
-  const ownerOfPart = useMemo(() => {
-    const m = new Map<string, PartItem['owner']>();
-    parts.forEach((p) => m.set(p.id, p.owner || 'APP'));
-    return m;
-  }, [parts]);
+  // Owner split (Ko Hein 2026-08-11): stock is owned by APP (shop fund).
+  // Ko Hein 2026-08-24: KZH removed — all stock is APP now.
   const ownerCostsOf = (wo: WorkOrder) => {
-    let kzh = 0;
     let app = 0;
     (wo.lineItems || []).forEach((li) => {
       if (!li.partId || li.isLabor) return;
       const cost = (Number(li.unitCost) || 0) * (Number(li.quantity) || 1);
-      if (ownerOfPart.get(li.partId) === 'KZH') kzh += cost;
-      else app += cost;
+      app += cost;
     });
-    return { kzh, app };
+    return { app };
   };
   const pendingOwnerTotals = pendingFundTickets.reduce(
     (acc, wo) => {
-      const { kzh, app } = ownerCostsOf(wo);
-      acc.kzh += kzh;
+      const { app } = ownerCostsOf(wo);
       acc.app += app;
       return acc;
     },
-    { kzh: 0, app: 0 }
+    { app: 0 }
   );
 
   // Financial Calculations
@@ -1068,7 +1058,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
             </div>
             <div className="flex items-center gap-3 shrink-0">
               <div className="flex items-center gap-1">
-                {(['ALL', 'APP', 'KZH'] as const).map((owner) => (
+                {(['ALL', 'APP'] as const).map((owner) => (
                   <Button
                     key={owner}
                     type="button"
@@ -1114,11 +1104,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                       <td className="p-3">
                         <div className="flex items-center gap-2">
                           <span
-                            className={`rounded px-1.5 py-0.5 text-[10px] font-black uppercase ${
-                              (part.owner || 'APP') === 'KZH'
-                                ? 'bg-success/10 text-success-deep border border-success/30'
-                                : 'bg-brand-soft text-brand border border-brand/30'
-                            }`}
+                            className="rounded px-1.5 py-0.5 text-[10px] font-black uppercase bg-brand-soft text-brand border border-brand/30"
                           >
                             {part.owner || 'APP'}
                           </span>
@@ -1540,9 +1526,9 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
               <div>
                 <span className="text-xs text-muted block">Pending Settlement</span>
                 <span className="text-lg font-black text-warning">{pendingFundTotal.toLocaleString()} {currency}</span>
-                {(pendingOwnerTotals.kzh > 0 || pendingOwnerTotals.app > 0) && (
+                {(pendingOwnerTotals.app > 0) && (
                   <span className="text-[10px] font-bold text-muted block mt-0.5">
-                    KZH {pendingOwnerTotals.kzh.toLocaleString()} · APP {pendingOwnerTotals.app.toLocaleString()}
+                    APP {pendingOwnerTotals.app.toLocaleString()}
                   </span>
                 )}
               </div>
@@ -1586,7 +1572,7 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                   const pending = wo.inventorySettlementStatus !== 'settled';
                   const partsRev = partsRevenueOf(wo);
                   const partsCost = wo.inventoryConsumptionAmount || 0;
-                  const { kzh, app } = ownerCostsOf(wo);
+                  const { app } = ownerCostsOf(wo);
                   return (
                     <tr key={wo.id} className="hover:bg-surface">
                       <td className="p-3 font-mono font-bold text-brand">{wo.orderNumber}</td>
@@ -1595,25 +1581,10 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
                       <td className="p-3 font-mono font-black text-ink">{partsCost.toLocaleString()} {currency}</td>
                       <td className="p-3 font-mono font-black text-brand">+{(partsRev - partsCost).toLocaleString()} {currency}</td>
                       <td className="p-3">
-                        {kzh > 0 && app > 0 ? (
-                          <span className="inline-flex flex-col gap-0.5">
-                            <span className="inline-flex items-center gap-1 text-[10px] font-black">
-                              <span className="px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 border border-violet-200">KZH</span>
-                              <span className="font-mono">{kzh.toLocaleString()} {currency}</span>
-                            </span>
-                            <span className="inline-flex items-center gap-1 text-[10px] font-black">
-                              <span className="px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-200">APP</span>
-                              <span className="font-mono">{app.toLocaleString()} {currency}</span>
-                            </span>
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-black">
-                            <span className={`px-1.5 py-0.5 rounded border ${kzh > 0 ? 'bg-violet-100 text-violet-700 border-violet-200' : 'bg-sky-100 text-sky-700 border-sky-200'}`}>
-                              {kzh > 0 ? 'KZH' : 'APP'}
-                            </span>
-                            <span className="font-mono">{(kzh || app).toLocaleString()} {currency}</span>
-                          </span>
-                        )}
+                        <span className="inline-flex items-center gap-1 text-[10px] font-black">
+                          <span className="px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-200">APP</span>
+                          <span className="font-mono">{app.toLocaleString()} {currency}</span>
+                        </span>
                       </td>
                       <td className="p-3 font-mono text-muted">
                         {wo.inventoryConsumedAt ? new Date(wo.inventoryConsumedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}

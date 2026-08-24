@@ -232,13 +232,13 @@ export interface WorkOrder {
   inventorySettledAt?: string;
 }
 
-export type PartOwner = 'APP' | 'KZH';
+export type PartOwner = 'APP';
 
 export interface PartItem {
   id: string;
   sku: string;
   name: string;
-  /** Stock owner — APP (shop) or KZH (Ko Hein) (Ko Hein 2026-08-10); legacy rows default to APP. */
+  /** Stock owner — APP (shop) (Ko Hein 2026-08-24: KZH removed entirely). */
   owner?: PartOwner;
   applePartNumber?: string;
   category: string; // e.g., Display, Battery, Charging Port, Logic Board Chip, Back Glass

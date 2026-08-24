@@ -102,14 +102,10 @@ export function paginateTags(parts: PartItem[], perPage = 18): PartItem[][] {
   return pages;
 }
 
-/** Stock owner badge — APP (shop, brand blue) vs KZH (Ko Hein, green). */
+/** Stock owner badge — APP (shop, brand blue). KZH removed 2026-08-24. */
 export const OwnerBadge = ({ owner }: { owner?: string }) => {
-  const o = owner || 'APP';
-  return o === 'KZH' ? (
-    <span className="inline-flex items-center gap-1 rounded-md border border-success/30 bg-success/10 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-success-deep">
-      KZH
-    </span>
-  ) : (
+  void owner;
+  return (
     <span className="inline-flex items-center gap-1 rounded-md border border-brand/30 bg-brand-soft px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-brand">
       APP
     </span>

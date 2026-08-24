@@ -185,8 +185,8 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
   const dateFilter = externalDateFilter || internalDateFilter;
 
   const [internalSubTab, setInternalSubTab] = useState<'status-queue' | 'repair-data' | 'tech-kpi' | 'inventory' | 'finance' | 'warranty-watch'>('status-queue');
-  // Dashboard inventory snapshot owner filter default — APP (shop) vs KZH (Ko Hein)
-  const [dashOwner] = useState<'ALL' | 'APP' | 'KZH'>('ALL');
+  // Dashboard inventory snapshot owner filter — APP (shop) only (Ko Hein 2026-08-24: KZH removed)
+  const [dashOwner] = useState<'ALL' | 'APP'>('ALL');
   // Controlled from App navbar when provided; falls back to internal state.
   const activeDashboardSubTab = activeSubTab || internalSubTab;
   const setActiveDashboardSubTab = (tab: typeof activeDashboardSubTab) => {
@@ -307,24 +307,18 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
     (wo) => wo.inventoryConsumptionAmount && wo.inventorySettlementStatus !== 'settled'
   );
   const pendingFundTotal = pendingFundTickets.reduce((sum, wo) => sum + (wo.inventoryConsumptionAmount || 0), 0);
-  // Owner split for the reminder (Ko Hein 2026-08-11): APP shop fund vs KZH
-  // (Ko Hein's own parts) — so the shop knows WHO to pay back.
-  const ownerOfPart = useMemo(() => {
-    const m = new Map<string, PartItem['owner']>();
-    parts.forEach((p) => m.set(p.id, p.owner || 'APP'));
-    return m;
-  }, [parts]);
+  // Owner split for the reminder (Ko Hein 2026-08-11): APP shop fund only
+  // (Ko Hein 2026-08-24: KZH removed — all stock is APP now).
   const pendingOwnerTotals = pendingFundTickets.reduce(
     (acc, wo) => {
       (wo.lineItems || []).forEach((li) => {
         if (!li.partId || li.isLabor) return;
         const cost = (Number(li.unitCost) || 0) * (Number(li.quantity) || 1);
-        if (ownerOfPart.get(li.partId) === 'KZH') acc.kzh += cost;
-        else acc.app += cost;
+        acc.app += cost;
       });
       return acc;
     },
-    { kzh: 0, app: 0 }
+    { app: 0 }
   );
   // Revenue-eligible statuses only: quoted amounts on tickets that were
   // never repaired (Cant Repair / Customer Not Repair) are NOT revenue, and
@@ -636,11 +630,9 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
             <span className="font-bold text-warning min-w-0">
               Inventory fund reminder — {pendingFundTickets.length} ticket{pendingFundTickets.length > 1 ? 's' : ''} used parts worth{' '}
               <span className="font-black">{pendingFundTotal.toLocaleString()} {currency}</span> from stock, not settled yet
-              {(pendingOwnerTotals.kzh > 0 || pendingOwnerTotals.app > 0) && (
+              {(pendingOwnerTotals.app > 0) && (
                 <span className="block text-xs font-black mt-0.5 text-ink/70">
-                  Pay back: <span className="px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 border border-violet-200">KZH {pendingOwnerTotals.kzh.toLocaleString()} {currency}</span>
-                  {' · '}
-                  <span className="px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-200">APP {pendingOwnerTotals.app.toLocaleString()} {currency}</span>
+                  Pay back: <span className="px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-200">APP {pendingOwnerTotals.app.toLocaleString()} {currency}</span>
                 </span>
               )}
             </span>
