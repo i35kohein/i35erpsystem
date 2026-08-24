@@ -501,7 +501,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       // New intake tickets stay unassigned until the repair coordinator assigns a technician.
       assignedTechId: baseWorkOrder?.assignedTechId || (baseWorkOrder ? '' : defaultTechId),
       assignedTechName: baseWorkOrder?.assignedTechName || (baseWorkOrder ? '' : defaultTechName),
-      serviceType: baseWorkOrder?.serviceType || 'Standard Modular',
+      serviceType: baseWorkOrder?.serviceType || 'Spareparts',
       selectedRepairs,
       // Edit mode must respect the live form: resetting a diagnostic to N/A,
       // clearing notes or deleting photos would otherwise be silently

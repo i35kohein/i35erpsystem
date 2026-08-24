@@ -444,7 +444,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
 
       // Classify by the actual repair names first (selectedRepairs), then
       // symptoms, then serviceType — serviceType alone is usually just
-      // 'Standard Modular' and would dump everything into the wrong bucket.
+      // 'Spareparts' and would dump everything into the wrong bucket.
       if (hay.includes('display') || hay.includes('oled') || hay.includes('screen') || hay.includes('cracked')) {
         stats[0].count += 1;
         stats[0].revenue += rev;

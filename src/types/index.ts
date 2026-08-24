@@ -144,7 +144,7 @@ export interface WorkOrder {
   priority: RepairPriority;
   assignedTechId: string;
   assignedTechName?: string;
-  serviceType: 'Standard Modular' | 'Micro-Soldering' | 'B2B Mail-In';
+  serviceType: 'Spareparts' | 'Hardware';
   
   // Selected Repairs & Price Discounts
   selectedRepairs?: SelectedRepairItem[];
@@ -320,8 +320,8 @@ export interface Technician {
   specialty?: string;
   status?: 'Active' | 'On Leave' | 'Inactive';
   commissionRate?: number; // e.g. 15 for 15% (legacy combined rate; fallback for the two below)
-  commissionRateParts?: number; // % commission on Spareparts Change (Standard Modular) jobs
-  commissionRateHardware?: number; // % commission on Hardware Repair (Micro-Soldering) jobs
+  commissionRateParts?: number; // % commission on Spareparts Change jobs
+  commissionRateHardware?: number; // % commission on Hardware Repair jobs
   activeJobsCount: number;
   completedThisMonth: number;
   warrantyReturnCount: number;

@@ -1287,7 +1287,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                       max="50"
                       className="w-full h-10 bg-white text-ink font-bold px-3 rounded-xl border border-line-strong focus:outline-none "
                     />
-                    <p className="text-xs text-muted mt-1.5">Standard Modular (parts-swap) jobs</p>
+                    <p className="text-xs text-muted mt-1.5">Spareparts (parts-swap) jobs</p>
                   </div>
 
                   <div className="bg-surface border border-line rounded-xl p-3">
@@ -1300,7 +1300,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                       max="50"
                       className="w-full h-10 bg-white text-ink font-bold px-3 rounded-xl border border-line-strong focus:outline-none "
                     />
-                    <p className="text-xs text-muted mt-1.5">Micro-Soldering (board-level) jobs</p>
+                    <p className="text-xs text-muted mt-1.5">Hardware (board-level) jobs</p>
                   </div>
                 </div>
               </div>

@@ -46,7 +46,7 @@ interface FormState {
   customerType: CustomerType;
   town: string;
   priority: RepairPriority;
-  serviceType: 'Standard Modular' | 'Micro-Soldering' | 'B2B Mail-In';
+  serviceType: 'Spareparts' | 'Hardware';
   warrantyDays: number;
   warrantyLabel: string;
   photos: string[];
@@ -60,7 +60,7 @@ const EMPTY_FORM: FormState = {
   customerType: 'Retail',
   town: '',
   priority: 'Normal',
-  serviceType: 'Standard Modular',
+  serviceType: 'Spareparts',
   warrantyDays: 90,
   warrantyLabel: '90 Days Standard Warranty',
   photos: [],
@@ -276,7 +276,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
       customerType: wo.customerType || 'Retail',
       town: wo.customerAddress || '',
       priority: wo.priority || 'Normal',
-      serviceType: wo.serviceType || 'Standard Modular',
+      serviceType: (wo.serviceType === 'Hardware' ? 'Hardware' : 'Spareparts') as FormState['serviceType'],
       warrantyDays: wo.warrantyDays ?? systemSettings?.defaultWarrantyDays ?? 90,
       warrantyLabel: wo.warrantyLabel || `${wo.warrantyDays ?? systemSettings?.defaultWarrantyDays ?? 90} Days Standard Warranty`,
       photos: wo.intakePhotos || [],
@@ -780,9 +780,8 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 onChange={(e) => setForm((f) => ({ ...f, serviceType: e.target.value as FormState['serviceType'] }))}
                 className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors"
               >
-                <option value="Standard Modular">Standard Modular</option>
-                <option value="Micro-Soldering">Micro-Soldering</option>
-                <option value="B2B Mail-In">B2B Mail-In</option>
+                <option value="Spareparts">Spareparts</option>
+                <option value="Hardware">Hardware</option>
               </select>
             </label>
             {/* Warranty — full-form parity (Ko Hein 2026-08-11) */}

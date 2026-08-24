@@ -25,7 +25,7 @@ const baseWo = (overrides: Partial<WorkOrder> = {}): WorkOrder => ({
   status: 'Finished',
   priority: 'Normal',
   assignedTechId: 'tech-1',
-  serviceType: 'Standard Modular',
+  serviceType: 'Spareparts',
   lineItems: [],
   subtotal: 0,
   depositAmount: 0,
@@ -73,8 +73,8 @@ describe('getLoadBadge', () => {
 });
 
 describe('isHardwareRepair', () => {
-  it('flags Micro-Soldering service type', () => {
-    expect(isHardwareRepair(baseWo({ serviceType: 'Micro-Soldering' }))).toBe(true);
+  it('flags Hardware service type', () => {
+    expect(isHardwareRepair(baseWo({ serviceType: 'Hardware' }))).toBe(true);
   });
   it('flags microSolderingLog presence', () => {
     expect(isHardwareRepair(baseWo({ microSolderingLog: { boardModel: '820-02020', diodeReadings: [], thermalNotes: '', icReplaced: [], schematicTags: [], multimeterDiodeShortFound: '' } as any }))).toBe(true);
@@ -90,7 +90,7 @@ describe('isHardwareRepair', () => {
     expect(isHardwareRepair(baseWo({ selectedRepairs: [{ id: 'r1', name: 'Display Replacement', basePrice: 100, discountPercent: 0, finalPrice: 100 }] }))).toBe(false);
   });
   it('AI verdict overrides rules', () => {
-    const wo = baseWo({ repairTypeAI: 'hardware', serviceType: 'Standard Modular', symptomsReported: 'screen cracked' });
+    const wo = baseWo({ repairTypeAI: 'hardware', serviceType: 'Spareparts', symptomsReported: 'screen cracked' });
     expect(getRepairType(wo)).toBe('hardware');
   });
 });
@@ -143,7 +143,7 @@ describe('computeTechStats', () => {
     expect(stats.successRate).toBe(100);
   });
   it('est commission uses hardware rate for micro-soldering', () => {
-    const wo = baseWo({ status: 'Finished', serviceType: 'Micro-Soldering', totalAmount: 100000, subtotal: 100000, lineItems: [{ id: 'l1', description: 'Board', isLabor: true, unitCost: 0, unitPrice: 100000, quantity: 1 }] });
+    const wo = baseWo({ status: 'Finished', serviceType: 'Hardware', totalAmount: 100000, subtotal: 100000, lineItems: [{ id: 'l1', description: 'Board', isLabor: true, unitCost: 0, unitPrice: 100000, quantity: 1 }] });
     const stats = computeTechStats([wo], tech({ commissionRateParts: 10, commissionRateHardware: 15 }));
     // base = totalAmount 100000 − partsCost 0 = 100000 × 15%
     expect(stats.estCommission).toBe(15000);

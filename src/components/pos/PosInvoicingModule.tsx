@@ -287,7 +287,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
     if (!tech) return 0;
     const repairType =
       selectedWo.repairTypeAI ||
-      (selectedWo.serviceType === 'Micro-Soldering' ? ('hardware' as const) : ('spareparts' as const));
+      (selectedWo.serviceType === 'Hardware' ? ('hardware' as const) : ('spareparts' as const));
     const rate =
       repairType === 'hardware'
         ? tech.commissionRateHardware ?? tech.commissionRate ?? 0

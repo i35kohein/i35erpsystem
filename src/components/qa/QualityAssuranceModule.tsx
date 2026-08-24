@@ -315,7 +315,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
     !!systemSettings?.mandatoryQaChecklist && qaDiagnostics.every((d) => d.status !== 'Pass' && d.status !== 'Fail');
   const microSolderingGateBlocked =
     !!systemSettings?.requireMicroSolderingLog &&
-    (selectedWo?.serviceType === 'Micro-Soldering' ||
+    (selectedWo?.serviceType === 'Hardware' ||
       selectedWo?.repairTypeAI === 'hardware') &&
     !selectedWo?.microSolderingLog?.icReplaced?.length;
   const canConfirm = hasExplicitVerdict && !photoGateBlocked && !checklistGateBlocked && !microSolderingGateBlocked;

@@ -47,7 +47,7 @@ const IntakeTab: React.FC<IntakeTabProps> = ({ formData, setFormData }) => {
                 className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none "
               >
                 <option value={0}>No Warranty</option>
-                <option value={30}>30 Days (Standard Modular)</option>
+                <option value={30}>30 Days (Spareparts)</option>
                 <option value={60}>60 Days (Extended)</option>
                 <option value={90}>90 Days (Recommended Apple Lab Standard)</option>
                 <option value={180}>180 Days (Half-Year Warranty)</option>

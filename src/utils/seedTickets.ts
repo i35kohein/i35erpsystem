@@ -27,7 +27,7 @@ export const generate10TestTickets = (): WorkOrder[] => {
       priority: "Urgent",
       assignedTechId: "tech-1",
       assignedTechName: "Aung Ko Ko",
-      serviceType: "Standard Modular",
+      serviceType: "Spareparts",
       intakeChecklist: {
         powerOn: true,
         screenDisplay: true,
@@ -89,7 +89,7 @@ export const generate10TestTickets = (): WorkOrder[] => {
       priority: "Normal",
       assignedTechId: "tech-2",
       assignedTechName: "Kyaw Swar Lin",
-      serviceType: "Standard Modular",
+      serviceType: "Spareparts",
       intakeChecklist: {
         powerOn: true,
         screenDisplay: true,
@@ -155,7 +155,7 @@ export const generate10TestTickets = (): WorkOrder[] => {
       priority: "B2B Priority",
       assignedTechId: "tech-3",
       assignedTechName: "Thura Aung",
-      serviceType: "Micro-Soldering",
+      serviceType: "Spareparts",
       intakeChecklist: {
         powerOn: true,
         screenDisplay: true,
@@ -220,7 +220,7 @@ export const generate10TestTickets = (): WorkOrder[] => {
       priority: "Normal",
       assignedTechId: "tech-4",
       assignedTechName: "Min Htet (Senior Tech)",
-      serviceType: "Standard Modular",
+      serviceType: "Spareparts",
       intakeChecklist: {
         powerOn: true,
         screenDisplay: false,
@@ -284,7 +284,7 @@ export const generate10TestTickets = (): WorkOrder[] => {
       priority: "Normal",
       assignedTechId: "tech-5",
       assignedTechName: "Zin Mar Win",
-      serviceType: "Standard Modular",
+      serviceType: "Spareparts",
       intakeChecklist: {
         powerOn: true,
         screenDisplay: true,
@@ -349,7 +349,7 @@ export const generate10TestTickets = (): WorkOrder[] => {
       priority: "Urgent",
       assignedTechId: "tech-1",
       assignedTechName: "Aung Ko Ko",
-      serviceType: "Standard Modular",
+      serviceType: "Spareparts",
       intakeChecklist: {
         powerOn: true,
         screenDisplay: false,
@@ -416,7 +416,7 @@ export const generate10TestTickets = (): WorkOrder[] => {
       priority: "Normal",
       assignedTechId: "tech-3",
       assignedTechName: "Thura Aung",
-      serviceType: "Standard Modular",
+      serviceType: "Spareparts",
       intakeChecklist: {
         powerOn: true,
         screenDisplay: true,
@@ -484,7 +484,7 @@ export const generate10TestTickets = (): WorkOrder[] => {
       priority: "Normal",
       assignedTechId: "tech-2",
       assignedTechName: "Kyaw Swar Lin",
-      serviceType: "Standard Modular",
+      serviceType: "Spareparts",
       intakeChecklist: {
         powerOn: true,
         screenDisplay: true,
@@ -552,7 +552,7 @@ export const generate10TestTickets = (): WorkOrder[] => {
       priority: "Normal",
       assignedTechId: "tech-4",
       assignedTechName: "Min Htet (Senior Tech)",
-      serviceType: "Micro-Soldering",
+      serviceType: "Spareparts",
       intakeChecklist: {
         powerOn: false,
         screenDisplay: false,
@@ -613,7 +613,7 @@ export const generate10TestTickets = (): WorkOrder[] => {
       priority: "Normal",
       assignedTechId: "tech-3",
       assignedTechName: "Thura Aung",
-      serviceType: "Micro-Soldering",
+      serviceType: "Spareparts",
       intakeChecklist: {
         powerOn: false,
         screenDisplay: false,

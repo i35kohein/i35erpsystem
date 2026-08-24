@@ -10,7 +10,7 @@ export const LOAD_THRESHOLD_HEAVY = 5;
 
 // ===== Repair-type classification: Spareparts Change vs Hardware Repair =====
 // A ticket counts as HARDWARE (board-level) when any of these fire:
-//   1. serviceType === 'Micro-Soldering'
+//   1. serviceType === 'Hardware'
 //   2. microSolderingLog exists (real board diagnostics recorded)
 //   3. Repair name / symptoms match board-level keywords
 // Everything else defaults to Spareparts Change (modular parts swap).
@@ -40,7 +40,7 @@ const HARDWARE_KEYWORDS: RegExp[] = [
 ];
 
 export function isHardwareRepair(wo: WorkOrder): boolean {
-  if (wo.serviceType === 'Micro-Soldering') return true;
+  if (wo.serviceType === 'Hardware') return true;
   if (wo.microSolderingLog && Object.keys(wo.microSolderingLog).length > 0) return true;
   const text = [
     (wo.selectedRepairs || []).map((r) => r.name).join(' '),
@@ -52,13 +52,13 @@ export function isHardwareRepair(wo: WorkOrder): boolean {
 }
 
 /** Final repair type for a ticket: AI verdict wins; otherwise ONLY
- *  Micro-Soldering serviceType counts as hardware — matching the POS checkout
+ *  Hardware serviceType counts as hardware — matching the POS checkout
  *  and Finance payout engine exactly (audit D-P2). Keyword sniffing made the
  *  dashboard rate a "No Power" ticket at the hardware rate while POS paid the
  *  parts rate — three different numbers for the same ticket. */
 export function getRepairType(wo: WorkOrder): 'hardware' | 'spareparts' {
   if (wo.repairTypeAI) return wo.repairTypeAI;
-  return wo.serviceType === 'Micro-Soldering' ? 'hardware' : 'spareparts';
+  return wo.serviceType === 'Hardware' ? 'hardware' : 'spareparts';
 }
 
 export function getLoadBadge(activeCount: number) {
@@ -165,7 +165,7 @@ export function computeTechStats(workOrders: WorkOrder[], tech: Technician): Tec
 
   const revenue = finishedOrders.reduce((sum, wo) => sum + (wo.totalAmount || wo.subtotal || 0), 0);
   const laborRevenue = finishedOrders.reduce((sum, wo) => sum + getLaborRevenue(wo), 0);
-  // Split commission: Spareparts Change (Standard Modular / B2B) vs Hardware Repair (Micro-Soldering).
+  // Split commission: Spareparts Change vs Hardware Repair.
   // Legacy single commissionRate acts as fallback for both when the split fields aren't set.
   const commissionRateParts = tech.commissionRateParts ?? tech.commissionRate ?? 0;
   const commissionRateHardware = tech.commissionRateHardware ?? tech.commissionRate ?? 0;

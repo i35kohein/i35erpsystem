@@ -1795,7 +1795,7 @@ export default function App() {
       if (tech) {
         const repairType =
           current.repairTypeAI ||
-          (current.serviceType === 'Micro-Soldering' ? ('hardware' as const) : ('spareparts' as const));
+          (current.serviceType === 'Hardware' ? ('hardware' as const) : ('spareparts' as const));
         const rate =
           repairType === 'hardware'
             ? tech.commissionRateHardware ?? tech.commissionRate ?? 0

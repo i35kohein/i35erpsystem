@@ -66,7 +66,7 @@ export const SAMPLE_PRINT_WORK_ORDER: WorkOrder = {
   deviceColor: 'Natural Titanium',
   serialNumber: 'F17X8921LPM',
   passcode: '4920',
-  serviceType: 'Standard Modular',
+  serviceType: 'Spareparts',
   status: 'In Progress',
   priority: 'Normal',
   assignedTechId: 'tech-001',

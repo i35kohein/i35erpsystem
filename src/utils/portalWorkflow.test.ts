@@ -18,7 +18,7 @@ const baseWo = (overrides: Partial<WorkOrder> = {}): WorkOrder => ({
   status: 'Receive',
   priority: 'Normal',
   assignedTechId: '',
-  serviceType: 'Standard Modular',
+  serviceType: 'Spareparts',
   lineItems: [],
   subtotal: 0,
   depositAmount: 0,
