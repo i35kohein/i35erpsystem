@@ -72,7 +72,6 @@ import {
   Customer, 
   Technician, 
   WorkOrderStatus, 
-  RmaStatus, 
   PostRepairChecklist,
   DiagnosticItemResult,
   SystemSettings,
@@ -101,7 +100,6 @@ const SimpleTicketCreator = lazyWithRetry(() => import('./components/intake/Simp
 const CreateTicketSoloPage = lazyWithRetry(() => import('./components/intake/CreateTicketSoloPage').then((m) => ({ default: m.CreateTicketSoloPage })), 'CreateTicketSoloPage');
 const TrelloBoardModule = lazyWithRetry(() => import('./components/trello/TrelloBoardModule').then((m) => ({ default: m.TrelloBoardModule })), 'TrelloBoardModule');
 const InventoryManagementModule = lazyWithRetry(() => import('./components/inventory/InventoryManagementModule').then((m) => ({ default: m.InventoryManagementModule })), 'InventoryManagementModule');
-const SupplierRmaModule = lazyWithRetry(() => import('./components/suppliers/SupplierRmaModule').then((m) => ({ default: m.SupplierRmaModule })), 'SupplierRmaModule');
 const PosInvoicingModule = lazyWithRetry(() => import('./components/pos/PosInvoicingModule').then((m) => ({ default: m.PosInvoicingModule })), 'PosInvoicingModule');
 const CrmCustomerPortalModule = lazyWithRetry(() => import('./components/crm/CrmCustomerPortalModule').then((m) => ({ default: m.CrmCustomerPortalModule })), 'CrmCustomerPortalModule');
 const QualityAssuranceModule = lazyWithRetry(() => import('./components/qa/QualityAssuranceModule').then((m) => ({ default: m.QualityAssuranceModule })), 'QualityAssuranceModule');
@@ -236,7 +234,7 @@ export default function App() {
     // Restore tab from URL hash (#/pipeline) so deep links & reloads land correctly
     if (typeof window !== 'undefined') {
       const h = window.location.hash.replace(/^#\/?/, '');
-      if (h && ['dashboard','intake','simple-ticket','trello','qa','follow-up','price-catalog','pos','finance','inventory','suppliers','crm','settings','create-ticket','mermaid'].includes(h)) return h;
+      if (h && ['dashboard','intake','simple-ticket','trello','qa','follow-up','price-catalog','pos','finance','inventory','crm','settings','create-ticket','mermaid'].includes(h)) return h;
     }
     return 'dashboard';
   });
@@ -271,7 +269,6 @@ export default function App() {
       void import('./components/intake/SimpleTicketCreator');
       void import('./components/trello/TrelloBoardModule');
       void import('./components/inventory/InventoryManagementModule');
-      void import('./components/suppliers/SupplierRmaModule');
       void import('./components/pos/PosInvoicingModule');
       void import('./components/crm/CrmCustomerPortalModule');
       void import('./components/qa/QualityAssuranceModule');
@@ -315,7 +312,6 @@ export default function App() {
 
   // Modal triggers from top bar
   const [inventoryAddModalOpen, setInventoryAddModalOpen] = useState(false);
-  const [rmaModalOpen, setRmaModalOpen] = useState(false);
 
   // Finance: Record Expense button lives in the top navbar — module exposes openAddExpense via ref
   const financeModuleRef = useRef<{ openAddExpense: () => void } | null>(null);
@@ -889,7 +885,6 @@ export default function App() {
         return (techFilter !== 'ALL' ? 1 : 0) + d;
       case 'intake':
       case 'pos':
-      case 'suppliers':
       case 'qa':
         return (statusFilter !== 'ALL' ? 1 : 0) + d;
       case 'inventory':
@@ -927,22 +922,14 @@ export default function App() {
         )}
 
 
-        {(tab === 'intake' || tab === 'suppliers' || tab === 'qa') && (
+        {(tab === 'intake' || tab === 'qa') && (
           <div>
             <DrawerSelect
-              label={tab === 'suppliers' ? 'RMA Status' : tab === 'qa' ? 'QA Status' : 'Status'}
+              label={tab === 'qa' ? 'QA Status' : 'Status'}
               value={statusFilter}
               onChange={(v) => setStatusFilter(v as any)}
               options={
-                tab === 'suppliers'
-                    ? [
-                        { value: 'ALL', label: 'All RMA Statuses' },
-                        { value: 'Draft', label: 'Draft' },
-                        { value: 'Shipped to Vendor', label: 'Shipped to Vendor' },
-                        { value: 'Replaced / Refunded', label: 'Replaced / Refunded' },
-                        { value: 'Closed', label: 'Closed' },
-                      ]
-                    : tab === 'qa'
+                tab === 'qa'
                       ? [
                           { value: 'ALL', label: 'All QA Statuses' },
                           { value: 'Pending QA', label: 'Pending QA' },
@@ -1131,7 +1118,7 @@ export default function App() {
           </div>
         )}
 
-        {(tab === 'intake' || tab === 'crm' || tab === 'suppliers' || tab === 'qa' || tab === 'finance' || tab === 'dashboard') && (
+        {(tab === 'intake' || tab === 'crm' || tab === 'qa' || tab === 'finance' || tab === 'dashboard') && (
           <div>
             <DrawerSelect
               label="Date"
@@ -1638,46 +1625,6 @@ export default function App() {
   };
 
   // --- Purchase Orders (feature wiring: create + receive → restock) ---
-  const handleAddPurchaseOrder = (po: PurchaseOrder) => {
-    setPurchaseOrders((prev) => [po, ...prev]);
-    saveDocument('purchaseOrders', po).catch(reportSaveError);
-    addToast(`PO ${po.poNumber} created for ${po.supplierName} · ${po.totalCost.toLocaleString()} MMK`, 'success', 'Purchase Order');
-  };
-
-  // Mark a PO as Received and add its items back into parts stock (the flow was
-  // display-only before — nothing ever wrote purchaseOrders or restocked).
-  const handleReceivePurchaseOrder = (poId: string) => {
-    const po = purchaseOrders.find((p) => p.id === poId);
-    if (!po) return;
-    if (po.status === 'Received') {
-      addToast(`${po.poNumber} is already received.`, 'info', 'Purchase Order');
-      return;
-    }
-    const nowIso = new Date().toISOString();
-    let restocked = 0;
-    setParts((prev) =>
-      prev.map((part) => {
-        const line = po.items.find((it) => it.partId === part.id);
-        if (!line) return part;
-        restocked += line.quantity;
-        const updated = {
-          ...part,
-          quantityInStock: Number(part.quantityInStock || 0) + line.quantity,
-        };
-        saveDocument('parts', updated).catch(reportSaveError);
-        return updated;
-      })
-    );
-    const updatedPo: PurchaseOrder = {
-      ...po,
-      status: 'Received',
-      receivedAt: nowIso,
-    };
-    setPurchaseOrders((prev) => prev.map((p) => (p.id === poId ? updatedPo : p)));
-    saveDocument('purchaseOrders', updatedPo).catch(reportSaveError);
-    addToast(`${po.poNumber} received — ${restocked} unit(s) added to stock.`, 'success', 'PO Received');
-  };
-
   const handleUpdateSupplier = (supplier: Supplier) => {
     setSuppliers((prev) => prev.map((s) => (s.id === supplier.id ? supplier : s)));
     saveDocument('suppliers', supplier).catch(reportSaveError);
@@ -1693,41 +1640,6 @@ export default function App() {
     setSuppliers((prev) => prev.filter((s) => s.id !== supplierId));
     deleteDocument('suppliers', supplierId).catch(reportSaveError);
     addToast(`Supplier "${sup ? sup.name : supplierId}" deleted from system`, 'info', 'Supplier Deleted');
-  };
-
-  const handleUpdateRmaStatus = (rmaId: string, status: RmaStatus, creditAmount?: number) => {
-    const rma = rmas.find((r) => r.id === rmaId);
-    setRmas((prev) =>
-      prev.map((r) => {
-        if (r.id === rmaId) {
-          const updated = {
-            ...r,
-            status,
-            vendorCreditAmount: creditAmount !== undefined ? creditAmount : r.vendorCreditAmount,
-          };
-          saveDocument('rmas', updated).catch(reportSaveError);
-          return updated;
-        }
-        return r;
-      })
-    );
-    // Replacement Received → the replacement part comes back into stock.
-    if (status === 'Replacement Received' && rma) {
-      const qty = Number(rma.quantity || 0);
-      if (qty > 0) {
-        setParts((prev) =>
-          prev.map((p) => {
-            if (p.id === rma.partId) {
-              const updated = { ...p, quantityInStock: Number(p.quantityInStock || 0) + qty };
-              saveDocument('parts', updated).catch(reportSaveError);
-              return updated;
-            }
-            return p;
-          })
-        );
-        addToast(`Replacement received — ${qty} × ${rma.partName} added back to stock.`, 'success', 'RMA Replacement');
-      }
-    }
   };
 
   const handleMarkPaid = (workOrder: WorkOrder, paymentMethod: string, completedAtIso?: string) => {
@@ -2007,7 +1919,6 @@ export default function App() {
       case 'simple-ticket': return { category: t('navRepair'), title: 'Simple Ticket' };
       case 'trello': return { category: t('navRepair'), title: 'Ticket Board' };
       case 'inventory': return { category: t('navInventory'), title: t('navPartsMatrix') };
-      case 'suppliers': return { category: t('navInventory'), title: t('navSuppliers') };
       case 'price-catalog': return { category: t('navFinance'), title: t('navPriceList') };
       case 'pos': return { category: t('navFinance'), title: t('navPos') };
       case 'finance': return { category: t('navFinance'), title: 'Finance' };
@@ -2165,7 +2076,7 @@ export default function App() {
 
             {/* Price Catalog: top navbar controls hidden — module has its own device switcher,
                 settings live in Settings tab (Ko Hein 2026-08-09) */}
-            {activeTab === 'price-catalog' || activeTab === 'inventory' ? null : ['intake', 'pos', 'inventory', 'crm', 'suppliers'].includes(activeTab) ? (
+            {activeTab === 'price-catalog' || activeTab === 'inventory' ? null : ['intake', 'pos', 'inventory', 'crm'].includes(activeTab) ? (
               /* Contextual Search Input — desktop only (modules have their own mobile search);
                   also hidden on iPad inventory where the navbar scan box handles search */
               !(isIpad && activeTab === 'inventory') && (
@@ -2181,7 +2092,6 @@ export default function App() {
                     activeTab === 'intake' ? 'Search tickets'
                     : activeTab === 'inventory' ? 'Search parts'
                     : activeTab === 'crm' ? 'Search customers'
-                    : activeTab === 'suppliers' ? 'Search suppliers'
                     : activeTab === 'qa' ? 'Search QA tickets'
                     : activeTab === 'pos' ? 'Search POS tickets'
                     : `Search ${currentTab.title}`
@@ -2193,8 +2103,6 @@ export default function App() {
                       ? "Search Part #, Category, SKU..."
                       : activeTab === 'crm'
                       ? "Search Name, Phone, Email..."
-                      : activeTab === 'suppliers'
-                      ? "Search Vendor, Part, RMA #..."
                       : activeTab === 'qa'
                       ? "Search Ticket #, Model, Tech..."
                       : activeTab === 'pos'
@@ -2507,28 +2415,6 @@ export default function App() {
                 </div>              </>
             )}
 
-            {activeTab === 'suppliers' && (
-              <>
-                <div className="hidden md:flex items-center gap-2">
-                <CustomDropdownMenu
-                  value={statusFilter}
-                  onChange={(val) => setStatusFilter(val)}
-                  buttonClassName="!px-2.5 !py-1.5 !h-10 text-xs"
-                  triggerIcon={<ListFilter className="w-3.5 h-3.5" />}
-                  options={[
-                    { value: 'ALL', label: 'All RMA Statuses' },
-                    { value: 'Draft', label: 'Draft' },
-                    { value: 'Shipped to Vendor', label: 'Shipped to Vendor' },
-                    { value: 'Replaced / Refunded', label: 'Replaced / Refunded' },
-                    { value: 'Closed', label: 'Closed' },
-                  ]}
-                />
-
-                <DateFilterSelector filter={dateFilter} onChange={setDateFilter} compact iconOnly />
-
-                </div>              </>
-            )}
-
             {activeTab === 'qa' && (
               <>
                 {/* All QA Status dropdown + date filter + search removed 2026-08-10 (Ko Hein);
@@ -2633,15 +2519,6 @@ export default function App() {
                 </div>
               )}
               </>
-            ) : activeTab === 'suppliers' ? (
-              <Button
-                onClick={() => setRmaModalOpen(true)}
-                // audit A-P3: token hover pair (was raw purple-600).
-                className="h-10 flex items-center space-x-1.5 px-3.5 bg-purple hover:bg-purple/90 text-white text-xs font-bold rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>{t('flagRma')}</span>
-              </Button>
             ) : null}
 
             {/* Mobile filter drawer trigger — rightmost on phones (all tabs);
@@ -2816,30 +2693,6 @@ export default function App() {
                   purchaseOrders={purchaseOrders}
                   showAddModal={inventoryAddModalOpen}
                   setShowAddModal={setInventoryAddModalOpen}
-                />
-              )}
-
-              {activeTab === 'suppliers' && (
-                <SupplierRmaModule
-                  suppliers={suppliers}
-                  rmas={rmas}
-                  purchaseOrders={purchaseOrders}
-                  parts={parts}
-                  systemSettings={systemSettings}
-                  onAddRma={handleAddRma}
-                  onUpdatePart={handleUpdatePart}
-                  onAddSupplier={handleAddSupplier}
-                  onUpdateSupplier={handleUpdateSupplier}
-                  onDeleteSupplier={handleDeleteSupplier}
-                  onUpdateRmaStatus={handleUpdateRmaStatus}
-                  onAddPurchaseOrder={handleAddPurchaseOrder}
-                  onReceivePurchaseOrder={handleReceivePurchaseOrder}
-                  searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
-                  statusFilter={statusFilter}
-                  setStatusFilter={setStatusFilter}
-                  showNewRmaModal={rmaModalOpen}
-                  setShowNewRmaModal={setRmaModalOpen}
                 />
               )}
 
@@ -3129,7 +2982,7 @@ export default function App() {
         }}
         resetDisabled={getActiveFilterCount(activeTab) === 0}
         alwaysVisible={isIpad}
-        title={`${activeTab === 'crm' ? 'CRM' : activeTab === 'inventory' ? 'Inventory' : activeTab === 'suppliers' ? 'Suppliers' : activeTab === 'qa' ? 'QA' : activeTab === 'finance' ? 'Finance' : activeTab === 'dashboard' ? 'Dashboard' : 'Intake'} Filters`}
+        title={`${activeTab === 'crm' ? 'CRM' : activeTab === 'inventory' ? 'Inventory' : activeTab === 'qa' ? 'QA' : activeTab === 'finance' ? 'Finance' : activeTab === 'dashboard' ? 'Dashboard' : 'Intake'} Filters`}
       >
         {renderMobileFilters(activeTab)}
       </RightFilterDrawer>
