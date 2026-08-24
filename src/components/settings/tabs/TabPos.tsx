@@ -401,6 +401,7 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                   onChange={(e) => setFormData({ ...formData, a4DiagnosticDisplayFormat: e.target.value as SystemSettings['a4DiagnosticDisplayFormat'] })}
                   className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none "
                 >
+                  <option value="simple_checks">Simple Checks (circles + notes)</option>
                   <option value="comparison_table">Before vs After Table</option>
                   <option value="dual_grid">Before & After Dual Cards</option>
                   <option value="before_only">Before Repair Only</option>

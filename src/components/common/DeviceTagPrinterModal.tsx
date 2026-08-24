@@ -93,7 +93,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
   const a4ColorMode = systemSettings?.a4PrintColorMode ?? 'monochrome';
   const a4LayoutDensity = systemSettings?.a4PrintLayoutDensity ?? 'compact';
   const showDiagnostics = systemSettings?.a4ShowDiagnosticsTable ?? true;
-  const diagDisplayFormat = systemSettings?.a4DiagnosticDisplayFormat ?? 'comparison_table';
+  const diagDisplayFormat = systemSettings?.a4DiagnosticDisplayFormat ?? 'simple_checks';
   const showPricing = systemSettings?.a4ShowPricingTable ?? true;
   const showTerms = systemSettings?.a4ShowTermsDisclaimer ?? true;
   // The shared receipt text is also used on the A4 voucher so POS receipts and
@@ -190,6 +190,24 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
   // finalPrice, so the total is the discounted sum (was workOrder.subtotal =
   // pre-discount, which contradicted the rows; audit 2026-08-24).
   const estimatedTotal = printableRepairItems.reduce((sum, item) => sum + item.finalPrice, 0);
+
+  // Simple Ticket-style check circle (Ko Hein 2026-08-25): compact circle
+  // checkbox + note text on the A4 voucher, mirroring the Simple Ticket form.
+  const renderDiagCircle = (status: string, isMono: boolean, label: string) => (
+    <span
+      title={`${label}: ${status}`}
+      aria-label={`${label} ${status}`}
+      className={`a4-diag-circle inline-flex h-[14px] w-[14px] shrink-0 items-center justify-center rounded-full border text-[9px] font-black leading-none ${
+        status === 'Pass'
+          ? isMono ? 'border-black bg-black text-white' : 'border-success bg-success text-white'
+          : status === 'Fail'
+          ? isMono ? 'border-black bg-white text-black' : 'border-danger bg-danger text-white'
+          : 'border-line bg-white'
+      }`}
+    >
+      {status === 'Pass' ? '✓' : status === 'Fail' ? '✕' : ''}
+    </span>
+  );
 
   // Helper renderer for diagnostic status with clean text and icons
   const renderDiagStatus = (status: string, isMono: boolean) => {
@@ -439,6 +457,34 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                 )}
               </div>
             </div>
+
+            {/* FORMAT 0: SIMPLE CHECKS — circle checkboxes + note text in a
+                bordered box (Simple Ticket style; Ko Hein 2026-08-25) */}
+            {effectiveDiagDisplayFormat === 'simple_checks' && (
+              <div className="a4-simple-checks rounded-lg border border-line p-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-px">
+                  {beforeDiagnosticList.map((beforeItem, idx) => {
+                    const afterItem = hasAfterQa ? (afterDiagnosticList[idx] || beforeItem) : null;
+                    const note = (
+                      afterItem?.note || beforeItem.note ||
+                      (beforeItem.status === 'Fail' && afterItem?.status === 'Pass' ? 'Repaired & Passed QA' : 'Normal')
+                    ).trim();
+                    return (
+                      <div key={beforeItem.name} className="flex items-center gap-1.5 border-b border-line/70 py-[3px] min-h-[22px]">
+                        {renderDiagCircle(beforeItem.status, isMono, 'Before')}
+                        {hasAfterQa && renderDiagCircle(afterItem?.status || beforeItem.status, isMono, 'After QA')}
+                        <span className="min-w-0 flex-1 truncate font-semibold text-[11px] text-black">
+                          <strong className="font-mono text-muted">{idx + 1}.</strong> {beforeItem.name}
+                        </span>
+                        <span className="shrink-0 max-w-[45%] truncate text-[10px] italic text-muted" title={note}>
+                          {note}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* FORMAT 1: COMPARISON TABLE */}
             {effectiveDiagDisplayFormat === 'comparison_table' && hasAfterQa && (
@@ -771,6 +817,24 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
           .a4-print-compact h3 { font-size: 11px !important; }
           .a4-print-compact .a4-info-card p { font-size: 10px !important; }
           .a4-print-compact .print-shop-logo { border: none !important; }
+          /* Simple Checks diagnostic format — compact circle rows (Ko Hein 2026-08-25) */
+          .a4-voucher-print .a4-simple-checks {
+            font-size: 9.5px !important;
+            padding: 2mm !important;
+          }
+          .a4-voucher-print .a4-simple-checks > div > div {
+            min-height: 16px !important;
+            padding: 2px 0 !important;
+            gap: 5px !important;
+          }
+          .a4-voucher-print .a4-simple-checks .a4-diag-circle {
+            width: 12px !important;
+            height: 12px !important;
+            font-size: 8px !important;
+          }
+          .a4-voucher-print .a4-simple-checks > div > div > span:last-child {
+            font-size: 8.5px !important;
+          }
           @page {
             size: ${paperSize === 'a4_voucher' ? 'A4 portrait' : '3in 2in'};
             /* audit F-P3: zero margin for the 3x2 sticker — a 4mm margin left

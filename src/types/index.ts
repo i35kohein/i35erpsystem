@@ -392,7 +392,7 @@ export interface SystemSettings {
   a4ShowTermsDisclaimer?: boolean;
   a4CustomHeaderNote?: string;
   a4PrintLayoutDensity?: 'standard' | 'compact' | 'dual_voucher';
-  a4DiagnosticDisplayFormat?: 'comparison_table' | 'dual_grid' | 'before_only' | 'after_only';
+  a4DiagnosticDisplayFormat?: 'simple_checks' | 'comparison_table' | 'dual_grid' | 'before_only' | 'after_only';
 
   // Quality Assurance
   mandatoryQaChecklist: boolean;
