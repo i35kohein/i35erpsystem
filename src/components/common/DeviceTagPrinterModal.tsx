@@ -186,6 +186,11 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
     setTimeout(() => window.print(), 50);
   };
 
+  // Estimated total must match the printed rows — rows show discounted
+  // finalPrice, so the total is the discounted sum (was workOrder.subtotal =
+  // pre-discount, which contradicted the rows; audit 2026-08-24).
+  const estimatedTotal = printableRepairItems.reduce((sum, item) => sum + item.finalPrice, 0);
+
   // Helper renderer for diagnostic status with clean text and icons
   const renderDiagStatus = (status: string, isMono: boolean) => {
     if (status === 'Pass') {
@@ -404,7 +409,7 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                   <tr className={`border-t font-bold ${isMono ? 'border-black' : 'border-slate-800'}`}>
                     <td colSpan={4} className="p-1.5 text-right font-sans text-xs">Estimated Total Charge:</td>
                     <td className={`p-1.5 text-right text-sm font-mono tabular-nums ${isMono ? 'text-black font-extrabold' : 'text-brand'}`}>
-                      {(workOrder.subtotal || 0).toLocaleString()} MMK
+                      {(estimatedTotal || 0).toLocaleString()} MMK
                     </td>
                   </tr>
                 </tfoot>
