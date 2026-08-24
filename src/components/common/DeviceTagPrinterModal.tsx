@@ -250,9 +250,13 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
 
     return (
       <div className={`a4-voucher-content relative space-y-4 font-sans text-xs ${isMono ? 'text-black' : 'text-ink'}`}>
-        {/* PAID watermark — large diagonal stamp across the body */}
+        {/* PAID watermark — large diagonal stamp across the body.
+            NOTE: avoid the 'inset-0' utility class — the print CSS resets
+            '.fixed, .inset-0 { position: static !important }' for modal
+            overlays, which made the stamp float to the top of the page in
+            print (Ko Hein 2026-08-25). */}
         {isPaidWo && (
-          <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center overflow-hidden">
+          <div className="pointer-events-none absolute top-0 left-0 right-0 bottom-0 z-10 flex items-center justify-center overflow-hidden">
             <div className={`-rotate-[24deg] select-none border-4 px-10 py-3 font-black uppercase tracking-[0.35em] ${
               isMono
                 ? 'border-black/20 text-black/25'
