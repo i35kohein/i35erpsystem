@@ -1045,7 +1045,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                           {highlight(tab.label)}
                         </span>
                         {tab.desc && !q && (
-                          <span className="text-[10px] text-muted leading-snug">{tab.desc}</span>
+                          <span className={`text-[10px] leading-snug ${isActive ? 'text-white/85' : 'text-muted'}`}>{tab.desc}</span>
                         )}
                         <span className="absolute top-1.5 right-1.5 flex items-center gap-1 shrink-0">
                           {isDirty && isActive && (
