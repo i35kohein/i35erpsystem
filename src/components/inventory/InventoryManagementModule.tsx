@@ -62,6 +62,8 @@ interface InventoryManagementModuleProps {
   onDeleteSupplier?: (supplierId: string) => void;
   onDeletePart?: (partId: string) => void;
   onUpdatePartStock: (partId: string, newStock: number) => void;
+  /** Navigate to another tab (used by the purchase-order CTA). */
+  onNavigateToTab?: (tab: string) => void;
   searchQuery: string;
   setSearchQuery?: (q: string) => void;
   selectedCategory?: string;
@@ -125,6 +127,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   scanQuery: propScanQuery,
   setScanQuery: propSetScanQuery,
   onRegisterScanHandler,
+  onNavigateToTab,
   showAddModal: propShowAddModal,
   setShowAddModal: propSetShowAddModal,
 }) => {
@@ -167,6 +170,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const [isInlineSaving, setIsInlineSaving] = useState(false);
   const [localLowStockOnly, setLocalLowStockOnly] = useState(false);
   const [ownerFilter, setOwnerFilter] = useState<'ALL' | PartOwner>('ALL');
+  const [stockStatusFilter, setStockStatusFilter] = useState<'ALL' | 'LOW' | 'OUT'>('ALL');
   const showLowStockOnly = propShowLowStockOnly !== undefined ? propShowLowStockOnly : localLowStockOnly;
   const setShowLowStockOnly = (v: boolean) => {
     if (propOnSetLowStockOnly) propOnSetLowStockOnly(v);
@@ -875,6 +879,10 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           (device) => isSameDeviceModel(device, selectedModelFilter)
         );
       const matchesLowStock = !showLowStockOnly || part.quantityInStock <= part.reorderPoint;
+      const matchesStockStatus =
+        stockStatusFilter === 'ALL' ? true :
+        stockStatusFilter === 'OUT' ? part.quantityInStock === 0 :
+        part.quantityInStock > 0 && part.quantityInStock <= part.reorderPoint;
       const matchesOwner = ownerFilter === 'ALL' || (part.owner || 'APP') === ownerFilter;
       
       const query = activeSearchQuery.toLowerCase().trim();
@@ -886,7 +894,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         part.locationBin.toLowerCase().includes(query) ||
         part.deviceCompatibility.some((d) => d.toLowerCase().includes(query));
 
-      return matchesQuality && matchesCategory && matchesModel && matchesLowStock && matchesSearch && matchesOwner;
+      return matchesQuality && matchesCategory && matchesModel && matchesLowStock && matchesStockStatus && matchesSearch && matchesOwner;
     }).sort((a, b) => {
       if (sortKey === 'stock') {
         const diff = a.quantityInStock - b.quantityInStock;
@@ -908,7 +916,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       if (byCategory !== 0) return byCategory;
       return (a.name || '').localeCompare(b.name || '', undefined, { numeric: true, sensitivity: 'base' });
     });
-  }, [parts, selectedQuality, selectedCategory, selectedModelFilter, showLowStockOnly, activeSearchQuery, sortKey, sortDir, ownerFilter]);
+  }, [parts, selectedQuality, selectedCategory, selectedModelFilter, showLowStockOnly, stockStatusFilter, activeSearchQuery, sortKey, sortDir, ownerFilter]);
 
   const paginatedParts = filteredParts;
 
@@ -1256,29 +1264,124 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           </div>
         )}
 
-        {/* Low-stock quick audit banner — visible in Stock view too (not just Profit) */}
+        {/* Low-stock quick audit banner — action-oriented (Ko Hein 2026-08-24) */}
         {metrics.lowStockCount > 0 && (
-          <Button
-            type="button"
-            onClick={() => handleToggleLowStockOnly()}
-            className={`w-full flex items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-xs transition-all cursor-pointer active:scale-95 ${
-              showLowStockOnly
-                ? 'bg-warning border-amber-600 text-white'
-                : 'bg-warning/10 hover:bg-warning/15 border-warning/30 text-warning'
-            }`}
-          >
-            <span className="flex items-center gap-2 min-w-0">
-              <AlertTriangle className={`w-4 h-4 shrink-0 ${showLowStockOnly ? 'text-white' : 'text-warning'}`} />
-              <span className="truncate">
-                <strong className="font-mono">{metrics.lowStockCount}</strong> SKUs at or below reorder point
-                {metrics.outOfStockCount > 0 && <span className="opacity-80"> · {metrics.outOfStockCount} out of stock</span>}
-              </span>
-            </span>
-            <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-black ${showLowStockOnly ? 'bg-white text-warning' : 'bg-warning/25 text-warning'}`}>
-              {showLowStockOnly ? 'Filter Active ✓' : 'Tap to Filter'}
-            </span>
-          </Button>
+          <div className="w-full rounded-xl border border-warning/30 bg-warning/10 p-2.5 text-xs space-y-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <AlertTriangle className="w-4 h-4 shrink-0 text-warning" />
+                <span className="font-black text-warning">Stock Alert</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className={`rounded-full px-2 py-0.5 font-black border transition-colors ${
+                  stockStatusFilter === 'OUT'
+                    ? 'bg-danger text-white border-danger'
+                    : 'bg-danger/15 text-danger border-danger/30'
+                }`}>
+                  {metrics.outOfStockCount} out of stock
+                </span>
+                <span className={`rounded-full px-2 py-0.5 font-black border transition-colors ${
+                  stockStatusFilter === 'LOW'
+                    ? 'bg-warning text-white border-warning'
+                    : 'bg-warning/20 text-warning border-warning/30'
+                }`}>
+                  {Math.max(0, metrics.lowStockCount - metrics.outOfStockCount)} low stock
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                type="button"
+                onClick={() => { setStockStatusFilter('OUT'); setShowLowStockOnly(false); }}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-danger px-2.5 py-1.5 text-xs font-black text-white transition-all cursor-pointer hover:bg-danger/90 active:scale-95"
+              >
+                <PackageX className="w-3.5 h-3.5" />
+                Review {metrics.outOfStockCount} out-of-stock items
+              </Button>
+              <Button
+                type="button"
+                onClick={() => onNavigateToTab?.('suppliers')}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-2.5 py-1.5 text-xs font-black text-white transition-all cursor-pointer hover:bg-brand-deep active:scale-95"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Create purchase order
+              </Button>
+              <Button
+                type="button"
+                onClick={() => handleToggleLowStockOnly()}
+                variant="outline"
+                size="sm"
+                className="rounded-lg px-2.5 py-1.5 text-xs font-bold cursor-pointer"
+              >
+                {showLowStockOnly ? 'Filter Active ✓' : 'View low stock'}
+              </Button>
+              {stockStatusFilter !== 'ALL' && (
+                <Button
+                  type="button"
+                  onClick={() => setStockStatusFilter('ALL')}
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-lg px-2 py-1.5 text-xs font-bold text-muted cursor-pointer hover:text-ink"
+                >
+                  <X className="w-3 h-3 mr-1 inline" /> Clear
+                </Button>
+              )}
+            </div>
+          </div>
         )}
+
+        {/* Top filters — Model / Part type / Quality / Stock status (Ko Hein 2026-08-24) */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-[10px] font-extrabold uppercase tracking-wide text-muted mr-0.5">Filter:</span>
+          <select
+            aria-label="Filter by model"
+            value={selectedModelFilter}
+            onChange={(e) => setSelectedModelFilter(e.target.value)}
+            className="rounded-lg border border-line bg-white px-2 py-1.5 text-xs font-semibold text-ink outline-none max-w-[150px]"
+          >
+            {modelFilterOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+          <select
+            aria-label="Filter by part type"
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="rounded-lg border border-line bg-white px-2 py-1.5 text-xs font-semibold text-ink outline-none max-w-[150px]"
+          >
+            {categoryFilterOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+          <select
+            aria-label="Filter by quality tier"
+            value={selectedQuality}
+            onChange={(e) => setSelectedQuality(e.target.value)}
+            className="rounded-lg border border-line bg-white px-2 py-1.5 text-xs font-semibold text-ink outline-none max-w-[140px]"
+          >
+            {tierFilterOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+          {(['ALL', 'LOW', 'OUT'] as const).map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => setStockStatusFilter(s)}
+              className={`rounded-lg px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                stockStatusFilter === s
+                  ? s === 'OUT'
+                    ? 'bg-danger text-white shadow-2xs'
+                    : s === 'LOW'
+                    ? 'bg-warning text-white shadow-2xs'
+                    : 'bg-brand text-white shadow-2xs'
+                  : 'bg-surface text-muted hover:bg-line hover:text-ink'
+              }`}
+            >
+              {s === 'ALL' ? 'All' : s === 'LOW' ? 'Low' : 'Out'}
+            </button>
+          ))}
+        </div>
 
         <div className="workspace-panel workspace-panel--standard !h-auto !max-h-none flex-1 min-h-0 rounded-2xl border border-line bg-white text-xs shadow-xs">
           {filteredParts.length === 0 ? (

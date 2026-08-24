@@ -385,6 +385,8 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
   // "Ready for Pickup" = Finished only. Taken Out tickets have already been
   // collected — counting them inflated the card.
   const readyForPickup = filteredWorkOrders.filter((w) => w.status === 'Finished');
+  // Out-of-stock parts — drives the Today's Actions strip (Ko Hein 2026-08-24).
+  const outOfStockParts = parts.filter((p) => Number(p.quantityInStock) === 0);
 
   const pendingRmas = rmas.filter((r) => r.status === 'Shipped to Vendor' || r.status === 'Draft');
 
@@ -622,6 +624,46 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
 
   return (
     <div className="space-y-3">
+      {/* Today's Actions — priority strip (Ko Hein 2026-08-24): the three
+          signals the shop must act on first, above everything else. */}
+      {(activeRepairs.length > 0 || readyForPickup.length > 0 || outOfStockParts.length > 0) && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <button
+            type="button"
+            onClick={() => onNavigateToTab('intake')}
+            className="flex items-center justify-between gap-2 rounded-2xl border border-warning/30 bg-warning/10 px-3.5 py-3 text-left transition-all cursor-pointer hover:bg-warning/15 active:scale-[0.98] min-h-[44px]"
+          >
+            <span className="flex items-center gap-2 min-w-0">
+              <ClipboardList className="w-4 h-4 shrink-0 text-warning" />
+              <span className="text-xs font-bold text-ink">Active repairs</span>
+            </span>
+            <span className="font-mono text-lg font-black text-warning">{activeRepairs.length}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onNavigateToTab('intake')}
+            className="flex items-center justify-between gap-2 rounded-2xl border border-success/30 bg-success/10 px-3.5 py-3 text-left transition-all cursor-pointer hover:bg-success/15 active:scale-[0.98] min-h-[44px]"
+          >
+            <span className="flex items-center gap-2 min-w-0">
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-success-deep" />
+              <span className="text-xs font-bold text-ink">Ready for pickup</span>
+            </span>
+            <span className="font-mono text-lg font-black text-success-deep">{readyForPickup.length}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onNavigateToTab('inventory')}
+            className="flex items-center justify-between gap-2 rounded-2xl border border-danger/30 bg-danger/10 px-3.5 py-3 text-left transition-all cursor-pointer hover:bg-danger/15 active:scale-[0.98] min-h-[44px]"
+          >
+            <span className="flex items-center gap-2 min-w-0">
+              <AlertTriangle className="w-4 h-4 shrink-0 text-danger" />
+              <span className="text-xs font-bold text-ink">Out of stock</span>
+            </span>
+            <span className="font-mono text-lg font-black text-danger">{outOfStockParts.length}</span>
+          </button>
+        </div>
+      )}
+
       {/* Inventory Fund reminder — parts used from stock, not settled yet */}
       {pendingFundTickets.length > 0 && (
         <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-warning/10 border border-warning/30 rounded-2xl text-xs shadow-2xs">

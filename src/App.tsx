@@ -2006,13 +2006,14 @@ export default function App() {
       case 'trello': return { category: t('navRepair'), title: 'Ticket Board' };
       case 'inventory': return { category: t('navInventory'), title: t('navPartsMatrix') };
       case 'suppliers': return { category: t('navInventory'), title: t('navSuppliers') };
-      case 'price-catalog': return { category: t('navRepair'), title: t('navPriceList') };
+      case 'price-catalog': return { category: t('navFinance'), title: t('navPriceList') };
       case 'pos': return { category: t('navFinance'), title: t('navPos') };
       case 'finance': return { category: t('navFinance'), title: 'Finance' };
-      case 'crm': return { category: t('navManagement'), title: t('navCrm') };
+      case 'crm': return { category: t('navPeople'), title: t('navCrm') };
       case 'follow-up': return { category: t('navRepair'), title: 'Follow-Ups' };
-      case 'settings': return { category: t('navManagement'), title: t('navSettings') };
+      case 'settings': return { category: t('navSettings'), title: t('navSettings') };
       case 'qa': return { category: t('navRepair'), title: t('navQa') };
+      case 'mermaid': return { category: t('navMore'), title: t('navMermaid') };
       default: return { category: 'ERP', title: t('appTitle') };
     }
   };
@@ -2791,6 +2792,7 @@ export default function App() {
                   scanQuery={inventoryScanQuery}
                   setScanQuery={setInventoryScanQuery}
                   onRegisterScanHandler={(fn) => { inventoryScanSubmitRef.current = fn; }}
+                  onNavigateToTab={(tab) => setActiveTab(tab as any)}
                   showAddModal={inventoryAddModalOpen}
                   setShowAddModal={setInventoryAddModalOpen}
                 />

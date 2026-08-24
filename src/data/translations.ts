@@ -8,11 +8,13 @@ export const translations: TranslationDictionary = {
   appSubtitle: { en: 'Repair Shop Operating System', mm: 'စက်ပစ္စည်းပြုပြင်ရေးဆိုင် စီမံခန့်ခွဲမှုစနစ်' },
 
   // Navigation Groups
-  navRepair: { en: 'REPAIR', mm: 'ပြုပြင်ရေး' },
-  navInventory: { en: 'INVENTORY', mm: 'ပစ္စည်းစာရင်း' },
-  navFinance: { en: 'FINANCE', mm: 'ဘဏ္ဍာရေး' },
-  navManagement: { en: 'MANAGEMENT', mm: 'စီမံခန့်ခွဲမှု' },
-  navSpecialized: { en: 'SPECIALIZED', mm: 'အထူးပြုစနစ်' },
+  navRepair: { en: 'Repairs', mm: 'ပြုပြင်ရေး' },
+  navInventory: { en: 'Inventory', mm: 'ပစ္စည်းစာရင်း' },
+  navFinance: { en: 'Sales & Finance', mm: 'အရောင်းနှင့် ဘဏ္ဍာရေး' },
+  navManagement: { en: 'Management', mm: 'စီမံခန့်ခွဲမှု' },
+  navPeople: { en: 'People', mm: 'လူပုဂ္ဂိုလ်များ' },
+  navMore: { en: 'More', mm: 'နောက်ထပ်' },
+  navSpecialized: { en: 'Specialized', mm: 'အထူးပြုစနစ်' },
 
   // Navigation Tabs & Header Titles
   navDashboard: { en: 'Dashboard', mm: 'ဒက်ရှ်ဘုတ်' },
@@ -22,7 +24,7 @@ export const translations: TranslationDictionary = {
   // audit A-P2: keys for the previously hardcoded nav labels.
   navSimpleTicket: { en: 'Simple Ticket', mm: 'ရိုးရှင်းလက်မှတ်' },
   navTicketBoard: { en: 'Ticket Board', mm: 'လက်မှတ်ဘုတ်' },
-  navMermaid: { en: 'Mermaid', mm: 'Mermaid' },
+  navMermaid: { en: 'Workflow Diagram', mm: 'လုပ်ငန်းစဉ် ပုံကြမ်း' },
   navCreateTicket: { en: 'New Ticket', mm: 'ပြုပြင်ရေး လက်မှတ်အသစ် စာရင်းသွင်းခြင်း' },
   navPipeline: { en: 'Pipeline', mm: 'လုပ်ငန်းစဉ် လိုင်း' },
   navPriceList: { en: 'Price List', mm: 'ဈေးနှုန်းစာရင်း' },

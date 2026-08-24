@@ -147,11 +147,6 @@ export const Navigation: React.FC<NavigationProps> = ({
           badge: followUpPendingCount > 0 ? followUpPendingCount : undefined,
           badgeColor: 'bg-purple text-white',
         },
-        {
-          id: 'price-catalog',
-          label: t('navPriceList'),
-          icon: Tag,
-        },
       ],
     },
     {
@@ -171,6 +166,11 @@ export const Navigation: React.FC<NavigationProps> = ({
           badge: financePendingCount > 0 ? financePendingCount : undefined,
           badgeColor: 'bg-warning text-white',
         },
+        {
+          id: 'price-catalog',
+          label: t('navPriceList'),
+          icon: Tag,
+        },
       ],
     },
     {
@@ -178,7 +178,7 @@ export const Navigation: React.FC<NavigationProps> = ({
       items: [
         {
           id: 'inventory',
-          label: isCollapsed ? t('navPartsMatrix') : t('navPartsMatrix'),
+          label: t('navPartsMatrix'),
           icon: Boxes,
           badge: lowStockCount && lowStockCount > 0 ? lowStockCount : undefined,
           badgeColor: 'bg-danger text-white',
@@ -191,22 +191,32 @@ export const Navigation: React.FC<NavigationProps> = ({
       ],
     },
     {
-      title: t('navManagement'),
+      title: t('navPeople'),
       items: [
         {
           id: 'crm',
           label: t('navCrm'),
           icon: Users,
         },
-        {
-          id: 'mermaid',
-          label: t('navMermaid'),
-          icon: Tag,
-        },
+      ],
+    },
+    {
+      title: t('navSettings'),
+      items: [
         {
           id: 'settings',
           label: t('navSettings'),
           icon: Settings,
+        },
+      ],
+    },
+    {
+      title: t('navMore'),
+      items: [
+        {
+          id: 'mermaid',
+          label: t('navMermaid'),
+          icon: Tag,
         },
       ],
     },
@@ -260,7 +270,7 @@ export const Navigation: React.FC<NavigationProps> = ({
 
   const navButtonBase = (isActive: boolean) => `
     group w-full border transition-all duration-200
-    ${effectiveCollapsed ? `${collapsedNavBtn} relative` : 'h-10 justify-between px-2.5 rounded-xl'}
+    ${effectiveCollapsed ? `${collapsedNavBtn} relative` : 'h-11 lg:h-10 justify-between px-2.5 rounded-xl'}
     ${
       isActive
         ? 'bg-brand-soft text-brand-deep font-bold border-transparent'
@@ -443,7 +453,7 @@ export const Navigation: React.FC<NavigationProps> = ({
           {navGroups.map((group) => (
             <div key={group.title} className={`space-y-1 ${effectiveCollapsed ? '' : 'pb-2 border-b border-line/60 last:border-b-0'}`}>
               {!effectiveCollapsed && (
-                <div className="px-3 py-1 text-xs font-extrabold text-muted tracking-wider uppercase flex items-center justify-between">
+                <div className="px-3 py-1 text-xs font-extrabold text-muted tracking-wider flex items-center justify-between">
                   <span>{group.title}</span>
                   <span className="hidden sm:block w-8 h-[1px] bg-line" />
                 </div>

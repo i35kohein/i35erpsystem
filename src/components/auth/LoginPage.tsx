@@ -55,10 +55,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-1.5 block text-xs font-bold text-ink">Email</label>
+              <label htmlFor="login-email" className="mb-1.5 block text-xs font-bold text-ink">Email</label>
               <div className="relative">
                 <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
                 <Input
+                  id="login-email"
                   type="email"
                   required
                   autoComplete="email"
@@ -66,16 +67,17 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value.trim())}
                   placeholder="you@example.com"
-                  className="pl-10 pr-10 font-semibold"
+                  className="pl-10 pr-10 font-semibold !min-h-[44px]"
                 />
               </div>
             </div>
 
             <div>
-              <label className="mb-1.5 block text-xs font-bold text-ink">Password</label>
+              <label htmlFor="login-password" className="mb-1.5 block text-xs font-bold text-ink">Password</label>
               <div className="relative">
                 <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
                 <Input
+                  id="login-password"
                   type={showPassword ? 'text' : 'password'}
                   required
                   autoComplete="current-password"
@@ -83,12 +85,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="pl-10 pr-10 font-semibold"
+                  className="pl-10 pr-12 font-semibold !min-h-[44px]"
                 />
                 <Button variant="ghost"
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-ink"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 flex h-11 w-11 items-center justify-center text-muted hover:text-ink"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
