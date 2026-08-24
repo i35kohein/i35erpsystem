@@ -1024,7 +1024,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                           setSettingsDrilledIn(true);
                         }}
                         title={tab.label}
-                        className={`relative flex flex-col items-center justify-center gap-2 w-full text-center text-xs font-extrabold rounded-xl transition-all cursor-pointer border select-none active:scale-95 shrink-0 !min-h-24 px-2 py-3 ${
+                        className={`relative flex flex-col items-center justify-center gap-2 w-full text-center text-xs font-extrabold rounded-xl transition-all cursor-pointer border select-none active:scale-95 shrink-0 !h-auto !min-h-24 px-2 py-3 ${
                           isActive
                             ? 'bg-brand text-white border-brand shadow-xs'
                             : 'bg-white hover:bg-surface text-faint hover:text-ink border-line'
