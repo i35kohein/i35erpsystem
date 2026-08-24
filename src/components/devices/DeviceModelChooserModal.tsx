@@ -6,6 +6,7 @@ import {
   Settings,
   X,
   Check,
+  Clock,
 } from 'lucide-react';
 import { usePriceCatalog } from '../../hooks/usePriceCatalog';
 import { getModelFolderId } from '../../types/priceCatalog';
@@ -29,6 +30,24 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
 }) => {
   const { catalog, folders } = usePriceCatalog();
   const [deviceSearchQuery, setDeviceSearchQuery] = useState('');
+  // Recently picked models (localStorage) — shown at the top for fast re-selection (Ko Hein 2026-08-24).
+  const [recentModels, setRecentModels] = useState<string[]>(() => {
+    try {
+      const raw = localStorage.getItem('i35_recent_models');
+      return raw ? (JSON.parse(raw) as string[]) : [];
+    } catch {
+      return [];
+    }
+  });
+  const rememberModel = (name: string) => {
+    const next = [name, ...recentModels.filter((m) => m !== name)].slice(0, 6);
+    setRecentModels(next);
+    try {
+      localStorage.setItem('i35_recent_models', JSON.stringify(next));
+    } catch {
+      /* ignore */
+    }
+  };
   const [activeFamilyTab, setActiveFamilyTab] = useState<'All' | 'iPhone' | 'iPad' | 'Apple Watch' | 'Mac' | 'Other'>('All');
 
   // ESC closes the device chooser (embedded mode stays inert). While open,
@@ -191,9 +210,14 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
 
             const folderBlocks = visibleFolders.map((folder) => {
               const modelsInFolder = catalog.filter((item) => getModelFolderId(item.model) === folder.id);
-              const filteredModels = modelsInFolder.filter((m) =>
-                m.model.toLowerCase().includes(deviceSearchQuery.toLowerCase())
-              );
+              const filteredModels = modelsInFolder.filter((m) => {
+                const q = deviceSearchQuery.trim().toLowerCase();
+                if (!q) return true;
+                return (
+                  m.model.toLowerCase().includes(q) ||
+                  (m.modelCodes || []).some((c) => c.toLowerCase().includes(q))
+                );
+              });
 
               if (filteredModels.length === 0) return null;
               renderedFolderCount++;
@@ -215,6 +239,7 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
                           type="button"
                           variant="ghost"
                           onClick={() => {
+                            rememberModel(item.model);
                             onSelectDevice(item.model);
                             onClose();
                           }}
@@ -252,9 +277,50 @@ export const DeviceModelChooserModal: React.FC<DeviceModelChooserModalProps> = (
               );
             }
 
+            // Recent models — pinned above the folder grid when not searching (Ko Hein 2026-08-24).
+            const recentInCatalog = recentModels
+              .filter((name) => catalog.some((m) => m.model === name))
+              .slice(0, 6);
+            const recentBlock =
+              !deviceSearchQuery.trim() && recentInCatalog.length > 0 ? (
+                <div className="mb-5">
+                  <p className="mb-1.5 flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-muted">
+                    <Clock className="w-3.5 h-3.5" />
+                    Recent
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {recentInCatalog.map((name) => {
+                      const m = catalog.find((x) => x.model === name);
+                      return (
+                        <Button
+                          key={name}
+                          type="button"
+                          variant="ghost"
+                          onClick={() => {
+                            rememberModel(name);
+                            onSelectDevice(name);
+                            onClose();
+                          }}
+                          className="flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand-soft/60 px-2.5 py-1.5 text-xs font-extrabold text-brand-deep transition-colors cursor-pointer hover:bg-brand-soft"
+                        >
+                          <Check className="h-3 w-3" />
+                          <span className="truncate">{name}</span>
+                          {m?.modelCodes && m.modelCodes.length > 0 && (
+                            <span className="font-mono text-[10px] font-black text-brand/70">{m.modelCodes.join(', ')}</span>
+                          )}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : null;
+
             return (
-              <div className="grid grid-cols-1 items-stretch gap-x-6 gap-y-4 sm:grid-cols-3">
+              <div>
+                {recentBlock}
+                <div className="grid grid-cols-1 items-stretch gap-x-6 gap-y-4 sm:grid-cols-3">
                 {folderBlocks}
+                </div>
               </div>
             );
           })()}

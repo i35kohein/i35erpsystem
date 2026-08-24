@@ -21,7 +21,8 @@ import {
   FileText, 
   Folder,
   BadgePercent,
-  Trash2
+  Trash2,
+  Search,
 } from 'lucide-react';
 import { 
   ModelRepairPrice, 
@@ -313,6 +314,8 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
 
   const [quoteCopied, setQuoteCopied] = useState(false);
   const [isCartSheetOpen, setIsCartSheetOpen] = useState(false);
+  // Service search — symptom / service-name lookup (Ko Hein 2026-08-24).
+  const [serviceSearch, setServiceSearch] = useState('');
   // Which cart item has its discount picker expanded (mobile sheet only).
   const [discountMenuOpenFor, setDiscountMenuOpenFor] = useState<string | null>(null);
   const [customDiscountInput, setCustomDiscountInput] = useState('');
@@ -368,7 +371,21 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
     }
   }, [cart, discountMenuOpenFor]);
 
-  // Filter folders enabled by user
+  // Estimated repair time + parts note per category group — shown on the card
+  // so customer quotes are honest about scope (Ko Hein 2026-08-24).
+  const DETAIL_BY_GROUP: Record<string, { time: string; parts: string }> = {
+    Battery: { time: '~30 min', parts: 'Battery + labor included' },
+    Display: { time: '~45 min', parts: 'Display + labor included' },
+    Housing: { time: '~60 min', parts: 'Back glass/housing + labor included' },
+    Charging: { time: '~45 min', parts: 'Port/flex + labor included' },
+    Audio: { time: '~40 min', parts: 'Speaker/mic + labor included' },
+    'Logic Board': { time: '~2–3 h', parts: 'Board-level labor; parts quoted at intake' },
+    Network: { time: '~60 min', parts: 'Antenna/IC + labor included' },
+    'Sensors & Keys': { time: '~40 min', parts: 'Sensor + labor included' },
+  };
+
+  const getGroupDetail = (group: string) =>
+    DETAIL_BY_GROUP[group] || { time: '—', parts: 'Parts + labor included' };
   
 
   
@@ -499,9 +516,20 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
   // If the selected group disappears (device/search changed), fall back to ALL.
   const effectiveCategoryFilter = chipGroups.some(([g]) => g === categoryFilter) ? categoryFilter : 'ALL';
   const filteredItems = useMemo(() => {
-    if (effectiveCategoryFilter === 'ALL') return availableRepairItems;
-    return availableRepairItems.filter((item) => (item.group || 'Other') === effectiveCategoryFilter);
-  }, [availableRepairItems, effectiveCategoryFilter]);
+    const q = serviceSearch.trim().toLowerCase();
+    let items = availableRepairItems;
+    if (effectiveCategoryFilter !== 'ALL') {
+      items = items.filter((item) => (item.group || 'Other') === effectiveCategoryFilter);
+    }
+    if (q) {
+      items = items.filter(
+        (item) =>
+          item.label.toLowerCase().includes(q) ||
+          (item.group || '').toLowerCase().includes(q)
+      );
+    }
+    return items;
+  }, [availableRepairItems, effectiveCategoryFilter, serviceSearch]);
 
   // Cart Calculations
   const cartSummary = useMemo(() => {
@@ -1035,7 +1063,31 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
           </Button>
         </div>
 
+        {/* Repair service search (Ko Hein 2026-08-24) — symptom / service-name lookup */}
+        <div className="relative w-full">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" />
+          <Input
+            type="text"
+            value={serviceSearch}
+            onChange={(e) => setServiceSearch(e.target.value)}
+            placeholder="Search repair service… (Battery, Face ID, Back glass)"
+            aria-label="Search repair service"
+            className="w-full rounded-full border border-line bg-white pl-9 pr-8 py-2 text-xs font-bold text-ink placeholder:text-muted outline-none transition-colors focus:border-brand/50"
+          />
+          {serviceSearch && (
+            <button
+              type="button"
+              onClick={() => setServiceSearch('')}
+              aria-label="Clear service search"
+              className="absolute right-2 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full text-muted hover:text-ink hover:bg-surface transition-colors cursor-pointer"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+
         {/* Repair category quick-filter chips — below the device card (Ko Hein) */}
+          <div className="relative w-full">
           <div className="w-full -mx-1 px-1 overflow-x-auto no-scrollbar flex items-center gap-1.5 pb-0.5">
             <Button
               type="button"
@@ -1062,6 +1114,9 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                 {group} ({count})
               </Button>
             ))}
+          </div>
+          {/* Right-edge fade hint — shows the chips row scrolls on mobile (Ko Hein 2026-08-24) */}
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-white to-transparent lg:hidden" aria-hidden="true" />
           </div>
       </div>
 
@@ -1092,6 +1147,8 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                     role="button"
                     tabIndex={0}
                     aria-pressed={isSelected}
+                    aria-label={`${isSelected ? 'Remove' : 'Add'} ${item.label} to quote`}
+                    title={`${isSelected ? 'Remove from' : 'Add to'} quote — ${getGroupDetail(item.group).time} · ${getGroupDetail(item.group).parts}`}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
@@ -1120,10 +1177,10 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                       <WarrantyPill warranty={item.warranty} />
                     </div>
 
-                    {/* Row 2: Repair Category */}
+                    {/* Row 2: Repair Category + estimated time (Ko Hein 2026-08-24) */}
                     <div className="flex items-center justify-between gap-2 min-w-0">
-                      <span className="text-[10px] sm:text-[11px] font-extrabold text-muted uppercase tracking-wider truncate">
-                        {item.group}
+                      <span className="text-[10px] sm:text-[11px] font-extrabold text-muted uppercase tracking-wider truncate" title={`${getGroupDetail(item.group).parts}`}>
+                        {item.group} · {getGroupDetail(item.group).time}
                       </span>
                     </div>
 
@@ -1165,8 +1222,9 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
                             setDiscountPopupAnchor({ top: rect.bottom + 6, left: l });
                             setDiscountMenuOpenFor(item.key);
                           }}
-                          title={discountPct > 0 ? `${discountPct}% discount applied` : 'Add discount'}
-                          className={`discount-trigger !w-7 !h-7 !min-h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
+                          title={discountPct > 0 ? `${discountPct}% discount applied` : `Add discount for ${item.label}`}
+                          aria-label={discountPct > 0 ? `${discountPct}% discount applied for ${item.label}` : `Add discount for ${item.label}`}
+                          className={`discount-trigger !w-11 !h-11 !min-h-11 sm:!w-7 sm:!h-7 sm:!min-h-7 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
                             discountPct > 0
                               ? 'bg-success text-white'
                               : 'bg-transparent text-muted hover:bg-surface hover:text-ink'
@@ -1231,32 +1289,31 @@ export const PriceCatalogModule: React.FC<PriceCatalogModuleProps> = ({
         </div>
       </div>
 
-      {/* Mobile floating cart bar — always reachable while adding services (lg:hidden) */}
-      {cart.size > 0 && (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/95 backdrop-blur-sm px-4 pt-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] shadow-raised-top lg:hidden">
-          <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0 shrink-0">
-              <p className="text-xs font-bold text-muted uppercase tracking-wide">Selected Services</p>
-              <p className="font-mono tabular-nums font-black text-ink text-base leading-tight">
-                {cartSummary.count} <span className="text-xs font-normal text-muted">items · {formatPrice(cartSummary.totalDue)}</span>
+      {/* Mobile floating cart bar — ALWAYS visible so the cart is discoverable
+          even before anything is added (Ko Hein 2026-08-24: was hidden when empty) */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/95 backdrop-blur-sm px-4 pt-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] shadow-raised-top lg:hidden">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0 shrink-0">
+            <p className="text-xs font-bold text-muted uppercase tracking-wide">Selected Services</p>
+            <p className="font-mono tabular-nums font-black text-ink text-base leading-tight">
+              {cartSummary.count} <span className="text-xs font-normal text-muted">items · {formatPrice(cartSummary.totalDue)}</span>
+            </p>
+            {cartSummary.totalDiscountAmount > 0 && (
+              <p className="text-xs font-extrabold text-success leading-tight tabular-nums">
+                − {formatPrice(cartSummary.totalDiscountAmount)} saved
               </p>
-              {cartSummary.totalDiscountAmount > 0 && (
-                <p className="text-xs font-extrabold text-success leading-tight tabular-nums">
-                  − {formatPrice(cartSummary.totalDiscountAmount)} saved
-                </p>
-              )}
-            </div>
-            <Button
-              type="button"
-              onClick={() => setIsCartSheetOpen(true)}
-              className="flex-1 max-w-[180px] bg-ink hover:bg-ink/90 text-white"
-            >
-              <Receipt className="w-4 h-4 shrink-0" />
-              <span className="truncate">View Cart</span>
-            </Button>
+            )}
           </div>
+          <Button
+            type="button"
+            onClick={() => setIsCartSheetOpen(true)}
+            className="flex-1 max-w-[180px] bg-ink hover:bg-ink/90 text-white"
+          >
+            <Receipt className="w-4 h-4 shrink-0" />
+            <span className="truncate">{cartSummary.count === 0 ? 'View Cart' : 'View Cart'}</span>
+          </Button>
         </div>
-      )}
+      </div>
 
       {/* Mobile cart bottom sheet — popup instead of scrolling down (lg:hidden) */}
       {isCartSheetOpen && (
