@@ -850,11 +850,13 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
           }
           @page {
             size: ${paperSize === 'a4_voucher' ? 'A4 portrait' : '3in 2in'};
-            /* audit F-P3: zero margin for the 3x2 sticker — a 4mm margin left
-               only ~2.69in x 1.69in of printable area, clipping the 3in-wide
-               tag and spilling onto a second sheet. Printers that need margins
-               apply them via driver settings. */
-            margin: ${paperSize === 'a4_voucher' ? '3.5mm' : '0'};
+            /* Cross-browser normalization (Ko Hein 2026-08-25: Chrome vs Safari
+               printed differently). Safari ignores CSS @page margins and uses
+               its print-dialog margins instead, which shrinks/offsets the A4
+               output. Zero the page margin and let the .printable-area's own
+               padding (5mm) create the inset — then Chrome and Safari (dialog
+               Margins: None) print identically. */
+            margin: 0;
           }
         }
       `}</style>
