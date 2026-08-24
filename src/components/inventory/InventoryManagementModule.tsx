@@ -183,9 +183,10 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const [poQty, setPoQty] = useState<Record<string, number>>({});
   const suggestQty = (p: PartItem) => Math.max(1, (Number(p.reorderPoint) || 0) - (Number(p.quantityInStock) || 0));
   const openPoDraft = () => {
-    const outIds = new Set(parts.filter((p) => Number(p.quantityInStock) === 0).map((p) => p.id));
+    // Never auto-select the whole scope — staff picks the parts they actually
+    // need to reorder (Ko Hein 2026-08-24).
     setPoScope('OUT');
-    setPoSelected(outIds);
+    setPoSelected(new Set());
     setPoQty(Object.fromEntries(parts.map((p) => [p.id, suggestQty(p)])));
     setPoDraftOpen(true);
   };
@@ -3398,13 +3399,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     type="button"
                     onClick={() => {
                       setPoScope(s);
-                      const ids = new Set(
-                        (s === 'OUT'
-                          ? parts.filter((p) => Number(p.quantityInStock) === 0)
-                          : parts.filter((p) => Number(p.quantityInStock) > 0 && Number(p.quantityInStock) <= Number(p.reorderPoint))
-                        ).map((p) => p.id)
-                      );
-                      setPoSelected(ids);
+                      setPoSelected(new Set());
                     }}
                     className={`rounded-lg px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                       poScope === s ? (s === 'OUT' ? 'bg-danger text-white shadow-2xs' : 'bg-warning text-white shadow-2xs') : 'bg-surface text-muted hover:bg-line hover:text-ink'
@@ -3486,10 +3481,11 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               </div>
               <Button
                 type="button"
+                disabled={poSelected.size === 0}
                 onClick={() => { setPoDraftOpen(false); onNavigateToTab?.('suppliers'); }}
-                className="bg-brand hover:bg-brand-deep text-white text-xs font-extrabold rounded-xl px-3.5 py-2"
+                className="bg-brand hover:bg-brand-deep text-white text-xs font-extrabold rounded-xl px-3.5 py-2 disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                Review in Suppliers
+                {poSelected.size === 0 ? 'Select parts to continue' : `Review ${poSelected.size} in Suppliers`}
               </Button>
             </div>
           </div>
