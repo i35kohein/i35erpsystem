@@ -346,18 +346,6 @@ export const CustomerRepairTimeline: React.FC<CustomerRepairTimelineProps> = ({
                             {wo.passcode ? '•••• Provided' : 'None / Pattern'}
                           </span>
                         </div>
-                        <div>
-                          <span className="text-muted">Find My: </span>
-                          <span className={`font-bold px-1.5 py-0.5 rounded text-xs ${
-                            wo.findMyStatus === 'OFF' 
-                              ? 'bg-success/15 text-success-deep' 
-                              : wo.findMyStatus === 'ON' 
-                              ? 'bg-warning/15 text-warning' 
-                              : 'bg-gray-100 text-gray-700'
-                          }`}>
-                            {wo.findMyStatus}
-                          </span>
-                        </div>
                       </div>
                     </div>
                   </div>

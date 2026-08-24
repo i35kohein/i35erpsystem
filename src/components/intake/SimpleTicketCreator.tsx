@@ -43,7 +43,7 @@ interface FormState {
   checks: { status: 'N/A' | 'Pass' | 'Fail'; note: string }[];
   // Full-form parity (Ko Hein 2026-08-11): the simple form now captures the
   // same fields as Create Ticket — customer type, town, priority, service type,
-  // warranty, photos, scanner. (Find My removed from the simple form 2026-08-14.)
+  // warranty, photos, scanner.
   customerType: CustomerType;
   town: string;
   priority: RepairPriority;
@@ -313,8 +313,8 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
       setIsColorOpen(true);
       return;
     }
-    // Settings-driven gates (Ko Hein 2026-08-11): requirePasscodeIntake /
-    // requireFindMyCheck now actually enforce the simple intake form.
+    // Settings-driven gates (Ko Hein 2026-08-11): requirePasscodeIntake now
+    // actually enforces the simple intake form.
     if (systemSettings?.requirePasscodeIntake && !form.passcode.trim()) {
       toast('Device passcode is required (Settings > Intake).', 'error', 'Passcode Required');
       return;
@@ -402,9 +402,6 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
       imei: form.imei.trim() || existing?.imei || undefined,
       deviceColor: form.color.trim(),
       passcode: form.passcode.trim(),
-      // Find My removed from the simple form (Ko Hein 2026-08-14) — keep the
-      // value from an existing ticket when editing, default UNKNOWN on new.
-      findMyStatus: existing?.findMyStatus || 'UNKNOWN',
       status: existing?.status || 'Receive',
       priority: form.priority,
       assignedTechId: existing?.assignedTechId || (existing ? '' : defaultTechId),

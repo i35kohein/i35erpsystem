@@ -277,8 +277,6 @@ const DICT: [string, string][] = [
   ['ON', 'ဖွင့်'],
   ['UNKNOWN', 'မသိ'],
   ['Unknown', 'မသိ'],
-  ['Ask the customer to turn off Find My before accepting the device.', 'စက်လက်ခံရန် ဝယ်ယူသူကို Find My ပိတ်ရန် တောင်းဆိုပါ။'],
-  ['Find My Status', 'Find My အခြေအနေ'],
   ['Serial Number', 'Serial Number'],
   ['IMEI Number (15 Digits)', 'IMEI နံပါတ် (၁၅ လုံး)'],
   ['Device Passcode', 'Device Passcode'],

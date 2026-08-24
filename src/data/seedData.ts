@@ -224,7 +224,6 @@ export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
   defaultWarrantyDays: 90,
   defaultTechnicianId: 'tech-1',
   requirePasscodeIntake: true,
-  requireFindMyCheck: true,
 
   currencySymbol: 'MMK',
   taxPercentage: 5,

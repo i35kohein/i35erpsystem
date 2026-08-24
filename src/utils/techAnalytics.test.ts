@@ -22,7 +22,6 @@ const baseWo = (overrides: Partial<WorkOrder> = {}): WorkOrder => ({
   serialNumber: '',
   deviceColor: 'Black',
   passcode: '',
-  findMyStatus: 'OFF',
   status: 'Finished',
   priority: 'Normal',
   assignedTechId: 'tech-1',

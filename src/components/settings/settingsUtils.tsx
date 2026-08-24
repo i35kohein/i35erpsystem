@@ -71,7 +71,6 @@ export const SAMPLE_PRINT_WORK_ORDER: WorkOrder = {
   priority: 'Normal',
   assignedTechId: 'tech-001',
   warrantyDays: 90,
-  findMyStatus: 'OFF',
   estimatedCompletion: '2026-07-25',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),

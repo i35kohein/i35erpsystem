@@ -138,7 +138,6 @@ export interface WorkOrder {
   imei?: string;
   deviceColor: string;
   passcode: string;
-  findMyStatus: 'ON' | 'OFF' | 'UNKNOWN';
   
   // Pipeline & Assignment
   status: WorkOrderStatus;
@@ -357,7 +356,6 @@ export interface SystemSettings {
   defaultWarrantyDays: number;
   defaultTechnicianId: string;
   requirePasscodeIntake: boolean;
-  requireFindMyCheck: boolean;
 
   // Pricing & Finance
   currencySymbol: string;

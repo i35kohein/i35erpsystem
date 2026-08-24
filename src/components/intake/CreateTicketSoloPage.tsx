@@ -193,7 +193,6 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
   const [serialNumber, setSerialNumber] = useState(editWorkOrder?.serialNumber || '');
   const [imei, setImei] = useState(editWorkOrder?.imei || '');
   const [passcode, setPasscode] = useState(editWorkOrder?.passcode || '');
-  const [findMyStatus, setFindMyStatus] = useState<'ON' | 'OFF' | 'UNKNOWN'>(editWorkOrder?.findMyStatus || 'OFF');
 
   const [warrantyDays, setWarrantyDays] = useState(editWorkOrder?.warrantyDays || systemSettings?.defaultWarrantyDays || 90);
   const [warrantyLabel, setWarrantyLabel] = useState(editWorkOrder?.warrantyLabel || `${systemSettings?.defaultWarrantyDays || 90} Days Standard Warranty`);
@@ -241,7 +240,6 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       setSerialNumber(editWorkOrder.serialNumber || '');
       setImei(editWorkOrder.imei || '');
       setPasscode(editWorkOrder.passcode || '');
-      setFindMyStatus(editWorkOrder.findMyStatus || 'OFF');
       setWarrantyDays(editWorkOrder.warrantyDays || systemSettings?.defaultWarrantyDays || 90);
       setWarrantyLabel(editWorkOrder.warrantyLabel || `${editWorkOrder.warrantyDays || systemSettings?.defaultWarrantyDays || 90} Days Standard Warranty`);
       setSelectedRepairs(editWorkOrder.selectedRepairs || []);
@@ -416,13 +414,10 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
     if (!deviceModel.trim()) errs['intake-device'] = 'Select a device model to continue.';
     if (!deviceColor.trim()) errs['field-color'] = 'Select a device color to continue.';
     if (imei.trim() && imei.trim().length !== 15) errs['field-imei'] = 'IMEI must be exactly 15 digits.';
-    // Settings-driven gates (Ko Hein 2026-08-11): requirePasscodeIntake /
-    // requireFindMyCheck now actually enforce the intake form.
+    // Settings-driven gates (Ko Hein 2026-08-11): requirePasscodeIntake now
+    // actually enforces the intake form (Find My gate removed 2026-08-24).
     if (systemSettings?.requirePasscodeIntake && !passcode.trim()) {
       errs['field-passcode'] = 'Device passcode is required (Settings > Intake).';
-    }
-    if (systemSettings?.requireFindMyCheck && findMyStatus === 'UNKNOWN') {
-      errs['field-findmy'] = 'Find My must be checked ON or OFF (Settings > Intake).';
     }
     setFieldErrors(errs);
     if (Object.keys(errs).length > 0) {
@@ -434,7 +429,6 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
         'field-color': 'intake-device',
         'field-imei': 'intake-device',
         'field-passcode': 'intake-device',
-        'field-findmy': 'intake-device',
       };
       scrollToSection(sectionMap[firstKey] || 'intake-customer');
       toast.error(Object.values(errs)[0], 'Please Complete the Form');
@@ -502,7 +496,6 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
       imei: imei.trim() || '',
       deviceColor,
       passcode: passcode || 'None',
-      findMyStatus,
       status: baseWorkOrder?.status || 'Receive',
       priority: baseWorkOrder?.priority || 'Normal',
       // New intake tickets stay unassigned until the repair coordinator assigns a technician.
@@ -599,7 +592,6 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
     setSerialNumber('');
     setImei('');
     setPasscode('');
-    setFindMyStatus('OFF');
     setWarrantyDays(systemSettings?.defaultWarrantyDays || 90);
     setWarrantyLabel(`${systemSettings?.defaultWarrantyDays || 90} Days Standard Warranty`);
     setCustomWarrantyInput('');

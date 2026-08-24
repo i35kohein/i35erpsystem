@@ -69,19 +69,6 @@ const IntakeTab: React.FC<IntakeTabProps> = ({ formData, setFormData }) => {
                   <span className="text-xs text-muted">Prompt technicians to record screen passcodes for post-repair diagnostic testing.</span>
                 </div>
               </label>
-
-              <label className="flex items-center space-x-3 cursor-pointer p-3 bg-surface rounded-xl border border-line hover:border-brand transition-all">
-                <Input
-                  type="checkbox"
-                  checked={formData.requireFindMyCheck}
-                  onChange={(e) => setFormData({ ...formData, requireFindMyCheck: e.target.checked })}
-                  className="w-4 h-4 text-brand rounded cursor-pointer"
-                />
-                <div>
-                  <span className="font-extrabold text-ink text-xs block">Mandatory Find My / iCloud Lock Check</span>
-                  <span className="text-xs text-muted">Verify that Find My iPhone / Mac activation lock status is checked during work order creation.</span>
-                </div>
-              </label>
             </div>
           </div>
         </div>
