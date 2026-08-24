@@ -2323,8 +2323,8 @@ export default function App() {
 
             {activeTab === 'inventory' && (
               <>
-              {/* Desktop/tablet row (sm+): search + view switcher + Add Part + ⋯ */}
-              <div className={`hidden sm:flex items-center gap-1.5 sm:gap-2 shrink-0`}>
+              {/* Search + view switcher + Add Part + ⋯ — always visible, scrolls on mobile (Ko Hein 2026-08-24: was hidden below sm) */}
+              <div className={`flex items-center gap-1.5 sm:gap-2 shrink-0`}>
               {/* Scan / search — leftmost */}
               <div className="shrink-0">
                 <div className="relative">
@@ -2343,26 +2343,29 @@ export default function App() {
                     }}
                     placeholder="Scan barcode or search part..."
                     autoComplete="off"
-                    className="h-10 w-32 sm:w-40 xl:w-56 rounded-lg border border-line bg-white pl-8 pr-2 font-mono text-xs text-ink outline-none transition "
+                    aria-label="Scan barcode or search part"
+                    className="h-10 w-24 sm:w-40 xl:w-56 rounded-lg border border-line bg-white pl-8 pr-2 font-mono text-xs text-ink outline-none transition "
                   />
                 </div>
               </div>
 
-              {/* Stock / Profit / Matrix — desktop only (mobile: in ⋯ menu) */}
-              <div className="hidden md:flex items-center gap-1.5 sm:gap-2 shrink-0">
+              {/* Stock / Profit / Matrix — visible at all sizes, icon-only on mobile (Ko Hein 2026-08-24) */}
+              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                 {(['stock', 'profit', 'matrix'] as const).map((v) => (
                   <Button
                     key={v}
                     type="button"
                     onClick={() => setInventoryViewMode(v)}
-                    className={`h-9 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer focus:outline-none ${
+                    aria-label={`${v === 'stock' ? 'Stock' : v === 'profit' ? 'Profit' : 'Matrix'} view`}
+                    title={`${v === 'stock' ? 'Stock' : v === 'profit' ? 'Profit' : 'Matrix'} view`}
+                    className={`h-10 px-2.5 sm:px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer focus:outline-none ${
                       inventoryViewMode === v
                         ? 'bg-brand text-white shadow-2xs'
                         : 'bg-white text-ink border border-line hover:border-brand hover:text-brand'
                     }`}
                   >
                     {v === 'stock' ? <List className="w-3.5 h-3.5" /> : v === 'profit' ? <TrendingUp className="w-3.5 h-3.5" /> : <Grid className="w-3.5 h-3.5" />}
-                    {v === 'stock' ? 'Stock' : v === 'profit' ? 'Profit' : 'Matrix'}
+                    <span className="hidden sm:inline">{v === 'stock' ? 'Stock' : v === 'profit' ? 'Profit' : 'Matrix'}</span>
                   </Button>
                 ))}
               </div>
@@ -2371,10 +2374,10 @@ export default function App() {
               <Button
                 type="button"
                 onClick={() => setInventoryAddModalOpen(true)}
-                className="hidden lg:inline-flex h-10 items-center gap-1.5 px-3 sm:px-3.5 bg-brand hover:bg-brand-deep text-white text-xs font-bold rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+                className="hidden sm:inline-flex h-10 items-center gap-1.5 px-3 sm:px-3.5 bg-brand hover:bg-brand-deep text-white text-xs font-bold rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>Add Part</span>
+                <span className="hidden sm:inline">Add Part</span>
               </Button>
 
               {/* More actions — Print Tags + Edit (⋯) */}
@@ -2810,6 +2813,7 @@ export default function App() {
                   setScanQuery={setInventoryScanQuery}
                   onRegisterScanHandler={(fn) => { inventoryScanSubmitRef.current = fn; }}
                   onNavigateToTab={(tab) => setActiveTab(tab as any)}
+                  purchaseOrders={purchaseOrders}
                   showAddModal={inventoryAddModalOpen}
                   setShowAddModal={setInventoryAddModalOpen}
                 />

@@ -26,7 +26,7 @@ import {Boxes,
   Palette,
   ChevronDown,
   Printer} from 'lucide-react';
-import { PartItem, PartOwner, PartQualityTier, Supplier, SystemSettings, RmaItem } from '../../types';
+import { PartItem, PartOwner, PartQualityTier, Supplier, SystemSettings, RmaItem, PurchaseOrder } from '../../types';
 import { ModelRepairPrice } from '../../types/priceCatalog';
 
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
@@ -64,6 +64,8 @@ interface InventoryManagementModuleProps {
   onUpdatePartStock: (partId: string, newStock: number) => void;
   /** Navigate to another tab (used by the purchase-order CTA). */
   onNavigateToTab?: (tab: string) => void;
+  /** Existing POs — used for the duplicate-PO warning in the reorder draft (Ko Hein 2026-08-24). */
+  purchaseOrders?: PurchaseOrder[];
   searchQuery: string;
   setSearchQuery?: (q: string) => void;
   selectedCategory?: string;
@@ -128,6 +130,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   setScanQuery: propSetScanQuery,
   onRegisterScanHandler,
   onNavigateToTab,
+  purchaseOrders = [],
   showAddModal: propShowAddModal,
   setShowAddModal: propSetShowAddModal,
 }) => {
@@ -171,6 +174,48 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const [localLowStockOnly, setLocalLowStockOnly] = useState(false);
   const [ownerFilter, setOwnerFilter] = useState<'ALL' | PartOwner>('ALL');
   const [stockStatusFilter, setStockStatusFilter] = useState<'ALL' | 'LOW' | 'OUT'>('ALL');
+  // Purchase-order draft (Ko Hein 2026-08-24): supplier-grouped reorder preview
+  // before jumping to the Suppliers module. Scope defaults to OUT only — never
+  // auto-selects the whole below-reorder set.
+  const [poDraftOpen, setPoDraftOpen] = useState(false);
+  const [poScope, setPoScope] = useState<'OUT' | 'LOW'>('OUT');
+  const [poSelected, setPoSelected] = useState<Set<string>>(new Set());
+  const [poQty, setPoQty] = useState<Record<string, number>>({});
+  const suggestQty = (p: PartItem) => Math.max(1, (Number(p.reorderPoint) || 0) - (Number(p.quantityInStock) || 0));
+  const openPoDraft = () => {
+    const outIds = new Set(parts.filter((p) => Number(p.quantityInStock) === 0).map((p) => p.id));
+    setPoScope('OUT');
+    setPoSelected(outIds);
+    setPoQty(Object.fromEntries(parts.map((p) => [p.id, suggestQty(p)])));
+    setPoDraftOpen(true);
+  };
+  const poCandidates = useMemo(
+    () => (poScope === 'OUT' ? parts.filter((p) => Number(p.quantityInStock) === 0) : parts.filter((p) => Number(p.quantityInStock) > 0 && Number(p.quantityInStock) <= Number(p.reorderPoint))),
+    [parts, poScope]
+  );
+  const poSupplierGroups = useMemo(() => {
+    const groups = new Map<string, PartItem[]>();
+    poCandidates.forEach((p) => {
+      const key = p.supplierName?.trim() || 'No supplier set';
+      groups.set(key, [...(groups.get(key) || []), p]);
+    });
+    return Array.from(groups.entries());
+  }, [poCandidates]);
+  const poTotal = useMemo(
+    () => poCandidates.reduce((sum, p) => sum + (poSelected.has(p.id) ? (poQty[p.id] || suggestQty(p)) * (Number(p.costPrice) || 0) : 0), 0),
+    [poCandidates, poSelected, poQty]
+  );
+  // Duplicate-PO warning: same part already on a Draft/Sent PO.
+  const poDuplicateSkus = useMemo(() => {
+    const activeItems = purchaseOrders
+      .filter((po) => po.status === 'Draft' || po.status === 'Sent')
+      .flatMap((po) => po.items || []);
+    const activePartIds = new Set(activeItems.map((i) => i.partId));
+    return poCandidates.filter((p) => poSelected.has(p.id) && activePartIds.has(p.id)).map((p) => p.sku);
+  }, [purchaseOrders, poCandidates, poSelected]);
+  // Generation-first model filtering (Ko Hein 2026-08-24): quick chips like
+  // 'iPhone 17' match any model whose name starts with that generation.
+  const [modelGeneration, setModelGeneration] = useState<string>('ALL');
   const showLowStockOnly = propShowLowStockOnly !== undefined ? propShowLowStockOnly : localLowStockOnly;
   const setShowLowStockOnly = (v: boolean) => {
     if (propOnSetLowStockOnly) propOnSetLowStockOnly(v);
@@ -573,6 +618,24 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     ],
     [parts, inventoryDeviceModels],
   );
+  // Generation-first model chips (Ko Hein 2026-08-24): 'iPhone 17' matches any
+  // model whose name starts with that generation.
+  const modelGenerations = useMemo(() => {
+    const gens = new Set<string>();
+    modelFilterOptions.forEach((o) => {
+      if (o.value === 'ALL') return;
+      const m = o.label.match(/^(iPhone\s+\d+)/i);
+      if (m) gens.add(m[1]);
+    });
+    return [
+      'ALL',
+      ...Array.from(gens).sort((a, b) => {
+        const na = parseInt(a.replace(/\D/g, ''), 10);
+        const nb = parseInt(b.replace(/\D/g, ''), 10);
+        return (isNaN(nb) ? -1 : nb) - (isNaN(na) ? -1 : na);
+      }),
+    ];
+  }, [modelFilterOptions]);
   const categoryFilterOptions = useMemo(
     () => [
       { value: 'ALL', label: 'All Categories', badge: categories.length },
@@ -878,6 +941,13 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         part.deviceCompatibility.some(
           (device) => isSameDeviceModel(device, selectedModelFilter)
         );
+      // Generation-first filter (Ko Hein 2026-08-24): 'iPhone 17' chip matches
+      // any model name starting with that generation.
+      const matchesGeneration =
+        modelGeneration === 'ALL' ||
+        part.deviceCompatibility.some((device) =>
+          device.toLowerCase().startsWith(modelGeneration.toLowerCase())
+        );
       const matchesLowStock = !showLowStockOnly || part.quantityInStock <= part.reorderPoint;
       const matchesStockStatus =
         stockStatusFilter === 'ALL' ? true :
@@ -894,7 +964,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         part.locationBin.toLowerCase().includes(query) ||
         part.deviceCompatibility.some((d) => d.toLowerCase().includes(query));
 
-      return matchesQuality && matchesCategory && matchesModel && matchesLowStock && matchesStockStatus && matchesSearch && matchesOwner;
+      return matchesQuality && matchesCategory && matchesModel && matchesGeneration && matchesLowStock && matchesStockStatus && matchesSearch && matchesOwner;
     }).sort((a, b) => {
       if (sortKey === 'stock') {
         const diff = a.quantityInStock - b.quantityInStock;
@@ -916,7 +986,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       if (byCategory !== 0) return byCategory;
       return (a.name || '').localeCompare(b.name || '', undefined, { numeric: true, sensitivity: 'base' });
     });
-  }, [parts, selectedQuality, selectedCategory, selectedModelFilter, showLowStockOnly, stockStatusFilter, activeSearchQuery, sortKey, sortDir, ownerFilter]);
+  }, [parts, selectedQuality, selectedCategory, selectedModelFilter, modelGeneration, showLowStockOnly, stockStatusFilter, activeSearchQuery, sortKey, sortDir, ownerFilter]);
 
   const paginatedParts = filteredParts;
 
@@ -1300,7 +1370,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               </Button>
               <Button
                 type="button"
-                onClick={() => onNavigateToTab?.('suppliers')}
+                onClick={openPoDraft}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-2.5 py-1.5 text-xs font-black text-white transition-all cursor-pointer hover:bg-brand-deep active:scale-95"
               >
                 <Plus className="w-3.5 h-3.5" />
@@ -1333,6 +1403,21 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         {/* Top filters — Model / Part type / Quality / Stock status (Ko Hein 2026-08-24) */}
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-[10px] font-extrabold uppercase tracking-wide text-muted mr-0.5">Filter:</span>
+          {/* Generation chips (Ko Hein 2026-08-24): quick iPhone generation filter */}
+          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full py-0.5">
+            {modelGenerations.map((gen) => (
+              <button
+                key={gen}
+                type="button"
+                onClick={() => setModelGeneration(modelGeneration === gen ? 'ALL' : gen)}
+                className={`rounded-lg px-2 py-1 text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  modelGeneration === gen ? 'bg-brand text-white shadow-2xs' : 'bg-surface text-muted hover:bg-line hover:text-ink'
+                }`}
+              >
+                {gen === 'ALL' ? 'All models' : gen}
+              </button>
+            ))}
+          </div>
           <select
             aria-label="Filter by model"
             value={selectedModelFilter}
@@ -1377,8 +1462,9 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     : 'bg-brand text-white shadow-2xs'
                   : 'bg-surface text-muted hover:bg-line hover:text-ink'
               }`}
+              title={s === 'LOW' ? 'Quantity above zero but at or below the reorder point' : s === 'OUT' ? 'Quantity is zero' : 'Show all parts'}
             >
-              {s === 'ALL' ? 'All' : s === 'LOW' ? 'Low' : 'Out'}
+              {s === 'ALL' ? 'All' : s === 'LOW' ? `Below reorder (${Math.max(0, metrics.lowStockCount - metrics.outOfStockCount)})` : `Out of stock (${metrics.outOfStockCount})`}
             </button>
           ))}
         </div>
@@ -1674,7 +1760,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                       </Button>
                     </th>
                     {inlineEditMode && <th className="w-[13%] min-w-[110px] px-1.5 py-2 bg-surface">Supplier</th>}
-                    <th className="w-[10%] min-w-[96px] px-2.5 py-2 bg-surface hidden md:table-cell">Bin</th>
+                    <th className="w-[10%] min-w-[96px] px-2.5 py-2 bg-surface hidden md:table-cell">{stockStatusFilter === 'ALL' ? 'Bin' : 'Supplier'}</th>
                     {!inlineEditMode && <th className="w-[12%] min-w-[80px] px-2.5 py-2 text-right bg-surface">Detail</th>}
                   </tr>
                 </thead>
@@ -1710,7 +1796,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                               <p className="font-extrabold text-ink text-xs leading-snug">
                                 {part.name}
                               </p>
-                              <p className="mt-0.5 font-mono text-xs font-medium text-muted">SKU {part.sku}</p>
+                              <p className="mt-0.5 font-mono text-xs font-medium text-muted truncate max-w-[160px]" title={`SKU ${part.sku}`}>SKU {part.sku}</p>
                               {part.deviceCompatibility && part.deviceCompatibility.length > 0 && (
                                 <div className="mt-1 flex flex-wrap gap-1">
                                   {part.deviceCompatibility.map((device) => (
@@ -1856,6 +1942,14 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                             <div className="flex min-w-0 flex-col gap-0.5 text-xs font-bold uppercase tracking-wide text-muted">
                               <span>Bin</span>
                               <select aria-label={`Bin for ${part.name}`} value={editValue('locationBin', part.locationBin) as string} onFocus={() => beginInlineEdit(part)} onChange={(e) => setInlineDrafts((current) => ({ ...current, [part.id]: { ...current[part.id], locationBin: e.target.value } }))} className="w-full min-w-0 rounded-md border border-line-strong bg-white px-2 py-1.5 text-sm font-semibold font-sans tabular-nums tracking-normal text-ink"><option value="">Choose bin</option>{existingLocationBins.map((bin) => <option key={bin} value={bin}>{bin}</option>)}</select>
+                            </div>
+                          ) : stockStatusFilter !== 'ALL' ? (
+                            <div className="flex min-w-0 flex-col gap-0.5 text-xs font-bold uppercase tracking-wide text-muted">
+                              <span>Supplier</span>
+                              <span className="inline-flex items-center gap-1 px-1 py-0.5 text-xs font-extrabold leading-none text-ink truncate max-w-[120px]" title={part.supplierName}>
+                                {part.supplierName || '—'}
+                              </span>
+                              <span className="text-[10px] font-semibold text-muted">Reorder: {part.reorderPoint}</span>
                             </div>
                           ) : part.locationBin ? (
                             <div className="flex min-w-0 flex-col gap-0.5 text-xs font-bold uppercase tracking-wide text-muted">
@@ -3278,6 +3372,129 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         setSelectedTagIds={setSelectedTagIds}
         onClose={() => setIsTagsPrintOpen(false)}
       />
+
+      {/* Purchase-order draft preview (Ko Hein 2026-08-24): supplier-grouped
+          reorder review BEFORE jumping to Suppliers — no blind select-all. */}
+      {poDraftOpen && (
+        <div className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center bg-slate-900/50 backdrop-blur-sm p-0 sm:p-4" role="dialog" aria-modal="true" aria-label="Purchase order draft">
+          <div className="flex max-h-[92dvh] w-full flex-col rounded-t-3xl sm:rounded-2xl bg-white shadow-2xl sm:max-w-2xl overflow-hidden">
+            <div className="flex items-center justify-between gap-2 border-b border-line px-4 py-3 shrink-0">
+              <div className="min-w-0">
+                <h3 className="text-sm font-extrabold text-ink">Purchase Order Draft</h3>
+                <p className="text-xs text-muted truncate">Review what to reorder, grouped by supplier</p>
+              </div>
+              <Button type="button" variant="iconGhost" onClick={() => setPoDraftOpen(false)} aria-label="Close" className="p-1.5 text-muted hover:text-ink rounded-lg cursor-pointer">
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              {/* Scope toggle — never auto-selects everything (Ko Hein 2026-08-24) */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-extrabold uppercase tracking-wide text-muted">Scope:</span>
+                {(['OUT', 'LOW'] as const).map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => {
+                      setPoScope(s);
+                      const ids = new Set(
+                        (s === 'OUT'
+                          ? parts.filter((p) => Number(p.quantityInStock) === 0)
+                          : parts.filter((p) => Number(p.quantityInStock) > 0 && Number(p.quantityInStock) <= Number(p.reorderPoint))
+                        ).map((p) => p.id)
+                      );
+                      setPoSelected(ids);
+                    }}
+                    className={`rounded-lg px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                      poScope === s ? (s === 'OUT' ? 'bg-danger text-white shadow-2xs' : 'bg-warning text-white shadow-2xs') : 'bg-surface text-muted hover:bg-line hover:text-ink'
+                    }`}
+                  >
+                    {s === 'OUT' ? `Out of stock (${parts.filter((p) => Number(p.quantityInStock) === 0).length})` : `Below reorder (${parts.filter((p) => Number(p.quantityInStock) > 0 && Number(p.quantityInStock) <= Number(p.reorderPoint)).length})`}
+                  </button>
+                ))}
+                <span className="ml-auto text-[10px] font-bold text-muted">{poSelected.size} selected</span>
+              </div>
+
+              {/* Duplicate-PO warning */}
+              {poDuplicateSkus.length > 0 && (
+                <div className="flex items-start gap-2 rounded-xl border border-warning/40 bg-warning/10 px-3 py-2 text-xs">
+                  <AlertTriangle className="w-4 h-4 shrink-0 text-warning mt-0.5" />
+                  <p className="text-warning font-bold">
+                    {poDuplicateSkus.length} part{poDuplicateSkus.length > 1 ? 's' : ''} already on a Draft/Sent purchase order:{' '}
+                    <span className="font-mono">{poDuplicateSkus.slice(0, 4).join(', ')}{poDuplicateSkus.length > 4 ? ` +${poDuplicateSkus.length - 4}` : ''}</span>
+                  </p>
+                </div>
+              )}
+
+              {/* Supplier-grouped list */}
+              {poSupplierGroups.length === 0 ? (
+                <p className="text-center text-xs font-bold text-muted py-6">No parts in this scope.</p>
+              ) : (
+                poSupplierGroups.map(([supplier, items]) => {
+                  const subTotal = items.reduce((sum, p) => sum + (poSelected.has(p.id) ? (poQty[p.id] || suggestQty(p)) * (Number(p.costPrice) || 0) : 0), 0);
+                  return (
+                    <div key={supplier} className="rounded-xl border border-line bg-surface/60 overflow-hidden">
+                      <div className="flex items-center justify-between gap-2 border-b border-line bg-white px-3 py-2">
+                        <span className="text-xs font-extrabold text-ink truncate">{supplier}</span>
+                        <span className="text-xs font-mono font-black text-ink shrink-0">{subTotal.toLocaleString()} {currency}</span>
+                      </div>
+                      <div className="divide-y divide-line">
+                        {items.map((p) => {
+                          const checked = poSelected.has(p.id);
+                          const qty = poQty[p.id] || suggestQty(p);
+                          return (
+                            <div key={p.id} className="flex items-center gap-2 px-3 py-2">
+                              <Input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => setPoSelected((prev) => { const next = new Set(prev); if (next.has(p.id)) next.delete(p.id); else next.add(p.id); return next; })}
+                                aria-label={`Include ${p.name}`}
+                                className="accent-brand w-3.5 h-3.5 shrink-0 cursor-pointer"
+                              />
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-xs font-bold text-ink">{p.name}</p>
+                                <p className="truncate font-mono text-[10px] text-muted">SKU {p.sku} · stock {p.quantityInStock} · reorder {p.reorderPoint}</p>
+                              </div>
+                              <label className="flex items-center gap-1 text-[10px] font-bold text-muted shrink-0">
+                                Qty
+                                <Input
+                                  type="number"
+                                  min={1}
+                                  value={qty}
+                                  onChange={(e) => setPoQty((prev) => ({ ...prev, [p.id]: Math.max(1, Number(e.target.value) || 1) }))}
+                                  className="w-14 rounded-md border border-line bg-white px-1.5 py-1 text-xs font-mono font-bold text-ink"
+                                  aria-label={`Quantity for ${p.name}`}
+                                />
+                              </label>
+                              <span className="w-20 text-right font-mono text-[11px] font-bold text-ink shrink-0">{(checked ? qty * (Number(p.costPrice) || 0) : 0).toLocaleString()} {currency}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="shrink-0 border-t border-line bg-white px-4 py-3 flex items-center justify-between gap-3">
+              <div className="text-xs">
+                <span className="text-muted font-bold">Estimated cost: </span>
+                <span className="font-mono font-black text-ink">{poTotal.toLocaleString()} {currency}</span>
+                <span className="block text-[10px] text-muted">{poSelected.size} part{poSelected.size !== 1 ? 's' : ''} · group by supplier on review</span>
+              </div>
+              <Button
+                type="button"
+                onClick={() => { setPoDraftOpen(false); onNavigateToTab?.('suppliers'); }}
+                className="bg-brand hover:bg-brand-deep text-white text-xs font-extrabold rounded-xl px-3.5 py-2"
+              >
+                Review in Suppliers
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
