@@ -966,7 +966,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
                     <div className="flex items-center justify-between gap-1 border-t border-line/60 pt-1.5">
                       <span className="text-[10px] font-bold text-brand truncate">{w.assignedTechName || 'Unassigned'}</span>
                       {w.status === 'Finished' && (
-                        <span className={`font-mono text-[10px] font-black shrink-0 ${w.isPaid ? 'text-success-deep' : 'text-danger'}`}>
+                        <span className={`font-mono text-[10px] font-black shrink-0 min-w-[64px] text-right ${w.isPaid ? 'text-success-deep' : 'text-danger'}`}>
                           {(w.totalAmount || 0).toLocaleString()} {currency}
                         </span>
                       )}
@@ -981,7 +981,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
                 onClick={() => onNavigateToTab('intake')}
                 className="mt-auto shrink-0 w-full py-1.5 text-[10px] font-extrabold text-brand hover:bg-brand/5 transition-colors border-t border-line bg-white"
               >
-                Open in Intake →
+                All {col.tickets.length} → Open in Intake
               </button>
             )}
           </div>
