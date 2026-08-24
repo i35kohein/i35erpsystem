@@ -431,7 +431,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
       </div>
 
       {/* Main Full-Width Section: Controls Bar & Ticket List */}
-      <div className="workspace-panel workspace-panel--with-toolbar !h-auto flex-1 min-h-0 bg-white border border-line rounded-2xl shadow-xs">
+      <div className="workspace-panel workspace-panel--with-toolbar flex-1 min-h-0 bg-white border border-line rounded-2xl shadow-xs">
         {/* Controls Bar: Items Count, Filters, Clear All, Sort */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 px-5 pt-4 pb-3 border-b border-line">
           <div className="flex items-center space-x-3">
