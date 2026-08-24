@@ -103,11 +103,15 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
   // Explicit empty value wins: if the shop clears the header/footer fields in
   // Settings, the printed voucher shows NO subtitle / NO footer — the fallback
   // text only applies when the field was never set (Ko Hein 2026-08-25:
-  // 'ဖျက်လိုက်ရင် နကိုအတိုင်း စာပြန်ပေါ်နေတယ်').
-  const voucherHeaderText = (systemSettings?.receiptHeaderTitle?.trim() || systemSettings?.a4CustomHeaderNote?.trim()) ||
-    (systemSettings?.receiptHeaderTitle === undefined && systemSettings?.a4CustomHeaderNote === undefined
-      ? 'Official Device Intake & Hardware Diagnostic Voucher'
-      : '');
+  // 'ဖျက်လိုက်ရင် နကိုအတိုင်း စာပြန်ပေါ်နေတယ်'). The main field is
+  // receiptHeaderTitle ('Voucher Header Subtitle'); when it is explicitly set
+  // (even empty) it wins. a4CustomHeaderNote is a legacy secondary used only
+  // when receiptHeaderTitle was never set.
+  const headerTitle = systemSettings?.receiptHeaderTitle;
+  const customNote = systemSettings?.a4CustomHeaderNote;
+  const voucherHeaderText = headerTitle !== undefined && headerTitle !== null
+    ? headerTitle.trim()
+    : (customNote?.trim() || (customNote === undefined ? 'Official Device Intake & Hardware Diagnostic Voucher' : ''));
   const voucherFooterText = systemSettings?.receiptFooterNote !== undefined && systemSettings?.receiptFooterNote !== null
     ? systemSettings.receiptFooterNote.trim()
     : `Thank you for choosing ${systemSettings?.shopName || 'our repair shop'}.`;

@@ -388,9 +388,10 @@ const PosTab: React.FC<PosTabProps> = ({ formData, setFormData, isSectionOpen, t
                 <label className="font-bold text-ink block">Voucher Header Subtitle</label>
                 <Input
                   type="text"
-                  value={formData.a4CustomHeaderNote || 'Official Device Intake & Hardware Diagnostic Voucher'}
+                  value={formData.a4CustomHeaderNote || ''}
                   onChange={(e) => setFormData({ ...formData, a4CustomHeaderNote: e.target.value })}
                   className="w-full bg-surface text-ink font-bold px-3 py-2 rounded-xl border border-line-strong focus:bg-white focus:outline-none "
+                  placeholder="e.g. Official Device Intake & Hardware Diagnostic Voucher"
                 />
               </div>
 
