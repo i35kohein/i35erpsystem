@@ -85,7 +85,10 @@ async function startServer() {
 
   // ---- Global API rate limit (per-IP token bucket) ----
   const apiHits = new Map<string, { count: number; resetAt: number }>();
-  const API_RATE_MAX = 300; // per window
+  // audit 2026-08-25: was 300/min — rapid reloads during deploys (each load
+  // fetches ~15 collections + realtime + lazy retries) tripped 429s on the
+  // whole app. 900/min is still a sane abuse ceiling but survives burst reloads.
+  const API_RATE_MAX = 900; // per window
   const API_RATE_WINDOW_MS = 60_000;
   app.use("/api", (req, res, next) => {
     const ip = getClientIpSafe(req);
