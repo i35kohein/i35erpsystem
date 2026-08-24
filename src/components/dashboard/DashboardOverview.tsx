@@ -24,6 +24,7 @@ import {Coins,
 import { WorkOrder, PartItem, RmaItem, Technician, WorkOrderStatus } from '../../types';
 import { Button , Input } from '../ui';
 import { toast } from '../../lib/toast';
+import { confirmDialog } from '../common/ConfirmDialog';
 
 import { DateFilterState, filterByDateRange} from '../common/DateFilterSelector';
 import { LITE_MODE } from '../../lib/lite';
@@ -185,6 +186,8 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
   const dateFilter = externalDateFilter || internalDateFilter;
 
   const [internalSubTab, setInternalSubTab] = useState<'status-queue' | 'repair-data' | 'tech-kpi' | 'inventory' | 'finance' | 'warranty-watch'>('status-queue');
+  // Bulk settle guard (Ko Hein 2026-08-24): prevents double-tap while the fund settle request is in flight.
+  const [isSettlingFund, setIsSettlingFund] = useState(false);
   // Dashboard inventory snapshot owner filter — APP (shop) only (Ko Hein 2026-08-24: KZH removed)
   const [dashOwner] = useState<'ALL' | 'APP'>('ALL');
   // Controlled from App navbar when provided; falls back to internal state.
@@ -385,8 +388,6 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
   // "Ready for Pickup" = Finished only. Taken Out tickets have already been
   // collected — counting them inflated the card.
   const readyForPickup = filteredWorkOrders.filter((w) => w.status === 'Finished');
-  // Out-of-stock parts — drives the Today's Actions strip (Ko Hein 2026-08-24).
-  const outOfStockParts = parts.filter((p) => Number(p.quantityInStock) === 0);
 
   const pendingRmas = rmas.filter((r) => r.status === 'Shipped to Vendor' || r.status === 'Draft');
 
@@ -499,6 +500,24 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
     });
 
     return { totalCollected, totalUnpaidBalance, paidCount, unpaidCount };
+  }, [filteredWorkOrders]);
+
+  // Unpaid recovery queue (Ko Hein 2026-08-24): tickets with an outstanding
+  // balance, sorted by amount due — feeds the Finance subtab queue.
+  const unpaidRecoveryTickets = useMemo(() => {
+    return filteredWorkOrders
+      .map((wo) => {
+        const total = wo.totalAmount || wo.subtotal || 0;
+        if (total <= 0) return null;
+        const paid = wo.isPaid ? total : (wo.paidAmount || wo.depositAmount || 0);
+        const balance = Math.max(0, total - paid);
+        if (balance <= 0) return null;
+        const openAt = wo.updatedAt || wo.createdAt || '';
+        const daysOpen = openAt ? Math.max(0, Math.floor((Date.now() - new Date(openAt).getTime()) / 86400000)) : null;
+        return { wo, balance, daysOpen };
+      })
+      .filter((x): x is { wo: WorkOrder; balance: number; daysOpen: number | null } => x !== null)
+      .sort((a, b) => b.balance - a.balance);
   }, [filteredWorkOrders]);
 
   // Inventory & RMA Analytics
@@ -625,41 +644,54 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
   return (
     <div className="space-y-3">
       {/* Today's Actions — priority strip (Ko Hein 2026-08-24): the three
-          signals the shop must act on first, above everything else. */}
-      {(activeRepairs.length > 0 || readyForPickup.length > 0 || outOfStockParts.length > 0) && (
+          signals staff must act on first. Each tile navigates to the queue
+          where the work happens. */}
+      {(readyForPickup.length > 0 || financialAnalytics.unpaidCount > 0 || inventoryAnalytics.lowStockCount > 0) && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           <button
             type="button"
             onClick={() => onNavigateToTab('intake')}
-            className="flex items-center justify-between gap-2 rounded-2xl border border-warning/30 bg-warning/10 px-3.5 py-3 text-left transition-all cursor-pointer hover:bg-warning/15 active:scale-[0.98] min-h-[44px]"
-          >
-            <span className="flex items-center gap-2 min-w-0">
-              <ClipboardList className="w-4 h-4 shrink-0 text-warning" />
-              <span className="text-xs font-bold text-ink">Active repairs</span>
-            </span>
-            <span className="font-mono text-lg font-black text-warning">{activeRepairs.length}</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => onNavigateToTab('intake')}
             className="flex items-center justify-between gap-2 rounded-2xl border border-success/30 bg-success/10 px-3.5 py-3 text-left transition-all cursor-pointer hover:bg-success/15 active:scale-[0.98] min-h-[44px]"
+            title="Open the ticket queue to contact customers for pickup"
           >
             <span className="flex items-center gap-2 min-w-0">
               <CheckCircle2 className="w-4 h-4 shrink-0 text-success-deep" />
-              <span className="text-xs font-bold text-ink">Ready for pickup</span>
+              <span className="min-w-0">
+                <span className="block text-xs font-bold text-ink">Ready for pickup</span>
+                <span className="block text-[10px] font-semibold text-muted truncate">Contact customers to collect</span>
+              </span>
             </span>
-            <span className="font-mono text-lg font-black text-success-deep">{readyForPickup.length}</span>
+            <span className="font-mono text-lg font-black text-success-deep shrink-0">{readyForPickup.length}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onNavigateToTab('pos')}
+            className="flex items-center justify-between gap-2 rounded-2xl border border-danger/30 bg-danger/10 px-3.5 py-3 text-left transition-all cursor-pointer hover:bg-danger/15 active:scale-[0.98] min-h-[44px]"
+            title="Open POS checkout to collect unpaid balances"
+          >
+            <span className="flex items-center gap-2 min-w-0">
+              <Coins className="w-4 h-4 shrink-0 text-danger" />
+              <span className="min-w-0">
+                <span className="block text-xs font-bold text-ink">Unpaid tickets</span>
+                <span className="block text-[10px] font-semibold text-muted truncate">{financialAnalytics.totalUnpaidBalance.toLocaleString()} {currency} to collect</span>
+              </span>
+            </span>
+            <span className="font-mono text-lg font-black text-danger shrink-0">{financialAnalytics.unpaidCount}</span>
           </button>
           <button
             type="button"
             onClick={() => onNavigateToTab('inventory')}
-            className="flex items-center justify-between gap-2 rounded-2xl border border-danger/30 bg-danger/10 px-3.5 py-3 text-left transition-all cursor-pointer hover:bg-danger/15 active:scale-[0.98] min-h-[44px]"
+            className="flex items-center justify-between gap-2 rounded-2xl border border-warning/30 bg-warning/10 px-3.5 py-3 text-left transition-all cursor-pointer hover:bg-warning/15 active:scale-[0.98] min-h-[44px]"
+            title="Open inventory filtered by low-stock parts"
           >
             <span className="flex items-center gap-2 min-w-0">
-              <AlertTriangle className="w-4 h-4 shrink-0 text-danger" />
-              <span className="text-xs font-bold text-ink">Out of stock</span>
+              <AlertTriangle className="w-4 h-4 shrink-0 text-warning" />
+              <span className="min-w-0">
+                <span className="block text-xs font-bold text-ink">SKUs below reorder</span>
+                <span className="block text-[10px] font-semibold text-muted truncate">Low-stock parts to restock</span>
+              </span>
             </span>
-            <span className="font-mono text-lg font-black text-danger">{outOfStockParts.length}</span>
+            <span className="font-mono text-lg font-black text-warning shrink-0">{inventoryAnalytics.lowStockCount}</span>
           </button>
         </div>
       )}
@@ -691,11 +723,24 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
             </Button>
             <Button
               type="button"
-              onClick={() => onSettleInventoryFund?.(pendingFundTickets.map((wo) => wo.id))}
-              size="sm"
-              className="bg-warning hover:bg-warning text-white"
+              onClick={async () => {
+                if (isSettlingFund) return;
+                const ok = await confirmDialog({
+                  title: 'Mark All Pending Tickets Settled',
+                  message: `Settle the inventory fund for ${pendingFundTickets.length} ticket(s) totaling ${pendingFundTotal.toLocaleString()} ${currency}? This records the parts fund as repaid.`,  
+                  confirmLabel: `Settle ${pendingFundTickets.length} Tickets`,
+                  danger: true,
+                });
+                if (!ok) return;
+                setIsSettlingFund(true);
+                onSettleInventoryFund?.(pendingFundTickets.map((wo) => wo.id));
+                setTimeout(() => setIsSettlingFund(false), 1200);
+              }}
+              disabled={isSettlingFund}
+              className="bg-white border border-warning/50 text-warning hover:bg-warning/10 font-extrabold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5"
             >
-              Mark All Settled
+              <CheckCircle2 className="w-4 h-4" />
+              Mark All {pendingFundTickets.length} Pending Tickets Settled ({pendingFundTotal.toLocaleString()} {currency})
             </Button>
           </div>
         </div>
@@ -933,9 +978,17 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
                   <span className="text-muted">Collected</span>
                   <p className="font-black text-ink">{financialAnalytics.totalCollected.toLocaleString()} {currency}</p>
                 </div>
-                <div className="p-3 bg-surface rounded-2xl space-y-1">
+                <div
+                  className="p-3 bg-surface rounded-2xl space-y-1 cursor-pointer hover:bg-line/50 transition-colors"
+                  onClick={() => setActiveDashboardSubTab('finance')}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveDashboardSubTab('finance'); } }}
+                  title={`${financialAnalytics.unpaidCount} unpaid tickets — open recovery queue`}
+                >
                   <span className="text-muted">Unpaid</span>
                   <p className="font-black text-danger">{financialAnalytics.totalUnpaidBalance.toLocaleString()} {currency}</p>
+                  <span className="text-[10px] font-bold text-danger">{financialAnalytics.unpaidCount} tickets</span>
                 </div>
                 <div className="p-3 bg-surface rounded-2xl space-y-1">
                   <span className="text-muted">Avg ticket</span>
@@ -952,7 +1005,14 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
                   <span className="text-muted">Paid tickets</span>
                   <span className="font-bold text-ink">{financialAnalytics.paidCount}</span>
                 </div>
-                <div className="flex items-center justify-between">
+                <div
+                  className="flex items-center justify-between cursor-pointer hover:text-brand transition-colors"
+                  onClick={() => setActiveDashboardSubTab('finance')}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveDashboardSubTab('finance'); } }}
+                  title="Open unpaid recovery queue"
+                >
                   <span className="text-muted">Unpaid tickets</span>
                   <span className="font-bold text-ink">{financialAnalytics.unpaidCount}</span>
                 </div>
@@ -971,16 +1031,16 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
                   <span className="text-muted">Stock value</span>
                   <p className="font-black text-ink">{inventoryAnalytics.totalValuation.toLocaleString()} {currency}</p>
                 </div>
-                <div className="p-3 bg-surface rounded-2xl space-y-1">
-                  <span className="text-muted">Total items</span>
+                <div className="p-3 bg-surface rounded-2xl space-y-1" title="Total physical units across all SKUs">
+                  <span className="text-muted">Units in stock</span>
                   <p className="font-black text-ink">{inventoryAnalytics.totalItems}</p>
                 </div>
-                <div className="p-3 bg-surface rounded-2xl space-y-1">
-                  <span className="text-muted">Low stock</span>
+                <div className="p-3 bg-surface rounded-2xl space-y-1" title="Number of SKUs whose quantity is at or below the reorder point">
+                  <span className="text-muted">SKUs below reorder</span>
                   <p className={`font-black ${inventoryAnalytics.lowStockCount > 0 ? 'text-warning' : 'text-success-deep'}`}>{inventoryAnalytics.lowStockCount}</p>
                 </div>
-                <div className="p-3 bg-surface rounded-2xl space-y-1">
-                  <span className="text-muted">Repair parts low</span>
+                <div className="p-3 bg-surface rounded-2xl space-y-1" title="SKUs used in repairs (not accessories) at or below reorder point">
+                  <span className="text-muted">Repair SKUs low</span>
                   <p className={`font-black ${repairLowStockParts.length > 0 ? 'text-danger' : 'text-success-deep'}`}>{repairLowStockParts.length}</p>
                 </div>
               </div>
@@ -1323,6 +1383,86 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
               footerClass="font-semibold text-danger"
             />
           </div>
+
+          {/* Unpaid Recovery Queue — money to collect, oldest first (Ko Hein 2026-08-24) */}
+          {unpaidRecoveryTickets.length > 0 && (
+            <div className="bg-white border border-danger/20 rounded-2xl p-5 shadow-xs space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="space-y-0.5">
+                  <div className="flex items-center space-x-2">
+                    <div className="p-2 bg-danger/10 text-danger-deep rounded-xl border border-danger/20">
+                      <Coins className="w-4 h-4" />
+                    </div>
+                    <h3 className="text-sm font-extrabold text-ink">Unpaid Recovery Queue</h3>
+                  </div>
+                  <p className="text-xs text-muted">Outstanding balances to collect — contact the customer, then settle in POS.</p>
+                </div>
+                <span className="shrink-0 rounded-full bg-danger/10 text-danger border border-danger/25 px-2.5 py-1 text-xs font-black">
+                  {unpaidRecoveryTickets.length} tickets · {unpaidRecoveryTickets.reduce((s, t) => s + t.balance, 0).toLocaleString()} {currency}
+                </span>
+              </div>
+              <div className="overflow-x-auto border border-line rounded-xl text-xs">
+                <table className="w-full text-left">
+                  <thead className="bg-surface text-muted uppercase font-mono text-xs">
+                    <tr>
+                      <th className="p-3">Ticket</th>
+                      <th className="p-3">Customer / Device</th>
+                      <th className="p-3 text-right">Balance Due</th>
+                      <th className="p-3">Days Open</th>
+                      <th className="p-3">Contact Status</th>
+                      <th className="p-3">Reminders</th>
+                      <th className="p-3 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-line">
+                    {unpaidRecoveryTickets.slice(0, 12).map(({ wo, balance, daysOpen }) => {
+                      const records = (wo.followUpRecords || []).length;
+                      const contact = wo.followUpStatus || '—';
+                      return (
+                        <tr key={wo.id} className="hover:bg-surface">
+                          <td className="p-3 font-mono font-bold text-brand">{wo.orderNumber}</td>
+                          <td className="p-3">
+                            <p className="font-bold text-ink truncate max-w-[160px]">{wo.customerName}</p>
+                            <p className="text-muted truncate max-w-[160px]">{wo.deviceModel}</p>
+                          </td>
+                          <td className="p-3 text-right font-mono font-black text-danger whitespace-nowrap">{balance.toLocaleString()} {currency}</td>
+                          <td className="p-3 font-mono">
+                            {daysOpen !== null && (
+                              <span className={`${daysOpen >= 14 ? 'text-danger font-bold' : daysOpen >= 7 ? 'text-warning font-bold' : 'text-muted'}`}>
+                                {daysOpen}d
+                              </span>
+                            )}
+                          </td>
+                          <td className="p-3">
+                            <span className={`px-1.5 py-0.5 rounded font-bold ${
+                              contact === 'Satisfied' || contact === 'Closed' ? 'bg-success/10 text-success-deep' :
+                              contact === 'Issue Reported' ? 'bg-danger/10 text-danger' :
+                              'bg-surface text-ink border border-line'
+                            }`}>{contact}</span>
+                          </td>
+                          <td className="p-3">
+                            <span className="font-mono">{records > 0 ? `${records}×` : '—'}</span>
+                          </td>
+                          <td className="p-3 text-right">
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={() => onNavigateToTab('pos')}
+                              className="bg-brand hover:bg-brand-deep text-white text-xs font-extrabold rounded-lg"
+                              title="Collect balance in POS checkout"
+                            >
+                              Collect
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-[10px] text-muted">Showing top {Math.min(12, unpaidRecoveryTickets.length)} of {unpaidRecoveryTickets.length} unpaid tickets by amount due.</p>
+            </div>
+          )}
 
           {/* Revenue & Repairs Trend — with previous-period comparison */}
           <div className="bg-white border border-line rounded-2xl p-5 shadow-xs space-y-4">

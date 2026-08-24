@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useImperativeHandle, forwardRef, useEffect } from 'react';
+import { confirmDialog } from '../common/ConfirmDialog';
 import {DollarSign, 
   TrendingUp, 
   Receipt, 
@@ -1543,9 +1544,21 @@ export const ShopFinancePlModule = forwardRef<ShopFinancePlModuleHandle, ShopFin
           {pendingFundTickets.length > 0 && (
             <Button variant="ghost"
               type="button"
-              onClick={() => { if (isSettlingFund) return; setIsSettlingFund(true); onSettleInventoryFund?.(pendingFundTickets.map((wo) => wo.id)); setTimeout(() => setIsSettlingFund(false), 1200); }}
+              onClick={async () => {
+                if (isSettlingFund) return;
+                const ok = await confirmDialog({
+                  title: 'Mark All Pending Tickets Settled',
+                  message: `Settle the inventory fund for ${pendingFundTickets.length} ticket(s) totaling ${pendingFundTotal.toLocaleString()} ${currency}? This records the parts fund as repaid.`,
+                  confirmLabel: `Settle ${pendingFundTickets.length} Tickets`,
+                  danger: true,
+                });
+                if (!ok) return;
+                setIsSettlingFund(true);
+                onSettleInventoryFund?.(pendingFundTickets.map((wo) => wo.id));
+                setTimeout(() => setIsSettlingFund(false), 1200);
+              }}
               disabled={isSettlingFund}
-              className="w-full p-3 bg-warning/10 border border-warning/30 rounded-xl text-xs font-extrabold text-warning hover:bg-warning/15 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+              className="w-full p-3 bg-white border-2 border-warning/40 rounded-xl text-xs font-extrabold text-warning hover:bg-warning/10 transition-all cursor-pointer flex items-center justify-center gap-1.5"
             >
               <CheckCircle2 className="w-4 h-4" />
               Mark All {pendingFundTickets.length} Pending Tickets Settled ({pendingFundTotal.toLocaleString()} {currency})

@@ -2268,7 +2268,7 @@ export default function App() {
 
             {activeTab === 'dashboard' && (
               <>
-                <div className={isIpad ? 'flex items-center gap-1.5' : 'hidden lg:flex items-center gap-1.5'}>
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0">
                   {[
                     { id: 'status-queue', label: 'Status Queue', icon: ListFilter },
                     { id: 'repair-data', label: 'Analytics', icon: Activity },
