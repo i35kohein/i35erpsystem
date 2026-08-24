@@ -1038,14 +1038,14 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                         >
                           <Icon className="w-5 h-5" />
                         </span>
-                        <span className="leading-tight line-clamp-2">
+                        <span className="leading-snug">
                           {q && (
                             <span className="block text-[9px] font-bold uppercase tracking-wide text-muted mb-0.5">{group.label} →</span>
                           )}
                           {highlight(tab.label)}
                         </span>
                         {tab.desc && !q && (
-                          <span className="text-[10px] text-muted leading-tight line-clamp-1">{tab.desc}</span>
+                          <span className="text-[10px] text-muted leading-snug">{tab.desc}</span>
                         )}
                         <span className="absolute top-1.5 right-1.5 flex items-center gap-1 shrink-0">
                           {isDirty && isActive && (
