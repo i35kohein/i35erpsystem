@@ -33,8 +33,7 @@ interface FormState {
   phone: string;
   model: string;
   color: string;
-  imei: string;
-  serial: string; // audit B-P2: serial kept separate from IMEI
+  deviceId: string; // combined IMEI / Serial (Ko Hein 2026-08-24): 15-digit = IMEI, else = Serial
   date: string;
   error: string;
   repairs: SelectedRepairItem[];
@@ -54,7 +53,7 @@ interface FormState {
 }
 
 const EMPTY_FORM: FormState = {
-  name: '', phone: '', model: '', color: '', imei: '', serial: '',
+  name: '', phone: '', model: '', color: '', deviceId: '',
   date: new Date().toISOString().slice(0, 10),
   error: '', repairs: [], passcode: '', reply: '',
   checks: DIAGNOSTIC_NAMES.map(() => ({ status: 'N/A' as const, note: '' })),
@@ -258,11 +257,9 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
       phone: wo.customerPhone || '',
       model: wo.deviceModel || '',
       color: wo.deviceColor || '',
-      // Audit B-P2: keep IMEI and serial SEPARATE — the old code stuffed the
-      // serial into the imei field, so editing a serial-only ticket wrote the
-      // serial into imei (and vice-versa), corrupting both identifiers.
-      imei: wo.imei || '',
-      serial: wo.serialNumber || '',
+      // Combined IMEI / Serial (Ko Hein 2026-08-24): show the IMEI (the big
+      // 15-digit number) when both exist; length-routing happens on save.
+      deviceId: wo.imei || wo.serialNumber || '',
       date: (wo.createdAt || new Date().toISOString()).slice(0, 10),
       error: '',
       repairs: wo.selectedRepairs || [],
@@ -384,6 +381,9 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
         0
       );
 
+    const deviceIdClean = form.deviceId.trim().replace(/\s+/g, '');
+    const isImei = /^\d{15}$/.test(deviceIdClean);
+
     const base: WorkOrder = {
       ...(existing || ({} as WorkOrder)), // preserve everything not edited below
       id: editingId || uniqueId('wo'),
@@ -398,8 +398,9 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
       customerType: form.customerType,
       deviceCategory,
       deviceModel: form.model.trim() || 'Unknown Model',
-      serialNumber: form.serial.trim() || existing?.serialNumber || '',
-      imei: form.imei.trim() || existing?.imei || undefined,
+      // IMEI = the big 15-digit number; anything else is the serial (Ko Hein 2026-08-24).
+      serialNumber: isImei ? (existing?.serialNumber || '') : (deviceIdClean.toUpperCase() || existing?.serialNumber || ''),
+      imei: isImei ? deviceIdClean : (existing?.imei || undefined),
       deviceColor: form.color.trim(),
       passcode: form.passcode.trim(),
       status: existing?.status || 'Receive',
@@ -686,28 +687,23 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 <ChevronDown className="print:hidden h-4 w-4 shrink-0 text-muted" />
               </button>
             </label>
-            {/* IMEI — audit B-P2: separate field from Serial so editing one
-                never corrupts the other (the old single field wrote the same
-                value into both serialNumber and imei). */}
+            {/* IMEI / Serial — combined (Ko Hein 2026-08-24): one field; the
+               15-digit big number is the IMEI, anything else is the serial. */}
             <label className="flex flex-col items-stretch gap-1 py-1.5 sm:flex-row sm:items-center sm:gap-3">
-              <span className="w-full shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted sm:w-32">IMEI</span>
-              <input
-                value={form.imei}
-                onChange={(e) => set('imei', e.target.value)}
-                inputMode="numeric"
-                placeholder="15-digit IMEI"
-                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-muted"
-              />
-            </label>
-            {/* Serial Number */}
-            <label className="flex flex-col items-stretch gap-1 py-1.5 sm:flex-row sm:items-center sm:gap-3">
-              <span className="w-full shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted sm:w-32">Serial</span>
-              <input
-                value={form.serial}
-                onChange={(e) => set('serial', e.target.value.toUpperCase())}
-                placeholder="Device serial number"
-                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-muted"
-              />
+              <span className="w-full shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-muted sm:w-32">IMEI / Serial</span>
+              <div className="relative flex-1">
+                <input
+                  value={form.deviceId}
+                  onChange={(e) => set('deviceId', e.target.value)}
+                  placeholder="Scan or type IMEI (15-digit) or serial number"
+                  className="w-full rounded-lg border border-line bg-white px-3 py-2 pr-16 text-sm text-ink outline-none transition-colors placeholder:text-muted"
+                />
+                <span className={`pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 rounded px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wide ${
+                  /^\d{15}$/.test(form.deviceId.trim()) ? 'bg-brand/10 text-brand' : 'bg-surface text-muted'
+                }`}>
+                  {/^\d{15}$/.test(form.deviceId.trim()) ? 'IMEI' : 'Serial'}
+                </span>
+              </div>
               {/* Camera scanner — full-form parity (Ko Hein 2026-08-11) */}
               <button
                 type="button"
@@ -1309,7 +1305,8 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
             onClose={() => setIsScannerOpen(false)}
             onScanSuccess={(scannedText) => {
               const clean = (scannedText || '').trim().replace(/\s+/g, ' ');
-              set('serial', clean.toUpperCase());
+              // Combined field — routing to IMEI (15-digit) vs Serial happens on save.
+              set('deviceId', clean);
               setIsScannerOpen(false);
             }}
           />
