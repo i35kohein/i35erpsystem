@@ -44,7 +44,6 @@ import {
   stockBarWidthPercent,
   generateRmaNumber,
   InlineDraft,
-  OwnerBadge,
 } from './inventoryUtils';
 import { PartDetailsModal, MatrixPrintSheet, TagsPrintSheet } from './InventoryModals';
 
@@ -1211,26 +1210,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
 
 
-        {/* Owner filter — APP (shop) stock (Ko Hein 2026-08-24: KZH removed) */}
-        <div className="flex flex-wrap items-center gap-1.5">
-          {(['ALL', 'APP'] as const).map((owner) => {
-            const count = owner === 'ALL' ? parts.length : parts.filter((p) => (p.owner || 'APP') === owner).length;
-            const active = ownerFilter === owner;
-            return (
-              <Button
-                key={owner}
-                type="button"
-                onClick={() => setOwnerFilter(owner)}
-                className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold transition-all cursor-pointer ${
-                  active ? 'bg-brand text-white shadow-2xs' : 'bg-surface text-muted hover:bg-line hover:text-ink'
-                }`}
-              >
-                {owner === 'ALL' ? 'All Owners' : owner}
-                <span className={`rounded-full px-1.5 text-[10px] font-black ${active ? 'bg-white/20' : 'bg-white'}`}>{count}</span>
-              </Button>
-            );
-          })}
-        </div>
       {/* VIEW MODE 1: STOCK TABLE */}
       {viewMode === 'stock' && (
         <>
@@ -1379,7 +1358,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-1.5">
-                      <OwnerBadge owner={part.owner} />
                       {qualityBadge}
                       {part.locationBin && (
                         <span className="inline-flex items-center gap-1 rounded-md border border-line bg-surface px-1.5 py-0.5 text-xs font-extrabold text-brand">
@@ -1546,18 +1524,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                                     ))}
                                   </select>
                                 </div>
-                                <div>
-                                  <p className="text-[10px] font-extrabold uppercase tracking-wide text-muted mb-1">Owner</p>
-                                  <select
-                                    aria-label="Filter by owner"
-                                    value={ownerFilter}
-                                    onChange={(e) => setOwnerFilter(e.target.value as 'ALL' | PartOwner)}
-                                    className="w-full rounded-lg border border-line bg-white px-2 py-1.5 text-xs font-semibold text-ink outline-none "
-                                  >
-                                    <option value="ALL">All Owners</option>
-                                    <option value="APP">APP — Shop</option>
-                                  </select>
-                                </div>
                                 <label className="flex items-center gap-1.5 text-xs font-bold text-ink cursor-pointer pt-1.5 mt-1 border-t border-line">
                                   <Input
                                     type="checkbox"
@@ -1597,9 +1563,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         Stock
                         {sortKey === 'stock' && <SortArrow dir={sortDir} />}
                       </Button>
-                    </th>
-                    <th className="w-[9%] min-w-[64px] px-1.5 py-2 bg-surface hidden md:table-cell">
-                      <span className="uppercase font-mono text-xs text-muted">Owner</span>
                     </th>
                     <th className="w-[13%] min-w-[110px] px-1.5 py-2 bg-surface">
                       <Button type="button" onClick={() => toggleSort('price')} className="inline-flex items-center gap-1 hover:text-brand transition-colors cursor-pointer uppercase font-mono text-xs focus:outline-none" title="Sort by selling price">
@@ -1725,11 +1688,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                               />
                             </div>}
                           </div>}
-                        </td>
-
-                        {/* Owner — APP */}
-                        <td className="w-[9%] min-w-[64px] px-1.5 py-2 hidden md:table-cell">
-                          <OwnerBadge owner={part.owner} />
                         </td>
 
                         {/* Selling price only — profit belongs in the Profit tab. */}

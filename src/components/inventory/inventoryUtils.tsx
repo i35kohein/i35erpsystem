@@ -102,12 +102,4 @@ export function paginateTags(parts: PartItem[], perPage = 18): PartItem[][] {
   return pages;
 }
 
-/** Stock owner badge — APP (shop, brand blue). KZH removed 2026-08-24. */
-export const OwnerBadge = ({ owner }: { owner?: string }) => {
-  void owner;
-  return (
-    <span className="inline-flex items-center gap-1 rounded-md border border-brand/30 bg-brand-soft px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-brand">
-      APP
-    </span>
-  );
-};
+/** Stock owner badge — removed 2026-08-24 (all stock is APP; KZH deleted). */
