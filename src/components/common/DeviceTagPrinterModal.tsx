@@ -446,7 +446,13 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                     <tr key={item.id}>
                       <td className="p-1.5 font-sans font-semibold">{item.name}</td>
                       <td className="p-1.5 text-right">{item.basePrice.toLocaleString()} MMK</td>
-                      <td className="p-1.5 text-right">{item.discountPercent}%</td>
+                      {/* Discount cell: blank when no discount; when present show
+                          % + how much was saved (Ko Hein 2026-08-25) */}
+                      <td className="p-1.5 text-right">
+                        {item.discountPercent > 0
+                          ? `${item.discountPercent}% (-${Math.round(item.basePrice * item.discountPercent / 100).toLocaleString()} MMK)`
+                          : ''}
+                      </td>
                       <td className="p-1.5 text-right">{workOrder.warrantyDays ?? 0} Days</td>
                       <td className="p-1.5 text-right font-bold">{item.finalPrice.toLocaleString()} MMK</td>
                     </tr>
