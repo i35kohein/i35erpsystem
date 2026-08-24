@@ -240,13 +240,13 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
     icon: React.ElementType;
     color: string;
   }[] = [
-    { value: 'Receive', label: 'Receive', shortLabel: 'In', icon: Inbox, color: 'bg-brand text-white border-brand shadow-brand/20' },
-    { value: 'In Progress', label: 'In Progress', shortLabel: 'Fix', icon: Wrench, color: 'bg-purple text-white border-purple shadow-purple/20' },
-    { value: 'Pending', label: 'Pending', shortLabel: 'Wait', icon: Clock, color: 'bg-warning text-white border-warning shadow-warning/20' },
-    { value: 'Finished', label: 'Finished', shortLabel: 'Done', icon: CheckCircle2, color: 'bg-success text-white border-success shadow-success/20' },
-    { value: 'Cant Repair', label: 'Cant Repair', shortLabel: 'No', icon: Ban, color: 'bg-danger text-white border-danger shadow-danger/20' },
-    { value: 'Customer Not Repair', label: 'Customer Not Repair', shortLabel: 'Skip', icon: UserX, color: 'bg-muted text-white border-muted shadow-muted/20' },
-    { value: 'Taken Out', label: 'Takeout', shortLabel: 'Out', icon: PackageCheck, color: 'bg-ink text-white border-ink shadow-ink/20' },
+    { value: 'Receive', label: 'Receive', shortLabel: 'In', icon: Inbox, color: '!bg-brand !text-white border-brand shadow-brand/20' },
+    { value: 'In Progress', label: 'In Progress', shortLabel: 'Fix', icon: Wrench, color: '!bg-purple !text-white border-purple shadow-purple/20' },
+    { value: 'Pending', label: 'Pending', shortLabel: 'Wait', icon: Clock, color: '!bg-warning !text-white border-warning shadow-warning/20' },
+    { value: 'Finished', label: 'Finished', shortLabel: 'Done', icon: CheckCircle2, color: '!bg-success !text-white border-success shadow-success/20' },
+    { value: 'Cant Repair', label: 'Cant Repair', shortLabel: 'No', icon: Ban, color: '!bg-danger !text-white border-danger shadow-danger/20' },
+    { value: 'Customer Not Repair', label: 'Customer Not Repair', shortLabel: 'Skip', icon: UserX, color: '!bg-muted !text-white border-muted shadow-muted/20' },
+    { value: 'Taken Out', label: 'Takeout', shortLabel: 'Out', icon: PackageCheck, color: '!bg-ink !text-white border-ink shadow-ink/20' },
   ];
 
   const renderStatusCirclePicker = (wo: WorkOrder) => {
@@ -339,7 +339,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
         variant="ghost"
         type="button"
         onClick={(e) => { e.stopPropagation(); onNavigateToTab?.('pos'); }}
-        className="!h-6 !min-h-6 w-6 shrink-0 px-0 rounded-full bg-success text-white hover:bg-success/90 border border-success shadow-2xs focus-visible:ring-2 focus-visible:ring-success/40"
+        className="!h-6 !min-h-6 w-6 shrink-0 px-0 rounded-full !bg-success !text-white hover:!bg-success/90 border border-success shadow-2xs focus-visible:ring-2 focus-visible:ring-success/40"
         title="Go to POS checkout"
         aria-label={`Checkout ${wo.orderNumber || wo.id}`}
       >
