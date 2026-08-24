@@ -775,14 +775,13 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
              checklist overflows, it flows cleanly onto page 2. */
           .a4-voucher-print {
             padding: 5mm !important;
-            /* Full preview scale — A4 has room and the customer-facing voucher
-               should read comfortably on paper (Ko Hein 2026-08-25: fonts were
-               too small). */
-            font-size: 12.5px !important;
-            line-height: 1.35 !important;
+            /* Max comfortable size that still fits ONE A4 sheet (Ko Hein
+               2026-08-25: fonts keep coming out small; never exceed 1 page). */
+            font-size: 13px !important;
+            line-height: 1.4 !important;
           }
           .a4-voucher-print > .a4-voucher-content > * + * {
-            margin-top: 10px !important;
+            margin-top: 12px !important;
           }
           .a4-voucher-print .a4-voucher-header,
           .a4-voucher-print .a4-info-card,
@@ -795,18 +794,18 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
             break-inside: auto !important;
           }
           .a4-voucher-print .a4-diagnostic-row {
-            min-height: 20px !important;
+            min-height: 22px !important;
             padding: 4px 5px !important;
             gap: 5px !important;
-            font-size: 11px !important;
-            line-height: 1.25 !important;
+            font-size: 12px !important;
+            line-height: 1.3 !important;
           }
           .a4-voucher-print .a4-service-table {
-            font-size: 11.5px !important;
+            font-size: 12.5px !important;
           }
           .a4-voucher-print .a4-service-table th,
           .a4-voucher-print .a4-service-table td {
-            padding: 4px 6px !important;
+            padding: 5px 7px !important;
           }
           .a4-voucher-print tr,
           .a4-voucher-print .a4-diagnostic-row {
@@ -816,38 +815,38 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
           /* Layout density setting (System Management) still has a mild effect:
              compact tightens slightly, standard prints at full preview scale. */
           .a4-print-compact {
-            font-size: 11.5px !important;
-            line-height: 1.3 !important;
+            font-size: 12.5px !important;
+            line-height: 1.35 !important;
           }
           .a4-print-compact .a4-diagnostic-row {
-            min-height: 18px !important;
+            min-height: 20px !important;
             padding: 3px 4px !important;
-            font-size: 10.5px !important;
+            font-size: 11.5px !important;
           }
           .a4-print-compact .a4-service-table {
-            font-size: 10.5px !important;
+            font-size: 12px !important;
           }
-          .a4-print-compact h1 { font-size: 17px !important; }
-          .a4-print-compact h3 { font-size: 12px !important; }
-          .a4-print-compact .a4-info-card p { font-size: 11px !important; }
+          .a4-print-compact h1 { font-size: 18px !important; }
+          .a4-print-compact h3 { font-size: 13px !important; }
+          .a4-print-compact .a4-info-card p { font-size: 12px !important; }
           .a4-print-compact .print-shop-logo { border: none !important; }
           /* Simple Checks diagnostic format — compact circle rows (Ko Hein 2026-08-25) */
           .a4-voucher-print .a4-simple-checks {
-            font-size: 11px !important;
-            padding: 2.5mm !important;
+            font-size: 12px !important;
+            padding: 3mm !important;
           }
           .a4-voucher-print .a4-simple-checks > div > div {
-            min-height: 19px !important;
+            min-height: 22px !important;
             padding: 3px 0 !important;
-            gap: 6px !important;
+            gap: 7px !important;
           }
           .a4-voucher-print .a4-simple-checks .a4-diag-circle {
-            width: 14px !important;
-            height: 14px !important;
-            font-size: 9px !important;
+            width: 16px !important;
+            height: 16px !important;
+            font-size: 10px !important;
           }
           .a4-voucher-print .a4-simple-checks > div > div > span:last-child {
-            font-size: 10px !important;
+            font-size: 11px !important;
           }
           @page {
             size: ${paperSize === 'a4_voucher' ? 'A4 portrait' : '3in 2in'};
