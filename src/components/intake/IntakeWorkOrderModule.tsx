@@ -285,9 +285,9 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           aria-expanded={isOpen}
           aria-label={`Current status ${currentStatus.label}. Change status.`}
           title={`Current: ${currentStatus.label}`}
-          className={`!h-8 !min-h-8 w-8 shrink-0 px-0 flex items-center justify-center rounded-full border shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-brand/30 ${currentStatus.color}`}
+          className={`!h-6 !min-h-6 w-6 shrink-0 px-0 flex items-center justify-center rounded-full border shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-brand/30 ${currentStatus.color}`}
         >
-          <CurrentIcon className="h-3.5 w-3.5" />
+          <CurrentIcon className="h-3 w-3" />
         </Button>
         {/* Visible text anchor for the icon-only status circle (Ko Hein 2026-08-24 UX audit) */}
         <span className="text-[9px] font-black uppercase leading-none text-muted max-w-[52px] truncate">{currentStatus.shortLabel}</span>
@@ -339,11 +339,11 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
         variant="ghost"
         type="button"
         onClick={(e) => { e.stopPropagation(); onNavigateToTab?.('pos'); }}
-        className="!h-8 !min-h-8 w-8 shrink-0 px-0 rounded-full bg-success text-white hover:bg-success/90 border border-success shadow-2xs focus-visible:ring-2 focus-visible:ring-success/40"
+        className="!h-6 !min-h-6 w-6 shrink-0 px-0 rounded-full bg-success text-white hover:bg-success/90 border border-success shadow-2xs focus-visible:ring-2 focus-visible:ring-success/40"
         title="Go to POS checkout"
         aria-label={`Checkout ${wo.orderNumber || wo.id}`}
       >
-        <DollarSign className="w-3.5 h-3.5" />
+        <DollarSign className="w-3 h-3" />
       </Button>
     );
   };
