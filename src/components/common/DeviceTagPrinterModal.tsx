@@ -711,208 +711,65 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
           .tag-printable-area .h-8 {
             height: 20px !important;
           }
-          /* A4 vouchers are always print-condensed, even when the screen
-             preview uses Standard A4. This keeps the full 21-point list on
-             one physical A4 sheet without changing the on-screen layout. */
+          /* A4 vouchers print at (near) preview scale — the on-screen Standard A4
+             layout is what the customer should receive, not a receipt-like
+             compressed sheet (Ko Hein 2026-08-24: 'preview ပြထားသလို လှလှလေး
+             print မထွက်ဘူး'). Sections never split mid-way; if the 21-point
+             checklist overflows, it flows cleanly onto page 2. */
           .a4-voucher-print {
-            padding: 2.5mm !important;
-            font-size: 8px !important;
-            line-height: 1.04 !important;
+            padding: 5mm !important;
+            font-size: 11px !important;
+            line-height: 1.3 !important;
           }
           .a4-voucher-print > .a4-voucher-content > * + * {
-            margin-top: 3px !important;
+            margin-top: 8px !important;
           }
-          .a4-voucher-print .a4-voucher-header {
+          .a4-voucher-print .a4-voucher-header,
+          .a4-voucher-print .a4-info-card,
+          .a4-voucher-print .a4-service-section,
+          .a4-voucher-print .a4-terms {
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
+          }
+          .a4-voucher-print .a4-diagnostic-section {
+            break-inside: auto !important;
+          }
+          .a4-voucher-print .a4-diagnostic-row {
+            min-height: 18px !important;
+            padding: 3px 4px !important;
             gap: 4px !important;
-            padding-bottom: 3px !important;
-          }
-          .a4-voucher-print .a4-voucher-header h1 {
-            font-size: 12px !important;
-            line-height: 1 !important;
-          }
-          .a4-voucher-print .a4-voucher-header p {
-            font-size: 7px !important;
-            line-height: 1.05 !important;
-            margin: 1px 0 !important;
-          }
-          .a4-voucher-print .print-shop-logo {
-            width: 34px !important;
-            min-height: 34px !important;
-            max-height: 34px !important;
-          }
-          .a4-voucher-print .print-qr {
-            padding: 1px !important;
-          }
-          .a4-voucher-print .print-qr svg {
-            width: 34px !important;
-            height: 34px !important;
-          }
-          .a4-voucher-print .print-qr span {
-            font-size: 6px !important;
-            margin-top: 0 !important;
-          }
-          .a4-voucher-print .a4-info-card {
-            padding: 4px !important;
-            border-radius: 3px !important;
-            gap: 1px !important;
-          }
-          .a4-voucher-print .a4-info-card h3 {
-            font-size: 8px !important;
-            line-height: 1 !important;
-            padding-bottom: 2px !important;
-            margin-bottom: 1px !important;
-          }
-          .a4-voucher-print .a4-info-card p {
-            font-size: 7.5px !important;
-            line-height: 1.06 !important;
-            margin: 0 !important;
-          }
-          .a4-voucher-print .a4-service-section {
-            gap: 2px !important;
-          }
-          .a4-voucher-print .a4-service-section h3 {
-            font-size: 8px !important;
-            padding-bottom: 2px !important;
+            font-size: 10px !important;
+            line-height: 1.2 !important;
           }
           .a4-voucher-print .a4-service-table {
-            font-size: 7px !important;
-            line-height: 1.04 !important;
+            font-size: 10px !important;
           }
           .a4-voucher-print .a4-service-table th,
           .a4-voucher-print .a4-service-table td {
-            padding: 1.5px 2px !important;
-            line-height: 1.04 !important;
+            padding: 3px 4px !important;
           }
-          .a4-voucher-print .a4-diagnostic-section {
-            padding-top: 2px !important;
-            gap: 2px !important;
-          }
-          .a4-voucher-print .a4-diagnostic-section > div:first-child {
-            padding-bottom: 2px !important;
-            gap: 2px !important;
-          }
-          .a4-voucher-print .a4-diagnostic-section h3 {
-            font-size: 8px !important;
-            line-height: 1 !important;
-          }
-          .a4-voucher-print .a4-diagnostic-section h3 svg {
-            width: 10px !important;
-            height: 10px !important;
-          }
-          .a4-voucher-print .a4-diagnostic-section > div:first-child > div span {
-            font-size: 7px !important;
-            padding: 1px 3px !important;
-          }
-          .a4-voucher-print .a4-diagnostic-grid {
-            gap: 0 !important;
-          }
-          .a4-voucher-print .a4-diagnostic-row {
-            min-height: 12px !important;
-            padding: 1px 2px !important;
-            gap: 3px !important;
-            font-size: 7px !important;
-            line-height: 1 !important;
-            border: none !important;
-            border-bottom: 1px solid #d2d2d7 !important;
-            border-radius: 0 !important;
-            background: transparent !important;
-          }
-          .a4-voucher-print .a4-diagnostic-row > span:nth-child(2) {
-            font-size: 6.5px !important;
-            line-height: 1 !important;
-            padding-left: 2px !important;
-          }
-          .a4-voucher-print .a4-diagnostic-row .inline-flex {
-            font-size: 7px !important;
-            line-height: 9px !important;
-            padding: 0 2px !important;
-          }
-          .a4-voucher-print .a4-diagnostic-row .inline-flex svg {
-            width: 7px !important;
-            height: 7px !important;
-          }
-          .a4-voucher-print .a4-diagnostic-table {
-            border: none !important;
-            font-size: 7px !important;
-            line-height: 1 !important;
-          }
-          .a4-voucher-print .a4-diagnostic-table th,
-          .a4-voucher-print .a4-diagnostic-table td {
-            padding: 1px 2px !important;
-            line-height: 1 !important;
-          }
-          .a4-voucher-print .a4-diagnostic-table tr {
-            height: 11px !important;
-            border-bottom: 1px solid #d2d2d7 !important;
-          }
-          .a4-voucher-print .a4-terms {
-            padding-top: 2px !important;
-            gap: 0 !important;
-            font-size: 7px !important;
-            line-height: 1.05 !important;
-          }
-          .a4-voucher-print .a4-terms p {
-            margin: 0 !important;
-          }
-          .a4-voucher-print .print-voucher-footer-text {
-            white-space: pre-wrap !important;
-          }
-          .a4-voucher-print .print-voucher-footer-text.footer-text-small {
-            font-size: 6.5px !important;
-          }
-          .a4-voucher-print .print-voucher-footer-text.footer-text-medium {
-            font-size: 7px !important;
-          }
-          .a4-voucher-print .print-voucher-footer-text.footer-text-large {
-            font-size: 8px !important;
-          }
-          .a4-voucher-print .print-voucher-footer-text .footer-text-small { font-size: 6.5px !important; }
-          .a4-voucher-print .print-voucher-footer-text .footer-text-medium { font-size: 7px !important; }
-          .a4-voucher-print .print-voucher-footer-text .footer-text-large { font-size: 8px !important; }
           .a4-voucher-print tr,
           .a4-voucher-print .a4-diagnostic-row {
             break-inside: avoid !important;
             page-break-inside: avoid !important;
           }
+          /* Layout density setting (System Management) still has a mild effect:
+             compact tightens slightly, standard prints at full preview scale. */
           .a4-print-compact {
             font-size: 10px !important;
-            line-height: 1.15 !important;
-            zoom: 1 !important;
+            line-height: 1.25 !important;
           }
-          .a4-print-compact > div,
-          .a4-print-compact .space-y-5 > :not([hidden]) ~ :not([hidden]),
-          .a4-print-compact .space-y-4 > :not([hidden]) ~ :not([hidden]),
-          .a4-print-compact .space-y-3 > :not([hidden]) ~ :not([hidden]) {
-            margin-top: 3px !important;
-          }
-          .a4-print-compact table th,
-          .a4-print-compact table td {
-            padding: 3px !important;
-            line-height: 1.1 !important;
-          }
-          .a4-print-compact h1 { font-size: 14px !important; }
-          .a4-print-compact h3 { font-size: 10px !important; }
-          .a4-print-compact .a4-diagnostic-grid { gap: 0 !important; }
           .a4-print-compact .a4-diagnostic-row {
-            min-height: 12px !important;
-            padding: 1px 2px !important;
-            gap: 3px !important;
-            font-size: 7px !important;
-            border: none !important;
-            border-bottom: 1px solid #d2d2d7 !important;
-            background: transparent !important;
+            min-height: 16px !important;
+            padding: 2px 3px !important;
+            font-size: 9.5px !important;
           }
-          .a4-print-compact .a4-diagnostic-table {
-            border: none !important;
+          .a4-print-compact .a4-service-table {
+            font-size: 9.5px !important;
           }
-          .a4-print-compact .a4-diagnostic-table tr {
-            border-bottom: 1px solid #d2d2d7 !important;
-          }
-          .a4-print-compact .a4-diagnostic-table th,
-          .a4-print-compact .a4-diagnostic-table td {
-            border-left: none !important;
-            border-right: none !important;
-          }
+          .a4-print-compact h1 { font-size: 16px !important; }
+          .a4-print-compact h3 { font-size: 11px !important; }
+          .a4-print-compact .a4-info-card p { font-size: 10px !important; }
           .a4-print-compact .print-shop-logo { border: none !important; }
           @page {
             size: ${paperSize === 'a4_voucher' ? 'A4 portrait' : '3in 2in'};
