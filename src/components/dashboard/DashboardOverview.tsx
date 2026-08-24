@@ -420,29 +420,6 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
       .slice(0, 8);
   }, [filteredWorkOrders]);
 
-  // STATUS QUEUE columns — one column per tracked status, oldest-first
-  // (longest-waiting ticket at the top; Ko Hein 2026-08-24).
-  const daysInStatus = (w: WorkOrder) => {
-    const from = w.statusChangedAt || w.createdAt;
-    if (!from) return 0;
-    return Math.max(0, Math.floor((Date.now() - new Date(from).getTime()) / 86400000));
-  };
-  const queueColumns = useMemo(() => {
-    const meta = [
-      { status: 'Receive', label: 'Received', dot: 'bg-brand', chip: 'bg-brand/10 text-brand' },
-      { status: 'In Progress', label: 'In Progress', dot: 'bg-purple', chip: 'bg-purple/10 text-purple' },
-      { status: 'Pending', label: 'Pending', dot: 'bg-warning', chip: 'bg-warning/15 text-warning' },
-      { status: 'Finished', label: 'Finished', dot: 'bg-success', chip: 'bg-success/10 text-success-deep' },
-      { status: 'Taken Out', label: 'Taken Out', dot: 'bg-ink', chip: 'bg-ink/10 text-ink' },
-    ] as const;
-    return meta.map((m) => ({
-      ...m,
-      tickets: filteredWorkOrders
-        .filter((w) => w.status === m.status)
-        .sort((a, b) => new Date(a.statusChangedAt || a.createdAt).getTime() - new Date(b.statusChangedAt || b.createdAt).getTime()),
-    }));
-  }, [filteredWorkOrders]);
-
   // Top Repair Categories with income — ticket + revenue per repair category.
   // Revenue counts only Finished/Taken Out tickets (audit D-P2); declined
   // quotes and open estimates are not revenue.
@@ -933,61 +910,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
         </div>
       </div>
 
-          {/* STATUS QUEUE — live ticket board, one column per status (Ko Hein 2026-08-24) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3 items-start">
-        {queueColumns.map((col) => (
-          <div key={col.status} className="flex flex-col rounded-2xl border border-line bg-surface/50 min-h-[240px] overflow-hidden">
-            <div className="flex items-center justify-between gap-2 px-3 py-2.5 border-b border-line bg-white">
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${col.dot}`} />
-                <span className="text-xs font-extrabold text-ink truncate">{col.label}</span>
-              </div>
-              <span className={`px-2 py-0.5 rounded-full font-mono text-[10px] font-black shrink-0 ${col.chip}`}>{col.tickets.length}</span>
             </div>
-            <div className="p-2 space-y-2 overflow-y-auto max-h-[520px]">
-              {col.tickets.length === 0 ? (
-                <p className="text-center text-[10px] font-bold text-muted py-8">No tickets</p>
-              ) : col.tickets.map((w) => {
-                const age = daysInStatus(w);
-                return (
-                  <div
-                    key={w.id}
-                    className="rounded-xl border border-line bg-white p-2.5 space-y-1.5 shadow-2xs hover:border-brand/40 hover:shadow-sm transition-all cursor-default select-none"
-                    title={`${w.orderNumber} · ${w.deviceModel} · ${w.customerName || 'no customer'} · in ${col.label} ${age}d`}
-                  >
-                    <div className="flex items-center justify-between gap-1">
-                      <span className="font-mono text-[11px] font-black text-ink truncate">{w.orderNumber || w.id.slice(0, 8)}</span>
-                      <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full shrink-0 ${age >= 7 ? 'bg-danger text-white' : age >= 3 ? 'bg-warning/15 text-warning' : 'bg-surface text-muted'}`}>
-                        {age === 0 ? 'today' : `${age}d`}
-                      </span>
-                    </div>
-                    <p className="text-xs font-bold text-ink truncate">{w.deviceModel}{w.deviceColor ? ` · ${w.deviceColor}` : ''}</p>
-                    <p className="text-[10px] text-muted truncate">{w.customerName || '—'}</p>
-                    <div className="flex items-center justify-between gap-1 border-t border-line/60 pt-1.5">
-                      <span className="text-[10px] font-bold text-brand truncate">{w.assignedTechName || 'Unassigned'}</span>
-                      {w.status === 'Finished' && (
-                        <span className={`font-mono text-[10px] font-black shrink-0 min-w-[64px] text-right ${w.isPaid ? 'text-success-deep' : 'text-danger'}`}>
-                          {(w.totalAmount || 0).toLocaleString()} {currency}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            {col.tickets.length > 0 && (
-              <button
-                type="button"
-                onClick={() => onNavigateToTab('intake')}
-                className="mt-auto shrink-0 w-full py-1.5 text-[10px] font-extrabold text-brand hover:bg-brand/5 transition-colors border-t border-line bg-white"
-              >
-                All {col.tickets.length} → Open in Intake
-              </button>
-            )}
-          </div>
-        ))}
-      </div>
-        </div>
       )}
 
       {/* SUBTAB 2: REPAIR DATA */}
