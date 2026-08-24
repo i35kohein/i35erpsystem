@@ -344,8 +344,30 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
     }
   };
 
+  // QR flow: opened from the voucher's "Check Status" QR (?ticket=WO-...) —
+  // never show the login form; go straight to a loading state, then the
+  // ticket status (or a not-found message). Staff controls are hidden from
+  // customers (Ko Hein 2026-08-25).
+  const isQrFlow = !!initialIdentifier;
+
   // Render Login View if not authenticated
   if (!authenticatedCustomerPhoneOrEmail || !currentWorkOrder) {
+    if (isQrFlow) {
+      return (
+        <div className="min-h-screen bg-surface flex flex-col items-center justify-center p-6 text-sm antialiased">
+          <div className="w-12 h-12 rounded-2xl bg-brand-soft text-brand border border-brand/20 flex items-center justify-center animate-pulse">
+            <Smartphone className="w-6 h-6" />
+          </div>
+          <h2 className="mt-4 text-lg font-extrabold text-ink">Checking your repair status…</h2>
+          <p className="mt-1 text-xs text-muted">Looking up ticket {initialIdentifier}</p>
+          {loginError && (
+            <p role="alert" className="mt-3 p-3 bg-danger/10 border border-danger/30 rounded-xl text-danger text-xs font-medium max-w-sm text-center">
+              {loginError}
+            </p>
+          )}
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen bg-surface flex flex-col justify-between p-4 sm:p-6 text-sm antialiased">
         {/* Top Header */}
@@ -469,7 +491,7 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
               </div>
             )}
 
-            {onExitPortalMode && (
+            {!isQrFlow && onExitPortalMode && (
               <Button variant="ghost"
                 onClick={onExitPortalMode}
                 className="hidden sm:flex items-center space-x-1 px-3 py-1.5 bg-surface hover:bg-line text-ink font-bold rounded-xl border border-line transition-all cursor-pointer"
@@ -479,18 +501,20 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
               </Button>
             )}
 
-            <Button
-              type="button"
-              onClick={() => {
-                setAuthenticatedCustomerPhoneOrEmail(null);
-                setSelectedWorkOrderId(null);
-              }}
-              variant="ghost"
-              size="sm"
-              className="bg-danger/10 hover:bg-danger/20 text-danger border border-danger/20"
-            >
-              Log Out
-            </Button>
+            {!isQrFlow && (
+              <Button
+                type="button"
+                onClick={() => {
+                  setAuthenticatedCustomerPhoneOrEmail(null);
+                  setSelectedWorkOrderId(null);
+                }}
+                variant="ghost"
+                size="sm"
+                className="bg-danger/10 hover:bg-danger/20 text-danger border border-danger/20"
+              >
+                Log Out
+              </Button>
+            )}
           </div>
         </div>
       </header>
