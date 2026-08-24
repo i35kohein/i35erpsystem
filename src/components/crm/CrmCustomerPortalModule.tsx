@@ -327,7 +327,6 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                     <td className="px-3 py-2.5 hidden md:table-cell">
                       <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${
                         cust.type === 'B2B Corporate' ? 'bg-purple/10 text-purple border-purple/30' :
-                        cust.type === 'Wholesale Mail-In' ? 'bg-brand-soft text-brand border-brand/20' :
                         'bg-surface text-ink border-line'
                       }`}>
                         {cust.type}
@@ -542,7 +541,6 @@ export const CrmCustomerPortalModule: React.FC<CrmCustomerPortalModuleProps> = (
                   >
                     <option value="Retail">Retail</option>
                     <option value="B2B Corporate">B2B Corporate</option>
-                    <option value="Wholesale Mail-In">Wholesale Mail-In</option>
                   </select>
                 </div>
               </div>

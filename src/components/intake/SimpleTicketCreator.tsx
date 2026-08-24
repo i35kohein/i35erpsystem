@@ -641,7 +641,6 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               >
                 <option value="Retail">Retail</option>
                 <option value="B2B Corporate">B2B Corporate</option>
-                <option value="Wholesale Mail-In">Wholesale Mail-In</option>
               </select>
             </label>
             {/* Town / Address — full-form parity (Ko Hein 2026-08-11) */}
@@ -773,7 +772,6 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
               >
                 <option value="Normal">Normal</option>
                 <option value="Urgent">Urgent</option>
-                <option value="Rush">Rush</option>
                 <option value="B2B Priority">B2B Priority</option>
                 <option value="Warranty Redo">Warranty Redo</option>
               </select>

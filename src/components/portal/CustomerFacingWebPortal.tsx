@@ -547,11 +547,6 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
                 }`}>
                   Status: {friendlyStatus}
                 </span>
-                {currentWorkOrder.priority === 'Rush' && (
-                  <span className="bg-danger/10 text-danger text-xs font-extrabold px-2 py-0.5 rounded-full border border-danger/30">
-                    RUSH SERVICE
-                  </span>
-                )}
               </div>
 
               <h2 className="text-lg sm:text-xl font-extrabold text-ink mt-2">

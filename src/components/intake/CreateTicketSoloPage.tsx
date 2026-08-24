@@ -182,7 +182,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerTown, setCustomerTown] = useState('');
-  const [customerType, setCustomerType] = useState<'Retail' | 'B2B Corporate' | 'Wholesale Mail-In'>('Retail');
+  const [customerType, setCustomerType] = useState<'Retail' | 'B2B Corporate'>('Retail');
 
   // Device Form State - Default empty to force selecting model first if no prefill
   const [deviceModel, setDeviceModel] = useState<string>(editWorkOrder?.deviceModel || prefill?.model || '');
@@ -920,11 +920,10 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
               <label className="block text-muted mb-1 font-medium">Customer Type</label>
               <CustomDropdownMenu
                 value={customerType}
-                onChange={(value) => setCustomerType(value as 'Retail' | 'B2B Corporate' | 'Wholesale Mail-In')}
+                onChange={(value) => setCustomerType(value as 'Retail' | 'B2B Corporate')}
                 options={[
                   { value: 'Retail', label: 'Retail Walk-In' },
                   { value: 'B2B Corporate', label: 'B2B Corporate Account' },
-                  { value: 'Wholesale Mail-In', label: 'Wholesale Mail-In Partner' },
                 ]}
                 menuAlign="left"
                 className="w-full"

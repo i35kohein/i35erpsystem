@@ -14,11 +14,11 @@ export type WorkOrderStatus =
   | 'Cant Repair'
   | 'Customer Not Repair';
 
-export type RepairPriority = 'Normal' | 'Urgent' | 'Rush' | 'B2B Priority' | 'Warranty Redo';
+export type RepairPriority = 'Normal' | 'Urgent' | 'B2B Priority' | 'Warranty Redo';
 
 export type TechnicianLevel = 'Level 1 Spareparts' | 'Level 2 Spareparts + Hardware' | 'Level 3 Master';
 
-export type CustomerType = 'Retail' | 'B2B Corporate' | 'Wholesale Mail-In';
+export type CustomerType = 'Retail' | 'B2B Corporate';
 
 export type RmaStatus = 'Draft' | 'Shipped to Vendor' | 'Credit Approved' | 'Replacement Received' | 'Rejected';
 

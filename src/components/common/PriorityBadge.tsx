@@ -30,7 +30,6 @@ export const PriorityBadge: React.FC<PriorityBadgeProps> = ({
 
   switch (normPriority) {
     case 'Urgent':
-    case 'Rush':
       // audit A-P3: no shadow — badges shouldn't float; elevation was
       // inconsistent across priority levels.
       badgeStyle = 'bg-danger/15 text-danger border border-danger/30';
@@ -51,8 +50,7 @@ export const PriorityBadge: React.FC<PriorityBadgeProps> = ({
     <span
       className={`inline-flex items-center justify-center whitespace-nowrap border shrink-0 transition-all duration-200 ${sizeClasses} ${badgeStyle} ${className}`}
     >
-      {/* audit A-P3: display the stored value as-is — substituting 'Rush'
-          with 'Urgent' silently confused filtering/debugging. */}
+      {/* audit A-P3: display the stored value as-is — no silent substitution. */}
       {normPriority}
     </span>
   );

@@ -71,7 +71,6 @@ export const CustomerRepairHistoryModal: React.FC<CustomerRepairHistoryModalProp
                 <h2 className="text-lg font-black text-ink">{customer.name}</h2>
                 <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
                   customer.type === 'B2B Corporate' ? 'bg-purple/10 text-purple border-purple/30' :
-                  customer.type === 'Wholesale Mail-In' ? 'bg-brand-soft text-brand border-brand/20' :
                   'bg-white text-ink border-line'
                 }`}>
                   {customer.type}

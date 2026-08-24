@@ -164,8 +164,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
 
   const getPriorityWeight = (priority: string) => {
     switch (priority) {
-      case 'Urgent':
-      case 'Rush': return 4;
+      case 'Urgent': return 4;
       case 'Warranty Redo': return 3;
       case 'B2B Priority': return 2;
       default: return 1;
@@ -230,7 +229,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
     pending: techScopedOrders.filter(w => w.status === 'Pending').length,
     finished: techScopedOrders.filter(w => w.status === 'Finished').length,
     takenOut: techScopedOrders.filter(w => w.status === 'Taken Out').length,
-    rush: techScopedOrders.filter(w => w.priority === 'Urgent' || w.priority === 'Rush' || w.priority === 'Warranty Redo').length,
+    rush: techScopedOrders.filter(w => w.priority === 'Urgent' || w.priority === 'Warranty Redo').length,
   };
 
   const rosterStatusActions: {

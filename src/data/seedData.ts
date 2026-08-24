@@ -540,7 +540,7 @@ export const INITIAL_CUSTOMERS: Customer[] = [
     company: 'Bay Repairs Wholesale',
     email: 'wholesale@bayrepairs.com',
     phone: '(555) 777-9900',
-    type: 'Wholesale Mail-In',
+    type: 'B2B Corporate',
     discountPercentage: 20,
     totalOrdersCount: 28,
     totalSpent: 11250.00,

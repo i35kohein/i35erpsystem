@@ -1124,7 +1124,6 @@ export default function App() {
                 { value: 'ALL', label: 'All Account Types' },
                 { value: 'Retail', label: 'Retail' },
                 { value: 'B2B Corporate', label: 'B2B Corporate' },
-                { value: 'Wholesale Mail-In', label: 'Wholesale' },
               ]}
             />
           </div>
@@ -2479,7 +2478,6 @@ export default function App() {
                     { value: 'ALL', label: 'All Account Types' },
                     { value: 'Retail', label: 'Retail' },
                     { value: 'B2B Corporate', label: 'B2B Corporate' },
-                    { value: 'Wholesale Mail-In', label: 'Wholesale' },
                   ]}
                 />
 
