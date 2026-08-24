@@ -90,9 +90,28 @@ export const PosConfirmPaymentModal: React.FC<PosConfirmModalProps> = ({
             <span className="font-mono font-bold text-brand">{selectedWo.orderNumber}</span>
           </div>
           <div className="flex justify-between">
+            <span className="text-muted">Customer</span>
+            <span className="font-bold text-ink truncate max-w-[60%]">{selectedWo.customerName || '—'}</span>
+          </div>
+          <div className="flex justify-between">
             <span className="text-muted">Device</span>
             <span className="font-bold text-ink">{selectedWo.deviceModel}</span>
           </div>
+          {/* Total discounts — prominent so double-discounts are visible before
+              the irreversible payment (Ko Hein 2026-08-24). */}
+          {(() => {
+            const itemDiscount = (selectedWo.lineItems || []).reduce(
+              (s, li) => s + (Number(li.unitPrice) || 0) * (Number(li.lineItemDiscountPercent) || 0) / 100 * (Number(li.quantity) || 1),
+              0
+            );
+            const totalDiscounts = Math.round(itemDiscount + (Number(selectedWo.discountAmount) || 0));
+            return totalDiscounts > 0 ? (
+              <div className="flex justify-between">
+                <span className="text-muted">Total Discounts</span>
+                <span className="font-mono font-black text-danger">-{totalDiscounts.toLocaleString()} {currency}</span>
+              </div>
+            ) : null;
+          })()}
           <div className="flex justify-between">
             <span className="text-muted">Method</span>
             <span className="font-bold text-ink">{paymentMethod}</span>

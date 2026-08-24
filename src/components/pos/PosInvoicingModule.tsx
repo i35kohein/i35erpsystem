@@ -10,12 +10,13 @@ import {
   Receipt,
   UserCheck,
   X,
+  Search,
 } from 'lucide-react';
 import { WorkOrder, Customer, SystemSettings, PartItem, WorkOrderLineItem, Technician, SelectedRepairItem } from '../../types';
 import { ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
 import { ModelRepairPrice } from '../../types/priceCatalog';
 import { PriorityBadge } from '../common/PriorityBadge';
-import { Button } from '../ui';
+import { Button, Input } from '../ui';
 import { getActivePaymentMethods } from '../../data/seedData';
 import { PrintableInvoiceModal } from '../common/PrintableInvoiceModal';
 import { CustomerNotificationModal } from '../common/CustomerNotificationModal';
@@ -54,6 +55,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   onSaveWorkOrder,
   priceCatalog,
   searchQuery = '',
+  setSearchQuery: propSetSearchQuery = () => {},
   dateFilter: propDateFilter,
   statusFilter = 'ALL',
 }) => {
@@ -855,6 +857,19 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
         toast.error('Please enter at least one split payment amount.', 'Split Payment Incomplete');
         return;
       }
+      // Exact-match guard: splits must equal the amount due (Ko Hein 2026-08-24).
+      const splitTotal = validSplits.reduce((s, x) => s + x.amount, 0);
+      const dueTotal = selectedWo.totalAmount || 0;
+      if (splitTotal !== dueTotal) {
+        const diff = dueTotal - splitTotal;
+        toast.error(
+          diff > 0
+            ? `Split payments total ${splitTotal.toLocaleString()} ${currency} — ${diff.toLocaleString()} ${currency} short of the ${dueTotal.toLocaleString()} ${currency} due.`
+            : `Split payments total ${splitTotal.toLocaleString()} ${currency} — ${Math.abs(diff).toLocaleString()} ${currency} over the ${dueTotal.toLocaleString()} ${currency} due.`,
+          'Split Payment Mismatch'
+        );
+        return;
+      }
       finalMethod = `Split Payment (${validSplits.map((s) => `${s.method}: ${s.amount.toLocaleString()} ${currency}`).join(' + ')})`;
     }
     setIsProcessingPayment(true);
@@ -1021,6 +1036,18 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
 
           {!isQueueCollapsed && (
           <div className="space-y-2 overflow-y-auto pr-1 min-h-[360px] md:min-h-0 md:flex-1">
+            {/* Mobile queue search — desktop uses the topbar search (Ko Hein 2026-08-24) */}
+            <div className="relative lg:hidden">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" />
+              <Input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => propSetSearchQuery(e.target.value)}
+                placeholder="Search ticket / customer / IMEI…"
+                aria-label="Search POS tickets"
+                className="w-full rounded-lg border border-line bg-white pl-8 pr-2 py-2 text-xs font-bold text-ink placeholder:text-muted outline-none transition-colors focus:border-brand/50"
+              />
+            </div>
             {filteredWorkOrders.length === 0 ? (
               <div className="flex min-h-0 flex-1 flex-col items-center justify-center p-8 text-center text-muted space-y-2 bg-surface rounded-xl border border-dashed border-line-strong my-4">
                 <CheckCircle2 className="w-8 h-8 mx-auto text-success opacity-70" />
@@ -1053,39 +1080,57 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
                       isSelected ? 'border-ink ring-2 ring-ink/10 bg-surface' : 'border-line'
                     }`}
                   >
-                    {/* Top row: order # + priority */}
+                    {/* Compact card (Ko Hein 2026-08-24): Ticket # · device · customer ·
+                        due · age — full repair/tech detail expands only when selected. */}
                     <div className="flex items-center justify-between gap-1.5">
                       <span className="font-mono text-[11px] font-black text-ink truncate">{wo.orderNumber}</span>
                       <div className="flex items-center gap-1 shrink-0">
+                        {(() => {
+                          const age = Math.max(0, Math.floor((Date.now() - new Date(wo.createdAt || Date.now()).getTime()) / 86400000));
+                          return (
+                            <span
+                              className={`text-[10px] font-black px-1.5 py-px rounded ${
+                                age >= 14 ? 'bg-danger text-white' : age >= 7 ? 'bg-warning text-white' : 'bg-surface text-muted border border-line'
+                              }`}
+                              title={`Due since ${new Date(wo.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
+                            >
+                              {age >= 14 ? `${age}d overdue` : age >= 1 ? `${age}d` : 'today'}
+                            </span>
+                          );
+                        })()}
                         <PriorityBadge priority={wo.priority} size="xs" />
-                        <span aria-live="polite" className={`text-[10px] font-black px-1.5 py-px rounded uppercase ${
-                          wo.isPaid ? 'bg-success text-white' : 'bg-warning text-white'
-                        }`}>
-                          {wo.isPaid ? 'PAID' : 'DUE'}
-                        </span>
                       </div>
                     </div>
 
-                    {/* Device + customer + open date (Ko Hein 2026-08-11) */}
-                    <p className="mt-1.5 text-xs font-extrabold text-ink truncate">{wo.deviceModel}</p>
-                    <p className="text-[11px] text-muted truncate">{wo.customerName} · {wo.customerPhone}</p>
-                    <p className="text-[10px] font-mono font-bold text-muted/80">
-                      {new Date(wo.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </p>
+                    {/* Device + customer */}
+                    <p className="mt-1 text-xs font-extrabold text-ink truncate">{wo.deviceModel}</p>
+                    <p className="text-[11px] text-muted truncate">{wo.customerName}</p>
 
-                    {/* Repair summary */}
-                    <p className="mt-1 line-clamp-2 text-[11px] font-medium text-muted leading-snug">
-                      {repairSummaryOf(wo)}
-                    </p>
-
-                    {/* Footer: tech + amount */}
-                    <div className="mt-2 flex items-center justify-between border-t border-line/60 pt-1.5">
-                      <span className="flex items-center space-x-1 text-[11px] font-bold text-ink min-w-0 truncate">
-                        <UserCheck className="w-3 h-3 shrink-0" />
-                        <span className="truncate max-w-[80px]">{wo.assignedTechName || 'Unassigned'}</span>
-                      </span>
+                    {/* Due amount + expand hint */}
+                    <div className="mt-1.5 flex items-center justify-between border-t border-line/60 pt-1.5">
                       <span className="font-mono text-[11px] font-black text-success-deep">{wo.totalAmount.toLocaleString()} {currency}</span>
+                      <span className={`text-[10px] font-bold ${isSelected ? 'text-brand' : 'text-muted'}`}>
+                        {isSelected ? 'Selected ✓' : 'Tap to review'}
+                      </span>
                     </div>
+
+                    {/* Expanded detail — only when selected (Ko Hein 2026-08-24) */}
+                    {isSelected && (
+                      <div className="mt-2 space-y-1.5 rounded-lg bg-surface/70 p-2">
+                        <p className="text-[11px] font-medium text-muted leading-snug line-clamp-2">
+                          {repairSummaryOf(wo)}
+                        </p>
+                        <div className="flex items-center justify-between text-[11px]">
+                          <span className="flex items-center space-x-1 font-bold text-ink min-w-0 truncate">
+                            <UserCheck className="w-3 h-3 shrink-0" />
+                            <span className="truncate max-w-[110px]">{wo.assignedTechName || 'Unassigned'}</span>
+                          </span>
+                          <span className="text-[10px] font-mono font-bold text-muted/80 shrink-0">
+                            Due {new Date(wo.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })

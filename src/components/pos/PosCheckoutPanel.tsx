@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   AlertTriangle,
   Check,
@@ -125,6 +125,33 @@ export const PosCheckoutPanel: React.FC<PosCheckoutPanelProps> = ({
   setIsInvoiceModalOpen,
   setPrintableInvoiceWo,
 }) => {
+  // Payment-method discoverability (Ko Hein 2026-08-24): first 3 methods shown
+  // always, the rest behind a "More payment methods" toggle; last-used method
+  // is remembered and preselected.
+  const [showMoreMethods, setShowMoreMethods] = useState(false);
+  const PRESELECTED_KEY = 'i35_recent_payment_method';
+  useEffect(() => {
+    try {
+      const recent = localStorage.getItem(PRESELECTED_KEY);
+      if (recent && activePaymentMethods.some((m) => m.name === recent)) {
+        setPaymentMethod(recent);
+      }
+    } catch {
+      /* ignore */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const rememberMethod = (name: string) => {
+    setPaymentMethod(name);
+    try {
+      localStorage.setItem(PRESELECTED_KEY, name);
+    } catch {
+      /* ignore */
+    }
+  };
+  const visibleMethods = showMoreMethods ? activePaymentMethods : activePaymentMethods.slice(0, 3);
+  const hiddenMethodCount = Math.max(0, activePaymentMethods.length - 3);
+
   return (
 selectedWo ? (
             <div className="space-y-3">
@@ -703,13 +730,13 @@ selectedWo ? (
                   </div>
                 ) : (
                 <div className="flex flex-wrap gap-1.5">
-                  {activePaymentMethods.map((m) => {
+                  {visibleMethods.map((m) => {
                     const isSelected = paymentMethod === m.name;
                     return (
                       <Button
                         key={m.id}
                         type="button"
-                        onClick={() => setPaymentMethod(m.name)}
+                        onClick={() => rememberMethod(m.name)}
                         variant="ghost"
                         className={`!h-9 !min-h-0 px-2.5 py-1 rounded-lg text-[11px] font-extrabold border-0 shadow-none transition-all cursor-pointer focus:outline-none active:scale-95 ${
                           isSelected ? 'bg-ink text-white' : 'bg-transparent text-ink hover:bg-surface'
@@ -721,6 +748,28 @@ selectedWo ? (
                       </Button>
                     );
                   })}
+
+                  {/* Collapsed methods behind a More toggle (Ko Hein 2026-08-24) */}
+                  {hiddenMethodCount > 0 && !showMoreMethods && (
+                    <Button
+                      type="button"
+                      onClick={() => setShowMoreMethods(true)}
+                      variant="ghost"
+                      className="!h-9 !min-h-0 px-2.5 py-1 rounded-lg text-[11px] font-extrabold border border-line text-muted hover:text-ink hover:bg-surface transition-all cursor-pointer"
+                    >
+                      +{hiddenMethodCount} More payment methods
+                    </Button>
+                  )}
+                  {showMoreMethods && (
+                    <Button
+                      type="button"
+                      onClick={() => setShowMoreMethods(false)}
+                      variant="ghost"
+                      className="!h-9 !min-h-0 px-2.5 py-1 rounded-lg text-[11px] font-extrabold border border-line text-muted hover:text-ink hover:bg-surface transition-all cursor-pointer"
+                    >
+                      Show fewer
+                    </Button>
+                  )}
 
                   {/* Split Payment pill */}
                   <Button
