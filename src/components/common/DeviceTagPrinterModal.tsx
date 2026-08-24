@@ -100,11 +100,17 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
   // printed intake documents always carry the same shop wording. Keep this
   // separate from the optional A4 layout fields so a saved voucher message can
   // never be hidden by a layout toggle or an empty legacy field.
-  const voucherHeaderText = systemSettings?.receiptHeaderTitle?.trim() ||
-    systemSettings?.a4CustomHeaderNote?.trim() ||
-    'Official Device Intake & Hardware Diagnostic Voucher';
-  const voucherFooterText = systemSettings?.receiptFooterNote?.trim() ||
-    `Thank you for choosing ${systemSettings?.shopName || 'our repair shop'}.`;
+  // Explicit empty value wins: if the shop clears the header/footer fields in
+  // Settings, the printed voucher shows NO subtitle / NO footer — the fallback
+  // text only applies when the field was never set (Ko Hein 2026-08-25:
+  // 'ဖျက်လိုက်ရင် နကိုအတိုင်း စာပြန်ပေါ်နေတယ်').
+  const voucherHeaderText = (systemSettings?.receiptHeaderTitle?.trim() || systemSettings?.a4CustomHeaderNote?.trim()) ||
+    (systemSettings?.receiptHeaderTitle === undefined && systemSettings?.a4CustomHeaderNote === undefined
+      ? 'Official Device Intake & Hardware Diagnostic Voucher'
+      : '');
+  const voucherFooterText = systemSettings?.receiptFooterNote !== undefined && systemSettings?.receiptFooterNote !== null
+    ? systemSettings.receiptFooterNote.trim()
+    : `Thank you for choosing ${systemSettings?.shopName || 'our repair shop'}.`;
   const voucherFooterTextAlign = systemSettings?.receiptFooterTextAlign ?? 'left';
   const voucherFooterLineAlignments = systemSettings?.receiptFooterLineAlignments ?? {};
   const voucherFooterTextSizeRanges = systemSettings?.receiptFooterTextSizeRanges ?? [];
@@ -304,12 +310,14 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                     </span>
                   )}
                 </div>
-                <p
-                  data-print-voucher-header-text
-                  className={`text-xs font-semibold mb-0.5 leading-snug ${isMono ? 'text-ink' : 'text-muted'}`}
-                >
-                  {voucherHeaderText}
-                </p>
+                {voucherHeaderText && (
+                  <p
+                    data-print-voucher-header-text
+                    className={`text-xs font-semibold mb-0.5 leading-snug ${isMono ? 'text-ink' : 'text-muted'}`}
+                  >
+                    {voucherHeaderText}
+                  </p>
+                )}
                 {/* Separated Store Address, Website, and Phone Lines */}
                 <div className="space-y-0.5 text-xs text-muted font-medium pt-0.5">
                   {shopAddress && (
@@ -614,23 +622,25 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
               * <strong>Terms & Authorization:</strong> {authorizationText}
             </p>
           )}
-          <div
-            data-print-voucher-footer-text
-            className={`print-voucher-footer-text leading-tight font-medium whitespace-pre-wrap footer-text-${voucherFooterFontSize} ${voucherFooterPreviewSizeClass}`}
-          >
-            {voucherFooterSegments.map((segments, lineIndex) => (
-              <p
-                key={lineIndex}
-                style={{ textAlign: voucherFooterLineAlignments[lineIndex] || voucherFooterTextAlign }}
-              >
-                {segments.map((segment, index) => (
-                  <span key={index} className={segment.size ? `footer-text-${segment.size}` : undefined}>
-                    {segment.text}
-                  </span>
-                ))}
-              </p>
-            ))}
-          </div>
+          {voucherFooterText && (
+            <div
+              data-print-voucher-footer-text
+              className={`print-voucher-footer-text leading-tight font-medium whitespace-pre-wrap footer-text-${voucherFooterFontSize} ${voucherFooterPreviewSizeClass}`}
+            >
+              {voucherFooterSegments.map((segments, lineIndex) => (
+                <p
+                  key={lineIndex}
+                  style={{ textAlign: voucherFooterLineAlignments[lineIndex] || voucherFooterTextAlign }}
+                >
+                  {segments.map((segment, index) => (
+                    <span key={index} className={segment.size ? `footer-text-${segment.size}` : undefined}>
+                      {segment.text}
+                    </span>
+                  ))}
+                </p>
+              ))}
+            </div>
+          )}
         </div>
 
       </div>
