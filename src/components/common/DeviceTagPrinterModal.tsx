@@ -284,12 +284,12 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                 <img 
                   src={shopLogoUrl} 
                   alt={shopName} 
-                    className={`print-shop-logo w-10 h-auto min-h-[40px] self-stretch rounded-lg object-contain bg-white border p-0.5 shrink-0 ${
+                    className={`print-shop-logo w-14 h-auto min-h-[56px] self-stretch rounded-lg object-contain bg-white border p-0.5 shrink-0 ${
                     isMono ? 'border-black' : 'border-line'
                   }`}
                 />
               ) : (
-                <div className={`w-8 min-h-[32px] self-stretch rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
+                <div className={`w-14 min-h-[56px] self-stretch rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
                   isMono ? 'bg-black text-white' : 'bg-brand text-white'
                 }`}>
                   <CircleDot className="w-5 h-5" />
@@ -341,9 +341,11 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                 Voucher #: {workOrder.orderNumber}
               </p>
               <p className="text-xs text-muted">Date: {formatPrintDate(workOrder.createdAt)}</p>
-              <p className="text-xs text-muted">
-                Est. Return: {workOrder.estimatedCompletion ? formatPrintDate(workOrder.estimatedCompletion) : '—'}
-              </p>
+              {workOrder.estimatedCompletion && (
+                <p className="text-xs text-muted">
+                  Est. Return: {formatPrintDate(workOrder.estimatedCompletion)}
+                </p>
+              )}
               {isPaidWo && (
                 <p className="text-xs font-bold text-muted">
                   Taken Out: {formatPrintDate(workOrder.updatedAt || Date.now())}
@@ -354,8 +356,8 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
             <div className={`print-qr p-1.5 bg-white border rounded-lg flex flex-col items-center shrink-0 ${
               isMono ? 'border-black' : 'border-line shadow-2xs'
             }`}>
-              <QRCodeSVG value={ticketUrl} size={a4LayoutDensity === 'compact' ? 40 : 48} level="M" />
-              <span className="text-xs font-black text-black uppercase tracking-tight mt-0.5">Check Status</span>
+              <QRCodeSVG value={ticketUrl} size={a4LayoutDensity === 'compact' ? 64 : 72} level="M" />
+              <span className="text-[8px] font-black text-black uppercase tracking-tight mt-0.5">Check Status</span>
             </div>
           </div>
         </div>
