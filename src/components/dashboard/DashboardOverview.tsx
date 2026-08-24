@@ -16,7 +16,6 @@ import {Coins,
   ArrowUpRight,
   Boxes,
   ClipboardList,
-  ListFilter,
   Copy,
   Search,
   RefreshCw,
@@ -419,6 +418,29 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
       .map(([name, stats]) => ({ name, ...stats }))
       .sort((a, b) => b.count - a.count || b.revenue - a.revenue)
       .slice(0, 8);
+  }, [filteredWorkOrders]);
+
+  // STATUS QUEUE columns — one column per tracked status, oldest-first
+  // (longest-waiting ticket at the top; Ko Hein 2026-08-24).
+  const daysInStatus = (w: WorkOrder) => {
+    const from = w.statusChangedAt || w.createdAt;
+    if (!from) return 0;
+    return Math.max(0, Math.floor((Date.now() - new Date(from).getTime()) / 86400000));
+  };
+  const queueColumns = useMemo(() => {
+    const meta = [
+      { status: 'Receive', label: 'Received', dot: 'bg-brand', chip: 'bg-brand/10 text-brand' },
+      { status: 'In Progress', label: 'In Progress', dot: 'bg-purple', chip: 'bg-purple/10 text-purple' },
+      { status: 'Pending', label: 'Pending', dot: 'bg-warning', chip: 'bg-warning/15 text-warning' },
+      { status: 'Finished', label: 'Finished', dot: 'bg-success', chip: 'bg-success/10 text-success-deep' },
+      { status: 'Taken Out', label: 'Taken Out', dot: 'bg-ink', chip: 'bg-ink/10 text-ink' },
+    ] as const;
+    return meta.map((m) => ({
+      ...m,
+      tickets: filteredWorkOrders
+        .filter((w) => w.status === m.status)
+        .sort((a, b) => new Date(a.statusChangedAt || a.createdAt).getTime() - new Date(b.statusChangedAt || b.createdAt).getTime()),
+    }));
   }, [filteredWorkOrders]);
 
   // Top Repair Categories with income — ticket + revenue per repair category.
@@ -911,166 +933,60 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
         </div>
       </div>
 
-          {/* Compact Dashboard Summary */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-
-            {/* Repair Health */}
-            <div className="flex flex-col bg-white border border-line rounded-2xl p-4 shadow-2xs">
-              <div className="flex items-center space-x-2 mb-3">
-                <ListFilter className="w-4 h-4 text-brand" />
-                <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Repair Health</h3>
+          {/* STATUS QUEUE — live ticket board, one column per status (Ko Hein 2026-08-24) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3 items-start">
+        {queueColumns.map((col) => (
+          <div key={col.status} className="flex flex-col rounded-2xl border border-line bg-surface/50 min-h-[240px] overflow-hidden">
+            <div className="flex items-center justify-between gap-2 px-3 py-2.5 border-b border-line bg-white">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${col.dot}`} />
+                <span className="text-xs font-extrabold text-ink truncate">{col.label}</span>
               </div>
-              <div className="space-y-2.5 text-xs">
-                {[
-                  { label: 'Received', count: filteredWorkOrders.filter((w) => w.status === 'Receive').length, color: 'bg-brand' },
-                  { label: 'In Progress', count: filteredWorkOrders.filter((w) => w.status === 'In Progress').length, color: 'bg-purple' },
-                  { label: 'Pending', count: filteredWorkOrders.filter((w) => w.status === 'Pending').length, color: 'bg-warning' },
-                  { label: 'Finished', count: filteredWorkOrders.filter((w) => w.status === 'Finished').length, color: 'bg-success' },
-                  { label: 'Taken Out', count: filteredWorkOrders.filter((w) => w.status === 'Taken Out').length, color: 'bg-line' },
-                ].map((stage) => {
-                  // Audit D-P3: percentages must sum to 100 — the denominator is
-                  // the 5 tracked statuses only, so Cant Repair / Customer Not
-                  // Repair tickets don't make the bars under-fill.
-                  const tracked = filteredWorkOrders.filter((w) =>
-                    ['Receive', 'In Progress', 'Pending', 'Finished', 'Taken Out'].includes(w.status)
-                  ).length;
-                  const pct = tracked > 0 ? Math.round((stage.count / tracked) * 100) : 0;
-                  return (
-                    <div key={stage.label} className="space-y-1">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="font-semibold text-ink">{stage.label}</span>
-                        <span className="font-mono font-black text-muted">{stage.count}</span>
-                      </div>
-                      <div className="w-full h-1.5 bg-line rounded-full overflow-hidden">
-                        <div className={`${stage.color} h-full rounded-full`} style={{ width: `${pct}%` }} />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="pt-4 border-t border-line space-y-3 text-xs">
-                {topRepairDevices.length === 0 ? (
-                  <p className="text-muted">No data in period.</p>
-                ) : (
-                  topRepairDevices.slice(0, 3).map((dev, idx) => (
-                    <div key={dev.name} className="flex items-center justify-between gap-2">
-                      <span className="truncate text-sm font-semibold text-ink">{idx + 1}. {dev.name}</span>
-                      <span className="text-xs text-muted">{dev.count}</span>
-                    </div>
-                  ))
-                )}
-              </div>
+              <span className={`px-2 py-0.5 rounded-full font-mono text-[10px] font-black shrink-0 ${col.chip}`}>{col.tickets.length}</span>
             </div>
-
-            {/* Financial Pulse */}
-            <div className="flex flex-col bg-white border border-line rounded-2xl p-4 shadow-2xs">
-              <div className="flex items-center space-x-2 mb-3">
-                <Coins className="w-4 h-4 text-success" />
-                <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">Financial Pulse</h3>
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="p-3 bg-surface rounded-2xl space-y-1">
-                  <span className="text-muted">Collected</span>
-                  <p className="font-black text-ink">{financialAnalytics.totalCollected.toLocaleString()} {currency}</p>
-                </div>
-                <div
-                  className="p-3 bg-surface rounded-2xl space-y-1 cursor-pointer hover:bg-line/50 transition-colors"
-                  onClick={() => setActiveDashboardSubTab('finance')}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveDashboardSubTab('finance'); } }}
-                  title={`${financialAnalytics.unpaidCount} unpaid tickets — open recovery queue`}
-                >
-                  <span className="text-muted">Unpaid</span>
-                  <p className="font-black text-danger">{financialAnalytics.totalUnpaidBalance.toLocaleString()} {currency}</p>
-                  <span className="text-[10px] font-bold text-danger">{financialAnalytics.unpaidCount} tickets</span>
-                </div>
-                <div className="p-3 bg-surface rounded-2xl space-y-1">
-                  <span className="text-muted">Avg ticket</span>
-                  <p className="font-black text-ink">{avgTicketValue.toLocaleString()} {currency}</p>
-                </div>
-                <div className="p-3 bg-surface rounded-2xl space-y-1">
-                  <span className="text-muted">Margin</span>
-                  <p className={`font-black ${marginPercent < 0 ? 'text-danger' : 'text-success-deep'}`}>{marginPercent}%</p>
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-line space-y-2 text-xs">
-                <div className="flex items-center justify-between">
-                  <span className="text-muted">Paid tickets</span>
-                  <span className="font-bold text-ink">{financialAnalytics.paidCount}</span>
-                </div>
-                <div
-                  className="flex items-center justify-between cursor-pointer hover:text-brand transition-colors"
-                  onClick={() => setActiveDashboardSubTab('finance')}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveDashboardSubTab('finance'); } }}
-                  title="Open unpaid recovery queue"
-                >
-                  <span className="text-muted">Unpaid tickets</span>
-                  <span className="font-bold text-ink">{financialAnalytics.unpaidCount}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Inventory & Warranty */}
-            <div className="flex flex-col bg-white border border-line rounded-2xl p-4 shadow-2xs">
-              <div className="flex items-center gap-2 mb-3">
-                <Boxes className="w-4 h-4 text-warning shrink-0" />
-                <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">{LITE_MODE ? 'Warranty' : 'Inventory & Warranty'}</h3>
-              </div>
-              {!LITE_MODE && (
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="p-3 bg-surface rounded-2xl space-y-1">
-                  <span className="text-muted">Stock value</span>
-                  <p className="font-black text-ink">{inventoryAnalytics.totalValuation.toLocaleString()} {currency}</p>
-                </div>
-                <div className="p-3 bg-surface rounded-2xl space-y-1" title="Total physical units across all SKUs">
-                  <span className="text-muted">Units in stock</span>
-                  <p className="font-black text-ink">{inventoryAnalytics.totalItems}</p>
-                </div>
-                <div className="p-3 bg-surface rounded-2xl space-y-1" title="Number of SKUs whose quantity is at or below the reorder point">
-                  <span className="text-muted">SKUs below reorder</span>
-                  <p className={`font-black ${inventoryAnalytics.lowStockCount > 0 ? 'text-warning' : 'text-success-deep'}`}>{inventoryAnalytics.lowStockCount}</p>
-                </div>
-                <div className="p-3 bg-surface rounded-2xl space-y-1" title="SKUs used in repairs (not accessories) at or below reorder point">
-                  <span className="text-muted">Repair SKUs low</span>
-                  <p className={`font-black ${repairLowStockParts.length > 0 ? 'text-danger' : 'text-success-deep'}`}>{repairLowStockParts.length}</p>
-                </div>
-              </div>
-              )}
-
-              <div className="pt-4 border-t border-line space-y-2 text-xs">
-                <div className="flex items-center justify-between">
-                  <span className="text-muted">Expiring soon</span>
-                  <span className="font-bold text-warning">{expiringSoonWorkOrders.length}</span>
-                </div>
-              </div>
-
-              {expiringSoonWorkOrders.length > 0 ? (
-                <div className="mt-3 space-y-2 text-xs">
-                  {expiringSoonWorkOrders.slice(0, 3).map((item) => (
-                    <div key={item.wo.id} className="flex items-center justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="font-semibold text-ink truncate">{item.wo.orderNumber}</p>
-                        <p className="text-muted truncate">{item.wo.customerName}</p>
-                      </div>
-                      <span className={`px-2 py-0.5 rounded-full text-xs ${item.isCritical ? 'bg-danger text-white' : 'bg-warning/15 text-warning'}`}>
-                        {item.remainingDays}d
+            <div className="p-2 space-y-2 overflow-y-auto max-h-[520px]">
+              {col.tickets.length === 0 ? (
+                <p className="text-center text-[10px] font-bold text-muted py-8">No tickets</p>
+              ) : col.tickets.map((w) => {
+                const age = daysInStatus(w);
+                return (
+                  <div
+                    key={w.id}
+                    className="rounded-xl border border-line bg-white p-2.5 space-y-1.5 shadow-2xs hover:border-brand/40 hover:shadow-sm transition-all cursor-default select-none"
+                    title={`${w.orderNumber} · ${w.deviceModel} · ${w.customerName || 'no customer'} · in ${col.label} ${age}d`}
+                  >
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="font-mono text-[11px] font-black text-ink truncate">{w.orderNumber || w.id.slice(0, 8)}</span>
+                      <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full shrink-0 ${age >= 7 ? 'bg-danger text-white' : age >= 3 ? 'bg-warning/15 text-warning' : 'bg-surface text-muted'}`}>
+                        {age === 0 ? 'today' : `${age}d`}
                       </span>
                     </div>
-                  ))}
-                  <Button type="button" onClick={() => setActiveDashboardSubTab('warranty-watch')} className="w-full bg-brand hover:bg-brand-deep text-white text-xs font-bold py-2 rounded-xl">
-                    View full warranty roster
-                  </Button>
-                </div>
-              ) : (
-                <div className="mt-3 text-xs text-muted">No warranties nearing expiry in this period.</div>
-              )}
+                    <p className="text-xs font-bold text-ink truncate">{w.deviceModel}{w.deviceColor ? ` · ${w.deviceColor}` : ''}</p>
+                    <p className="text-[10px] text-muted truncate">{w.customerName || '—'}</p>
+                    <div className="flex items-center justify-between gap-1 border-t border-line/60 pt-1.5">
+                      <span className="text-[10px] font-bold text-brand truncate">{w.assignedTechName || 'Unassigned'}</span>
+                      {w.status === 'Finished' && (
+                        <span className={`font-mono text-[10px] font-black shrink-0 ${w.isPaid ? 'text-success-deep' : 'text-danger'}`}>
+                          {(w.totalAmount || 0).toLocaleString()} {currency}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
+            {col.tickets.length > 0 && (
+              <button
+                type="button"
+                onClick={() => onNavigateToTab('intake')}
+                className="mt-auto shrink-0 w-full py-1.5 text-[10px] font-extrabold text-brand hover:bg-brand/5 transition-colors border-t border-line bg-white"
+              >
+                Open in Intake →
+              </button>
+            )}
           </div>
+        ))}
+      </div>
         </div>
       )}
 
