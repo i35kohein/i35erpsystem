@@ -500,7 +500,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           </div>
         ) : viewMode === 'table' ? (
           /* TABLE VIEW */
-          <div className="workspace-panel__scroll scroll-shadow-right scroll-shadow-bottom rounded-xl pb-6">
+          <div className="workspace-panel__scroll scroll-shadow-right rounded-xl pb-6">
             <table className="w-full text-left text-xs">
               <thead className="sticky top-0 z-10 shadow-[0_1px_0_0_var(--line)]">
                 <tr className="border-b border-line text-muted font-bold text-xs uppercase tracking-wider bg-surface">
