@@ -29,7 +29,8 @@ import {ClipboardList, Stethoscope,
   RotateCcw,
   Ban,
   UserX,
-  PackageCheck } from 'lucide-react';
+  PackageCheck,
+  Plus } from 'lucide-react';
 import {WorkOrder, 
   PartItem, 
   Customer, 
@@ -255,7 +256,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
     const isOpen = statusPicker?.id === wo.id;
 
     return (
-      <div className="inline-flex" aria-label={`Change status for ${wo.orderNumber || wo.id}`}>
+      <div className="inline-flex items-center gap-1" aria-label={`Change status for ${wo.orderNumber || wo.id}`}>
         <Button
           variant="ghost"
           type="button"
@@ -288,6 +289,8 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
         >
           <CurrentIcon className="h-3.5 w-3.5" />
         </Button>
+        {/* Visible text anchor for the icon-only status circle (Ko Hein 2026-08-24 UX audit) */}
+        <span className="text-[9px] font-black uppercase leading-none text-muted max-w-[52px] truncate">{currentStatus.shortLabel}</span>
         {isOpen && createPortal(
           <>
             <div className="fixed inset-0 z-40" onClick={() => setStatusPicker(null)} role="presentation" aria-hidden="true" />
@@ -450,6 +453,16 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           </div>
 
           <div className="flex items-center space-x-2 flex-wrap">
+            {/* Primary create action — lives in the roster header too, not just the
+                sidebar (Ko Hein 2026-08-24 UX audit) */}
+            <Button
+              type="button"
+              onClick={() => onOpenNewWorkOrder?.()}
+              className="bg-brand hover:bg-brand-deep text-white h-9 px-3 rounded-lg text-xs font-extrabold flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all shadow-2xs"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>New Intake Ticket</span>
+            </Button>
             {/* Date sort — visible in both table & card views (Ko Hein 2026-08-11) */}
             <div className="flex items-center rounded-lg border border-line bg-white overflow-hidden">
               <span className="pl-2.5 pr-1 text-[10px] font-black uppercase tracking-wider text-muted">Sort</span>
@@ -487,7 +500,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           </div>
         ) : viewMode === 'table' ? (
           /* TABLE VIEW */
-          <div className="workspace-panel__scroll scroll-shadow-right scroll-shadow-bottom rounded-xl pb-3">
+          <div className="workspace-panel__scroll scroll-shadow-right scroll-shadow-bottom rounded-xl pb-6">
             <table className="w-full text-left text-xs">
               <thead className="sticky top-0 z-10 shadow-[0_1px_0_0_var(--line)]">
                 <tr className="border-b border-line text-muted font-bold text-xs uppercase tracking-wider bg-surface">
@@ -691,7 +704,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
           </div>
         ) : (
           /* GRID CARDS VIEW — POS Ready-to-Checkout style */
-          <div className="workspace-panel__scroll grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 content-start rounded-xl p-2 sm:p-3">
+          <div className="workspace-panel__scroll grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 content-start rounded-xl p-2 sm:p-3 pb-8">
             {filteredOrders.map((wo) => {
               const woColorStyle = getRealisticColorStyle(wo.deviceColor);
               const summary = (wo.selectedRepairs || []).map((r) => r.name).join(', ') || wo.serviceType || 'General Repair';
@@ -723,9 +736,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
                     <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
                       {wo.priority && wo.priority !== 'Normal' ? (
                         <PriorityBadge priority={wo.priority} size="xs" />
-                      ) : (
-                        <span className="text-[10px] font-black px-1.5 py-px rounded uppercase bg-surface text-muted">Normal</span>
-                      )}
+                      ) : null}
                       {onUpdateWorkOrderStatus ? (
                         renderStatusCirclePicker(wo)
                       ) : (
@@ -810,7 +821,6 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
             <span className="font-bold">
               Showing all <strong className="text-ink">{filteredOrders.length}</strong> tickets
             </span>
-            <span className="font-bold text-ink">{filteredOrders.length} tickets</span>
           </div>
         )}
       </div>
