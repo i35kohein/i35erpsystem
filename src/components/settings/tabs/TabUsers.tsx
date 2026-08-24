@@ -1,5 +1,5 @@
 import React from 'react';
-import {Edit2, Plus, Trash2, UserPlus, LogOut} from 'lucide-react';
+import {Edit2, Plus, Trash2, UserPlus, LogOut, AlertTriangle, ShieldAlert} from 'lucide-react';
 import { Button } from '../../ui';
 import { toast } from '../../../lib/toast';
 import { confirmDialog } from '../../common/ConfirmDialog';
@@ -15,9 +15,22 @@ interface UsersTabProps {
   handleOpenAddUser: () => void;
   handleOpenEditUser: (usr: AppUser) => void;
   onDeleteUser?: (id: string) => void;
+  /** Navigate to the Recycle Bin tab (Danger Zone action, Ko Hein 2026-08-24). */
+  onNavigateToRecycle?: () => void;
 }
 
-const UsersTab: React.FC<UsersTabProps> = ({ users, currentUser, handleOpenAddUser, handleOpenEditUser, onDeleteUser }) => {
+const UsersTab: React.FC<UsersTabProps> = ({ users, currentUser, handleOpenAddUser, handleOpenEditUser, onDeleteUser, onNavigateToRecycle }) => {
+  // Sensitive-permission chip: red when granted, muted when denied (Ko Hein 2026-08-24).
+  const PermBadge = ({ on, label }: { on: boolean; label: string }) => (
+    <span
+      className={`px-1.5 py-0.5 rounded font-bold border ${
+        on ? 'bg-danger/10 text-danger border-danger/25' : 'bg-white text-muted border-line'
+      }`}
+      title={on ? `${label} access granted` : `No ${label.toLowerCase()} access`}
+    >
+      {on ? '✓ ' : '— '}{label}
+    </span>
+  );
   // Sign out every logged-in device except the current one (bug #8).
   const handleLogoutAllDevices = async () => {
     const token = localStorage.getItem('i35_session_token');
@@ -67,18 +80,6 @@ const UsersTab: React.FC<UsersTabProps> = ({ users, currentUser, handleOpenAddUs
                 <Plus className="w-4 h-4" />
                 <span>Add New User Account</span>
               </Button>
-
-              {currentUser?.role === 'Admin' && (
-                <Button
-                  type="button"
-                  onClick={handleLogoutAllDevices}
-                  variant="outline"
-                  className="shrink-0 flex items-center space-x-1.5 border-warning/40 text-warning hover:bg-warning/10"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>Sign Out All Devices</span>
-                </Button>
-              )}
             </div>
 
             {/* Role Rules Banner */}
@@ -199,7 +200,7 @@ const UsersTab: React.FC<UsersTabProps> = ({ users, currentUser, handleOpenAddUs
                         )}
                       </div>
 
-                      {/* Permissions Tags */}
+                      {/* Key Permissions — sensitive caps shown as compact badges (Ko Hein 2026-08-24) */}
                       <div className="bg-surface p-2 rounded-xl text-xs text-faint space-y-1">
                         <div className="font-extrabold text-ink flex items-center justify-between">
                           <span>Key Permissions:</span>
@@ -208,9 +209,20 @@ const UsersTab: React.FC<UsersTabProps> = ({ users, currentUser, handleOpenAddUs
                           </span>
                         </div>
                         <div className="flex flex-wrap gap-1 pt-0.5">
-                          {isAdmin && <span className="bg-purple/15 text-purple px-1.5 py-0.5 rounded">All Settings</span>}
+                          {isAdmin && <span className="bg-danger/10 text-danger px-1.5 py-0.5 rounded border border-danger/20">Full access — all sensitive permissions</span>}
                           {isReception && <span className="bg-warning/15 text-warning px-1.5 py-0.5 rounded">All Ops Except Settings</span>}
                           {isTech && <span className="bg-brand/15 text-brand-deep px-1.5 py-0.5 rounded">Assigned Pipeline & QA Only</span>}
+                          {!isAdmin && (
+                            <>
+                              <PermBadge
+                                on={Boolean(usr.permissions?.canDeleteWorkOrders || usr.permissions?.canDeleteInventory || usr.permissions?.canDeleteCustomers || usr.permissions?.canDeleteLogs)}
+                                label="Delete"
+                              />
+                              <PermBadge on={Boolean(usr.permissions?.canAccessFinance)} label="Finance" />
+                              <PermBadge on={Boolean(usr.permissions?.canEditPrices)} label="Price edit" />
+                              <PermBadge on={Boolean(usr.permissions?.canAccessSettings)} label="Settings" />
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -219,6 +231,67 @@ const UsersTab: React.FC<UsersTabProps> = ({ users, currentUser, handleOpenAddUs
               </div>
             </div>
           </div>
+
+          {/* Danger Zone — high-risk admin actions grouped with impact notes (Ko Hein 2026-08-24) */}
+          {currentUser?.role === 'Admin' && (
+            <div className="rounded-2xl border-2 border-danger/40 bg-danger/5 p-5 space-y-4">
+              <div className="flex items-center space-x-2">
+                <span className="p-2 bg-danger text-white rounded-xl shadow-2xs">
+                  <ShieldAlert className="w-5 h-5" />
+                </span>
+                <div>
+                  <h3 className="text-base font-extrabold text-danger">Danger Zone</h3>
+                  <p className="text-xs text-muted">High-risk actions that affect every staff member or permanently remove data. Each action asks for confirmation before running.</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="bg-white rounded-xl border border-danger/25 p-3.5 space-y-2">
+                  <p className="font-extrabold text-sm text-ink flex items-center space-x-1.5">
+                    <LogOut className="w-4 h-4 text-danger" />
+                    <span>Sign Out All Devices</span>
+                  </p>
+                  <p className="text-xs text-muted leading-relaxed">Revoke every logged-in session across all staff devices. Everyone must sign in again — useful after a suspected credential leak.</p>
+                  <Button
+                    type="button"
+                    onClick={handleLogoutAllDevices}
+                    className="w-full bg-danger hover:bg-danger-deep text-white text-xs font-extrabold rounded-xl flex items-center justify-center space-x-1.5"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>Sign Out All Devices</span>
+                  </Button>
+                </div>
+
+                <div className="bg-white rounded-xl border border-danger/25 p-3.5 space-y-2">
+                  <p className="font-extrabold text-sm text-ink flex items-center space-x-1.5">
+                    <Trash2 className="w-4 h-4 text-danger" />
+                    <span>Delete User Accounts</span>
+                  </p>
+                  <p className="text-xs text-muted leading-relaxed">Permanently remove a staff account and its access. Use the red delete button on each user card above — this cannot be undone.</p>
+                  <p className="text-[11px] font-bold text-danger bg-danger/10 border border-danger/20 rounded-lg px-2 py-1.5">
+                    <AlertTriangle className="w-3 h-3 inline mr-1" />
+                    Only the owner account cannot be deleted.
+                  </p>
+                </div>
+
+                <div className="bg-white rounded-xl border border-danger/25 p-3.5 space-y-2">
+                  <p className="font-extrabold text-sm text-ink flex items-center space-x-1.5">
+                    <Trash2 className="w-4 h-4 text-danger" />
+                    <span>Recycle Bin & Trash</span>
+                  </p>
+                  <p className="text-xs text-muted leading-relaxed">Restore or permanently delete trashed tickets, parts, customers and logs. Permanent deletion is final.</p>
+                  <Button
+                    type="button"
+                    onClick={() => onNavigateToRecycle?.()}
+                    className="w-full bg-white border border-danger/40 text-danger hover:bg-danger/10 text-xs font-extrabold rounded-xl flex items-center justify-center space-x-1.5"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Open Recycle Bin</span>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
   );
 };

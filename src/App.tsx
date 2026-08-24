@@ -86,7 +86,7 @@ import { ActiveFilterChips } from './components/common/ActiveFilterChips';
 import { DrawerSelect } from './components/common/DrawerSelect';
 import { checkIsDiagnosticCompleted, checkIsBeforeDiagnosticCompleted, checkIsAfterDiagnosticCompleted } from './utils/diagnosticUtils';
 import { CustomDropdownMenu } from './components/common/CustomDropdownMenu';
-import { ConfirmDialogHost } from './components/common/ConfirmDialog';
+import { ConfirmDialogHost, confirmDialog } from './components/common/ConfirmDialog';
 import { Button , Input } from './components/ui';
 import { ModuleLoadingSkeleton } from './components/common/ModuleLoadingSkeleton';
 import { useLanguage } from './context/LanguageContext';
@@ -329,6 +329,8 @@ export default function App() {
   // Settings top navigation controls state
   const settingsResetRef = useRef<(() => void) | null>(null);
   const settingsSaveRef = useRef<(() => void) | null>(null);
+  // Unsaved-changes state reported by the Settings module (Ko Hein 2026-08-24).
+  const [settingsDirty, setSettingsDirty] = useState(false);
   
   // Intake Ticket prefill state
   const [ticketPrefill, setTicketPrefill] = useState<any | null>(null);
@@ -2127,21 +2129,36 @@ export default function App() {
               <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
                 <Button variant="ghost"
                   type="button"
-                  onClick={() => settingsResetRef.current?.()}
-                  className="h-10 px-2.5 sm:px-3 bg-surface hover:bg-line text-ink font-bold text-xs rounded-xl border border-line-strong transition-all flex items-center space-x-1 sm:space-x-1.5 cursor-pointer shadow-2xs active:scale-95"
-                  title="Reset settings draft"
+                  disabled={!settingsDirty}
+                  onClick={async () => {
+                    if (!settingsDirty) return;
+                    const ok = await confirmDialog({
+                      title: 'Discard Unsaved Changes',
+                      message: 'Reset all unsaved settings edits back to the last saved state?',
+                      confirmLabel: 'Discard Changes',
+                      danger: true,
+                    });
+                    if (ok) settingsResetRef.current?.();
+                  }}
+                  className="h-10 px-2.5 sm:px-3 bg-surface hover:bg-line text-ink font-bold text-xs rounded-xl border border-line-strong transition-all flex items-center space-x-1 sm:space-x-1.5 cursor-pointer shadow-2xs active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+                  title={settingsDirty ? 'Discard unsaved changes' : 'No unsaved changes'}
                 >
                   <RotateCcw className="w-3.5 h-3.5 text-muted" />
-                  <span className="hidden sm:inline">Reset Draft</span>
+                  <span className="hidden md:inline">Discard changes</span>
+                  <span className="md:hidden">Discard</span>
                 </Button>
                 <Button
                   type="button"
+                  disabled={!settingsDirty}
                   onClick={() => settingsSaveRef.current?.()}
-                  className="h-10 px-3 sm:px-3.5 bg-brand hover:bg-brand-deep text-white font-extrabold text-xs rounded-xl transition-all shadow-2xs flex items-center space-x-1 sm:space-x-1.5 cursor-pointer active:scale-95"
-                  title="Save all settings"
+                  className="h-10 px-3 sm:px-3.5 bg-brand hover:bg-brand-deep text-white font-extrabold text-xs rounded-xl transition-all shadow-2xs flex items-center space-x-1 sm:space-x-1.5 cursor-pointer active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed relative"
+                  title={settingsDirty ? 'Save all settings' : 'No unsaved changes'}
                 >
                   <Save className="w-3.5 h-3.5" />
                   <span>Save All Settings</span>
+                  {settingsDirty && (
+                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-warning border-2 border-white animate-pulse" aria-label="Unsaved changes" />
+                  )}
                 </Button>
               </div>
             )}
@@ -2984,6 +3001,7 @@ export default function App() {
                     settingsResetRef.current = actions.reset;
                     settingsSaveRef.current = actions.save;
                   }}
+                  onDirtyChange={(dirty) => setSettingsDirty(dirty)}
                   onAiRescanTickets={handleAiRescanTickets}
                   priceCatalogManager={{
                     catalog: priceCatalog.catalog,

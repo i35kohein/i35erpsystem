@@ -101,6 +101,8 @@ interface SystemManagementSettingsModuleProps {
   onOpenRecycleBin?: () => void;
   archivedCount?: number;
   onRegisterActions?: (actions: { reset: () => void; save: () => void }) => void;
+  /** Reports whether the settings draft has unsaved changes (drives the header Save/Reset buttons, Ko Hein 2026-08-24). */
+  onDirtyChange?: (dirty: boolean) => void;
   initialSubTab?: 'users' | 'ai';
   onAiRescanTickets?: () => Promise<{ classified: number; failed: number }>;
   /** Price Catalog manager — powers the embedded Price Catalog settings panel. */
@@ -153,6 +155,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
   onOpenRecycleBin,
   archivedCount = 0,
   onRegisterActions,
+  onDirtyChange,
   initialSubTab,
   onAiRescanTickets,
   priceCatalogManager,
@@ -176,6 +179,11 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
     () => JSON.stringify(formData) !== JSON.stringify(settings),
     [formData, settings]
   );
+  // Report dirty state up to the shell so the header Save/Reset buttons can
+  // show an unsaved-changes indicator and disable when clean (Ko Hein 2026-08-24).
+  React.useEffect(() => {
+    onDirtyChange?.(isDirty);
+  }, [isDirty, onDirtyChange]);
   // Collapsible long sections (mobile-friendly) — keyed by section id, default open
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
   const toggleSection = (key: string) =>
@@ -942,21 +950,21 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
 
         {(() => {
           const tabDefs = [
-            { id: 'users', label: 'User Roles & Permissions', icon: UserPlus, badge: users.length },
-            { id: 'shop', label: 'Shop Settings & Logo', icon: Store },
-            { id: 'theme', label: 'Theme & Color Palette', icon: Palette },
-            { id: 'technicians', label: 'Technicians & Staff', icon: Users, badge: technicians.length },
-            { id: 'intake', label: 'Work Orders & Intake', icon: FileText },
-            { id: 'pricing', label: 'Pricing & Currency', icon: DollarSign },
-            { id: 'payment', label: 'Payment Methods & MM QR', icon: CreditCard },
-            ...(LITE_MODE ? [] : [{ id: 'inventory', label: 'Inventory Data & Quality', icon: Boxes, badge: inventoryCategories.length }]),
-            { id: 'pos', label: 'POS & Receipt Layout', icon: Printer },
-            { id: 'notifications', label: 'SMS & Telegram Alerts', icon: BellRing },
-            { id: 'ai', label: 'AI Assistant & API', icon: Sparkles },
-            { id: 'qa', label: 'QA & Diagnostic Rules', icon: ShieldCheck },
-            { id: 'price-catalog', label: 'Price Catalog & Models', icon: Tag },
-            { id: 'modules', label: 'Modules & Visibility', icon: Blocks },
-            { id: 'recycle', label: 'Recycle Bin & Trash', icon: Trash2, badge: archivedCount },
+            { id: 'users', label: 'User Roles & Permissions', icon: UserPlus, badge: users.length, desc: 'Manage accounts, roles & access control' },
+            { id: 'shop', label: 'Shop Settings & Logo', icon: Store, desc: 'Shop name, logo, address & contact info' },
+            { id: 'theme', label: 'Theme & Color Palette', icon: Palette, desc: 'App color palette & appearance' },
+            { id: 'technicians', label: 'Technicians & Staff', icon: Users, badge: technicians.length, desc: 'Add staff, set commission rates' },
+            { id: 'intake', label: 'Work Orders & Intake', icon: FileText, desc: 'Ticket numbering, warranty & intake rules' },
+            { id: 'pricing', label: 'Pricing & Currency', icon: DollarSign, desc: 'Currency, tax & labor discount defaults' },
+            { id: 'payment', label: 'Payment Methods & MM QR', icon: CreditCard, desc: 'Bank accounts, KBZPay / WavePay & MM QR' },
+            ...(LITE_MODE ? [] : [{ id: 'inventory', label: 'Inventory Data & Quality', icon: Boxes, badge: inventoryCategories.length, desc: 'Part categories, SKU data & quality tiers' }]),
+            { id: 'pos', label: 'POS & Receipt Layout', icon: Printer, desc: 'Invoice layout, receipt footer & print' },
+            { id: 'notifications', label: 'SMS & Telegram Alerts', icon: BellRing, desc: 'SMS & Telegram alert triggers' },
+            { id: 'ai', label: 'AI Assistant & API', icon: Sparkles, desc: 'AI assistant & API keys' },
+            { id: 'qa', label: 'QA & Diagnostic Rules', icon: ShieldCheck, desc: 'Diagnostic checklist & warranty rules' },
+            { id: 'price-catalog', label: 'Price Catalog & Models', icon: Tag, desc: 'Device models, repair prices & warranty' },
+            { id: 'modules', label: 'Modules & Visibility', icon: Blocks, desc: 'Show / hide app modules' },
+            { id: 'recycle', label: 'Recycle Bin & Trash', icon: Trash2, badge: archivedCount, desc: 'Restore or permanently delete trashed items' },
           ];
           const defById = new Map(tabDefs.map((t) => [t.id, t]));
           const groups = [
@@ -973,6 +981,19 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
             System: 'bg-warning/10 text-warning',
           };
           const q = settingsTabQuery.trim().toLowerCase();
+          // Highlight the matched substring in search results (Ko Hein 2026-08-24).
+          const highlight = (text: string) => {
+            if (!q) return text;
+            const idx = text.toLowerCase().indexOf(q);
+            if (idx < 0) return text;
+            return (
+              <>
+                {text.slice(0, idx)}
+                <mark className="bg-yellow-200/80 text-ink rounded-sm px-0.5">{text.slice(idx, idx + q.length)}</mark>
+                {text.slice(idx + q.length)}
+              </>
+            );
+          };
           let visibleCount = 0;
           const rendered = groups.map((group) => {
             const tabs = group.ids.map((id) => defById.get(id)!).filter((t) => !q || t.label.toLowerCase().includes(q));
@@ -1017,7 +1038,15 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
                         >
                           <Icon className="w-5 h-5" />
                         </span>
-                        <span className="leading-tight line-clamp-2">{tab.label}</span>
+                        <span className="leading-tight line-clamp-2">
+                          {q && (
+                            <span className="block text-[9px] font-bold uppercase tracking-wide text-muted mb-0.5">{group.label} →</span>
+                          )}
+                          {highlight(tab.label)}
+                        </span>
+                        {tab.desc && !q && (
+                          <span className="text-[10px] text-muted leading-tight line-clamp-1">{tab.desc}</span>
+                        )}
                         <span className="absolute top-1.5 right-1.5 flex items-center gap-1 shrink-0">
                           {isDirty && isActive && (
                             <span className="w-1.5 h-1.5 rounded-full bg-warning shrink-0" title="Unsaved changes" aria-label="Unsaved changes" />
@@ -1081,7 +1110,7 @@ export const SystemManagementSettingsModule: React.FC<SystemManagementSettingsMo
         </Suspense>
       )}      {activeSubTab === 'users' && (
         <Suspense fallback={<ModuleLoadingSkeleton />}>
-          <TabUsersLazy formData={formData} setFormData={setFormData} users={users} currentUser={currentUser} handleOpenAddUser={handleOpenAddUser} handleOpenEditUser={handleOpenEditUser} onDeleteUser={onDeleteUser} />
+          <TabUsersLazy formData={formData} setFormData={setFormData} users={users} currentUser={currentUser} handleOpenAddUser={handleOpenAddUser} handleOpenEditUser={handleOpenEditUser} onDeleteUser={onDeleteUser} onNavigateToRecycle={() => setActiveSubTab('recycle')} />
         </Suspense>
       )}{activeSubTab === 'shop' && (
         <Suspense fallback={<ModuleLoadingSkeleton />}>
