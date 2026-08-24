@@ -5,8 +5,6 @@ import {Boxes,
   AlertTriangle, 
   Tag, 
   ShieldCheck, 
-  ShieldAlert,
-  Truck,
   FileText,
   Cpu, 
   MapPin, 
@@ -26,7 +24,7 @@ import {Boxes,
   Palette,
   ChevronDown,
   Printer} from 'lucide-react';
-import { PartItem, PartOwner, PartQualityTier, Supplier, SystemSettings, RmaItem, PurchaseOrder } from '../../types';
+import { PartItem, PartOwner, PartQualityTier, SystemSettings, PurchaseOrder } from '../../types';
 import { ModelRepairPrice } from '../../types/priceCatalog';
 
 import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
@@ -42,24 +40,18 @@ import {
   DEFAULT_QUALITY_TIERS,
   sanitizeNonNegativeNumber,
   stockBarWidthPercent,
-  generateRmaNumber,
   InlineDraft,
 } from './inventoryUtils';
 import { PartDetailsModal, MatrixPrintSheet, TagsPrintSheet } from './InventoryModals';
 
 interface InventoryManagementModuleProps {
   parts: PartItem[];
-  suppliers: Supplier[];
   systemSettings?: SystemSettings;
   deviceModels?: string[];
   priceCatalog?: ModelRepairPrice[];
   inventoryCategories?: string[];
   onAddPart: (part: PartItem) => void;
   onUpdatePart?: (part: PartItem) => void;
-  onAddRma?: (rma: RmaItem) => void;
-  onAddSupplier?: (supplier: Supplier) => void;
-  onUpdateSupplier?: (supplier: Supplier) => void;
-  onDeleteSupplier?: (supplierId: string) => void;
   onDeletePart?: (partId: string) => void;
   onUpdatePartStock: (partId: string, newStock: number) => void;
   /** Navigate to another tab (used by the purchase-order CTA). */
@@ -95,17 +87,12 @@ interface InventoryManagementModuleProps {
 
 export const InventoryManagementModule: React.FC<InventoryManagementModuleProps> = ({
   parts,
-  suppliers,
   systemSettings,
   deviceModels,
   priceCatalog: _priceCatalog = [],
   inventoryCategories = [],
   onAddPart,
   onUpdatePart,
-  onAddRma,
-  onAddSupplier,
-  onUpdateSupplier,
-  // onDeleteSupplier removed (unused)
   onDeletePart,
   onUpdatePartStock,
   searchQuery,
@@ -129,11 +116,20 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   scanQuery: propScanQuery,
   setScanQuery: propSetScanQuery,
   onRegisterScanHandler,
-  onNavigateToTab,
   purchaseOrders = [],
   showAddModal: propShowAddModal,
   setShowAddModal: propSetShowAddModal,
 }) => {
+  const fallbackCopy = (text: string) => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch { /* noop */ }
+    document.body.removeChild(ta);
+  };
   const currency = systemSettings?.currencySymbol || 'MMK';
   const [localQuality, setLocalQuality] = useState<string>('ALL');
   const [localCategory, setLocalCategory] = useState<string>('ALL');
@@ -174,9 +170,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const [localLowStockOnly, setLocalLowStockOnly] = useState(false);
   const [ownerFilter, setOwnerFilter] = useState<'ALL' | PartOwner>('ALL');
   const [stockStatusFilter, setStockStatusFilter] = useState<'ALL' | 'LOW' | 'OUT'>('ALL');
-  // Purchase-order draft (Ko Hein 2026-08-24): supplier-grouped reorder preview
-  // before jumping to the Suppliers module. Scope defaults to OUT only — never
-  // auto-selects the whole below-reorder set.
+  // Purchase-order draft (Ko Hein 2026-08-24): model-grouped reorder preview.
+  // Scope defaults to OUT only — never auto-selects the whole below-reorder set.
   const [poDraftOpen, setPoDraftOpen] = useState(false);
   const [poScope, setPoScope] = useState<'OUT' | 'LOW'>('OUT');
   const [poSelected, setPoSelected] = useState<Set<string>>(new Set());
@@ -194,10 +189,10 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
     () => (poScope === 'OUT' ? parts.filter((p) => Number(p.quantityInStock) === 0) : parts.filter((p) => Number(p.quantityInStock) > 0 && Number(p.quantityInStock) <= Number(p.reorderPoint))),
     [parts, poScope]
   );
-  const poSupplierGroups = useMemo(() => {
+  const poModelGroups = useMemo(() => {
     const groups = new Map<string, PartItem[]>();
     poCandidates.forEach((p) => {
-      const key = p.supplierName?.trim() || 'No supplier set';
+      const key = p.deviceCompatibility?.[0]?.trim() || p.category?.trim() || 'Other parts';
       groups.set(key, [...(groups.get(key) || []), p]);
     });
     return Array.from(groups.entries());
@@ -228,83 +223,10 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
   const [bulkReorderOpen, setBulkReorderOpen] = useState(false);
   const [bulkReorderValue, setBulkReorderValue] = useState('');
 
-  // Supplier & Quality Tier Edit States
-  const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
-
   // Tiers are managed centrally in System Management and synchronised with Supabase.
   const customQualityTiers = DEFAULT_QUALITY_TIERS;
 
-  // Mini modals for quick-add inside Part Add/Edit forms
-  const [showAddSupplierMiniModal, setShowAddSupplierMiniModal] = useState(false);
-
-  // Form State for Adding Supplier
-  const [newSupplierForm, setNewSupplierForm] = useState({
-    name: '',
-    code: '',
-    phone: '',
-    contactEmail: '',
-    website: '',
-    avgRmaTurnaroundDays: 3,
-    rating: 5,
-  });
-
   // Form State for Adding Quality Tier
-
-  const handleCreateSupplier = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!newSupplierForm.name.trim()) return;
-    const createdSup: Supplier = {
-      id: `sup-${Date.now()}`,
-      name: newSupplierForm.name.trim(),
-      code: newSupplierForm.code.trim().toUpperCase() || 'SUP',
-      phone: newSupplierForm.phone.trim() || 'N/A',
-      contactEmail: newSupplierForm.contactEmail.trim() || 'vendor@example.com',
-      website: newSupplierForm.website.trim() || 'https://supplier.com',
-      avgRmaTurnaroundDays: Number(newSupplierForm.avgRmaTurnaroundDays) || 3,
-      rating: Number(newSupplierForm.rating) || 5,
-    };
-
-    // audit C-P3: block duplicate supplier codes — duplicates broke vendor reports.
-    const normalizedCode = createdSup.code.toLowerCase();
-    if (suppliers.some((s) => s.code.toLowerCase() === normalizedCode)) {
-      toast.error(`A supplier with code "${createdSup.code}" already exists. Codes must be unique.`, 'Duplicate Supplier Code');
-      return;
-    }
-
-    if (onAddSupplier) {
-      onAddSupplier(createdSup);
-    }
-    toast.success(`Supplier vendor "${createdSup.name}" registered.`, 'Supplier Added');
-    setNewSupplierForm({
-      name: '',
-      code: '',
-      phone: '',
-      contactEmail: '',
-      website: '',
-      avgRmaTurnaroundDays: 3,
-      rating: 5,
-    });
-    setShowAddSupplierMiniModal(false);
-  };
-
-  const handleSaveEditSupplier = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!editingSupplier || !editingSupplier.name.trim()) return;
-    // audit C-P3: block duplicate supplier codes (case-insensitive) on edit too.
-    const normalizedCode = editingSupplier.code.trim().toLowerCase();
-    if (suppliers.some((s) => s.id !== editingSupplier.id && s.code.toLowerCase() === normalizedCode)) {
-      toast.error(`A supplier with code "${editingSupplier.code}" already exists. Codes must be unique.`, 'Duplicate Supplier Code');
-      return;
-    }
-    if (onUpdateSupplier) {
-      onUpdateSupplier(editingSupplier);
-    }
-    setEditingSupplier(null);
-  };
-
-  
-
-  
 
   const activeDeviceModels = useMemo(() => {
     return sortModelsNewestFirst([...new Set(deviceModels?.filter(Boolean) || [])]);
@@ -442,101 +364,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       left: r.left,
       width: r.width,
     };
-  };
-
-  // Warranty Claim Modal state
-  const [claimingWarrantyPart, setClaimingWarrantyPart] = useState<PartItem | null>(null);
-  // Preset warranty reasons — the modal's <select> shows the matching preset
-  // when the free-text input holds one, else a placeholder (audit P2).
-  const PRESET_WARRANTY_REASONS = [
-    'Screen touch unresponsive / ghost touching',
-    'Display flickering / dead pixels / lines',
-    'Battery swelling / rapid discharge / non-charging',
-    'FPC connector damaged / loose fit',
-    'DOA (Dead On Arrival) / No power',
-    'Wrong part delivered / mislabeled',
-  ];
-
-  const [warrantyForm, setWarrantyForm] = useState<{
-    supplierId: string;
-    supplierName: string;
-    quantity: number;
-    reason: string;
-    trackingNumber: string;
-    unitCost: number;
-  }>({
-    supplierId: '',
-    supplierName: '',
-    quantity: 1,
-    reason: 'Screen touch unresponsive / defect after installation',
-    trackingNumber: '',
-    unitCost: 0,
-  });
-
-  // audit C-P2: pre-fill the claim's supplier from the part's existing supplier
-  // when the modal opens — otherwise submitting without touching the supplier
-  // select silently wiped the part's supplierId/supplierName ("Supplier Vendor").
-  useEffect(() => {
-    if (!claimingWarrantyPart) return;
-    const existingSup = suppliers.find((s) => s.id === claimingWarrantyPart.supplierId);
-    setWarrantyForm((form) => ({
-      ...form,
-      supplierId: claimingWarrantyPart.supplierId || form.supplierId,
-      supplierName: existingSup?.name || claimingWarrantyPart.supplierName || form.supplierName,
-      quantity: 1,
-    }));
-  }, [claimingWarrantyPart, suppliers]);
-
-  
-
-  const handleSubmitWarrantyClaim = () => {
-    if (!claimingWarrantyPart) return;
-    const selectedSup = suppliers.find((s) => s.id === warrantyForm.supplierId);
-    const resolvedSupName = selectedSup?.name || warrantyForm.supplierName || claimingWarrantyPart.supplierName || 'Supplier Vendor';
-
-    // audit C-P2: cap the claim at on-hand stock — an oversized claim would
-    // otherwise inflate stock when "Replacement Received" adds it back later.
-    const claimQty = Math.max(1, Math.floor(Number(warrantyForm.quantity) || 1));
-    if (claimQty > (claimingWarrantyPart.quantityInStock || 0)) {
-      toast.error(`Claim quantity (${claimQty}) exceeds stock on hand (${claimingWarrantyPart.quantityInStock || 0}) for ${claimingWarrantyPart.name}.`, 'Invalid Claim Quantity');
-      return;
-    }
-
-    const rmaRecord: RmaItem = {
-      id: `rma-${Date.now()}`,
-      rmaNumber: generateRmaNumber(),
-      partId: claimingWarrantyPart.id,
-      partName: claimingWarrantyPart.name,
-      partQuality: claimingWarrantyPart.qualityTier,
-      supplierId: warrantyForm.supplierId || selectedSup?.id || claimingWarrantyPart.supplierId || 'sup-1',
-      supplierName: resolvedSupName,
-      quantity: claimQty,
-      unitCost: Number.isFinite(Number(warrantyForm.unitCost)) ? Math.max(0, Number(warrantyForm.unitCost)) : (claimingWarrantyPart.costPrice || 0),
-      reason: warrantyForm.reason || 'Parts Warranty Claim',
-      status: 'Shipped to Vendor',
-      trackingNumber: warrantyForm.trackingNumber || '',
-      createdAt: new Date().toISOString(),
-    };
-
-    if (onAddRma) {
-      onAddRma(rmaRecord);
-    }
-
-    // audit C-P2: 1) never wipe the part's supplier — only adopt a new one when
-    // the user explicitly picked a different supplier; 2) defective units leave
-    // the shelf at claim time (balanced by the "Replacement Received" increment).
-    if (onUpdatePart) {
-      const supplierChanged = Boolean(warrantyForm.supplierId && warrantyForm.supplierId !== claimingWarrantyPart.supplierId);
-      onUpdatePart({
-        ...claimingWarrantyPart,
-        supplierId: supplierChanged ? warrantyForm.supplierId : claimingWarrantyPart.supplierId,
-        supplierName: supplierChanged ? resolvedSupName : claimingWarrantyPart.supplierName,
-        quantityInStock: Math.max(0, (claimingWarrantyPart.quantityInStock || 0) - claimQty),
-      });
-    }
-
-    toast.success(`Warranty claim submitted to ${resolvedSupName}. RMA # ${rmaRecord.rmaNumber}`, 'RMA Submitted');
-    setClaimingWarrantyPart(null);
   };
 
   const activeSearchQuery = propSetSearchQuery ? searchQuery : localSearchQuery;
@@ -993,8 +820,8 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
 
   const handleSaveNewPart = () => {
     const needsColor = isBackGlassCategory && !isMultiDevice;
-    if (!newPartData.name || !newPartData.sku || !newPartData.category || !newPartData.qualityTier || !newPartData.supplierId || !newPartData.deviceCompatibility?.[0] || (needsColor && !newPartData.backGlassColor)) {
-      toast.error('Add at least one device model, category, quality tier, and supplier. Single-device Back Glass parts also need a color. Then enter the part name and SKU.', 'Incomplete Part Details');
+    if (!newPartData.name || !newPartData.sku || !newPartData.category || !newPartData.qualityTier || !newPartData.deviceCompatibility?.[0] || (needsColor && !newPartData.backGlassColor)) {
+      toast.error('Add at least one device model, category, and quality tier. Single-device Back Glass parts also need a color. Then enter the part name and SKU.', 'Incomplete Part Details');
       return;
     }
 
@@ -1088,10 +915,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         if (draft.sellingPrice?.trim() && Number(draft.sellingPrice) !== part.sellingPrice) {
           changes.push({ label: 'Selling price', value: `${part.sellingPrice.toLocaleString()} → ${Number(draft.sellingPrice).toLocaleString()}` });
         }
-        if (draft.supplierId !== undefined && draft.supplierId !== part.supplierId) {
-          const selectedSup = suppliers.find((supplier) => supplier.id === draft.supplierId);
-          changes.push({ label: 'Supplier', value: `${part.supplierName || '—'} → ${selectedSup?.name || '—'}` });
-        }
         if (draft.locationBin !== undefined && draft.locationBin !== part.locationBin) {
           changes.push({ label: 'Bin', value: `${part.locationBin || '—'} → ${draft.locationBin || '—'}` });
         }
@@ -1107,7 +930,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         part: PartItem;
         changes: Array<{ label: string; value: string }>;
       }>;
-  }, [inlineDrafts, parts, suppliers]);
+  }, [inlineDrafts, parts]);
 
   const confirmInlineSave = () => {
     if (!inlineSaveReview.length || !onUpdatePart || isInlineSaving) {
@@ -1145,7 +968,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
         const parsedReorder = draft.reorderPoint?.trim() ? sanitizeNonNegativeNumber(draft.reorderPoint, part.reorderPoint) : part.reorderPoint;
         const parsedCost = draft.costPrice?.trim() ? sanitizeNonNegativeNumber(draft.costPrice, part.costPrice) : part.costPrice;
         const parsedSelling = draft.sellingPrice?.trim() ? sanitizeNonNegativeNumber(draft.sellingPrice, part.sellingPrice) : part.sellingPrice;
-        const selectedSup = suppliers.find((supplier) => supplier.id === draft.supplierId);
         onUpdatePart({
           ...part,
           ...draft,
@@ -1153,8 +975,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           reorderPoint: parsedReorder,
           costPrice: parsedCost,
           sellingPrice: parsedSelling,
-          supplierId: draft.supplierId || part.supplierId,
-          supplierName: selectedSup?.name || part.supplierName,
         });
       });
 
@@ -1640,9 +1460,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         <span className="block text-[10px] sm:text-xs font-bold uppercase text-muted">Selling Price</span>
                         <span className="font-mono text-sm font-black text-success-deep">{part.sellingPrice.toLocaleString()} {currency}</span>
                       </div>
-                      {part.supplierName && (
-                        <span className="max-w-[45%] truncate text-xs font-semibold text-muted" title={part.supplierName}>{part.supplierName}</span>
-                      )}
                     </div>
                   </div>
                 );
@@ -1760,8 +1577,7 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                         {sortKey === 'price' && <SortArrow dir={sortDir} />}
                       </Button>
                     </th>
-                    {inlineEditMode && <th className="w-[13%] min-w-[110px] px-1.5 py-2 bg-surface">Supplier</th>}
-                    <th className="w-[10%] min-w-[96px] px-2.5 py-2 bg-surface hidden md:table-cell">{stockStatusFilter === 'ALL' ? 'Bin' : 'Supplier'}</th>
+                    <th className="w-[10%] min-w-[96px] px-2.5 py-2 bg-surface hidden md:table-cell">Bin</th>
                     {!inlineEditMode && <th className="w-[12%] min-w-[80px] px-2.5 py-2 text-right bg-surface">Detail</th>}
                   </tr>
                 </thead>
@@ -1896,61 +1712,12 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                           ) : <>{part.sellingPrice.toLocaleString()} {currency}</>}
                         </td>
 
-                        {inlineEditMode ? (
-                          <td className="w-[13%] min-w-[110px] px-1.5 py-2 align-top">
-                            <div className="flex min-w-0 flex-col gap-0.5 text-xs font-bold uppercase tracking-wide text-muted">
-                              <span>Supplier</span>
-                              <CustomDropdownMenu
-                                value={inlineDrafts[part.id]?.supplierId ?? part.supplierId ?? ''}
-                                onChange={(supplierId) => {
-                                  const selectedSup = suppliers.find((supplier) => supplier.id === supplierId);
-                                  beginInlineEdit(part);
-                                  setInlineDrafts((current) => ({
-                                    ...current,
-                                    [part.id]: {
-                                      ...current[part.id],
-                                      supplierId,
-                                    },
-                                  }));
-                                  if (selectedSup) {
-                                    // keep name in sync immediately for downstream save review
-                                    setInlineDrafts((current) => ({
-                                      ...current,
-                                      [part.id]: {
-                                        ...current[part.id],
-                                        supplierId,
-                                      },
-                                    }));
-                                  }
-                                }}
-                                placeholder={suppliers.length ? 'Choose supplier' : 'No supplier'}
-                                options={suppliers.map((supplier) => ({
-                                  value: supplier.id,
-                                  label: `${supplier.name} (${supplier.code})`,
-                                  badge: `${supplier.avgRmaTurnaroundDays}d`,
-                                }))}
-                                className="w-full"
-                                buttonClassName="w-full rounded-md bg-white px-2 py-1.5 text-left text-sm font-semibold text-ink"
-                                menuAlign="left"
-                              />
-                            </div>
-                          </td>
-                        ) : null}
-
                         {/* Location Bin */}
                         <td className="w-[10%] min-w-[96px] px-1.5 py-2 hidden md:table-cell">
                           {inlineEditMode ? (
                             <div className="flex min-w-0 flex-col gap-0.5 text-xs font-bold uppercase tracking-wide text-muted">
                               <span>Bin</span>
                               <select aria-label={`Bin for ${part.name}`} value={editValue('locationBin', part.locationBin) as string} onFocus={() => beginInlineEdit(part)} onChange={(e) => setInlineDrafts((current) => ({ ...current, [part.id]: { ...current[part.id], locationBin: e.target.value } }))} className="w-full min-w-0 rounded-md border border-line-strong bg-white px-2 py-1.5 text-sm font-semibold font-sans tabular-nums tracking-normal text-ink"><option value="">Choose bin</option>{existingLocationBins.map((bin) => <option key={bin} value={bin}>{bin}</option>)}</select>
-                            </div>
-                          ) : stockStatusFilter !== 'ALL' ? (
-                            <div className="flex min-w-0 flex-col gap-0.5 text-xs font-bold uppercase tracking-wide text-muted">
-                              <span>Supplier</span>
-                              <span className="inline-flex items-center gap-1 px-1 py-0.5 text-xs font-extrabold leading-none text-ink truncate max-w-[120px]" title={part.supplierName}>
-                                {part.supplierName || '—'}
-                              </span>
-                              <span className="text-[10px] font-semibold text-muted">Reorder: {part.reorderPoint}</span>
                             </div>
                           ) : part.locationBin ? (
                             <div className="flex min-w-0 flex-col gap-0.5 text-xs font-bold uppercase tracking-wide text-muted">
@@ -2495,38 +2262,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 />
               </div>
 
-              <div className="sm:col-span-2">
-                <div className="flex justify-between items-center mb-1">
-                  <label className="block font-bold text-ink">Supplier Name *</label>
-                  <Button
-                    type="button"
-                    onClick={() => setShowAddSupplierMiniModal(true)}
-                    variant="ghost"
-                    className="text-xs text-brand font-extrabold hover:underline flex items-center space-x-0.5 cursor-pointer"
-                  >
-                    <Plus className="w-3 h-3" />
-                    <span>Add Supplier Data</span>
-                  </Button>
-                </div>
-                <CustomDropdownMenu
-                  value={newPartData.supplierId || ''}
-                  onChange={(supplierId) => {
-                    const selectedSup = suppliers.find((supplier) => supplier.id === supplierId);
-                    setNewPartData({
-                      ...newPartData,
-                      supplierId,
-                      supplierName: selectedSup?.name || '',
-                    });
-                  }}
-                  options={suppliers.map((supplier) => ({ value: supplier.id, label: supplier.name }))}
-                  placeholder={suppliers.length ? 'Choose supplier name' : 'Add a supplier first'}
-                  className="w-full"
-                  buttonClassName="!h-8 !w-full !rounded-lg !border-line !bg-surface !px-2.5"
-                  menuAlign="left"
-                  size="md"
-                />
-              </div>
-
               <div>
                 <label className="block font-bold text-ink mb-1">Cost Price ({currency})</label>
                 <Input
@@ -2687,7 +2422,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
           setSelectedPartForDetails((prev) => (prev && prev.id === partId ? { ...prev, quantityInStock: Math.max(0, newStock) } : prev));
         }}
         onEdit={(part) => { setEditingPart(part); setSelectedPartForDetails(null); }}
-        onWarranty={(part) => { setClaimingWarrantyPart(part); setSelectedPartForDetails(null); }}
         onDelete={(partId) => { onDeletePart?.(partId); setSelectedPartForDetails(null); }}
         onClose={() => setSelectedPartForDetails(null)}
       />
@@ -2880,40 +2614,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 </select>
               </div>
 
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <label className="block font-bold text-ink">Supplier Name (For Warranty / RMA Claim) *</label>
-                  <Button variant="ghost"
-                    type="button"
-                    onClick={() => setShowAddSupplierMiniModal(true)}
-                    className="text-xs text-brand font-extrabold hover:underline flex items-center space-x-0.5 cursor-pointer"
-                  >
-                    <Plus className="w-3 h-3" />
-                    <span>Add Supplier Data</span>
-                  </Button>
-                </div>
-                <CustomDropdownMenu
-                  value={editingPart.supplierId || ''}
-                  onChange={(supplierId) => {
-                    const selectedSup = suppliers.find((s) => s.id === supplierId);
-                    setEditingPart({
-                      ...editingPart,
-                      supplierId,
-                      supplierName: selectedSup?.name || editingPart.supplierName,
-                    });
-                  }}
-                  placeholder={suppliers.length ? 'Choose supplier name' : 'Add a supplier first'}
-                  options={suppliers.map((s) => ({
-                    value: s.id,
-                    label: `${s.name} (${s.code})`,
-                    badge: `${s.avgRmaTurnaroundDays}d`,
-                  }))}
-                  className="w-full"
-                  buttonClassName="w-full rounded-xl bg-surface px-3 py-2.5 text-left text-xs font-bold text-ink"
-                  menuAlign="left"
-                />
-              </div>
-
             </div>
 
             <div className="flex justify-end space-x-2 pt-3 border-t border-line">
@@ -2957,315 +2657,6 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
       )}
 
       {/* MODAL: FILE PARTS WARRANTY CLAIM */}
-      {claimingWarrantyPart && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white border border-line rounded-2xl max-w-lg w-full p-5 space-y-4 text-xs shadow-2xl">
-            <div className="flex justify-between items-center border-b border-line pb-3">
-              <h3 className="text-base font-extrabold text-ink flex items-center space-x-2">
-                <ShieldAlert className="w-5 h-5 text-warning" />
-                <span>File Parts Warranty Claim (RMA)</span>
-              </h3>
-              <Button variant="ghost"
-                onClick={() => setClaimingWarrantyPart(null)}
-                className="text-muted hover:text-ink p-1 rounded-lg"
-                aria-label="Close"
-                title="Close"
-              >
-                <X className="w-5 h-5" />
-              </Button>
-            </div>
-
-            {/* Part Details Summary Banner */}
-            <div className="p-3 bg-warning/10 border border-warning/30 rounded-xl space-y-1">
-              <p className="font-extrabold text-warning text-xs">
-                Component: {claimingWarrantyPart.name}
-              </p>
-              <p className="text-xs text-warning font-mono">
-                SKU: {claimingWarrantyPart.sku} | Quality: {claimingWarrantyPart.qualityTier} | Stock: {claimingWarrantyPart.quantityInStock} units
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              {/* Supplier Selection for Warranty Claim */}
-              <div>
-                <label className="block font-bold text-ink mb-1">Select Supplier Name for Claim *</label>
-                <select
-                  value={warrantyForm.supplierId}
-                  onChange={(e) => {
-                    const selectedSup = suppliers.find((s) => s.id === e.target.value);
-                    setWarrantyForm({
-                      ...warrantyForm,
-                      supplierId: e.target.value,
-                      supplierName: selectedSup?.name || e.target.value,
-                    });
-                  }}
-                  className="w-full bg-surface border border-line rounded-xl p-2.5 text-xs font-bold text-ink focus:bg-white focus:outline-none"
-                >
-                  {/* audit C-P2: "keep current" placeholder — submitting without
-                      changing the select must NOT wipe the part's supplier. */}
-                  <option value="">
-                    {claimingWarrantyPart.supplierId ? `Keep current supplier (${claimingWarrantyPart.supplierName || claimingWarrantyPart.supplierId})` : 'No supplier on this part — pick one…'}
-                  </option>
-                  {suppliers.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name} ({s.code}) - Avg RMA: {s.avgRmaTurnaroundDays}d
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-ink mb-1">Claim Quantity</label>
-                  <Input
-                    type="number"
-                    min={1}
-                    max={claimingWarrantyPart.quantityInStock || 99}
-                    value={warrantyForm.quantity}
-                    onChange={(e) => setWarrantyForm({ ...warrantyForm, quantity: Number(e.target.value) })}
-                    className="w-full bg-surface border border-line rounded-xl p-2.5 text-xs font-mono font-bold text-ink"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-bold text-ink mb-1">Unit Cost ({currency})</label>
-                  <Input
-                    type="number"
-                    value={warrantyForm.unitCost}
-                    onChange={(e) => setWarrantyForm({ ...warrantyForm, unitCost: Number(e.target.value) })}
-                    className="w-full bg-surface border border-line rounded-xl p-2.5 text-xs font-mono font-bold text-ink"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-bold text-ink mb-1">Defect / Warranty Reason *</label>
-                <select
-                  value={PRESET_WARRANTY_REASONS.includes(warrantyForm.reason) ? warrantyForm.reason : ''}
-                  onChange={(e) => {
-                    if (e.target.value) setWarrantyForm({ ...warrantyForm, reason: e.target.value });
-                  }}
-                  className="w-full bg-surface border border-line rounded-xl p-2.5 text-xs font-medium text-ink mb-2"
-                >
-                  <option value="" disabled>Choose a preset reason or type one below…</option>
-                  <option value="Screen touch unresponsive / ghost touching">Screen touch unresponsive / ghost touching</option>
-                  <option value="Display flickering / dead pixels / lines">Display flickering / dead pixels / lines</option>
-                  <option value="Battery swelling / rapid discharge / non-charging">Battery swelling / rapid discharge / non-charging</option>
-                  <option value="FPC connector damaged / loose fit">FPC connector damaged / loose fit</option>
-                  <option value="DOA (Dead On Arrival) / No power">DOA (Dead On Arrival) / No power</option>
-                  <option value="Wrong part delivered / mislabeled">Wrong part delivered / mislabeled</option>
-                </select>
-                <Input
-                  type="text"
-                  value={warrantyForm.reason}
-                  onChange={(e) => setWarrantyForm({ ...warrantyForm, reason: e.target.value })}
-                  placeholder="Or type custom warranty reason..."
-                  className="w-full bg-surface border border-line rounded-xl p-2 text-xs text-ink"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-ink mb-1">Return Tracking / RMA Reference Number</label>
-                <Input
-                  type="text"
-                  value={warrantyForm.trackingNumber}
-                  onChange={(e) => setWarrantyForm({ ...warrantyForm, trackingNumber: e.target.value })}
-                  placeholder="e.g. 1Z9999990199887766 or RMA-8891"
-                  className="w-full bg-surface border border-line rounded-xl p-2.5 text-xs font-mono text-ink"
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end space-x-2 pt-3 border-t border-line">
-              <Button variant="ghost"
-                type="button"
-                onClick={() => setClaimingWarrantyPart(null)}
-                className="px-4 py-2 bg-white border border-line text-ink font-bold rounded-xl"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                onClick={handleSubmitWarrantyClaim}
-                className="px-4 py-2 bg-warning hover:brightness-95 text-white font-extrabold rounded-xl shadow-xs flex items-center space-x-1.5 cursor-pointer"
-              >
-                <ShieldAlert className="w-4 h-4" />
-                <span>File Warranty Claim</span>
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-
-      {/* MINI MODAL: QUICK ADD SUPPLIER */}
-      {showAddSupplierMiniModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <form onSubmit={handleCreateSupplier} className="bg-white border border-line rounded-2xl max-w-md w-full p-5 space-y-4 text-xs shadow-2xl">
-            <div className="flex justify-between items-center border-b border-line pb-2">
-              <h4 className="font-extrabold text-ink text-sm flex items-center space-x-1.5">
-                <Truck className="w-4 h-4 text-brand" />
-                <span>Quick Register Supplier Vendor</span>
-              </h4>
-              <Button variant="ghost"
-                type="button"
-                onClick={() => setShowAddSupplierMiniModal(false)}
-                className="text-muted hover:text-ink"
-                aria-label="Close"
-                title="Close"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-            <div className="space-y-3">
-              <div>
-                <label className="block font-bold text-ink mb-1">Supplier Name *</label>
-                <Input
-                  type="text"
-                  required
-                  value={newSupplierForm.name}
-                  onChange={(e) => setNewSupplierForm({ ...newSupplierForm, name: e.target.value })}
-                  placeholder="e.g. MobileSentrix USA"
-                  className="w-full bg-surface border border-line rounded-xl p-2 text-xs font-bold text-ink"
-                />
-              </div>
-              <div>
-                <label className="block font-bold text-ink mb-1">Supplier Short Code *</label>
-                <Input
-                  type="text"
-                  required
-                  value={newSupplierForm.code}
-                  onChange={(e) => setNewSupplierForm({ ...newSupplierForm, code: e.target.value })}
-                  placeholder="e.g. MS-US"
-                  className="w-full bg-surface border border-line rounded-xl p-2 text-xs font-mono font-bold text-ink"
-                />
-              </div>
-              <div>
-                <label className="block font-bold text-ink mb-1">Avg RMA Turnaround (Days)</label>
-                <Input
-                  type="number"
-                  value={newSupplierForm.avgRmaTurnaroundDays}
-                  onChange={(e) => setNewSupplierForm({ ...newSupplierForm, avgRmaTurnaroundDays: Number(e.target.value) })}
-                  className="w-full bg-surface border border-line rounded-xl p-2 text-xs font-mono text-ink"
-                />
-              </div>
-            </div>
-            <div className="flex justify-end space-x-2 pt-2 border-t border-line">
-              <Button variant="ghost"
-                type="button"
-                onClick={() => setShowAddSupplierMiniModal(false)}
-                className="px-3 py-2 bg-white border border-line text-ink font-bold rounded-xl"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                className="px-4 py-2 bg-brand text-white font-extrabold rounded-xl shadow-xs"
-              >
-                Save Supplier
-              </Button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* MINI MODAL: QUICK ADD QUALITY TIER */}
-
-
-      {/* EDIT SUPPLIER MODAL */}
-      {editingSupplier && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <form onSubmit={handleSaveEditSupplier} className="bg-white border border-line rounded-2xl max-w-md w-full p-5 space-y-4 text-xs shadow-2xl">
-            <div className="flex justify-between items-center border-b border-line pb-2">
-              <h4 className="font-extrabold text-ink text-sm flex items-center space-x-1.5">
-                <Truck className="w-4 h-4 text-brand" />
-                <span>Edit Supplier Vendor</span>
-              </h4>
-              <Button variant="ghost"
-                type="button"
-                onClick={() => setEditingSupplier(null)}
-                className="text-muted hover:text-ink"
-                aria-label="Close"
-                title="Close"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <label className="block font-bold text-ink mb-1">Supplier Name *</label>
-                <Input
-                  type="text"
-                  required
-                  value={editingSupplier.name}
-                  onChange={(e) => setEditingSupplier({ ...editingSupplier, name: e.target.value })}
-                  className="w-full bg-surface border border-line rounded-xl p-2 text-xs font-bold text-ink"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block font-bold text-ink mb-1">Short Code *</label>
-                  <Input
-                    type="text"
-                    required
-                    value={editingSupplier.code}
-                    onChange={(e) => setEditingSupplier({ ...editingSupplier, code: e.target.value })}
-                    className="w-full bg-surface border border-line rounded-xl p-2 text-xs font-mono font-bold text-ink"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-ink mb-1">Phone Number</label>
-                  <Input
-                    type="text"
-                    value={editingSupplier.phone}
-                    onChange={(e) => setEditingSupplier({ ...editingSupplier, phone: e.target.value })}
-                    className="w-full bg-surface border border-line rounded-xl p-2 text-xs text-ink"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-bold text-ink mb-1">Contact Email</label>
-                <Input
-                  type="email"
-                  value={editingSupplier.contactEmail}
-                  onChange={(e) => setEditingSupplier({ ...editingSupplier, contactEmail: e.target.value })}
-                  className="w-full bg-surface border border-line rounded-xl p-2 text-xs text-ink"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-ink mb-1">Avg RMA Turnaround (Days)</label>
-                <Input
-                  type="number"
-                  value={editingSupplier.avgRmaTurnaroundDays}
-                  onChange={(e) => setEditingSupplier({ ...editingSupplier, avgRmaTurnaroundDays: Number(e.target.value) })}
-                  className="w-full bg-surface border border-line rounded-xl p-2 text-xs text-ink"
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end space-x-2 pt-2 border-t border-line">
-              <Button variant="ghost"
-                type="button"
-                onClick={() => setEditingSupplier(null)}
-                className="px-3 py-2 bg-white border border-line text-ink font-bold rounded-xl cursor-pointer"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                className="px-4 py-2 bg-brand hover:bg-brand-deep text-white font-extrabold rounded-xl shadow-xs cursor-pointer"
-              >
-                Save Changes
-              </Button>
-            </div>
-          </form>
-        </div>
-      )}
-
       {/* EDIT QUALITY TIER MODAL */}
 
 
@@ -3422,16 +2813,16 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
                 </div>
               )}
 
-              {/* Supplier-grouped list */}
-              {poSupplierGroups.length === 0 ? (
+              {/* Model-grouped list (suppliers removed 2026-08-24) */}
+              {poModelGroups.length === 0 ? (
                 <p className="text-center text-xs font-bold text-muted py-6">No parts in this scope.</p>
               ) : (
-                poSupplierGroups.map(([supplier, items]) => {
+                poModelGroups.map(([model, items]) => {
                   const subTotal = items.reduce((sum, p) => sum + (poSelected.has(p.id) ? (poQty[p.id] || suggestQty(p)) * (Number(p.costPrice) || 0) : 0), 0);
                   return (
-                    <div key={supplier} className="rounded-xl border border-line bg-surface/60 overflow-hidden">
+                    <div key={model} className="rounded-xl border border-line bg-surface/60 overflow-hidden">
                       <div className="flex items-center justify-between gap-2 border-b border-line bg-white px-3 py-2">
-                        <span className="text-xs font-extrabold text-ink truncate">{supplier}</span>
+                        <span className="text-xs font-extrabold text-ink truncate">{model}</span>
                         <span className="text-xs font-mono font-black text-ink shrink-0">{subTotal.toLocaleString()} {currency}</span>
                       </div>
                       <div className="divide-y divide-line">
@@ -3477,15 +2868,27 @@ export const InventoryManagementModule: React.FC<InventoryManagementModuleProps>
               <div className="text-xs">
                 <span className="text-muted font-bold">Estimated cost: </span>
                 <span className="font-mono font-black text-ink">{poTotal.toLocaleString()} {currency}</span>
-                <span className="block text-[10px] text-muted">{poSelected.size} part{poSelected.size !== 1 ? 's' : ''} · group by supplier on review</span>
+                <span className="block text-[10px] text-muted">{poSelected.size} part{poSelected.size !== 1 ? 's' : ''} · grouped by model</span>
               </div>
               <Button
                 type="button"
                 disabled={poSelected.size === 0}
-                onClick={() => { setPoDraftOpen(false); onNavigateToTab?.('suppliers'); }}
+                onClick={() => {
+                  const lines = poModelGroups
+                    .flatMap(([, items]) => items)
+                    .filter((p) => poSelected.has(p.id))
+                    .map((p) => `${p.sku}\t${p.name}\tQty ${poQty[p.id] || suggestQty(p)}\t${((poQty[p.id] || suggestQty(p)) * (Number(p.costPrice) || 0)).toLocaleString()} ${currency}`);
+                  const text = lines.join('\n');
+                  const done = () => toast.success(`Copied ${poSelected.size} part${poSelected.size !== 1 ? 's' : ''} to clipboard`, 'Reorder List Copied');
+                  if (navigator.clipboard?.writeText) {
+                    navigator.clipboard.writeText(text).then(done).catch(() => { fallbackCopy(text); done(); });
+                  } else {
+                    fallbackCopy(text); done();
+                  }
+                }}
                 className="bg-brand hover:bg-brand-deep text-white text-xs font-extrabold rounded-xl px-3.5 py-2 disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                {poSelected.size === 0 ? 'Select parts to continue' : `Review ${poSelected.size} in Suppliers`}
+                {poSelected.size === 0 ? 'Select parts to continue' : `Copy ${poSelected.size} part${poSelected.size !== 1 ? 's' : ''} list`}
               </Button>
             </div>
           </div>

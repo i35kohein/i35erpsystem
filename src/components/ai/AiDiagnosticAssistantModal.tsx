@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { Button } from '../ui';
 import { Bot, Send, Sparkles, X, AlertTriangle, PackageSearch, PhoneCall, Activity, Settings2, Copy, Database, RotateCcw, Loader2 } from 'lucide-react';
 import { confirmDialog } from '../common/ConfirmDialog';
-import { Customer, PartItem, Supplier, SystemSettings, Technician, TechnicianPayoutRecord, WorkOrder } from '../../types';
+import { Customer, PartItem, SystemSettings, Technician, TechnicianPayoutRecord, WorkOrder } from '../../types';
 import { ModelRepairPrice as PriceCatalogItem } from '../../types/priceCatalog';
 
 type ChatMessage = {
@@ -19,7 +19,7 @@ interface AiDiagnosticAssistantModalProps {
   parts: PartItem[];
   customers: Customer[];
   technicians: Technician[];
-  suppliers: Supplier[];
+  suppliers?: never;
   technicianPayouts?: TechnicianPayoutRecord[];
   priceCatalog?: PriceCatalogItem[];
   systemSettings: SystemSettings;
@@ -49,7 +49,6 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
   parts,
   customers,
   technicians,
-  suppliers,
   technicianPayouts = [],
   priceCatalog = [],
   systemSettings,
@@ -188,7 +187,6 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
         completedToday: completedToday.length,
         unpaidTickets: workOrders.filter((order) => !order.isPaid).length,
         customers: customers.length,
-        suppliers: suppliers.length,
       },
       statusCounts: Object.fromEntries(
         ['Receive', 'In Progress', 'Pending', 'Finished', 'Taken Out', 'Cant Repair', 'Customer Not Repair'].map((status) => [
@@ -242,7 +240,7 @@ export const AiDiagnosticAssistantModal: React.FC<AiDiagnosticAssistantModalProp
         return `${p.model}: ${priced.length ? priced.join(', ') : 'no prices'}`;
       }),
     };
-  }, [workOrders, parts, customers, technicians, suppliers, technicianPayouts, priceCatalog]);
+  }, [workOrders, parts, customers, technicians, technicianPayouts, priceCatalog]);
 
   const isExternalAi = Boolean(
     systemSettings.aiProvider

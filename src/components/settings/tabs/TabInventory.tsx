@@ -1,7 +1,6 @@
 import React from 'react';
 import { Button , Input } from '../../ui';
-import {AlertCircle, Boxes, ChevronDown, MapPin, Plus, ShieldCheck, Truck} from 'lucide-react';
-import type { Supplier } from '../../../types';
+import {AlertCircle, Boxes, ChevronDown, MapPin, Plus, ShieldCheck} from 'lucide-react';
 import type { SystemSettings } from '../../../types';
 import type { PartItem } from '../../../types';
 import { confirmDialog } from '../../common/ConfirmDialog';
@@ -10,19 +9,16 @@ interface InventoryTabProps {
   formData: SystemSettings;
   setFormData: React.Dispatch<React.SetStateAction<SystemSettings>>;
   parts: PartItem[];
-  suppliers?: Supplier[];
   inventoryCategories?: string[];
   settings: SystemSettings;
   isSavedBanner: boolean;
   onUpdateInventoryCategories?: (categories: string[]) => void;
-  onUpdateSupplier?: (supplier: Supplier) => void;
-  onDeleteSupplier?: (id: string) => void;
   onUpdatePart?: (part: PartItem) => void;
   onUpdateSettings: (newSettings: SystemSettings) => void;
   setActiveSubTab: (t: any) => void;
   isSectionOpen: (key: string) => boolean;
   toggleSection: (key: string) => void;
-  inventoryDataTab: 'categories' | 'suppliers' | 'tiers' | 'bins' | 'rules';
+  inventoryDataTab: 'categories' | 'tiers' | 'bins' | 'rules';
   setInventoryDataTab: React.Dispatch<React.SetStateAction<any>>;
   categoryDraft: string;
   setCategoryDraft: React.Dispatch<React.SetStateAction<string>>;
@@ -30,10 +26,6 @@ interface InventoryTabProps {
   setEditingCategoryKey: React.Dispatch<React.SetStateAction<string | null>>;
   editingCategoryLabel: string;
   setEditingCategoryLabel: React.Dispatch<React.SetStateAction<string>>;
-  supplierDraft: any;
-  setSupplierDraft: React.Dispatch<React.SetStateAction<any>>;
-  editingInventorySupplier: Supplier | null;
-  setEditingInventorySupplier: React.Dispatch<React.SetStateAction<Supplier | null>>;
   qualityTierDraft: string;
   setQualityTierDraft: React.Dispatch<React.SetStateAction<string>>;
   editingQualityTier: string | null;
@@ -49,7 +41,6 @@ interface InventoryTabProps {
   partsByBin: Map<string, PartItem[]>;
   handleAddInventoryCategory: () => void;
   handleSaveInventoryCategory: (c: string) => void;
-  handleAddInventorySupplier: (e: React.FormEvent) => void;
   handleAddInventoryQualityTier: () => void;
   handleSaveInventoryQualityTier: (t: string) => void;
   handleDeleteInventoryQualityTier: (t: string) => void;
@@ -57,7 +48,7 @@ interface InventoryTabProps {
   handleDeleteInventoryBin: (bin: string) => void;
 }
 
-const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, parts, suppliers, inventoryCategories, onUpdateInventoryCategories, onUpdateSupplier, onDeleteSupplier, inventoryDataTab, setInventoryDataTab, categoryDraft, setCategoryDraft, editingCategoryKey, setEditingCategoryKey, editingCategoryLabel, setEditingCategoryLabel, supplierDraft, setSupplierDraft, editingInventorySupplier, setEditingInventorySupplier, qualityTierDraft, setQualityTierDraft, editingQualityTier, setEditingQualityTier, editingQualityTierLabel, setEditingQualityTierLabel, binDraft, setBinDraft, expandedBinName, setExpandedBinName, inventoryQualityTiers, inventoryBinNames, partsByBin, handleAddInventoryCategory, handleSaveInventoryCategory, handleAddInventorySupplier, handleAddInventoryQualityTier, handleSaveInventoryQualityTier, handleDeleteInventoryQualityTier, handleAddInventoryBin, handleDeleteInventoryBin }) => {
+const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, parts, inventoryCategories, onUpdateInventoryCategories, inventoryDataTab, setInventoryDataTab, categoryDraft, setCategoryDraft, editingCategoryKey, setEditingCategoryKey, editingCategoryLabel, setEditingCategoryLabel, qualityTierDraft, setQualityTierDraft, editingQualityTier, setEditingQualityTier, editingQualityTierLabel, setEditingQualityTierLabel, binDraft, setBinDraft, expandedBinName, setExpandedBinName, inventoryQualityTiers, inventoryBinNames, partsByBin, handleAddInventoryCategory, handleSaveInventoryCategory, handleAddInventoryQualityTier, handleSaveInventoryQualityTier, handleDeleteInventoryQualityTier, handleAddInventoryBin, handleDeleteInventoryBin }) => {
   return (
         <div className="bg-white p-5 rounded-2xl border border-line-strong shadow-2xs space-y-6">
           <div>
@@ -70,7 +61,6 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
           <div className="flex flex-wrap gap-1.5 border-b border-line pb-3">
             {([
               ['categories', 'Categories'],
-              ['suppliers', 'Suppliers'],
               ['tiers', 'Quality Tiers'],
               ['bins', 'Storage Bins'],
               ['rules', 'Stock Rules'],
@@ -139,47 +129,6 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ formData, setFormData, part
                   </Button>
                 </div>
               ))}
-            </div>
-          </section>
-
-          <section className={`${inventoryDataTab === 'suppliers' ? 'space-y-3' : 'hidden'} border-b border-line pb-5`}>
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div>
-                <h4 className="text-xs font-extrabold text-ink">Supplier Name Data</h4>
-                <p className="text-xs text-muted">Supplier records used when registering stock parts and RMA claims.</p>
-              </div>
-              <span className="rounded-full bg-brand/10 px-2 py-0.5 font-mono text-xs font-bold text-brand-deep">{suppliers.length} suppliers</span>
-            </div>
-
-            <form onSubmit={handleAddInventorySupplier} className="grid grid-cols-1 gap-2 rounded-xl border border-line bg-surface p-3 sm:grid-cols-2 lg:grid-cols-5">
-              <Input required value={supplierDraft.name} onChange={(event) => setSupplierDraft({ ...supplierDraft, name: event.target.value })} placeholder="Supplier name" className="h-9 rounded-lg border border-line-strong bg-white px-2.5 text-xs font-semibold outline-none " />
-              <Input required value={supplierDraft.code} onChange={(event) => setSupplierDraft({ ...supplierDraft, code: event.target.value })} placeholder="Code" className="h-9 rounded-lg border border-line-strong bg-white px-2.5 font-mono text-xs outline-none " />
-              <Input value={supplierDraft.phone} onChange={(event) => setSupplierDraft({ ...supplierDraft, phone: event.target.value })} placeholder="Phone" className="h-9 rounded-lg border border-line-strong bg-white px-2.5 text-xs outline-none " />
-              <Input type="number" min="1" value={supplierDraft.avgRmaTurnaroundDays} onChange={(event) => setSupplierDraft({ ...supplierDraft, avgRmaTurnaroundDays: Number(event.target.value) })} placeholder="RMA days" className="h-9 rounded-lg border border-line-strong bg-white px-2.5 text-xs outline-none " />
-              <Button type="submit" className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-brand px-3 text-xs font-extrabold text-white hover:bg-brand-deep"><Plus className="h-3.5 w-3.5" /> Add supplier</Button>
-            </form>
-
-            {editingInventorySupplier && (
-              <form onSubmit={(event) => { event.preventDefault(); onUpdateSupplier?.(editingInventorySupplier); setEditingInventorySupplier(null); }} className="grid grid-cols-1 gap-2 rounded-xl border border-brand/30 bg-brand-soft/60 p-3 sm:grid-cols-2 lg:grid-cols-5">
-                <Input required value={editingInventorySupplier.name} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, name: event.target.value })} className="h-9 rounded-lg border border-brand/30 bg-white px-2.5 text-xs font-semibold outline-none " />
-                <Input required value={editingInventorySupplier.code} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, code: event.target.value })} className="h-9 rounded-lg border border-brand/30 bg-white px-2.5 font-mono text-xs outline-none " />
-                <Input value={editingInventorySupplier.phone} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, phone: event.target.value })} className="h-9 rounded-lg border border-brand/30 bg-white px-2.5 text-xs outline-none " />
-                <Input type="number" min="1" value={editingInventorySupplier.avgRmaTurnaroundDays} onChange={(event) => setEditingInventorySupplier({ ...editingInventorySupplier, avgRmaTurnaroundDays: Number(event.target.value) })} className="h-9 rounded-lg border border-brand/30 bg-white px-2.5 text-xs outline-none " />
-                <div className="flex gap-2"><Button type="submit" className="h-9 flex-1 rounded-lg bg-brand text-xs font-extrabold text-white">Save</Button><Button type="button" onClick={() => setEditingInventorySupplier(null)} className="h-9 rounded-lg border border-line-strong px-3 text-xs font-bold">Cancel</Button></div>
-              </form>
-            )}
-
-            <div className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-white">
-              {suppliers.length ? suppliers.map((supplier) => (
-                <div key={supplier.id} className="flex items-center gap-3 px-3 py-2.5 text-xs">
-                  <Truck className="h-4 w-4 shrink-0 text-brand" />
-                  <span className="min-w-0 flex-1 truncate font-extrabold text-ink">{supplier.name}</span>
-                  <span className="font-mono text-xs text-muted">{supplier.code}</span>
-                  <span className="hidden text-xs text-muted sm:inline">{supplier.avgRmaTurnaroundDays} days</span>
-                  <Button variant="ghost" type="button" onClick={() => setEditingInventorySupplier(supplier)} className="text-xs font-extrabold text-brand">Edit</Button>
-                  <Button variant="ghost" type="button" onClick={async () => { if (await confirmDialog({ title: 'Delete Supplier', message: `Delete supplier “${supplier.name}”?`, confirmLabel: 'Delete Supplier', danger: true })) onDeleteSupplier?.(supplier.id); }} className="text-xs font-extrabold text-danger">Delete</Button>
-                </div>
-              )) : <p className="px-3 py-4 text-center text-xs text-muted">No suppliers yet.</p>}
             </div>
           </section>
 

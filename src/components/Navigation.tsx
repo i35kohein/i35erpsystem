@@ -204,16 +204,6 @@ export const Navigation: React.FC<NavigationProps> = ({
         },
       ],
     },
-    {
-      title: t('navMore'),
-      items: [
-        {
-          id: 'mermaid',
-          label: t('navMermaid'),
-          icon: Tag,
-        },
-      ],
-    },
   ];
 
   // Module visibility (Ko Hein 2026-08-14): hide sidebar entries the shop

@@ -7,7 +7,6 @@ import {
   MoreHorizontal,
   Edit2,
   Trash2,
-  ShieldAlert,
 } from 'lucide-react';
 import { PartItem } from '../../types';
 import { Button, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, Input } from '../ui';
@@ -24,7 +23,6 @@ export interface PartDetailsModalProps {
   currency: string;
   onUpdatePartStock: (partId: string, newStock: number) => void;
   onEdit: (part: PartItem) => void;
-  onWarranty: (part: PartItem) => void;
   onDelete: (partId: string) => void;
   onClose: () => void;
 }
@@ -34,7 +32,6 @@ export const PartDetailsModal: React.FC<PartDetailsModalProps> = ({
   currency,
   onUpdatePartStock,
   onEdit,
-  onWarranty,
   onDelete,
   onClose,
 }) => {
@@ -81,13 +78,7 @@ export const PartDetailsModal: React.FC<PartDetailsModalProps> = ({
           </div>
         </div>
 
-        <div className="rounded-xl border border-line bg-surface p-3">
-          <p className="text-xs font-bold uppercase tracking-wide text-muted">Supplier</p>
-          <p className="mt-1 font-semibold text-ink">{part.supplierName || 'No supplier assigned'}</p>
-        </div>
-
         <div className="flex items-center justify-end gap-2 border-t border-line pt-3">
-          <Button variant="ghost" type="button" onClick={() => { onWarranty(part); }} className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-warning/30 bg-warning/10 px-2.5 font-extrabold text-warning hover:bg-warning/15"><ShieldAlert className="h-3.5 w-3.5" /> Warranty</Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button type="button" variant="iconGhost" size="icon" aria-label="Part actions" className="border border-line">

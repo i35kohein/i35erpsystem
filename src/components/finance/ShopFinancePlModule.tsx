@@ -22,7 +22,6 @@ import {
   WorkOrder, 
   PartItem, 
   Technician, 
-  Supplier, 
   ExpenseItem, 
   SupplierDebtRecord, 
   TechnicianPayoutRecord, 
@@ -38,7 +37,8 @@ interface ShopFinancePlModuleProps {
   workOrders: WorkOrder[];
   parts: PartItem[];
   technicians: Technician[];
-  suppliers: Supplier[];
+  suppliers?: never;
+
   expenses: ExpenseItem[];
   supplierDebts: SupplierDebtRecord[];
   technicianPayouts: TechnicianPayoutRecord[];

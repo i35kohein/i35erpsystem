@@ -21,7 +21,7 @@ import {Coins,
   Search,
   RefreshCw,
   X} from 'lucide-react';
-import { WorkOrder, PartItem, RmaItem, Technician, WorkOrderStatus } from '../../types';
+import { WorkOrder, PartItem, Technician, WorkOrderStatus } from '../../types';
 import { Button , Input } from '../ui';
 import { toast } from '../../lib/toast';
 import { confirmDialog } from '../common/ConfirmDialog';
@@ -37,7 +37,6 @@ import { computeTechStats, getDurationHours } from '../../utils/techAnalytics';
 interface DashboardOverviewProps {
   workOrders: WorkOrder[];
   parts: PartItem[];
-  rmas: RmaItem[];
   technicians: Technician[];
   onNavigateToTab: (tab: string) => void;
   onSelectPrintTag?: (wo: WorkOrder) => void;
@@ -172,7 +171,6 @@ function KpiCard({
 export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOverviewProps>(({
   workOrders,
   parts,
-  rmas,
   technicians,
   onNavigateToTab,
   currencySymbol,
@@ -389,9 +387,7 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
   // collected — counting them inflated the card.
   const readyForPickup = filteredWorkOrders.filter((w) => w.status === 'Finished');
 
-  const pendingRmas = rmas.filter((r) => r.status === 'Shipped to Vendor' || r.status === 'Draft');
-
-    // Technician load imbalance — drives the amber suggestion banner (single source: computeTechStats)
+  // Technician load imbalance — drives the amber suggestion banner (single source: computeTechStats)
   const techLoadData = useMemo(() => {
     return technicians.map((tech) => {
       const stats = computeTechStats(filteredWorkOrders, tech);
@@ -1047,12 +1043,6 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
               )}
 
               <div className="pt-4 border-t border-line space-y-2 text-xs">
-                {!LITE_MODE && (
-                <div className="flex items-center justify-between">
-                  <span className="text-muted">Pending RMAs</span>
-                  <span className="font-bold text-ink">{pendingRmas.length}</span>
-                </div>
-                )}
                 <div className="flex items-center justify-between">
                   <span className="text-muted">Expiring soon</span>
                   <span className="font-bold text-warning">{expiringSoonWorkOrders.length}</span>
@@ -1238,11 +1228,11 @@ export const DashboardOverview = forwardRef<DashboardOverviewHandle, DashboardOv
             </div>
 
             <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-1">
-              <span className="text-xs font-bold text-muted uppercase">Pending Vendor RMAs</span>
+              <span className="text-xs font-bold text-muted uppercase">Warranty Watch</span>
               <div className="p-3 bg-surface rounded-2xl">
-                <p className="text-xl font-extrabold text-purple">{pendingRmas.length} Defective Returns</p>
+                <p className="text-xl font-extrabold text-brand">{activeWarrantyCount}</p>
               </div>
-              <p className="text-xs text-purple font-semibold">Awaiting supplier credits</p>
+              <p className="text-xs text-brand font-semibold">Active warranties</p>
             </div>
           </div>
 

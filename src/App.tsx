@@ -66,8 +66,6 @@ import { DEFAULT_SYSTEM_SETTINGS, INITIAL_USERS } from './data/seedData';
 import { 
   WorkOrder, 
   PartItem, 
-  Supplier, 
-  RmaItem, 
   PurchaseOrder, 
   Customer, 
   Technician, 
@@ -106,7 +104,6 @@ const QualityAssuranceModule = lazyWithRetry(() => import('./components/qa/Quali
 const PriceCatalogModule = lazyWithRetry(() => import('./components/prices/PriceCatalogModule').then((m) => ({ default: m.PriceCatalogModule })), 'PriceCatalogModule');
 const SystemManagementSettingsModule = lazyWithRetry(() => import('./components/settings/SystemManagementSettingsModule').then((m) => ({ default: m.SystemManagementSettingsModule })), 'SystemManagementSettingsModule');
 const CustomerFacingWebPortal = lazyWithRetry(() => import('./components/portal/CustomerFacingWebPortal').then((m) => ({ default: m.CustomerFacingWebPortal })), 'CustomerFacingWebPortal');
-const MermaidModule = lazyWithRetry(() => import('./components/mermaid/MermaidModule').then((m) => ({ default: m.MermaidModule })), 'MermaidModule');
 
 // Modal / tab modules below are also code-split (lazyWithRetry) so their chunks
 // only download when actually opened (AI chat, tag printing, recycle bin,
@@ -234,7 +231,7 @@ export default function App() {
     // Restore tab from URL hash (#/pipeline) so deep links & reloads land correctly
     if (typeof window !== 'undefined') {
       const h = window.location.hash.replace(/^#\/?/, '');
-      if (h && ['dashboard','intake','simple-ticket','trello','qa','follow-up','price-catalog','pos','finance','inventory','crm','settings','create-ticket','mermaid'].includes(h)) return h;
+      if (h && ['dashboard','intake','simple-ticket','trello','qa','follow-up','price-catalog','pos','finance','inventory','crm','settings','create-ticket'].includes(h)) return h;
     }
     return 'dashboard';
   });
@@ -353,8 +350,6 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState<AppUser>(INITIAL_USERS[0]);
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
   const [parts, setParts] = useState<PartItem[]>([]);
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-  const [rmas, setRmas] = useState<RmaItem[]>([]);
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [technicians, setTechnicians] = useState<Technician[]>([]);
@@ -472,14 +467,6 @@ export default function App() {
       setParts(normalized);
     }, []);
 
-    const unsubSuppliers = LITE_MODE ? () => {} : subscribeToCollection<Supplier>('suppliers', (data) => {
-      setSuppliers(data);
-    }, []);
-
-    const unsubRmas = LITE_MODE ? () => {} : subscribeToCollection<RmaItem>('rmas', (data) => {
-      setRmas(data);
-    }, []);
-
     const unsubPos = LITE_MODE ? () => {} : subscribeToCollection<PurchaseOrder>('purchaseOrders', (data) => {
       setPurchaseOrders(data);
     }, []);
@@ -518,8 +505,6 @@ export default function App() {
     return () => {
       unsubWo();
       unsubParts();
-      unsubSuppliers();
-      unsubRmas();
       unsubPos();
       unsubCust();
       unsubTech();
@@ -1614,34 +1599,6 @@ export default function App() {
     );
   };
 
-  const handleAddRma = (rma: RmaItem) => {
-    setRmas((prev) => [rma, ...prev]);
-    saveDocument('rmas', rma).catch(reportSaveError);
-  };
-
-  const handleAddSupplier = (supplier: Supplier) => {
-    setSuppliers((prev) => [...prev, supplier]);
-    saveDocument('suppliers', supplier).catch(reportSaveError);
-  };
-
-  // --- Purchase Orders (feature wiring: create + receive → restock) ---
-  const handleUpdateSupplier = (supplier: Supplier) => {
-    setSuppliers((prev) => prev.map((s) => (s.id === supplier.id ? supplier : s)));
-    saveDocument('suppliers', supplier).catch(reportSaveError);
-    addToast(`Supplier "${supplier.name}" updated successfully`, 'success', 'Supplier Updated');
-  };
-
-  const handleDeleteSupplier = (supplierId: string) => {
-    if (currentUser.role !== 'Admin') {
-      addToast('🔒 Access Denied: Only Admin accounts can delete suppliers.', 'error', 'Permission Required');
-      return;
-    }
-    const sup = suppliers.find((s) => s.id === supplierId);
-    setSuppliers((prev) => prev.filter((s) => s.id !== supplierId));
-    deleteDocument('suppliers', supplierId).catch(reportSaveError);
-    addToast(`Supplier "${sup ? sup.name : supplierId}" deleted from system`, 'info', 'Supplier Deleted');
-  };
-
   const handleMarkPaid = (workOrder: WorkOrder, paymentMethod: string, completedAtIso?: string) => {
     // Synchronous idempotency guard (audit B/D P2): a same-tick double call
     // (or a parallel call from another surface) must not consume stock twice,
@@ -1926,7 +1883,6 @@ export default function App() {
       case 'follow-up': return { category: t('navRepair'), title: 'Follow-Ups' };
       case 'settings': return { category: t('navSettings'), title: t('navSettings') };
       case 'qa': return { category: t('navRepair'), title: t('navQa') };
-      case 'mermaid': return { category: t('navMore'), title: t('navMermaid') };
       default: return { category: 'ERP', title: t('appTitle') };
     }
   };
@@ -2553,7 +2509,6 @@ export default function App() {
                   onSubTabChange={(tab) => setDashboardSubTab(tab)}
                   workOrders={activeWorkOrders}
                   parts={parts}
-                  rmas={rmas}
                   technicians={technicians}
                   onNavigateToTab={setActiveTab}
                   dateFilter={dateFilter}
@@ -2655,7 +2610,6 @@ export default function App() {
               {activeTab === 'inventory' && (
                 <InventoryManagementModule
                   parts={parts}
-                  suppliers={suppliers}
                   systemSettings={systemSettings}
                   deviceModels={inventoryDeviceModels}
                   priceCatalog={priceCatalog.catalog}
@@ -2663,10 +2617,6 @@ export default function App() {
                   onAddPart={handleAddPart}
                   onUpdatePart={handleUpdatePart}
                   onDeletePart={handleDeletePart}
-                  onAddRma={handleAddRma}
-                  onAddSupplier={handleAddSupplier}
-                  onUpdateSupplier={handleUpdateSupplier}
-                  onDeleteSupplier={handleDeleteSupplier}
                   onUpdatePartStock={handleUpdatePartStock}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
@@ -2766,7 +2716,6 @@ export default function App() {
                   workOrders={activeWorkOrders}
                   parts={parts}
                   technicians={technicians}
-                  suppliers={suppliers}
                   expenses={expenses}
                   supplierDebts={supplierDebts}
                   technicianPayouts={technicianPayouts}
@@ -2795,10 +2744,6 @@ export default function App() {
                   customerTypeFilter={customerTypeFilter}
                   setCustomerTypeFilter={setCustomerTypeFilter}
                 />
-              )}
-
-              {activeTab === 'mermaid' && (
-                <MermaidModule />
               )}
 
               {activeTab === 'portal' && (
@@ -2842,10 +2787,6 @@ export default function App() {
                   inventoryCategories={inventoryCategories}
                   onUpdateInventoryCategories={(inventoryCategories) => handleUpdateSettings({ ...systemSettings, inventoryCategories })}
                   parts={parts}
-                  suppliers={suppliers}
-                  onAddSupplier={handleAddSupplier}
-                  onUpdateSupplier={handleUpdateSupplier}
-                  onDeleteSupplier={handleDeleteSupplier}
                   onUpdatePart={handleUpdatePart}
                   onOpenRecycleBin={() => setIsRecycleBinOpen(true)}
                   archivedCount={archivedWorkOrders.length}
@@ -2929,7 +2870,6 @@ export default function App() {
             parts={parts}
             customers={rosterCustomers}
             technicians={technicians}
-            suppliers={suppliers}
             technicianPayouts={technicianPayouts}
             priceCatalog={priceCatalog.catalog}
             systemSettings={systemSettings}
