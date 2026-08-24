@@ -322,17 +322,19 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                     {voucherHeaderText}
                   </p>
                 )}
-                {/* Separated Store Address, Website, and Phone Lines */}
-                <div className="space-y-0.5 text-xs text-muted font-medium pt-0.5">
+                {/* Separated Store Address, Website, and Phone Lines — compact
+                    small type so the long Myanmar address wraps neatly (Ko Hein
+                    2026-08-25: 'အောက်လိုင်းဆင်းလိုက် အရှည်ကြီးမလုပ်နဲ့ Font size သေး') */}
+                <div className="a4-shop-info-lines space-y-0.5 text-[10px] text-muted font-medium pt-1">
                   {shopAddress && (
-                    <p className="flex items-center space-x-1">
-                      <MapPin className="w-3 h-3 text-muted shrink-0" />
+                    <p className="flex items-start space-x-1 leading-snug">
+                      <MapPin className="w-2.5 h-2.5 text-muted shrink-0 mt-[1px]" />
                       <span>{shopAddress}</span>
                     </p>
                   )}
                   {shopWebsite && (
                     <p className="flex items-center space-x-1">
-                      <Globe className="w-3 h-3 text-muted shrink-0" />
+                      <Globe className="w-2.5 h-2.5 text-muted shrink-0" />
                       {/* Same font as the address line (was font-mono, which
                           rendered visually smaller — Ko Hein 2026-08-25) */}
                       <span>{shopWebsite}</span>
@@ -340,8 +342,8 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                   )}
                   {shopPhoneStr && (
                     <p className="flex items-center space-x-1">
-                      <Phone className="w-3 h-3 text-muted shrink-0" />
-                      <span>Phone: <strong className="text-black font-semibold font-mono">{shopPhoneStr}</strong></span>
+                      <Phone className="w-2.5 h-2.5 text-muted shrink-0" />
+                      <span>Phone: <strong className="text-black font-semibold">{shopPhoneStr}</strong></span>
                     </p>
                   )}
                 </div>
@@ -349,19 +351,19 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
-            <div className="text-left sm:text-right font-mono space-y-0.5 tabular-nums">
+          <div className="flex items-center space-x-3 shrink-0">
+            <div className="text-left sm:text-right font-mono space-y-1 tabular-nums text-[11px]">
               <p className={`text-xs font-black ${isMono ? 'text-black' : 'text-brand'}`}>
                 Voucher #: {workOrder.orderNumber}
               </p>
-              <p className="text-xs text-muted">Date: {formatPrintDate(workOrder.createdAt)}</p>
+              <p className="text-muted">Date: {formatPrintDate(workOrder.createdAt)}</p>
               {workOrder.estimatedCompletion && (
-                <p className="text-xs text-muted">
+                <p className="text-muted">
                   Est. Return: {formatPrintDate(workOrder.estimatedCompletion)}
                 </p>
               )}
               {isPaidWo && (
-                <p className="text-xs font-bold text-muted">
+                <p className="font-bold text-muted">
                   Taken Out: {formatPrintDate(workOrder.updatedAt || Date.now())}
                 </p>
               )}
@@ -846,6 +848,16 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
           .a4-print-compact h3 { font-size: 13px !important; }
           .a4-print-compact .a4-info-card p { font-size: 12px !important; }
           .a4-print-compact .print-shop-logo { border: none !important; }
+          /* Shop info lines (address/website/phone) — intentionally small so the
+             long Myanmar address wraps compactly (Ko Hein 2026-08-25) */
+          .a4-voucher-print .a4-shop-info-lines {
+            font-size: 10px !important;
+            line-height: 1.3 !important;
+          }
+          .a4-voucher-print .a4-shop-info-lines svg {
+            width: 10px !important;
+            height: 10px !important;
+          }
           /* Simple Checks diagnostic format — compact circle rows (Ko Hein 2026-08-25) */
           .a4-voucher-print .a4-simple-checks {
             font-size: 12px !important;
