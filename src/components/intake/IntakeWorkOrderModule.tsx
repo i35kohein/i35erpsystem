@@ -817,7 +817,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
 
         {/* Full list footer — always visible with full count (like Inventory) */}
         {filteredOrders.length > 0 && (
-          <div className="p-3.5 bg-white border-t border-line flex items-center justify-between text-xs text-muted shrink-0">
+          <div className="p-3.5 bg-surface/70 border-t-2 border-line flex items-center justify-between text-xs text-muted shrink-0">
             <span className="font-bold">
               Showing all <strong className="text-ink">{filteredOrders.length}</strong> tickets
             </span>
