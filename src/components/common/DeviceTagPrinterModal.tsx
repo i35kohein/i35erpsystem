@@ -329,7 +329,9 @@ export const DeviceTagPrinterModal: React.FC<DeviceTagPrinterModalProps> = ({
                   {shopWebsite && (
                     <p className="flex items-center space-x-1">
                       <Globe className="w-3 h-3 text-muted shrink-0" />
-                      <span className="font-mono">{shopWebsite}</span>
+                      {/* Same font as the address line (was font-mono, which
+                          rendered visually smaller — Ko Hein 2026-08-25) */}
+                      <span>{shopWebsite}</span>
                     </p>
                   )}
                   {shopPhoneStr && (
