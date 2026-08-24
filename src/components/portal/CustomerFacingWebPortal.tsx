@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {CircleDot, 
   Search, 
   CheckCircle2, 
@@ -189,6 +189,17 @@ export const CustomerFacingWebPortal: React.FC<CustomerFacingWebPortalProps> = (
       setLoginError('No repair ticket matched that identifier. Please check the identifier printed on your voucher receipt.');
     }
   };
+
+  // Auto-login when opened via the voucher QR "Check Status" link
+  // (?ticket=WO-...) — wait until workOrders have loaded (Ko Hein 2026-08-25).
+  const initialAutoLoginDoneRef = useRef(false);
+  useEffect(() => {
+    if (!initialIdentifier || initialAutoLoginDoneRef.current) return;
+    if (!workOrders || workOrders.length === 0) return; // data not loaded yet
+    initialAutoLoginDoneRef.current = true;
+    handleLogin(undefined, initialIdentifier);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialIdentifier, workOrders]);
 
   // audit C-P2: re-read the freshest copy of the work order at write time.
   // The portal previously saved the rendered snapshot, which clobbered

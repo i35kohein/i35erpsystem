@@ -236,6 +236,14 @@ export default function App() {
     return 'dashboard';
   });
   const [searchQuery, setSearchQuery] = useState<string>('');
+  // Voucher QR 'Check Status' link (?ticket=WO-...) → open the customer
+  // portal for that ticket (Ko Hein 2026-08-25: QR is meant for customers).
+  const ticketParam = typeof window !== 'undefined'
+    ? new URLSearchParams(window.location.search).get('ticket')
+    : null;
+  useEffect(() => {
+    if (ticketParam) setActiveTab('portal');
+  }, [ticketParam]);
   
   // Dynamic Header Top Bar Filter States
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
@@ -2753,6 +2761,7 @@ export default function App() {
                   systemSettings={systemSettings}
                   onUpdateWorkOrder={handleSaveWorkOrder}
                   onExitPortalMode={() => setActiveTab('dashboard')}
+                  initialIdentifier={ticketParam || undefined}
                 />
               )}
 
