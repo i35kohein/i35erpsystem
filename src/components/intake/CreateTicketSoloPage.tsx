@@ -414,11 +414,6 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
     if (!deviceModel.trim()) errs['intake-device'] = 'Select a device model to continue.';
     if (!deviceColor.trim()) errs['field-color'] = 'Select a device color to continue.';
     if (imei.trim() && imei.trim().length !== 15) errs['field-imei'] = 'IMEI must be exactly 15 digits.';
-    // Settings-driven gates (Ko Hein 2026-08-11): requirePasscodeIntake now
-    // actually enforces the intake form (Find My gate removed 2026-08-24).
-    if (systemSettings?.requirePasscodeIntake && !passcode.trim()) {
-      errs['field-passcode'] = 'Device passcode is required (Settings > Intake).';
-    }
     setFieldErrors(errs);
     if (Object.keys(errs).length > 0) {
       const firstKey = Object.keys(errs)[0];

@@ -355,7 +355,6 @@ export interface SystemSettings {
   ticketPrefix: string;
   defaultWarrantyDays: number;
   defaultTechnicianId: string;
-  requirePasscodeIntake: boolean;
 
   // Pricing & Finance
   currencySymbol: string;

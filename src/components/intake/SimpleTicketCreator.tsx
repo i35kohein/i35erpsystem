@@ -310,12 +310,6 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
       setIsColorOpen(true);
       return;
     }
-    // Settings-driven gates (Ko Hein 2026-08-11): requirePasscodeIntake now
-    // actually enforces the simple intake form.
-    if (systemSettings?.requirePasscodeIntake && !form.passcode.trim()) {
-      toast('Device passcode is required (Settings > Intake).', 'error', 'Passcode Required');
-      return;
-    }
     submittingRef.current = true;
     setIsSubmitting(true);
     try {

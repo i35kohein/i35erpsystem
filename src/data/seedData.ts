@@ -223,7 +223,6 @@ export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
   ticketPrefix: 'WO-',
   defaultWarrantyDays: 90,
   defaultTechnicianId: 'tech-1',
-  requirePasscodeIntake: true,
 
   currencySymbol: 'MMK',
   taxPercentage: 5,

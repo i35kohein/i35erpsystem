@@ -55,21 +55,6 @@ const IntakeTab: React.FC<IntakeTabProps> = ({ formData, setFormData }) => {
               </select>
             </div>
 
-            {/* Checkbox Toggles */}
-            <div className="md:col-span-2 space-y-3 pt-3 border-t border-line">
-              <label className="flex items-center space-x-3 cursor-pointer p-3 bg-surface rounded-xl border border-line hover:border-brand transition-all">
-                <Input
-                  type="checkbox"
-                  checked={formData.requirePasscodeIntake}
-                  onChange={(e) => setFormData({ ...formData, requirePasscodeIntake: e.target.checked })}
-                  className="w-4 h-4 text-brand rounded cursor-pointer"
-                />
-                <div>
-                  <span className="font-extrabold text-ink text-xs block">Require Device Passcode / PIN at Intake</span>
-                  <span className="text-xs text-muted">Prompt technicians to record screen passcodes for post-repair diagnostic testing.</span>
-                </div>
-              </label>
-            </div>
           </div>
         </div>
   );
