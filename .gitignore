@@ -17,3 +17,4 @@ error-log.jsonl
 # Server-side audit trail (military-grade security, never commit)
 audit-log.jsonl
 ai-chat-history.json
+dist-lite/

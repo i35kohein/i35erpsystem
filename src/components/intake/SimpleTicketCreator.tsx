@@ -1213,7 +1213,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
                 {/* Anchored discount popup (price-list style) */}
                 {discountMenuFor && discountAnchor && (
                   <div
-                    className="discount-popup fixed z-[80] w-44 rounded-2xl border border-line bg-white p-2 shadow-xl relative"
+                    className="discount-popup fixed z-[80] w-44 rounded-2xl border border-line bg-white p-2 shadow-xl"
                     style={{ top: discountAnchor.top, left: discountAnchor.left }}
                     onClick={(e) => e.stopPropagation()}
                   >
