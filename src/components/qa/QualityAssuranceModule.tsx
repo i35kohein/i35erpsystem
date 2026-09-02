@@ -16,6 +16,7 @@ import { CustomDropdownMenu } from '../common/CustomDropdownMenu';
 import { compressImageFile } from '../../lib/utils';
 import { confirmDialog } from '../common/ConfirmDialog';
 import { PriorityBadge } from '../common/PriorityBadge';
+import { get21Diagnostics } from '../../utils/diagnosticUtils';
 
 interface QualityAssuranceModuleProps {
   workOrders: WorkOrder[];
@@ -169,6 +170,12 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
       qaTechnicianId: inspectorOptions[0]?.value || 'tech-1',
       notes: '',
     }
+  );
+
+  // Before-repair diagnostics (from intake, read-only in QA)
+  const beforeDiagnosticsList = useMemo(() =>
+    selectedWo ? get21Diagnostics(selectedWo.beforeDiagnostics, selectedWo.symptomsReported, selectedWo.intakeChecklist) : [],
+    [selectedWo]
   );
 
   // 21-Point Post-Repair Diagnostic Checklist State
@@ -760,11 +767,12 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                 )}
               </div>
 
-              {/* 21-Point checklist — PHONE TESTING & CHECKING style (Ko Hein) */}
+              {/* 21-Point checklist — Before (intake) + After (QA) columns */}
               <div>
                 <div className="flex items-center justify-between border-b border-line pb-2">
                   <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted">Post-Repair Inspection</span>
                   <div className="flex items-center gap-2">
+                    <span className="rounded-md border border-line bg-surface px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-muted">Before · After</span>
                     <span className="shrink-0 font-mono text-[11px] font-black text-brand">
                       {qaDiagnostics.filter((d) => d.status !== 'N/A').length}/{qaDiagnostics.length || 21}
                     </span>
@@ -789,14 +797,33 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                     const isPass = item.status === 'Pass';
                     const isFail = item.status === 'Fail';
                     const isCantTest = item.status === 'Cant Test';
+                    // Before-repair diagnostic for this row (from intake, read-only)
+                    const beforeItem = beforeDiagnosticsList[idx];
+                    const beforeStatus = beforeItem ? beforeItem.status : 'N/A';
+                    const beforeIsPass = beforeStatus === 'Pass';
+                    const beforeIsFail = beforeStatus === 'Fail';
                     return (
-                      <div key={item.id} className="flex min-h-6 items-center gap-1.5 border-b border-line/50 py-1">
+                      <div key={item.id} className="flex min-h-6 items-center gap-1 border-b border-line/50 py-1">
+                        {/* Before status dot (read-only, from intake) */}
+                        <span
+                          title={`Before (intake): ${beforeStatus}`}
+                          className={`flex !h-4 !w-4 !min-h-4 !min-w-4 shrink-0 items-center justify-center rounded-full border text-[8px] font-black leading-none ${
+                            beforeIsPass
+                              ? 'border-success bg-success/60 text-white'
+                              : beforeIsFail
+                              ? 'border-danger bg-danger/60 text-white'
+                              : 'border-line bg-white text-muted'
+                          }`}
+                        >
+                          {beforeIsPass ? '✓' : beforeIsFail ? '✕' : ''}
+                        </span>
+                        {/* After status dot (clickable, QA) */}
                         <Button
                           type="button"
                           onClick={() => cycleStatus(item.id, item.status)}
                           title={isPass ? 'Pass — tap for Fail' : isFail ? 'Fail — tap for N/A' : isCantTest ? 'Cant Test — tap for N/A' : 'Not checked — tap for Pass'}
                           aria-label={`Change status for ${item.name}`}
-                          className={`flex !h-6 !w-6 !min-h-6 !min-w-6 shrink-0 items-center justify-center rounded-full border transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-brand/40 ${
+                          className={`flex !h-5 !w-5 !min-h-5 !min-w-5 shrink-0 items-center justify-center rounded-full border transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-brand/40 ${
                             isPass
                               ? 'border-success bg-success text-white'
                               : isFail
@@ -806,7 +833,7 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
                               : 'border-line bg-white text-muted hover:border-brand'
                           }`}
                         >
-                          {isPass ? <Check className="w-2.5 h-2.5" /> : isFail ? <X className="w-2.5 h-2.5" /> : isCantTest ? <Minus className="w-2.5 h-2.5" /> : null}
+                          {isPass ? <Check className="w-2 h-2" /> : isFail ? <X className="w-2 h-2" /> : isCantTest ? <Minus className="w-2 h-2" /> : null}
                         </Button>
                         <button
                           type="button"
