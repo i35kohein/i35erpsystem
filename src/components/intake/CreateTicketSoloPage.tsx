@@ -53,7 +53,7 @@ import {
   SelectedRepairItem,
   SystemSettings
 } from '../../types';
-import { ModelRepairPrice } from '../../types/priceCatalog';
+import { ModelRepairPrice, RepairCategoryDef } from '../../types/priceCatalog';
 import { Button, Input } from '../ui';
 import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
 import {
@@ -84,6 +84,7 @@ interface CreateTicketSoloPageProps {
   technicians: Technician[];
   systemSettings?: SystemSettings;
   priceCatalog?: ModelRepairPrice[];
+  priceCategories?: RepairCategoryDef[];
   prefill?: TicketPrefillData | null;
   onSaveWorkOrder: (wo: WorkOrder) => void;
   onSelectPrintTag: (wo: WorkOrder) => void;
@@ -129,6 +130,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
   technicians,
   systemSettings,
   priceCatalog,
+  priceCategories,
   prefill,
   onSaveWorkOrder,
   onSelectPrintTag,
@@ -279,7 +281,7 @@ export const CreateTicketSoloPage: React.FC<CreateTicketSoloPageProps> = ({
   const [selectedGroupFilter, setSelectedGroupFilter] = useState('ALL');
 
   // Dynamic Price Catalog lookup for current selected device model
-  const catalogItemsForModel = getModelPriceCatalogItems(deviceModel, priceCatalog);
+  const catalogItemsForModel = getModelPriceCatalogItems(deviceModel, priceCatalog, priceCategories);
   const matchedModelName = catalogItemsForModel.length > 0 ? catalogItemsForModel[0].modelMatchedName : deviceModel;
 
   const toggleCatalogRepair = (item: ModelRepairCatalogItem) => {

@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { WorkOrder, Customer, SystemSettings, PartItem, WorkOrderLineItem, Technician, SelectedRepairItem } from '../../types';
 import { ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
-import { ModelRepairPrice } from '../../types/priceCatalog';
+import { ModelRepairPrice, RepairCategoryDef } from '../../types/priceCatalog';
 import { PriorityBadge } from '../common/PriorityBadge';
 import { Button, Input } from '../ui';
 import { getActivePaymentMethods } from '../../data/seedData';
@@ -37,6 +37,7 @@ interface PosInvoicingModuleProps {
   onOpenPrintTag?: (wo: WorkOrder) => void;
   onSaveWorkOrder?: (wo: WorkOrder) => void;
   priceCatalog?: ModelRepairPrice[];
+  priceCategories?: RepairCategoryDef[];
   searchQuery?: string;
   setSearchQuery?: (q: string) => void;
   dateFilter?: DateFilterState;
@@ -54,6 +55,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
   onOpenPrintTag,
   onSaveWorkOrder,
   priceCatalog,
+  priceCategories,
   searchQuery = '',
   setSearchQuery: propSetSearchQuery = () => {},
   dateFilter: propDateFilter,
@@ -1332,6 +1334,7 @@ export const PosInvoicingModule: React.FC<PosInvoicingModuleProps> = ({
         isOpen={isAddRepairFromPriceListOpen}
         workOrder={selectedWo}
         priceCatalog={priceCatalog}
+        priceCategories={priceCategories}
         selection={posCatalogSelection}
         onSelectionChange={setPosCatalogSelection}
         discounts={posCatalogDiscounts}

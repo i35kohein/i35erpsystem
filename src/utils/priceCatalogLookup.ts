@@ -14,10 +14,16 @@ export interface ModelRepairCatalogItem {
 
 /**
  * Looks up repair prices from the Price Catalog for a specific device model.
+ *
+ * @param customCategories - Live categories from Supabase (e.g. priceCatalog.categories).
+ *   When provided, uses these instead of the hardcoded REPAIR_CATEGORIES so
+ *   new categories added in Settings → Price Catalog appear in Add Repairs too.
+ *   Falls back to REPAIR_CATEGORIES when omitted for backward compatibility.
  */
 export function getModelPriceCatalogItems(
   deviceModel: string,
-  customCatalog?: ModelRepairPrice[]
+  customCatalog?: ModelRepairPrice[],
+  customCategories?: RepairCategoryDef[]
 ): ModelRepairCatalogItem[] {
   const catalogToSearch = customCatalog && customCatalog.length > 0 ? customCatalog : INITIAL_REPAIR_PRICE_DATA;
   const targetModel = (deviceModel || 'iPhone 15 Pro Max').trim();
@@ -67,7 +73,12 @@ export function getModelPriceCatalogItems(
   // Build catalog items array
   const items: ModelRepairCatalogItem[] = [];
 
-  REPAIR_CATEGORIES.forEach((cat) => {
+  // Use live Supabase categories when available (fix: new Price Catalog categories
+  // now appear in Add Repairs). Fall back to hardcoded REPAIR_CATEGORIES for
+  // backward compat with older callers that don't pass categories.
+  const categoriesToUse = (customCategories && customCategories.length > 0) ? customCategories : REPAIR_CATEGORIES;
+
+  categoriesToUse.forEach((cat) => {
     const catalogPrice = matched?.prices?.[cat.key];
     const catalogWarranty = matched?.warranties?.[cat.key] || '3 Month Warranty';
 
@@ -87,7 +98,8 @@ export function getModelPriceCatalogItems(
       // Model-specific service: only show when the selected device model has a
       // real catalog price (e.g. iPhone 13 Pro / 13 Pro Max). No fallback price.
     } else {
-      // Provide tier-adjusted baseline fallback price so UI is complete
+      // Provide tier-adjusted baseline fallback price so UI is complete.
+      // Unknown / newly-added categories get the default fallback (e.g. 100K MMK).
       const fallbackPrice = getFallbackPriceForCategory(cat.key, lowerTarget);
       items.push({
         id: `price-${cat.key}-${modelMatchedName}`,

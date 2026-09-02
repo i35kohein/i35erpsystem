@@ -2,7 +2,7 @@ import React, { useState, useMemo, useRef, useEffect, lazy, Suspense } from 'rea
 import { ChevronDown, Search, BadgePercent, ShieldCheck, Camera, X, Sparkles, CheckCircle2, Printer, List } from 'lucide-react';
 import { WorkOrder, DiagnosticItemResult, AppleDeviceCategory, SelectedRepairItem, SystemSettings, CustomerType, RepairPriority, Technician } from '../../types';
 import { toast } from '../../lib/toast';
-import { ModelRepairPrice } from '../../types/priceCatalog';
+import { ModelRepairPrice, RepairCategoryDef } from '../../types/priceCatalog';
 import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
 import { DIAGNOSTIC_NAMES, WARRANTY_OPTIONS, getAvailableColorsForModel, getRealisticColorStyle } from './deviceData';
 import { nextOrderNumber as nextOrderNumberFrom, uniqueId } from '../../utils/orderNumbers';
@@ -18,6 +18,7 @@ interface SimpleTicketCreatorProps {
   customers?: Array<{ id: string; name: string; phone: string; type?: string }>;
   technicians?: Technician[];
   priceCatalog?: ModelRepairPrice[];
+  priceCategories?: RepairCategoryDef[];  // live categories from Supabase (fix: new cat show up)
   systemSettings?: SystemSettings;
   onSaveWorkOrder: (wo: WorkOrder) => void;
   /** Open the Sticker Tag Voucher printer (same as New Intake Ticket) */
@@ -77,6 +78,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   customers = [],
   technicians = [],
   priceCatalog = [],
+  priceCategories,
   systemSettings,
   onSaveWorkOrder,
   onSelectPrintTag,
@@ -111,7 +113,7 @@ const SimpleTicketCreator: React.FC<SimpleTicketCreatorProps> = ({
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
 
-  const catalogItemsForModel = getModelPriceCatalogItems(form.model, priceCatalog);
+  const catalogItemsForModel = getModelPriceCatalogItems(form.model, priceCatalog, priceCategories);
   // Single filter pass for the repair list (audit area-B): avoids running the
   // predicate twice per render and keeps the empty-state check in sync.
   const visibleRepairItems = useMemo(

@@ -10,7 +10,7 @@ import {
   BadgePercent,
 } from 'lucide-react';
 import { WorkOrder, PartItem, SystemSettings } from '../../types';
-import { ModelRepairPrice } from '../../types/priceCatalog';
+import { ModelRepairPrice, RepairCategoryDef } from '../../types/priceCatalog';
 import { getModelPriceCatalogItems, ModelRepairCatalogItem } from '../../utils/priceCatalogLookup';
 import { Button, Input } from '../ui';
 import { DISCOUNT_OPTIONS, shortWarranty } from './posUtils';
@@ -642,6 +642,7 @@ export interface PosPriceListPickerProps {
   isOpen: boolean;
   workOrder: WorkOrder | null;
   priceCatalog: ModelRepairPrice[];
+  priceCategories?: RepairCategoryDef[];
   selection: string[];
   onSelectionChange: (sel: string[]) => void;
   discounts: Record<string, number>;
@@ -665,6 +666,7 @@ export const PosPriceListPickerModal: React.FC<PosPriceListPickerProps> = ({
   isOpen,
   workOrder: selectedWo,
   priceCatalog,
+  priceCategories,
   selection,
   onSelectionChange,
   discounts,
@@ -684,7 +686,7 @@ export const PosPriceListPickerModal: React.FC<PosPriceListPickerProps> = ({
   onClose,
 }) => {
   if (!isOpen || !selectedWo) return null;
-  const catalogItems = getModelPriceCatalogItems(selectedWo.deviceModel || '', priceCatalog);
+  const catalogItems = getModelPriceCatalogItems(selectedWo.deviceModel || '', priceCatalog, priceCategories);
   const matchedModelName = catalogItems.length > 0 ? catalogItems[0].modelMatchedName : selectedWo.deviceModel;
   // audit A-P2-6: fabricated fallback prices (isCatalogMatch === false)
   // must never be addable to a live invoice — staff would charge a

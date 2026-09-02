@@ -2533,6 +2533,7 @@ export default function App() {
                   technicians={technicians}
                   systemSettings={systemSettings}
                   priceCatalog={priceCatalog.catalog}
+                  priceCategories={priceCatalog.categories}
                   prefill={ticketPrefill}
                   onSaveWorkOrder={handleSaveWorkOrder}
                   onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
@@ -2588,6 +2589,7 @@ export default function App() {
                   customers={rosterCustomers}
                   technicians={technicians}
                   priceCatalog={priceCatalog.catalog}
+                  priceCategories={priceCatalog.categories}
                   systemSettings={systemSettings}
                   onSaveWorkOrder={handleSaveWorkOrder}
                   onSelectPrintTag={(wo) => setPrintableTagWo(wo)}
@@ -2713,6 +2715,7 @@ export default function App() {
                   onOpenPrintTag={(wo) => setPrintableTagWo(wo)}
                   onSaveWorkOrder={handleSaveWorkOrder}
                   priceCatalog={priceCatalog.catalog}
+                  priceCategories={priceCatalog.categories}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
                 />
