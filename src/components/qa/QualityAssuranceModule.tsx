@@ -255,24 +255,25 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
           note: diagnostic.note?.trim().toLowerCase() === 'qa verified ok' ? '' : diagnostic.note,
         })),
       );
-    } else if (
-      (wo.afterDiagnostics && wo.afterDiagnostics.length > 0) ||
-      (wo.beforeDiagnostics && wo.beforeDiagnostics.length > 0)
-    ) {
-      const sourceDiagnostics =
-        wo.afterDiagnostics && wo.afterDiagnostics.length > 0
-          ? wo.afterDiagnostics
-          : wo.beforeDiagnostics;
-
-      // Ko Hein 2026-09-02: When only before-repair diagnostics exist, keep
-      // their Pass/Fail statuses so the QA inspector sees the intake state
-      // instead of a blank N/A slate.
-      const hasAfter = Boolean(wo.afterDiagnostics && wo.afterDiagnostics.length > 0);
+    } else if (wo.afterDiagnostics && wo.afterDiagnostics.length > 0) {
+      // After diagnostics exist but no postRepairChecklist yet — load them as-is
       setQaDiagnostics(
-        sourceDiagnostics.map((diagnostic) => ({
+        wo.afterDiagnostics.map((diagnostic) => ({
           ...diagnostic,
-          status: hasAfter ? diagnostic.status : (diagnostic.status === 'Pass' || diagnostic.status === 'Fail' ? diagnostic.status : 'N/A'),
-          note: hasAfter ? diagnostic.note : '',
+          status: 'N/A',
+          note: '',
+        })),
+      );
+    } else if (wo.beforeDiagnostics && wo.beforeDiagnostics.length > 0) {
+      // Only before-repair diagnostics exist (intake) — QA After column starts
+      // all N/A. Before status is shown separately via beforeDiagnosticsList.
+      const baseList = wo.beforeDiagnostics;
+      setQaDiagnostics(
+        baseList.map((d, idx) => ({
+          id: `qa-after-${idx}`,
+          name: d.name,
+          status: 'N/A' as const,
+          note: '',
         })),
       );
     } else {
