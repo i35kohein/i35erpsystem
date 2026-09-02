@@ -117,7 +117,7 @@ export const IntakeWorkOrderModule: React.FC<IntakeWorkOrderModuleProps> = ({
   useEffect(() => {
     if (window.innerWidth < 768) setViewMode('cards');
   }, []);
-  const [localFilterStatus, setLocalFilterStatus] = useState<string>('ALL');
+  const [localFilterStatus, setLocalFilterStatus] = useState<string>('Receive');
   const localDateFilter: DateFilterState = useMemo(() => ({ preset: 'all' }), []);
 
   const filterStatus = propFilterStatus !== undefined ? propFilterStatus : localFilterStatus;
