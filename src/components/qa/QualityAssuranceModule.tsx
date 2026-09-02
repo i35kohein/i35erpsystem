@@ -252,16 +252,20 @@ export const QualityAssuranceModule: React.FC<QualityAssuranceModuleProps> = ({
       (wo.afterDiagnostics && wo.afterDiagnostics.length > 0) ||
       (wo.beforeDiagnostics && wo.beforeDiagnostics.length > 0)
     ) {
-      const untestedDiagnostics =
+      const sourceDiagnostics =
         wo.afterDiagnostics && wo.afterDiagnostics.length > 0
           ? wo.afterDiagnostics
           : wo.beforeDiagnostics;
 
+      // Ko Hein 2026-09-02: When only before-repair diagnostics exist, keep
+      // their Pass/Fail statuses so the QA inspector sees the intake state
+      // instead of a blank N/A slate.
+      const hasAfter = Boolean(wo.afterDiagnostics && wo.afterDiagnostics.length > 0);
       setQaDiagnostics(
-        untestedDiagnostics.map((diagnostic) => ({
+        sourceDiagnostics.map((diagnostic) => ({
           ...diagnostic,
-          status: 'N/A',
-          note: '',
+          status: hasAfter ? diagnostic.status : (diagnostic.status === 'Pass' || diagnostic.status === 'Fail' ? diagnostic.status : 'N/A'),
+          note: hasAfter ? diagnostic.note : '',
         })),
       );
     } else {
