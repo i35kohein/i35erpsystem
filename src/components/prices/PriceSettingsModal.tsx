@@ -334,21 +334,31 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
     triggerToast(`Global warranty set to "${globalWarrantyTerm}" across target models.`);
   };
 
-  const handleExportJson = () => {
-    const exportData = {
-      catalog,
-      folders,
-      categories,
-      currencySymbol,
-      exportedAt: new Date().toISOString()
-    };
-    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportData, null, 2));
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute('href', dataStr);
-    downloadAnchor.setAttribute('download', `applerepair_price_catalog_${new Date().toISOString().split('T')[0]}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
+  const csvEscape = (value: string | number) => {
+    const str = String(value);
+    if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+  };
+
+  const handleExportCsv = () => {
+    // Export as CSV matching the import format — the exported file can be
+    // re-imported directly (Ko Hein 2026-09-02: was JSON, mismatched import).
+    const headers = ['Model', ...categories.map((c) => `${c.label} Price`), ...categories.map((c) => `${c.label} Warranty`)].map(csvEscape);
+    const rows = catalog.map((item) => {
+      const priceVals = categories.map((c) => item.prices?.[c.key] ?? '');
+      const warrantyVals = categories.map((c) => item.warranties?.[c.key] ?? '');
+      return [csvEscape(item.model), ...priceVals.map(csvEscape), ...warrantyVals.map(csvEscape)].join(',');
+    });
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `applerepair_price_list_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   };
 
   const handleImportCsv = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -550,12 +560,12 @@ export const PriceSettingsModal: React.FC<PriceSettingsModalProps> = ({
             </Button>
             <Button variant="ghost"
               type="button"
-              onClick={handleExportJson}
+              onClick={handleExportCsv}
               className="px-3 py-1.5 rounded-lg bg-surface hover:bg-line text-ink font-bold text-xs transition-all flex items-center space-x-1.5 border border-line cursor-pointer"
-              aria-label="Export JSON"
+              aria-label="Export CSV"
             >
               <Download className="w-3.5 h-3.5 text-brand" />
-              <span className="hidden sm:inline">Export JSON</span>
+              <span className="hidden sm:inline">Export CSV</span>
             </Button>
             <Button variant="ghost"
               type="button"
