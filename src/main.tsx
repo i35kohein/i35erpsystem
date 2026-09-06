@@ -6,6 +6,7 @@ import './carbon-coat.css';
 import { ThemeProvider } from './context/ThemeContext.tsx';
 import { LanguageProvider } from './context/LanguageContext.tsx';
 import { ErrorBoundary } from './components/common/ErrorBoundary.tsx';
+import { AntdThemeWrapper } from './components/common/AntdThemeWrapper';
 
 // ERP is deliberately online-only. Remove the legacy offline worker and its
 // cache once so previous browser data cannot be shown or uploaded later.
@@ -88,7 +89,9 @@ createRoot(document.getElementById('root')!).render(
     <ErrorBoundary>
       <ThemeProvider>
         <LanguageProvider>
-          <App />
+          <AntdThemeWrapper>
+            <App />
+          </AntdThemeWrapper>
         </LanguageProvider>
       </ThemeProvider>
     </ErrorBoundary>
