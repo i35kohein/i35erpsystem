@@ -1,32 +1,21 @@
 import React, { useState, useMemo, forwardRef, useImperativeHandle } from 'react';
 
-import {Coins, 
-  AlertTriangle, 
-  CheckCircle2, 
-  Clock, 
-  TrendingUp, 
-  Users,
-  BarChart3,
-  Smartphone,
-  Activity,
-  Zap,
-  ShieldCheck,
-  ShieldAlert,
-  Check,
-  ArrowUpRight,
-  Boxes,
-  ClipboardList,
-  Copy,
-  Search,
-  RefreshCw,
-  X} from 'lucide-react';
+import {
+  Coins, AlertTriangle, CheckCircle2, Clock, TrendingUp,
+  Users, BarChart3, Smartphone, Activity, Zap,
+  ShieldCheck, ShieldAlert, Check, ArrowUpRight,
+  Boxes, ClipboardList, Copy, Search, RefreshCw, X
+} from 'lucide-react';
 import { WorkOrder, PartItem, Technician, WorkOrderStatus } from '../../types';
-import { Button , Input } from '../ui';
+import { Button, Input } from '../ui';
 import { toast } from '../../lib/toast';
 import { confirmDialog } from '../common/ConfirmDialog';
 
 import { DateFilterState, filterByDateRange} from '../common/DateFilterSelector';
 import { LITE_MODE } from '../../lib/lite';
+import {
+  Card as AntCard, Statistic, Space
+} from 'antd';
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend } from 'recharts';
 import { TechnicianPerformanceTab } from './TechnicianPerformanceTab';
 import { TechnicianLeaderboardView } from './TechnicianLeaderboardView';
@@ -143,10 +132,11 @@ export interface DashboardOverviewHandle {
 function KpiCard({
   label,
   value,
-  valueClass = 'text-ink',
+  valueClass = '#1D1D1F',
   footer,
   footerClass = 'text-muted',
   footerIcon,
+  prefix,
 }: {
   label: string;
   value: string;
@@ -154,16 +144,32 @@ function KpiCard({
   footer: string;
   footerClass?: string;
   footerIcon?: React.ReactNode;
+  prefix?: React.ReactNode;
 }) {
   return (
-    <div className="bg-white border border-line rounded-2xl p-4 shadow-2xs space-y-1">
-      <span className="text-xs font-extrabold uppercase tracking-wider text-muted">{label}</span>
-      <p className={`text-2xl font-black ${valueClass}`}>{value}</p>
-      <p className={`text-xs flex items-center space-x-1 ${footerClass}`}>
-        {footerIcon}
-        <span>{footer}</span>
-      </p>
-    </div>
+    <AntCard size="small" style={{ borderRadius: 16, height: '100%' }}>
+      <Statistic
+        title={
+          <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#616161' }}>
+            {label}
+          </span>
+        }
+        value={value}
+        valueStyle={{
+          fontSize: 24,
+          fontWeight: 900,
+          color: valueClass,
+          fontFamily: "'IBM Plex Mono', monospace",
+        }}
+        prefix={prefix}
+      />
+      <div style={{ marginTop: 4, fontSize: 11, color: footerClass === 'text-muted' ? '#616161' : footerClass }}>
+        <Space size={4}>
+          {footerIcon}
+          <span>{footer}</span>
+        </Space>
+      </div>
+    </AntCard>
   );
 }
 
